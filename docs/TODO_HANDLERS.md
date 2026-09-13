@@ -1,53 +1,30 @@
 # Server handler 待辦清單 (廿四輪自動盤點)
 
 > 「client 有 builder、server 尚無 handler」的 REQ 全表 — 附自動抽出
-> 的寫入序列, 按此實作 handler 即可。已實作 23 個 (Auth/Lobby/Shop/
-> Stats/Clan/Quest/Friend)。
+> 的寫入序列, 按此實作 handler 即可。已實作 63 個 REQ handler
+> (Auth/Lobby/Shop/Stats/Clan/Quest/Friend/Room/Channel/Voice)。
+>
+> 本輪 (房間設定/聊天簇) 新增: 139 GG_EXITGAME、167/169/171/173/175
+> /177、340/364/712、728 觀戰聊天、990 GR_DAMAGEROOM (db/packets.tsv
+> 補 990/991 後命名) — 全數限房主、ACK 同值廣播, 詳 docs/PACKETS.md
+> §3.15b2。177/178 為 client 死碼 (無呼叫者/無 dispatcher case)。
 
 | op | 名稱 | REQ 寫入序列 |
 |---|---|---|
 | 103 | GE_LOGOUT_REQ | `(空)` |
-| 111 | GL_MAKEROOM_REQ | `u8 s8 u8 s8 str str u8 u8 u8 u8 u8 s8 u8 s8 str u8 u8 u8 u8` |
-| 113 | GL_ENTERROOM_REQ | `u8` |
-| 121 | GR_MAPCHANGE_REQ | `u8` |
-| 123 | GR_LEAVE_REQ | `(空)` |
-| 125 | GR_CHATTING_REQ | `s32 u8 wstr || s32 u8 str` |
-| 127 | GR_READY_REQ | `(空)` |
-| 129 | GR_START_REQ | `u8` |
 | 131 | GR_FORCEOUT_REQ | `u8` |
-| 133 | GR_END_REQ | `(空)` |
-| 135 | GR_CHANGESLOT_REQ | `u8 u8` |
-| 139 | GG_EXITGAME_REQ | `(空)` |
-| 141 | PM_CONNECT_REQ | `(空)` |
-| 143 | PM_UDPSTART_REQ | `str s32 s8 s32` |
-| 165 | Y_TCP_INF_REQ | `u8 u8 s32 u16 u16 u16 u16 u16 u16 u16 u8 u8 u8 u8 s16 u8 s16 s16 f32 u` |
-| 167 | GR_CHANGEUSER_REQ | `s16` |
-| 169 | GR_RULECHANGE_REQ | `u8` |
-| 171 | GR_WINCHANGE_REQ | `s16` |
-| 173 | GR_TIMECHANGE_REQ | `u8` |
-| 175 | GR_ITEMCHANGE_REQ | `u8` |
-| 177 | GR_AUTOCHANGE_REQ | `s8` |
-| 183 | GR_ENDLOADING_REQ | `(空)` |
-| 187 | GG_STARTGAME_REQ | `(空)` |
 | 191 | GR_CALLUSER_REQ | `str` |
-| 195 | GC_ENTERCHANNEL_REQ | `u8 u8 u8` |
 | 214 | GM_CREATECHAR_REQ | `u8 s16 s16 s16` |
-| 216 | GL_ENTERROOMPASS_REQ | `u8 str` |
 | 218 | GI_CHANGEDATA_REQ | `u8` |
 | 220 | GI_CHANGEWP_REQ | `u8` |
 | 230 | GP_CHLOSSC_REQ | `s32` |
 | 232 | GP_CHKILLC_REQ | `s32` |
 | 244 | GP_CHTKILLC_REQ | `s32` |
-| 246 | GL_CLIENTINFO_REQ | `str` |
-| 250 | GL_LOBBYIN_REQ | `(空)` |
-| 252 | GL_SHOPIN_REQ | `(空)` |
-| 254 | GL_INVENIN_REQ | `u8` |
 | 260 | GL_JOIN_REQ | `u8` |
 | 262 | GL_JOINPASS_REQ | `u8 str` |
 | 264 | GL_JOININFO_REQ | `u8` |
 | 266 | GL_JOINGAME_REQ | `u8 u8` |
 | 268 | GL_JOINPLAY_REQ | `u8 u8` |
-| 271 | PM_TSPOSUPDATE_REQ | `u8 str u8 u16 u16 u16 s32 u8` |
 | 275 | MASTER_MEMO_REQ | `wstr` |
 | 277 | MASTER_MEMOALL_REQ | `wstr` |
 | 279 | MASTER_USERCUT_REQ | `u8 str` |
@@ -71,7 +48,6 @@
 | 326 | GG_UNHACKSTART_REQ | `u8` |
 | 328 | GG_UNHACKSUCC_REQ | `u8` |
 | 330 | GG_UNHACKFAIL_REQ | `u8` |
-| 340 | GR_KILLCHANGE_REQ | `s16` |
 | 342 | GG_SOLORESPON_REQ | `s32` |
 | 344 | GG_LIVECHAT_REQ | `s32 u8 str` |
 | 346 | GG_TEAMCHAT_REQ | `s32 u8 str` |
@@ -79,7 +55,6 @@
 | 350 | GG_TEAMDEADCHAT_REQ | `s32 u8 str` |
 | 358 | GS_BUYCASHITEM_REQ | `u8 s32 s32` |
 | 360 | GG_TSURRESPON_REQ | `s32` |
-| 364 | GR_BALANCECHANGE_REQ | `s8` |
 | 368 | GR_TEAMSHUFFLECHANGE_REQ | `s8` |
 | 370 | GL_CHANGECHANNEL_REQ | `u8` |
 | 374 | GR_GETCRYSTAL_REQ | `u8` |
@@ -94,10 +69,7 @@
 | 414 | MASTER_DISLOG_REQ | `str s32` |
 | 416 | MASTER_KILLALL_REQ | `(空)` |
 | 418 | MASTER_RESETTCPGROUPINFO_REQ | `str s32` |
-| 419 | GL_MSG_ADD_REQ | `s32 str str str str u16 u8` |
-| 421 | GL_MSG_DEL_REQ | `str` |
 | 423 | GL_MSG_READ_REQ | `str` |
-| 425 | GL_MSG_RECVLIST_REQ | `s32` |
 | 437 | GG_ROOMBROADCAST_REQ | `u8 s32 rawN` |
 | 439 | GL_FRIEND_CHAT_REQ | `s32 str str str` |
 | 441 | GL_FRIEND_WHERE_REQ | `str` |
@@ -127,13 +99,11 @@
 | 704 | GL_LEVEL_KILL_LIMIT_REQ | `(空)` |
 | 706 | GL_BILLTOKEN_REQ | `(空)` |
 | 708 | GL_CHECKCASHPG_REQ | `s32` |
-| 712 | GR_NOSKILL_REQ | `s8` |
 | 714 | GG_INVALIDWPDATA_REQ | `u8 u8 u8 str s32` |
 | 716 | GG_CHANGEWPQUICKSLOT_REQ | `s16 s16 s16 s16` |
 | 718 | GR_START_VOTING_REQ | `s32 s32 s32` |
 | 724 | GL_COMBISKILLITEM_REQ | `s32 s32 s32 s32` |
 | 726 | GG_OBSERVERCHAT_REQ | `str str` |
-| 728 | GR_OBSERVERCHAT_REQ | `wstr wstr` |
 | 730 | GG_GETPULP_REQ | `u8` |
 | 733 | GG_SPAWNPULP_REQ | `(空)` |
 | 736 | GG_PULPSTEAL_REQ | `u8` |
@@ -151,12 +121,8 @@
 | 771 | GL_CLAN_TNMT_ALL_INFO_REQ | `s32` |
 | 773 | MASTER_RELOAD_TNMT_REQ | `(空)` |
 | 776 | GL_CLAN_TNMT_CLANREC_REQ | `(空)` |
-| 783 | GL_NEW_MSG_COUNT_REQ | `(空)` |
 | 785 | GL_FRIEND_ADD_PROCESS_REQ | `str` |
 | 787 | GL_RACKINGWEB_TOKEN_REQ | `(空)` |
-| 791 | GL_VOICEITEMSLOT_REQ | `(空)` |
-| 793 | GI_VOICEITEMSLOT_ALL_REQ | `(空)` |
-| 795 | GI_CHANGE_VOICEITEMSLOT_REQ | `u8 u8 s16 s16 u8 u8 s16 u8 || s32 s16 s16 s16 u8` |
 | 802 | GS_DESTROYITEM_REQ | `s32 s32 u8 s32 s32` |
 | 804 | MASTER_RELOAD_HIDDEN_ITEM_LIST_REQ | `(空)` |
 | 806 | GS_HIDDEN_ITEM_LIST_REQ | `s16` |

@@ -46,7 +46,7 @@ public sealed class Router
             return false;
         }
 
-        await handler(session, packet, ctx).ConfigureAwait(false);
+        await handler(session, packet, context).ConfigureAwait(false);
         return true;
     }
 }

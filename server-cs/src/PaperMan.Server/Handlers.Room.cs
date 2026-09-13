@@ -1,7 +1,7 @@
 // =============================================================================
-// 房間 handlers — 111/112 建房, 113/114 進房, 123/124 離房。
+// 房間 handlers — 111/112 建房, 113/114 進房, 123/124 離房, 房設定簇。
 //
-// 佈局出自反編譯 (docs/PACKETS.md §3.15 + 多輪逐欄定案):
+// 佈局出自反編譯 (docs/PACKETS.md §3.15 + §3.15b2, 多輪逐欄定案):
 //   111 REQ: u8 map, s8 has_pass, str title, [str pass],
 //            u8 rule(modeIndex), u8 max, u8 x, u8 y
 //   112 ACK (sub_56A7B0): u8 err, u8 room_no(<210), u16 max_slot_mask,
@@ -11,6 +11,11 @@
 //   114 ACK (sub_56B360): u8 sub_type; 1=單人進房通知(既有成員),
 //            2=完整房間狀態(進房者), 0=失敗 — 成員條目含完整 CClientData
 //   124 GR_LEAVE_ACK: u8 result; ≠0 → u8 slot (成員移除廣播)
+//
+//   房設定簇 (REQ 限房主, ACK 同值廣播): 139/140 退場, 167/168 槽位點陣,
+//   169/170 模式, 171/172 勝場, 173/174 時間, 175/176 道具, 177 死碼吸收,
+//   340/341 擊殺, 364/365 平衡, 712/713 無技背景, 728/729 觀戰聊天,
+//   990/991 雙倍傷害 — 對應 room 欄位見 Rooms.cs 與 §3.15b2 總圖。
 // =============================================================================
 using PaperMan.Protocol;
 
@@ -40,6 +45,21 @@ public static class RoomHandlers
         add(Opcode.GR_ENDLOADING_REQ, EndLoading);
         add(Opcode.GG_STARTGAME_REQ, BeginBattle);
         add(Opcode.GR_END_REQ, EndGame);
+
+        // 房設定簇 — REQ 限房主, 值寫入 room 欄位後以同值 ACK 廣播全房
+        // (client 端 REQ 只設 pending 狀態, ACK handler 才落地 — 詳 §3.15b2)
+        add(Opcode.GG_EXITGAME_REQ, ExitGame);
+        add(Opcode.GR_CHANGEUSER_REQ, ChangeUserSlots);
+        add(Opcode.GR_RULECHANGE_REQ, RuleChange);
+        add(Opcode.GR_WINCHANGE_REQ, WinChange);
+        add(Opcode.GR_TIMECHANGE_REQ, TimeChange);
+        add(Opcode.GR_ITEMCHANGE_REQ, ItemChange);
+        add(Opcode.GR_AUTOCHANGE_REQ, AutoChange);
+        add(Opcode.GR_KILLCHANGE_REQ, KillChange);
+        add(Opcode.GR_BALANCECHANGE_REQ, BalanceChange);
+        add(Opcode.GR_NOSKILL_REQ, NoSkillChange);
+        add(Opcode.GR_OBSERVERCHAT_REQ, ObserverChat);
+        add(Opcode.GR_DAMAGEROOM_REQ, DamageRoomChange);
     }
 
     // 129 REQ: u8 n125 → 130 ACK (sub_562870 讀序):
@@ -65,17 +85,17 @@ public static class RoomHandlers
             .WriteS32(0)                                    // elapsed_ms (新局=0)
             .WriteU8(roomNo)                                // room_no (client 定址房物件)
             .WriteU8((byte)room.Members.Count)              // +105 cur_players
-            .WriteU8(room.MaxPlayers)                       // +129 max_players (client 以 +110 重算)
+            .WriteU8(room.OpenSlotCount)                       // +129 max_players (client 以 +110 重算)
             .WriteU16(room.MaxSlotMask)                     // +110 上限槽位點陣
             .WriteU8(room.MapId)                            // +130 map (sub_540280)
             .WriteU8(room.Rule)                             // mode → sub_53FBB0
-            .WriteU16(0)                                    // +144 (未確認)
-            .WriteU8(0)                                     // flags (bit0→mode+4)
-            .WriteU8(0)                                     // mode+12
-            .WriteU8(0)                                     // +109
-            .WriteU8(0)                                     // mode+13
-            .WriteU8(0)                                     // +185
-            .WriteU8(0);                                    // +128 (未確認)
+            .WriteU16(room.WinCount)                        // +144 勝場目標 (171/172)
+            .WriteU8(room.ItemMode)                         // flags bit0→mode+4, bit1→mode+8 (175/176)
+            .WriteU8(0)                                     // mode+12 (未確認)
+            .WriteU8(0)                                     // +109 (未確認)
+            .WriteU8(0)                                     // mode+13 (未確認)
+            .WriteBool(room.NoSkillBg)                      // +185 noskillbg (712/713)
+            .WriteBool(room.DoubleDamage);                  // +128 double_damage (990/991)
         for (int i = 0; i < 16; i++)
         {
             ack.WriteS32(0);                                // per-slot 值
@@ -144,14 +164,14 @@ public static class RoomHandlers
             .WriteU8(room.MapId)                            // +130 map (sub_540280)
             .WriteU8(0)                                     // client 讀後丟棄 (i_1)
             .WriteU8(roomNo)                                // room_no (client 定址房物件)
-            .WriteU8(room.MaxPlayers)                       // +129 max_players (client 以 +110 重算)
+            .WriteU8(room.OpenSlotCount)                    // +129 max_players (client 以 +110 重算)
             .WriteU16(room.MaxSlotMask)                     // +110 上限槽位點陣 (回房恢復)
             .WriteU8(room.Rule)                             // mode → sub_53FBB0
-            .WriteU8(0)                                     // +136 (未確認)
-            .WriteU16(0)                                    // +144 (未確認)
-            .WriteU8(0)                                     // flags (bit0→mode+4)
+            .WriteU8(room.TimeLimit)                        // +136 時間 (173/174)
+            .WriteU16(room.WinCount)                        // +144 勝場目標 (171/172)
+            .WriteU8(room.ItemMode)                         // flags bit0→mode+4, bit1→mode+8
             .WriteU8(0)                                     // +146 (未確認)
-            .WriteU16(0)                                    // +148 (未確認)
+            .WriteU16(room.KillCount)                       // +148 擊殺目標 (340/341)
             .WriteU8(0)                                     // +150 (未確認)
             .WriteU8(0)                                     // mode+12
             .WriteU8(0)                                     // +109
@@ -239,8 +259,10 @@ public static class RoomHandlers
             .WriteU8(ok ? (byte)1 : (byte)0));
     }
 
-    // 125 REQ (與 119 同構) → 126 ACK (sub_56EA80):
-    //   s32 custom_tex, u8 slot, wstr message — 房內廣播
+    // 125 REQ (sub_56E860 wstr 版; sub_56E6C0 str 版為死碼 — 無呼叫者):
+    //   s32 uid(server 回 126 時 client 讀後丟棄), u8 slot, wstr message
+    // → 126 ACK (sub_56EA80): s32 uid(丟棄), u8 slot, wstr message —
+    //   以 slot 定址顯示, 全房廣播
     private static async ValueTask RoomChat(Session session, Packet packet, ServerContext context)
     {
         if (session.RoomNo is not { } roomNo || context.Rooms.Find(roomNo) is not { } room)
@@ -248,10 +270,10 @@ public static class RoomHandlers
             return;
         }
 
-        // 廿八輪自動表: 125 = s32 tex, u8 slot, wstr msg (次變體 str)
-        int tex = packet.ReadS32();
+        int uid = packet.ReadS32();
         _ = packet.ReadU8();                                     // client 附 slot (以 server 記錄為準)
 
+        // 活路一律 wstr (sub_56E860); 但保留 str 回退以容忍怪客端
         var message = packet.Remaining >= 2 && packet.Remaining % 2 == 0
             ? packet.ReadWStr()
             : packet.ReadStr();
@@ -263,25 +285,229 @@ public static class RoomHandlers
 
         var slot = room.Members.FirstOrDefault(kv => ReferenceEquals(kv.Value, session)).Key;
         var notice = new Packet(Opcode.GR_CHATTING_ACK)
-            .WriteS32(tex)
+            .WriteS32(uid)
             .WriteU8(slot)
             .WriteWStr(message);
         await RoomManager.BroadcastAsync(room, notice);
     }
 
-    // 121 REQ: u8 map → 122 ACK (sub_56E530): u8 map — 房主換圖廣播
+    // 121 REQ (sub_56E480): u8 map → 122 ACK (sub_56E530): u8 map —
+    // 房主換圖廣播; sub_42FC50 以 sub_540280 寫 room+130 (map)
     private static async ValueTask MapChange(Session session, Packet packet, ServerContext context)
     {
-        if (session.RoomNo is not { } roomNo || context.Rooms.Find(roomNo) is not { } room)
+        byte mapId = packet.ReadU8();
+        if (!TryGetRoom(session, context, out var room, out var slot) || !IsMaster(room, slot))
         {
             return;
         }
 
-        byte mapId = packet.ReadU8();
         room.MapId = mapId;
 
         await RoomManager.BroadcastAsync(room,
             new Packet(Opcode.GR_MAPCHANGE_ACK).WriteU8(mapId));
+    }
+
+    // ═══════════ 房設定簇 (REQ 限房主, ACK 以同值廣播全房) ═══════════
+    // client 的 UI 變更函式 (sub_42FE20/sub_4306E0/…) 只寫 pending 狀態並送
+    // REQ; 真正落地在 dispatcher 的 ACK handler (sub_42FE50/sub_430720/…)。
+    // 因此 server 收到 REQ 後必須把新值寫回 room 欄位並廣播 ACK — 否則連
+    // 房主自己的 UI 也會卡在 pending。
+
+    /// <summary>取得 session 所在房與其 slot; 任一不成立回 false。</summary>
+    private static bool TryGetRoom(Session session, ServerContext context, out Room room, out byte slot)
+    {
+        room = null!;
+        slot = 0;
+
+        if (session.RoomNo is not { } roomNo || context.Rooms.Find(roomNo) is not { } r)
+        {
+            return false;
+        }
+
+        room = r;
+        foreach (var (s, member) in r.Members)
+        {
+            if (ReferenceEquals(member, session))
+            {
+                slot = s;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>房設定變更僅房主可為 (client UI 只對房主開這些控制項)。</summary>
+    private static bool IsMaster(Room room, byte slot) => slot == room.MasterSlot;
+
+    // 139 GG_EXITGAME_REQ (sub_560720): 空 payload — 玩家離開對戰回房
+    // → 140 ACK (sub_563430): u8 n2==1, u8 slot — 單人退場廣播 (n2==2 是
+    //   整房重置, 由 133/134 流程觸發, 此處不涉及)
+    private static async ValueTask ExitGame(Session session, Packet packet, ServerContext context)
+    {
+        if (!TryGetRoom(session, context, out var room, out var slot))
+        {
+            return;
+        }
+
+        await RoomManager.BroadcastAsync(room, new Packet(Opcode.GG_EXITGAME_ACK)
+            .WriteU8(1)
+            .WriteU8(slot));
+    }
+
+    // 167 GR_CHANGEUSER_REQ (sub_56F360): u16 slot_mask — 房主改開放槽位點陣
+    // → 168 ACK (sub_56F410→sub_4325D0): u16 slot_mask 寫 room+110 並以
+    //   sub_53FB10 popcount 重算 +129 (最大人數); 點陣可非連續 (踢人/關槽)
+    private static async ValueTask ChangeUserSlots(Session session, Packet packet, ServerContext context)
+    {
+        ushort mask = packet.ReadU16();
+        if (!TryGetRoom(session, context, out var room, out var slot) || !IsMaster(room, slot))
+        {
+            return;
+        }
+
+        room.SlotMask = mask;
+        await RoomManager.BroadcastAsync(room, new Packet(Opcode.GR_CHANGEUSER_ACK).WriteU16(mask));
+    }
+
+    // 169 GR_RULECHANGE_REQ (sub_56F440): u8 mode(modeIndex) — 房主改遊戲模式
+    // → 170 ACK (sub_56F4F0→sub_42FE50): u8 mode — client 以 sub_53FBB0 重建
+    //   mode UI 並依 mode 設定表 (sub_426930) 回推預設地圖寫 +130
+    private static async ValueTask RuleChange(Session session, Packet packet, ServerContext context)
+    {
+        byte mode = packet.ReadU8();
+        if (!TryGetRoom(session, context, out var room, out var slot) || !IsMaster(room, slot))
+        {
+            return;
+        }
+
+        room.Rule = mode;
+        await RoomManager.BroadcastAsync(room, new Packet(Opcode.GR_RULECHANGE_ACK).WriteU8(mode));
+    }
+
+    // 171 GR_WINCHANGE_REQ (sub_56F520): u16 win_count — 房主改勝場目標
+    // → 172 ACK (sub_56F5D0→sub_430720): u16 寫 room+144
+    private static async ValueTask WinChange(Session session, Packet packet, ServerContext context)
+    {
+        ushort win = packet.ReadU16();
+        if (!TryGetRoom(session, context, out var room, out var slot) || !IsMaster(room, slot))
+        {
+            return;
+        }
+
+        room.WinCount = win;
+        await RoomManager.BroadcastAsync(room, new Packet(Opcode.GR_WINCHANGE_ACK).WriteU16(win));
+    }
+
+    // 173 GR_TIMECHANGE_REQ (sub_56F600): u8 time_idx — 房主改遊戲時間
+    // → 174 ACK (sub_56F6B0→sub_430920): u8 寫 room+136
+    private static async ValueTask TimeChange(Session session, Packet packet, ServerContext context)
+    {
+        byte time = packet.ReadU8();
+        if (!TryGetRoom(session, context, out var room, out var slot) || !IsMaster(room, slot))
+        {
+            return;
+        }
+
+        room.TimeLimit = time;
+        await RoomManager.BroadcastAsync(room, new Packet(Opcode.GR_TIMECHANGE_ACK).WriteU8(time));
+    }
+
+    // 175 GR_ITEMCHANGE_REQ (sub_56F6E0): u8 item_mode(2bit) — 房主改道具
+    // → 176 ACK (sub_56F790→sub_430D50): bit0→sub_74F450(mode+4), bit1→
+    //   sub_74F430(mode+8) — 兩把武器的道具開關
+    private static async ValueTask ItemChange(Session session, Packet packet, ServerContext context)
+    {
+        byte item = packet.ReadU8();
+        if (!TryGetRoom(session, context, out var room, out var slot) || !IsMaster(room, slot))
+        {
+            return;
+        }
+
+        room.ItemMode = item;
+        await RoomManager.BroadcastAsync(room, new Packet(Opcode.GR_ITEMCHANGE_ACK).WriteU8(item));
+    }
+
+    // 177 GR_AUTOCHANGE_REQ (sub_56F8A0): s8 — client 端無呼叫者 (死碼),
+    // 178 ACK 亦不在 sub_58B010 主 switch (走 vtable 前置轉發器)。僅吸收。
+    private static ValueTask AutoChange(Session session, Packet packet, ServerContext context)
+    {
+        _ = packet.Remaining >= 1 ? packet.ReadS8() : (sbyte)0;
+        return ValueTask.CompletedTask;
+    }
+
+    // 340 GR_KILLCHANGE_REQ (sub_56F7C0): u16 kill_count — 與 171 同送 (sub_4306E0)
+    // → 341 ACK (sub_56F870→sub_430F50): u16 寫 room+148
+    private static async ValueTask KillChange(Session session, Packet packet, ServerContext context)
+    {
+        ushort kill = packet.ReadU16();
+        if (!TryGetRoom(session, context, out var room, out var slot) || !IsMaster(room, slot))
+        {
+            return;
+        }
+
+        room.KillCount = kill;
+        await RoomManager.BroadcastAsync(room, new Packet(Opcode.GR_KILLCHANGE_ACK).WriteU16(kill));
+    }
+
+    // 364 GR_BALANCECHANGE_REQ (sub_56FA30): u8 — 房主切換隊伍平衡
+    // → 365 ACK (sub_56FAE0→sub_431160): u8 只寫 GAMEROOM_TEAMBALANCE UI
+    //   (一般房 room+186 不上 wire; 錦標賽 ctor sub_53F9F0 才寫 +186)
+    private static async ValueTask BalanceChange(Session session, Packet packet, ServerContext context)
+    {
+        byte on = packet.ReadU8();
+        if (!TryGetRoom(session, context, out var room, out var slot) || !IsMaster(room, slot))
+        {
+            return;
+        }
+
+        room.TeamBalance = on != 0;
+        await RoomManager.BroadcastAsync(room, new Packet(Opcode.GR_BALANCECHANGE_ACK).WriteU8(on));
+    }
+
+    // 712 GR_NOSKILL_REQ (sub_56FB10): u8 — 房主切換 no-skill 背景
+    // → 713 ACK (sub_56FBC0→sub_4312C0): u8 寫 room+185 (noskillbg)
+    private static async ValueTask NoSkillChange(Session session, Packet packet, ServerContext context)
+    {
+        byte on = packet.ReadU8();
+        if (!TryGetRoom(session, context, out var room, out var slot) || !IsMaster(room, slot))
+        {
+            return;
+        }
+
+        room.NoSkillBg = on != 0;
+        await RoomManager.BroadcastAsync(room, new Packet(Opcode.GR_NOSKILL_ACK).WriteU8(on));
+    }
+
+    // 728 GR_OBSERVERCHAT_REQ (sub_56E560): wstr sender, wstr message —
+    // 觀戰者聊天 (觀戰/錦標賽 n2==2 才走這條; 一般房走 125)
+    // → 729 ACK (sub_56E610): wstr sender, wstr message — 全房廣播
+    private static async ValueTask ObserverChat(Session session, Packet packet, ServerContext context)
+    {
+        var sender = packet.ReadWStr();
+        var message = packet.ReadWStr();
+        if (!TryGetRoom(session, context, out var room, out _) || message.Length == 0)
+        {
+            return;
+        }
+
+        await RoomManager.BroadcastAsync(room, new Packet(Opcode.GR_OBSERVERCHAT_ACK)
+            .WriteWStr(sender)
+            .WriteWStr(message));
+    }
+
+    // 990 GR_DAMAGEROOM_REQ (sub_56F950): u8 — 房主切換 double damage
+    // → 991 ACK (sub_56FA00→sub_430FD0): u8 寫 room+128 (double_damage)
+    private static async ValueTask DamageRoomChange(Session session, Packet packet, ServerContext context)
+    {
+        byte on = packet.ReadU8();
+        if (!TryGetRoom(session, context, out var room, out var slot) || !IsMaster(room, slot))
+        {
+            return;
+        }
+
+        room.DoubleDamage = on != 0;
+        await RoomManager.BroadcastAsync(room, new Packet(Opcode.GR_DAMAGEROOM_ACK).WriteU8(on));
     }
 
     // 111 → 112 (+108 更新大廳清單由 client 重拉)
@@ -456,20 +682,20 @@ public static class RoomHandlers
            .WriteU8(room.MapId)                            // v176 → +130 map (sub_540280)
            .WriteU8((byte)room.Members.Count)              // ii_1 成員數 (cur)
            .WriteU8(room.RoomNo)                           // v191[2] room_no (sub_537690 我的房號)
-           .WriteU8(room.MaxPlayers)                       // v170 → +129 最大人數 (client 以 +110 重算)
+           .WriteU8(room.OpenSlotCount)                    // v170 → +129 最大人數 (client 以 +110 重算)
            .WriteU16(room.MaxSlotMask)                     // v181 → +110 上限槽位點陣 (popcount = 最大人數)
            .WriteU8(room.Rule)                             // thisa_1 → sub_53FBB0 遊戲模式 (0..15)
-           .WriteU8(0)                                     // v167 → +136
-           .WriteU16(0)                                    // v178 → +144
-           .WriteU8(0)                                     // v187 flags (bit0→mode+4, bit1)
-           .WriteU8(0)                                     // v193 → +146
-           .WriteU16(0)                                    // v191[3] → +148
-           .WriteU8(0)                                     // v169 → +150
+           .WriteU8(room.TimeLimit)                        // v167 → +136 時間
+           .WriteU16(room.WinCount)                        // v178 → +144 勝場目標
+           .WriteU8(room.ItemMode)                         // v187 flags (bit0→mode+4, bit1→mode+8)
+           .WriteU8(0)                                     // v193 → +146 (未確認)
+           .WriteU16(room.KillCount)                       // v191[3] → +148 擊殺目標
+           .WriteU8(0)                                     // v169 → +150 (未確認)
            .WriteU8(0)                                     // v173 → mode+12
            .WriteU8(0)                                     // v185 → +109
            .WriteU8(0)                                     // v141[0] → mode+13
-           .WriteU8(0)                                     // v177 → +185 no_skill_bg
-           .WriteU8(0)                                     // v171 → +128
+           .WriteBool(room.NoSkillBg)                      // v177 → +185 no_skill_bg
+           .WriteBool(room.DoubleDamage)                   // v171 → +128 double_damage
            .WriteU8(0);                                    // v142 → mode+14 (sub_74F4D0)
     }
 

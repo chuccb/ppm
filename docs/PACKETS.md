@@ -194,7 +194,8 @@ s32  result           1=成功, 2=帳密錯(0x42), 其他≠0=一般失敗(0x23D
 
 `sub_9D2050` 用 `sub_9EAF50(name, id, ...)` 把 **674 個** packet 名稱註冊進
 全域 map `dword_2317F50` (packet-viewer / debug 名稱表)。ID 即 wire opcode。
-完整清單見 `db/packets.tsv` (670 個唯一 ID, 100–994；GS_BASE=100)。
+完整清單見 `db/packets.tsv` (672 個唯一 ID, 100–994；GS_BASE=100)。
+其中 990/991 為本輪以 UI 字串補名 (sub_9D2050 名稱表未註冊)。
 
 命名規約:
 | 前綴 | 子系統 | 數量 |
@@ -969,12 +970,13 @@ festival: 681 的 3 頻道組 ↔ 195 的 group 序號互證; 頻道類型 n2==3
                        sub_42FC50→sub_540280); 房主換圖廣播
 124 GR_LEAVE_ACK       (sub_5607C0): u8 result; ≠0 → u8 slot 迴圈
                        比對並移除成員 (n11==6 觀戰特判)
-125 GR_CHATTING_REQ    (sub_56E6C0 str 版 / sub_56E860 wstr 版):
-                       s32 sender_uid, u8 slot, str|wstr message —
-                       房內聊天 (a3!=0 走本地 echo 不送出)
+125 GR_CHATTING_REQ    (sub_56E860 wstr 版; sub_56E6C0 str 版為死碼
+                       — 無呼叫者): s32 uid(dword_F2A684), u8 slot,
+                       wstr message — 房內聊天 (a3!=0 走本地 echo)
 126 GR_CHATTING_ACK    (sub_56EA80): s32 uid(讀後丟棄), u8 slot,
                        wstr message — 以 slot 定址顯示 (與 120 大廳
                        同構, 但以 slot 而非 nick 定位)
+139 GG_EXITGAME_REQ    (sub_560720): 空 payload — 玩家離開對戰回房
 140 GG_EXITGAME_ACK    (sub_563430): u8 n2 (1→u8 slot 單人退場;
                        2→回房重置)
 —— 房設定簇 (REQ=UI 變更送端 / ACK=dispatcher 收端寫入房物件) ——
@@ -1007,10 +1009,11 @@ festival: 681 的 3 頻道組 ↔ 195 的 group 序號互證; 頻道類型 n2==3
 728 GR_OBSERVERCHAT_REQ(sub_56E560): wstr sender, wstr message
 729 GR_OBSERVERCHAT_ACK(sub_56E610): wstr sender, wstr message —
                        觀戰者聊天 (sub_431EC0 顯示, 錦標賽 sub_478CF0)
-990 (無名) DAMAGEROOM_REQ (sub_56F950, UI sub_430FA0): u8
-991 (無名) DAMAGEROOM_ACK (sub_56FA00→sub_430FD0): u8 — room+128
+990 GR_DAMAGEROOM_REQ  (sub_56F950, UI sub_430FA0): u8 — 房主切換
+991 GR_DAMAGEROOM_ACK  (sub_56FA00→sub_430FD0): u8 — room+128
                        (double_damage) + GAMEROOM_DAMAGEROOM UI
-                       (990/991 未在 sub_9D2050 名稱表註冊)
+                       (sub_9D2050 名稱表未註冊; server 以 UI 字串
+                       補名 GR_DAMAGEROOM_* 入 db/packets.tsv)
 184 GR_ENDLOADING_ACK  (sub_563B00): u8 n2; 迴圈 u8 slot ×2
                        (n2==2 特判) + u8 — 載入完成同步
 188 GG_STARTGAME_ACK   (sub_563D60): u8 n2 (1→u8 count+slots 清單;
@@ -1022,6 +1025,29 @@ festival: 681 的 3 頻道組 ↔ 195 的 group 序號互證; 頻道類型 n2==3
                        — 呼叫玩家
 194 GC_CHANNEL_ACK     (sub_56FE90): u8 — 頻道確認
 ```
+
+**房物件 (CLobbyGameRoom) 欄位總圖 — 四十一輪逐欄定案** (wire 序經
+sub_568CE0/sub_53F830/sub_53F920/sub_53F9F0 三 ctor 交叉驗證):
+```
++4   room_no                     +105  cur_players (108 送 cur)
++5..104 title (100B, qmemcpy)    +106  has_pass
++107  1 (=active 房)             +108  room_type_A (ROOMTYPE bit)
++109  room_type_B (ROOMTYPE bit) +110  max_slot_mask (u16, bit0..max-1)
++112..127 逐槽旗標 (sub_53FB10)  +128  double_damage (990/991)
++129  max_players = popcount(+110)  (108 的 max 欄為冗餘, 被重算覆寫)
++130  map (sub_540280; 122 換圖亦寫)  +136 time (173/174)
++144  win_count (u16, 171/172)   +146  ? (ctor 0, 未確認)
++148  kill_count (u16, 340/341)  +150  ? (ctor 0, 未確認)
++185  no_skill_bg (712/713)      +186  team_balance (僅錦標賽 ctor
+                                        sub_53F9F0 寫; 一般房 364/365
+                                        只切 GAMEROOM_TEAMBALANCE UI)
++33   mode LobbyUI 物件 (sub_53FBB0 建, modeIndex 0..15)
++132  mode rule 物件 (其 +4=item bit0, +8=item bit1, +12=rule param,
+      +14=team flag; sub_74F450/74F430/74F4D0 寫, 74F4B0 讀)
+```
+模式變更 (169/170) 後 client 以 mode 設定表 `sub_426930` 回推預設
+地圖寫 +130 — server 若要同步 room.MapId 需鏡像 `map_StartIndex.xml`
+的 modeIndex→modeStartIndex 對照 (本輪未做, 見 TODO)。
 
 ### 3.15b3 TeamHacking 駭入/炸彈協定 317-333 (廿二輪 — TH 模式核心)
 ```

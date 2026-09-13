@@ -99,7 +99,7 @@ public static class LobbyHandlers
             .WriteU8(0).WriteU8(0).WriteU8(0)
             .WriteS32(info.Cash)
             .WriteS32(0).WriteS32(0)
-            .WriteRaw(stackalloc byte[48])
+            .WriteRaw(new byte[48])                         // [28],[29] 後的 48B 保留區 (零)
             .WriteU8(info.CurrentChar);
 
         // sub_524360: u8 slot + u8 char_type + 12×u16 外觀
@@ -180,16 +180,16 @@ public static class LobbyHandlers
                .WriteStr(room.Title)
                .WriteU8((byte)room.Members.Count)           // +105 cur_players
                .WriteBool(room.Password is not null)        // +106 has_pass
-               .WriteU8(room.MaxPlayers)                    // +129 max_players (client 以 +110 重算)
+               .WriteU8(room.OpenSlotCount)                    // +129 max_players (client 以 +110 重算)
                .WriteU16(room.MaxSlotMask)                  // +110 上限槽位點陣 (popcount = 最大人數)
                .WriteU8(room.Rule)                          // game_mode → sub_53FBB0 (0..15)
                .WriteBool(false)                            // +108 room_type bit A
                .WriteU8(0)                                  // mode+12 (mode 參數)
                .WriteBool(false)                            // +109 room_type bit B
-               .WriteBool(false)                            // +128 double_damage
+               .WriteBool(room.DoubleDamage)                // +128 double_damage (990/991)
                .WriteU8(room.MapId)                         // +130 map (sub_540280/540260; 122 亦寫此欄)
                .WriteU8(0)                                  // mode+4 (mode 參數)
-               .WriteBool(false);                           // +185 no_skill_bg
+               .WriteBool(room.NoSkillBg);                  // +185 no_skill_bg (712/713)
         }
 
         await session.SendAsync(ack);

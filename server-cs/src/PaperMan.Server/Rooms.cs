@@ -27,17 +27,31 @@ public sealed class Room
     public required string Title { get; set; }
     public string? Password { get; set; }
     public byte MapId { get; set; }
-    public byte Rule { get; set; }                          // modeIndex
-    public byte MaxPlayers { get; set; } = 16;
+    public byte Rule { get; set; }                          // modeIndex (0..16)
 
     /// <summary>
-    /// 房物件 +110: 上限槽位點陣 — bit 0..MaxPlayers-1 為 1。
+    /// 房物件 +110: 開放槽位點陣 (bit 0..15 為 1 = 可入座)。
     /// client sub_53FB10 以 popcount 此點陣得出 +129 (最大人數) 並展開
     /// +112..+127 逐槽旗標; 108 房單 / 112 建房 / 114 進房 / 130 開戰 /
-    /// 134 回房皆送此點陣 (全數交叉驗證, 非勝場點陣)。
+    /// 134 回房皆送此點陣。建檔時 = (1&lt;&lt;maxPlayers)-1; 房主可經
+    /// 167 GR_CHANGEUSER 改為任意點陣 (含非連續槽位)。
     /// </summary>
-    public ushort MaxSlotMask =>
-        (ushort)((1 << Math.Clamp(MaxPlayers, 0, 16)) - 1);
+    public ushort SlotMask { get; set; }
+
+    /// <summary>+129: 開放槽位數 = popcount(SlotMask)。</summary>
+    public byte OpenSlotCount => (byte)ushort.PopCount(SlotMask);
+
+    /// <summary>開放槽位點陣 (沿用舊名, 同 SlotMask)。</summary>
+    public ushort MaxSlotMask => SlotMask;
+
+    // ── 房設定簇 (REQ/ACK 寫入的 room 欄位; 預設對齊 sub_53F920 建檔 ctor) ──
+    public byte TimeLimit { get; set; } = 3;                // +136 (173/174 時間)
+    public ushort WinCount { get; set; } = 10;              // +144 (171/172 勝場目標)
+    public ushort KillCount { get; set; }                   // +148 (340/341 擊殺目標)
+    public byte ItemMode { get; set; }                      // flags bit0=主武器, bit1=副武器 (175/176)
+    public bool NoSkillBg { get; set; }                     // +185 (712/713)
+    public bool TeamBalance { get; set; }                   // +186 (364/365; 一般房僅 client UI, 錦標賽才上 wire)
+    public bool DoubleDamage { get; set; }                  // +128 (990/991)
 
     /// <summary>slot → session (最多 16 人)。</summary>
     public ConcurrentDictionary<byte, Session> Members { get; } = new();
@@ -106,9 +120,9 @@ public sealed class Room
 
     public byte? TakeFreeSlot()
     {
-        for (byte s = 0; s < MaxPlayers && s < 16; s++)
+        for (byte s = 0; s < 16; s++)
         {
-            if (!Members.ContainsKey(s))
+            if ((SlotMask & (1 << s)) != 0 && !Members.ContainsKey(s))
             {
                 return s;
             }
@@ -139,7 +153,7 @@ public sealed class RoomManager
                 Password = pass,
                 MapId = mapId,
                 Rule = rule,
-                MaxPlayers = Math.Clamp(maxPlayers, (byte)2, (byte)16),
+                SlotMask = (ushort)((1 << Math.Clamp(maxPlayers, 2, 16)) - 1),
             };
 
             if (!_rooms.TryAdd(no, room))
