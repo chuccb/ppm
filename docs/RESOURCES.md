@@ -134,7 +134,7 @@ sub_5359B0 (getter) 證實記憶體 1212..1224/1228..1240 = 兩檔位 4×s32
   for i = size-1 .. 0:
       out[i] = ROL8(in[i], i) ^ state
       state = ((state ^ 0xFA5387AD) & 0x0F3A94AA)
-              ^ ((i | state) + 0x48945B4A) ^ 0x1A68DCCF
+              ^ ((i | state) + 0x48945DCA) ^ 0x1A68DCCF
   state 初值 = size
   ```
   (加密端 sub_711720 = 先 XOR 再 ROR — 互逆已對照)
@@ -201,6 +201,26 @@ grp7 = 15.288M 整槍配色 (L96 A1 Color...)
 ドッドン/ガイ/テリシア/アルル/ヴァン/フッド/リカ/レム/エリス/
 ルコット/ルーシー。推薦套裝 char_type 1..14 與角色段序號一一對應
 (198 wire 的 u8 char_type 即此編號) — 第六次互證。
+
+## 5d. system XML 資料表 (二十輪全掃)
+
+| 檔案 | 內容 | 對應 opcode |
+|---|---|---|
+| map_StartIndex.xml | **官方模式名表** (modeIndex↔modeName) | 111 rule |
+| ItemAbilityLevTable.xml | 能力 lev 效果換算 (pmFile 加密!) | 205 f32 能力值 |
+| AI/AiMultiCompensation.xml | AI 協力模式過關獎勵 (難度×等級→物品) | AI 模式結算 |
+| AI/gamecenter_map_info.xml | 射擊館關卡 (盾 HP/Fever/砲位) | 479 GAMECENTER |
+| AI/BotWave/BotEnemy/Scenario | AI 波次/敵人/劇本 (easy/intelligent) | AI 對戰 |
+| Total_Package_Index.xml | 角色套裝 UI 索引 (114 套) | 商店套裝頁 |
+| URLList_01.xml | 正版端點 (dl.paperman.jp, bill.paperman.jp, hangame.co.jp) | 網頁跳轉 |
+| TimeLimit_NotUse_IP.xml | 防沉迷白名單 IP | — |
+| netcafe_contents.xml | 網咖特典 (UTF-16) | PopUpNetCafeShop |
+| voice_customize_contents.xml | 語音自訂 (UTF-16) | 695 kind 語音 |
+| CharacterFitting.xml | 試衣間預設 (hand*.tga ← data.pat 快取!) | — |
+| face_contents.xml | 臉型清單 | 角色創建 |
+
+(CharacterFitting 引用 hand12.tga — 與 data.pat 快取表的 15 個
+hand*.tga 互證: 那是「試衣間手部貼圖」快取)
 
 ## 6. 其他已知資源
 
