@@ -74,29 +74,72 @@ public static class LobbyHandlers
     private static Packet BuildMyInfoAck(Db.MyInfo info, List<Db.CharSlot> chars)
     {
         var st = info.Stats;
+
+        // 統計欄位佈局 — 十二輪以任務條件檢查器 sub_9252D0 逐欄破解:
+        //   cond5→dword[37]=wins, cond6→[38]=losses, cond3→[39]=kills,
+        //   cond4→[40]=deaths, cond7→[41]=disc, cond10→[42]=hearts,
+        //   cond8→[43]=headshots, cond11→[45]=double, cond12→[46]=triple,
+        //   cond9→[44]=combos, cond13..17→[47..51]=multi/ultra/z/k/dd
+        //   (事件號經 GP ACK handler sub_556B30 等 → sub_92EF00(n,...) 對齊)
+        // wire 讀序 (sub_523BF0):
+        //   群組2 = [34],[35],[36],[37],[38]  (34..36 無讀取者 — 保留槽)
+        //   群組3 = [39],[40],[41],[42]
+        //   群組4 = [43],[45],[46],[44]  ⚠ 亂序: heads, double, triple, combos
+        //   群組5 = [47],[48],[49],[50],[51]
         var ack = new Packet(Opcode.GL_MYINFO_ACK)
             .WriteBool(true)
             .WriteS32((int)info.UserId)
             // --- sub_523BF0 基本資料 ---
             .WriteStr(info.Nickname)
             .WriteU8(info.CurrentChar)                             // char_type (+88)
-            .WriteS32(info.Level).WriteS32((int)info.Exp).WriteS32(0)
-            .WriteS32((int)st.Wins).WriteS32((int)st.Losses)
-            .WriteS32((int)st.Kills).WriteS32((int)st.Deaths)
-            .WriteS32((int)st.Disconnects)
-            .WriteS32((int)st.Headshots).WriteS32((int)st.Combos)
-            .WriteS32((int)st.Hearts).WriteS32((int)st.DoubleKill)
-            .WriteS32((int)st.TripleKill).WriteS32((int)st.MultiKill)
-            .WriteS32((int)st.UltraKill).WriteS32((int)st.ZKill)
-            .WriteS32((int)st.KKill).WriteS32((int)st.DdKill)
-            .WriteS32((int)st.Criticals)
-            .WriteS32((int)st.PlayCount).WriteS32((int)st.RoundCount)
+            .WriteS32(info.Level)                                  // [23]
+            .WriteS32((int)info.Exp)                               // [24] (level 由 client 查表重算)
+            .WriteS32(0)                                           // [27] 任務 cond1 計數
+            // 群組2: [34..36] 保留, [37]=wins, [38]=losses
+            .WriteS32((int)st.PlayCount)                           // [34] (未證, 放次要值)
+            .WriteS32((int)st.RoundCount)                          // [35] (未證)
+            .WriteS32((int)st.Criticals)                           // [36] (未證)
+            .WriteS32((int)st.Wins)                                // [37] 任務 cond5
+            .WriteS32((int)st.Losses)                              // [38] 任務 cond6
+            // 群組3: [39..42]
+            .WriteS32((int)st.Kills)                               // [39] cond3
+            .WriteS32((int)st.Deaths)                              // [40] cond4
+            .WriteS32((int)st.Disconnects)                         // [41] cond7
+            .WriteS32((int)st.Hearts)                              // [42] cond10
+            // 群組4 (wire 亂序 43,45,46,44):
+            .WriteS32((int)st.Headshots)                           // [43] cond8
+            .WriteS32((int)st.DoubleKill)                          // [45] cond11
+            .WriteS32((int)st.TripleKill)                          // [46] cond12
+            .WriteS32((int)st.Combos)                              // [44] cond9
+            // 群組5: [47..51]
+            .WriteS32((int)st.MultiKill)                           // [47] cond13
+            .WriteS32((int)st.UltraKill)                           // [48] cond14
+            .WriteS32((int)st.ZKill)                               // [49] cond15
+            .WriteS32((int)st.KKill)                               // [50] cond16
+            .WriteS32((int)st.DdKill)                              // [51] cond17
             .WriteU8(0).WriteU8(0).WriteU8(0)                      // flags (+304..306)
-            .WriteS32(info.Cash)                                   // (+104)
-            .WriteS32(0).WriteS32(0)                               // (+112,116)
-            .WriteRaw(stackalloc byte[48])                         // extra blob (+208)
+            .WriteS32(info.Cash)                                   // [26] (+104)
+            .WriteS32(0).WriteS32(0)                               // [28],[29] (+112,116)
+            .WriteRaw(BuildPlayModeBlob(st))                       // [52..63] 模式別計數 blob
             .WriteU8(info.CurrentChar);                            // slot_current (+4)
 
+        return FinishMyInfoAck(ack, chars, info);
+    }
+
+    /// <summary>
+    /// [52..63] 48B blob — 十二輪破解 (sub_9252D0 cond20+模式條件):
+    /// dword[52] = 累計遊玩秒數 (任務 cond20), [53..60] = 各遊戲模式
+    /// 完成場次 (模式 id 經 sub_923BF0 對照), [61..63] 未引用。
+    /// </summary>
+    private static byte[] BuildPlayModeBlob(Db.Stats st)
+    {
+        var blob = new byte[48];
+        BitConverter.TryWriteBytes(blob, (int)st.PlayTimeS);    // [52] cond20
+        return blob;
+    }
+
+    private static Packet FinishMyInfoAck(Packet ack, List<Db.CharSlot> chars, Db.MyInfo info)
+    {
         // --- sub_524010 角色槽 (≤20, 每個 1 type + 12 裝備 u16) ---
         ack.WriteU8((byte)Math.Min(chars.Count, 20));
         foreach (var c in chars.Take(20))

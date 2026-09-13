@@ -107,6 +107,10 @@ CREATE TABLE IF NOT EXISTS user_stats (
 
 -- ----------------------------------------------------------------------------
 -- 4. 角色槽 — sub_524010: 最多 20 個, 每個 13 個 u16 (1 type + 12 裝備位)
+-- ⚠ 裝備 u16 是「類別內偏移」not 完整 item_id (十二輪, getter 群
+--   sub_525F10..526640 逐一定案): full_id = 類別基底 + (u16 % 100000)
+--   wire[0]=19,900,000(套裝?) wire[1]=10,000,000 wire[2]=10,100,000 ...
+--   wire[11]=11,000,000 (每槽 +100,000; 0 = 空)
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS characters (
     user_id      INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,

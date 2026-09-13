@@ -45,19 +45,21 @@ except sqlite3.IntegrityError:
 
 # --- 3. 商店購買 -> 背包 (GS_BUYITEM 204 -> GL_MYITEM_ACK 200) ---
 step('item_catalog / inventory / period 白名單')
-c.execute("INSERT INTO item_catalog(item_id,name,kind,price_gp,durability) VALUES (1001,'AK Paper',0,800,100)")
-c.execute("INSERT INTO item_catalog(item_id,name,kind,price_gp) VALUES (2001,'Red Cap',2,300)")
+# 真實 id 空間 (十二輪定案): 可購武器段 A = 15,301,001..15,302,000;
+# 裝飾類 full_id = 類別基底 + u16 偏移 (見 docs/PACKETS.md §3.15pre1)
+c.execute("INSERT INTO item_catalog(item_id,name,kind,price_gp,durability) VALUES (15301001,'AK Paper',0,800,100)")
+c.execute("INSERT INTO item_catalog(item_id,name,kind,price_gp) VALUES (10400001,'Red Cap',2,300)")
 c.execute("""INSERT INTO inventory(user_id,slot,item_id,period_days,expires_at,
              durability_cur,durability_max)
-             VALUES (?,0,1001,30,unixepoch()+30*86400,100,100)""", (uid,))
-c.execute('INSERT INTO inventory(user_id,slot,item_id,period_days) VALUES (?,1,2001,0)', (uid,))
+             VALUES (?,0,15301001,30,unixepoch()+30*86400,100,100)""", (uid,))
+c.execute('INSERT INTO inventory(user_id,slot,item_id,period_days) VALUES (?,1,10400001,0)', (uid,))
 try:
-    c.execute('INSERT INTO inventory(user_id,slot,item_id,period_days) VALUES (?,2,1001,45)', (uid,))
+    c.execute('INSERT INTO inventory(user_id,slot,item_id,period_days) VALUES (?,2,15301001,45)', (uid,))
     raise AssertionError('period 45 應該被 CHECK 擋下 (白名單 sub_570B00)')
 except sqlite3.IntegrityError:
     pass
 c.execute("""INSERT INTO shop_transactions(user_id,tx_type,item_id,period_days,gp_delta)
-             VALUES (?,0,1001,30,-800)""", (uid,))
+             VALUES (?,0,15301001,30,-800)""", (uid,))
 
 # 分頁 wire view (100/頁)
 rows = c.execute('SELECT * FROM v_inventory_wire WHERE user_id=? ORDER BY slot LIMIT 100 OFFSET 0',
@@ -66,7 +68,7 @@ assert len(rows) == 2 and rows[0][5] in (29, 30)   # period_days_left
 
 # --- 4. 武器編組 (GI_CHANGEWP 220) ---
 step('weapon_groups update')
-c.execute('UPDATE weapon_groups SET equipped=1, part0=1001 WHERE user_id=? AND group_no=0', (uid,))
+c.execute('UPDATE weapon_groups SET equipped=1, part0=15301001 WHERE user_id=? AND group_no=0', (uid,))
 
 # --- 5. 房間 (GL_MAKEROOM 111 / GR_CHANGESLOT 135) ---
 step('rooms / room_slots')
