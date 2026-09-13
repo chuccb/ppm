@@ -8,6 +8,10 @@
 > /177、340/364/712、728 觀戰聊天、990 GR_DAMAGEROOM (db/packets.tsv
 > 補 990/991 後命名) — 全數限房主、ACK 同值廣播, 詳 docs/PACKETS.md
 > §3.15b2。177/178 為 client 死碼 (無呼叫者/無 dispatcher case)。
+>
+> 四十輪: 169/170 已鏡像 mode→預設圖 (system/map_StartIndex.xml);
+> +146/+150 定案為「wire 送、client 存而不讀」的 mode param (送 0 安全)。
+> 下一輪可做: 368/894 隊打散 (u8 / u8 u8)、366 (未註冊, u8, n2_0!=3)。
 
 | op | 名稱 | REQ 寫入序列 |
 |---|---|---|

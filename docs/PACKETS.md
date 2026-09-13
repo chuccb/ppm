@@ -1003,6 +1003,12 @@ festival: 681 的 3 頻道組 ↔ 195 的 group 序號互證; 頻道類型 n2==3
 364 GR_BALANCECHANGE_REQ (sub_56FA30, UI sub_431130/432170): u8(1)
 365 GR_BALANCECHANGE_ACK (sub_56FAE0→sub_431160): u8 — 寫
                        GAMEROOM_TEAMBALANCE UI (room 欄位不變)
+368 GR_TEAMSHUFFLECHANGE_REQ (sub_585CE0): u8 — GAMEROOM_TEAMSHUFFLE
+369 GR_TEAMSHUFFLECHANGE_ACK (sub_585D90→sub_4354B0): u8
+                       (隊打散; server 尚缺 — 見 TODO)
+894 GR_TEAMSHUFFLE_REQ  (sub_585DC0): u8 u8 — 隊打散變體
+895 GR_TEAMSHUFFLE_ACK  (sub_585E70→sub_435680): — (server 尚缺)
+366 (未註冊名稱, sub_585FD0): u8, 僅 n2_0!=3 送 — 隊相關 (待定)
 712 GR_NOSKILL_REQ     (sub_56FB10, UI sub_431290): u8
 713 GR_NOSKILL_ACK     (sub_56FBC0→sub_4312C0): u8 — room+185
                        (noskillbg) + GAMEROOM_{NORMAL,CLAN}_NOSKILL UI

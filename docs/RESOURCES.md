@@ -266,7 +266,7 @@ hand*.tga 互證: 那是「試衣間手部貼圖」快取)
 | GAMEROOM_ITEM (checkbox) | 道具開關 | 175/176 (bit0/bit1 → mode+4/+8) |
 | GAMEROOM_DAMAGEROOM (checkbox) | 雙倍傷害 | 990/991 (u8 → room+128) |
 | GAMEROOM_TEAMBALANCE (checkbox) | 隊伍平衡 | 364/365 (僅切 UI) |
-| GAMEROOM_TEAMSHUFFLE (checkbox) | 隊伍隨機打散 | (UI, 未見獨立 opcode) |
+| GAMEROOM_TEAMSHUFFLE (checkbox) | 隊伍打散 | 368/369 (u8)、894/895 (u8 u8) |
 | GAMEROOM_NORMAL_NOSKILL / CLAN_NOSKILL | 無技背景 | 712/713 (u8 → room+185) |
 | GAMEROOM_LOCALROOM (checkbox) | 區域限定房 | (UI 過濾) |
 | GAMEROOM_SOCCER (checkbox) | 足球模式開關 | (mode 12) |
