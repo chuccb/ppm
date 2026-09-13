@@ -496,6 +496,20 @@ repeat: string from, u8, string title, u32 msg_id, string body(≤201), string, 
 233 killc → 差分進 EE8DAC 累計, 882 playtime → `(20,23,Δ,0)`。
 → 伺服器送這些 ACK 等於在幫 client 推進「贏 N 場」「殺 N 人」型任務;
 total 送錯會讓任務進度爆走 (再次強調: 必須 MAX 單調)。
+### 3.12b 任務條件類型全表 (十八輪 — Quest.pat 844 條實測分布)
+兩類條件 (雙機制互證):
+- **cond 1..20 = 累計型** (sub_9252D0 查 CClientData): 3=kills(302條!),
+  5=wins(155), 20=playtime(30), 7=disc, 8=heads, 9=combos, 10=hearts,
+  11=double, 12=triple, 2=exp/level(13)...
+- **cond 21..36 = 事件型** (sub_92EF00 事件流直接推進, CClientData 無
+  對應槽): 21=連勝『最強の傭兵』(67條), 26=模式事件『略奪者阻止』,
+  36=助攻『アシストチャレンジ』, 19=星星『星集める者たち』, 24/25/32/35
+  = 房間/特殊事件 — 與十一輪在 C 檔找到的 sub_92EF00(19/21/24/25/26/
+  32/35/36,...) 呼叫點一一對應!
+其他欄位: PeriodType 恆 1; QuestRepeat 215 條可重複; LimitDate 分鐘制
+(180/1200/1440); TermItem1-5 (305 條要求持有物品); UseWeapon (20 條
+限定武器)。
+
 ### 3.13 GQ_QUEST 任務家族 (八輪全家讀畢)
 13-byte 任務快照 = `{s32 quest_index, s32 progress, u8 state, s32 extra}`
 (state: 0=NONE 1=WORKING 2=SUCCESS 3=FAILED — sub_91C7B0 的除錯字串直接
