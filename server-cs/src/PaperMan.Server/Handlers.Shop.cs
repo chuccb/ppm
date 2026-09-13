@@ -31,6 +31,9 @@ public static class ShopHandlers
     //   若 count==0: 額外 bool + u8 (錯誤碼對)
     //   尾端固定 7×s32: pair(?,cash) pair(?,gp) pair(?,x) + s32 last
     //   (count!=0 時 v16→EE8D18=cash 顯示, v20→GP, v27→EE8D1C)
+    // REQ(204) builder @0x570A2C (六輪逐行驗證):
+    //   u8 count; repeat count {s32 item_id, u8 kind, s16 period,
+    //   [s16 -(idx+1) 只在 kind 12/13/17 = 顏色/貼圖類]}
     private static async ValueTask BuyItems(Session s, Packet p, ServerContext ctx)
     {
         byte count = p.ReadU8();
@@ -38,17 +41,22 @@ public static class ShopHandlers
         for (int i = 0; i < count && p.Remaining > 0; i++)
         {
             int itemId = p.ReadS32();
-            byte period = p.Remaining > 0 ? p.ReadU8() : (byte)0;
-            bool useCash = p.Remaining > 0 && p.ReadU8() != 0;
-            WriteResult(ack, Buy(s, ctx, itemId, period, useCash));
+            byte kind = p.ReadU8();
+            short period = p.ReadS16();
+            if (kind is 12 or 13 or 17 && p.Remaining >= 2)
+                _ = p.ReadS16();                            // 變體索引 (負編碼)
+            WriteResult(ack, Buy(s, ctx, itemId, (byte)period, useCash: true));
         }
         await s.SendAsync(WriteTail(ack, s, ctx));
     }
 
+    // REQ(695) builder sub_570B00 兩變體 (六輪確認):
+    //   a5!=0: s32 item, str(64) opt_name, u8 kind, u8 period
+    //   a5==0: s32 item, u8 kind, u8 period       (無字串)
     private static async ValueTask BuyOnceItem(Session s, Packet p, ServerContext ctx)
     {
         int itemId = p.ReadS32();
-        _ = p.ReadStr();                                   // opt
+        if (p.Remaining > 2) _ = p.ReadStr();              // 帶 opt_name 的變體
         _ = p.ReadU8();                                    // kind (server 以 catalog 為準)
         byte period = p.Remaining > 0 ? p.ReadU8() : (byte)0;
 

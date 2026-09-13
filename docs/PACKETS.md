@@ -330,7 +330,14 @@ GS_BUY_ONCEITEM_REQ (695): u8/s32 item_id, string opt, u8 kind, u8 period。
 period 合法值: 1/7/15/30/60/90 天 (kind 0,1,3,14)、0 = 永久型 (kind 2,4,9,15,10,11,16)。
 
 ### 3.5 GS_CASH_ACK (357) — sub_572420: `bool ok, s32 cash`。
-### 3.6 GS_SELLITEM/DESTROY (209) — sub_5725D0: `u8 count, s32 money; repeat{bool ok, s32 item_id, float, float}`。
+### 3.6 GS_SELLITEM_ACK (209) — sub_5725D0 (六輪修正):
+`u8 count, s32 money; repeat count{bool ok; ok 時: s32 item_id, f32, f32,
+s32 flags}` — 每條目尾端的 s32 flags 先前遺漏; count==0 → 失敗 UI。
+### 3.6b GS_BUYITEM_REQ (204) — builder @0x570A2C (六輪逐行驗證):
+`u8 count; repeat{s32 item_id, u8 kind, s16 period, [s16 -(idx+1) 只在
+kind 12/13/17 = 顏色/貼圖變體]}`
+### 3.6c GS_BUY_ONCEITEM_REQ (695) — sub_570B00 兩變體:
+有名版 `s32 item, str(64), u8 kind, u8 period`; 無名版省略 str。
 ### 3.7 GM_CHECKNICK (210/211) / GM_CREATENICK (212/213)
 REQ (builder @0x572D30 / sub_572DC0): **只有 `str nick`** (⚠ 四輪修正:
 u8+str 是 216/262 的格式 sub_56B180/56B230, 先前誤植)。
