@@ -156,7 +156,7 @@ def import_weapon_parts(con: sqlite3.Connection) -> int:
         """
         CREATE TABLE IF NOT EXISTS weapon_parts_catalog (
             gun_item_id  INTEGER NOT NULL,
-            grp          INTEGER NOT NULL CHECK (grp BETWEEN 0 AND 3),
+            grp          INTEGER NOT NULL CHECK (grp BETWEEN 0 AND 7),
             slot         INTEGER NOT NULL CHECK (slot BETWEEN 0 AND 9),
             part_item_id INTEGER NOT NULL,
             PRIMARY KEY (gun_item_id, grp, slot)
@@ -165,13 +165,15 @@ def import_weapon_parts(con: sqlite3.Connection) -> int:
     )
     con.execute("DELETE FROM weapon_parts_catalog")
 
+    # 十九輪修正: 實際 8 組 — Parts1..4(col1..40), Parts5(41..50),
+    # Dot(51..60), Parts6(61..70), Parts7(71..80); grp 依欄位序 0..7
     rows = []
     for line in lines[2:]:
         parts = line.split(",")
         if not parts or not parts[0].strip().isdigit():
             continue
         gun = int(parts[0])
-        for grp in range(4):
+        for grp in range(8):
             for slot in range(10):
                 col = 1 + grp * 10 + slot
                 if col < len(parts) and parts[col].strip().isdigit() and int(parts[col]) > 0:
