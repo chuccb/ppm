@@ -163,7 +163,7 @@ public static class LobbyHandlers
     //     u8 cur_players(+105), bool has_pass(+106), u8 max_players(+129 冗餘,
     //     client 以 +110 popcount 重算), u16 max_slot_mask(+110),
     //     u8 game_mode(→sub_53FBB0), bool room_type_A(+108), u8 mode_param_a(+12),
-    //     bool room_type_B(+109), bool double_damage(+128), bool flag130(+130),
+    //     bool room_type_B(+109), bool double_damage(+128), u8 map(+130),
     //     u8 mode_param_b(+4), bool no_skill_bg(+185) }
     private static async ValueTask RoomList(Session session, Packet packet, ServerContext context)
     {
@@ -187,7 +187,7 @@ public static class LobbyHandlers
                .WriteU8(0)                                  // mode+12 (mode 參數)
                .WriteBool(false)                            // +109 room_type bit B
                .WriteBool(false)                            // +128 double_damage
-               .WriteBool(false)                            // +130 flag
+               .WriteU8(room.MapId)                         // +130 map (sub_540280/540260; 122 亦寫此欄)
                .WriteU8(0)                                  // mode+4 (mode 參數)
                .WriteBool(false);                           // +185 no_skill_bg
         }

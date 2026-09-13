@@ -4,8 +4,9 @@
 // 佈局出自反編譯 (docs/PACKETS.md §3.15 + 多輪逐欄定案):
 //   111 REQ: u8 map, s8 has_pass, str title, [str pass],
 //            u8 rule(modeIndex), u8 max, u8 x, u8 y
-//   112 ACK (sub_56A7B0): u8 err, u8 room_no(<210), u16, s32 room_uid,
-//            u8, s8 obs — err==0 → client 自任房主, 狀態切 10
+//   112 ACK (sub_56A7B0): u8 err, u8 room_no(<210), u16 max_slot_mask,
+//            s32 room_uid, u8 no_skill_bg(+185), u8 mode+13 — err==0 →
+//            client 自任房主 (sub_53F920: +105=1 自身), 狀態切 10
 //   113 REQ: u8 room_no
 //   114 ACK (sub_56B360): u8 sub_type; 1=單人進房通知(既有成員),
 //            2=完整房間狀態(進房者), 0=失敗 — 成員條目含完整 CClientData
@@ -45,7 +46,7 @@ public static class RoomHandlers
     //   u8 result(1=開戰), u8 隊旗(→mode+14), s32 elapsed_ms(新局=0),
     //   u8 room_no, u8 cur_players(+105), u8 max_players(+129 冗餘,
     //   client 以 +110 popcount 重算), u16 max_slot_mask(+110),
-    //   u8 (+130), u8 mode(→sub_53FBB0), u16 (+144), u8 flags(bit0→mode+4),
+    //   u8 map(+130), u8 mode(→sub_53FBB0), u16 (+144), u8 flags(bit0→mode+4),
     //   u8 mode+12, u8 +109, u8 mode+13, u8 +185, u8 +128,
     //   16×s32 (per-slot → dword_F6DD1C)
     //   — room_no 為 client 以 sub_407E80 定址房物件的索引
@@ -66,7 +67,7 @@ public static class RoomHandlers
             .WriteU8((byte)room.Members.Count)              // +105 cur_players
             .WriteU8(room.MaxPlayers)                       // +129 max_players (client 以 +110 重算)
             .WriteU16(room.MaxSlotMask)                     // +110 上限槽位點陣
-            .WriteU8(0)                                     // +130 flag (未確認)
+            .WriteU8(room.MapId)                            // +130 map (sub_540280)
             .WriteU8(room.Rule)                             // mode → sub_53FBB0
             .WriteU16(0)                                    // +144 (未確認)
             .WriteU8(0)                                     // flags (bit0→mode+4)
@@ -125,7 +126,7 @@ public static class RoomHandlers
     }
 
     // 133 REQ 空 → 134 ACK (sub_562EA0 讀序): 回房重置
-    //   u8 result(1=回房), u8(+130), u8(讀後丟棄), u8 room_no,
+    //   u8 result(1=回房), u8 map(+130), u8(讀後丟棄), u8 room_no,
     //   u8 max_players(+129 冗餘, client 以 +110 popcount 重算),
     //   u16 max_slot_mask(+110, 回房恢復大廳), u8 mode(→sub_53FBB0),
     //   u8(+136), u16(+144), u8 flags(bit0→mode+4), u8(+146),
@@ -140,8 +141,8 @@ public static class RoomHandlers
 
         var ack = new Packet(Opcode.GR_END_ACK)
             .WriteU8(1)                                     // result: 回房
-            .WriteU8(0)                                     // +130 (未確認)
-            .WriteU8(0)                                     // client 讀後丟棄
+            .WriteU8(room.MapId)                            // +130 map (sub_540280)
+            .WriteU8(0)                                     // client 讀後丟棄 (i_1)
             .WriteU8(roomNo)                                // room_no (client 定址房物件)
             .WriteU8(room.MaxPlayers)                       // +129 max_players (client 以 +110 重算)
             .WriteU16(room.MaxSlotMask)                     // +110 上限槽位點陣 (回房恢復)
@@ -452,7 +453,7 @@ public static class RoomHandlers
     private static void WriteRoomState(Packet ack, Room room)
     {
         ack.WriteS32(room.RoomUid)                         // v192 → dword_F2A65C
-           .WriteU8(0)                                     // v176 → +130 (sub_540280)
+           .WriteU8(room.MapId)                            // v176 → +130 map (sub_540280)
            .WriteU8((byte)room.Members.Count)              // ii_1 成員數 (cur)
            .WriteU8(room.RoomNo)                           // v191[2] room_no (sub_537690 我的房號)
            .WriteU8(room.MaxPlayers)                       // v170 → +129 最大人數 (client 以 +110 重算)

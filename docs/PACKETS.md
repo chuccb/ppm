@@ -521,7 +521,10 @@ ACK (sub_572D80/572E70): `u8 result` — **result 語意十輪逐分支定案**:
 - 213 (sub_41BD40): ⚠ **`1` = 成功** (拷貝 6 個統計欄位到全域,
   state:=5 進大廳), `0` = 失敗 (彈窗, state:=4), 其他值被忽略
   (client 卡在原畫面) — 成功碼是 1 不是 0!
-### 3.8 GL_USERLIST_ACK (106) — sub_56A250 (四輪修正):
+### 3.8 GL_USERLIST_REQ (105) / GL_USERLIST_ACK (106)
+REQ 端 `sub_56A0F0`: `s8 (=1)` — client 每 ≥1 秒 (timeGetTime 差
+≥0x3E8) 送一次要求刷新名單, log `L"Send UserList"`; server 直接回
+106。ACK 端 sub_56A250 (四輪修正):
 ```
 u16    count
 若 count != 0:      ← count==0 時後面什麼都沒有
@@ -551,7 +554,8 @@ repeat count:
     u8   mode_param_a  (→ mode 物件 +12)
     bool room_type_B   (+109; sub_44DA70 — ROOMTYPE bit)
     bool double_damage (+128; sub_44DBB0)
-    bool flag130       (+130; sub_540280)
+    u8   map           (+130; sub_540280/sub_540260 — 122 亦寫此欄,
+                        124/125 = 特殊地圖 id)
     u8   mode_param_b  (→ mode 物件 +4, sub_74F450)
     bool no_skill_bg   (+185; sub_44E820 — NOSKILLBG)
   若 mode==2: 兩組 {s32 team_id, u32 custom_tex_crc, str(75/87) tex_name,
@@ -561,7 +565,8 @@ repeat count:
 `+129=max_players (sub_44E990; sub_5403F0 取 /2 為單隊上限)`,
 `+110=上限槽位點陣 (popcount=最大人數; 非勝場點陣)`, `sub_44E7D0 =
 +129 - +105 = 空位數`; `+106=has_pass`, `+108/+109=ROOMTYPE 兩 bit`,
-`+128=double_damage`, `+185=noskillbg`。
+`+128=double_damage`, `+130=map (sub_540260 取; 124/125 特殊地圖)`,
+`+185=noskillbg`。
 **game_mode 枚舉 (sub_53FBB0 factory, 0x10=16 → 原樣不改; 其他 → null):**
 `0=TeamMatch, 1=IndividualSurvival, 2=DefuseBomb, 3=TeamSurvival,
  4=Steal, 5=Practice, 6=Tutorial, 7=ChattingRoom, 8=Pulp'n'Roll,
@@ -957,27 +962,62 @@ festival: 681 的 3 頻道組 ↔ 195 的 group 序號互證; 頻道類型 n2==3
      一次性 latch 觸發 sub_596300, 屬 UDP 建立後的補充回報)
 ```
 
-### 3.15b2 房間管理/戰場雜項 (廿二輪掃畢)
+### 3.15b2 房間管理/戰場雜項 (廿二輪掃畢; 卅八輪補 REQ 端+設定簇)
 ```
-122 GR_MAPCHANGE_ACK   (sub_56E530): u8 map_id — 房主換圖廣播
+121 GR_MAPCHANGE_REQ   (sub_56E480): u8 map_id — 房主換圖請求
+122 GR_MAPCHANGE_ACK   (sub_56E530): u8 map_id — 寫 room+130 (map,
+                       sub_42FC50→sub_540280); 房主換圖廣播
 124 GR_LEAVE_ACK       (sub_5607C0): u8 result; ≠0 → u8 slot 迴圈
                        比對並移除成員 (n11==6 觀戰特判)
-126 GR_CHATTING_ACK    (sub_56EA80): s32 custom_tex, u8 slot,
-                       wstr message — 房內聊天 (與 120 大廳同構,
-                       但以 slot 而非 nick 定位)
+125 GR_CHATTING_REQ    (sub_56E6C0 str 版 / sub_56E860 wstr 版):
+                       s32 sender_uid, u8 slot, str|wstr message —
+                       房內聊天 (a3!=0 走本地 echo 不送出)
+126 GR_CHATTING_ACK    (sub_56EA80): s32 uid(讀後丟棄), u8 slot,
+                       wstr message — 以 slot 定址顯示 (與 120 大廳
+                       同構, 但以 slot 而非 nick 定位)
 140 GG_EXITGAME_ACK    (sub_563430): u8 n2 (1→u8 slot 單人退場;
                        2→回房重置)
-168 GR_CHANGEUSER_ACK  (sub_56F410): u16 — 房員數變更
-170 GR_RULECHANGE_ACK  (sub_56F4F0): u8 rule (modeIndex!)
-172 GR_WINCHANGE_ACK   (sub_56F5D0): u16 win_count
-174 GR_TIMECHANGE_ACK  (sub_56F6B0): u8 time_idx
-176 GR_ITEMCHANGE_ACK  (sub_56F790): u8 item_mode
+—— 房設定簇 (REQ=UI 變更送端 / ACK=dispatcher 收端寫入房物件) ——
+167 GR_CHANGEUSER_REQ  (sub_56F360, UI sub_4325A0): s16 slot_mask
+168 GR_CHANGEUSER_ACK  (sub_56F410→sub_4325D0): s16 slot_mask —
+                       寫 room+110=上限槽位點陣 與 room mgr +214,
+                       sub_53FB10 重算 +129=popcount(最大人數)
+169 GR_RULECHANGE_REQ  (sub_56F440, UI sub_42FE20): u8 mode
+170 GR_RULECHANGE_ACK  (sub_56F4F0→sub_42FE50): u8 mode (modeIndex) —
+                       sub_53FBB0 重建 mode UI(+132), 再由 mode 設定表
+                       (sub_426930) 回推 map 寫 +130, 並重繪 USERSLOTS
+171 GR_WINCHANGE_REQ   (sub_56F520, UI sub_4306E0): s16 win_count
+172 GR_WINCHANGE_ACK   (sub_56F5D0→sub_430720): s16 win_count — room+144
+173 GR_TIMECHANGE_REQ  (sub_56F600, UI sub_4308F0): u8 time_idx
+174 GR_TIMECHANGE_ACK  (sub_56F6B0→sub_430920): u8 time_idx — room+136
+175 GR_ITEMCHANGE_REQ  (sub_56F6E0, UI sub_430AF0): u8 item_mode(2bit)
+176 GR_ITEMCHANGE_ACK  (sub_56F790→sub_430D50): u8 item_mode — bit0→
+                       sub_74F450(mode+4), bit1→sub_74F430(mode+8)
+177 GR_AUTOCHANGE_REQ  (sub_56F8A0): s8 — 無呼叫者 (僅 builder 存在)
+178 GR_AUTOCHANGE_ACK  : 註冊表有, 但不在 sub_58B010 主 switch
+                       (走 vtable 前置轉發器, 場景層處理)
+340 GR_KILLCHANGE_REQ  (sub_56F7C0, UI sub_430F20): s16 — 與 171 同送
+341 GR_KILLCHANGE_ACK  (sub_56F870→sub_430F50): s16 — room+148
+364 GR_BALANCECHANGE_REQ (sub_56FA30, UI sub_431130/432170): u8(1)
+365 GR_BALANCECHANGE_ACK (sub_56FAE0→sub_431160): u8 — 寫
+                       GAMEROOM_TEAMBALANCE UI (room 欄位不變)
+712 GR_NOSKILL_REQ     (sub_56FB10, UI sub_431290): u8
+713 GR_NOSKILL_ACK     (sub_56FBC0→sub_4312C0): u8 — room+185
+                       (noskillbg) + GAMEROOM_{NORMAL,CLAN}_NOSKILL UI
+728 GR_OBSERVERCHAT_REQ(sub_56E560): wstr sender, wstr message
+729 GR_OBSERVERCHAT_ACK(sub_56E610): wstr sender, wstr message —
+                       觀戰者聊天 (sub_431EC0 顯示, 錦標賽 sub_478CF0)
+990 (無名) DAMAGEROOM_REQ (sub_56F950, UI sub_430FA0): u8
+991 (無名) DAMAGEROOM_ACK (sub_56FA00→sub_430FD0): u8 — room+128
+                       (double_damage) + GAMEROOM_DAMAGEROOM UI
+                       (990/991 未在 sub_9D2050 名稱表註冊)
 184 GR_ENDLOADING_ACK  (sub_563B00): u8 n2; 迴圈 u8 slot ×2
                        (n2==2 特判) + u8 — 載入完成同步
 188 GG_STARTGAME_ACK   (sub_563D60): u8 n2 (1→u8 count+slots 清單;
                        2→...) — 開戰廣播
 190 GR_CHANGEMASTER_ACK(sub_56FBF0): u8 new_master_slot
                        (n0x10 比對自己 → 房主 UI 切換)
+191 GR_CALLUSER_REQ    (sub_56FD60): str nick — 呼叫指定玩家
 192 GR_CALLUSER_ACK    (sub_56FE10): n2==2 時 u8 slot + str nick
                        — 呼叫玩家
 194 GC_CHANNEL_ACK     (sub_56FE90): u8 — 頻道確認
@@ -1206,7 +1246,7 @@ dispatcher case 102 → `sub_58D6F0` 立即 `ctor(101)` 回送
   `u8 sub_type` + 0=失敗回大廳;
   ==1 單人進房通知: `s32 uid, u8 slot, str nick, s32 exp(level 由 client
   查表), u8 char_type, 成員負載`;
-  ==2 完整房間狀態: `s32 room_uid, u8(+130), u8 count, u8 room_no,
+  ==2 完整房間狀態: `s32 room_uid, u8 map(+130), u8 count, u8 room_no,
   u8 max_players(+129 冗餘), u16 max_slot_mask(+110),
   u8 mode(→sub_53FBB0), u8(+136), u16(+144), u8 flags(bit0→mode+4),
   u8(+146), u16(+148), u8(+150), u8 mode+12, u8(+109), u8 mode+13,
