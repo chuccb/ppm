@@ -11,7 +11,7 @@
 | **cfg\Quest.pat** | @602219 | 任務目錄 | ★★★ 填 quest_catalog: 條件類型/目標值/獎勵 |
 | **cfg\weaponparts.pat** | @619191 | 武器改裝件 | ★★ 220/221 編組 parts 驗證 |
 | **cfg\maplist.pat** | (sub_717E50) | 地圖清單 | ★★ 111 建房 map id 驗證 |
-| **cfg\partsability.pat** | | 改裝件能力 | ★ |
+| **cfg\partsability.pat** | | 改裝件**效果差分** (31 欄彈道模型) | ★★ |
 | **cfg\RecommandItem.pat** | @686031 | 推薦商品 (809) | ★ GS_GET_RECOMMENDSET_INFO 內容 |
 | **data.pat** | @225227 | 主資料容器 | ★★ (見 §3 已破解格式) |
 | **Data\pmClient.dat** | @415210 | pmFile 打包主檔 | ★★★ 上面所有 cfg\*.pat 都從這打包檔讀出 |
@@ -183,6 +183,10 @@ grp4 = 15.25M ストック (槍托)   grp5 = 15.26M ドットサイト (紅點)
 grp6 = 15.278M ペイント弾 (彈藥皮膚, 5,089 條)
 grp7 = 15.288M 整槍配色 (L96 A1 Color...)
 ```
+partsability.pat (413 條) 的 id 段 15.21M..15.28M **正好覆蓋全部 8 組**
+(49/37/37/58/58/19/20/135 條) — 它是「改裝件效果差分表」: 每件對
+recoil/range/damage/shot_delay/姿勢精度 (miJump/miSit/miStand/miWalk/
+miRun) 等 31 項彈道參數的修正 — weaponparts↔partsability 第九次互證。
 → 220/221 武器編組的 8×u32 parts 欄位即此 8 組!
 (RecommandItem 頭兩行: 1030=資料行數, 20=概念類別數)
 
