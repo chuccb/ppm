@@ -402,6 +402,63 @@ public sealed class Db : IDisposable
         }
     }
 
+    // ------------------------------------------------------------- sell
+    /// <summary>
+    /// 賣出背包單件 (208)。回收價 = 目錄 price_gp 的 20% (私服預設;
+    /// 日版實價由 server 決定)。回 (ok, item_id, 賣後 GP)。
+    /// </summary>
+    public (bool Ok, int ItemId, long GpAfter) SellItem(long userId, int slot)
+    {
+        lock (_gate)
+        {
+            using var tx = _conn.BeginTransaction();
+            try
+            {
+                using var find = Cmd(
+                    "SELECT rowid, item_id FROM inventory WHERE user_id=@u AND slot=@s",
+                    ("@u", userId), ("@s", slot));
+                find.Transaction = tx;
+
+                long rowId;
+                int itemId;
+                using (var r = find.ExecuteReader())
+                {
+                    if (!r.Read())
+                    {
+                        tx.Rollback();
+                        return (false, 0, 0);
+                    }
+
+                    rowId = r.GetInt64(0);
+                    itemId = r.GetInt32(1);
+                }
+
+                using var price = Cmd(
+                    "SELECT price_gp FROM item_catalog WHERE item_id=@i", ("@i", itemId));
+                price.Transaction = tx;
+                long refund = Convert.ToInt64(price.ExecuteScalar() ?? 0L) / 5;
+
+                using var del = Cmd("DELETE FROM inventory WHERE rowid=@id", ("@id", rowId));
+                del.Transaction = tx;
+                del.ExecuteNonQuery();
+
+                using var pay = Cmd(
+                    "UPDATE users SET game_point = game_point + @g WHERE user_id=@u RETURNING game_point",
+                    ("@g", refund), ("@u", userId));
+                pay.Transaction = tx;
+                long gpAfter = Convert.ToInt64(pay.ExecuteScalar()!);
+
+                tx.Commit();
+                return (true, itemId, gpAfter);
+            }
+            catch
+            {
+                tx.Rollback();
+                throw;
+            }
+        }
+    }
+
     // ------------------------------------------------------------- gifts
     /// <summary>
     /// 送禮 (296)。回 297 的 result 碼: 0=成功, 2=收件人不存在,

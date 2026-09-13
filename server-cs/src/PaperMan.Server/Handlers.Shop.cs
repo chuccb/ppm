@@ -18,6 +18,30 @@ public static class ShopHandlers
         add(Opcode.GS_BUYITEM_REQ, BuyItems);
         add(Opcode.GS_BUY_ONCEITEM_REQ, BuyOnceItem);
         add(Opcode.GS_GIVEGIFT_REQ, GiveGift);
+        add(Opcode.GS_SELLITEM_REQ, SellItem);
+    }
+
+    // REQ(208) sub_572AD0: s32 slot_idx — 賣出單件
+    // ACK(209) sub_572B80 (廿三輪自動審計重修): bool ok;
+    //   ok → s32 v11, s32 gp_after(→PG 顯示), s32 item_id
+    //   (client 以 item_id 掃背包快取移除該件; 單件交易無迴圈 —
+    //    四/六輪的 count+repeat 版為誤讀, dispatcher 直查定案)
+    private static async ValueTask SellItem(Session s, Packet p, ServerContext ctx)
+    {
+        int slot = p.ReadS32();
+        var r = s.UserId != 0
+            ? ctx.Db.SellItem(s.UserId, slot)
+            : ((bool Ok, int ItemId, long GpAfter))(false, 0, 0);
+
+        var ack = new Packet(Opcode.GS_SELLITEM_ACK).WriteBool(r.Ok);
+        if (r.Ok)
+        {
+            ack.WriteS32(0)                                 // v11 (保留)
+               .WriteS32((int)r.GpAfter)                    // → *EE8D18 PG 顯示
+               .WriteS32(r.ItemId);                         // 背包快取移除鍵
+        }
+
+        await s.SendAsync(ack);
     }
 
     private static async ValueTask Cash(Session s, Packet p, ServerContext ctx)

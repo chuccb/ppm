@@ -425,9 +425,14 @@ GS_BUY_ONCEITEM_REQ (695): u8/s32 item_id, string opt, u8 kind, u8 period。
 period 合法值: 1/7/15/30/60/90 天 (kind 0,1,3,14)、0 = 永久型 (kind 2,4,9,15,10,11,16)。
 
 ### 3.5 GS_CASH_ACK (357) — sub_572420: `bool ok, s32 cash`。
-### 3.6 GS_SELLITEM_ACK (209) — sub_5725D0 (六輪修正):
-`u8 count, s32 money; repeat count{bool ok; ok 時: s32 item_id, f32, f32,
-s32 flags}` — 每條目尾端的 s32 flags 先前遺漏; count==0 → 失敗 UI。
+### 3.6 GS_SELLITEM (208/209) — ⚠ 廿三輪自動審計重修!
+**REQ 208** (sub_572AD0): `s32 slot_idx` — 賣出單件 (背包槽序)。
+### GS_SELLITEM_ACK (209) — sub_572B80:
+`bool ok; ok → s32 v11, s32 gp_after(→*EE8D18 = PG 顯示), s32 item_id`
+— client 以 item_id 掃背包快取 (EE8FF4, 28B/條) 移除該件並左移
+壓縮陣列, PG 餘額更新。**單件交易, 無 count 迴圈** — 四/六輪的
+「u8 count + repeat」版本是誤讀他函數 (sub_5725D0 非 209 handler,
+dispatcher case 209 → sub_572B80 直查定案)。
 ### 3.6b GS_BUYITEM_REQ (204) — builder @0x570A2C (六輪逐行驗證):
 `u8 count; repeat{s32 item_id, u8 kind, s16 period, [s16 -(idx+1) 只在
 kind 12/13/17 = 顏色/貼圖變體]}`
