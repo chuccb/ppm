@@ -79,15 +79,20 @@ public static class ShopHandlers
         await s.SendAsync(WriteTail(ack, s, ctx));
     }
 
-    // REQ(695) builder sub_570B00 兩變體 (六輪確認):
-    //   a5!=0: s32 item, str(64) opt_name, u8 kind, u8 period
-    //   a5==0: s32 item, u8 kind, u8 period       (無字串)
+    // REQ(695) builder sub_570B00 (廿四輪自動抽取定案):
+    //   s32 item_id, u8 kind, u8 period, u16 variant
+    //   (七輪的 str(64) 版是誤讀 String 緩衝宣告 — 三個 builder 呼叫點
+    //    序列一致: 592A20+592920+592920+5929A0, 無字串寫入)
     private static async ValueTask BuyOnceItem(Session s, Packet p, ServerContext ctx)
     {
         int itemId = p.ReadS32();
-        if (p.Remaining > 2) _ = p.ReadStr();              // 帶 opt_name 的變體
         _ = p.ReadU8();                                    // kind (server 以 catalog 為準)
         byte period = p.Remaining > 0 ? p.ReadU8() : (byte)0;
+
+        if (p.Remaining >= 2)
+        {
+            _ = p.ReadU16();                               // 顏色/貼圖變體 (負編碼)
+        }
 
         var ack = new Packet(Opcode.GS_BUYITEM_ACK).WriteU8(1);
         WriteResult(ack, Buy(s, ctx, itemId, period, useCash: true));

@@ -448,8 +448,9 @@ dispatcher case 209 → sub_572B80 直查定案)。
 ### 3.6b GS_BUYITEM_REQ (204) — builder @0x570A2C (六輪逐行驗證):
 `u8 count; repeat{s32 item_id, u8 kind, s16 period, [s16 -(idx+1) 只在
 kind 12/13/17 = 顏色/貼圖變體]}`
-### 3.6c GS_BUY_ONCEITEM_REQ (695) — sub_570B00 兩變體:
-有名版 `s32 item, str(64), u8 kind, u8 period`; 無名版省略 str。
+### 3.6c GS_BUY_ONCEITEM_REQ (695) — sub_570B00 (廿四輪定案):
+`s32 item_id, u8 kind, u8 period, u16 variant` — 三個呼叫點序列
+一致; 七輪的「str(64) 版」是誤讀 String 緩衝宣告, 已更正。
 ### 3.7 GM_CHECKNICK (210/211) / GM_CREATENICK (212/213)
 REQ (builder @0x572D30 / sub_572DC0): **只有 `str nick`** (⚠ 四輪修正:
 u8+str 是 216/262 的格式 sub_56B180/56B230, 先前誤植)。
