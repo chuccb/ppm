@@ -422,6 +422,17 @@ count==0 失敗路徑的 `u8 err` (→ sub_468470 a3, 十一輪逐 case):
 8=背包滿(0x327), 9=其他 — 只有這 7 個值有訊息, 其他值靜默。
 ```
 GS_BUY_ONCEITEM_REQ (695): u8/s32 item_id, string opt, u8 kind, u8 period。
+### 3.6d GS_BUYCASHITEM_ACK (359) — sub_5725D0 (廿三輪正位!):
+`u8 result, s32, bool, s32 item_id, f32 f1, f32 f2, s32 period` —
+四/六輪曾誤把此函數當 209 賣出; 自動審計正位: 它是 **CASH 購買 ACK**
+(單件 + 技能 roll 值)。
+### 3.6e GS_BUY_ONCEITEM_ACK (696) — sub_571D70 (廿三輪首錄):
+`u8 mode, s32 item_id` +
+- mode==0 → u32 (n100 直購)
+- mode==1 且 item==E975BE(15,300,030 コイン充填) → s32 gp → GP 更新
+- item 為 MAC 特殊 id (sub_9A8660) → s32×2 (目錄調整)
+- item==E975A1 (sub_9A8620) → str + 完整 19 欄 (名稱+能力+餘額組)
+即 695 的回包 — 依購買物種類多型!
 period 合法值: 1/7/15/30/60/90 天 (kind 0,1,3,14)、0 = 永久型 (kind 2,4,9,15,10,11,16)。
 
 ### 3.5 GS_CASH_ACK (357) — sub_572420: `bool ok, s32 cash`。
