@@ -5,7 +5,11 @@ using PaperMan.Protocol;
 
 namespace PaperMan.Server;
 
-public sealed record ServerContext(Db Db, ServerConfig Config);
+public sealed record ServerContext(Db Db, ServerConfig Config)
+{
+    /// <summary>全服房間表 (廿八輪)。</summary>
+    public RoomManager Rooms { get; } = new();
+}
 
 public sealed record ServerConfig
 {

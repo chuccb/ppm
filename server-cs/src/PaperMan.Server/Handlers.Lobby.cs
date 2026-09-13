@@ -151,9 +151,34 @@ public static class LobbyHandlers
     //     state>=0 → u8 map, bool, u8 rule, u16 win, u8 max, bool pass, u8[1]
     //     state<0  → str title + 同欄位;
     //     共同尾段 bool,bool,u8,u8,u8; mode==2 加 2×{s32,u32 crc,str,u8} }
-    private static async ValueTask RoomList(Session s, Packet p, ServerContext ctx) =>
-        await s.SendAsync(new Packet(Opcode.GL_GAMEROOMINFO_ACK)
-            .WriteU8(0).WriteU8(0));
+    private static async ValueTask RoomList(Session s, Packet p, ServerContext ctx)
+    {
+        var rooms = ctx.Rooms.All.Take(50).ToList();
+
+        var ack = new Packet(Opcode.GL_GAMEROOMINFO_ACK)
+            .WriteU8(0)                                     // mode 0 = 一般清單
+            .WriteU8((byte)rooms.Count);
+
+        foreach (var room in rooms)
+        {
+            ack.WriteU8(room.RoomNo)
+               .WriteS8(-1)                                 // state<0 → str title 版條目
+               .WriteStr(room.Title)
+               .WriteU8(room.MapId)
+               .WriteBool(false)
+               .WriteU8(room.Rule)
+               .WriteU16(room.WinCount)
+               .WriteU8(room.MaxPlayers)
+               .WriteBool(room.Password is not null)
+               .WriteBool(false)                            // title0
+               .WriteBool(false).WriteBool(false)           // b2, b3 共同尾段
+               .WriteU8((byte)room.Members.Count)
+               .WriteU8(0)
+               .WriteU8(0);
+        }
+
+        await s.SendAsync(ack);
+    }
 
     // ACK(198): 完整 CClientData 序列化 (docs/PACKETS.md §3.2)
     private static async ValueTask MyInfo(Session s, Packet p, ServerContext ctx)

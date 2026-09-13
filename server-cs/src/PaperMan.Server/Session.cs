@@ -23,6 +23,9 @@ public sealed class Session(TcpClient client, PacketCodec codec, long id) : IDis
 
     /// <summary>最後一次收到 101 GT_PING_REQ (client pong) 的時間。</summary>
     public DateTimeOffset LastPongAt { get; set; } = DateTimeOffset.UtcNow;
+
+    /// <summary>目前所在房號 (null = 大廳)。</summary>
+    public byte? RoomNo { get; set; }
     public bool Authenticated => AccountId != 0;
 
     private readonly NetworkStream _stream = client.GetStream();
