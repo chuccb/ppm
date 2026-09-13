@@ -147,6 +147,16 @@ map_catalog)。
 否則用加密的 .pat — 表示 .pat 內容就是對應 .txt 的加密版。
 FilterWord / ExceptionWord / soundprops 同模式。
 
+## 5b. 十六輪補充實測
+
+- **pm_lobbydata.dat = 明文** (LOBBYMAIN/L_MR.DDS + UI 座標表) — 非加密
+- **0.xml** = 打包清單 (character.dat/item.dat/map.dat/pepachi.dat 對映)
+- **ClientDataList.xml** = 頂層資料清單
+- kind 語意與封包白名單互證: kind 13 = ヘアパズル (髮型拼圖,
+  11,012,xxx 段) → 正是 204/296 變體尾欄的 kind 12/13/17 「可覆寫」類;
+  kind 9 = 武器 (永久型白名單) ✓ sub_570B00 互證
+- 日版無 kind 17 條目 (空集), kind 12 = 服務類 (シャウトチャット等)
+
 ## 6. 其他已知資源
 
 - `system/map_StartIndex.xml`, `SelectRandomMap.xml`: 地圖選擇
