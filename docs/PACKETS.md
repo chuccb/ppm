@@ -1036,18 +1036,21 @@ sub_568CE0/sub_53F830/sub_53F920/sub_53F9F0 三 ctor 交叉驗證):
 +112..127 逐槽旗標 (sub_53FB10)  +128  double_damage (990/991)
 +129  max_players = popcount(+110)  (108 的 max 欄為冗餘, 被重算覆寫)
 +130  map (sub_540280; 122 換圖亦寫)  +136 time (173/174)
-+144  win_count (u16, 171/172)   +146  ? (ctor 0, 未確認)
-+148  kill_count (u16, 340/341)  +150  ? (ctor 0, 未確認)
-+185  no_skill_bg (712/713)      +186  team_balance (僅錦標賽 ctor
-                                        sub_53F9F0 寫; 一般房 364/365
-                                        只切 GAMEROOM_TEAMBALANCE UI)
++144  win_count (u16, 171/172)   +146  mode param (u8, wire 114/130/134/
++148  kill_count (u16, 340/341)        309 送; client 存而不讀 — 送 0 安全)
++150  mode param (u8, 同 +146,   +185  no_skill_bg (712/713)
+      client 存而不讀 — 送 0 安全)
++186  team_balance (僅錦標賽 ctor sub_53F9F0 寫; 一般房 364/365
+      只切 GAMEROOM_TEAMBALANCE UI)
 +33   mode LobbyUI 物件 (sub_53FBB0 建, modeIndex 0..15)
-+132  mode rule 物件 (其 +4=item bit0, +8=item bit1, +12=rule param,
-      +14=team flag; sub_74F450/74F430/74F4D0 寫, 74F4B0 讀)
++132  mode rule 物件 (其 +4=item bit0(sub_74F450), +8=item bit1
+      (sub_74F430), +12/+13=rule param (wire 直寫), +14=team flag
+      (sub_74F4D0 寫/sub_74F4B0 讀))
 ```
-模式變更 (169/170) 後 client 以 mode 設定表 `sub_426930` 回推預設
-地圖寫 +130 — server 若要同步 room.MapId 需鏡像 `map_StartIndex.xml`
-的 modeIndex→modeStartIndex 對照 (本輪未做, 見 TODO)。
+模式變更 (169/170) 後 client 以 mode 設定表 `sub_426930(mode)` 回推
+預設地圖寫 +130 (sub_540280)。server 現已鏡像 (RoomHandlers.ModeDefaultMap,
+`map_StartIndex.xml` modeIndex→modeStartIndex): 0→5 1→1 2→14 3→15
+4→23 8→51; 其餘 mode (5/6/7/9/10/11/12/13/15/16) 無地圖目錄 → 保留原圖。
 
 ### 3.15b3 TeamHacking 駭入/炸彈協定 317-333 (廿二輪 — TH 模式核心)
 ```

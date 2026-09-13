@@ -17,6 +17,7 @@
 //   340/341 擊殺, 364/365 平衡, 712/713 無技背景, 728/729 觀戰聊天,
 //   990/991 雙倍傷害 — 對應 room 欄位見 Rooms.cs 與 §3.15b2 總圖。
 // =============================================================================
+using System.Collections.Frozen;
 using PaperMan.Protocol;
 
 namespace PaperMan.Server;
@@ -30,6 +31,24 @@ public static class RoomHandlers
         Full = 1,                                           // 210 房全滿
         BadParams = 2,
     }
+
+    /// <summary>
+    /// 各模式的預設地圖 (map_StartIndex.xml modeIndex→modeStartIndex, 即
+    /// maplist 的絕對 map_id)。169/170 改模式時 client 以 sub_426930(mode)
+    /// 回推同一值寫 +130 (sub_540280) — server 鏡像以免 114/130/134 送舊圖。
+    /// 其餘 mode (5=練習 6=教學 7=聊天 9=射擊館 10/11/13 佔領/AI 12=足球
+    /// 15=武器試射 16=空) 無地圖目錄 → 保留原圖。
+    /// </summary>
+    private static readonly FrozenDictionary<byte, byte> ModeDefaultMap =
+        new Dictionary<byte, byte>
+        {
+            [0] = 5,                                        // TeamDeath (TD_)
+            [1] = 1,                                        // FreeForAll (PS_)
+            [2] = 14,                                       // TeamHacking/駭入 (TH_)
+            [3] = 15,                                       // TeamSurvival (TS_)
+            [4] = 23,                                       // TeamSteal (TW_)
+            [8] = 51,                                       // Pulp'n Roll (PNR)
+        }.ToFrozenDictionary();
 
     public static void Register(Registrar add)
     {
@@ -81,8 +100,8 @@ public static class RoomHandlers
 
         var ack = new Packet(Opcode.GR_START_ACK)
             .WriteU8(1)                                     // result: 開戰
-            .WriteS8(0)                                     // 隊旗 (未確認)
-            .WriteS32(0)                                    // elapsed_ms (新局=0)
+            .WriteS8(0)                                     // mode+14 隊旗 (sub_74F4D0)
+            .WriteS32(0)                                    // elapsed_ms 基準 (新局=0; sub_537670 存 timeGetTime()-x)
             .WriteU8(roomNo)                                // room_no (client 定址房物件)
             .WriteU8((byte)room.Members.Count)              // +105 cur_players
             .WriteU8(room.OpenSlotCount)                       // +129 max_players (client 以 +110 重算)
@@ -372,7 +391,9 @@ public static class RoomHandlers
 
     // 169 GR_RULECHANGE_REQ (sub_56F440): u8 mode(modeIndex) — 房主改遊戲模式
     // → 170 ACK (sub_56F4F0→sub_42FE50): u8 mode — client 以 sub_53FBB0 重建
-    //   mode UI 並依 mode 設定表 (sub_426930) 回推預設地圖寫 +130
+    //   mode UI 並以 sub_426930(mode) 回推預設地圖寫 +130 (sub_540280)。
+    //   server 同步鏡像: 有 map_StartIndex 條目的 mode 重設 MapId, 其餘
+    //   (練習/教學/聊天/射擊館…無地圖目錄) 保留原圖 — 見 ModeDefaultMap。
     private static async ValueTask RuleChange(Session session, Packet packet, ServerContext context)
     {
         byte mode = packet.ReadU8();
@@ -382,6 +403,11 @@ public static class RoomHandlers
         }
 
         room.Rule = mode;
+        if (ModeDefaultMap.TryGetValue(mode, out var defaultMap))
+        {
+            room.MapId = defaultMap;                        // client 端 sub_426930 同源重置
+        }
+
         await RoomManager.BroadcastAsync(room, new Packet(Opcode.GR_RULECHANGE_ACK).WriteU8(mode));
     }
 

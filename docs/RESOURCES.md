@@ -250,3 +250,47 @@ hand*.tga 互證: 那是「試衣間手部貼圖」快取)
 - `Options.cfg`, `CustomMap.cfg`, `LastConnect.ini`: 本機設定 (非資源)
 - `TNMT_*.xml`: 錦標賽 UI 資料
 - `occupymode.xml` / `occupyrenewalmode.xml`: 佔領模式參數
+
+## 7. 房/模式 UI 資源互證 (四十二輪 — ui/*.xml 對照房設定簇)
+
+本輪逐檔比對 `main` 分支 `Extracted/ui/*.xml`, 把房設定簇 (121/122、
+167–178、340/341、364/365、712/713、990/991) 的語意釘死到控制項:
+
+**gameroom.xml** (房內 UI) 控制項 → 協定對照:
+| 控制項 | 語意 | 協定 |
+|---|---|---|
+| GAMEROOM_SCROLL_MAP | 地圖選擇 | 121/122 (u8 map_id → room+130) |
+| GAMEROOM_SCROLL_RULE | 模式選擇 | 169/170 (u8 mode) |
+| GAMEROOM_SCROLL_TIME | 遊戲時間 | 173/174 (u8 → room+136) |
+| GAMEROOM_SCROLL_OBJECT | 擊殺/目標數 | 340/341 (u16 → room+148) |
+| GAMEROOM_ITEM (checkbox) | 道具開關 | 175/176 (bit0/bit1 → mode+4/+8) |
+| GAMEROOM_DAMAGEROOM (checkbox) | 雙倍傷害 | 990/991 (u8 → room+128) |
+| GAMEROOM_TEAMBALANCE (checkbox) | 隊伍平衡 | 364/365 (僅切 UI) |
+| GAMEROOM_TEAMSHUFFLE (checkbox) | 隊伍隨機打散 | (UI, 未見獨立 opcode) |
+| GAMEROOM_NORMAL_NOSKILL / CLAN_NOSKILL | 無技背景 | 712/713 (u8 → room+185) |
+| GAMEROOM_LOCALROOM (checkbox) | 區域限定房 | (UI 過濾) |
+| GAMEROOM_SOCCER (checkbox) | 足球模式開關 | (mode 12) |
+| CUSTOMMAP_ON_BTN | 自訂地圖 | SelectRandomMap 點陣 |
+
+**roommake.xml** (建房 UI) 下拉值域:
+- GAMEMODE 可選 mode = **{0,1,2,3,4,5,8,10,11,12,13}** (無 6/7/9/14/15 —
+  教學/聊天/射擊館/足球/武器試射不走一般建房; 7 由 CHKBTN_CHATROOM 勾出)
+- USERS 可選人數 = **{2,4,6,8,10,12,14,16}**
+- CHKBTN_CHATROOM (勾選=聊天房 mode 7) / CHKBTN_NOSKILL (無技背景)
+- ROOMNAME textlimit=120, PASSWORD_INPUT textlimit=8
+
+**SelectRandomMap.xml** (自訂隨機圖): CUSTOM_MAP_LIST 8 列, 點陣列
+`MAP_NUM_0..7` 的 x 值 = **1,2,4,8,16,512,4096,16384** — 即 16-bit
+自訂地圖 bitmask 的 bit {0,1,2,3,4,9,12,14} (對齊 maplist.pat +0 的
+模式 bitmask 位定義)。
+
+**map_StartIndex.xml** (官方模式名 + 預設圖): `modeIndex→modeStartIndex`
+= 0→5(TeamDeath) 1→1(FreeForAll) 2→14(TeamHacking) 3→15(TeamSurvival)
+4→23(TeamSteal) 8→51(PNR)。modeStartIndex 即該模式預設 map_id
+(maplist 0..122) — 169/170 改模式時 client `sub_426930(mode)` 回推
+此值寫 room+130, server 已鏡像 (RoomHandlers.ModeDefaultMap)。
+
+**mode 枚舉正名 (sub_53FBB0 factory)**: 0=TeamMatch 1=IndividualSurvival
+2=DefuseBomb(駭入) 3=TeamSurvival 4=Steal 5=Practice 6=Tutorial
+7=ChattingRoom 8=Pulp'n'Roll 9=GunShooting 10=Occupy 11=AIMulti
+12=TeamSoccer 13=OccupyRenewal 15=WeaponTest — 14 無 (default→null)。
