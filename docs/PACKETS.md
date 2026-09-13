@@ -655,7 +655,10 @@ Server 的 GG 處理 = **驗證 + 廣播**, 三種模式:
 其他: 443/445/447 奪寶三連 (ACK u8+u8+u16×3 分數組); 964/967 足球
 (得球/進球 = u8×2); 749 GIMMICK (s32×2+u8); 752 地圖重載;
 962 掉落武器 (REQ 6 欄 → ACK 13 欄 = server 附 drop_id+item 詳情);
-474-483 射擊館 (476 END 帶 raw24+raw44 成績塊, 478 CHECK raw36 防作弊);
+474-483 射擊館 — 476 END 成績塊解構 (廿五輪): raw24 =
+{tick, 0, user_no(sub_525070), uid(EE8CB4), score, wave} 6×s32;
+raw44 = {…, [12]=命中, [7]/[8]/[9]=擊殺分類, [5]=fever} 11×s32
+(sub_8EE1D0 射擊館統計物件); 478 CHECK raw36 防作弊快照;
 716 快速槽 4×s16; 437 房間廣播 (u8+s32+rawN 自由載荷)。
 334/336/338 SEEDKEY/UNIQUEKEY/DETECTCRACK = 反作弊挑戰 (REQ/ACK 皆
 無 builder/parser — 由安全模組直接組包, 私服可忽略)。
