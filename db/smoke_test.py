@@ -47,8 +47,8 @@ except sqlite3.IntegrityError:
 step('item_catalog / inventory / period 白名單')
 # 真實 id 空間 (十二輪定案): 可購武器段 A = 15,301,001..15,302,000;
 # 裝飾類 full_id = 類別基底 + u16 偏移 (見 docs/PACKETS.md §3.15pre1)
-c.execute("INSERT INTO item_catalog(item_id,name,kind,price_gp,durability) VALUES (15301001,'AK Paper',0,800,100)")
-c.execute("INSERT INTO item_catalog(item_id,name,kind,price_gp) VALUES (10400001,'Red Cap',2,300)")
+c.execute("INSERT OR IGNORE INTO item_catalog(item_id,name,kind,price_gp,durability) VALUES (15301001,'AK Paper',0,800,100)")
+c.execute("INSERT OR IGNORE INTO item_catalog(item_id,name,kind,price_gp) VALUES (10400001,'Red Cap',2,300)")
 c.execute("""INSERT INTO inventory(user_id,slot,item_id,period_days,expires_at,
              durability_cur,durability_max)
              VALUES (?,0,15301001,30,unixepoch()+30*86400,100,100)""", (uid,))

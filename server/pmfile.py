@@ -37,10 +37,10 @@ def _ror8(b: int, n: int) -> int:
 
 
 def _next_state(state: int, i: int) -> int:
-    """sub_7117D0 的 keystream 遞推 (常數 0xFA5387AD/0x0F3A94AA/0x48945B4A/0x1A68DCCF)。"""
+    """sub_7117D0 的 keystream 遞推 (常數 0xFA5387AD/0x0F3A94AA/0x48945DCA/0x1A68DCCF)。"""
     return (
         ((state ^ 0xFA5387AD) & 0x0F3A94AA)
-        ^ (((i | state) + 0x48945B4A) & M32)
+        ^ (((i | state) + 0x48945DCA) & M32)
         ^ 0x1A68DCCF
     ) & M32
 
