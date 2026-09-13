@@ -490,6 +490,27 @@ repeat: string from, u8, string title, u32 msg_id, string body(≤201), string, 
 **ACK 297** (sub_57AA50): `u8 result` — 0=成功, 之後 5×s32
 (cash/餘額顯示組); 1..11 = 錯誤碼 (11 種禮物失敗訊息)。
 
+### 3.15e GL_JOINPLAY_ACK (269) — sub_574B20, 1524 行巨型函數 (十輪讀畢)
+中途加入/觀戰的「全房間快照」。頂層: `u8 n7` switch:
+- 0: 失敗, 通知 UI (sub_406F20(0))
+- 1..5, 8, 9: 各種拒絕碼 (sub_406F20(n7))
+- 6: **觀戰者自己入房** — `s32 v482, u8 slot(≤16), str nick` +
+  CClientData 嵌入 (sub_524360) + `u8, s16, s16, s16` (角色外觀) +
+  `s32, s32, s32 custom_tex, str(64)` + 4×武器組 {s16 equipped,
+  kk!=3 → s16×2... , equipped→8×s32 parts} + `u8` + [8×s32] + ...
+- 7 (fall-through 主體): **完整房間+全成員快照**:
+  房間頭: `s32 room_uid, s32 game_time(0x1770), u8 map, u8 count(jj_1),
+  u8 room_no, u8 rule, u16 win, u8 max, u8, u16, u8 flags(bit0/1 拆),
+  u8 has_pass, u16, u8, u8, u8 obs` + `u8×4 (n2_10 等模式旗標)`
+  然後 count× 成員條目:
+  `s32 uid, u8 slot, str nick, u8 team, u8 ready(1&1→0 特例),
+  s32, s32, s32 custom_tex, u8 alive, u8 dead_flag` +
+  [alive==0: 16B blob, u16×2, u16, u16×2, s8 觀戰目標] +
+  strcmp 自己→special, `u8 char_type, s16×3 外觀`, `s32×2, s32 tex,
+  str(64)`, 4×武器組 (kk!=3 帶 sub-slot, equipped→8×s32 parts), u8 + 8×s32
+私服要點: 快照結構 = 114 (ENTERROOM sub_type==2) 的擴充版; 兩者成員
+條目欄位順序一致 (交叉驗證), 269 多了戰鬥中狀態 (alive/dead/觀戰目標)。
+
 ### 3.15d 連線生命週期 103/141-144 (九輪讀畢)
 ```
 103 GE_LOGOUT_REQ (sub_58D660): 無 payload — client 登出通知
@@ -545,6 +566,14 @@ repeat: string from, u8, string title, u32 msg_id, string body(≤201), string, 
 136 GR_CHANGESLOT_ACK (sub_56EF40): u8 ok; ok → (n11 10/11 特判)
     u8 from, u8 to, s32, s32, u8 count, count×條目
 ```
+
+### 3.15pre Ping 方向 (十輪更正 — 重要!)
+`GT_PING_ACK(102)` 是**伺服器→client** 的主動心跳; client 的
+dispatcher case 102 → `sub_58D6F0` 立即 `ctor(101)` 回送
+`GT_PING_REQ(101)` (空 payload)。101 在 client 端**沒有** builder 以外
+的用途, 102 在 client 端沒有 handler 以外的用途。
+→ 伺服器: 週期發 102 當 keepalive, 收 101 更新 last-seen;
+**絕不可收 101 回 102** (無限迴圈)。
 
 ### 3.15a 大廳聊天/名單 (八輪讀畢)
 - **119 GL_CHATTING_REQ**: `str message` (ANSI)

@@ -1,7 +1,9 @@
 // =============================================================================
 // 登入/連線 handlers — 佈局出自反編譯 (docs/PACKETS.md §1.4, §3.1):
 //   682 GL_LOGIN_REQ    → 681 GL_LOGIN_ACK (0x43E651 分支) + 694 門檻協商
-//   101 GT_PING_REQ     → 102 GT_PING_ACK (空 payload)
+//   ping 方向 (十輪更正): 伺服器主動發 102, client (case 102 →
+//   sub_58D6F0) 回 101 — 收到 101 只需更新 last-seen, 不可回 102
+//   (否則形成無限 ping 迴圈)。101/102 皆空 payload。
 // =============================================================================
 using PaperMan.Protocol;
 
@@ -11,12 +13,17 @@ public static class AuthHandlers
 {
     public static void Register(Registrar add)
     {
-        add(Opcode.GT_PING_REQ, Ping);
+        add(Opcode.GT_PING_REQ, PingReply);
         add(Opcode.GL_LOGIN_REQ, Login);
     }
 
-    private static async ValueTask Ping(Session s, Packet p, ServerContext ctx) =>
-        await s.SendAsync(new Packet(Opcode.GT_PING_ACK));
+    // 101 = client 對伺服器 102 的回應 (sub_58D6F0: 收 102 → ctor(101) 送出)。
+    // 靜默吸收即可; 週期性發 102 屬 keepalive 機制 (Session 層可選)。
+    private static ValueTask PingReply(Session s, Packet p, ServerContext ctx)
+    {
+        s.LastPongAt = DateTimeOffset.UtcNow;
+        return ValueTask.CompletedTask;
+    }
 
     // REQ builder (0x43DFxx, sub_401B50 取帳號):
     //   str account ×2, u64 hw(混淆), u8 sec_state(0/1/2, sub_9A8790/9A86A0),

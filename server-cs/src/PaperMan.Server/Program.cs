@@ -63,6 +63,10 @@ async Task RunSessionAsync(TcpClient client, long sid, CancellationToken ct)
     using var session = new Session(client, codec, sid);
     Console.WriteLine($"[s{sid}] connect {session.Remote}");
 
+    // 心跳: 伺服器主動發 102, client 以 101 回應 (sub_58D6F0; 方向十輪定案)
+    using var pingCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+    _ = PingLoopAsync(session, pingCts.Token);
+
     try
     {
         await foreach (var packet in session.ReceiveAsync(ct))
@@ -89,6 +93,27 @@ async Task RunSessionAsync(TcpClient client, long sid, CancellationToken ct)
     {
         Console.WriteLine($"[s{sid}] session error: {ex.Message}");
     }
+    finally
+    {
+        pingCts.Cancel();
+    }
 
     Console.WriteLine($"[s{sid}] disconnect {session.Remote}");
+}
+
+// 30 秒一次的 102 GT_PING_ACK 心跳; client 收到即回 101 (sub_58D6F0)。
+static async Task PingLoopAsync(Session session, CancellationToken ct)
+{
+    using var timer = new PeriodicTimer(TimeSpan.FromSeconds(30));
+    try
+    {
+        while (await timer.WaitForNextTickAsync(ct))
+        {
+            await session.SendAsync(new Packet(Opcode.GT_PING_ACK), ct);
+        }
+    }
+    catch (Exception)
+    {
+        // 連線收攤 / 取消 — 心跳自然停止
+    }
 }
