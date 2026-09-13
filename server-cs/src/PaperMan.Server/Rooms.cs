@@ -69,6 +69,18 @@ public sealed class Room
         }
     }
 
+    /// <summary>房主離開時選最小 slot 為新房主 (190 GR_CHANGEMASTER 廣播用)。</summary>
+    public byte? ElectNewMaster()
+    {
+        var next = Members.Keys.Order().Cast<byte?>().FirstOrDefault();
+        if (next is { } slot)
+        {
+            MasterSlot = slot;
+        }
+
+        return next;
+    }
+
     /// <summary>128 GR_READY: 翻轉 slot 的 ready 狀態, 回新值。</summary>
     public bool ToggleReady(byte slot)
     {
@@ -143,6 +155,40 @@ public sealed class RoomManager
 
     public void Remove(byte roomNo) =>
         _rooms.TryRemove(roomNo, out _);
+
+    /// <summary>
+    /// 成員離房共用流程 (主動離房 124 與斷線清理共用):
+    /// 移除成員 → 空房回收 / 廣播 124 (u8 slot) →
+    /// 房主離開時再廣播 190 (u8 = 該 slot 的玩家識別值, 對照
+    /// client dword_F6DCF4 快取 — sub_56FBF0 卅五輪定案)。
+    /// </summary>
+    public async ValueTask RemoveMemberAsync(Room room, Session member)
+    {
+        var slot = room.Members.FirstOrDefault(kv => ReferenceEquals(kv.Value, member)).Key;
+        bool wasMaster = slot == room.MasterSlot;
+        room.Members.TryRemove(slot, out _);
+        member.RoomNo = null;
+
+        if (room.Members.IsEmpty)
+        {
+            Remove(room.RoomNo);
+            return;
+        }
+
+        var leaveNotice = new Packet(Opcode.GR_LEAVE_ACK)
+            .WriteU8(1)
+            .WriteU8(slot);
+        await BroadcastAsync(room, leaveNotice);
+
+        if (wasMaster && room.ElectNewMaster() is { } newMaster)
+        {
+            // 190 的 u8 = client F6DCF4[slot] 快取值 = 我方 114 寫入的 uid
+            var masterSession = room.Members[newMaster];
+            var masterNotice = new Packet(Opcode.GR_CHANGEMASTER_ACK)
+                .WriteU8(unchecked((byte)masterSession.UserId));
+            await BroadcastAsync(room, masterNotice);
+        }
+    }
 
     /// <summary>對房內所有成員廣播 (逐 session 送出)。</summary>
     public static async ValueTask BroadcastAsync(Room room, Packet packet, Session? except = null)

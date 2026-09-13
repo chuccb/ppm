@@ -126,6 +126,20 @@ async Task RunSessionAsync(TcpClient client, long sessionId, ServerRole role, Ca
     finally
     {
         pingCts.Cancel();
+
+        // 斷線清理: 還在房內 → 與主動離房相同流程
+        // (124 離房廣播 + 190 房主遷移 + 空房回收) — 防殭屍成員
+        if (session.RoomNo is { } roomNo && ctx.Rooms.Find(roomNo) is { } room)
+        {
+            try
+            {
+                await ctx.Rooms.RemoveMemberAsync(room, session);
+            }
+            catch
+            {
+                // 清理失敗不影響斷線流程
+            }
+        }
     }
 
     Console.WriteLine($"[s{sessionId}] disconnect {session.Remote}");
