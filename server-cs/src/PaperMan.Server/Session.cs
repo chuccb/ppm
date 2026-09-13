@@ -30,9 +30,16 @@ public sealed class Session(TcpClient client, PacketCodec codec, long id) : IDis
     public async Task SendAsync(Packet p, CancellationToken ct = default)
     {
         var frame = codec.Encode(p);
+
         await _sendGate.WaitAsync(ct).ConfigureAwait(false);
-        try { await _stream.WriteAsync(frame, ct).ConfigureAwait(false); }
-        finally { _sendGate.Release(); }
+        try
+        {
+            await _stream.WriteAsync(frame, ct).ConfigureAwait(false);
+        }
+        finally
+        {
+            _sendGate.Release();
+        }
     }
 
     /// <summary>讀 socket 並逐 frame 產出封包; 連線關閉時自然結束。</summary>
@@ -42,13 +49,26 @@ public sealed class Session(TcpClient client, PacketCodec codec, long id) : IDis
         while (!ct.IsCancellationRequested)
         {
             int n;
-            try { n = await _stream.ReadAsync(_rxBuf.AsMemory(_rxLen), ct).ConfigureAwait(false); }
-            catch (Exception e) when (e is IOException or SocketException) { yield break; }
-            if (n == 0) yield break;
+            try
+            {
+                n = await _stream.ReadAsync(_rxBuf.AsMemory(_rxLen), ct).ConfigureAwait(false);
+            }
+            catch (Exception e) when (e is IOException or SocketException)
+            {
+                yield break;                                 // 對端斷線
+            }
+
+            if (n == 0)
+            {
+                yield break;                                 // 正常關閉
+            }
+
             _rxLen += n;
 
             while (TryTakeFrame() is { } pkt)
+            {
                 yield return pkt;
+            }
         }
     }
 
@@ -58,8 +78,17 @@ public sealed class Session(TcpClient client, PacketCodec codec, long id) : IDis
         while (_rxLen >= Packet.HeaderSize)
         {
             int frameLen = PacketCodec.FrameLength(_rxBuf.AsSpan(0, _rxLen));
-            if (frameLen > _rxBuf.Length) { _rxLen = 0; return null; }   // 不可能的長度
-            if (_rxLen < frameLen) return null;                          // 半包 (sub_591D50)
+
+            if (frameLen > _rxBuf.Length)
+            {
+                _rxLen = 0;                                  // 不可能的長度 → 整緩衝丟棄
+                return null;
+            }
+
+            if (_rxLen < frameLen)
+            {
+                return null;                                 // 半包, 等更多資料 (sub_591D50)
+            }
 
             Packet? pkt;
             try
@@ -68,7 +97,7 @@ public sealed class Session(TcpClient client, PacketCodec codec, long id) : IDis
             }
             catch
             {
-                _rxLen = 0;                                              // 原版: 解不開 → 清空緩衝
+                _rxLen = 0;                                  // 原版: 解不開 → 清空緩衝
                 return null;
             }
 
@@ -76,6 +105,7 @@ public sealed class Session(TcpClient client, PacketCodec codec, long id) : IDis
             _rxLen -= frameLen;
             return pkt;
         }
+
         return null;
     }
 

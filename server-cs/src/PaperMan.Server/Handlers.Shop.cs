@@ -44,9 +44,13 @@ public static class ShopHandlers
             byte kind = p.ReadU8();
             short period = p.ReadS16();
             if (kind is 12 or 13 or 17 && p.Remaining >= 2)
+            {
                 _ = p.ReadS16();                            // 變體索引 (負編碼)
+            }
+
             WriteResult(ack, Buy(s, ctx, itemId, (byte)period, useCash: true));
         }
+
         await s.SendAsync(WriteTail(ack, s, ctx));
     }
 

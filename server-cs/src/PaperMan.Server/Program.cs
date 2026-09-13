@@ -30,14 +30,24 @@ listener.Start();
 Console.WriteLine($"[paperman] listening on {config.ListenHost}:{config.Port}");
 
 using var cts = new CancellationTokenSource();
-Console.CancelKeyPress += (_, e) => { e.Cancel = true; cts.Cancel(); };
+Console.CancelKeyPress += (_, e) =>
+{
+    e.Cancel = true;
+    cts.Cancel();
+};
 
 long nextSessionId = 0;
 while (!cts.IsCancellationRequested)
 {
     TcpClient client;
-    try { client = await listener.AcceptTcpClientAsync(cts.Token); }
-    catch (OperationCanceledException) { break; }
+    try
+    {
+        client = await listener.AcceptTcpClientAsync(cts.Token);
+    }
+    catch (OperationCanceledException)
+    {
+        break;
+    }
 
     _ = RunSessionAsync(client, Interlocked.Increment(ref nextSessionId), cts.Token);
 }
@@ -61,7 +71,9 @@ async Task RunSessionAsync(TcpClient client, long sid, CancellationToken ct)
             try
             {
                 if (!await router.DispatchAsync(session, packet, ctx))
+                {
                     Console.WriteLine($"[s{sid}] unhandled {packet}");
+                }
             }
             catch (Exception ex)
             {
@@ -69,10 +81,14 @@ async Task RunSessionAsync(TcpClient client, long sid, CancellationToken ct)
             }
         }
     }
-    catch (OperationCanceledException) { }
+    catch (OperationCanceledException)
+    {
+        // 伺服器關閉中 — 靜默結束
+    }
     catch (Exception ex)
     {
         Console.WriteLine($"[s{sid}] session error: {ex.Message}");
     }
+
     Console.WriteLine($"[s{sid}] disconnect {session.Remote}");
 }

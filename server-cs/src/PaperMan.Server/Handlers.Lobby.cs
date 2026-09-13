@@ -47,6 +47,7 @@ public static class LobbyHandlers
             await s.SendAsync(new Packet(Opcode.GL_MYINFO_ACK).WriteBool(false));
             return;
         }
+
         await s.SendAsync(BuildMyInfoAck(info, ctx.Db.GetCharacters(info.UserId)));
     }
 
@@ -81,7 +82,10 @@ public static class LobbyHandlers
         foreach (var c in chars.Take(20))
         {
             ack.WriteU8(c.CharType);
-            foreach (var eq in c.Equip) ack.WriteU16(eq);
+            foreach (var eq in c.Equip)
+            {
+                ack.WriteU16(eq);
+            }
         }
 
         // --- sub_524660 武器編組 (4 組, equipped=0 → 不帶 8×parts) ---
@@ -89,17 +93,26 @@ public static class LobbyHandlers
         for (byte g = 0; g < 4; g++)
         {
             ack.WriteU8(g).WriteU16(0);
-            if (g != 3) ack.WriteU16(0).WriteU16(0).WriteU16(0);
+            if (g != 3)
+            {
+                ack.WriteU16(0).WriteU16(0).WriteU16(0);    // 非第 4 組 → 3 個 sub-slot
+            }
         }
 
         // --- sub_527550 (sub_522480): 9×s32 裝備/技能 id, 無前導 count!
         //     每個非零 id 都要過 sub_535020 目錄驗證, 否則 client 錯誤 10
-        for (int i = 0; i < 9; i++) ack.WriteS32(0);
+        for (int i = 0; i < 9; i++)
+        {
+            ack.WriteS32(0);
+        }
 
         // --- sub_527D00: u8 n5 (+144452) + raw 28B = 7×s32 (sub_527AF0),
         //     非零 id 同樣過目錄驗證, 失敗 → client 錯誤 9
         ack.WriteU8(5);                                            // n5 預設值 5
-        for (int i = 0; i < 7; i++) ack.WriteS32(0);
+        for (int i = 0; i < 7; i++)
+        {
+            ack.WriteS32(0);
+        }
 
         // --- sub_570550 尾段 (u16 → i_23, s32 → sub_5392A0 GP,
         //     u8 count + count×u8 教學旗標 → sub_5A9B30, 最多 20) ---
@@ -128,6 +141,7 @@ public static class LobbyHandlers
                    .WriteU8(0)                                     // extra (sub_524B70 a3=1)
                    .WriteU16(it.DuraCur);
         }
+
         await s.SendAsync(ack.WriteS32(-1));                       // sentinel
     }
 
@@ -149,8 +163,11 @@ public static class LobbyHandlers
         {
             long uid = ctx.Db.CreateNick(s.AccountId, nick);
             if (uid != 0)
+            {
                 (s.UserId, s.Nickname, result) = (uid, nick, (byte)0);
+            }
         }
+
         await s.SendAsync(new Packet(Opcode.GM_CREATENICK_ACK).WriteU8(result));
     }
 

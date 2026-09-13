@@ -36,7 +36,10 @@ public sealed class Router
     public async ValueTask<bool> DispatchAsync(Session session, Packet packet, ServerContext ctx)
     {
         if (!_table.TryGetValue(packet.OpcodeRaw, out var handler))
+        {
             return false;
+        }
+
         await handler(session, packet, ctx).ConfigureAwait(false);
         return true;
     }

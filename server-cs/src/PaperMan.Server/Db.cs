@@ -51,11 +51,19 @@ public sealed class Db : IDisposable
             using var r = cmd.ExecuteReader();
 
             if (!r.Read())
+            {
                 return new(LoginCode.BadCredentials);
+            }
+
             if (r.GetInt64(3) != 0)
+            {
                 return new(LoginCode.Banned);
+            }
+
             if (!VerifyPassword(r.GetString(2), tokenOrPass, r.GetString(1)))
+            {
                 return new(LoginCode.BadCredentials);
+            }
 
             var result = new LoginResult(
                 LoginCode.Ok,
@@ -120,7 +128,10 @@ public sealed class Db : IDisposable
                     ("@a", accountId), ("@n", nick));
                 return (long)cmd.ExecuteScalar()!;
             }
-            catch (SqliteException) { return 0; }
+            catch (SqliteException)
+            {
+                return 0;                                   // UNIQUE(nickname) 落敗
+            }
         }
     }
 
@@ -149,7 +160,11 @@ public sealed class Db : IDisposable
                 FROM v_myinfo WHERE user_id=@u
                 """, ("@u", userId));
             using var r = cmd.ExecuteReader();
-            if (!r.Read()) return null;
+            if (!r.Read())
+            {
+                return null;
+            }
+
 
             return new(
                 r.GetInt64(0), r.GetString(1), r.GetInt32(2), r.GetInt64(3),
@@ -188,6 +203,7 @@ public sealed class Db : IDisposable
                     eq[i] = (ushort)r.GetInt32(2 + i);
                 list.Add(new((byte)r.GetInt32(0), (byte)r.GetInt32(1), eq));
             }
+
             return list;
         }
     }
@@ -203,7 +219,10 @@ public sealed class Db : IDisposable
                     ("@u", userId), ("@s", slotNo), ("@c", charType));
                 return cmd.ExecuteNonQuery() == 1;
             }
-            catch (SqliteException) { return false; }
+            catch (SqliteException)
+            {
+                return false;                               // UNIQUE(user_id,slot_no) 落敗
+            }
         }
     }
 
@@ -247,10 +266,23 @@ public sealed class Db : IDisposable
             try
             {
                 var result = BuyItemInTx(tx, userId, itemId, periodDays, useCash);
-                if (result.Ok) tx.Commit(); else tx.Rollback();
+
+                if (result.Ok)
+                {
+                    tx.Commit();
+                }
+                else
+                {
+                    tx.Rollback();
+                }
+
                 return result;
             }
-            catch { tx.Rollback(); throw; }
+            catch
+            {
+                tx.Rollback();
+                throw;
+            }
         }
     }
 
@@ -272,7 +304,11 @@ public sealed class Db : IDisposable
             ("@i", itemId)))
         using (var r = q.ExecuteReader())
         {
-            if (!r.Read()) return BuyResult.Fail(itemId);
+            if (!r.Read())
+            {
+                return BuyResult.Fail(itemId);              // 不在商品目錄
+            }
+
             kind = (byte)r.GetInt32(0);
             price = useCash ? r.GetInt32(2) : r.GetInt32(1);
             dura = (ushort)r.GetInt32(3);
@@ -285,7 +321,11 @@ public sealed class Db : IDisposable
             2 or 4 or 9 or 10 or 11 or 15 or 16 => periodDays == 0,
             _ => false,
         };
-        if (!periodOk) return BuyResult.Fail(itemId);
+        if (!periodOk)
+        {
+            return BuyResult.Fail(itemId);                  // period 不在白名單 (sub_570B00)
+        }
+
 
         // 3. 扣款 (條件式 UPDATE = 原子餘額檢查)
         string wallet = useCash
@@ -293,7 +333,10 @@ public sealed class Db : IDisposable
             : "UPDATE users SET game_point=game_point-@p WHERE user_id=@u AND game_point>=@p";
         using (var pay = TxCmd(wallet, ("@p", price), ("@u", userId)))
         {
-            if (pay.ExecuteNonQuery() != 1) return BuyResult.Fail(itemId);
+            if (pay.ExecuteNonQuery() != 1)
+            {
+                return BuyResult.Fail(itemId);              // 餘額不足
+            }
         }
 
         // 4. 最小空 slot (背包上限 5120, sub_524B70)
@@ -306,7 +349,12 @@ public sealed class Db : IDisposable
         {
             slot = Convert.ToInt32(slotQ.ExecuteScalar());
         }
-        if (slot >= 5120) return BuyResult.Fail(itemId);
+
+        if (slot >= 5120)
+        {
+            return BuyResult.Fail(itemId);                  // 背包已滿 (上限 sub_524B70)
+        }
+
 
         // 5. 入包 + 記帳
         using (var ins = TxCmd("""
@@ -316,6 +364,7 @@ public sealed class Db : IDisposable
         {
             ins.ExecuteNonQuery();
         }
+
         using (var log = TxCmd("""
             INSERT INTO shop_transactions(user_id,tx_type,item_id,period_days,gp_delta,cash_delta)
             VALUES(@u,@t,@i,@p,@g,@c)
@@ -362,7 +411,11 @@ public sealed class Db : IDisposable
     /// </summary>
     public long CreateClan(long leaderUserId, string name)
     {
-        if (name is not { Length: > 0 and <= 16 }) return 0;
+        if (name is not { Length: > 0 and <= 16 })
+        {
+            return 0;
+        }
+
         lock (_gate)
         {
             using var tx = _conn.BeginTransaction();
@@ -409,8 +462,14 @@ public sealed class Db : IDisposable
                   rx_bytes=rx_bytes+@rb, tx_bytes=tx_bytes+@tb
                 """, ("@o", opcode), ("@rc", rx ? 1 : 0), ("@tc", rx ? 0 : 1),
                      ("@rb", rx ? bytes : 0), ("@tb", rx ? 0 : bytes));
-            try { cmd.ExecuteNonQuery(); }
-            catch (SqliteException) { /* opcode 不在 protocol_packets */ }
+            try
+            {
+                cmd.ExecuteNonQuery();
+            }
+            catch (SqliteException)
+            {
+                // opcode 不在 protocol_packets — 統計表 FK 落敗, 可忽略
+            }
         }
     }
 }

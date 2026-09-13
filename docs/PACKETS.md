@@ -398,7 +398,32 @@ repeat: string from, u8, string title, u32 msg_id, string body(≤201), string, 
 u8 result (0=OK, 7=特殊錯誤); result!=0: s32 quest_index_type
 result==0: 13-byte 快照 {s32 quest_id, s32, u8, s32}
 ```
-### 3.14 GS_GIVEGIFT_ACK (297) — sub_579830: `string from, string to, u8 x4`。
+### 3.14 GS_GIVEGIFT_ACK (297) — sub_57AA50 (七輪修正; sub_579830 屬 290):
+`u8 result` — 0=成功, 之後 5×s32 (cash/餘額顯示組); 1..11 = 錯誤碼
+(對應 11 種禮物失敗訊息)。
+
+### 3.15 房間系統 (七輪讀畢)
+- **111 GL_MAKEROOM_REQ** (builder @0x569xxx): `u8 map(a1<0 時 0xFF), u8 pass_flag,
+  [str title 無密碼版/密碼版], str pass, u8 rule, u8 max_player, u8 x, u8 y`
+  (兩個分支: a3!=0 帶密碼, 否則 title 版)
+- **112 GL_MAKEROOM_ACK** (sub_56A7B0): `u8 err, u8 room_no(<210), u16, f32;
+  u8, bool` + err==0 時: `u8 n2, {s32 team_id, s32 tex_crc, str, u8}×2
+  (mode==2)` — 建房成功即以自己為房主初始化房間物件
+- **113 GL_ENTERROOM_REQ**: `u8 room_no` (單欄位)
+- **114 GL_ENTERROOM_ACK** (sub_56B360): `u8 sub_type` +
+  sub_type==0: 失敗回大廳; ==1: `s32 uid, u8 slot, str nick, [s32, u8]...`
+  單人進房通知 (含 CClientData 嵌入 sub_524360 + s32 custom_tex + str);
+  ==2: `f32, u8, u8 count, u8 slot, u8 host, u16 ...` 完整房間狀態 +
+  count×成員條目 {s32 uid, u8 slot, str nick, bool, bool, [完整資料]};
+  ==3..9: 各種單欄位/雙欄位變更通知 (首欄皆 u8 room_no)
+- **110 GL_ROOMINFOCHANGE_ACK** (sub_569240): `bool ok, u8 sub_type` +
+  sub_type 1/2: room_no + 標題/密碼/規則變更組; 3..9: u8 room_no 單欄位
+- **216 GL_ENTERROOMPASS_REQ / 262 GL_JOINPASS_REQ**: `u8 room_no, str pass`
+  (sub_56B180/sub_56B230 — 六輪已證非暱稱包)
+- **218 GI_CHANGEDATA_REQ** (sub_572FC0): `u8 char_type, u8 count,
+  count×{u8 slot_idx, u16 item×12 (sub_5244E0: 1+12 欄位)}` — 只送有
+  變更的角色槽 (sub_525450 差異偵測)
+- **219 GI_CHANGEDATA_ACK** (sub_573230): `u8 result` → UI 解鎖 + 重繪
 
 ---
 

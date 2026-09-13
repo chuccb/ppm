@@ -54,7 +54,9 @@ public static class AuthHandlers
     {
         var ack = new Packet(Opcode.GL_LOGIN_ACK).WriteS32((int)r.Result);
         if (r.Result is not LoginCode.Ok)
+        {
             return ack;
+        }
 
         ack.WriteS32((int)r.UserId)                        // user_no
            .WriteS32(100)                                  // n100 伺服器等級參數
@@ -69,13 +71,19 @@ public static class AuthHandlers
 
         for (int group = 0; group < 3; group++)            // 每台 3 組頻道
         {
-            if (group != 0) { ack.WriteS16(0); continue; }
+            if (group != 0)
+            {
+                ack.WriteS16(0);                            // 空頻道組: 只寫 ch_count=0
+                continue;
+            }
+
             ack.WriteS16(1)                                //   ch_count
                .WriteU8(0)                                 //   ch_type (≠3 → 無 extra byte)
                .WriteStr("Ch.1")
                .WriteS16((short)cfg.Port)
                .WriteU8(0);
         }
+
         return ack.WriteU32(0).WriteU32(0);                // billing ×2
     }
 }

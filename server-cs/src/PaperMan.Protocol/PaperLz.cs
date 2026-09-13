@@ -47,8 +47,15 @@ public static class PaperLz
                 {
                     dst[flagPos] |= (byte)mask;             // *dst_2 |= n128
                     int len = 3;
-                    while (len < 66 && src[sp + len] == src[mp + len]) len++;
-                    if (dp + 2 > dst.Length) return src.ToArray();
+                    while (len < 66 && src[sp + len] == src[mp + len])
+                    {
+                        len++;
+                    }
+                    if (dp + 2 > dst.Length)
+                    {
+                        return src.ToArray();               // 壓不小 → 放棄
+                    }
+
                     dst[dp++] = (byte)((dist >> 8) | (len * 4 - 12));  // BYTE1(dist) | (4*i-12)
                     dst[dp++] = (byte)dist;
                     sp += len;
@@ -56,9 +63,14 @@ public static class PaperLz
                 }
             }
 
-            if (dp >= dst.Length) return src.ToArray();
+            if (dp >= dst.Length)
+            {
+                return src.ToArray();                       // 壓不小 → 放棄
+            }
+
             dst[dp++] = src[sp++];                          // literal
         }
+
         return dst[..dp];
     }
 
@@ -77,18 +89,29 @@ public static class PaperLz
             {
                 mask = 1;
                 flags = src[sp++];
-                if (sp > src.Length) break;
+                if (sp > src.Length)
+                {
+                    break;
+                }
             }
 
             if ((flags & mask) != 0)
             {
-                if (sp + 2 > src.Length) break;
+                if (sp + 2 > src.Length)
+                {
+                    break;
+                }
+
                 int b0 = src[sp], b1 = src[sp + 1];
                 sp += 2;
                 int len = (b0 >> 2) + 3;                    // (*v9 >> 2) + 3
                 int dist = (((b0 << 8) | b1) & 0x3FF);      // bswap16 & 0x3FF
                 int from = dp - dist;
-                if (from < 0) throw new InvalidDataException("lz backref out of range");
+                if (from < 0)
+                {
+                    throw new InvalidDataException("lz backref out of range");
+                }
+
                 for (int i = 0; i < len && dp < origSize; i++)
                     dst[dp++] = dst[from++];                // 逐 byte, 允許重疊
             }
@@ -97,6 +120,7 @@ public static class PaperLz
                 dst[dp++] = src[sp++];
             }
         }
+
         return dst[..dp];
     }
 }

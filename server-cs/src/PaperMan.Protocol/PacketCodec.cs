@@ -74,7 +74,9 @@ public sealed class PacketCodec(byte[]? aesKey = null, ushort compressThreshold 
         {
             var packed = PaperLz.Compress(payload);
             if (packed.Length < payload.Length)
+            {
                 payload = packed;                              // w3 仍 = 原始大小
+            }
         }
 
         // --- AES (sub_592FB0: 上取 16 對齊, 空 payload 也補一塊) ---
@@ -82,7 +84,10 @@ public sealed class PacketCodec(byte[]? aesKey = null, ushort compressThreshold 
         {
             int n16 = Align16(payload.Length);
             if (n16 >= MaxEncryptedSize)
+            {
                 throw new InvalidOperationException($"payload too large to encrypt ({n16} >= 0x2578)");
+            }
+
             var block = new byte[n16];
             payload.CopyTo(block);
             _aes.EncryptEcb(block);                            // sub_4042A0 (n2_4=0 → ECB)
@@ -111,14 +116,18 @@ public sealed class PacketCodec(byte[]? aesKey = null, ushort compressThreshold 
     public Packet Decode(ReadOnlySpan<byte> frame)
     {
         if (frame.Length < Packet.HeaderSize)
+        {
             throw new EndOfStreamException("short header");
+        }
 
         ushort w0 = BinaryPrimitives.ReadUInt16LittleEndian(frame);
         ushort op = BinaryPrimitives.ReadUInt16LittleEndian(frame[2..]);
         ushort w2 = BinaryPrimitives.ReadUInt16LittleEndian(frame[4..]);
         ushort w3 = BinaryPrimitives.ReadUInt16LittleEndian(frame[6..]);
         if (frame.Length < Packet.HeaderSize + w0)
+        {
             throw new EndOfStreamException("short payload");
+        }
 
         var payload = frame.Slice(Packet.HeaderSize, w0).ToArray();
 
@@ -127,7 +136,10 @@ public sealed class PacketCodec(byte[]? aesKey = null, ushort compressThreshold 
         {
             bool valid = w0 >= 16 && (w0 & 0xF) == 0 && w0 == Align16(w2) && w0 < MaxEncryptedSize;
             if (!valid)
+            {
                 throw new InvalidDataException($"bad encrypted frame (w0={w0}, w2={w2})");
+            }
+
             _aes.DecryptEcb(payload);
             payload = payload[..w2];                           // word0 := word2
         }
@@ -136,10 +148,16 @@ public sealed class PacketCodec(byte[]? aesKey = null, ushort compressThreshold 
         if (w3 >= CompressThreshold && payload.Length < w3)
         {
             if (w3 >= NeverCompress)
+            {
                 throw new InvalidDataException($"decompressed size out of range ({w3})");
+            }
+
             var plain = PaperLz.Decompress(payload, w3);
             if (plain.Length != w3)
+            {
                 throw new InvalidDataException($"lz size mismatch ({plain.Length} != {w3})");
+            }
+
             payload = plain;
         }
 

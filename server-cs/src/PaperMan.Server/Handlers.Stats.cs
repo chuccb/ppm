@@ -22,7 +22,11 @@ namespace PaperMan.Server;
 
 public static class StatHandlers
 {
-    private enum AckShape { Single, Pair }
+    private enum AckShape
+    {
+        Single,                                             // 223..235: 1×s32 total
+        Pair,                                               // 237..389: s32 total + s32 extra
+    }
 
     private static readonly (Opcode Req, Opcode Ack, string Column, AckShape Shape)[] Counters =
     [
@@ -57,21 +61,34 @@ public static class StatHandlers
         {
             // REQ = client 的新絕對累計值 (sub_5567F0 等: a1>=0 才送)
             long total = p.Remaining >= 4 ? p.ReadS32() : 0;
-            if (total < 0) total = 0;
+            if (total < 0)
+            {
+                total = 0;
+            }
+
 
             if (s.UserId != 0)
+            {
                 total = ctx.Db.SetStatMax(s.UserId, column, total);   // 只允許單調遞增
+            }
 
             var reply = new Packet(ack).WriteS32((int)total);
             if (shape is AckShape.Pair)
+            {
                 reply.WriteS32(0);                                    // extra (UI 顯示用)
+            }
+
             await s.SendAsync(reply);
         };
 
     /// <summary>882 推播: s32 累計總遊玩秒數 (client 自行差分, 無 REQ)。</summary>
     public static async ValueTask PushPlayTime(Session s, ServerContext ctx)
     {
-        if (s.UserId == 0) return;
+        if (s.UserId == 0)
+        {
+            return;
+        }
+
         long total = ctx.Db.SetStatMax(s.UserId, "play_time_s", 0);
         await s.SendAsync(new Packet(Opcode.GP_CHPLAYTIMEC_ACK).WriteS32((int)total));
     }

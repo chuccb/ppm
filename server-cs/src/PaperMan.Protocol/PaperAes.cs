@@ -40,7 +40,10 @@ public sealed class PaperAes : IDisposable
     public PaperAes(ReadOnlySpan<byte> key16)
     {
         if (key16.Length != 16)
+        {
             throw new ArgumentException("AES-128 key must be 16 bytes", nameof(key16));
+        }
+
         _aes = Aes.Create();
         _aes.Key = key16.ToArray();
     }

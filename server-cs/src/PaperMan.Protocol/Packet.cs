@@ -91,9 +91,15 @@ public sealed class Packet(Opcode opcode)
     private void SetPayload(ReadOnlySpan<byte> data)
     {
         if (data.Length > MaxPayload)
+        {
             throw new ArgumentException($"payload {data.Length} exceeds {MaxPayload}");
+        }
+
         if (data.Length > _buf.Length)
+        {
             _buf = new byte[data.Length];
+        }
+
         data.CopyTo(_buf);
         Length = data.Length;
         ReadPos = 0;
@@ -104,23 +110,79 @@ public sealed class Packet(Opcode opcode)
     {
         // sub_592580: write cursor + n 不得超過 buffer 終點
         if (Length + n > MaxPayload)
+        {
             throw new InvalidOperationException($"payload would exceed {MaxPayload}");
+        }
+
         if (Length + n > _buf.Length)
+        {
             Array.Resize(ref _buf, Math.Max(_buf.Length * 2, Length + n));
+        }
+
         var span = _buf.AsSpan(Length, n);
         Length += n;
         return span;
     }
 
-    public Packet WriteU8(byte v)     { Grow(1)[0] = v; return this; }                                       // sub_592920
-    public Packet WriteS8(sbyte v)    { Grow(1)[0] = unchecked((byte)v); return this; }                      // sub_5928E0
-    public Packet WriteBool(bool v)   => WriteU8(v ? (byte)1 : (byte)0);
-    public Packet WriteU16(ushort v)  { BinaryPrimitives.WriteUInt16LittleEndian(Grow(2), v); return this; } // sub_5929A0
-    public Packet WriteS16(short v)   { BinaryPrimitives.WriteInt16LittleEndian(Grow(2), v);  return this; } // sub_5929E0
-    public Packet WriteU32(uint v)    { BinaryPrimitives.WriteUInt32LittleEndian(Grow(4), v); return this; } // sub_592A60
-    public Packet WriteS32(int v)     { BinaryPrimitives.WriteInt32LittleEndian(Grow(4), v);  return this; } // sub_592A20
-    public Packet WriteU64(ulong v)   { BinaryPrimitives.WriteUInt64LittleEndian(Grow(8), v); return this; } // sub_592AE0
-    public Packet WriteF32(float v)   { BinaryPrimitives.WriteSingleLittleEndian(Grow(4), v); return this; } // sub_592B20
+    /// <summary>sub_592920: 單一 byte。</summary>
+    public Packet WriteU8(byte v)
+    {
+        Grow(1)[0] = v;
+        return this;
+    }
+
+    /// <summary>sub_5928E0: 帶號 byte。</summary>
+    public Packet WriteS8(sbyte v)
+    {
+        Grow(1)[0] = unchecked((byte)v);
+        return this;
+    }
+
+    /// <summary>sub_592900 讀端對應: 0/1 旗標。</summary>
+    public Packet WriteBool(bool v) =>
+        WriteU8(v ? (byte)1 : (byte)0);
+
+    /// <summary>sub_5929A0: u16 little-endian。</summary>
+    public Packet WriteU16(ushort v)
+    {
+        BinaryPrimitives.WriteUInt16LittleEndian(Grow(2), v);
+        return this;
+    }
+
+    /// <summary>sub_5929E0: s16 little-endian。</summary>
+    public Packet WriteS16(short v)
+    {
+        BinaryPrimitives.WriteInt16LittleEndian(Grow(2), v);
+        return this;
+    }
+
+    /// <summary>sub_592A60: u32 little-endian。</summary>
+    public Packet WriteU32(uint v)
+    {
+        BinaryPrimitives.WriteUInt32LittleEndian(Grow(4), v);
+        return this;
+    }
+
+    /// <summary>sub_592A20: s32 little-endian。</summary>
+    public Packet WriteS32(int v)
+    {
+        BinaryPrimitives.WriteInt32LittleEndian(Grow(4), v);
+        return this;
+    }
+
+    /// <summary>sub_592AE0: u64 little-endian。</summary>
+    public Packet WriteU64(ulong v)
+    {
+        BinaryPrimitives.WriteUInt64LittleEndian(Grow(8), v);
+        return this;
+    }
+
+    /// <summary>sub_592B20: IEEE-754 單精度。</summary>
+    public Packet WriteF32(float v)
+    {
+        BinaryPrimitives.WriteSingleLittleEndian(Grow(4), v);
+        return this;
+    }
 
     /// <summary>sub_5926F0: NUL 結尾 ANSI (CP949) 字串, 無長度前綴。</summary>
     public Packet WriteStr(string s)
@@ -162,28 +224,60 @@ public sealed class Packet(Opcode opcode)
     {
         // sub_592500: cursor+n 同時對 w0 與 buffer 終點做上限檢查
         if (ReadPos + n > Length)
+        {
             throw new EndOfStreamException($"read {n} at {ReadPos}/{Length} (op={Opcode})");
+        }
+
         var span = _buf.AsSpan(ReadPos, n);
         ReadPos += n;
         return span;
     }
 
-    public byte ReadU8()     => Take(1)[0];                                                  // sub_592940
-    public sbyte ReadS8()    => unchecked((sbyte)Take(1)[0]);                                // sub_592900
-    public bool ReadBool()   => Take(1)[0] != 0;
-    public ushort ReadU16()  => BinaryPrimitives.ReadUInt16LittleEndian(Take(2));            // sub_592A00
-    public short ReadS16()   => BinaryPrimitives.ReadInt16LittleEndian(Take(2));             // sub_5929C0
-    public uint ReadU32()    => BinaryPrimitives.ReadUInt32LittleEndian(Take(4));            // sub_592A80
-    public int ReadS32()     => BinaryPrimitives.ReadInt32LittleEndian(Take(4));             // sub_592A40
-    public ulong ReadU64()   => BinaryPrimitives.ReadUInt64LittleEndian(Take(8));            // sub_592B00
-    public float ReadF32()   => BinaryPrimitives.ReadSingleLittleEndian(Take(4));            // sub_592AC0
+    /// <summary>sub_592940。</summary>
+    public byte ReadU8() =>
+        Take(1)[0];
+
+    /// <summary>sub_592900。</summary>
+    public sbyte ReadS8() =>
+        unchecked((sbyte)Take(1)[0]);
+
+    /// <summary>u8 != 0。</summary>
+    public bool ReadBool() =>
+        Take(1)[0] != 0;
+
+    /// <summary>sub_592A00。</summary>
+    public ushort ReadU16() =>
+        BinaryPrimitives.ReadUInt16LittleEndian(Take(2));
+
+    /// <summary>sub_5929C0。</summary>
+    public short ReadS16() =>
+        BinaryPrimitives.ReadInt16LittleEndian(Take(2));
+
+    /// <summary>sub_592A80。</summary>
+    public uint ReadU32() =>
+        BinaryPrimitives.ReadUInt32LittleEndian(Take(4));
+
+    /// <summary>sub_592A40。</summary>
+    public int ReadS32() =>
+        BinaryPrimitives.ReadInt32LittleEndian(Take(4));
+
+    /// <summary>sub_592B00。</summary>
+    public ulong ReadU64() =>
+        BinaryPrimitives.ReadUInt64LittleEndian(Take(8));
+
+    /// <summary>sub_592AC0。</summary>
+    public float ReadF32() =>
+        BinaryPrimitives.ReadSingleLittleEndian(Take(4));
 
     /// <summary>sub_592730: 讀到 NUL。maxBytes 對應客戶端定長 buffer。</summary>
     public string ReadStr(int maxBytes = MaxPayload)
     {
         int end = Array.IndexOf(_buf, (byte)0, ReadPos, Math.Min(Remaining, maxBytes));
         if (end < 0)
+        {
             throw new EndOfStreamException($"unterminated string (op={Opcode})");
+        }
+
         var s = Ansi.GetString(_buf, ReadPos, end - ReadPos);
         ReadPos = end + 1;
         return s;
@@ -193,7 +287,10 @@ public sealed class Packet(Opcode opcode)
     public string ReadWStr()
     {
         int i = ReadPos;
-        while (i + 1 < Length && (_buf[i] != 0 || _buf[i + 1] != 0)) i += 2;
+        while (i + 1 < Length && (_buf[i] != 0 || _buf[i + 1] != 0))
+        {
+            i += 2;
+        }
         var s = Encoding.Unicode.GetString(_buf, ReadPos, i - ReadPos);
         ReadPos = Math.Min(i + 2, Length);
         return s;

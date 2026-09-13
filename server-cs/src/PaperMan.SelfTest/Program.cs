@@ -14,8 +14,16 @@ int pass = 0, fail = 0;
 
 void Check(string name, bool ok)
 {
-    if (ok) { pass++; Console.WriteLine($"  ok  {name}"); }
-    else { fail++; Console.WriteLine($"FAIL  {name}"); }
+    if (ok)
+    {
+        pass++;
+        Console.WriteLine($"  ok  {name}");
+    }
+    else
+    {
+        fail++;
+        Console.WriteLine($"FAIL  {name}");
+    }
 }
 
 // ---- 1. Packet 原語 ---------------------------------------------------------
@@ -45,7 +53,10 @@ void Check(string name, bool ok)
 // ---- 2. PaperLz -------------------------------------------------------------
 {
     var rep = new byte[4096];
-    for (int i = 0; i < rep.Length; i++) rep[i] = (byte)(i % 7);
+    for (int i = 0; i < rep.Length; i++)
+    {
+        rep[i] = (byte)(i % 7);
+    }
     var packed = PaperLz.Compress(rep);
     Check("lz compresses repetitive", packed.Length < rep.Length);
     Check("lz roundtrip repetitive", PaperLz.Decompress(packed, rep.Length).AsSpan().SequenceEqual(rep));
@@ -85,7 +96,10 @@ foreach (var (label, codec) in codecs)
     Check($"{label}: small payload", d1.ReadS32() == 42 && d1.ReadStr() == "nick");
 
     var big = new Packet(Opcode.GL_MYITEM_ACK);
-    for (int i = 0; i < 500; i++) big.WriteS32(i % 3).WriteU16(7);
+    for (int i = 0; i < 500; i++)
+    {
+        big.WriteS32(i % 3).WriteU16(7);
+    }
     var f2 = codec.Encode(big);
     var d2 = codec.Decode(f2);
     bool okBig = d2.Length == big.Length;
@@ -109,7 +123,10 @@ foreach (var (label, codec) in codecs)
     // 壓縮管線: w3 = 原始大小, w2 = 加密前(=壓縮後)大小
     var (_, czip) = codecs[2];                               // aes+compress, 門檻 64
     var big = new Packet(Opcode.GL_MYITEM_ACK);
-    for (int i = 0; i < 300; i++) big.WriteS32(1);
+    for (int i = 0; i < 300; i++)
+    {
+        big.WriteS32(1);
+    }
     var zf = czip.Encode(big);
     ushort zw2 = BinaryPrimitives.ReadUInt16LittleEndian(zf.AsSpan(4));
     ushort zw3 = BinaryPrimitives.ReadUInt16LittleEndian(zf.AsSpan(6));
@@ -119,12 +136,22 @@ foreach (var (label, codec) in codecs)
     // 壞包必須擲例外或亂碼 (原版 drop-all)
     frame[8] ^= 0xFF;
     bool rejected;
-    try { rejected = codec.Decode(frame).ReadS32() != 123; }
-    catch { rejected = true; }
+    try
+    {
+        rejected = codec.Decode(frame).ReadS32() != 123;
+    }
+    catch
+    {
+        rejected = true;
+    }
+
     Check("tampered frame rejected/garbled", rejected);
 }
 
-foreach (var (_, codec) in codecs) codec.Dispose();
+foreach (var (_, codec) in codecs)
+{
+    codec.Dispose();
+}
 
 // ---- 5. 客戶端原生 AES 金鑰測試向量 -----------------------------------------
 // 金鑰 = sub_403430 的 EUC-KR 字串「트렁크점령전머지」;
