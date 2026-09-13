@@ -32,6 +32,63 @@ public static class RoomHandlers
         add(Opcode.GR_LEAVE_REQ, LeaveRoom);
         add(Opcode.GR_CHATTING_REQ, RoomChat);
         add(Opcode.GR_MAPCHANGE_REQ, MapChange);
+        add(Opcode.GR_READY_REQ, Ready);
+        add(Opcode.GR_CHANGESLOT_REQ, ChangeSlot);
+        add(Opcode.GL_ENTERROOMPASS_REQ, EnterRoomPass);
+    }
+
+    // 127 REQ 空 → 128 ACK (sub_5626D0): u8 ready_flag, u8 slot —
+    // ready 狀態翻轉廣播 (server 維護 per-slot ready 集合)
+    private static async ValueTask Ready(Session s, Packet p, ServerContext ctx)
+    {
+        if (s.RoomNo is not { } roomNo || ctx.Rooms.Find(roomNo) is not { } room)
+        {
+            return;
+        }
+
+        var slot = room.Members.FirstOrDefault(kv => ReferenceEquals(kv.Value, s)).Key;
+        bool nowReady = room.ToggleReady(slot);
+
+        await RoomManager.BroadcastAsync(room, new Packet(Opcode.GR_READY_ACK)
+            .WriteU8(nowReady ? (byte)1 : (byte)0)
+            .WriteU8(slot));
+    }
+
+    // 135 REQ: u8 n254, u8 target_slot → 136 ACK: u8 ok + from/to 廣播
+    private static async ValueTask ChangeSlot(Session s, Packet p, ServerContext ctx)
+    {
+        _ = p.ReadU8();                                     // n254 (模式參數)
+        byte target = p.ReadU8();
+
+        if (s.RoomNo is not { } roomNo || ctx.Rooms.Find(roomNo) is not { } room
+            || target >= 16 || room.Members.ContainsKey(target))
+        {
+            await s.SendAsync(new Packet(Opcode.GR_CHANGESLOT_ACK).WriteU8(0));
+            return;
+        }
+
+        var from = room.Members.FirstOrDefault(kv => ReferenceEquals(kv.Value, s)).Key;
+        room.Members.TryRemove(from, out _);
+        room.Members[target] = s;
+
+        await RoomManager.BroadcastAsync(room, new Packet(Opcode.GR_CHANGESLOT_ACK)
+            .WriteU8(1)
+            .WriteU8(from)
+            .WriteU8(target));
+    }
+
+    // 216 REQ: u8 room_no, str pass → 217 ACK: u8 result → 成功後 client 送 113
+    private static async ValueTask EnterRoomPass(Session s, Packet p, ServerContext ctx)
+    {
+        byte roomNo = p.ReadU8();
+        var pass = p.ReadStr();
+        var room = ctx.Rooms.Find(roomNo);
+
+        bool ok = room is not null
+            && (room.Password is null || room.Password == pass);
+
+        await s.SendAsync(new Packet(Opcode.GL_ENTERROOMPASS_ACK)
+            .WriteU8(ok ? (byte)1 : (byte)0));
     }
 
     // 125 REQ (與 119 同構) → 126 ACK (sub_56EA80):

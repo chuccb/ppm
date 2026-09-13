@@ -36,6 +36,23 @@ public sealed class Room
 
     public byte MasterSlot { get; set; }
 
+    private readonly HashSet<byte> _ready = [];
+
+    /// <summary>128 GR_READY: 翻轉 slot 的 ready 狀態, 回新值。</summary>
+    public bool ToggleReady(byte slot)
+    {
+        lock (_ready)
+        {
+            if (!_ready.Add(slot))
+            {
+                _ready.Remove(slot);
+                return false;
+            }
+
+            return true;
+        }
+    }
+
     public byte? TakeFreeSlot()
     {
         for (byte s = 0; s < MaxPlayers && s < 16; s++)
