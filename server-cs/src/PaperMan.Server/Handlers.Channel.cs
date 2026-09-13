@@ -33,12 +33,16 @@ public static class ChannelHandlers
         Kicked = 3,
     }
 
-    /// <summary>196 的 result 碼 (sub_4177B0 錯誤表: 0=頻道滿 0xDA, 2=維護 0x148)。</summary>
+    /// <summary>196 的 result 碼 — 卅四輪全表 (sub_4177B0 十碼)。</summary>
     private enum EnterChannelResult : byte
     {
-        Full = 0,
-        Ok = 1,
-        Maintenance = 2,
+        Full = 0,               // 0xDA 頻道滿
+        Ok = 1,                 // 頻道號回顯 → client 切大廳場景
+        Maintenance = 2,        // 0x148 維護中
+        VersionMismatch = 3,    // 0x328
+        GenericError = 4,       // 4/5/7/9 → 0x1A5
+        Error6 = 6,             // 0x3A6
+        Error8 = 8,             // 0x3A7
     }
 
     public static void Register(Registrar add)

@@ -777,7 +777,10 @@ GG 戰鬥事件中繼 (server 原樣轉發即可) 與 MASTER_* GM 工具組。
 
 196 ACK (CLobbyChannel::sub_4179D0 case 196 — 不在 dispatcher!
          經 vtable 場景層分發):
-    u8  result   (1=成功; 0→訊息0xDA 頻道滿, 2→0x148 維護中)
+    u8  result — 卅四輪全表 (sub_4177B0 十碼):
+        1=成功 (417D00()[0]:=v17 頻道號回顯, state:=2);
+        0=頻道滿(0xDA) 2=維護(0x148) 3=版本不符(0x328)
+        6=(0x3A6) 8=(0x3A7) 4/5/7/9=一般錯誤(0x1A5)
     s32 v15      (→ sub_417D00()[1] 頻道 id)
     u8  v17      (與 result 一起進 sub_4177B0 錯誤表)
     result==1 續讀:
@@ -790,6 +793,12 @@ GG 戰鬥事件中繼 (server 原樣轉發即可) 與 MASTER_* GM 工具組。
       f32  v11 (bit0 → byte_1D0D21B 旗標)
       u8   n5 → sub_417D00()[8] (預設 5)
 ```
+**196 成功後的閉環 (卅四輪)**: state 119:=2 → CLobbyChannel tick
+(sub_415F90) 清 CClientData + 場景切換 sub_405EB0(9=大廳/8=AI 頻道
+[this+148==3]/2=回放) → CLobbyMainRoom 進場自動送 107 (房間清單) —
+**頻道→大廳鏈全閉環**。196 handler 經場景 vtable (sub_407360 的
+vtbl+52) 分發, 與 CLobbyShop 同層 (引用計數 1 = 純虛表呼叫證據)。
+
 festival: 681 的 3 頻道組 ↔ 195 的 group 序號互證; 頻道類型 n2==3
 = AI 頻道 (bitmask 1024 段地圖) — 與 ch_type==3 讀 extra byte
 (二輪 681 佈局) 同源!

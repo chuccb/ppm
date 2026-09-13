@@ -23,9 +23,11 @@ connect ──► server 發 694 (門檻 0x2580) ──► client 送 682 (帳�
 【頻道伺服器 TCP :40201 (握手=693 GL_TCPCONNSUCC; 681 清單指向此 port)】
 connect → server 發 693 → client 送 143 (nick + n100/ext_count
   雙 token 回送) → 144 (n108: 0=OK 3=踢出 — token 不符即踢)
-  → **client 自動續送 141** (144 handler 尾端 ctor(141) — 卅二輪)
-  → 142 回 UDP 打洞目標 (host/port 直填 sockaddr, sub_596E60)
-  → client 開始 UDP session (預留 :40202)
+  → [CLobbyChannel 層自動] 195 GC_ENTERCHANNEL(group,channel,replay)
+  → 196 (result 十碼表; 成功=⭐UDP host/port 正主 + ch_type
+     [3=AI→sub_875680 關卡塊] ) → state 119:=2 → tick 清 CClientData
+  → 場景切換 (9=大廳/8=AI/2=回放) → CLobbyMainRoom 自動送 107
+  → UDP session (op18→141→142 位址再確認)   【卅三/卅四輪全鏈閉環】
 port 佈局: 40200 登入(694) / 40201 頻道(693) / 40202 UDP(未來 relay)
 【戰鬥 (P2P + relay)】
 UDP 打洞 (私有編號 2-34, sub_595E80; 32→33/34 移動同步);
@@ -59,6 +61,14 @@ parts_ability 413 (31欄彈道) / recommend 3,180 / protocol 670
 2. wire LZSS (dist≤1023, len 3-66, 門檻 694 協商)
 3. pmFile per-byte 滾動 (keystream FA5387AD/0F3A94AA/48945DCA/1A68DCCF)
 4. data.pat 容器 (pmFile→ROL混淆→zlib 1.2.3→CRC自帶表)
+
+## 4b. C# 結構 (卅四輪 — partial 依領域拆分)
+
+Db = 4 partial: Db.cs (連線/帳號/暱稱/LogPacket 160行) +
+Db.Player (MyInfo/戰績) + Db.Economy (背包/賣/禮/信箱) +
+Db.Social (好友/任務/戰隊) — 共用基礎 (_conn/_gate/Cmd) 集中主檔,
+領域 helper 各自持有。Handlers 11 檔按子系統分 + 2 個泛型轉發器
+(BattleRelay 三模式 / Stats 表驅動)。
 
 ## 5. Server 現況
 
