@@ -41,10 +41,18 @@
 >   已取代 130/134/114/108 四處原本送 0 的寫法; +146/+150 確認 client
 >   存而不讀 (全 exe 無讀者) 送 0 安全。
 >
+> 卌六輪 (資源盤點 + README 整理): ① mode 枚舉定案 — sub_53FBB0
+> factory 15 個 CyGameModes 類 (0..13/15; 14/16 無效), 兩隊制集合
+> {0,2,3,4,8,10,11,12,13} 與 maplist `modes` bitmask 的 bit↔mode
+> 對照表已更正在 RESOURCES.md §4b; ② 版控新增 msgtableres.lang、
+> roommake.xml/gameroom.xml、slanderfilter 過濾詞 (見 README);
+> ③ 111 建房/169 改模式的 mode 值現在可用 map_catalog.modes
+> (bitmask) 做「該模式可選地圖」驗證, server 尚未做 — 列下一輪。
+>
 > 下一輪可做: GM/MASTER 群 (275-299/394-416/822-831/883-885, 需權限
 > 分級); warehouse 群 (855-861); matching room 群 (983/986/988);
 > AI 模式群 (918-944); 130/134 的 +146/+150 原服語意 (client 存而不讀,
-> 送 0 已安全)。
+> 送 0 已安全); 111/169 依 mode→bit 過濾可選地圖 (map_catalog.modes)。
 
 | op | 名稱 | REQ 寫入序列 |
 |---|---|---|

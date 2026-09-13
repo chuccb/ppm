@@ -154,12 +154,29 @@ sub_5359B0 (getter) 證實記憶體 1212..1224/1228..1240 = 兩檔位 4×s32
 ```
 → 111 GL_MAKEROOM_REQ 的 map id 驗證即對照這張表 (123 張圖已入
 map_catalog)。
-**模式 bitmask 解碼 (十七輪, 檔名前綴互證)**:
-bit0=PS(個人戰) bit1=TS(團隊戰) bit2=TD(爆破) bit3=TH(奪寶?)
-bit4=TW(佔領戰) bit5/6=TU(教學) bit9=PNR bit10=AI(協力)
-bit11=ECT(武器試射) bit12=OCC(基地建設) bit13=PVE bit14=TS世界盃
-bit15=OCC2 — Quest.pat 的 GameMode 欄 (1..10) ≈ bit 位 +1,
-建房時 client 以 bitmask 過濾可選地圖。
+**模式 bitmask 解碼 (卌六輪修正 — sub_53FBB0 枚舉 + map_StartIndex
+modeName + maplist 檔名前綴三方互證; 舊表 bit1/2/3/4 的語意已更正)**:
+
+| bit | 檔名前綴 | mode | modeName (map_StartIndex) | CyGameModes:: 類 | 日文語意 |
+|---|---|---|---|---|---|
+| 0 | PS | 1 | FreeForAll | CyIndividualSurvivalMode | 個人サバイバル |
+| 1 | TS | 3 | TeamSurvival | CyTeamSurvivalMode | チームサバイバル |
+| 2 | TD | 0 | TeamDeath | CyTeamMatchMode | チーム戦 |
+| 3 | TH | 2 | TeamHacking | CyDefuseBombMode | 爆破ミッション |
+| 4 | TW | 4 | TeamSteal | CyStealMode | スチール |
+| 5/6 | TU | 6 | — | CyTutorialMode | チュートリアル |
+| 9 | PNR | 8 | PNR | CyPulpnRollMode | パルプ&ロール |
+| 10 | AI | 9 | GunShooting | CyGunShootingMode | ガンシューティング |
+| 11 | ECT | 15 | — | CyWeaponTestMode | 武器試射 |
+| 12 | OCC | 10 | — | CyOccupyMode | 占領 |
+| 13 | PVE | 11 | — | CyAIMultiMode | AI 協力 (PvE) |
+| 14 | TS(worldcup) | 12 | SOCCER | CyTeamSoccerMode | サッカー |
+| 15 | OCC2 | 13 | — | CyOccupyRenewalMode | new占領 |
+
+(mode 5 Practice / 7 ChattingRoom 無專屬地圖; bit 7/8 未用。)
+建房時 client 以 `(map.modes >> bit) & 1` 過濾該模式可選地圖;
+`mode` 是 room 的模式值 (0..13/15, 見 §7), `bit` 是上表對應的
+maplist `modes` 位 — 兩者**不是同一編號** (如 mode 0=TeamDeath↔bit2)。
 
 ## 5. .pat 文字/二進位雙軌 (convars)
 
@@ -378,3 +395,62 @@ state 0..16 即「預設房名」, state<0 才送自訂房名 inline):
 **server 側取用方式**: 訊息文字留在 client (server 只送 code, 不送
 文字) — 895 的 status、112 的 err 碼都只是一個 u8, client 自行查表。
 server 選錯 code 只會顯示錯誤文字, 不會當機。
+
+## 9. UI 圖像/音效資產盤點 (卌六輪 — 圖片檔佐證各模式/區塊)
+
+`main:Extracted/ui/` 下 4 個圖像資料夾 + 1 個音效資料夾, 全部是
+DDS (DXT 壓縮) / TGA / JPG 貼圖, 主流 1024×1024 (少數 512×512,
+Room_Identity 1024×512), 為 UI **紋理圖集 (atlas)** — 各控制項以
+XML 的 l/t/r/b 像素矩形切圖, 不逐一列出。用途依檔名即可判讀,
+以下只列對協議/模式有佐證價值的:
+
+**ui/game/** (87 張 — 遊戲中 HUD/模式 UI):
+- `main.dds` / `main02.dds` 遊戲主 HUD; `result.dds` / `result2.dds`
+  結算畫面 (對 134 GR_END_ACK); `observer_01.dds` 觀戰 UI;
+  `message.dds` / `message02.dds` 局內訊息; `kill_image.dds` 擊殺圖示;
+  `level_exp.dds` (512) 經驗條; `ui_radar.dds` / `mapicon.dds` (512)
+  雷達與地圖圖示; `crosshair.dds` 準星; `recStatus.dds` 錄影中。
+- **模式專屬 UI** (與 §7 mode 枚舉互證): `soccer.dds`(12 足球)、
+  `pulpnroll.dds`(8 PNR)、`ocuppy_01/02.dds`(10 佔領)、
+  `pnr_crazy_ui.dds` + `pnr_crazy_reenter_{red,yellow}.dds`(PNR crazy)、
+  `weaponEffectIcon.dds`(15 武器試射特效)。
+- `emblem_base/frame/mark_{101..302}.dds` 徽章三層 (底/框/紋 — 對
+  583/584 戰隊徽章 CRC 上傳); `SniperOfScope/` 狙擊鏡 14 張;
+  `c_emicon.dds` 表情圖示; `tu_t_1..3` / `tuto_*` 教學步驟圖。
+
+**ui/bot/** (13 張 — 槍械射擊館): `gunshooting*.dds`、`gs_ui/gs_ui02`、
+`gs_popup/gs_popup02`、`ai2.dds`、`specialabilityslot.dds` — 全屬
+mode 9 GunShooting / AI 協力 UI, 佐證「mode 9 不走一般建房」的
+roommake 結論。
+
+**ui/lobby/** (96 張 — 大廳/商店/角色/公會):
+- `lobby_01..03.dds` 大廳背景; `l_gr.dds`/`l_gr_02`/`l_mr*` 遊戲房/
+  電影房清單列; `l_notice.dds` 公告; `l_tournament_*` 錦標賽(對 108
+  mode==3 的 sub_580A80); `Room_Identity.dds`(1024×512) 房單身份卡
+  (Popup_Room_Identity.xml 的貼圖, 對 §7 房旗字串簇);
+  `c_main/c_menu/c_cl/c_em/c_ge/c_ji/c_ms/c_se` 公會(戰隊)介面;
+  `shop_01..03` / `store_01..06` / `store_NSkillInventory_1..3` 商店;
+  `warehouse.dds` 倉庫; `quest.dds` 任務; `pepachi.dds`/`pepagacha.dds`
+  轉蛋; `tuto_*`/`tutorial_openning` 新手教學; `noparts.dds`(改裝件
+  未裝提示); `weapontest_back.dds` 武器試射背景。
+- TGA: `Back.tga`/`BackGround.tga` 大廳底圖、`L_CharMake(.02).tga`
+  角色創建、`Mouse_00/01.tga` 游標、`n_p{f,g,h,l,s,o,j,gg,..}` 商店
+  角色立繪/物品預覽、`p_pui.tga`、`n_call01/N_CALL02/N_PMSG/N_PG/N_PEN`
+  呼叫/訊息視窗。
+
+**ui/loadscreen/** (55 張): `loading*.dds/jpg/png` 讀取畫面、
+`mainloading_bg/spr0/spr1` 主讀取、`tips_001..010` 讀取小提示、
+`SDCount_0..14` (**S**udden **D**eath 倒數 — 平手延長賽倒數數字,
+0..14 共 15 個數字貼圖)、`companylogo/studiologo` 廠商標。
+
+**ui/sounds/** (非圖像, 但檔名是最佳模式佐證):
+- `soccer_sounds/spe_soccer_*`(12 足球)、`occupy_sounds/occ*` +
+  `occ2_*`(10/13 佔領)、`pve_01_sounds/AI3_*` + `stage_clear/spy_1..16`
+  (11 AI 協力 16 波)、`bomb_tolerance_1st/3rd`(2 爆破)、
+  `ai2_boss_emergence`/`boss_emergence`(9/11 魔王)、
+  `charCut_crazy`/`crazy*`/`fever_*`/`gage_*`(PNR crazy/fever)、
+  `paper_horror.wav`(map_BGMSoundNames 104/105 城堡恐怖 BGM)。
+
+> 註: 這些是二進位貼圖, 不入版控 (參考 .gitignore 慣例只收小文字
+> 資源)。尺寸/格式可用 `PIL.Image.open` 直接讀 DDS/TGA 頭確認;
+> 本環境無視覺檢視器, 上述判讀依據 = 檔名 + XML 引用 + 模式枚舉互證。

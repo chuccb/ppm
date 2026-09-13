@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UIDEFINE>
+	<bgmfile filename="bgm/bgm_character.mp3" />
+	<image name="ROOMMAKE_N_PM" filename="N_PM.DDS" />
+
+
+	<msprite sx="362" sy="264" ex="362" ey="264" l="0" t="0" r="373" b="243" texture="ROOMMAKE_N_PM" />
+	<msprite name="HIDE_TEXT" sx='595' sy='356' ex='595' ey='356' l='374' t='0' r='456' b='14' texture="ROOMMAKE_N_PM"/>
+ 
+  
+	<checkbox name="CHKBTN_CHATROOM" x="683" y="353" w="25" h="25">
+		<sprite l="374" t="15" r="399" b="40" texture="ROOMMAKE_N_PM" />
+		<sprite l="374" t="41" r="399" b="66" texture="ROOMMAKE_N_PM" />
+	</checkbox>
+
+ 
+	<checkbox name="CHKBTN_NOSKILL" x="683" y="353" w="25" h="25">
+		<sprite l="374" t="15" r="399" b="40" texture="ROOMMAKE_N_PM" />
+		<sprite l="374" t="41" r="399" b="66" texture="ROOMMAKE_N_PM" />
+	</checkbox>
+
+  <editbox name="ROOMNAME" l="465" t="328" r="703" b="344" linelimit="1" textlimit="120" TCR="255" TCG="255" TCB="255" TCA="255" />
+  <editbox name="PASSWORD_INPUT" l="465" t="359" r="565" b="375" linelimit="1" textlimit="8" password="true" TCR="255" TCG="255" TCB="255" TCA="255" />
+  <hscroll name="GAMEMODE" l="488" t="388" r="680" b="407">
+    <element name="0" value="0" color="ffffffff" />
+    <element name="1" value="1" color="ffffffff" />
+    <element name="2" value="2" color="ffffffff" />
+    <element name="3" value="3" color="ffffffff" />
+    <element name="4" value="4" color="ffffffff" />
+    <element name="5" value="5" color="ffffffff" />
+    <element name="6" value="8" color="ffffffff" />
+    <element name="7" value="10" color="ffffffff" />
+    <element name="8" value="11" color="ffffffff" />
+    <element name="9" value="12" color="ffffffff" />
+    <element name="10" value="13" color="ffffffff" />
+
+	<button name="LEFT" x="461" y="386" w="23" h="23">
+		<sprite l="952" t="348" r="975" b="371" texture="UI_Button" />
+		<sprite l="952" t="372" r="975" b="395" texture="UI_Button" />
+		<sprite l="952" t="396" r="975" b="419" texture="UI_Button" />
+	</button>
+	<button name="RIGHT" x="684" y="386" w="23" h="23">
+		<sprite l="976" t="348" r="999" b="371" texture="UI_Button" />
+		<sprite l="976" t="372" r="999" b="395" texture="UI_Button" />
+		<sprite l="976" t="396" r="999" b="419" texture="UI_Button" />
+	</button>
+	
+
+</hscroll>
+  
+
+
+<hscroll name="USERS" l="488" t="420" r="680" b="439">
+    <element name="2" value="2" color="ffffffff" />
+    <element name="4" value="4" color="ffffffff" />
+    <element name="6" value="6" color="ffffffff" />
+    <element name="8" value="8" color="ffffffff" />
+    <element name="10" value="10" color="ffffffff" />
+    <element name="12" value="12" color="ffffffff" />
+    <element name="14" value="14" color="ffffffff" />
+    <element name="16" value="16" color="ffffffff" />
+  <button name="LEFT" x="461" y="418" w="23" h="23">
+		<sprite l="952" t="348" r="975" b="371" texture="UI_Button" />
+		<sprite l="952" t="372" r="975" b="395" texture="UI_Button" />
+		<sprite l="952" t="396" r="975" b="419" texture="UI_Button" />
+	</button>
+	<button name="RIGHT" x="684" y="418" w="23" h="23">
+		<sprite l="976" t="348" r="999" b="371" texture="UI_Button" />
+		<sprite l="976" t="372" r="999" b="395" texture="UI_Button" />
+		<sprite l="976" t="396" r="999" b="419" texture="UI_Button" />
+	</button>
+  </hscroll>
+
+
+	<button name="OK" x="560" y="474" w="84" h="28">
+		<sprite l="777" t="881" r="861" b="909" texture="UI_Button" />
+		<sprite l="777" t="910" r="861" b="938" texture="UI_Button" />
+		<sprite l="777" t="939" r="861" b="967" texture="UI_Button" />
+	</button>
+	<button name="CANCEL" x="646" y="474" w="84" h="28">
+		<sprite l="85" t="347" r="169" b="375" texture="UI_Button" />
+		<sprite l="85" t="376" r="169" b="404" texture="UI_Button" />
+		<sprite l="85" t="405" r="169" b="433" texture="UI_Button" />
+	</button>
+
+
+
+</UIDEFINE>

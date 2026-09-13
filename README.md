@@ -8,6 +8,10 @@
 | 路徑 | 內容 |
 |------|------|
 | `docs/PACKETS.md` | **協議完整分析**: Packet 類佈局、wire 格式、序列化原語、checksum/壓縮/加密層、關鍵 payload 結構 (全部附反編譯函數地址) |
+| `docs/RESOURCES.md` | **客戶端資源地圖**: maplist/物品/任務/訊息表 `msgtableres.lang`、UI 圖像音效盤點、mode 枚舉正名 |
+| `docs/LAYOUTS.md` / `docs/LAYOUTS_REQ.md` | 各封包 dispatcher 讀取序 / REQ builder 寫入序 (欄位級對照) |
+| `docs/ARCHITECTURE.md` | 全景架構: 生命週期、資料層、加密、互證鏈 |
+| `docs/TODO_HANDLERS.md` | 尚未實作的 server handler 清單與下一輪建議 |
 | `db/packets.tsv` | 從 `sub_9D2050` 抽出的 **670 個 opcode ↔ 名稱** 對照表 (100–994) |
 | `db/schema.sql` | SQLite schema (STRICT tables, 30 表 + 3 視圖 + 4 觸發器), 每個欄位註明來源封包/函數 |
 | `db/build_db.py` | 建 DB + 匯入 opcode 註冊表 + 預設運維設定 + 自檢 |
@@ -22,6 +26,7 @@
 python3 db/build_db.py --fresh   # 重建 DB
 python3 db/smoke_test.py         # 跑全流程測試
 python3 server/packet.py         # Packet 編解碼自測
+python3 db/import_pats.py        # 資源目錄灌 DB (需先以 server/pmfile.py 解密 cfg/*.pat)
 ```
 
 ## 逆向重點摘要
@@ -66,6 +71,45 @@ python3 server/packet.py         # Packet 編解碼自測
 
 `protocol_packets` 表載入了全部 670 個 opcode, 伺服器可直接拿來做
 route table / 日誌 / `packet_stats` 監控。
+
+## 客戶端資源地圖 (`Extracted/`, 詳見 `docs/RESOURCES.md`)
+
+主分支 `main:Extracted/` 有日版 ペーパーマン 的完整資源。已灌入 DB 或
+已逆向、對私服最有價值的幾件:
+
+| 資源 | 用途 |
+|------|------|
+| `ui/cfg/maplist.pat` | **123 張地圖** (id/日文名/檔名/模式 bitmask) → `db/map_catalog` |
+| `ui/cfg/itemdata.pat` / `Quest.pat` / `weaponparts.pat` / `partsability.pat` | 物品/任務/改裝件目錄 → `db` 對應表 |
+| `ui/lang/msgtableres.lang` | **全 client 唯一訊息表** (CP932, entry i=第 i+3 行) — ACK error code、預設房名(309..325)、895/112 status 的權威文字來源 |
+| `ui/roommake.xml` / `gameroom.xml` | 建房/房內 UI 控制項 → 房設定簇 (121/122、167–178、340/341、364/365、712/713、990/991) 語意 |
+| `ui/system/map_StartIndex.xml` | mode → 預設 map_id (0→106、1→104、2→14、3→107、4→23、8→51、9→89、12→98) |
+| `ui/slanderfilter/filterword.txt` + `exceptionword.txt` | 聊天/暱稱過濾詞 (GM/GS 變體 + 髒話) |
+| `ui/system/Total_Package_Index.xml` / `SpecialWeaponType.xml` / `map_BGMSoundNames.xml` | 套裝索引 / 特殊武器型態 / 地圖 BGM |
+| `ui/{bot,game,lobby,loadscreen}/` + `ui/sounds/` | DDS/TGA 圖集與音效 — 檔名可佐證各模式 UI (見下) |
+| `data.pat` / `convars.pat` / `0.xml` / `ClientDataList.xml` | 資料容器/控制台變數/打包清單 |
+
+### 模式枚舉 (權威, `sub_53FBB0` mode factory)
+
+房 rule 的 mode 值 0..15, 對應 `CyGameModes::Cy*ModeLobbyUI` 類:
+
+```
+0 TeamMatch(TeamDeath)   1 IndividualSurvival(FreeForAll)
+2 DefuseBomb(爆破)       3 TeamSurvival           4 Steal(スチール)
+5 Practice               6 Tutorial               7 ChattingRoom
+8 Pulp'n'Roll(PNR)       9 GunShooting           10 Occupy(占領)
+11 AIMulti(PvE)         12 TeamSoccer(サッカー)  13 OccupyRenewal(new占領)
+14 (無效)               15 WeaponTest            16 (哨兵=不改)
+```
+
+- `sub_438990` = 「是否兩隊制」→ mode∈{0,2,3,4,8,10,11,12,13};
+  130/134 序列化的 `mode+12` 欄位即此旗標。
+- 建房 UI (`roommake.xml`) 只開放 {0,1,2,3,4,5,8,10,11,12,13};
+  6/7/9/15 走專用入口 (教學/聊天房/射擊館/武器試射)。
+- 地圖過濾 bitmask: maplist 的 `modes` 欄以 `1<<bit` 標記該圖可玩的
+  模式, bit↔mode 對照 (0→bit2, 1→bit0, 2→bit3, 3→bit1, 4→bit4,
+  8→bit9, 9→bit10, 10→bit12, 11→bit13, 12→bit14, 13→bit15, 15→bit11)
+  見 `docs/RESOURCES.md` §4b。
 
 ## C# 14 伺服器 (`server-cs/`)
 
