@@ -646,6 +646,24 @@ GM 權限: 這些 REQ 無等級檢查 — server 端必須以帳號 GM flag gate
 (客戶端 builder 存在不代表可用; 681 result 0xD6 的「GM IP 白名單」
 是唯一 client 端 gate)。
 
+### 3.15d2b 推播族 NOTIFY/NOTICE 補遺 (廿六輪終掃)
+```
+587 CLAN_GAMEEND_RESULT: (s32×3+u16×2)×2 — 戰隊戰兩隊結算
+683 GL_SERVERLIST_NOTICE: 不在 dispatcher (登入層 0x43E651 處理)
+745 GG_DEFENSE_REWARD: u8+u16×2 防守獎勵
+760/761 TNMT 報名成功/取消: s32 [+f32]
+775 TNMT 廣播: u8+str+s32+u8+str; 779 CLAN_INFO 變更: u8+s32×2+u8+str
+847/848 網咖武器: s32 開通 / u16 停用
+911 GM 排程公告: str
+921 AI_APPEARED_BOT: u16×5 (波次怪物出現)
+934 AI_TEAMSCORE: s32+u8+s32+u8+s32×2 (協力分數板)
+937 AI_FEVER_END: u8; 942 獎勵選擇開始: u8+s32+u8×2+s32×2
+960 DROPWEAPON_DESTROY: u8+u16 (掉落武器消失)
+994 GG_ASSISTPOINT: u8×2+s32+u8×2+s32×3 (助攻點數 → cond36 事件源!)
+155/156 Y_UDP_HOLE_INF: UDP 打洞層 (sub_595E80 編號 155/156 處理)
+無 payload 通知: 766/778/811/833/889/908 (純觸發)
+```
+
 ### 3.15d3 GG 戰鬥中繼全 58 對 — 轉發模式分類 (廿五輪自動配對)
 Server 的 GG 處理 = **驗證 + 廣播**, 三種模式:
 1. **slot 前綴轉發** (最常見): ACK = `u8 actor_slot` + REQ 原欄位
