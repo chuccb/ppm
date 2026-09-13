@@ -58,23 +58,77 @@ offset 8   ...  payload (小端, 緊湊, 無對齊)
 
 **字串一律以 NUL 結尾直接寫進 payload，沒有長度前綴** (讀出端靠 lstrlenA)。
 
-### 1.4 混淆 / 完整性層 (傳送前 sub_593280 / sub_5923D0)
+### 1.4 傳送/接收管線 — ⚠ 第二輪逆向的重要修正
 
-**A. bitcount checksum + XOR (sub_5923D0 "seal"):**
-1. `sub_592220`: checksum = payload 每 byte popcount 之和 (u16)。
-2. 寫入 header word2 (`sub_592390`)。
-3. `sub_592470`: payload 每 byte `XOR (checksum & 0xFF)`。
-   驗證端: `sub_592420` 先 XOR 還原再比對 popcount。
+**修正: `sub_5923D0` / `sub_592420` (popcount checksum + XOR, 即第一輪文檔的
+「seal」) 在整個 binary 裡沒有任何呼叫者 — 是死碼。** 真實管線只有兩層:
 
-**B. 壓縮 (sub_592CE0 → sub_591600):** 自製 LZ (128-flag byte + 距離/長度對)。
-   若壓縮無利可圖直接原樣複製。成功則設旗標 bit0，
-   header word2 保存壓縮前大小 (`sub_591F90`)。
+**送出 (sub_555090 → sub_593280):**
+```
+1. 若 word3==0: word3 := word0 (原始 payload 大小)     (sub_591F90)
+2. 若 n0x2580>0 且 word0 ≥ n0x2580 → LZ 壓縮:
+     sub_592CE0 → sub_592D30 → sub_591600
+     word2 := 壓縮前大小, word0 := 壓縮後大小, flag|=1
+     (壓不小就放棄, 不設 flag)
+3. 一律 AES 加密: sub_592F60 → sub_592FB0
+     n16 = 16-byte 對齊上取 (空 payload 也補一個 block)
+     sub_4042A0(key_schedule, buf, n16, n2_4)   n2_4=1 CBC-加密 / 2 CBC-XOR先 / 其他 ECB
+     word2 := 加密前 word0, word0 := n16, flag|=4
+4. WSASend(this+24, word0 + 8)
+```
 
-**C. 區塊加密 (sub_592F60 → sub_592FB0):** payload 依 16-byte (n16_0=16,
-   在 0x2986 附近初始化 — AES-128 型的 SBox/roundkey 表 dword_23199F8) 補齊後用
-   `sub_4042A0` 加密。header word3 = 加密前實際大小，旗標設 bit2。
+**接收 (sub_555280 / sub_554E00 event loop):**
+```
+1. 累積 stream 到 9600-byte buffer, 依 word0+8 切 frame (sub_591FB0)
+2. 合法性: sub_591D50 (total≥8 且 total ≥ word0+8)
+3. AES 解密: sub_5930C0 → sub_593110 → sub_404470(key, buf, n16, n2_4)
+     驗證: word0 必須 16 對齊且 == align16(word2), 否則丟包
+     word0 := word2 (還原大小), flag|=8
+4. 若 word3 > word0 且 word3 ≥ n0x2580 → LZ 解壓:
+     sub_592E50 判斷 → sub_592E00 → sub_592E90 → sub_591900
+     驗證: 解壓後大小必須 == word3, 否則丟包
+5. dispatch 到 handler (vtable+4 虛呼叫)
+```
 
-`sub_555090` 傳送時呼叫 `sub_593280`: 大於門檻 (n0x2580) 才壓縮，一律加密。
+**AES 細節 (sub_403430 = key schedule 初始化):**
+- 全域常數: `n16_0=16` (block), `n10=10` (rounds) → **AES-128**
+- 金鑰: `unk_B69E88` 起 16 bytes **硬編碼在 .data 段** (Rijndael key
+  expansion + T-table `dword_B69208/B69608/B69A08/B68E08`, SBox `byte_B66C08`)
+- `sub_403DE0`/`sub_403650` = 單 block 加密, `sub_404040` = 單 block 解密
+- 模式由全域 `n2_4` 決定: 1/2 = 兩種 CBC 變體 (IV=0, XOR 前/後), 其他 = ECB
+- **注意**: 封包路徑上 `n2_4` 未見初始化 (BSS 預設 0) → 實際運行為 **ECB 模式**;
+  出現在別處的 `n2_4=1/2` 賦值屬於 UI 狀態機變數重名, 與加密無關
+- 金鑰 16 bytes 需從 exe .data 段 0xB69E88 抽出 (`.c` 導出檔沒帶資料段內容)
+
+**壓縮門檻協商**: 全域 `n0x2580` 初始 0x2580(9600, 即「從不壓縮」)。
+`GL_ACCOUNTCONNSUCC(694)` ACK 攜帶一個 u16, 若 <0x2580 則更新門檻
+(見 0x43E651 附近 `n694==694` 分支) — 即 **由伺服器決定是否啟用壓縮**。
+私服最簡策略: 不送 694 的門檻欄位 / 送 0x2580 → 完全停用壓縮層。
+
+**GL_LOGIN_ACK(681) 完整結構** (0x43E651 同函數 `n694==681` 分支):
+```
+s32  result           1=成功, 2=帳密錯, 0xC8..0xD6=各種封鎖/維護錯誤碼
+若 result==1:
+  s32  user_no        (dword_EE8970)
+  s32  n100           (伺服器等級參數, ==100 時檢查特殊 UI)
+  s32  ext_count      >0 時: s32 a, s32 b, u8 c → sub_A1C870(頻道保留資訊)
+  s16  server_count
+  repeat server_count:                 ← 伺服器清單
+    s16  server_id
+    str  name  (ANSI)
+    str  host? (v124, 16B buffer)
+    s16  port?
+    u8   flag
+    s16  group
+    repeat 3:                          ← 每台 3 個頻道分組
+      s16  ch_count (>0 才有後續)
+      u8   ch_type
+      str  ch_name
+      s16  ch_port
+      u8   ch_flag
+      若 ch_type==3: u8 extra
+  u32  x2 (v142,v137 → 帳號計費/會員資訊)
+```
 
 ---
 

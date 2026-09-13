@@ -10,10 +10,13 @@ PaperMan wire-protocol Packet 參考實作 (Python 3)。
   seal()/unseal()            <- sub_5923D0 / sub_592420 (popcount checksum + XOR)
   to_bytes()/from_stream()   <- sub_555090 (WSASend size+8) / sub_555280
 
-注意: 正式客戶端在 sub_593280 對大包多做一層 LZ 壓縮 (sub_591600) 與
-16-byte 區塊加密 (sub_4042A0, 表在 dword_23199F8)。本模組先實作
-輕量層 (checksum+XOR)，壓縮/加密層留 hook — 兩者只在 payload
-超過門檻或連線協商後才啟用。
+⚠️ 二次深挖後的重要更正 (詳見 docs/PACKETS.md §1.4):
+  seal()/unseal() (sub_5923D0/sub_592420) 是 **死碼** — 全 exe 無任何
+  呼叫者, 真實傳輸管線只有 LZ 壓縮 + AES-128-ECB 加密:
+    送出 sub_593280: w3=原始大小 → (w0≥門檻時) LZ → 一律 AES
+    接收 sub_5930C0: AES 解密 → (條件) LZ 解壓
+  本模組保留 seal/unseal 僅作歷史參考, 與真客戶端互通請以
+  server-cs/src/PaperMan.Protocol/PacketCodec.cs 為準。
 """
 from __future__ import annotations
 

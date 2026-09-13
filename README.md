@@ -13,7 +13,8 @@
 | `db/build_db.py` | 建 DB + 匯入 opcode 註冊表 + 預設運維設定 + 自檢 |
 | `db/smoke_test.py` | 模擬 登入→建角→購物→背包分頁→開房→結算→好友/訊息/任務/公會 全流程的 DB 讀寫測試 |
 | `db/paperman.db` | 已建好的資料庫 |
-| `server/packet.py` | wire 協議 Packet 參考實作 (逐函數對應反編譯), 含自測 |
+| `server/packet.py` | wire 協議 Packet 參考實作 (Python, 逐函數對應反編譯), 含自測 |
+| `server-cs/` | **C# 14 / .NET 10 伺服器** (協定層 + TCP 伺服器 + SQLite 存取層 + 自測), 見 `server-cs/README.md` |
 
 ## 快速開始
 
@@ -28,13 +29,19 @@ python3 server/packet.py         # Packet 編解碼自測
 ### Wire 格式 (Packet 類 @ 0x591AC0, `sub_591DA0` 初始化)
 
 ```
-[u16 payload_size][u16 opcode][u16 checksum][u16 orig_size][payload ≤9592B]
+[u16 payload_size][u16 opcode][u16 w2][u16 w3=orig_size][payload ≤9592B]
 ```
-- 傳送 `sub_555090`: `WSASend(this+24, size+8)`
-- 密封 `sub_5923D0`: checksum = payload 逐 byte popcount 和 (`sub_592220`)，
-  之後 payload 逐 byte XOR checksum 低 8 位 (`sub_592470`)
-- 大包再經自製 LZ (`sub_591600`) + 16-byte 區塊加密 (`sub_4042A0`)
-- 字串: NUL 結尾 ANSI (CP949), 無長度前綴
+- 傳送 `sub_555090` → `sub_593280`: w3=原始大小 → (w0≥門檻時) 自製 LZ
+  壓縮 (`sub_591600`, w2=壓前大小) → **一律** AES-128-ECB 加密
+  (`sub_4042A0`, 補齊 16, w2=加密前大小) → `WSASend(this+24, size+8)`
+- 接收 `sub_5930C0`: AES 解密 (驗 16 對齊 + `w0==align16(w2)`) →
+  (w3≥門檻且 w0<w3 時) LZ 解壓 (`sub_591900`, 結果須==w3), 壞包整緩衝丟棄
+- ⚠️ popcount checksum + XOR「seal」層 (`sub_5923D0/sub_592420`) 為
+  **死碼** (無呼叫者), 二次深挖後已自管線剔除 — 詳見 `docs/PACKETS.md` §1.4
+- 壓縮門檻由 `GL_ACCOUNTCONNSUCC(694)` 的 u16 協商, 預設 0x2580(9600)=永不壓縮
+- AES-128 金鑰在 exe `.data` VA `0xB69E88` (IDA .c 不含資料段, 需另行 dump)
+- 字串: NUL 結尾 ANSI (CP949), 無長度前綴 (`sub_5926F0` = `lstrlenA`+1);
+  寬字串: 雙 NUL 結尾 UTF-16LE (`sub_592770`)
 
 ### Opcode 註冊表 (`sub_9D2050`)
 
@@ -58,3 +65,26 @@ python3 server/packet.py         # Packet 編解碼自測
 
 `protocol_packets` 表載入了全部 670 個 opcode, 伺服器可直接拿來做
 route table / 日誌 / `packet_stats` 監控。
+
+## C# 14 伺服器 (`server-cs/`)
+
+依上述逆向成果重建的可運行伺服端 (net10.0, `LangVersion 14`):
+
+- `PaperMan.Protocol` — 純協定層: `Opcode.cs` (670 opcodes, 由
+  `tools/gen_opcodes.py` 從 `db/packets.tsv` 產生)、`Packet.cs` (讀寫原語)、
+  `PaperLz.cs` / `PaperAes.cs` / `PacketCodec.cs` (真實 LZ+AES 管線)。
+- `PaperMan.Server` — TCP 伺服器: 9600B 框架 (`Session.cs`)、SQLite 存取層
+  (`Db.cs`, 交易式購物/登入/暱稱/背包分頁)、封包 handlers
+  (登入 681/694、大廳、商店、GP_CH*C 戰績 19 計數器)。
+- `PaperMan.SelfTest` — 不需遊戲客戶端的 codec round-trip 自測。
+- LZ 演算法另以 Python 逐行移植跑過 310 組 round-trip/fuzz 驗證。
+
+本沙箱無法安裝 .NET SDK (所有鏡像被網路封鎖), 原始碼未經編譯 —
+建置/執行方式與 AES 金鑰抽取方法見 `server-cs/README.md`。
+
+### 為何選 SQLite (2026-09 現況)
+
+單行程私服 + WAL 模式 = 每秒數萬寫入輕鬆達標且無網路 round-trip;
+`STRICT` 表 + `CHECK` 約束把逆向得到的值域直接壓進 schema;
+一檔即全部狀態、零運維; `Microsoft.Data.Sqlite` 是 .NET 10 第一方支援。
+詳細論證見 `server-cs/README.md` 末節。
