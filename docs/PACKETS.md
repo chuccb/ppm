@@ -399,11 +399,14 @@ repeat count:
   若 ok: s32 item_id, float f1, float f2, s32 period_days,
          u8 item_kind, u16 durability
 若 count==0: bool err, u8 err2     (錯誤碼對, sub_468470 顯示)
-尾端固定 7×s32 (無條件讀取):
-  s32 a, s32 cash    (cash → dword_EE8D18, CASH UI 顯示 "%10d")
-  s32 b, s32 gp      (gp → GP UI)
-  s32 c, s32 d       (d → dword_EE8D1C)
-  s32 flag           (進 sub_468470 最後參數)
+尾端固定 7×s32 (無條件讀取; ⚠ 十一輪以商店 UI 標籤逐槽定案,
+先前 CASH/GP 對映相反):
+  s32 v22 (保留), s32 v16  (v16 → *EE8D18 → "PG" 欄位 = GP 點數)
+  s32 v26 (保留), s32 v20  (v20 → "CASH" 欄位 = 現金)
+  s32 v15 (保留), s32 v27  (v27 → *EE8D1C → "CP" 欄位 = 第三貨幣)
+  s32 v18 (旗標, 進 sub_468470 最後參數)
+(UI 於 36084 行: EE8D18 印在 "PG" label, ArgList=v20 印在 "CASH",
+EE8D1C 印在 "CP" — 標籤即鐵證)
 ```
 GS_BUY_ONCEITEM_REQ (695): u8/s32 item_id, string opt, u8 kind, u8 period。
 period 合法值: 1/7/15/30/60/90 天 (kind 0,1,3,14)、0 = 永久型 (kind 2,4,9,15,10,11,16)。
@@ -477,6 +480,12 @@ repeat: string from, u8, string title, u32 msg_id, string body(≤201), string, 
   顯示區, 送 0 安全)
 - 882 (playtimec): **無 REQ**, server 推播 `s32 總秒數`, client case 882
   自行差分 (dword_EE8D7C)。
+**十一輪補 — ACK 的隱藏副作用 (任務進度 hook sub_92EF00)**:
+多數奇數 ACK 存值後還驅動任務系統: 223 playc → `sub_92EF00(21,23,Δ,0)`
+(差分後餵), 229 winc → `(5,23,1,0)`, 231 lossc → `(6,23,1,0)`,
+233 killc → 差分進 EE8DAC 累計, 882 playtime → `(20,23,Δ,0)`。
+→ 伺服器送這些 ACK 等於在幫 client 推進「贏 N 場」「殺 N 人」型任務;
+total 送錯會讓任務進度爆走 (再次強調: 必須 MAX 單調)。
 ### 3.13 GQ_QUEST 任務家族 (八輪全家讀畢)
 13-byte 任務快照 = `{s32 quest_index, s32 progress, u8 state, s32 extra}`
 (state: 0=NONE 1=WORKING 2=SUCCESS 3=FAILED — sub_91C7B0 的除錯字串直接
@@ -588,6 +597,13 @@ repeat: string from, u8, string title, u32 msg_id, string body(≤201), string, 
 136 GR_CHANGESLOT_ACK (sub_56EF40): u8 ok; ok → (n11 10/11 特判)
     u8 from, u8 to, s32, s32, u8 count, count×條目
 ```
+
+### 3.15pre2 GL_CLIENTINFO (246/247) — 查看他人資料 (十一輪發現)
+247 ACK (sub_573EB0): `u8 ok(==1)` → **sub_523BF0 完整基本資料塊**
+(與 198 首段完全同構 — 21×欄位 + 48B blob) + **sub_524360 單角色外觀**
+`u8 slot(<20), u8 char_type, 12×u16 equip` (與 198 的 sub_524010 條目
+逐欄位一致, 互為交叉驗證)。n11==9 時再驅動個人資料視窗 UI。
+→ 伺服器實作 247 時可重用 BuildMyInfoAck 的首段 builder。
 
 ### 3.15pre Ping 方向 (十輪更正 — 重要!)
 `GT_PING_ACK(102)` 是**伺服器→client** 的主動心跳; client 的

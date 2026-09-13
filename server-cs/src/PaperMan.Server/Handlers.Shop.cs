@@ -125,16 +125,27 @@ public static class ShopHandlers
         }
     }
 
-    /// <summary>205 尾端 7×s32 (client 無條件讀取, 順序見 sub_571910 v22/v16/v26/v20/v15/v27/v18)。</summary>
+    /// <summary>
+    /// 205 尾端 7×s32 (client 無條件讀取; 順序 sub_571910
+    /// v22/v16/v26/v20/v15/v27/v18)。
+    /// ⚠ 十一輪以 UI 標籤逐槽定案 (先前 CASH/GP 對映相反):
+    ///   v16 → *EE8D18 → 商店 "PG" 欄位 (GP 點數)
+    ///   v20 → ArgList → 商店 "CASH" 欄位 (現金)
+    ///   v27 → *EE8D1C → 商店 "CP" 欄位 (第三貨幣)
+    /// </summary>
     private static Packet WriteTail(Packet ack, Session s, ServerContext ctx)
     {
         int cash = s.UserId != 0 ? ctx.Db.GetCash(s.UserId) : 0;
         var info = s.UserId != 0 ? ctx.Db.GetMyInfo(s.UserId) : null;
         int gp = (int)(info?.Gp ?? 0);
+
         return ack
-            .WriteS32(0).WriteS32(cash)     // v22, v16 → EE8D18 (CASH 顯示)
-            .WriteS32(0).WriteS32(gp)       // v26, v20 → GP 顯示
-            .WriteS32(0).WriteS32(0)        // v15, v27 → EE8D1C
+            .WriteS32(0)                    // v22 (保留)
+            .WriteS32(gp)                   // v16 → EE8D18 = "PG" (GP)
+            .WriteS32(0)                    // v26 (保留)
+            .WriteS32(cash)                 // v20 → "CASH"
+            .WriteS32(0)                    // v15 (保留)
+            .WriteS32(0)                    // v27 → EE8D1C = "CP"
             .WriteS32(0);                   // v18 (旗標, 進 UI callback)
     }
 }
