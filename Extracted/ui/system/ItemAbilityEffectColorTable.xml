@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ItemEffectColorTable>
+  <Lev_1 id="3" speed="120 ,120 ,250" agility="190 ,250 ,250" hp="245 ,90 ,90" def="80, 240, 80" hit="255, 255, 80"/>
+  <Lev_2 id="4" speed="90 ,90 ,250" agility="160, 250, 250" hp="245 ,60 ,60" def="50, 220, 50" hit="255, 255, 70" />
+  <Lev_3 id="5" speed="60 ,60 ,250" agility="130 ,250 ,250" hp="245 ,30 ,30" def="20, 220, 20" hit="255, 255, 20" />
+  <AlphaValue Lev1="0.5" Lev2="0.65" Lev3="0.72" Lev4="0.78" Lev5="0.84" Lev6="0.90"></AlphaValue>
+  <Penalty color="40 , 40 , 40" alpha="0.8" />
+</ItemEffectColorTable>

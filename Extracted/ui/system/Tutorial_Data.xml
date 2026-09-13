@@ -1,0 +1,203 @@
+<TutorialDataPath>				
+	<TUTO_TECH>			
+		<map num="101"/>		
+		<mission index="1">		
+			<delaytime time='5'/>	
+			<player>	
+				<angle val='72'/>
+				<position x='-715' y='441' z='209'/>
+				<weapon slot='0' type='0' weapon='27' magazine='30' maxmagazine='120'/>
+			</player>	
+			<clearArrow x= '554' y='505' z='-142'/>	
+		</mission>		
+		<mission index="2">		
+			<delaytime time='5'/>	
+				<botangle val='5'/>
+			<player>	
+				<angle val='144'/>
+				<position x='479' y='570' z='-378'/>
+				<weapon slot='0' type='0' weapon='27' magazine='30' maxmagazine='120'/>
+			</player>	
+			<bot index="1">	
+				<position x='378' y='503' z='-746'/>
+				<weapon weaponType='0' weapon='27'/>
+				<avata body='1' hair='1445' face='319' set='530' hp='100'/>
+			</bot>	
+			<bot index='2'>	
+				<position x='269' y='504' z='-741'/>
+				<weapon weaponType='0' weapon='27'/>
+				<avata body='6' hair='1450' face='324' set='535' hp='100'/>
+			</bot>	
+		</mission>		
+		<mission index="3">		
+			<delaytime time='5'/>	
+				<botangle val='-10'/>
+			<player>	
+				<angle val='126'/>
+				<position x='312' y='562' z='-503'/>
+				<weapon slot='0' type='0' weapon='27' magazine='0' maxmagazine='0'/>
+				<weapon slot='1' type='0' weapon='24' magazine='50' maxmagazine='100'/>
+			</player>	
+			<bot index="1">	
+				<position x='378' y='503' z='-746'/>
+				<weapon weaponType='0' weapon='25'/>
+				<avata body='1' hair='1445' face='319' set='530' hp='100'/>
+			</bot>	
+			<bot index='2'>	
+				<position x='269' y='504' z='-741'/>
+				<weapon weaponType='0' weapon='25'/>
+				<avata body='6' hair='1450' face='324' set='535' hp='100'/>
+			</bot>	
+			<bot index='3'>	
+				<position x='325' y='500' z='-828'/>
+				<weapon weaponType='0' weapon='207'/>
+				<avata body='9' hair='1453' face='327' set='538' hp='100'/>
+			</bot>	
+			<clearArrow x= '-159' y='515' z='-478'/>	
+		</mission>		
+		<mission index="4">		
+			<delaytime time='5'/>	
+				<botangle val='50'/>
+			<player>	
+				<angle val='-75'/>
+				<position x='-348' y='568' z='-490'/>
+				<weapon slot='0' type='1' weapon='26' magazine='12' maxmagazine='24'/>
+			</player>	
+			<bot index="1">	
+				<position x='-853' y='508' z='-574'/>
+				<weapon weaponType='0' weapon='26'/>
+				<avata body='4' hair='1448' face='322' set='533' hp='100'/>
+			</bot>	
+			<bot index="2">	
+				<position x='-848' y='510' z='-678'/>
+				<weapon weaponType='0' weapon='26'/>
+				<avata body='1' hair='1445' face='319' set='530' hp='100'/>
+			</bot>	
+		</mission>		
+		<mission index="5">		
+			<delaytime time='5'/>	
+				<botangle val='55'/>
+			<player>	
+				<angle val='-68'/>
+				<position x='-534' y='557' z='-588'/>
+				<weapon slot='0' type='1' weapon='26' magazine='0' maxmagazine='0'/>
+				<weapon slot='1' type='1' weapon='79' magazine='4' maxmagazine='0'/>
+			</player>	
+			<bot index="1">	
+				<position x='-902' y='510' z='-626'/>
+				<weapon weaponType='0' weapon='79'/>
+				<avata body='6' hair='1450' face='324' set='535' hp='15'/>
+			</bot>	
+			<clearArrow x= '-321' y='503' z='-1026'/>	
+		</mission>		
+		<mission index="6">		
+			<delaytime time='5'/>	
+				<botangle val='30'/>
+			<player>	
+				<angle val='-80'/>
+				<position x='-536' y='446' z='-1047'/>
+				<weapon slot='0' type='2' weapon='4' magazine='0' maxmagazine='0'/>
+			</player>	
+			<bot index="1">	
+				<position x='-776' y='364' z='-1240'/>
+				<weapon weaponType='0' weapon='25'/>
+				<avata body='1' hair='1445' face='319' set='530' hp='90'/>
+			</bot>	
+		</mission>		
+		<mission index="7">		
+			<delaytime time='5'/>	
+				<botangle val='-70'/>
+			<player>	
+				<angle val='64'/>
+				<position x='-652' y='414' z='-1162'/>
+				<weapon slot='0' type='3' weapon='7' magazine='4' maxmagazine='0'/>
+			</player>	
+			<bot index="1">	
+				<position x='-120' y='376' z='-1161'/>
+				<weapon weaponType='0' weapon='208'/>
+				<avata body='5' hair='1449' face='323' set='534' hp='24'/>
+			</bot>	
+		</mission>		
+		<mission index="8">		
+			<delaytime time='5'/>	
+				<botangle val='-40'/>
+			<player>	
+				<angle val='90'/>
+				<position x='-652' y='426' z='-1162'/>
+				<weapon slot='0' type='0' weapon='501' magazine='80' maxmagazine='160'/>
+				<weapon slot='0' type='3' weapon='12' magazine='5' maxmagazine='0'/>
+			</player>	
+			<bot index="1">	
+				<position x='-364' y='364' z='-1374'/>
+				<weapon weaponType='0' weapon='501'/>
+				<avata body='10' hair='1454' face='328' set='539' hp='70'/>
+			</bot>	
+			<clearArrow x= '-951' y='518' z='-1439'/>	
+		</mission>		
+		<mission index="9">		
+			<delaytime time='5'/>	
+				<botangle val='-55'/>
+			<player>	
+				<angle val='65'/>
+				<position x='-708' y='653' z='-1603'/>
+				<weapon slot='0' type='0' weapon='28' magazine='5' maxmagazine='20'/>
+			</player>	
+			<bot index="1">	
+				<position x='409' y='910' z='-1662'/>
+				<weapon weaponType='0' weapon='207'/>
+				<avata body='4' hair='1448' face='322' set='533' hp='100'/>
+			</bot>	
+			<bot index='2'>	
+				<position x='409' y='910' z='-1583'/>
+				<weapon weaponType='0' weapon='207'/>
+				<avata body='9' hair='1453' face='327' set='538' hp='100'/>
+			</bot>	
+			<clearArrow x= '264' y='505' z='-1390'/>	
+		</mission>		
+	</TUTO_TECH>			
+	<TUTO_MODE>			
+		<map num="102"/>		
+		<mission index="1">		
+			<delaytime time='5'/>	
+				<angle val='65'/>
+				<position x='215' y='561' z='-1382'/>
+		</mission>		
+		<mission index="2">		
+			<delaytime time='5'/>	
+			<objectpos x='700' y='580' z='-1392' rotX='4.7' rotY='-1' rotZ='2.55'/>	
+				<angle val='65'/>
+				<position x='563' y='583' z='-1388'/>
+			<clearArrow x= '507' y='502' z='-1735'/>	
+		</mission>		
+		<mission index="3">		
+			<delaytime time='5'/>	
+				<angle val='128'/>
+				<position x='517' y='558' z='-1941'/>
+			<clearArrow x= '913' y='502' z='-2355'/>	
+		</mission>		
+		<mission index="4">		
+			<delaytime time='5'/>	
+				<angle val='60'/>
+				<position x='1080' y='568' z='-2352'/>
+		</mission>		
+		<mission index="5">		
+			<delaytime time='5'/>	
+				<botangle val='70'/>
+				<angle val='68'/>
+				<position x='1080' y='568' z='-2352'/>
+			<pulp_returnpos x='-1557' y='78' z='-152'/>	
+			<bot index="1">	
+				<position x='1604' y='506' z='-2540'/>
+				<weapon weaponType='0' weapon='3001'/>
+				<avata body='1' hair='1445' face='319' set='530' hp='100'/>
+			</bot>	
+			<clearArrow x= '1891' y='502' z='-2093'/>	
+		</mission>		
+		<mission index="6">		
+			<delaytime time='5'/>	
+				<angle val='85'/>
+				<position x='2084' y='568' z='-2093'/>
+			<clearArrow x= '2700' y='403' z='-2336'/>	
+		</mission>		
+	</TUTO_MODE>			
+</TutorialDataPath>				

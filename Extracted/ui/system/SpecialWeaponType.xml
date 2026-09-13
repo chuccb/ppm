@@ -1,0 +1,18 @@
+<SPECIALWEAPON>
+
+<!--    WEAPON_TYEP
+
+	NONE = 0,
+	DUAL_GUN = 1,
+	EMPTY_RELOAD = 2,
+-->
+	<Weapon Index="2381" SpecialType="1" />
+	<Weapon Index="2382" SpecialType="1" />
+	<Weapon Index="2383" SpecialType="1" />
+	<Weapon Index="2384" SpecialType="1" />
+	<Weapon Index="2377" SpecialType="2" />
+	<Weapon Index="2378" SpecialType="2" />
+	<Weapon Index="2379" SpecialType="2" />
+	<Weapon Index="2380" SpecialType="2" />
+
+</SPECIALWEAPON>

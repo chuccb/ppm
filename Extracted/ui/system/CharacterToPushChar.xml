@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CHARACTER_TO_PUSHCHAR_PROPERTY>
+  <hayate bEnable="1">
+    <data_1 pos_width="20.0f" pos_sin="5.0f" shake_yaw="5.0f" damage_aim="1f"></data_1>
+  </hayate>
+  <tina bEnable="1">
+    <data_1 pos_width="20.0f" pos_sin="5.0f" shake_yaw="5.0f" damage_aim="1f"></data_1>
+  </tina>
+  <milly bEnable="1">
+    <data_1 pos_width="20.0f" pos_sin="5.0f" shake_yaw="5.0f" damage_aim="1f"></data_1>
+  </milly>
+  <Cyrus bEnable="1">
+    <data_1 pos_width="20.0f" pos_sin="5.0f" shake_yaw="5.0f" damage_aim="1f"></data_1>
+  </Cyrus>
+  <Doddon bEnable="1">
+    <data_1 pos_width="20.0f" pos_sin="5.0f" shake_yaw="5.0f" damage_aim="0.6f"></data_1>
+  </Doddon>
+  <Guy bEnable="1">
+    <data_1 pos_width="20.0f" pos_sin="5.0f" shake_yaw="5.0f" damage_aim="0.25f"></data_1>
+  </Guy>
+  <Tericia bEnable="1">
+    <data_1 pos_width="20.0f" pos_sin="5.0f" shake_yaw="5.0f" damage_aim="0.25f"></data_1>
+  </Tericia>
+  <alulu bEnable="1">
+    <data_1 pos_width="20.0f" pos_sin="5.0f" shake_yaw="5.0f" damage_aim="0.3f"></data_1>
+  </alulu>
+  <van bEnable="1">
+    <data_1 pos_width="20.0f" pos_sin="5.0f" shake_yaw="5.0f" damage_aim="0.4f"></data_1>
+  </van>
+  <hood bEnable="1">
+    <data_1 pos_width="20.0f" pos_sin="5.0f" shake_yaw="5.0f" damage_aim="0.2f"></data_1>
+  </hood>
+  <spygirl bEnable="1">
+    <data_1 pos_width="20.0f" pos_sin="5.0f" shake_yaw="5.0f" damage_aim="1f"></data_1>
+  </spygirl>
+  <robotgirl bEnable="1">
+    <data_1 pos_width="20.0f" pos_sin="5.0f" shake_yaw="5.0f" damage_aim="1f"></data_1>
+  </robotgirl>
+  <tsunderegirl bEnable="1">
+    <data_1 pos_width="20.0f" pos_sin="5.0f" shake_yaw="5.0f" damage_aim="1f"></data_1>
+  </tsunderegirl>
+  <magicgirl bEnable="1">
+    <data_1 pos_width="20.0f" pos_sin="5.0f" shake_yaw="5.0f" damage_aim="0.2f"></data_1>
+  </magicgirl>
+  <devilgirl bEnable="1">
+    <data_1 pos_width="20.0f" pos_sin="5.0f" shake_yaw="5.0f" damage_aim="1f"></data_1>
+  </devilgirl>
+</CHARACTER_TO_PUSHCHAR_PROPERTY>

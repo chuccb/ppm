@@ -713,6 +713,26 @@ wire[11] 基底 11,000,000  特殊/ヘアパズル          +169
 逐欄位一致, 互為交叉驗證)。n11==9 時再驅動個人資料視窗 UI。
 → 伺服器實作 247 時可重用 BuildMyInfoAck 的首段 builder。
 
+### 3.15pre-2 客戶端狀態機 + 官方模式表 (二十輪)
+**客戶端狀態 (sub_537710 set / sub_5376F0 get, byte_EE8968+24)**:
+2=帳號伺服器已連(250 GL_LOBBYIN 前後), 3=商店(252), 9=大廳(198 後),
+10=房內/戰鬥(GR START), 12/14/15=特殊模式(回放/教學), 4..8/16..19=
+過場狀態。dispatcher 內大量 `sub_5376F0()==9/10` 分支即以此判斷
+「同一 ACK 在大廳 vs 房內」的不同處理 — 佈局裡的 [n11==9]/[n11==10]
+特判全部對應此狀態機。
+
+**官方遊戲模式表 (map_StartIndex.xml — 二十輪, 正名十七輪的猜測)**:
+```
+modeIndex 0 = TeamDeath     (TD_, bit2)   ← 建房 111 的 u8 rule 用這套
+modeIndex 1 = FreeForAll    (PS_, bit0)
+modeIndex 2 = TeamHacking   (TH_, bit3)   ← 「爆破」正名: 駭入模式
+modeIndex 3 = TeamSurvival  (TS_, bit1)
+modeIndex 4 = TeamSteal     (TW_, bit4)   ← 「佔領」正名: 奪寶
+modeIndex 8 = PNR (bit9)    9 = GunShooting  12 = SOCCER (bit14)
+```
+map bitmask (maplist.pat +0) 與 modeIndex 是**兩套編號**: bitmask 管
+「這張圖可玩哪些模式」, modeIndex 管「這房間玩什麼」。
+
 ### 3.15pre Ping 方向 (十輪更正 — 重要!)
 `GT_PING_ACK(102)` 是**伺服器→client** 的主動心跳; client 的
 dispatcher case 102 → `sub_58D6F0` 立即 `ctor(101)` 回送

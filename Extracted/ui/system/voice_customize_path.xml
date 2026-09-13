@@ -1,0 +1,1750 @@
+<vcustomizepathTable>
+  <sounds index="0">
+    <first_path speech="sound\sounds"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds>
+
+  <sounds01 index="01">
+    <first_path speech="sound\sounds01"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds01>
+
+  <sounds02 index="02">
+    <first_path speech="sound\sounds02"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds02>
+
+  <sounds03 index="03">
+    <first_path speech="sound\sounds03"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds03>
+
+  <sounds04 index="04">
+    <first_path speech="sound\sounds04"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds04>
+
+  <sounds05 index="05">
+    <first_path speech="sound\sounds05"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds05>
+
+  <sounds06 index="06">
+    <first_path speech="sound\sounds06"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds06>
+
+  <sounds07 index="07">
+    <first_path speech="sound\sounds07"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds07>
+
+  <sounds08 index="08">
+    <first_path speech="sound\sounds08"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds08>
+
+  <sounds09 index="09">
+    <first_path speech="sound\sounds09"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds09>
+
+  <sounds10 index="10">
+    <first_path speech="sound\sounds10"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds10>
+
+  <sounds11 index="11">
+    <first_path speech="sound\sounds11"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds11>
+
+  <sounds12 index="12">
+    <first_path speech="sound\sounds12"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds12>
+
+  <sounds13 index="13">
+    <first_path speech="sound\sounds13"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds13>
+
+  <sounds14 index="14">
+    <first_path speech="sound\sounds14"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds14>
+
+  <sounds15 index="15">
+    <first_path speech="sound\sounds15"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds15>
+
+  <sounds16 index="16">
+    <first_path speech="sound\sounds16"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds16>
+
+  <sounds17 index="17">
+    <first_path speech="sound\sounds17"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds17>
+
+  <sounds18 index="18">
+    <first_path speech="sound\sounds18"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds18>
+
+  <sounds19 index="19">
+    <first_path speech="sound\sounds19"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds19>
+
+  <sounds20 index="20">
+    <first_path speech="sound\sounds20"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds20>
+
+  <sounds21 index="21">
+    <first_path speech="sound\sounds21"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds21>
+
+  <sounds22 index="22">
+    <first_path speech="sound\sounds22"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds22>
+
+  <sounds23 index="23">
+    <first_path speech="sound\sounds23"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds23>
+
+  <sounds24 index="24">
+    <first_path speech="sound\sounds24"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds24>
+
+  <sounds25 index="25">
+    <first_path speech="sound\sounds25"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds25>
+
+  <sounds26 index="26" killmsg="1">
+    <first_path speech="sound\sounds26"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="cacao"/>
+    <sub_path_hana speech="cacao"/>
+    <sub_path_lich speech="cacao"/>
+    <sub_path_loki speech="cacao"/>
+    <sub_path_maru speech="cacao"/>
+    <sub_path_momo speech="cacao"/>
+    <sub_path_nari speech="cacao"/>
+    <sub_path_pero speech="cacao"/>
+    <sub_path_robotgirl_12 speech="cacao"/>
+    <sub_path_spy_11 speech="cacao"/>
+    <sub_path_wooka speech="cacao"/>
+    <sub_path_tsunderegirl speech="cacao"/>
+    <sub_path_magicgirl speech="cacao"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds26>
+
+  <sounds27 index="27">
+    <first_path speech="sound\sounds27"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds27>
+
+  <sounds28 index="28">
+    <first_path speech="sound\sounds28"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds28>
+
+  <sounds29 index="29">
+    <first_path speech="sound\sounds29"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds29>
+
+  <sounds30 index="30">
+    <first_path speech="sound\sounds30"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds30>
+
+  <sounds31 index="31">
+    <first_path speech="sound\sounds31"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds31>
+
+  <sounds32 index="32">
+    <first_path speech="sound\sounds32"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds32>
+
+  <sounds33 index="33">
+    <first_path speech="sound\sounds33"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="dallae"/>
+    <sub_path_lich speech="cacao"/>
+    <sub_path_loki speech="cacao"/>
+    <sub_path_maru speech="cacao"/>
+    <sub_path_momo speech="dallae"/>
+    <sub_path_nari speech="dallae"/>
+    <sub_path_pero speech="cacao"/>
+    <sub_path_robotgirl_12 speech="dallae"/>
+    <sub_path_spy_11 speech="dallae"/>
+    <sub_path_wooka speech="cacao"/>
+    <sub_path_tsunderegirl speech="dallae"/>
+    <sub_path_magicgirl speech="dallae"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds33>
+
+  <sounds34 index="34">
+    <first_path speech="sound\sounds34"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="dallae"/>
+    <sub_path_lich speech="cacao"/>
+    <sub_path_loki speech="cacao"/>
+    <sub_path_maru speech="cacao"/>
+    <sub_path_momo speech="dallae"/>
+    <sub_path_nari speech="dallae"/>
+    <sub_path_pero speech="cacao"/>
+    <sub_path_robotgirl_12 speech="dallae"/>
+    <sub_path_spy_11 speech="dallae"/>
+    <sub_path_wooka speech="cacao"/>
+    <sub_path_tsunderegirl speech="dallae"/>
+    <sub_path_magicgirl speech="dallae"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds34>
+
+  <sounds35 index="35">
+    <first_path speech="sound\sounds35"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="dallae"/>
+    <sub_path_lich speech="cacao"/>
+    <sub_path_loki speech="cacao"/>
+    <sub_path_maru speech="cacao"/>
+    <sub_path_momo speech="dallae"/>
+    <sub_path_nari speech="dallae"/>
+    <sub_path_pero speech="cacao"/>
+    <sub_path_robotgirl_12 speech="dallae"/>
+    <sub_path_spy_11 speech="dallae"/>
+    <sub_path_wooka speech="cacao"/>
+    <sub_path_tsunderegirl speech="dallae"/>
+    <sub_path_magicgirl speech="dallae"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds35>
+
+  <sounds36 index="36">
+    <first_path speech="sound\sounds36"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="cacao"/>
+    <sub_path_hana speech="cacao"/>
+    <sub_path_lich speech="cacao"/>
+    <sub_path_loki speech="cacao"/>
+    <sub_path_maru speech="cacao"/>
+    <sub_path_momo speech="cacao"/>
+    <sub_path_nari speech="cacao"/>
+    <sub_path_pero speech="cacao"/>
+    <sub_path_robotgirl_12 speech="cacao"/>
+    <sub_path_spy_11 speech="cacao"/>
+    <sub_path_wooka speech="cacao"/>
+    <sub_path_tsunderegirl speech="cacao"/>
+    <sub_path_magicgirl speech="cacao"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds36>
+
+  <sounds37 index="37">
+    <first_path speech="sound\sounds37"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="cacao"/>
+    <sub_path_hana speech="cacao"/>
+    <sub_path_lich speech="cacao"/>
+    <sub_path_loki speech="cacao"/>
+    <sub_path_maru speech="cacao"/>
+    <sub_path_momo speech="cacao"/>
+    <sub_path_nari speech="cacao"/>
+    <sub_path_pero speech="cacao"/>
+    <sub_path_robotgirl_12 speech="cacao"/>
+    <sub_path_spy_11 speech="cacao"/>
+    <sub_path_wooka speech="cacao"/>
+    <sub_path_tsunderegirl speech="cacao"/>
+    <sub_path_magicgirl speech="cacao"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds37>
+
+  <sounds38 index="38">
+    <first_path speech="sound\sounds38"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="cacao"/>
+    <sub_path_hana speech="cacao"/>
+    <sub_path_lich speech="cacao"/>
+    <sub_path_loki speech="cacao"/>
+    <sub_path_maru speech="cacao"/>
+    <sub_path_momo speech="cacao"/>
+    <sub_path_nari speech="cacao"/>
+    <sub_path_pero speech="cacao"/>
+    <sub_path_robotgirl_12 speech="cacao"/>
+    <sub_path_spy_11 speech="cacao"/>
+    <sub_path_wooka speech="cacao"/>
+    <sub_path_tsunderegirl speech="cacao"/>
+    <sub_path_magicgirl speech="cacao"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds38>
+
+  <sounds39 index="39">
+    <first_path speech="sound\sounds39"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="cacao"/>
+    <sub_path_hana speech="cacao"/>
+    <sub_path_lich speech="cacao"/>
+    <sub_path_loki speech="cacao"/>
+    <sub_path_maru speech="cacao"/>
+    <sub_path_momo speech="cacao"/>
+    <sub_path_nari speech="cacao"/>
+    <sub_path_pero speech="cacao"/>
+    <sub_path_robotgirl_12 speech="cacao"/>
+    <sub_path_spy_11 speech="cacao"/>
+    <sub_path_wooka speech="cacao"/>
+    <sub_path_tsunderegirl speech="cacao"/>
+    <sub_path_magicgirl speech="cacao"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds39>
+
+  <sounds40 index="40">
+    <first_path speech="sound\sounds40"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="cacao"/>
+    <sub_path_hana speech="cacao"/>
+    <sub_path_lich speech="cacao"/>
+    <sub_path_loki speech="cacao"/>
+    <sub_path_maru speech="cacao"/>
+    <sub_path_momo speech="cacao"/>
+    <sub_path_nari speech="cacao"/>
+    <sub_path_pero speech="cacao"/>
+    <sub_path_robotgirl_12 speech="cacao"/>
+    <sub_path_spy_11 speech="cacao"/>
+    <sub_path_wooka speech="cacao"/>
+    <sub_path_tsunderegirl speech="cacao"/>
+    <sub_path_magicgirl speech="cacao"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds40>
+
+  <sounds41 index="41">
+    <first_path speech="sound\sounds41"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds41>
+
+  <sounds42 index="42">
+    <first_path speech="sound\sounds42"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds42>
+
+  <sounds43 index="43">
+    <first_path speech="sound\sounds43"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds43>
+
+  <sounds44 index="44">
+    <first_path speech="sound\sounds44"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="dallae"/>
+    <sub_path_lich speech="cacao"/>
+    <sub_path_loki speech="cacao"/>
+    <sub_path_maru speech="cacao"/>
+    <sub_path_momo speech="dallae"/>
+    <sub_path_nari speech="dallae"/>
+    <sub_path_pero speech="cacao"/>
+    <sub_path_robotgirl_12 speech="dallae"/>
+    <sub_path_spy_11 speech="dallae"/>
+    <sub_path_wooka speech="cacao"/>
+    <sub_path_tsunderegirl speech="dallae"/>
+    <sub_path_magicgirl speech="dallae"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds44>
+
+  <sounds45 index="45">
+    <first_path speech="sound\sounds45"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds45>
+
+  <sounds46 index="46">
+    <first_path speech="sound\sounds46"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds46>
+
+  <sounds47 index="47">
+    <first_path speech="sound\sounds47"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds47>
+
+  <sounds48 index="48">
+    <first_path speech="sound\sounds48"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="dallae"/>
+    <sub_path_lich speech="cacao"/>
+    <sub_path_loki speech="cacao"/>
+    <sub_path_maru speech="cacao"/>
+    <sub_path_momo speech="dallae"/>
+    <sub_path_nari speech="dallae"/>
+    <sub_path_pero speech="cacao"/>
+    <sub_path_robotgirl_12 speech="dallae"/>
+    <sub_path_spy_11 speech="dallae"/>
+    <sub_path_wooka speech="cacao"/>
+    <sub_path_tsunderegirl speech="dallae"/>
+    <sub_path_magicgirl speech="dallae"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds48>
+
+  <sounds49 index="49">
+    <first_path speech="sound\sounds49"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="cacao"/>
+    <sub_path_hana speech="cacao"/>
+    <sub_path_lich speech="cacao"/>
+    <sub_path_loki speech="cacao"/>
+    <sub_path_maru speech="cacao"/>
+    <sub_path_momo speech="cacao"/>
+    <sub_path_nari speech="cacao"/>
+    <sub_path_pero speech="cacao"/>
+    <sub_path_robotgirl_12 speech="cacao"/>
+    <sub_path_spy_11 speech="cacao"/>
+    <sub_path_wooka speech="cacao"/>
+    <sub_path_tsunderegirl speech="cacao"/>
+    <sub_path_magicgirl speech="cacao"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds49>
+
+  <sounds50 index="50">
+    <first_path speech="sound\sounds50"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="cacao"/>
+    <sub_path_hana speech="cacao"/>
+    <sub_path_lich speech="cacao"/>
+    <sub_path_loki speech="cacao"/>
+    <sub_path_maru speech="cacao"/>
+    <sub_path_momo speech="cacao"/>
+    <sub_path_nari speech="cacao"/>
+    <sub_path_pero speech="cacao"/>
+    <sub_path_robotgirl_12 speech="cacao"/>
+    <sub_path_spy_11 speech="cacao"/>
+    <sub_path_wooka speech="cacao"/>
+    <sub_path_tsunderegirl speech="cacao"/>
+    <sub_path_magicgirl speech="cacao"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds50>
+
+  <sounds51 index="51">
+    <first_path speech="sound\sounds51"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="cacao"/>
+    <sub_path_hana speech="cacao"/>
+    <sub_path_lich speech="cacao"/>
+    <sub_path_loki speech="cacao"/>
+    <sub_path_maru speech="cacao"/>
+    <sub_path_momo speech="cacao"/>
+    <sub_path_nari speech="cacao"/>
+    <sub_path_pero speech="cacao"/>
+    <sub_path_robotgirl_12 speech="cacao"/>
+    <sub_path_spy_11 speech="cacao"/>
+    <sub_path_wooka speech="cacao"/>
+    <sub_path_tsunderegirl speech="cacao"/>
+    <sub_path_magicgirl speech="cacao"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds51>
+
+  <sounds52 index="52">
+    <first_path speech="sound\sounds52"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="cacao"/>
+    <sub_path_hana speech="cacao"/>
+    <sub_path_lich speech="cacao"/>
+    <sub_path_loki speech="cacao"/>
+    <sub_path_maru speech="cacao"/>
+    <sub_path_momo speech="cacao"/>
+    <sub_path_nari speech="cacao"/>
+    <sub_path_pero speech="cacao"/>
+    <sub_path_robotgirl_12 speech="cacao"/>
+    <sub_path_spy_11 speech="cacao"/>
+    <sub_path_wooka speech="cacao"/>
+    <sub_path_tsunderegirl speech="cacao"/>
+    <sub_path_magicgirl speech="cacao"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds52>
+
+  <sounds53 index="53">
+    <first_path speech="sound\sounds53"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="cacao"/>
+    <sub_path_hana speech="cacao"/>
+    <sub_path_lich speech="cacao"/>
+    <sub_path_loki speech="cacao"/>
+    <sub_path_maru speech="cacao"/>
+    <sub_path_momo speech="cacao"/>
+    <sub_path_nari speech="cacao"/>
+    <sub_path_pero speech="cacao"/>
+    <sub_path_robotgirl_12 speech="cacao"/>
+    <sub_path_spy_11 speech="cacao"/>
+    <sub_path_wooka speech="cacao"/>
+    <sub_path_tsunderegirl speech="cacao"/>
+    <sub_path_magicgirl speech="cacao"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds53>
+
+  <sounds54 index="54">
+    <first_path speech="sound\sounds54"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="cacao"/>
+    <sub_path_hana speech="cacao"/>
+    <sub_path_lich speech="cacao"/>
+    <sub_path_loki speech="cacao"/>
+    <sub_path_maru speech="cacao"/>
+    <sub_path_momo speech="cacao"/>
+    <sub_path_nari speech="cacao"/>
+    <sub_path_pero speech="cacao"/>
+    <sub_path_robotgirl_12 speech="cacao"/>
+    <sub_path_spy_11 speech="cacao"/>
+    <sub_path_wooka speech="cacao"/>
+    <sub_path_tsunderegirl speech="cacao"/>
+    <sub_path_magicgirl speech="cacao"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds54>
+
+  <sounds55 index="55">
+    <first_path speech="sound\sounds55"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds55>
+
+  <sounds56 index="56">
+    <first_path speech="sound\sounds56"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds56>
+
+  <sounds57 index="57">
+    <first_path speech="sound\sounds57"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds57>
+
+  <sounds58 index="58">
+    <first_path speech="sound\sounds58"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="dallae"/>
+    <sub_path_lich speech="cacao"/>
+    <sub_path_loki speech="cacao"/>
+    <sub_path_maru speech="cacao"/>
+    <sub_path_momo speech="dallae"/>
+    <sub_path_nari speech="dallae"/>
+    <sub_path_pero speech="cacao"/>
+    <sub_path_robotgirl_12 speech="dallae"/>
+    <sub_path_spy_11 speech="dallae"/>
+    <sub_path_wooka speech="cacao"/>
+    <sub_path_tsunderegirl speech="dallae"/>
+    <sub_path_magicgirl speech="dallae"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds58>
+
+  <sounds59 index="59">
+    <first_path speech="sound\sounds59"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds59>
+
+  <sounds60 index="60">
+    <first_path speech="sound\sounds60"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="dallae"/>
+    <sub_path_lich speech="cacao"/>
+    <sub_path_loki speech="cacao"/>
+    <sub_path_maru speech="cacao"/>
+    <sub_path_momo speech="dallae"/>
+    <sub_path_nari speech="dallae"/>
+    <sub_path_pero speech="cacao"/>
+    <sub_path_robotgirl_12 speech="dallae"/>
+    <sub_path_spy_11 speech="dallae"/>
+    <sub_path_wooka speech="cacao"/>
+    <sub_path_tsunderegirl speech="dallae"/>
+    <sub_path_magicgirl speech="dallae"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds60>
+
+  <sounds61 index="61">
+    <first_path speech="sound\sounds61"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="dallae"/>
+    <sub_path_lich speech="cacao"/>
+    <sub_path_loki speech="cacao"/>
+    <sub_path_maru speech="cacao"/>
+    <sub_path_momo speech="dallae"/>
+    <sub_path_nari speech="dallae"/>
+    <sub_path_pero speech="cacao"/>
+    <sub_path_robotgirl_12 speech="dallae"/>
+    <sub_path_spy_11 speech="dallae"/>
+    <sub_path_wooka speech="cacao"/>
+    <sub_path_tsunderegirl speech="dallae"/>
+    <sub_path_magicgirl speech="dallae"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds61>
+
+  <sounds62 index="62">
+    <first_path speech="sound\sounds62"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="dallae"/>
+    <sub_path_lich speech="cacao"/>
+    <sub_path_loki speech="cacao"/>
+    <sub_path_maru speech="cacao"/>
+    <sub_path_momo speech="dallae"/>
+    <sub_path_nari speech="dallae"/>
+    <sub_path_pero speech="cacao"/>
+    <sub_path_robotgirl_12 speech="dallae"/>
+    <sub_path_spy_11 speech="dallae"/>
+    <sub_path_wooka speech="cacao"/>
+    <sub_path_tsunderegirl speech="dallae"/>
+    <sub_path_magicgirl speech="dallae"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds62>
+
+  <sounds63 index="63">
+    <first_path speech="sound\sounds63"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="dallae"/>
+    <sub_path_lich speech="cacao"/>
+    <sub_path_loki speech="cacao"/>
+    <sub_path_maru speech="cacao"/>
+    <sub_path_momo speech="dallae"/>
+    <sub_path_nari speech="dallae"/>
+    <sub_path_pero speech="cacao"/>
+    <sub_path_robotgirl_12 speech="dallae"/>
+    <sub_path_spy_11 speech="dallae"/>
+    <sub_path_wooka speech="cacao"/>
+    <sub_path_tsunderegirl speech="dallae"/>
+    <sub_path_magicgirl speech="dallae"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds63>
+
+  <sounds64 index="64">
+    <first_path speech="sound\sounds64"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="dallae"/>
+    <sub_path_lich speech="cacao"/>
+    <sub_path_loki speech="cacao"/>
+    <sub_path_maru speech="cacao"/>
+    <sub_path_momo speech="dallae"/>
+    <sub_path_nari speech="dallae"/>
+    <sub_path_pero speech="cacao"/>
+    <sub_path_robotgirl_12 speech="dallae"/>
+    <sub_path_spy_11 speech="dallae"/>
+    <sub_path_wooka speech="cacao"/>
+    <sub_path_tsunderegirl speech="dallae"/>
+    <sub_path_magicgirl speech="dallae"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds64>
+
+  <sounds65 index="65">
+    <first_path speech="sound\sounds65"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds65>
+
+  <sounds66 index="66">
+    <first_path speech="sound\sounds66"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds66>
+
+  <sounds67 index="67">
+    <first_path speech="sound\sounds67"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds67>
+
+  <sounds68 index="68">
+    <first_path speech="sound\sounds68"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="dallae"/>
+    <sub_path_lich speech="cacao"/>
+    <sub_path_loki speech="cacao"/>
+    <sub_path_maru speech="cacao"/>
+    <sub_path_momo speech="dallae"/>
+    <sub_path_nari speech="dallae"/>
+    <sub_path_pero speech="cacao"/>
+    <sub_path_robotgirl_12 speech="dallae"/>
+    <sub_path_spy_11 speech="dallae"/>
+    <sub_path_wooka speech="cacao"/>
+    <sub_path_tsunderegirl speech="dallae"/>
+    <sub_path_magicgirl speech="dallae"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds68>
+
+  <sounds69 index="69">
+    <first_path speech="sound\sounds69"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds69>
+
+  <sounds70 index="70">
+    <first_path speech="sound\sounds70"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds70>
+
+  <sounds71 index="71">
+    <first_path speech="sound\sounds71"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds71>
+
+  <sounds72 index="72">
+    <first_path speech="sound\sounds72"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds72>
+
+  <sounds73 index="73">
+    <first_path speech="sound\sounds73"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="dallae"/>
+    <sub_path_lich speech="cacao"/>
+    <sub_path_loki speech="cacao"/>
+    <sub_path_maru speech="cacao"/>
+    <sub_path_momo speech="dallae"/>
+    <sub_path_nari speech="dallae"/>
+    <sub_path_pero speech="cacao"/>
+    <sub_path_robotgirl_12 speech="dallae"/>
+    <sub_path_spy_11 speech="dallae"/>
+    <sub_path_wooka speech="cacao"/>
+    <sub_path_tsunderegirl speech="dallae"/>
+    <sub_path_magicgirl speech="dallae"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds73>
+
+  <sounds74 index="74">
+    <first_path speech="sound\sounds74"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds74>
+
+  <sounds75 index="75">
+    <first_path speech="sound\sounds75"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="dallae"/>
+    <sub_path_lich speech="cacao"/>
+    <sub_path_loki speech="cacao"/>
+    <sub_path_maru speech="cacao"/>
+    <sub_path_momo speech="dallae"/>
+    <sub_path_nari speech="dallae"/>
+    <sub_path_pero speech="cacao"/>
+    <sub_path_robotgirl_12 speech="dallae"/>
+    <sub_path_spy_11 speech="dallae"/>
+    <sub_path_wooka speech="cacao"/>
+    <sub_path_tsunderegirl speech="dallae"/>
+    <sub_path_magicgirl speech="dallae"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds75>
+
+  <sounds76 index="76">
+    <first_path speech="sound\sounds76"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="dallae"/>
+    <sub_path_lich speech="cacao"/>
+    <sub_path_loki speech="cacao"/>
+    <sub_path_maru speech="cacao"/>
+    <sub_path_momo speech="dallae"/>
+    <sub_path_nari speech="dallae"/>
+    <sub_path_pero speech="cacao"/>
+    <sub_path_robotgirl_12 speech="dallae"/>
+    <sub_path_spy_11 speech="dallae"/>
+    <sub_path_wooka speech="cacao"/>
+    <sub_path_tsunderegirl speech="dallae"/>
+    <sub_path_magicgirl speech="dallae"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds76>
+
+  <sounds77 index="77">
+    <first_path speech="sound\sounds77"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="dallae"/>
+    <sub_path_lich speech="cacao"/>
+    <sub_path_loki speech="cacao"/>
+    <sub_path_maru speech="cacao"/>
+    <sub_path_momo speech="dallae"/>
+    <sub_path_nari speech="dallae"/>
+    <sub_path_pero speech="cacao"/>
+    <sub_path_robotgirl_12 speech="dallae"/>
+    <sub_path_spy_11 speech="dallae"/>
+    <sub_path_wooka speech="cacao"/>
+    <sub_path_tsunderegirl speech="dallae"/>
+    <sub_path_magicgirl speech="dallae"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds77>
+
+  <sounds78 index="78">
+    <first_path speech="sound\sounds78"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds78>
+
+  <sounds79 index="79">
+    <first_path speech="sound\sounds79"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds79>
+
+  <sounds80 index="80">
+    <first_path speech="sound\sounds80"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds80>
+
+  <sounds81 index="81">
+    <first_path speech="sound\sounds81"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="dallae"/>
+    <sub_path_lich speech="cacao"/>
+    <sub_path_loki speech="cacao"/>
+    <sub_path_maru speech="cacao"/>
+    <sub_path_momo speech="dallae"/>
+    <sub_path_nari speech="dallae"/>
+    <sub_path_pero speech="cacao"/>
+    <sub_path_robotgirl_12 speech="dallae"/>
+    <sub_path_spy_11 speech="dallae"/>
+    <sub_path_wooka speech="cacao"/>
+    <sub_path_tsunderegirl speech="dallae"/>
+    <sub_path_magicgirl speech="dallae"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds81>
+
+  <sounds82 index="82">
+    <first_path speech="sound\sounds82"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="dallae"/>
+    <sub_path_lich speech="cacao"/>
+    <sub_path_loki speech="cacao"/>
+    <sub_path_maru speech="cacao"/>
+    <sub_path_momo speech="dallae"/>
+    <sub_path_nari speech="dallae"/>
+    <sub_path_pero speech="cacao"/>
+    <sub_path_robotgirl_12 speech="dallae"/>
+    <sub_path_spy_11 speech="dallae"/>
+    <sub_path_wooka speech="cacao"/>
+    <sub_path_tsunderegirl speech="dallae"/>
+    <sub_path_magicgirl speech="dallae"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds82>
+
+  <sounds83 index="83">
+    <first_path speech="sound\sounds83"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds83>
+  
+  <sounds84 index="84">
+    <first_path speech="sound\sounds84"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds84>
+  
+  <sounds85 index="85">
+    <first_path speech="sound\sounds85"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds85>
+  
+  <sounds86 index="86">
+    <first_path speech="sound\sounds86"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds86>
+  
+  <sounds88 index="88">
+    <first_path speech="sound\sounds88"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds88>
+
+  <sounds89 index="89">
+    <first_path speech="sound\sounds89"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds89>
+  
+  <sounds90 index="90">
+    <first_path speech="sound\sounds90"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds90>
+  
+  <sounds91 index="91">
+    <first_path speech="sound\sounds91"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds91>
+  
+  <sounds92 index="92">
+    <first_path speech="sound\sounds92"/>
+    <sub_path_cacao speech="cacao"/>
+    <sub_path_dallae speech="dallae"/>
+    <sub_path_hana speech="hana"/>
+    <sub_path_lich speech="lich"/>
+    <sub_path_loki speech="loki"/>
+    <sub_path_maru speech="maru"/>
+    <sub_path_momo speech="momo"/>
+    <sub_path_nari speech="nari"/>
+    <sub_path_pero speech="pero"/>
+    <sub_path_robotgirl_12 speech="robotgirl_12"/>
+    <sub_path_spy_11 speech="spy_11"/>
+    <sub_path_wooka speech="wooka"/>
+    <sub_path_tsunderegirl speech="tsunderegirl"/>
+    <sub_path_magicgirl speech="magicgirl"/>
+	<sub_path_devilgirl speech="devilgirl"/>
+  </sounds92>
+
+</vcustomizepathTable>

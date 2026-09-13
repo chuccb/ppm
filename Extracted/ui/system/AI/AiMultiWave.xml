@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BOT_WAVE>
+  <MODE index="95">
+
+    <WAVE_EASY_SETTING wave_time="720000" con_wv2_min="480000" con_wv3_min="360000" con_wv4_min="210000"/>
+    <WAVE_NORMAL_SETTING wave_time="720000" con_wv2_min="480000" con_wv3_min="360000" con_wv4_min="210000"/>
+    <WAVE_HARD_SETTING wave_time="720000" con_wv2_min="480000" con_wv3_min="360000" con_wv4_min="210000"/>
+    
+    <WAVE wave="1">
+      <SHILD_SETTING  shieldPos="-352, 257, 36" shieldhp="6800" feverTime="3000" botlaserTex="1" botplasmaTex="1"/>
+      <WARNING_LIGHT_POS pos0="-153, -52, -320" pos1="147, -52, -320" pos2="-153, -52, -50" pos3="147, -52, -50" pos4="-153, -52, 300" pos5="147, -52, 300" />
+      <SHILD_NAME shild_1="shiled1_PVE1.dds" shild_2="shiled2_PVE1.dds" shild_3="shiled3_PVE1.dds" />
+      <WAVE_RESTARTCOIN easy="0" normal="0" hard="0"/>
+      <SCENARIO_RATIO scenario="10" selectRatio="8" />
+      <SCENARIO_RATIO scenario="11" selectRatio="8" />
+      <SCENARIO_RATIO scenario="12" selectRatio="8" />
+      <SCENARIO_RATIO scenario="13" selectRatio="8" />
+      <SCENARIO_RATIO scenario="14" selectRatio="8" />
+      <SCENARIO_RATIO scenario="15" selectRatio="8" />
+      <SCENARIO_RATIO scenario="16" selectRatio="8" />
+      <SCENARIO_RATIO scenario="17" selectRatio="8" />
+      <SCENARIO_RATIO scenario="18" selectRatio="8" />
+      <SCENARIO_RATIO scenario="19" selectRatio="8" />
+      <SCENARIO_RATIO scenario="50" selectRatio="4" />
+      <SCENARIO_RATIO scenario="51" selectRatio="4" />
+      <SCENARIO_RATIO scenario="52" selectRatio="6" />
+      <SCENARIO_RATIO scenario="53" selectRatio="6" />
+    </WAVE>
+    <WAVE wave="2">
+      <SHILD_SETTING  shieldPos="2826, 585, 652" shieldhp="7000" feverTime="3000" botlaserTex="1" botplasmaTex="1"/>
+      <WARNING_LIGHT_POS pos0="-153, -52, -320" pos1="147, -52, -320" pos2="-153, -52, -50" pos3="147, -52, -50" pos4="-153, -52, 300" pos5="147, -52, 300" />
+      <SHILD_NAME shild_1="shiled1_PVE1.dds" shild_2="shiled2_PVE1.dds" shild_3="shiled3_PVE1.dds" />
+      <WAVE_RESTARTCOIN easy="2" normal="2" hard="2"/>
+      <SCENARIO_RATIO scenario="20" selectRatio="8" />
+      <SCENARIO_RATIO scenario="21" selectRatio="8" />
+      <SCENARIO_RATIO scenario="22" selectRatio="8" />
+      <SCENARIO_RATIO scenario="23" selectRatio="8" />
+      <SCENARIO_RATIO scenario="24" selectRatio="8" />
+      <SCENARIO_RATIO scenario="25" selectRatio="8" />
+      <SCENARIO_RATIO scenario="26" selectRatio="8" />
+      <SCENARIO_RATIO scenario="27" selectRatio="8" />
+      <SCENARIO_RATIO scenario="28" selectRatio="8" />
+      <SCENARIO_RATIO scenario="29" selectRatio="8" />
+      <SCENARIO_RATIO scenario="60" selectRatio="4" />
+      <SCENARIO_RATIO scenario="61" selectRatio="4" />
+      <SCENARIO_RATIO scenario="62" selectRatio="6" />
+      <SCENARIO_RATIO scenario="63" selectRatio="6" />
+    </WAVE>
+    <WAVE wave="3">
+      <SHILD_SETTING  shieldPos="6625, 1060, 657" shieldhp="6800" feverTime="3000" botlaserTex="1" botplasmaTex="1"/>
+      <WARNING_LIGHT_POS pos0="-153, -52, -320" pos1="147, -52, -320" pos2="-153, -52, -50" pos3="147, -52, -50" pos4="-153, -52, 300" pos5="147, -52, 300" />
+      <SHILD_NAME shild_1="shiled1_PVE1.dds" shild_2="shiled2_PVE1.dds" shild_3="shiled3_PVE1.dds" />
+      <WAVE_RESTARTCOIN easy="2" normal="2" hard="2"/>
+      <SCENARIO_RATIO scenario="30" selectRatio="8" />
+      <SCENARIO_RATIO scenario="31" selectRatio="8" />
+      <SCENARIO_RATIO scenario="32" selectRatio="8" />
+      <SCENARIO_RATIO scenario="33" selectRatio="8" />
+      <SCENARIO_RATIO scenario="34" selectRatio="8" />
+      <SCENARIO_RATIO scenario="35" selectRatio="8" />
+      <SCENARIO_RATIO scenario="36" selectRatio="8" />
+      <SCENARIO_RATIO scenario="37" selectRatio="8" />
+      <SCENARIO_RATIO scenario="38" selectRatio="8" />
+      <SCENARIO_RATIO scenario="39" selectRatio="8" />
+      <SCENARIO_RATIO scenario="70" selectRatio="4" />
+      <SCENARIO_RATIO scenario="71" selectRatio="4" />
+      <SCENARIO_RATIO scenario="72" selectRatio="6" />
+      <SCENARIO_RATIO scenario="73" selectRatio="6" />
+    </WAVE>
+    <WAVE wave="4">
+      <SHILD_SETTING  shieldPos="3552, 3638, 733" shieldhp="6800" feverTime="3000" botlaserTex="1" botplasmaTex="1"/>
+      <WARNING_LIGHT_POS pos0="-153, -52, -320" pos1="147, -52, -320" pos2="-153, -52, -50" pos3="147, -52, -50" pos4="-153, -52, 300" pos5="147, -52, 300" />
+      <SHILD_NAME shild_1="shiled1_PVE1.dds" shild_2="shiled2_PVE1.dds" shild_3="shiled3_PVE1.dds" />
+      <WAVE_RESTARTCOIN easy="2" normal="2" hard="2"/>
+      <SCENARIO_RATIO scenario="40" selectRatio="8" />
+      <SCENARIO_RATIO scenario="41" selectRatio="8" />
+      <SCENARIO_RATIO scenario="42" selectRatio="8" />
+      <SCENARIO_RATIO scenario="43" selectRatio="8" />
+      <SCENARIO_RATIO scenario="44" selectRatio="8" />
+      <SCENARIO_RATIO scenario="45" selectRatio="8" />
+      <SCENARIO_RATIO scenario="46" selectRatio="8" />
+      <SCENARIO_RATIO scenario="47" selectRatio="8" />
+      <SCENARIO_RATIO scenario="48" selectRatio="8" />
+      <SCENARIO_RATIO scenario="49" selectRatio="8" />
+      <SCENARIO_RATIO scenario="80" selectRatio="4" />
+      <SCENARIO_RATIO scenario="81" selectRatio="4" />
+      <SCENARIO_RATIO scenario="82" selectRatio="6" />
+      <SCENARIO_RATIO scenario="83" selectRatio="6" />
+    </WAVE>
+  </MODE>
+</BOT_WAVE>

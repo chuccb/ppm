@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ItemAbilityEffectNameTable>
+  <Lev ThirdPersonView="Ptcl_ItemEffect1" FirstPersonView="" LevValue="1"></Lev>
+  <Lev ThirdPersonView="Ptcl_ItemEffect2" FirstPersonView="" LevValue="2"></Lev>
+  <Lev ThirdPersonView="Ptcl_ItemEffect3" FirstPersonView="" LevValue="3"></Lev>
+  <Lev ThirdPersonView="Ptcl_ItemEffect4" FirstPersonView="" LevValue="4"></Lev>
+  <Lev ThirdPersonView="Ptcl_ItemEffect5" FirstPersonView="" LevValue="5"></Lev>
+  <Lev ThirdPersonView="Ptcl_ItemEffect6" FirstPersonView="" LevValue="6"></Lev>
+  <Lev ThirdPersonView="Ptcl_ItemEffect7" FirstPersonView="" LevValue="7"></Lev>
+  <Lev ThirdPersonView="Ptcl_ItemEffect8" FirstPersonView="" LevValue="8"></Lev>
+  <Lev ThirdPersonView="Ptcl_ItemEffect9" FirstPersonView="" LevValue="9"></Lev>
+  <Lev ThirdPersonView="Ptcl_ItemEffect10" FirstPersonView="" LevValue="10"></Lev>
+  <Lev ThirdPersonView="Ptcl_ItemEffect11" FirstPersonView="" LevValue="11"></Lev>
+  <Lev ThirdPersonView="Ptcl_ItemEffect12" FirstPersonView="" LevValue="12"></Lev>
+  <Lev ThirdPersonView="Ptcl_ItemEffect13" FirstPersonView="" LevValue="13"></Lev>
+  <Lev ThirdPersonView="Ptcl_ItemEffect14" FirstPersonView="" LevValue="14"></Lev>
+  <Lev ThirdPersonView="Ptcl_ItemEffect15" FirstPersonView="" LevValue="15"></Lev>
+</ItemAbilityEffectNameTable>

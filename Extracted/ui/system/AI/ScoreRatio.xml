@@ -1,0 +1,25 @@
+<SCORERATIO>
+	<Kill_1Time HeadShotRatio="2" HeartShotRatio="1.5" CriticalShotRatio="1.8" AirComboRatio="2"/>
+	<Kill_Chain index="0" name="Quick0" level="0" active_value="1" spend_time="8000" ratio="1" miss_shot="100"/>
+	<Kill_Chain index="0" name="Quick1" level="1" active_value="2" spend_time="8000" ratio="1.5" miss_shot="100"/>
+	<Kill_Chain index="0" name="Quick2" level="2" active_value="4" spend_time="7000" ratio="2" miss_shot="100"/>
+	<Kill_Chain index="0" name="Quick3" level="3" active_value="6" spend_time="6000" ratio="2.5" miss_shot="100"/>
+	<Kill_Chain index="1" name="Weakness0" level="0" active_value="1" spend_time="10000" ratio="1" miss_shot="100"/>
+	<Kill_Chain index="1" name="Weakness1" level="1" active_value="3" spend_time="10000" ratio="1.5" miss_shot="100"/>
+	<Kill_Chain index="1" name="Weakness2" level="2" active_value="6" spend_time="8000" ratio="2" miss_shot="100"/>
+	<Kill_Chain index="1" name="Weakness3" level="3" active_value="9" spend_time="6000" ratio="3" miss_shot="100"/>
+	<Kill_Chain index="2" name="Fever1" level="1" active_value="1" spend_time="8000" ratio="2" miss_shot="100"/>
+	<Kill_Chain index="2" name="Fever2" level="2" active_value="2" spend_time="7000" ratio="2.5" miss_shot="100"/>
+	<Kill_Chain index="2" name="Fever3" level="3" active_value="3" spend_time="5000" ratio="3" miss_shot="100"/>
+	<Kill_Chain index="3" name="Combo0" level="0" active_value="1" spend_time="480000" ratio="1" miss_shot="100"/>
+	<Kill_Chain index="3" name="Combo1" level="1" active_value="10" spend_time="12000" ratio="1.1" miss_shot="100"/>
+	<Kill_Chain index="3" name="Combo2" level="2" active_value="20" spend_time="12000" ratio="1.2" miss_shot="100"/>
+	<Kill_Chain index="3" name="Combo3" level="3" active_value="30" spend_time="10000" ratio="1.3" miss_shot="100"/>
+	<Kill_Chain index="3" name="Combo4" level="4" active_value="40" spend_time="10000" ratio="1.4" miss_shot="100"/>
+	<Kill_Chain index="3" name="Combo5" level="5" active_value="50" spend_time="10000" ratio="1.5" miss_shot="100"/>
+	<Kill_Chain index="3" name="Combo6" level="6" active_value="60" spend_time="8000" ratio="1.6" miss_shot="100"/>
+	<Kill_Chain index="3" name="Combo7" level="7" active_value="70" spend_time="8000" ratio="1.7" miss_shot="100"/>
+	<Kill_Chain index="3" name="Combo8" level="8" active_value="80" spend_time="7000" ratio="1.8" miss_shot="100"/>
+	<Kill_Chain index="3" name="Combo9" level="9" active_value="90" spend_time="7000" ratio="2" miss_shot="100"/>
+	<Kill_Chain index="3" name="Combo10" level="10" active_value="100" spend_time="6000" ratio="2.2" miss_shot="100"/>
+</SCORERATIO>

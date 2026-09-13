@@ -1,0 +1,638 @@
+<!--
+	EFF1,				// 건슈팅 킬 콤보 COMBO 메세지
+	EFF2,				// 건슈팅 킬 콤보 파란 별 모양
+	EFF3,				// 건슈팅 킬 콤보 하얀 별 모양
+	EFF4,				// 건슈팅 킬 콤보 수치
+	EFF5,				// 건슈팅 헤드샷 표시
+	EFF6,				// 건슈팅 하트샷 표시
+	EFF7,				// 건슈팅 크리티컬샷 표시
+	EFF8,				// 건슈팅 에어샷 표시
+	EFF9,				// 건슈팅 킬 스코어
+	EFF10,			// 건슈팅 곱하기
+	EFF11,			// 건슈팅 배율 자연수
+	EFF12,			// 건슈팅 배율 소수점
+	EFF13,			// 건슈팅 배율 소수
+	EFF14,			// 실드가 데미지를 입을 때				-> 사용안하는 사양으로 바뀜
+	EFF15, 			// 배율 이펙트 흰색
+	EFF16,			// 배율 이펙트 분홍
+	EFF17,			// 배율 이펙트 파랑
+	EFF18,			// 배율 이팩트 별
+	EFF19,			// 배율 이펙트 피버 텍스트
+	EFF20,			// 배율 이펙트 래피드 킬 텍스트
+	EFF21,			// 배율 이펙트 약점 킬 텍스트
+	EFF22,			// 배율 이펙트 킬 콤보 텍스트
+	EFF23,			// LV 1
+	EFF24,			// LV 2
+	EFF25,			// LV 3
+	EFF26,			// LV 4
+	EFF27,			// LV 5
+	EFF28,			// LV 6
+	EFF29,			// LV 7
+	EFF30,			// LV 8
+	EFF31,			// LV 9
+	EFF32,			// LV 10
+	EFF33,			// 피버1 단계
+	EFF34,			// 피버2 단계
+	EFF35,			// 피버 표시
+	EFF36,			// 피버 별 표시
+	EFF37~39,		// AI피버 이펙트
+	EFF40~41,		// AI ui bottom 이펙트
+	EFF42~43,		// AI ui top 이펙트
+	EFF44~49,		// AI wave 경고 이펙트
+	EFF50~51,		// 2초
+	EFF52~54,		// Stage 이동중
+	EFF55,			// Clear 팝업
+	EFF56,			// 방장 찾는중 애니메이션
+	EFF57~59,		// 1F 웨이브 경고 이펙트
+	EFF60~62,		// 실드 경고 이펙트
+	EFF63~64		// 컨티뉴 성공 이펙트
+	EFF65~67,		// 4F 최종 보스 클리어 이펙트
+	EFF68,		// 보스 등장씬
+	EFF69,		//EVENT EFFECT -> 신캐관련이펙트->SHOP
+	EFF70~71		//축구모드 공 가졌을때 이펙트
+	EFF72~73		//축구모드 공 리스폰되었을때
+	EFF74~75		//축구모드 득점시 점수판 부분 이펙트
+	EFF76~77		//축구모드 석세스 이펙트
+	EFF78			//축구모드 골 득점시 이펙트
+	EFF79			//축구모드 골 넣었을때 추가 pg획득 이펙트
+
+	
+		
+-->
+<UIACTOR>
+	<IMAGES>
+		<image name="GS_TEXT" texture="ui/bot/gunshooting.dds" />
+		<image name="GS_POP2" texture="ui/bot/gs_popup02.dds" />
+		<image name="GS_02" texture="ui/bot/gs_ui02.dds" />
+		<image name="AI2" texture="ui/bot/ai2.dds" />
+		<image name="GS_POP" texture="ui/bot/gs_popup.dds" />
+		<image name="HELP" texture="ui/game/help.dds" />
+		<image name="CRH" texture="ui/game/crosshair.dds" />
+		<image name="LOBBY_BACK" texture="ui/lobby/back1.dds"/>
+		<image name="MAIN" texture="ui/game/main.dds"/>
+		<image name="SC" texture="ui/game/soccer.dds"/>
+	</IMAGES>
+	<ACTORS>
+		<EFF_1>	
+			<MSG index='0' position="805, 175, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='180' loop='0' stay='0' elapsTime="200" mustShow="1" isCharacter='0' l='292' t='397' r='421' b='425' spriteName="GS_TEXT" soundName="" />
+			<MSG index='1' position="805, 175, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='160' loop='0' stay='0' elapsTime="200" mustShow="1" isCharacter='0' l='292' t='397' r='421' b='425' spriteName="GS_TEXT" soundName="" />
+			<MSG index='2' position="805, 175, 0" scale="1.4, 1.4, 1.0" rot="0" alpha='180' loop='0' stay='0' elapsTime="200" mustShow="1" isCharacter='0' l='292' t='397' r='421' b='425' spriteName="GS_TEXT" soundName="" />
+			<MSG index='3' position="805, 175, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="300" mustShow="1" isCharacter='0' l='292' t='397' r='421' b='425' spriteName="GS_TEXT" soundName="" />
+			<MSG index='4' position="805, 175, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='200' loop='0' stay='0' elapsTime="200" mustShow="1" isCharacter='0' l='292' t='397' r='421' b='425' spriteName="GS_TEXT" soundName="" />
+			<MSG index='5' position="805, 175, 0" scale="1.4, 1.4, 1.0" rot="0" alpha='80' loop='0' stay='1' elapsTime="300" mustShow="1" isCharacter='0' l='292' t='397' r='421' b='425' spriteName="GS_TEXT" soundName="" />
+			<MSG index='6' position="805, 175, 0" scale="1.4, 1.4, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="0" mustShow="1" isCharacter='0' l='292' t='397' r='421' b='425' spriteName="GS_TEXT" soundName="" />
+		</EFF_1>
+		<EFF_2>
+			<MSG index='0' position="750, 70, 0" scale="0.8, 0.8, 1.0" rot="0" alpha='80' loop='0' stay='0' elapsTime="300" mustShow="1" isCharacter='0' l='1' t='591' r='246' b='835' spriteName="GS_TEXT" soundName="" />
+			<MSG index='1' position="750, 70, 0" scale="1.0, 1.0, 1.0" rot="120" alpha='180' loop='0' stay='0' elapsTime="300" mustShow="1" isCharacter='0' l='1' t='591' r='246' b='835' spriteName="GS_TEXT" soundName="" />
+			<MSG index='2' position="750, 70, 0" scale="0.8, 0.8, 1.0" rot="240" alpha='120' loop='0' stay='0' elapsTime="400" mustShow="1" isCharacter='0' l='1' t='591' r='246' b='835' spriteName="GS_TEXT" soundName="" />
+			<MSG index='3' position="750, 70, 0" scale="1.0, 1.0, 1.0" rot="360" alpha='30' loop='0' stay='0' elapsTime="0" mustShow="1" isCharacter='0' l='1' t='591' r='246' b='835' spriteName="GS_TEXT" soundName="" />
+		</EFF_2>
+		<EFF_3>
+			<MSG index='0' position="750, 70, 0" scale="0.5, 0.5, 1.0" rot="0" alpha='50' loop='0' stay='0' elapsTime="120" mustShow="1" isCharacter='0' l='248' t='591' r='494' b='837' spriteName="GS_TEXT" soundName="" />
+			<MSG index='1' position="750, 70, 0" scale="0.7, 0.7, 1.0" rot="-60" alpha='150' loop='0' stay='0' elapsTime="120" mustShow="1" isCharacter='0' l='248' t='591' r='494' b='837' spriteName="GS_TEXT" soundName="" />
+			<MSG index='2' position="750, 70, 0" scale="0.5, 0.5, 1.0" rot="-120" alpha='100' loop='0' stay='0' elapsTime="120" mustShow="1" isCharacter='0'l='248' t='591' r='494' b='837' spriteName="GS_TEXT" soundName="" />
+			<MSG index='3' position="750, 70, 0" scale="0.6, 0.6, 1.0" rot="-180" alpha='150' loop='0' stay='0' elapsTime="120" mustShow="1" isCharacter='0'l='248' t='591' r='494' b='837'spriteName="GS_TEXT" soundName="" />
+			<MSG index='4' position="750, 70, 0" scale="0.4, 0.4, 1.0" rot="-240" alpha='50' loop='0' stay='0' elapsTime="120" mustShow="1" isCharacter='0' l='248' t='591' r='494' b='837' spriteName="GS_TEXT" soundName="" />
+			<MSG index='5' position="750, 70, 0" scale="0.5, 0.5, 1.0" rot="-300" alpha='150' loop='0' stay='0' elapsTime="120" mustShow="1" isCharacter='0' l='248' t='591' r='494' b='837' spriteName="GS_TEXT" soundName="" />
+			<MSG index='6' position="750, 70, 0" scale="0.6, 0.6, 1.0" rot="-360" alpha='30' loop='0' stay='0' elapsTime="0" mustShow="1" isCharacter='0' l='248' t='591' r='494' b='837' spriteName="GS_TEXT" soundName="" />
+		</EFF_3>
+		<EFF_4>
+			<MSG index='0' position="828, 210, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='50' loop='0' stay='0' elapsTime="200" mustShow="1" isCharacter='1' order='3' spriteName="COMBO_Font" soundName="" />
+			<MSG index='1' position="828, 210, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='180' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='1' order='3' spriteName="COMBO_Font" soundName="" />
+			<MSG index='2' position="828, 210, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='80' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='1' order='3' spriteName="COMBO_Font" soundName="" />
+			<MSG index='3' position="828, 210, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="300" mustShow="1" isCharacter='1' order='3' spriteName="COMBO_Font" soundName="" />
+			<MSG index='4' position="828, 210, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='200' loop='0' stay='0' elapsTime="300" mustShow="1" isCharacter='1' order='3' spriteName="COMBO_Font" soundName="" />
+			<MSG index='5' position="828, 210, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='80' loop='0' stay='1' elapsTime="300" mustShow="1" isCharacter='1' order='3' spriteName="COMBO_Font" soundName="" />
+			<MSG index='5' position="828, 210, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="0" mustShow="1" isCharacter='1' order='3' spriteName="COMBO_Font" soundName="" />
+		</EFF_4>
+		<EFF_5>
+			<MSG index='0' position="90, 80, 0" scale="2.8, 2.8, 1.0" rot="0" alpha='150' loop='0' stay='0' elapsTime="300" mustShow="1" isCharacter='0' l='0' t='541' r='180' b='565' spriteName="GS_TEXT" soundName="" />
+			<MSG index='1' position="90, 80, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='240' loop='0' stay='0' elapsTime="200" mustShow="1" isCharacter='0' l='0' t='541' r='180' b='565' spriteName="GS_TEXT" soundName="" />
+			<MSG index='2' position="90, 80, 0" scale="0.8, 0.8, 1.0" rot="0" alpha='200' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='0' t='541' r='180' b='565' spriteName="GS_TEXT" soundName="" />
+			<MSG index='3' position="90, 80, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='240' loop='0' stay='0' elapsTime="500" mustShow="1" isCharacter='0' l='0' t='541' r='180' b='565' spriteName="GS_TEXT" soundName="" />
+			<MSG index='4' position="90, 80, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='50' loop='0' stay='0' elapsTime="0" mustShow="1" isCharacter='0' l='0' t='541' r='180' b='565' spriteName="GS_TEXT" soundName="" />
+		</EFF_5>
+		<EFF_6>
+			<MSG index='0' position="90, 80, 0" scale="2.8, 2.8, 1.0" rot="0" alpha='150' loop='0' stay='0' elapsTime="300" mustShow="1" isCharacter='0' l='0' t='493' r='180' b='517' spriteName="GS_TEXT" soundName="" />
+			<MSG index='1' position="90, 80, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='240' loop='0' stay='0' elapsTime="200" mustShow="1" isCharacter='0' l='0' t='493' r='180' b='517' spriteName="GS_TEXT" soundName="" />
+			<MSG index='2' position="90, 80, 0" scale="0.8, 0.8, 1.0" rot="0" alpha='200' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='0' t='493' r='180' b='517' spriteName="GS_TEXT" soundName="" />
+			<MSG index='3' position="90, 80, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='240' loop='0' stay='0' elapsTime="500" mustShow="1" isCharacter='0' l='0' t='493' r='180' b='517' spriteName="GS_TEXT" soundName="" />
+			<MSG index='4' position="90, 80, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='50' loop='0' stay='0' elapsTime="0" mustShow="1" isCharacter='0' l='0' t='493' r='180' b='517' spriteName="GS_TEXT" soundName="" />
+		</EFF_6>
+		<EFF_7>
+			<MSG index='0' position="90, 80, 0" scale="2.8, 2.8, 1.0" rot="0" alpha='150' loop='0' stay='0' elapsTime="300" mustShow="1" isCharacter='0' l='0' t='565' r='180' b='589' spriteName="GS_TEXT" soundName="" />
+			<MSG index='1' position="90, 80, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='240' loop='0' stay='0' elapsTime="200" mustShow="1" isCharacter='0' l='0' t='565' r='180' b='589' spriteName="GS_TEXT" soundName="" />
+			<MSG index='2' position="90, 80, 0" scale="0.8, 0.8, 1.0" rot="0" alpha='200' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='0' t='565' r='180' b='589' spriteName="GS_TEXT" soundName="" />
+			<MSG index='3' position="90, 80, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='240' loop='0' stay='0' elapsTime="500" mustShow="1" isCharacter='0' l='0' t='565' r='180' b='589' spriteName="GS_TEXT" soundName="" />
+			<MSG index='4' position="90, 80, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='50' loop='0' stay='0' elapsTime="0" mustShow="1" isCharacter='0' l='0' t='565' r='180' b='589' spriteName="GS_TEXT" soundName="" />
+		</EFF_7>
+		<EFF_8>
+			<MSG index='0' position="90, 80, 0" scale="2.8, 2.8, 1.0" rot="0" alpha='150' loop='0' stay='0' elapsTime="300" mustShow="1" isCharacter='0' l='0' t='517' r='180' b='541' texture="GS_TEXT" soundName="" />
+			<MSG index='1' position="90, 80, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='240' loop='0' stay='0' elapsTime="200" mustShow="1" isCharacter='0' l='0' t='517' r='180' b='541' texture="GS_TEXT" soundName="" />
+			<MSG index='2' position="90, 80, 0" scale="0.8, 0.8, 1.0" rot="0" alpha='200' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='0' t='517' r='180' b='541' texture="GS_TEXT" soundName="" />
+			<MSG index='3' position="90, 80, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='240' loop='0' stay='0' elapsTime="500" mustShow="1" isCharacter='0' l='0' t='517' r='180' b='541' texture="GS_TEXT" soundName="" />
+			<MSG index='4' position="90, 80, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='50' loop='0' stay='0' elapsTime="0" mustShow="1" isCharacter='0' l='0' t='517' r='180' b='541' texture="GS_TEXT" soundName="" />
+		</EFF_8>
+		<EFF_9>
+			<MSG index='0' position="55, 110, 0" scale="2.6, 2.6, 1.0" rot="0" alpha='50' loop='0' stay='0' elapsTime="200" mustShow="1" isCharacter='1' order='6' spriteName="BotScoreFont" soundName="" />
+			<MSG index='1' position="55, 110, 0" scale="1.4, 1.4, 1.0" rot="0" alpha='240' loop='0' stay='0' elapsTime="250" mustShow="1" isCharacter='1' order='6' spriteName="BotScoreFont" soundName="" />
+			<MSG index='2' position="55, 110, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='200' loop='0' stay='0' elapsTime="200" mustShow="1" isCharacter='1' order='6' spriteName="BotScoreFont" soundName="" />
+			<MSG index='3' position="55, 110, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='240' loop='0' stay='0' elapsTime="400" mustShow="1" isCharacter='1' order='6' spriteName="BotScoreFont" soundName="" />
+			<MSG index='4' position="55, 110, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='50' loop='0' stay='0' elapsTime="0" mustShow="1" isCharacter='1' order='6' spriteName="BotScoreFont" soundName="" />
+		</EFF_9>
+		<EFF_10>
+			<MSG index='0' position="180, 110, 0" scale="2.6, 2.6, 1.0" rot="0" alpha='50' loop='0' stay='0' elapsTime="200" mustShow="1" isCharacter='0' l='57' t='270' r='74' b='287' spriteName="GS_TEXT" soundName="" />
+			<MSG index='1' position="180, 110, 0" scale="1.4, 1.4, 1.0" rot="0" alpha='240' loop='0' stay='0' elapsTime="250" mustShow="1" isCharacter='0' l='57' t='270' r='74' b='287' spriteName="GS_TEXT" soundName="" />
+			<MSG index='2' position="180, 110, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='200' loop='0' stay='0' elapsTime="200" mustShow="1" isCharacter='0' l='57' t='270' r='74' b='287' spriteName="GS_TEXT" soundName="" />
+			<MSG index='3' position="180, 110, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='240' loop='0' stay='0' elapsTime="400" mustShow="1" isCharacter='0' l='57' t='270' r='74' b='287' spriteName="GS_TEXT" soundName="" />
+			<MSG index='4' position="180, 110, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='50' loop='0' stay='0' elapsTime="0" mustShow="1" isCharacter='0' l='57' t='270' r='74' b='287' spriteName="GS_TEXT" soundName="" />
+		</EFF_10>
+		<EFF_11>
+			<MSG index='0' position="195, 110, 0" scale="2.6, 2.6, 1.0" rot="0" alpha='50' loop='0' stay='0' elapsTime="200" mustShow="1" isCharacter='1' order='2' spriteName="BotScoreFont" soundName="" />
+			<MSG index='1' position="195, 110, 0" scale="1.4, 1.4, 1.0" rot="0" alpha='240' loop='0' stay='0' elapsTime="250" mustShow="1" isCharacter='1' order='2' spriteName="BotScoreFont" soundName="" />
+			<MSG index='2' position="195, 110, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='200' loop='0' stay='0' elapsTime="200" mustShow="1" isCharacter='1' order='2' spriteName="BotScoreFont" soundName="" />
+			<MSG index='3' position="195, 110, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='240' loop='0' stay='0' elapsTime="400" mustShow="1" isCharacter='1' order='2' spriteName="BotScoreFont" soundName="" />
+			<MSG index='4' position="195, 110, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='50' loop='0' stay='0' elapsTime="0" mustShow="1" isCharacter='1' order='2' spriteName="BotScoreFont" soundName="" />
+		</EFF_11>
+		<EFF_12>
+			<MSG index='0' position="235, 110, 0" scale="2.6, 2.6, 1.0" rot="0" alpha='50' loop='0' stay='0' elapsTime="200" mustShow="1" isCharacter='0' l='38' t='270' r='55' b='287' spriteName="GS_TEXT" soundName="" />
+			<MSG index='1' position="235, 110, 0" scale="1.4, 1.4, 1.0" rot="0" alpha='240' loop='0' stay='0' elapsTime="250" mustShow="1" isCharacter='0' l='38' t='270' r='55' b='287' spriteName="GS_TEXT" soundName="" />
+			<MSG index='2' position="235, 110, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='200' loop='0' stay='0' elapsTime="200" mustShow="1" isCharacter='0' l='38' t='270' r='55' b='287' spriteName="GS_TEXT" soundName="" />
+			<MSG index='3' position="235, 110, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='240' loop='0' stay='0' elapsTime="400" mustShow="1" isCharacter='0' l='38' t='270' r='55' b='287' spriteName="GS_TEXT" soundName="" />
+			<MSG index='4' position="235, 110, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='50' loop='0' stay='0' elapsTime="0" mustShow="1" isCharacter='0' l='38' t='270' r='55' b='287' spriteName="GS_TEXT" soundName="" />
+		</EFF_12>
+		<EFF_13>
+			<MSG index='0' position="245, 110, 0" scale="2.6, 2.6, 1.0" rot="0" alpha='50' loop='0' stay='0' elapsTime="200" mustShow="1" isCharacter='1' order='1' spriteName="BotScoreFont" soundName="" />
+			<MSG index='1' position="245, 110, 0" scale="1.4, 1.4, 1.0" rot="0" alpha='240' loop='0' stay='0' elapsTime="250" mustShow="1" isCharacter='1' order='1' spriteName="BotScoreFont" soundName="" />
+			<MSG index='2' position="245, 110, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='200' loop='0' stay='0' elapsTime="200" mustShow="1" isCharacter='1' order='1' spriteName="BotScoreFont" soundName="" />
+			<MSG index='3' position="245, 110, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='240' loop='0' stay='0' elapsTime="400" mustShow="1" isCharacter='1' order='1' spriteName="BotScoreFont" soundName="" />
+			<MSG index='4' position="245, 110, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='50' loop='0' stay='0' elapsTime="0" mustShow="1" isCharacter='1' order='1' spriteName="BotScoreFont" soundName="" />
+		</EFF_13>
+		<EFF_14>
+			<MSG index='0' position="0, 0, 0" scale="1.0,  1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="0" mustShow="1" isCharacter='0' l='0' t='0' r='0' b='0' spriteName="GS_TEXT" soundName="" />
+		</EFF_14>
+		<EFF_15>
+			<MSG index='0' position="400, 240, 0" scale="0.5, 0.5, 1.0" rot="0" alpha='50' loop='0' stay='0' elapsTime="200" mustShow="1" isCharacter='0' l='740' t='0' r='970' b='230' spriteName="GS_TEXT" soundName="" />
+			<MSG index='1' position="400, 240, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="200" mustShow="1" isCharacter='0' l='740' t='0' r='970' b='230' spriteName="GS_TEXT" soundName="" />
+			<MSG index='2' position="400, 240, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='180' loop='0' stay='0' elapsTime="300" mustShow="0" isCharacter='0' l='740' t='0' r='970' b='230' spriteName="GS_TEXT" soundName="" />
+			<MSG index='3' position="400, 240, 0" scale="2.2, 2.2, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="0" mustShow="0" isCharacter='0' l='740' t='0' r='970' b='230' spriteName="GS_TEXT" soundName="" />
+		</EFF_15>
+		<EFF_16>
+			<MSG index='0' position="400, 240, 0" scale="0.8, 1.2, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="200" mustShow="1" isCharacter='0' l='740' t='231' r='970' b='461' spriteName="GS_TEXT" soundName="" />
+			<MSG index='1' position="400, 240, 0" scale="0.8, 1.2, 1.0" rot="270" alpha='150' loop='0' stay='0' elapsTime="200" mustShow="1" isCharacter='0' l='740' t='231' r='970' b='461' spriteName="GS_TEXT" soundName="" />
+			<MSG index='2' position="400, 240, 0" scale="1.2, 1.8, 1.0" rot="120" alpha='150' loop='0' stay='0' elapsTime="300" mustShow="0" isCharacter='0' l='740' t='231' r='970' b='461' spriteName="GS_TEXT" soundName="" />
+			<MSG index='3' position="400, 240, 0" scale="1.5, 2.1, 1.0" rot="360" alpha='0' loop='0' stay='0' elapsTime="0" mustShow="0" isCharacter='0' l='740' t='231' r='970' b='461' spriteName="GS_TEXT" soundName="" />
+		</EFF_16>
+		<EFF_17>
+			<MSG index='0' position="400, 240, 0" scale="1.3, 0.9, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="200" mustShow="1" isCharacter='0' l='740' t='462' r='970' b='692' spriteName="GS_TEXT" soundName="" />
+			<MSG index='1' position="400, 240, 0" scale="1.3, 0.9, 1.0" rot="-120" alpha='100' loop='0' stay='0' elapsTime="200" mustShow="1" isCharacter='0' l='740' t='462' r='970' b='692' spriteName="GS_TEXT" soundName="" />
+			<MSG index='2' position="400, 240, 0" scale="1.8, 1.2, 1.0" rot="-240" alpha='180' loop='0' stay='0' elapsTime="300" mustShow="0" isCharacter='0' l='740' t='462' r='970' b='692' spriteName="GS_TEXT" soundName="" />
+			<MSG index='3' position="400, 240, 0" scale="1.8, 1.2, 1.0" rot="-360" alpha='0' loop='0' stay='0' elapsTime="0" mustShow="0" isCharacter='0' l='740' t='462' r='970' b='692' spriteName="GS_TEXT" soundName="" />
+		</EFF_17>
+		<EFF_18>
+			<MSG index='0' position="400, 240, 0" scale="0.8, 0.8, 1.0" rot="0" alpha='100' loop='0' stay='0' elapsTime="80" mustShow="1" isCharacter='0' l='740' t='693' r='970' b='923' spriteName="GS_TEXT" soundName="" />
+			<MSG index='1' position="400, 240, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='150' loop='0' stay='0' elapsTime="80" mustShow="1" isCharacter='0' l='740' t='693' r='970' b='923' spriteName="GS_TEXT" soundName="" />
+			<MSG index='2' position="400, 240, 0" scale="2.0, 2.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="100" mustShow="1" isCharacter='0' l='740' t='693' r='970' b='923' spriteName="GS_TEXT" soundName="" />
+			<MSG index='3' position="400, 240, 0" scale="2.0, 2.0, 1.0" rot="0" alpha='100' loop='0' stay='0' elapsTime="100" mustShow="1" isCharacter='0' l='740' t='693' r='970' b='923' spriteName="GS_TEXT" soundName="" />
+			<MSG index='4' position="400, 240, 0" scale="2.0, 2.0, 1.0" rot="0" alpha='150' loop='0' stay='0' elapsTime="80" mustShow="0" isCharacter='0' l='740' t='693' r='970' b='923' spriteName="GS_TEXT" soundName="" />
+			<MSG index='5' position="400, 240, 0" scale="2.4, 2.4, 1.0" rot="0" alpha='50' loop='0' stay='0' elapsTime="0" mustShow="0" isCharacter='0' l='740' t='693' r='970' b='923' spriteName="GS_TEXT" soundName="" />
+		</EFF_18>
+		<EFF_19>
+			<MSG index='0' position="425, 315, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='150' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='432' t='320' r='626' b='378' spriteName="GS_TEXT" soundName="" />
+			<MSG index='1' position="425 315, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='432' t='320' r='626' b='378'  spriteName="GS_TEXT" soundName="" />
+			<MSG index='2' position="425, 315, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="180" mustShow="1" isCharacter='0' l='432' t='320' r='626' b='378'  spriteName="GS_TEXT" soundName="" />
+			<MSG index='3' position="425, 315, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='200' loop='0' stay='0' elapsTime="100" mustShow="0" isCharacter='0' l='432' t='320' r='626' b='378'  spriteName="GS_TEXT" soundName="" />
+			<MSG index='4' position="425, 315, 0" scale="1.8, 1.8, 1.0" rot="0" alpha='10' loop='0' stay='0' elapsTime="0" mustShow="0" isCharacter='0' l='432' t='320' r='626' b='378'  spriteName="GS_TEXT" soundName="" />
+		</EFF_19>
+		<EFF_20>
+			<MSG index='0' position="425, 315, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='150' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='432 ' t='438' r='626' b='496' spriteName="GS_TEXT" soundName="" />
+			<MSG index='1' position="425 315, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='432' t='438' r='626' b='496'  spriteName="GS_TEXT" soundName="" />
+			<MSG index='2' position="425, 315, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="180" mustShow="1" isCharacter='0' l='432' t='438' r='626' b='496' spriteName="GS_TEXT" soundName="" />
+			<MSG index='3' position="425, 315, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='200' loop='0' stay='0' elapsTime="100" mustShow="1" isCharacter='0' l='432' t='438' r='626' b='496'  spriteName="GS_TEXT" soundName="" />
+			<MSG index='4' position="425, 315, 0" scale="1.8, 1.8, 1.0" rot="0" alpha='10' loop='0' stay='0' elapsTime="0" mustShow="0" isCharacter='0' l='432' t='438' r='626' b='496'   spriteName="GS_TEXT" soundName="" />
+		</EFF_20>
+		<EFF_21>
+			<MSG index='0' position="425, 315, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='150' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='432' t='379' r='626' b='437' spriteName="GS_TEXT" soundName="" />
+			<MSG index='1' position="425 315, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='432' t='379' r='626' b='437'  spriteName="GS_TEXT" soundName="" />
+			<MSG index='2' position="425, 315, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="180" mustShow="1" isCharacter='0' l='432' t='379' r='626' b='437' spriteName="GS_TEXT" soundName="" />
+			<MSG index='3' position="425, 315, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='200' loop='0' stay='0' elapsTime="100" mustShow="1" isCharacter='0' l='432' t='379' r='626' b='437' spriteName="GS_TEXT" soundName="" />
+			<MSG index='4' position="425, 315, 0" scale="1.8, 1.8, 1.0" rot="0" alpha='10' loop='0' stay='0' elapsTime="0" mustShow="0" isCharacter='0' l='432' t='379' r='626' b='437'  spriteName="GS_TEXT" soundName="" />
+		</EFF_21>
+		<EFF_22>
+			<MSG index='0' position="425, 315, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='150' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='432' t='497' r='626' b='555' spriteName="GS_TEXT" soundName="" />
+			<MSG index='1' position="425 315, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='432' t='497' r='626' b='555'  spriteName="GS_TEXT" soundName="" />
+			<MSG index='2' position="425, 315, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="180" mustShow="1" isCharacter='0'l='432' t='497' r='626' b='555'  spriteName="GS_TEXT" soundName="" />
+			<MSG index='3' position="425, 315, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='200' loop='0' stay='0' elapsTime="100" mustShow="1" isCharacter='0' l='432' t='497' r='626' b='555'  spriteName="GS_TEXT" soundName="" />
+			<MSG index='4' position="425, 315, 0" scale="1.8, 1.8, 1.0" rot="0" alpha='10' loop='0' stay='0' elapsTime="0" mustShow="0" isCharacter='0' l='432' t='497' r='626' b='555' spriteName="GS_TEXT" soundName="" />
+		</EFF_22>
+		<EFF_23>
+			<MSG index='0' position="465, 375, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='150' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='631' t='133' r='739' b='179' spriteName="GS_TEXT" soundName="" />
+			<MSG index='1' position="465 375, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='631' t='133' r='739' b='179'  spriteName="GS_TEXT" soundName="" />
+			<MSG index='2' position="465, 375, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="180" mustShow="1" isCharacter='0' l='631' t='133' r='739' b='179' spriteName="GS_TEXT" soundName="" />
+			<MSG index='3' position="465, 375, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='200' loop='0' stay='0' elapsTime="100" mustShow="1" isCharacter='0' l='631' t='133' r='739' b='179' spriteName="GS_TEXT" soundName="" />
+			<MSG index='4' position="465, 375, 0" scale="1.8, 1.8, 1.0" rot="0" alpha='10' loop='0' stay='0' elapsTime="0" mustShow="0" isCharacter='0' l='631' t='133' r='739' b='179'spriteName="GS_TEXT" soundName="" />
+		</EFF_23>
+		<EFF_24>
+			<MSG index='0' position="465, 375, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='150' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='631' t='180' r='739' b='227' spriteName="GS_TEXT" soundName="" />
+			<MSG index='1' position="465, 375, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='631' t='180' r='739' b='227'  spriteName="GS_TEXT" soundName="" />
+			<MSG index='2' position="465, 375, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="180" mustShow="1" isCharacter='0' l='631' t='180' r='739' b='227' spriteName="GS_TEXT" soundName="" />
+			<MSG index='3' position="465, 375, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='200' loop='0' stay='0' elapsTime="100" mustShow="0" isCharacter='0' l='631' t='180' r='739' b='227' spriteName="GS_TEXT" soundName="" />
+			<MSG index='4' position="465, 375, 0" scale="1.8, 1.8, 1.0" rot="0" alpha='10' loop='0' stay='0' elapsTime="0" mustShow="0" isCharacter='0' l='631' t='180' r='739' b='227'spriteName="GS_TEXT" soundName="" />
+		</EFF_24>
+		<EFF_25>
+			<MSG index='0' position="465, 375, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='150' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='631' t='228' r='739' b='273' spriteName="GS_TEXT" soundName="" />
+			<MSG index='1' position="465, 375, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='631' t='228' r='739' b='273'  spriteName="GS_TEXT" soundName="" />
+			<MSG index='2' position="465, 375, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="180" mustShow="1" isCharacter='0' l='631' t='228' r='739' b='273' spriteName="GS_TEXT" soundName="" />
+			<MSG index='3' position="465, 375, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='200' loop='0' stay='0' elapsTime="100" mustShow="0" isCharacter='0' l='631' t='228' r='739' b='273' spriteName="GS_TEXT" soundName="" />
+			<MSG index='4' position="465, 375, 0" scale="1.8, 1.8, 1.0" rot="0" alpha='10' loop='0' stay='0' elapsTime="0" mustShow="0" isCharacter='0' l='631' t='228' r='739' b='273'spriteName="GS_TEXT" soundName="" />
+		</EFF_25>
+		<EFF_26>
+			<MSG index='0' position="465, 375, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='150' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='631' t='274' r='739' b='320' spriteName="GS_TEXT" soundName="" />
+			<MSG index='1' position="465, 375, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='631' t='274' r='739' b='320'  spriteName="GS_TEXT" soundName="" />
+			<MSG index='2' position="465, 375, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="180" mustShow="1" isCharacter='0' l='631' t='274' r='739' b='320' spriteName="GS_TEXT" soundName="" />
+			<MSG index='3' position="465, 375, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='200' loop='0' stay='0' elapsTime="100" mustShow="0" isCharacter='0' l='631' t='274' r='739' b='320' spriteName="GS_TEXT" soundName="" />
+			<MSG index='4' position="465, 375, 0" scale="1.8, 1.8, 1.0" rot="0" alpha='10' loop='0' stay='0' elapsTime="0" mustShow="0" isCharacter='0' l='631' t='274' r='739' b='320'spriteName="GS_TEXT" soundName="" />
+		</EFF_26>
+		<EFF_27>
+			<MSG index='0' position="465, 375, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='150' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='631' t='321' r='739' b='367' spriteName="GS_TEXT" soundName="" />
+			<MSG index='1' position="465, 375, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='631' t='321' r='739' b='367'  spriteName="GS_TEXT" soundName="" />
+			<MSG index='2' position="465, 375, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="180" mustShow="1" isCharacter='0' l='631' t='321' r='739' b='367' spriteName="GS_TEXT" soundName="" />
+			<MSG index='3' position="465, 375, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='200' loop='0' stay='0' elapsTime="100" mustShow="0" isCharacter='0' l='631' t='321' r='739' b='367' spriteName="GS_TEXT" soundName="" />
+			<MSG index='4' position="465, 375, 0" scale="1.8, 1.8, 1.0" rot="0" alpha='10' loop='0' stay='0' elapsTime="0" mustShow="0" isCharacter='0' l='631' t='321' r='739' b='367'spriteName="GS_TEXT" soundName="" />
+		</EFF_27>
+		<EFF_28>
+			<MSG index='0' position="465, 375, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='150' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='631' t='368' r='739' b='414' spriteName="GS_TEXT" soundName="" />
+			<MSG index='1' position="465, 375, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='631' t='368' r='739' b='414'  spriteName="GS_TEXT" soundName="" />
+			<MSG index='2' position="465, 375, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="180" mustShow="1" isCharacter='0' l='631' t='368' r='739' b='414' spriteName="GS_TEXT" soundName="" />
+			<MSG index='3' position="465, 375, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='200' loop='0' stay='0' elapsTime="100" mustShow="0" isCharacter='0' l='631' t='368' r='739' b='414' spriteName="GS_TEXT" soundName="" />
+			<MSG index='4' position="465, 375, 0" scale="1.8, 1.8, 1.0" rot="0" alpha='10' loop='0' stay='0' elapsTime="0" mustShow="0" isCharacter='0' l='631' t='368' r='739' b='414'spriteName="GS_TEXT" soundName="" />
+		</EFF_28>
+		<EFF_29>
+			<MSG index='0' position="465, 375, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='150' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='631' t='415' r='739' b='461' spriteName="GS_TEXT" soundName="" />
+			<MSG index='1' position="465, 375, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='631' t='415' r='739' b='461'  spriteName="GS_TEXT" soundName="" /> 
+			<MSG index='2' position="465, 375, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="180" mustShow="1" isCharacter='0' l='631' t='415' r='739' b='461' spriteName="GS_TEXT" soundName="" />
+			<MSG index='3' position="465, 375, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='200' loop='0' stay='0' elapsTime="100" mustShow="0" isCharacter='0' l='631' t='415' r='739' b='461' spriteName="GS_TEXT" soundName="" />
+			<MSG index='4' position="465, 375, 0" scale="1.8, 1.8, 1.0" rot="0" alpha='10' loop='0' stay='0' elapsTime="0" mustShow="0" isCharacter='0' l='631' t='415' r='739' b='461'spriteName="GS_TEXT" soundName="" />
+		</EFF_29>
+		<EFF_30>
+			<MSG index='0' position="465, 375, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='150' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='631' t='462' r='739' b='508' spriteName="GS_TEXT" soundName="" />
+			<MSG index='1' position="465, 375, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='631' t='462' r='739' b='508'  spriteName="GS_TEXT" soundName="" />
+			<MSG index='2' position="465, 375, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="180" mustShow="1" isCharacter='0' l='631' t='462' r='739' b='508' spriteName="GS_TEXT" soundName="" />
+			<MSG index='3' position="465, 375, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='200' loop='0' stay='0' elapsTime="100" mustShow="0" isCharacter='0' l='631' t='462' r='739' b='508' spriteName="GS_TEXT" soundName="" />
+			<MSG index='4' position="465, 375, 0" scale="1.8, 1.8, 1.0" rot="0" alpha='10' loop='0' stay='0' elapsTime="0" mustShow="0" isCharacter='0' l='631' t='462' r='739' b='508'spriteName="GS_TEXT" soundName="" />
+		</EFF_30>
+		<EFF_31>
+			<MSG index='0' position="465, 375, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='150' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='631' t='509' r='739' b='555' spriteName="GS_TEXT" soundName="" />
+			<MSG index='1' position="465, 375, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='631' t='509' r='739' b='555'  spriteName="GS_TEXT" soundName="" />
+			<MSG index='2' position="465, 375, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="180" mustShow="1" isCharacter='0' l='631' t='509' r='739' b='555' spriteName="GS_TEXT" soundName="" />
+			<MSG index='3' position="465, 375, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='200' loop='0' stay='0' elapsTime="100" mustShow="0" isCharacter='0' l='631' t='509' r='739' b='555' spriteName="GS_TEXT" soundName="" />
+			<MSG index='4' position="465, 375, 0" scale="1.8, 1.8, 1.0" rot="0" alpha='10' loop='0' stay='0' elapsTime="0" mustShow="0" isCharacter='0' l='631' t='509' r='739' b='555'spriteName="GS_TEXT" soundName="" />
+		</EFF_31>
+		<EFF_32>
+			<MSG index='0' position="465, 375, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='150' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='631' t='556' r='739' b='602' spriteName="GS_TEXT" soundName="" />
+			<MSG index='1' position="465, 375, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='631' t='556' r='739' b='602'  spriteName="GS_TEXT" soundName="" />
+			<MSG index='2' position="465, 375, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="180" mustShow="1" isCharacter='0' l='631' t='556' r='739' b='602' spriteName="GS_TEXT" soundName="" />
+			<MSG index='3' position="465, 375, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='200' loop='0' stay='0' elapsTime="100" mustShow="0" isCharacter='0' l='631' t='556' r='739' b='602' spriteName="GS_TEXT" soundName="" />
+			<MSG index='4' position="465, 375, 0" scale="1.8, 1.8, 1.0" rot="0" alpha='10' loop='0' stay='0' elapsTime="0" mustShow="0" isCharacter='0' l='631' t='556' r='739' b='602'spriteName="GS_TEXT" soundName="" />
+		</EFF_32>
+		<EFF_33>
+			<MSG index='0' position="972, 560, 0" scale="0.9, 1.0, 1.0" rot="0" alpha='220' loop='0' stay='0' elapsTime="300" mustShow="1" isCharacter='0' l='577' t='556' r='601' b='708' spriteName="GS_TEXT" soundName="" />
+			<MSG index='1' position="972, 560, 0" scale="0.6, 1.0, 1.0" rot="0" alpha='50' loop='1' stay='0' elapsTime="300" mustShow="1" isCharacter='0' l='577' t='556' r='601' b='708' spriteName="GS_TEXT" soundName="" />
+		</EFF_33>
+		<EFF_34>
+			<MSG index='0' position="972, 410, 0" scale="0.9, 1.0, 1.0" rot="0" alpha='230' loop='0' stay='0' elapsTime="300" mustShow="1" isCharacter='0' l='602' t='556' r='626' b='860' spriteName="GS_TEXT" soundName="" />
+			<MSG index='1' position="972, 410, 0" scale="0.6, 1.0, 1.0" rot="0" alpha='50' loop='1' stay='0' elapsTime="300" mustShow="1" isCharacter='0' l='602' t='556' r='626' b='860' spriteName="GS_TEXT" soundName="" />
+		</EFF_34>
+		<EFF_35>
+			<MSG index='0' position="935, 701, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="1000" mustShow="1" isCharacter='0' l='73' t='1' r='160' b='23' spriteName="GS_TEXT" soundName="" />
+			<MSG index='1' position="935, 701, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='1' stay='0' elapsTime="600" mustShow="1" isCharacter='0' l='73' t='24' r='160' b='46' spriteName="GS_TEXT" soundName="" />
+		</EFF_35>
+		<EFF_36>
+			<MSG index='0' position="946, 675, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='50' loop='0' stay='0' elapsTime="250" mustShow="1" isCharacter='0' l='0' t='47' r='78' b='123' spriteName="GS_TEXT" soundName="" />
+			<MSG index='1' position="946, 675, 0" scale="1.0, 1.0, 1.0" rot="180" alpha='200' loop='0' stay='0' elapsTime="250" mustShow="1" isCharacter='0' l='0' t='47' r='78' b='123' spriteName="GS_TEXT" soundName="" />
+			<MSG index='2' position="946, 675, 0" scale="1.0, 1.0, 1.0" rot="360" alpha='255' loop='0' stay='0' elapsTime="250" mustShow="1" isCharacter='0' l='0' t='47' r='78' b='123' spriteName="GS_TEXT" soundName="" />
+			<MSG index='3' position="946, 675, 0" scale="1.0, 1.0, 1.0" rot="480" alpha='0' loop='0' stay='0' elapsTime="250" mustShow="1" isCharacter='0' l='0' t='47' r='78' b='123' spriteName="GS_TEXT" soundName="" />
+			<MSG index='4' position="946, 675, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='1' stay='0' elapsTime="600" mustShow="1" isCharacter='0' l='0' t='0' r='0' b='0' spriteName="GS_TEXT" soundName="" />
+		</EFF_36>
+		
+
+		<EFF_37> <!-- 피버이펙트 F버튼 -->
+			<MSG index='0' position="963, 427, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="600" mustShow="1" isCharacter='0' l='558' t='939' r='577' b='958' spriteName="GS_POP2"  soundName="" />
+			<MSG index='1' position="963, 427, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='1' stay='0' elapsTime="600" mustShow="1" isCharacter='0' l='558' t='939' r='577' b='958' spriteName="GS_POP2"  soundName="" />
+		</EFF_37>
+		
+		<EFF_38> <!-- 피버이펙트  큰 원 -->
+			<MSG index='0' position="924, 415, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="2400" mustShow="1" isCharacter='0' l='224' t='618' r='267' b='661' spriteName="GS_POP2"  soundName="" />
+			<MSG index='1' position="924, 415, 0" scale="1.0, 1.0, 1.0" rot="-360" alpha='100' loop='1' stay='0' elapsTime="0" mustShow="1" isCharacter='0' l='224' t='618' r='267' b='661' spriteName="GS_POP2"  soundName="" />
+			
+		</EFF_38>
+		<EFF_39> <!-- 피버이펙트  작은 원 -->
+			<MSG index='0' position="925, 416, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="2200" mustShow="1" isCharacter='0' l='269' t='620' r='310' b='661' spriteName="GS_POP2"  soundName="" />
+			<MSG index='1' position="925, 416, 0" scale="1.0, 1.0, 1.0" rot="360" alpha='255' loop='1' stay='0' elapsTime="0" mustShow="1" isCharacter='0' l='269' t='620' r='310' b='661' spriteName="GS_POP2"  soundName="" />
+			
+		</EFF_39>
+		<EFF_40> <!-- 메인UI  큰 원 -->
+			<MSG index='0' position="558, 710, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="5400" mustShow="1" isCharacter='0' l='489' t='456' r='586' b='553' spriteName="GS_POP2"  soundName="" />
+			<MSG index='1' position="558, 710, 0" scale="1.0, 1.0, 1.0" rot="360" alpha='255' loop='1' stay='0' elapsTime="0" mustShow="1" isCharacter='0' l='489' t='456' r='586' b='553' spriteName="GS_POP2"  soundName="" />	
+		</EFF_40>
+		<EFF_41> <!-- 메인UI  작은 원 -->
+			<MSG index='0' position="564, 717, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="4200" mustShow="1" isCharacter='0' l='505' t='752' r='589' b='836' spriteName="GS_POP2"  soundName="" />
+			<MSG index='1' position="564, 717, 0" scale="1.0, 1.0, 1.0" rot="360" alpha='255' loop='1' stay='0' elapsTime="4200" mustShow="1" isCharacter='0' l='505' t='752' r='589' b='836' spriteName="GS_POP2"  soundName="" />
+			
+		</EFF_41>
+		<EFF_42> <!-- 메인UI  top_time 이펙트 1-->
+			<MSG index='0' position="470, -8, 0" scale="1.0, 1.0, 1.0" rot="0"   alpha='255' loop='0' stay='0' elapsTime="1800" mustShow="1" isCharacter='0' l='267' t='93' r='354' b='180' spriteName="AI2"  soundName="" />
+			<MSG index='1' position="470, -8, 0" scale="1.0, 1.0, 1.0" rot="180" alpha='255' loop='0' stay='0' elapsTime="0"    mustShow="1" isCharacter='0' l='267' t='93' r='354' b='180' spriteName="AI2"  soundName="" />
+			<MSG index='2' position="470, -8, 0" scale="1.0, 1.0, 1.0" rot="0"   alpha='255' loop='0' stay='0' elapsTime="1800" mustShow="1" isCharacter='0' l='267' t='93' r='354' b='180' spriteName="AI2"  soundName="" />
+			<MSG index='3' position="470, -8, 0" scale="1.0, 1.0, 1.0" rot="0"   alpha='0'   loop='1' stay='0' elapsTime="1800" mustShow="1" isCharacter='0' l='267' t='93' r='354' b='180' spriteName="AI2"  soundName="" />
+			
+		</EFF_42>
+		<EFF_43> <!-- 메인UI  side 이펙트 2 -->
+			<MSG index='0' position="0, 429, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="1200" mustShow="1" isCharacter='0' l='525' t='692' r='535' b='702' spriteName="GS_POP2"  soundName="" />
+			<MSG index='1' position="0, 429, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="1200" mustShow="1" isCharacter='0' l='525' t='692' r='535' b='702' spriteName="GS_POP2"  soundName="" />
+			<MSG index='2' position="0, 429, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="0" mustShow="1" isCharacter='0' l='525' t='692' r='535' b='702' spriteName="GS_POP2"  soundName="" />	
+			<MSG index='3' position="0, 441, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="1200" mustShow="1" isCharacter='0' l='525' t='692' r='535' b='702' spriteName="GS_POP2"  soundName="" />
+			<MSG index='4' position="0, 441, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="1200" mustShow="1" isCharacter='0' l='525' t='692' r='535' b='702' spriteName="GS_POP2"  soundName="" />
+			<MSG index='5' position="0, 441, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='1' stay='0' elapsTime="0" mustShow="1" isCharacter='0' l='525' t='692' r='535' b='702' spriteName="GS_POP2"  soundName="" />
+			
+		</EFF_43>
+
+		<EFF_44> <!-- WAVE TIME 이펙트 1 -->
+			<MSG index='0' position="192, 84, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="2400" mustShow="1" isCharacter='0' l='505' t='710' r='545' b='751' spriteName="GS_POP2"  soundName="" />
+			<MSG index='1' position="192, 84, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='1' stay='0' elapsTime="2400" mustShow="1" isCharacter='0' l='505' t='710' r='545' b='751' spriteName="GS_POP2"  soundName="" />
+			
+		</EFF_44>
+		<EFF_45> <!-- WAVE TIME 이펙트 2 -->
+			<MSG index='0' position="197, 89, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="3000" mustShow="0" isCharacter='0' l='546' t='721' r='576' b='751' spriteName="GS_POP2"  soundName="" />
+			<MSG index='1' position="197, 89, 0" scale="1.0, 1.0, 1.0" rot="-360" alpha='255' loop='1' stay='0' elapsTime="3000" mustShow="1" isCharacter='0' l='546' t='721' r='576' b='751' spriteName="GS_POP2"  soundName="" />
+			
+		</EFF_45>
+		<EFF_46> <!-- WAVE 2F 화살표 -->
+			<MSG index='0' position="335, 292, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="800" mustShow="1" isCharacter='0' l='500' t='0' r='701' b='117' spriteName="GS_POP2"  soundName="" />
+			<MSG index='1' position="335, 292, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='50' loop='1' stay='0' elapsTime="800" mustShow="1" isCharacter='0' l='500' t='0' r='701' b='117' spriteName="GS_POP2"  soundName="" />
+			
+		</EFF_46>
+		<EFF_47> <!-- WAVE 3F 엘리베이터 표시 -->
+			<MSG index='0' position="464, 349, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="1200" mustShow="0" isCharacter='0' l='558' t='918' r='578' b='938' spriteName="GS_POP2"  soundName="" />
+			<MSG index='1' position="464, 159, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='1' stay='0' elapsTime="0" mustShow="0" isCharacter='0' l='558' t='918' r='578' b='938' spriteName="GS_POP2"  soundName="" />
+			<MSG index='2' position="464, 349, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="0" mustShow="0" isCharacter='0' l='558' t='918' r='578' b='938' spriteName="GS_POP2"  soundName="" />
+			<MSG index='3' position="464, 159, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='1' stay='0' elapsTime="1200" mustShow="0" isCharacter='0' l='558' t='918' r='578' b='938' spriteName="GS_POP2"  soundName="" />
+			
+		</EFF_47>
+		<EFF_48> <!-- WAVE 4F 헬리콥터 표시 -->
+			<MSG index='0' position="374, 210, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="600" mustShow="0" isCharacter='0' l='763' t='266' r='962' b='465' spriteName="GS_02"  soundName="" />
+			<MSG index='1' position="374, 210, 0" scale="0.5, 0.5, 0.5" rot="0" alpha='0' loop='0' stay='0' elapsTime="600" mustShow="0" isCharacter='0' l='763' t='266' r='962' b='465' spriteName="GS_02"  soundName="" />
+			<MSG index='2' position="374, 210, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='1' stay='0' elapsTime="0" mustShow="0" isCharacter='0' l='763' t='266' r='962' b='465' spriteName="GS_02"  soundName="" />
+		</EFF_48>
+		<EFF_49> <!-- WAVE 1F 리카 컷 이펙트  -->
+			<MSG index='0' position="381, 296, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="600" mustShow="1" isCharacter='0' l='505' t='697' r='518' b='710' spriteName="GS_POP2"  soundName="" />
+			<MSG index='1' position="381, 296, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="0" mustShow="1" isCharacter='0' l='505' t='697' r='518' b='710' spriteName="GS_POP2"  soundName="" />
+			<MSG index='2' position="389, 301, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="600" mustShow="1" isCharacter='0' l='505' t='697' r='518' b='710' spriteName="GS_POP2"  soundName="" />
+			<MSG index='3' position="389, 301, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="0" mustShow="1" isCharacter='0' l='505' t='697' r='518' b='710' spriteName="GS_POP2"  soundName="" />
+			<MSG index='4' position="391, 318, 0" scale="0.7, 0.7, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="600" mustShow="1" isCharacter='0' l='505' t='697' r='518' b='710' spriteName="GS_POP2"  soundName="" />
+			<MSG index='5' position="391, 318, 0" scale="0.7, 0.7, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="0" mustShow="1" isCharacter='0' l='505' t='697' r='518' b='710' spriteName="GS_POP2"  soundName="" />
+			<MSG index='4' position="389, 326, 0" scale="0.6, 0.6, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="600" mustShow="1" isCharacter='0' l='505' t='697' r='518' b='710' spriteName="GS_POP2"  soundName="" />
+			<MSG index='5' position="389, 326, 0" scale="0.6, 0.6, 1.0" rot="0" alpha='0' loop='1' stay='0' elapsTime="0" mustShow="1" isCharacter='0' l='505' t='697' r='518' b='710' spriteName="GS_POP2"  soundName="" />
+			
+		</EFF_49>
+
+		<EFF_50> <!-- 2초 big circle -->
+			<MSG index='0' position="421, 234, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255'  loop='0' stay='0' elapsTime="1200" mustShow="1" isCharacter='0' l='398' t='91' r='579' b='272' spriteName="AI2"  soundName="" />
+			<MSG index='1' position="421, 234, 0" scale="1.0, 1.0, 1.0" rot="360" alpha='255' loop='1' stay='0' elapsTime="0" mustShow="1" isCharacter='0' l='398' t='91' r='579' b='272' spriteName="AI2"  soundName="" />
+		</EFF_50> 
+		
+		<EFF_51> <!-- 2초 dot -->
+			<MSG index='0' position="501, 322, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="400" mustShow="1" isCharacter='0' l='224' t='380' r='247' b='389' spriteName="AI2"  soundName="" />
+			<MSG index='1' position="501, 322, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='1' stay='0' elapsTime="0" mustShow="1" isCharacter='0' l='224' t='380' r='247' b='389' spriteName="AI2"  soundName="" />
+			
+		</EFF_51>
+
+		<EFF_52> <!-- stage 이동중 전층 공통이펙트3 main -->
+			<MSG index='0' position="300, 188, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="1600" mustShow="1" isCharacter='0' l='0' t='783' r='331' b='1024' spriteName="GS_POP"  soundName="" />
+			<MSG index='1' position="300, 188, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="1600" mustShow="1" isCharacter='0' l='0' t='783' r='331' b='1024' spriteName="GS_POP"  soundName="" />
+			<MSG index='2' position="300, 188, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="1400" mustShow="1" isCharacter='0' l='0' t='783' r='331' b='1024' spriteName="GS_POP"  soundName="" />
+			<MSG index='3' position="300, 188, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='1' stay='0' elapsTime="1600" mustShow="1" isCharacter='0' l='0' t='783' r='331' b='1024' spriteName="GS_POP"  soundName="" />
+			
+		</EFF_52>
+
+		<EFF_53> <!-- stage 이동중 전층 공통이펙트1 big circle -->
+			<MSG index='0' position="381, 222, 0" scale="1.0, 1.0, 1.0" rot="105" alpha='0' loop='0' stay='0' elapsTime="1600" mustShow="1" isCharacter='0' l='785' t='721' r='968' b='904' spriteName="GS_POP"  soundName="" />
+			<MSG index='1' position="381, 222, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="1600" mustShow="1" isCharacter='0' l='785' t='721' r='968' b='904' spriteName="GS_POP"  soundName="" />
+			<MSG index='2' position="381, 222, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="1600" mustShow="1" isCharacter='0' l='785' t='721' r='968' b='904' spriteName="GS_POP"  soundName="" />
+			<MSG index='3' position="381, 222, 0" scale="1.0, 1.0, 1.0" rot="-180" alpha='0' loop='1' stay='0' elapsTime="1600" mustShow="1" isCharacter='0' l='785' t='721' r='968' b='904' spriteName="GS_POP"  soundName="" />
+								
+		</EFF_53>
+
+		<EFF_54> <!-- stage 이동중 전층 공통이펙트2 small circle -->
+			<MSG index='0' position="413, 253, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="1600" mustShow="1" isCharacter='0' l='785' t='599' r='906' b='720' spriteName="GS_POP"  soundName="" />
+			<MSG index='1' position="413, 253, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="1600" mustShow="1" isCharacter='0' l='785' t='599' r='906' b='720' spriteName="GS_POP"  soundName="" />
+			<MSG index='2' position="413, 253, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="1600" mustShow="1" isCharacter='0' l='785' t='599' r='906' b='720' spriteName="GS_POP"  soundName="" />
+			<MSG index='3' position="413, 253, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='1' stay='0' elapsTime="1600" mustShow="1" isCharacter='0' l='785' t='599' r='906' b='720' spriteName="GS_POP"  soundName="" />
+		</EFF_54>
+
+		<EFF_55> <!-- stage 이동전 popup -->
+			<MSG index='0' position="96, 407, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="600" mustShow="1" isCharacter='0' l='220' t='532' r='266' b='552' spriteName="AI2"  soundName="" />
+			<MSG index='1' position="96, 407, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="600" mustShow="1" isCharacter='0' l='220' t='532' r='266' b='552' spriteName="AI2"  soundName="" />
+			<MSG index='2' position="96, 407, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="600" mustShow="1" isCharacter='0' l='267' t='532' r='313' b='552' spriteName="AI2"  soundName="" />
+			<MSG index='3' position="96, 407, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='1' stay='0' elapsTime="600" mustShow="1" isCharacter='0' l='267' t='532' r='313' b='552' spriteName="AI2"  ssoundName="" />
+						
+		</EFF_55>
+		<EFF_56> <!-- 방장 찾는중 회전 -->
+			<MSG index='0' position="456, 212, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="2800" mustShow="1" isCharacter='0' l='0' t='457' r='97' b='554' spriteName="AI2"  soundName="" />
+			<MSG index='1' position="456, 212, 0" scale="1.0, 1.0, 1.0" rot="360" alpha='255' loop='1' stay='0' elapsTime="0" mustShow="1" isCharacter='0'  l='0' t='457' r='97' b='554' spriteName="AI2"  soundName="" />
+						
+		</EFF_56>
+		<EFF_57> <!-- 리카 컷 이펙트 2 숫자 5,4,3  -->
+			<MSG index='0' position="617, 340, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0'   loop='0' stay='0' elapsTime="600" mustShow="1" isCharacter='0' l='327' t='341' r='354' b='389' spriteName="GS_02"  soundName="" />
+			<MSG index='1' position="617, 340, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="600" mustShow="1" isCharacter='0' l='327' t='341' r='354' b='389' spriteName="GS_02"  soundName="" />
+			<MSG index='2' position="617, 340, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0'   loop='0' stay='0' elapsTime="600" mustShow="1" isCharacter='0' l='355' t='341' r='382' b='389' spriteName="GS_02"  soundName="" />
+			<MSG index='3' position="617, 340, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="600" mustShow="1" isCharacter='0' l='355' t='341' r='382' b='389' spriteName="GS_02"  soundName="" />
+			<MSG index='4' position="617, 340, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0'   loop='0' stay='0' elapsTime="600" mustShow="1" isCharacter='0' l='383' t='341' r='410' b='389' spriteName="GS_02"  soundName="" />
+			<MSG index='5' position="617, 340, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="600" mustShow="1" isCharacter='0' l='383' t='341' r='410' b='389' spriteName="GS_02"  soundName="" />
+			<MSG index='6' position="617, 340, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0'   loop='0' stay='0' elapsTime="600" mustShow="1" isCharacter='0' l='410' t='341' r='438' b='389' spriteName="GS_02"  soundName="" />
+			<MSG index='7' position="617, 340, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="600" mustShow="1" isCharacter='0' l='410' t='341' r='438' b='389' spriteName="GS_02"  soundName="" />
+			<MSG index='8' position="617, 340, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0'   loop='0' stay='0' elapsTime="600" mustShow="1" isCharacter='0' l='439' t='341' r='467' b='389' spriteName="GS_02"  soundName="" />
+			<MSG index='9' position="617, 340, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='1' stay='0' elapsTime="600" mustShow="1" isCharacter='0' l='439' t='341' r='467' b='389' spriteName="GS_02"  soundName="" />
+		</EFF_57>
+		<EFF_58> <!-- 리카 컷 이펙트 3 화살표 -->
+			<MSG index='0' position="608, 292, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="600" mustShow="1" isCharacter='0' l='0' t='0' r='0' b='0' spriteName="GS_02"  soundName="" />
+			<MSG index='1' position="608, 292, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='1' stay='0' elapsTime="600" mustShow="1" isCharacter='0' l='0' t='0' r='0' b='0' spriteName="GS_02"  soundName="" />
+						
+		</EFF_58>
+		<EFF_59> <!-- 리카 컷 이펙트 4 REC -->
+			<MSG index='0' position="275, 222, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="1200" mustShow="1" isCharacter='0' l='327' t='393' r='338' b='404' spriteName="GS_02"  soundName="" />
+			<MSG index='1' position="275, 222, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='1' stay='0' elapsTime="1200" mustShow="1" isCharacter='0' l='327' t='393' r='338' b='404' spriteName="GS_02"  soundName="" />
+						
+		</EFF_59>
+		<EFF_60> <!-- 실드경고이펙트 BG -->
+			<MSG index='0' position="237, 0, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0'   loop='0' stay='0' elapsTime="0" mustShow="1" isCharacter='0' l='439' t='531' r='991' b='835' spriteName="HELP"  soundName="" />
+			<MSG index='1' position="237, 0, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='1' stay='1' elapsTime="1200" mustShow="1" isCharacter='0' l='439' t='531' r='991' b='835' spriteName="HELP"  soundName="" />
+						
+		</EFF_60>
+
+		<EFF_61> <!-- 실드경고이펙트  50% -->
+			<MSG index='0' position="476, 144, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="300" mustShow="1" isCharacter='0'   l='781' t='491' r='838' b='530' spriteName="HELP"  soundName="" />
+			<MSG index='1' position="476, 144, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='1' stay='1' elapsTime="300" mustShow="1" isCharacter='0' l='781' t='491' r='838' b='530' spriteName="HELP"  soundName="" />
+						
+		</EFF_61>
+		
+		<EFF_62> <!-- 실드경고이펙트  30% -->
+			<MSG index='0' position="476, 144, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0'   loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='725' t='491' r='780' b='530' spriteName="HELP"  soundName="" />
+			<MSG index='1' position="476, 144, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='1' stay='1' elapsTime="150" mustShow="1" isCharacter='0' l='725' t='491' r='780' b='530' spriteName="HELP"  soundName="" />
+						
+		</EFF_62>
+		<EFF_63> <!-- 컨티뉴이펙트  1 -->
+			<MSG index='0' position="392, 214, 0" scale="1.0, 1.0, 1.0" rot="105" alpha='0' loop='0' stay='0' elapsTime="1600" mustShow="1" isCharacter='0' l='0' t='761' r='263' b='1024' spriteName="GS_POP"  soundName="" />
+			<MSG index='1' position="392, 214, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="1600" mustShow="1" isCharacter='0' l='0' t='761' r='263' b='1024' spriteName="GS_POP"  soundName="" />
+			<MSG index='2' position="392, 214, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="1600" mustShow="1" isCharacter='0' l='0' t='761' r='263' b='1024' spriteName="GS_POP"  soundName="" />
+			<MSG index='3' position="392, 214, 0" scale="1.2, 1.2, 1.0" rot="-180" alpha='0' loop='1' stay='1' elapsTime="1600" mustShow="1" isCharacter='0' l='0' t='761' r='263' b='1024' spriteName="GS_POP"  soundName="" />
+						
+		</EFF_63>
+		
+
+		<EFF_64> <!-- 컨티뉴이펙트  2 -->
+			<MSG index='0' position="363, 168, 0" scale="1.0, 1.0, 1.0" rot="-105" alpha='0' loop='0' stay='0' elapsTime="1600" mustShow="1" isCharacter='0' l='264' t='801' r='488' b='1024' spriteName="GS_POP"  soundName="" />
+			<MSG index='1' position="363, 168, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="1600" mustShow="1" isCharacter='0' l='264' t='801' r='488' b='1024' spriteName="GS_POP"  soundName="" />
+			<MSG index='2' position="363, 168, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="1600" mustShow="1" isCharacter='0' l='264' t='801' r='488' b='1024' spriteName="GS_POP"  soundName="" />
+			<MSG index='3' position="363, 168, 0" scale="1.2, 1.2, 1.0" rot="180" alpha='0' loop='1' stay='1' elapsTime="1600" mustShow="1" isCharacter='0' l='264' t='801' r='488' b='1024' spriteName="GS_POP"  soundName="" />
+						
+		</EFF_64>
+
+
+		<EFF_65> <!-- BOSS CLEAR 이펙트 circle small -->
+			<MSG index='0' position="451, 323, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="600" mustShow="1" isCharacter='0' l='680' t='350' r='801' b='471' spriteName="GS_POP2"  soundName="" />
+			<MSG index='1' position="451, 323, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="900" mustShow="1" isCharacter='0' l='680' t='350' r='801' b='471' spriteName="GS_POP2"  soundName="" />
+			<MSG index='2' position="451, 323, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="900" mustShow="1" isCharacter='0' l='680' t='350' r='801' b='471'  spriteName="GS_POP2"  soundName="" />
+			<MSG index='3' position="451, 323, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='255' loop='1' stay='1' elapsTime="600" mustShow="1" isCharacter='0' l='680' t='350' r='801' b='471' spriteName="GS_POP2"  soundName="" />
+						
+		</EFF_65>
+		
+		<EFF_66> <!-- BOSS CLEAR 이펙트 circle big -->
+			<MSG index='0' position="401, 273, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="600" mustShow="1" isCharacter='0' l='802' t='350' r='1024' b='572' spriteName="GS_POP2"  soundName="" />
+			<MSG index='1' position="401, 273, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="900" mustShow="1" isCharacter='0' l='802' t='350' r='1024' b='572' spriteName="GS_POP2"  soundName="" />
+			<MSG index='2' position="401, 273, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="900" mustShow="1" isCharacter='0' l='802' t='350' r='1024' b='572' spriteName="GS_POP2"  soundName="" />
+			<MSG index='3' position="401, 273, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='1' stay='1' elapsTime="600" mustShow="1" isCharacter='0' l='802' t='350' r='1024' b='572' spriteName="GS_POP2"  soundName="" />
+						
+		</EFF_66>
+
+		<EFF_67> <!-- BOSS CLEAR 이펙트 BG -->
+			<MSG index='0' position="281, 268, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="600" mustShow="1"   isCharacter='0' l='255' t='635' r='688' b='865' spriteName="CRH"  soundName="" />
+			<MSG index='1' position="281, 268, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="900" mustShow="1" isCharacter='0' l='255' t='635' r='688' b='865' spriteName="CRH"  soundName="" />
+			<MSG index='2' position="281, 268, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="900" mustShow="1" isCharacter='0' l='255' t='635' r='688' b='865' spriteName="CRH"  soundName="" />
+			<MSG index='3' position="281, 268, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='1' stay='1' elapsTime="600" mustShow="1"   isCharacter='0' l='255' t='635' r='688' b='865' spriteName="CRH"  soundName="" />
+						
+		</EFF_67>
+
+		<EFF_68> <!-- 보스등장 씬 -->
+			<MSG index='0' position="312, 273, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="600" mustShow="1"  isCharacter='0' l='0' t='804' r='398' b='1014' spriteName="HELP"  soundName="" />
+			<MSG index='1' position="312, 273, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="1800" mustShow="1"  isCharacter='0' l='0' t='804' r='398' b='1014' spriteName="HELP"  soundName="" />
+			<MSG index='2' position="312, 273, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='1' elapsTime="600" mustShow="1"   isCharacter='0' l='0' t='804' r='398' b='1014' spriteName="HELP"  soundName="" />
+						
+		</EFF_68>
+	
+		<EFF_69> <!-- EVENT EFFECT -->
+			<MSG index='0' position="634, 86, 0" scale="0.2,  0.2, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="600" mustShow="1" isCharacter='0' l='0' t='768' r='63' b='812' spriteName="LOBBY_BACK" soundName="" />
+			<MSG index='1' position="634, 86, 0" scale="1.0,  1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="600" mustShow="1" isCharacter='0' l='0' t='768' r='63' b='812' spriteName="LOBBY_BACK" soundName="" />
+			<MSG index='2' position="634, 86, 0" scale="1.0,  1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="600" mustShow="1" isCharacter='0' l='0' t='768' r='63' b='812' spriteName="LOBBY_BACK" soundName="" />
+			<MSG index='3' position="634, 86, 0" scale="1.0,  1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="600" mustShow="1" isCharacter='0' l='0' t='768' r='63' b='812' spriteName="LOBBY_BACK" soundName="" />
+			
+		</EFF_69>
+
+		<EFF_70> <!-- Soccer mode_MY BALL -->
+			<MSG index='0' position="57, 362, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="300" mustShow="1"  isCharacter='0' l='345' t='506' r='389' b='550' spriteName="SC"  soundName="" />
+			<MSG index='1' position="57, 318, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='1' stay='0' elapsTime="600" mustShow="1"  isCharacter='0' l='345' t='506' r='389' b='550' spriteName="SC"  soundName="" />
+		</EFF_70>
+	
+		<EFF_71> <!-- Soccer mode_BALL SHADOW -->
+			<MSG index='0' position="59, 395, 0" scale="0.7, 0.7, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="300" mustShow="1"  isCharacter='0' l='675' t='16' r='719' b='32' spriteName="SC"  soundName="" />
+			<MSG index='1' position="59, 395, 0" scale="0.3, 0.3, 1.0" rot="0" alpha='150' loop='1' stay='0' elapsTime="600" mustShow="1"  isCharacter='0' l='675' t='16' r='719' b='32' spriteName="SC"  soundName="" />
+		
+		</EFF_71>
+	
+		<EFF_72> <!-- Soccer mode_BALL Respon EF1 -->
+			<MSG index='0' position="600, 119, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='50' loop='0' stay='0' elapsTime="300" mustShow="1"  isCharacter='0' l='345' t='551' r='373' b='579' spriteName="SC"  soundName="" />
+			<MSG index='1' position="496, 119, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="600" mustShow="1"  isCharacter='0' l='345' t='551' r='373' b='579' spriteName="SC"  soundName="" />
+			<MSG index='2' position="390, 119, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='150' loop='0' stay='0' elapsTime="1200" mustShow="1"  isCharacter='0' l='345' t='551' r='373' b='579' spriteName="SC"  soundName="" />
+			<MSG index='3' position="470, 119, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="600" mustShow="1"  isCharacter='0' l='345' t='551' r='373' b='579' spriteName="SC"  soundName="" />
+			
+		</EFF_72>
+		
+		<EFF_73> <!-- Soccer mode_BALL Respon EF2 -->
+			<MSG index='0' position="376, 119, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='50' loop='0' stay='0' elapsTime="300" mustShow="1"  isCharacter='0' l='345' t='551' r='373' b='579' spriteName="SC"  soundName="" />
+			<MSG index='1' position="496, 119, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="1200" mustShow="1"  isCharacter='0' l='345' t='551' r='373' b='579' spriteName="SC"  soundName="" />
+			<MSG index='2' position="600, 119, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="300" mustShow="1"  isCharacter='0' l='345' t='551' r='373' b='579' spriteName="SC"  soundName="" />
+			
+		</EFF_73>
+
+		<EFF_74> <!-- Soccer mode_Ateam_score-->
+			<MSG index='0' position="472, 6, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="300" mustShow="1"  isCharacter='0' l='458' t='174' r='538' b='270' spriteName="SC"  soundName="" />
+			<MSG index='1' position="472, 6, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="600" mustShow="1"  isCharacter='0' l='458' t='174' r='538' b='270' spriteName="SC"  soundName="" />
+			<MSG index='2' position="313, 6, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="600" mustShow="1"  isCharacter='0' l='458' t='174' r='538' b='270' spriteName="SC"  soundName="" />
+			<MSG index='3' position="336, 24, 0" scale="0.7, 0.7, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="300" mustShow="1"  isCharacter='0' l='418' t='737' r='450' b='769' spriteName="SC"  soundName="" />
+			<MSG index='4' position="336, 24, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="2400" mustShow="1"  isCharacter='0' l='418' t='737' r='450' b='769' spriteName="SC"  soundName="" />
+			<MSG index='5' position="336, 24, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="2400" mustShow="1"  isCharacter='0' l='418' t='737' r='450' b='769' spriteName="SC"  soundName="" />
+		</EFF_74>
+
+		<EFF_75> <!-- Soccer mode_Bteam_score-->
+			<MSG index='0' position="472, 6, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="300" mustShow="1"  isCharacter='0' l='458' t='174' r='538' b='270' spriteName="SC"  soundName="" />
+			<MSG index='1' position="472, 6, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="600" mustShow="1"  isCharacter='0' l='458' t='174' r='538' b='270' spriteName="SC"  soundName="" />
+			<MSG index='2' position="631, 6, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="600" mustShow="1"  isCharacter='0' l='458' t='174' r='538' b='270' spriteName="SC"  soundName="" />
+			<MSG index='3' position="656, 24, 0" scale="0.7, 0.7, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="300" mustShow="1"  isCharacter='0'  l='418' t='704' r='450' b='736' spriteName="SC"  soundName="" />
+			<MSG index='4' position="656, 24, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="2400" mustShow="1"  isCharacter='0'  l='418' t='704' r='450' b='736' spriteName="SC"  soundName="" />
+			<MSG index='5' position="656, 24, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="2400" mustShow="1"  isCharacter='0'  l='418' t='704' r='450' b='736' spriteName="SC"  soundName="" />
+			
+		</EFF_75>
+
+		<EFF_76> <!-- Soccer mode_goal success EF_goal -->
+			<MSG index='0' position="351, 489, 0" scale="4.0, 4.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="200" mustShow="1"  isCharacter='0'  l='0' t='986' r='322' b='1024' spriteName="SC"  soundName="" />
+			<MSG index='1' position="351, 489, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="600" mustShow="1"  isCharacter='0'  l='0' t='986' r='322' b='1024' spriteName="SC"  soundName="" />
+			<MSG index='2' position="351, 489, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="100" mustShow="1"  isCharacter='0'  l='0' t='986' r='322' b='1024' spriteName="SC"  soundName="" />
+			<MSG index='3' position="351, 489, 0" scale="1.0, 1.0, 1.0" rot="-15" alpha='255' loop='0' stay='0' elapsTime="100" mustShow="1"  isCharacter='0'  l='0' t='986' r='322' b='1024' spriteName="SC"  soundName="" />
+			<MSG index='4' position="351, 489, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="100" mustShow="1"  isCharacter='0'  l='0' t='986' r='322' b='1024' spriteName="SC"  soundName="" />
+			<MSG index='5' position="351, 489, 0" scale="1.0, 1.0, 1.0" rot="15" alpha='255' loop='0' stay='0' elapsTime="100" mustShow="1"  isCharacter='0'  l='0' t='986' r='322' b='1024' spriteName="SC"  soundName="" />
+			<MSG index='6' position="351, 489, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="100" mustShow="1"  isCharacter='0'  l='0' t='986' r='322' b='1024' spriteName="SC"  soundName="" />
+			<MSG index='7' position="351, 489, 0" scale="1.0, 1.0, 1.0" rot="-15" alpha='255' loop='0' stay='0' elapsTime="100" mustShow="1"  isCharacter='0'  l='0' t='986' r='322' b='1024' spriteName="SC"  soundName="" />
+			<MSG index='8' position="351, 489, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="100" mustShow="1"  isCharacter='0'  l='0' t='986' r='322' b='1024' spriteName="SC"  soundName="" />
+			<MSG index='9' position="351, 489, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="300" mustShow="1"  isCharacter='0'  l='0' t='986' r='322' b='1024' spriteName="SC"  soundName="" />
+			</EFF_76>
+
+		<EFF_77> <!-- Soccer mode_gqoal success EF_success -->
+.			<MSG index='0' position="648, 454, 0" scale="3.0, 3.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="300" mustShow="1"  isCharacter='0'   l='0' t='935' r='86' b='985' spriteName="SC"  soundName="" />
+			<MSG index='1' position="648, 454, 0" scale="3.0, 3.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="300" mustShow="1"  isCharacter='0'  l='0' t='935' r='86' b='985' spriteName="SC"  soundName="" />
+			<MSG index='2' position="648, 454, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="200" mustShow="1"  isCharacter='0'  l='0' t='935' r='86' b='985' spriteName="SC"  soundName="" />
+			<MSG index='3' position="648, 454, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="100" mustShow="1"  isCharacter='0'  l='0' t='935' r='86' b='985' spriteName="SC"  soundName="" />
+			<MSG index='4' position="648, 454, 0" scale="1.0, 1.0, 1.0" rot="-15" alpha='255' loop='0' stay='0' elapsTime="100" mustShow="1"  isCharacter='0'   l='0' t='935' r='86' b='985' spriteName="SC"  soundName="" />
+			<MSG index='5' position="648, 454, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="100" mustShow="1"  isCharacter='0'   l='0' t='935' r='86' b='985' spriteName="SC"  soundName="" />
+			<MSG index='6' position="648, 454, 0" scale="1.0, 1.0, 1.0" rot="15" alpha='255' loop='0' stay='0' elapsTime="100" mustShow="1"  isCharacter='0'  l='0' t='935' r='86' b='985' spriteName="SC"  soundName="" />
+			<MSG index='7' position="648, 454, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="100" mustShow="1"  isCharacter='0'   l='0' t='935' r='86' b='985' spriteName="SC"  soundName="" />
+			<MSG index='8' position="648, 454, 0" scale="1.0, 1.0, 1.0" rot="-15" alpha='255' loop='0' stay='0' elapsTime="100" mustShow="1"  isCharacter='0'   l='0' t='935' r='86' b='985' spriteName="SC"  soundName="" />
+			<MSG index='9' position="648, 454, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="100" mustShow="1"  isCharacter='0'   l='0' t='935' r='86' b='985' spriteName="SC"  soundName="" />
+			<MSG index='10' position="648, 454, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="300" mustShow="1"  isCharacter='0'   l='0' t='935' r='86' b='985' spriteName="SC"  soundName="" />
+		</EFF_77>
+
+		<EFF_78> <!-- Soccer mode_goal 득점시 이펙트 -->
+			<MSG index='0' position="412, 120, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="300" mustShow="1"  isCharacter='0' l='539' t='174' r='583' b='270' spriteName="SC"  soundName="" />
+			<MSG index='1' position="412, 120, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="600" mustShow="1"  isCharacter='0' l='539' t='174' r='583' b='270' spriteName="SC"  soundName="" />
+			<MSG index='2' position="412, 120, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="300" mustShow="1"  isCharacter='0' l='539' t='174' r='583' b='270' spriteName="SC"  soundName="" />
+			<MSG index='3' position="460, 153, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="1000" mustShow="1"  isCharacter='0' l='451' t='704' r='483' b='758' spriteName="SC"  soundName="" />
+			<MSG index='4' position="477, 153, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="1200" mustShow="1"  isCharacter='0' l='451' t='704' r='483' b='758' spriteName="SC"  soundName="" />
+			<MSG index='5' position="494, 153, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="1000" mustShow="1"  isCharacter='0' l='451' t='704' r='483' b='758' spriteName="SC"  soundName="" />
+		</EFF_78>
+
+	<EFF_79> <!-- Soccer PG PLUS -->
+			<MSG index='0' position="401, 715, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="300" mustShow="1"  isCharacter='0' l='490' t='286' r='531' b='332' spriteName="SC"  soundName="" />
+			<MSG index='1' position="401, 715, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="600" mustShow="1"  isCharacter='0' l='490' t='286' r='531' b='332' spriteName="SC"  soundName="" />
+			<MSG index='2' position="401, 715, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="300" mustShow="1"  isCharacter='0' l='490' t='286' r='531' b='332' spriteName="SC"  soundName="" />
+			<MSG index='3' position="401, 715, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="600" mustShow="1"  isCharacter='0' l='490' t='286' r='531' b='332' spriteName="SC"  soundName="" />
+			<MSG index='4' position="401, 715, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="300" mustShow="1"  isCharacter='0' l='490' t='286' r='531' b='332' spriteName="SC"  soundName="" />
+			<MSG index='5' position="401, 715, 0" scale="1.5, 1.5, 1.0" rot="0" alpha='255' loop='0' stay='0' elapsTime="600" mustShow="1"  isCharacter='0' l='490' t='286' r='531' b='332' spriteName="SC"  soundName="" />
+		</EFF_79>
+		
+		
+		
+	</ACTORS>
+
+
+
+</UIACTOR>

@@ -1,0 +1,83 @@
+<BOT_WAVE>
+	<MODE index = "0">
+	<WAVE wave="1" wave_time="20000">
+		<SCENARIO_RATIO scenario="11" speedRatio="1" selectRatio="34"/>
+		<SCENARIO_RATIO scenario="12" speedRatio="1" selectRatio="33"/>
+		<SCENARIO_RATIO scenario="13" speedRatio="1" selectRatio="33"/>
+	</WAVE>
+	<WAVE wave="2" wave_time="20000">
+		<SCENARIO_RATIO scenario="21" speedRatio="1" selectRatio="34"/>
+		<SCENARIO_RATIO scenario="22" speedRatio="1" selectRatio="33"/>
+		<SCENARIO_RATIO scenario="23" speedRatio="1" selectRatio="33"/>
+	</WAVE>
+	<WAVE wave="3" wave_time="20000">
+		<SCENARIO_RATIO scenario="31" speedRatio="1" selectRatio="34"/>
+		<SCENARIO_RATIO scenario="32" speedRatio="1" selectRatio="33"/>
+		<SCENARIO_RATIO scenario="33" speedRatio="1" selectRatio="33"/>
+	</WAVE>
+	<WAVE wave="4" wave_time="20000">
+		<SCENARIO_RATIO scenario="41" speedRatio="1" selectRatio="34"/>
+		<SCENARIO_RATIO scenario="42" speedRatio="1" selectRatio="33"/>
+		<SCENARIO_RATIO scenario="43" speedRatio="1" selectRatio="33"/>
+	</WAVE>
+	<WAVE wave="5" wave_time="20000">
+		<SCENARIO_RATIO scenario="51" speedRatio="1" selectRatio="34"/>
+		<SCENARIO_RATIO scenario="52" speedRatio="1" selectRatio="33"/>
+		<SCENARIO_RATIO scenario="53" speedRatio="1" selectRatio="33"/>
+	</WAVE>
+	<WAVE wave="6" wave_time="20000">
+		<SCENARIO_RATIO scenario="61" speedRatio="1.2" selectRatio="34"/>
+		<SCENARIO_RATIO scenario="62" speedRatio="1.2" selectRatio="33"/>
+		<SCENARIO_RATIO scenario="63" speedRatio="1.2" selectRatio="33"/>
+	</WAVE>
+	<WAVE wave="7" wave_time="20000">
+		<SCENARIO_RATIO scenario="71" speedRatio="1" selectRatio="100"/>
+	</WAVE>
+	<WAVE wave="8" wave_time="80000">
+		<SCENARIO_RATIO scenario="81" speedRatio="1" selectRatio="100"/>
+	</WAVE>
+	</MODE>
+<MODE index = "1">		
+	<WAVE wave="1" wave_time="19000">	
+		<SCENARIO_RATIO scenario="211" speedRatio="0.9" selectRatio="15"/>
+		<SCENARIO_RATIO scenario="212" speedRatio="0.9" selectRatio="15"/>
+		<SCENARIO_RATIO scenario="213" speedRatio="0.9" selectRatio="15"/>
+		<SCENARIO_RATIO scenario="214" speedRatio="0.9" selectRatio="15"/>
+		<SCENARIO_RATIO scenario="215" speedRatio="0.9" selectRatio="10"/>
+		<SCENARIO_RATIO scenario="216" speedRatio="0.9" selectRatio="10"/>
+		<SCENARIO_RATIO scenario="217" speedRatio="0.9" selectRatio="10"/>
+		<SCENARIO_RATIO scenario="218" speedRatio="0.9" selectRatio="10"/>
+
+	</WAVE>	
+	<WAVE wave="2" wave_time="20000">	
+		<SCENARIO_RATIO scenario="221" speedRatio="0.9" selectRatio="20"/>
+		<SCENARIO_RATIO scenario="222" speedRatio="0.9" selectRatio="20"/>
+		<SCENARIO_RATIO scenario="223" speedRatio="0.9" selectRatio="20"/>
+		<SCENARIO_RATIO scenario="224" speedRatio="0.9" selectRatio="20"/>
+		<SCENARIO_RATIO scenario="225" speedRatio="0.9" selectRatio="20"/>
+	</WAVE>	
+	<WAVE wave="3" wave_time="20000">	
+		<SCENARIO_RATIO scenario="231" speedRatio="0.9" selectRatio="20"/>
+		<SCENARIO_RATIO scenario="232" speedRatio="0.9" selectRatio="20"/>
+		<SCENARIO_RATIO scenario="233" speedRatio="0.9" selectRatio="20"/>
+		<SCENARIO_RATIO scenario="234" speedRatio="0.9" selectRatio="20"/>
+		<SCENARIO_RATIO scenario="235" speedRatio="0.9" selectRatio="20"/>
+	</WAVE>	
+	<WAVE wave="4" wave_time="42000">	
+		<SCENARIO_RATIO scenario="251" speedRatio="0.8" selectRatio="25"/>
+		<SCENARIO_RATIO scenario="252" speedRatio="0.8" selectRatio="25"/>
+		<SCENARIO_RATIO scenario="253" speedRatio="0.8" selectRatio="25"/>
+		<SCENARIO_RATIO scenario="254" speedRatio="0.8" selectRatio="25"/>
+	</WAVE>	
+	<WAVE wave="5" wave_time="23000">	
+	<SCENARIO_RATIO scenario="241" speedRatio="0.9" selectRatio="50"/>
+		<SCENARIO_RATIO scenario="243" speedRatio="0.9" selectRatio="50"/>
+	</WAVE>	
+	<WAVE wave="6" wave_time="45000">	
+		<SCENARIO_RATIO scenario="281" speedRatio="0.8" selectRatio="40"/>
+		<SCENARIO_RATIO scenario="282" speedRatio="0.8" selectRatio="30"/>
+		<SCENARIO_RATIO scenario="283" speedRatio="0.8" selectRatio="30"/>
+	</WAVE>	
+</MODE>		
+</BOT_WAVE>		
+
