@@ -447,6 +447,74 @@ public sealed class Db : IDisposable
         }
     }
 
+    // ------------------------------------------------------------- messages
+    public sealed record MailMsg(long MsgId, string From, string Title, string Body, bool IsRead, ushort DateCode);
+
+    /// <summary>寄信 (419)。收件人須存在; body ≤200 (schema CHECK)。</summary>
+    public bool SendMessage(long fromUserId, string toNick, string title, string body)
+    {
+        lock (_gate)
+        {
+            using var who = Cmd(
+                "SELECT user_id FROM users WHERE nickname=@n", ("@n", toNick));
+            var toId = who.ExecuteScalar();
+
+            if (toId is null)
+            {
+                return false;
+            }
+
+            using var ins = Cmd("""
+                INSERT INTO messages(from_user_id, to_user_id, title, body)
+                VALUES(@f, @t, @ti, @b)
+                """,
+                ("@f", fromUserId),
+                ("@t", (long)toId),
+                ("@ti", title),
+                ("@b", body.Length > 200 ? body[..200] : body));
+            return ins.ExecuteNonQuery() == 1;
+        }
+    }
+
+    /// <summary>收件匣 (425→426)。date 編碼 = MMDD (u16)。</summary>
+    public List<MailMsg> GetMessages(long userId)
+    {
+        lock (_gate)
+        {
+            using var cmd = Cmd("""
+                SELECT m.msg_id, COALESCE(u.nickname,'system'), m.title, m.body,
+                       m.is_read, strftime('%m%d', m.sent_at, 'unixepoch')
+                FROM messages m
+                LEFT JOIN users u ON u.user_id = m.from_user_id
+                WHERE m.to_user_id=@u
+                ORDER BY m.msg_id DESC LIMIT 50
+                """, ("@u", userId));
+            using var r = cmd.ExecuteReader();
+
+            List<MailMsg> list = [];
+            while (r.Read())
+            {
+                list.Add(new(
+                    r.GetInt64(0), r.GetString(1), r.GetString(2), r.GetString(3),
+                    r.GetInt64(4) != 0, ushort.Parse(r.GetString(5))));
+            }
+
+            return list;
+        }
+    }
+
+    /// <summary>刪信 (421)。</summary>
+    public bool DeleteMessage(long userId, long msgId)
+    {
+        lock (_gate)
+        {
+            using var cmd = Cmd(
+                "DELETE FROM messages WHERE msg_id=@m AND to_user_id=@u",
+                ("@m", msgId), ("@u", userId));
+            return cmd.ExecuteNonQuery() == 1;
+        }
+    }
+
     // ------------------------------------------------------------- sell
     /// <summary>
     /// 賣出背包單件 (208)。回收價 = 目錄 price_gp 的 20% (私服預設;

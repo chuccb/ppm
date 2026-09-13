@@ -31,6 +31,70 @@ public static class FriendHandlers
         add(Opcode.GL_FRIEND_DEL_REQ, Delete);
         add(Opcode.GL_FRIEND_LIST_REQ, List);
         add(Opcode.GL_FRIEND_INFO_REQ, Info);
+        add(Opcode.GL_MSG_ADD_REQ, MsgSend);
+        add(Opcode.GL_MSG_RECVLIST_REQ, MsgList);
+        add(Opcode.GL_MSG_DEL_REQ, MsgDelete);
+    }
+
+    // REQ(419): s32, str to, str title, str body, str, u16 date, u8
+    // ACK(420) sub_559810: str to_nick, u8, u8 result
+    //   (0=成功 1=拒收 2=信箱滿 — 九輪逐分支)
+    private static async ValueTask MsgSend(Session s, Packet p, ServerContext ctx)
+    {
+        _ = p.ReadS32();
+        var to = p.ReadStr();
+        var title = p.ReadStr();
+        var body = p.ReadStr();
+
+        byte result = s.UserId != 0 && ctx.Db.SendMessage(s.UserId, to, title, body)
+            ? (byte)0
+            : (byte)1;
+
+        await s.SendAsync(new Packet(Opcode.GL_MSG_ADD_ACK)
+            .WriteStr(to)
+            .WriteU8(0)
+            .WriteU8(result));
+    }
+
+    // REQ(425): s32 page → ACK(426) sub_55A630:
+    //   u16 x, str self, u8 count, count×{str from, u8, str title,
+    //   u32 msg_id, str body(≤201), str, u16 date}
+    private static async ValueTask MsgList(Session s, Packet p, ServerContext ctx)
+    {
+        var messages = s.UserId != 0
+            ? ctx.Db.GetMessages(s.UserId)
+            : [];
+
+        var ack = new Packet(Opcode.GL_MSG_RECVLIST_ACK)
+            .WriteU16(0)
+            .WriteStr(s.Nickname)
+            .WriteU8((byte)Math.Min(messages.Count, 50));
+
+        foreach (var m in messages.Take(50))
+        {
+            ack.WriteStr(m.From)
+               .WriteU8(m.IsRead ? (byte)1 : (byte)0)
+               .WriteStr(m.Title)
+               .WriteU32((uint)m.MsgId)
+               .WriteStr(m.Body.Length > 200 ? m.Body[..200] : m.Body)
+               .WriteStr("")
+               .WriteU16(m.DateCode);
+        }
+
+        await s.SendAsync(ack);
+    }
+
+    // REQ(421): str msg_key → ACK(422) sub_55A310: u8 ok, str key
+    private static async ValueTask MsgDelete(Session s, Packet p, ServerContext ctx)
+    {
+        var key = p.ReadStr();
+        bool ok = s.UserId != 0
+            && long.TryParse(key, out long msgId)
+            && ctx.Db.DeleteMessage(s.UserId, msgId);
+
+        await s.SendAsync(new Packet(Opcode.GL_MSG_DEL_ACK)
+            .WriteU8(ok ? (byte)1 : (byte)0)
+            .WriteStr(key));
     }
 
     private static async ValueTask Add(Session s, Packet p, ServerContext ctx)
