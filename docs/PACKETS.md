@@ -1049,8 +1049,9 @@ sub_568CE0/sub_53F830/sub_53F920/sub_53F9F0 三 ctor 交叉驗證):
 ```
 模式變更 (169/170) 後 client 以 mode 設定表 `sub_426930(mode)` 回推
 預設地圖寫 +130 (sub_540280)。server 現已鏡像 (RoomHandlers.ModeDefaultMap,
-`map_StartIndex.xml` modeIndex→modeStartIndex): 0→5 1→1 2→14 3→15
-4→23 8→51; 其餘 mode (5/6/7/9/10/11/12/13/15/16) 無地圖目錄 → 保留原圖。
+client 實際載入的 `system/map_StartIndex.xml` — ⚠ ui/ 根目錄另有一份
+舊版 modeStartIndex 不同, 以 system/ 為準): 0→106 1→104 2→14 3→107
+4→23 8→51 9→89 12→98; 其餘 mode (5/6/7/10/11/13/15/16) 無條目 → 保留原圖。
 
 ### 3.15b3 TeamHacking 駭入/炸彈協定 317-333 (廿二輪 — TH 模式核心)
 ```

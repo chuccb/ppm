@@ -284,9 +284,12 @@ hand*.tga 互證: 那是「試衣間手部貼圖」快取)
 自訂地圖 bitmask 的 bit {0,1,2,3,4,9,12,14} (對齊 maplist.pat +0 的
 模式 bitmask 位定義)。
 
-**map_StartIndex.xml** (官方模式名 + 預設圖): `modeIndex→modeStartIndex`
-= 0→5(TeamDeath) 1→1(FreeForAll) 2→14(TeamHacking) 3→15(TeamSurvival)
-4→23(TeamSteal) 8→51(PNR)。modeStartIndex 即該模式預設 map_id
+**map_StartIndex.xml** (官方模式名 + 預設圖): ⚠ 有兩份且值不同 —
+client 實際載入的是 `system/map_StartIndex.xml` (sub_717E50 路徑),
+`ui/` 根目錄那份是舊版 (0→5/1→1/3→15 已廢)。權威表
+`modeIndex→modeStartIndex` = 0→106(TeamDeath) 1→104(FreeForAll)
+2→14(TeamHacking) 3→107(TeamSurvival) 4→23(TeamSteal) 8→51(PNR)
+9→89(GunShooting) 12→98(SOCCER)。modeStartIndex 即該模式預設 map_id
 (maplist 0..122) — 169/170 改模式時 client `sub_426930(mode)` 回推
 此值寫 room+130, server 已鏡像 (RoomHandlers.ModeDefaultMap)。
 

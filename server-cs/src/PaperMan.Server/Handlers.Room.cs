@@ -33,21 +33,25 @@ public static class RoomHandlers
     }
 
     /// <summary>
-    /// 各模式的預設地圖 (map_StartIndex.xml modeIndex→modeStartIndex, 即
-    /// maplist 的絕對 map_id)。169/170 改模式時 client 以 sub_426930(mode)
-    /// 回推同一值寫 +130 (sub_540280) — server 鏡像以免 114/130/134 送舊圖。
-    /// 其餘 mode (5=練習 6=教學 7=聊天 9=射擊館 10/11/13 佔領/AI 12=足球
-    /// 15=武器試射 16=空) 無地圖目錄 → 保留原圖。
+    /// 各模式的預設地圖 — client 載入 `system/map_StartIndex.xml` (⚠ 非 ui/
+    /// 根目錄那份舊版, 兩者 modeStartIndex 不同!) 填 room 的 mode→map 表,
+    /// 169/170 改模式時 sub_426930(mode) 回推 modeStartIndex 寫 +130
+    /// (sub_540280)。modeStartIndex 即 maplist (123 圖) 的絕對 map_id。
+    /// server 鏡像以免 114/130/134 送舊圖。
+    /// 其餘 mode (5=練習 6=教學 7=聊天 10/11/13 佔領/AI 15=武器試射
+    /// 16=空) 無此表條目 → 保留原圖。
     /// </summary>
     private static readonly FrozenDictionary<byte, byte> ModeDefaultMap =
         new Dictionary<byte, byte>
         {
-            [0] = 5,                                        // TeamDeath (TD_)
-            [1] = 1,                                        // FreeForAll (PS_)
+            [0] = 106,                                      // TeamDeath (TD_)
+            [1] = 104,                                      // FreeForAll (PS_)
             [2] = 14,                                       // TeamHacking/駭入 (TH_)
-            [3] = 15,                                       // TeamSurvival (TS_)
+            [3] = 107,                                      // TeamSurvival (TS_)
             [4] = 23,                                       // TeamSteal (TW_)
             [8] = 51,                                       // Pulp'n Roll (PNR)
+            [9] = 89,                                       // GunShooting
+            [12] = 98,                                      // SOCCER
         }.ToFrozenDictionary();
 
     public static void Register(Registrar add)
