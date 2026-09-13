@@ -474,6 +474,15 @@ repeat: string from, u8, string title, u32 msg_id, string body(≤201), string, 
 **ACK 297** (sub_57AA50): `u8 result` — 0=成功, 之後 5×s32
 (cash/餘額顯示組); 1..11 = 錯誤碼 (11 種禮物失敗訊息)。
 
+### 3.15a 大廳聊天/名單 (八輪讀畢)
+- **119 GL_CHATTING_REQ**: `str message` (ANSI)
+- **120 GL_CHATTING_ACK** (sub_56E300): `s32 custom_tex, str nick,
+  wstr message` — ⚠ 訊息用**寬字串** (sub_5927B0, UTF-16LE 雙 NUL),
+  與 REQ 的 ANSI 不對稱; nick 過黑名單 sub_539320 過濾, n11==16
+  (回放模式) 時整包忽略
+- **116 GL_ADDUSER_ACK** (sub_56A4D0): `s32 uid, str nick` (大廳加人)
+- **118 GL_DELETEUSER_ACK** (sub_56A550): `str nick` (大廳減人)
+
 ### 3.15 房間系統 (七輪讀畢)
 - **111 GL_MAKEROOM_REQ** (builder @0x569xxx): `u8 map(a1<0 時 0xFF), u8 pass_flag,
   [str title 無密碼版/密碼版], str pass, u8 rule, u8 max_player, u8 x, u8 y`

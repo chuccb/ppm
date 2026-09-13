@@ -20,6 +20,26 @@ public static class LobbyHandlers
         add(Opcode.GL_MYITEM_REQ, MyItems);
         add(Opcode.GM_CHECKNICK_REQ, CheckNick);
         add(Opcode.GM_CREATENICK_REQ, CreateNick);
+        add(Opcode.GL_CHATTING_REQ, Chat);
+    }
+
+    // REQ(119) builder @0x56E2xx: str message (ANSI)
+    // ACK(120) sub_56E300: s32 custom_tex, str nick, wstr message
+    //   ⚠ 訊息回送用「寬字串」(sub_5927B0 讀 UTF-16LE) — 與 REQ 的 ANSI 不對稱!
+    //   client 端還會拿 nick 過 sub_539320 黑名單 (忽略清單) 過濾
+    private static async ValueTask Chat(Session s, Packet p, ServerContext ctx)
+    {
+        var message = p.ReadStr();
+        if (s.UserId == 0 || message.Length == 0)
+        {
+            return;
+        }
+
+        // 單人大廳: 回聲給自己 (多人時應廣播給同頻道所有 session)
+        await s.SendAsync(new Packet(Opcode.GL_CHATTING_ACK)
+            .WriteS32(0)                                    // custom_tex crc
+            .WriteStr(s.Nickname)
+            .WriteWStr(message));
     }
 
     // ACK(106) sub_56A250: u16 count; 若 count!=0 才有 u8 flags, u8 n,
