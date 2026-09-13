@@ -29,6 +29,7 @@ public sealed class Router
         ShopHandlers.Register(Add);
         StatHandlers.Register(Add);
         ClanHandlers.Register(Add);
+        QuestHandlers.Register(Add);
         return new(table);
     }
 

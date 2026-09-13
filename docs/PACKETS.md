@@ -439,10 +439,31 @@ repeat: string from, u8, string title, u32 msg_id, string body(≤201), string, 
   顯示區, 送 0 安全)
 - 882 (playtimec): **無 REQ**, server 推播 `s32 總秒數`, client case 882
   自行差分 (dword_EE8D7C)。
-### 3.13 GQ_QUEST_ACCEPT_ACK (868) — sub_91CC70:
+### 3.13 GQ_QUEST 任務家族 (八輪全家讀畢)
+13-byte 任務快照 = `{s32 quest_index, s32 progress, u8 state, s32 extra}`
+(state: 0=NONE 1=WORKING 2=SUCCESS 3=FAILED — sub_91C7B0 的除錯字串直接
+印出這些名稱, 交叉驗證用)。
 ```
-u8 result (0=OK, 7=特殊錯誤); result!=0: s32 quest_index_type
-result==0: 13-byte 快照 {s32 quest_id, s32, u8, s32}
+865 GL_SERVER_DATETIME_ACK (sub_585AB0): s32 unix_time
+866 GQ_QUEST_LIST_ACK  (sub_91C7B0): s32 count(<3), count×快照(13B),
+    然後 3 個 raw 塊: 7B (this+59682, len@59681=4→實為7B 初始),
+    再 2 塊 (len@59699/59765; 全 exe 僅此處引用 → 客戶端未再使用,
+    伺服器可送空/固定長度)
+867 GQ_QUEST_ACCEPT_REQ (sub_91CB80): s32 quest_index
+868 GQ_QUEST_ACCEPT_ACK (sub_91CC70): u8 result (0=OK; !=0 → s32 idx);
+    OK → 13B 快照
+869/870 CANCEL: REQ s32 idx; ACK (sub_91D290) u8 result
+    (!=0 → s32 idx, s32) — 成功後 client 清 working 槽
+871/872 SUCCESS: ACK (sub_91C6F0) u8 result, s32 idx
+    (state 2/3/4 分支處理)
+873/874 COMPLETE: ACK (sub_91C1E0) u8 result, s32 idx
+    (n4==1 領獎, 2/3/4 分支; n4==4 特殊獎勵)
+875 CHANGEDSTATE_ACK (sub_91D690): raw 5B = {s32 idx, u8 new_state}
+877 ACCEPT_DAILY_ACK (sub_91D7E0): u8 ok; ok → s32 count +
+    raw(13*count) 快照陣列 (每日任務批次)
+879 USER_COMPLETE_HONOR_ACK (sub_91CAA0): u8 result (0=成功),
+    str title, raw(len@239104) 榮譽塊
+881 CURRENTITEMQUEST_ACK (sub_91DC90): s32 item_quest_id
 ```
 ### 3.14 GS_GIVEGIFT (296/297) — 七輪修正 (sub_579830 屬 290):
 **REQ 296** 兩變體 (builder @0x57A6xx):
