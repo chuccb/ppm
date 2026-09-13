@@ -29,16 +29,32 @@ public static class LobbyHandlers
     //   client 端還會拿 nick 過 sub_539320 黑名單 (忽略清單) 過濾
     private static async ValueTask Chat(Session s, Packet p, ServerContext ctx)
     {
-        var message = p.ReadStr();
+        // 兩變體 (廿四輪): 完整版 s32 tex + str nick + wstr msg (與 ACK 同構);
+        // 簡版只有 str。以剩餘長度判別。
+        int tex = 0;
+        string nick = s.Nickname;
+        string message;
+
+        if (p.Remaining > 8)
+        {
+            tex = p.ReadS32();
+            nick = p.ReadStr();
+            message = p.ReadWStr();
+        }
+        else
+        {
+            message = p.ReadStr();
+        }
+
         if (s.UserId == 0 || message.Length == 0)
         {
             return;
         }
 
-        // 單人大廳: 回聲給自己 (多人時應廣播給同頻道所有 session)
+        // 單人大廳: 回聲給自己 (多人時原樣廣播 — client 已附 nick+tex)
         await s.SendAsync(new Packet(Opcode.GL_CHATTING_ACK)
-            .WriteS32(0)                                    // custom_tex crc
-            .WriteStr(s.Nickname)
+            .WriteS32(tex)
+            .WriteStr(nick)
             .WriteWStr(message));
     }
 

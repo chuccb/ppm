@@ -39,13 +39,13 @@ public static class ClanHandlers
         var name = p.ReadStr();
         var slogan = p.ReadStr();
         var intro = p.ReadStr();
-        byte emblem = p.Remaining > 0 ? p.ReadU8() : (byte)0;
+        int emblem = p.Remaining >= 4 ? p.ReadS32() : 0;    // s32 (廿四輪修正)
         _ = (slogan, intro);                                // schema 暫存於 notice 欄位外
 
         var result = s.UserId switch
         {
             0 => CreateResult.Failed,
-            _ => ctx.Db.CreateClan(s.UserId, name, emblem) switch
+            _ => ctx.Db.CreateClan(s.UserId, name, (byte)Math.Clamp(emblem, 0, 255)) switch
             {
                 > 0 => CreateResult.Ok,
                 _ => CreateResult.DuplicateName,

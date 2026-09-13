@@ -301,7 +301,8 @@ sub  REQ (client→server)          ACK (server→client, sub_54D040 分發)
 381..383  —         戰隊戰績       s32 ×2 (sub_54FF00/54FFC0, 帶 sub 參數)
 ```
 **獨立對: 585 GC_CLAN_CREATE_REQ / 586 _ACK (不走隧道!)**:
-REQ (sub_5505F0) = `str name, str slogan, str intro, u8 emblem`;
+REQ (sub_5505F0) = `str name, str slogan, str intro, s32 emblem`
+(廿四輪修正: sub_592A20 = s32 非 u8);
 ACK (sub_54CB90) = `s8 result` — 0=成功 (再讀 `s32 → EE8D18` 扣費後 GP,
 sub_54DD70), 1..7 = 錯誤碼 (重名/GP 不足/等級不夠...)。
 建立成功後 client 自行送 583/187 拉戰隊資訊。
@@ -914,7 +915,10 @@ dispatcher case 102 → `sub_58D6F0` 立即 `ctor(101)` 回送
 **絕不可收 101 回 102** (無限迴圈)。
 
 ### 3.15a 大廳聊天/名單 (八輪讀畢)
-- **119 GL_CHATTING_REQ**: `str message` (ANSI)
+- **119 GL_CHATTING_REQ** (廿四輪修正 — 兩變體):
+  簡版 `str message`; 完整版 `s32 custom_tex, str nick, wstr message`
+  — 與 120 ACK 完全同構! client 已附自己的 nick+tex, server 可
+  原樣廣播 (無需重組)
 - **120 GL_CHATTING_ACK** (sub_56E300): `s32 custom_tex, str nick,
   wstr message` — ⚠ 訊息用**寬字串** (sub_5927B0, UTF-16LE 雙 NUL),
   與 REQ 的 ANSI 不對稱; nick 過黑名單 sub_539320 過濾, n11==16
