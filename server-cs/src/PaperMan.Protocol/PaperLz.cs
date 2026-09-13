@@ -2,6 +2,10 @@
 // 自製 LZ — 逐行對應反編譯:
 //   壓縮   sub_591600: flag byte 每 8 個 token 一個 (bit 由低到高, n128 128→256 wrap)
 //          hash = src[2] ^ (src[1]-13) ^ (src[0]+13) → 256 槽 hash 表存絕對位址低 16 bit
+//          (表宣告 _WORD[258] → 索引必為 8-bit, C# 的 (byte) 截斷正確;
+//           位址低位差 & 0x3FF ≡ 位置差 & 0x3FF, 兩實作語意等價 — 十三輪三驗)
+//          原版 hash 表未初始化 (stack 垃圾) — 但 3-byte 比對守門,
+//          C# 零初始化只影響輸出位元組選擇, 不影響解壓相容性
 //          match 距離 = (pos - table[h]) & 0x3FF (≤1023), 長度 3..65
 //          token: 2 bytes = [(len*4-12) | dist>>8] [dist&0xFF]
 //          若輸出將超過 count-17 → 放棄, 原樣拷貝 (回傳 count → caller 視為失敗)
