@@ -51,6 +51,7 @@ def import_items(con: sqlite3.Connection) -> int:
         v540 = struct.unpack_from("<3i", tail, 5)
         v584 = struct.unpack_from("<6i", tail, 37)
 
+        # t8 = 基底物品參照 (變體→原型, 十七輪定案); t4 = 稀有連動
         rows.append((eid, name, min(kind, 20), 0, 0, v540[0], req_level, t4, t8))
         off += 20 + nl + TAIL
 

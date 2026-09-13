@@ -100,15 +100,29 @@ tail[714..720] padding
 sub_5359B0 (getter) 證實記憶體 1212..1224/1228..1240 = 兩檔位 4×s32
 價格組, +1248/+1252 = 檔位貨幣 id — 結構存在但日版資料未填。
 
-## 3. data.pat 容器格式 (@225227 — 已完整破解, 可直接寫解包器)
+## 2d. itemdata 頭部 16B 定案 (十七輪)
+```
++0  s32 item_id
++4  s32 t4  = 稀有連動物品 id (153 條非零)
++8  s32 t8  = 基底物品參照 — 變體→原型 (7,155 條: '赤組帽子' 變體
+             → 同名原型; ヘアパズル → 基底髮型 11012201...)
++12 s32 t12 = 改裝件掛載對象 (1,291 條非零)
+```
+
+## 3. data.pat 容器格式 (@225227 — 十七輪實測修正)
 
 ```
+0. ⚠ 檔案本身先過 pmFile 加密 (十七輪實測: 載入器經 pmFile 讀取)
+   → 先 pmfile_decrypt 再進下面流程
 [u32 size_1 (混淆)] [body...]
 1. size_1 = ROL32(讀入的前4B, 9) ^ 0x975E   → 解壓後大小
-2. body 逐 byte 解混淆 (i 從 len..1 遞減):
-     plain[k] = i ^ ROL8(cipher[k], 3)
-3. zlib 1.2.3 uncompress → 得 size_1 bytes
-4. 尾 4B = ~CRC32(前面內容) 校驗 (查表 dword_AFBF28, 多項式標準)
+2. body 逐 byte 解混淆: plain[k] = i ^ ROL8(cipher[k], 3), i 從 len..1
+3. zlib 1.2.3 uncompress → 得 size_1 bytes (實測 23,769,904B 精確吻合)
+4. 尾 4B = CRC (客戶端自帶表 dword_AFBF28, 與標準 crc32 不同 — 
+   實測不匹配, 解包工具改為警告)
+內容 (實測): 路徑快取表快照 — [s32 群組數=9][s32 count=15][s32 容量=3007]
++ 3007×128B UTF-16 名稱槽 (只填 15 個 hand*.tga 噴漆/手勢貼圖,
+87% 為 0xCD 未初始化填充) → **對私服無用**
 ```
 
 ## 4. pmClient.dat (pmFile 打包系統)
@@ -140,6 +154,12 @@ sub_5359B0 (getter) 證實記憶體 1212..1224/1228..1240 = 兩檔位 4×s32
 ```
 → 111 GL_MAKEROOM_REQ 的 map id 驗證即對照這張表 (123 張圖已入
 map_catalog)。
+**模式 bitmask 解碼 (十七輪, 檔名前綴互證)**:
+bit0=PS(個人戰) bit1=TS(團隊戰) bit2=TD(爆破) bit3=TH(奪寶?)
+bit4=TW(佔領戰) bit5/6=TU(教學) bit9=PNR bit10=AI(協力)
+bit11=ECT(武器試射) bit12=OCC(基地建設) bit13=PVE bit14=TS世界盃
+bit15=OCC2 — Quest.pat 的 GameMode 欄 (1..10) ≈ bit 位 +1,
+建房時 client 以 bitmask 過濾可選地圖。
 
 ## 5. .pat 文字/二進位雙軌 (convars)
 

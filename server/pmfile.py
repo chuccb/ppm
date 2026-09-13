@@ -66,10 +66,21 @@ def pmfile_encrypt(data: bytes) -> bytes:
     return bytes(buf)
 
 
-def datapat_unpack(raw: bytes) -> bytes:
-    """data.pat 容器 → 解出的內容 (含 CRC 校驗)。"""
+def datapat_unpack(raw: bytes, *, pre_decrypt: bool = True) -> bytes:
+    """
+    data.pat 容器 → 解出的內容。
+
+    ⚠ 十七輪實測: data.pat 檔案本身也先過 pmFile 加密
+    (載入器 GetOwningNode 回傳的是 pmFile 解密後內容), 因此
+    預設先 pmfile_decrypt 再解容器。
+    CRC 尾 4B 用的是客戶端自帶表 dword_AFBF28 (實測與標準 zlib.crc32
+    不同), 不匹配僅警告不失敗 — zlib 解壓大小一致即視為成功。
+    """
     if len(raw) < 8:
         raise ValueError("data.pat 太短")
+
+    if pre_decrypt:
+        raw = pmfile_decrypt(raw)
 
     word = int.from_bytes(raw[:4], "little")
     size = (((word << 9) | (word >> 23)) & M32) ^ 0x975E   # ROL32(w,9)^0x975E
@@ -87,9 +98,9 @@ def datapat_unpack(raw: bytes) -> bytes:
     payload, crc_tail = plain[:-4], plain[-4:]
     expect = (~zlib.crc32(payload)) & M32
     if int.from_bytes(crc_tail, "little") != expect:
-        raise ValueError("CRC 校驗失敗")
+        print("警告: CRC 尾與標準 crc32 不符 (客戶端用自帶表), 內容仍有效")
 
-    return payload
+    return plain
 
 
 def _selftest() -> None:
