@@ -76,7 +76,8 @@ route table / 日誌 / `packet_stats` 監控。
   `PaperLz.cs` / `PaperAes.cs` / `PacketCodec.cs` (真實 LZ+AES 管線)。
 - `PaperMan.Server` — TCP 伺服器: 9600B 框架 (`Session.cs`)、SQLite 存取層
   (`Db.cs`, 交易式購物/登入/暱稱/背包分頁)、封包 handlers
-  (登入 681/694、大廳、商店、GP_CH*C 戰績 18 REQ/ACK 對 + 882 推播)。
+  (登入 681/694、大廳、商店、送禮 296/297、戰隊隧道 583/584、
+  GP_CH*C 戰績 18 REQ/ACK 對 + 882 推播)。AES 原生金鑰已內建。
 - `PaperMan.SelfTest` — 不需遊戲客戶端的 codec round-trip 自測。
 - LZ 演算法另以 Python 逐行移植跑過 310 組 round-trip/fuzz 驗證。
 

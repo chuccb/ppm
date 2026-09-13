@@ -216,6 +216,10 @@ recvfrom ≤9600 → 同一 Packet 檢核 `sub_591D50` + AES 解密 `sub_5930C0`
 18,20,22,24,26,28,29,31,33,34 + 154 UDP_ALL_PING_ACK / 158
 UDP_TCP_DEAD_ACK 兩個註冊表編號)。UDP 戰鬥協定的編號與 TCP 註冊表
 **不共用**, 私服做 relay 時不可混淆兩個空間。
+七輪補: **154 UDP_ALL_PING_ACK** (sub_5965D0) = `u8 count,
+count×{u8 room_slot, u8 ping_grade}` — 以 slot 對照房間成員表更新
+ping 顯示; **158 UDP_TCP_DEAD_ACK** (sub_596910) = 無 payload 的
+斷線通知。
 
 **戰隊隧道協定 (五輪發現)**: `GC_CLAN_PROTOCOL_REQ(583)/_ACK(584)` 是
 **容器封包** — payload 第一個欄位是 `s32 sub_opcode`, 之後才是子協定
@@ -429,6 +433,12 @@ result==0: 13-byte 快照 {s32 quest_id, s32, u8, s32}
   count×{u8 slot_idx, u16 item×12 (sub_5244E0: 1+12 欄位)}` — 只送有
   變更的角色槽 (sub_525450 差異偵測)
 - **219 GI_CHANGEDATA_ACK** (sub_573230): `u8 result` → UI 解鎖 + 重繪
+- **220 GI_CHANGEWP_REQ** (builder @0x573380): `u8 count, count×{u8 group_no,
+  s16 equipped, [3×s16 若 group_no!=3], [8×u32 parts 若 equipped!=0]}`
+  (sub_524A50 — 與 198 的 sub_524660 讀端完全鏡像; 只送有變更的編組,
+  差異偵測 sub_525680)
+- **221 GI_CHANGEWP_ACK** (sub_5735F0): `u8 result` + 特殊模式 10 時
+  的 slot 更新通知
 
 ---
 

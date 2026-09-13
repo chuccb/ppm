@@ -53,7 +53,9 @@ public static class StatHandlers
     public static void Register(Registrar add)
     {
         foreach (var (req, ack, column, shape) in Counters)
+        {
             add(req, MakeCounter(ack, column, shape));
+        }
     }
 
     private static PacketHandler MakeCounter(Opcode ack, string column, AckShape shape) =>
@@ -65,7 +67,6 @@ public static class StatHandlers
             {
                 total = 0;
             }
-
 
             if (s.UserId != 0)
             {

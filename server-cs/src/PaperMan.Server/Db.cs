@@ -165,7 +165,6 @@ public sealed class Db : IDisposable
                 return null;
             }
 
-
             return new(
                 r.GetInt64(0), r.GetString(1), r.GetInt32(2), r.GetInt64(3),
                 r.GetInt64(4), r.GetInt32(5), (byte)r.GetInt32(6),
@@ -326,7 +325,6 @@ public sealed class Db : IDisposable
             return BuyResult.Fail(itemId);                  // period 不在白名單 (sub_570B00)
         }
 
-
         // 3. 扣款 (條件式 UPDATE = 原子餘額檢查)
         string wallet = useCash
             ? "UPDATE accounts SET cash=cash-@p WHERE account_id=(SELECT account_id FROM users WHERE user_id=@u) AND cash>=@p"
@@ -354,7 +352,6 @@ public sealed class Db : IDisposable
         {
             return BuyResult.Fail(itemId);                  // 背包已滿 (上限 sub_524B70)
         }
-
 
         // 5. 入包 + 記帳
         using (var ins = TxCmd("""
