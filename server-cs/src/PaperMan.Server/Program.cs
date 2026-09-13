@@ -69,6 +69,13 @@ async Task RunSessionAsync(TcpClient client, long sid, CancellationToken ct)
 
     try
     {
+        // 694 GL_ACCOUNTCONNSUCC = 「連上帳號伺服器」歡迎包 (十一輪定案):
+        // client 的 694 handler 收下 u16 門檻後呼叫 sub_43DF00 → 送出 682
+        // 登入 REQ。所以 694 必須在連線建立時發一次 (登入的觸發器),
+        // 且登入成功後不可再發 (否則 client 再送 682 → 無限迴圈)。
+        await session.SendAsync(new Packet(Opcode.GL_ACCOUNTCONNSUCC)
+            .WriteU16(config.CompressThreshold), ct);
+
         await foreach (var packet in session.ReceiveAsync(ct))
         {
             db.LogPacket(packet.OpcodeRaw, rx: true, packet.Length);

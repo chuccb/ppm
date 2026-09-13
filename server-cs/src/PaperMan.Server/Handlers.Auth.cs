@@ -45,15 +45,16 @@ public static class AuthHandlers
         ulong hwKey = hwValid ? hw32 : hwObf;              // 異常時保留原始值供記錄
 
         var r = ctx.Db.Login(account, token, hwKey);
-        await s.SendAsync(BuildLoginAck(r, ctx.Config));
 
         if (r.Result is LoginCode.Ok)
         {
             (s.AccountId, s.UserId, s.Nickname) = (r.AccountId, r.UserId, r.Nickname);
-            // 694: u16 壓縮門檻 (client 收到 <0x2580 才啟用壓縮)
-            await s.SendAsync(new Packet(Opcode.GL_ACCOUNTCONNSUCC)
-                .WriteU16(ctx.Config.CompressThreshold));
         }
+
+        // ⚠ 694 絕不可在此重發 — client 的 694 handler (0x43F...) 讀完門檻
+        //   會呼叫 sub_43DF00 再送一次 682 → 無限登入迴圈。
+        //   694 屬連線建立時的歡迎包 (見 Program.RunSessionAsync)。
+        await s.SendAsync(BuildLoginAck(r, ctx.Config));
     }
 
     /// <summary>681 結構: 見 docs/PACKETS.md §1.4 GL_LOGIN_ACK。</summary>
