@@ -508,8 +508,10 @@ total 送錯會讓任務進度爆走 (再次強調: 必須 MAX 單調)。
     OK → 13B 快照
 869/870 CANCEL: REQ s32 idx; ACK (sub_91D290) u8 result
     (!=0 → s32 idx, s32) — 成功後 client 清 working 槽
-871/872 SUCCESS: ACK (sub_91C6F0) u8 result, s32 idx
-    (state 2/3/4 分支處理)
+871/872 SUCCESS: ACK (sub_91C6F0) u8 result, s32 idx —
+    十三輪細節: **任務類別 = quest_index / 10000**; 只有類別 2/3/4
+    會轉 SUCCESS 狀態 (sub_91D700(idx, state=2)), 其他類別忽略。
+    → quest_id 編碼: 類別×10000 + 序號 (quest_catalog 需照此配 id)
 873/874 COMPLETE: ACK (sub_91C1E0) u8 result, s32 idx
     (n4==1 領獎, 2/3/4 分支; n4==4 特殊獎勵)
 875 CHANGEDSTATE_ACK (sub_91D690): raw 5B = {s32 idx, u8 new_state}

@@ -176,5 +176,19 @@ foreach (var (_, codec) in codecs)
         Convert.ToHexString(PaperAes.DefaultKey) == "C6AEB7B7C5A9C1A1B7C9C0FCB8D3C1F6");
 }
 
+// ---- 6. 黃金 frame 測試向量 (十三輪, 獨立 Python 第三方實作生成) --------
+// Encode(GT_PING_ACK(102), payload = s32 123) 以原生金鑰必須逐 byte 等於:
+//   header: w0=0010 op=0066 w2=0004 w3=0004 (LE)
+//   body  : AES-128-ECB(00000-pad 至 16B)
+{
+    using var codec = new PacketCodec(PaperAes.DefaultKey.ToArray());
+    var frame = codec.Encode(new Packet(Opcode.GT_PING_ACK).WriteS32(123));
+    const string golden = "1000660004000400CDD0757BFFCBBB8B427D5AE5277A3F89";
+    Check("golden frame: byte-exact vs 獨立實作", Convert.ToHexString(frame) == golden);
+
+    var back = codec.Decode(Convert.FromHexString(golden));
+    Check("golden frame: decode", back.Opcode == Opcode.GT_PING_ACK && back.ReadS32() == 123);
+}
+
 Console.WriteLine($"\n{pass} passed, {fail} failed");
 return fail == 0 ? 0 : 1;
