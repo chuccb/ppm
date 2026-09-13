@@ -122,7 +122,7 @@ public static class BattleRelayHandlers
         }
 
         var notice = Packet.FromPayload(packet.Opcode, packet.Payload);
-        await RoomManager.BroadcastAsync(room, notice, except: s);
+        await RoomManager.BroadcastAsync(room, notice, except: session);
     }
 
     private static (Room Room, byte Slot)? FindRoomSlot(Session session, ServerContext context)
@@ -132,7 +132,7 @@ public static class BattleRelayHandlers
             return null;
         }
 
-        var slot = room.Members.FirstOrDefault(kv => ReferenceEquals(kv.Value, s)).Key;
+        var slot = room.Members.FirstOrDefault(kv => ReferenceEquals(kv.Value, session)).Key;
         return (room, slot);
     }
 }

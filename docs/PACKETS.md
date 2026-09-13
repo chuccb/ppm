@@ -420,7 +420,8 @@ bool    success
       ⭐ 驗證段 11,010,001..11,070,000 = **ヘアパズル段** (1,273 條,
       kind 13) → 7 個「髮型拼圖槽」; n5 = 已解鎖拼圖數?
   --- sub_570550 尾段 (五輪補完, 先前部分遺漏):
-  u16     → i_23 (clan/channel id)
+  u16     → i_23 (禮物盒 pending 數; F0C100 — 299 寫入禮物盒,
+            301 收下/刪除時遞減 sub_57AFE0; 大廳禮物通知徽章)
   s32     game_point (GP, sub_5392A0)
   u8      tutorial_count (≤20); repeat count: u8 flag → sub_5A9B30
 ```
@@ -532,22 +533,42 @@ u16    count
 ⚠ 第三個 s32 是 **exp 不是 status** (十二輪定案): sub_588560 對它呼叫
 sub_403360(exp→level 查表) 後把 level 顯示在清單。custom_tex_id 進
 CCustomTexture 快取請求 (個人頭像貼圖)。
-### 3.9 GL_GAMEROOMINFO_ACK (108) — sub_568CE0 (五輪完整讀畢):
+### 3.9 GL_GAMEROOMINFO_ACK (108) — sub_568CE0 (卅七輪逐欄定案):
 ```
 u8   mode (3 = 錦標賽樹狀圖, 委派 sub_580A80; 其他 = 房間清單)
 u8   count
 repeat count:
   u8    room_no (需 <0xD2=210), s8 state
-  state>=0: u8 map, bool b1, u8 rule, u16 win_count, u8 max_player,
-            bool has_pass, u8[1] title_first (title 由 client 表查
-            room_no+309), 之後同下
-  state<0 : string title, 之後 u8 map, bool b1, u8 rule, u16 win_count,
-            u8 max_player, bool has_pass, bool title0
-  共同尾段: bool b2, bool b3, u8 flag1, u8 flag2, u8 flag3
-  (寫入 room+109=b2, room+128=b3)
+  state>=0: title 由 client 查字串表 state+309 (地圖預設房名);
+            state<0: string title (自訂房名) — 之後皆為下列 12 欄:
+    u8   cur_players   (+105; sub_44E970, 「cur/max」第一數)
+    bool has_pass      (+106)
+    u8   max_players   (+129; 冗餘 — client 以 +110 popcount 重算覆寫)
+    u16  max_slot_mask (+110; bit 0..max-1 = 1, sub_53FB10 以 popcount
+                        重算 +129 並展開 +112..+127 逐槽旗標)
+    u8   game_mode     (→ sub_53FBB0 建立 CyGameModes LobbyUI, 見下表)
+    bool room_type_A   (+108; sub_44E7B0 — ROOMTYPE bit)
+    u8   mode_param_a  (→ mode 物件 +12)
+    bool room_type_B   (+109; sub_44DA70 — ROOMTYPE bit)
+    bool double_damage (+128; sub_44DBB0)
+    bool flag130       (+130; sub_540280)
+    u8   mode_param_b  (→ mode 物件 +4, sub_74F450)
+    bool no_skill_bg   (+185; sub_44E820 — NOSKILLBG)
   若 mode==2: 兩組 {s32 team_id, u32 custom_tex_crc, str(75/87) tex_name,
-              u8 x} (隊伍自訂圖示, CCustomTexture 註冊)
+              u8 x} (隊伍自訂圖示, 存 room+188.., CCustomTexture 註冊)
 ```
+房物件語義 (getter 定案): `+105=cur_players (sub_44E970)`,
+`+129=max_players (sub_44E990; sub_5403F0 取 /2 為單隊上限)`,
+`+110=上限槽位點陣 (popcount=最大人數; 非勝場點陣)`, `sub_44E7D0 =
++129 - +105 = 空位數`; `+106=has_pass`, `+108/+109=ROOMTYPE 兩 bit`,
+`+128=double_damage`, `+185=noskillbg`。
+**game_mode 枚舉 (sub_53FBB0 factory, 0x10=16 → 原樣不改; 其他 → null):**
+`0=TeamMatch, 1=IndividualSurvival, 2=DefuseBomb, 3=TeamSurvival,
+ 4=Steal, 5=Practice, 6=Tutorial, 7=ChattingRoom, 8=Pulp'n'Roll,
+ 9=GunShooting, 10=Occupy, 11=AIMulti, 12=TeamSoccer,
+ 13=OccupyRenewal, 15=WeaponTest`
+— 與 `map_StartIndex.xml` 的 modeIndex 同源 (0=TeamDeath 1=FreeForAll
+2=TeamHacking 3=TeamSurvival 4=TeamSteal 8=PNR 9=GunShooting 12=SOCCER)。
 sub_580A80 (mode==3 錦標賽): u8 n4, u8 i1, u8 flags142;
 repeat i = n4-1 downto i1 {u8, u8 round_type, u8, s32, s32, u8 pair_count;
 repeat pair_count {s32 room, u8, u8, bool, u8, u16} + [u8 只在
@@ -1029,19 +1050,25 @@ u8+slot 系列)
 130 GR_START_ACK  (sub_562870): u8 result; ==1 →
     u8, s32 elapsed_ms (⚠ 十三輪更正: 是「已進行毫秒數」—
     sub_537670 存 timeGetTime()-x 當時間基準, 供中途加入同步;
-    開新局送 0), u8 slot, u8, u8, u16, u8, u8 host,
-    u16, u8 flags(bit0/bit1 拆開), u8, u8, u8, u8, u8 →
-    寫入房間物件 (+128/+4/+105/+129/+144/+110/+109/+185...),
-    然後 16×s32 (per-slot 值 → dword_F6DD1C[60195*i])
+    開新局送 0), u8 room_no(sub_407E80 定址房物件),
+    u8 cur_players(+105), u8 max_players(+129 冗餘, client 以 +110
+    popcount 重算), u16 max_slot_mask(+110), u8 flag(+130),
+    u8 mode(→sub_53FBB0), u16 (+144), u8 flags(bit0→mode+4/bit1 拆開),
+    u8 mode+12, u8 +109, u8 mode+13, u8 +185, u8 +128 →
+    寫入房間物件, 然後 16×s32 (per-slot 值 → dword_F6DD1C[60195*i])
 131 GR_FORCEOUT_REQ / 132 _ACK (sub_56ECC0): u8 ok; ok →
     u8 slot, [mode==2: s32, str, s32, str (兩組隊伍名)], [mode==3: ...]
 133 GR_END_REQ    (sub_562E00): 無 payload
 134 GR_END_ACK    (sub_562EA0): u8 result; ==1 →
-    u8, u8 count, u8 slot, u8, u16, u8 host, u8, u16, u8 flags,
-    u8, u16, u8, u8, u8 → 回房重置 (與 130 鏡像的房間物件更新)
+    u8(+130), u8(讀後丟棄), u8 room_no(sub_407E80 定址),
+    u8 max_players(+129 冗餘), u16 max_slot_mask(+110, 回房恢復),
+    u8 mode(→sub_53FBB0), u8(+136), u16(+144), u8 flags,
+    u8(+146), u16(+148), u8(+150), u8 mode+12, u8 +109, u8 mode+13 →
+    回房重置 (與 130 鏡像的房間物件更新)
 135 GR_CHANGESLOT_REQ (sub_56EE90): u8 n254, u8 slot(<16)
-136 GR_CHANGESLOT_ACK (sub_56EF40): u8 ok; ok → (n11 10/11 特判)
-    u8 from, u8 to, s32, s32, u8 count, count×條目
+136 GR_CHANGESLOT_ACK (sub_56EF40): u8 mode; mode!=0 → 失敗音效(不再讀 body);
+    mode==0 → u8 from(讀後丟棄), u8 new_slot, s32(讀後丟棄), s32 mover_uid,
+    u8 count, count×(u8 slot, s32 uid) — 全房依 uid 對位重建 F6DCF4
 ```
 
 ### 3.15pre-1 「補 0/佔位」欄位審計總表 (十二輪)
@@ -1168,16 +1195,30 @@ dispatcher case 102 → `sub_58D6F0` 立即 `ctor(101)` 回送
 - **111 GL_MAKEROOM_REQ** (builder @0x569xxx): `u8 map(a1<0 時 0xFF), u8 pass_flag,
   [str title 無密碼版/密碼版], str pass, u8 rule, u8 max_player, u8 x, u8 y`
   (兩個分支: a3!=0 帶密碼, 否則 title 版)
-- **112 GL_MAKEROOM_ACK** (sub_56A7B0): `u8 err, u8 room_no(<210), u16, f32;
-  u8, bool` + err==0 時: `u8 n2, {s32 team_id, s32 tex_crc, str, u8}×2
-  (mode==2)` — 建房成功即以自己為房主初始化房間物件
+- **112 GL_MAKEROOM_ACK** (sub_56A7B0): `u8 err, u8 room_no(<210),
+  u16 max_slot_mask(+110), s32 room_uid, u8 no_skill_bg(+185),
+  u8 mode+13` + err==0 時: `u8 n2, {s32 team_id, s32 tex_crc, str,
+  u8}×2 (mode==2)` — 建房成功即以自己為房主初始化房間物件
+  (sub_53F920: +105=1 自身、+106=0 無密碼、+110 上限槽位點陣、
+  +136=3、+144=7/10, 其餘取自 client 建房時自存的 rule/mode 全域)
 - **113 GL_ENTERROOM_REQ**: `u8 room_no` (單欄位)
-- **114 GL_ENTERROOM_ACK** (sub_56B360): `u8 sub_type` +
-  sub_type==0: 失敗回大廳; ==1: `s32 uid, u8 slot, str nick, [s32, u8]...`
-  單人進房通知 (含 CClientData 嵌入 sub_524360 + s32 custom_tex + str);
-  ==2: `f32, u8, u8 count, u8 slot, u8 host, u16 ...` 完整房間狀態 +
-  count×成員條目 {s32 uid, u8 slot, str nick, bool, bool, [完整資料]};
-  ==3..9: 各種單欄位/雙欄位變更通知 (首欄皆 u8 room_no)
+- **114 GL_ENTERROOM_ACK** (sub_56B360, 卅七輪逐欄):
+  `u8 sub_type` + 0=失敗回大廳;
+  ==1 單人進房通知: `s32 uid, u8 slot, str nick, s32 exp(level 由 client
+  查表), u8 char_type, 成員負載`;
+  ==2 完整房間狀態: `s32 room_uid, u8(+130), u8 count, u8 room_no,
+  u8 max_players(+129 冗餘), u16 max_slot_mask(+110),
+  u8 mode(→sub_53FBB0), u8(+136), u16(+144), u8 flags(bit0→mode+4),
+  u8(+146), u16(+148), u8(+150), u8 mode+12, u8(+109), u8 mode+13,
+  u8(+185), u8(+128), u8 mode+14` +
+  count×成員條目 {s32 uid, u8 slot, str nick, u8 crown, u8 status,
+  s32 exp, u8 char_type, u8 observer(1=OB 簡版, 不再讀負載), [負載]};
+  成員負載 = `u8 角色槽 0..0x13, u8 char_type, 12×u16 equip (sub_524360),
+  s32 custom_tex, s32 tex_crc, str tex_name, 武器組×4 (固定四組:
+  u16 equipped, [3×u16 sub 若組≠3], [8×s32 parts 若 equipped≠0]),
+  u8 extra_flag([8×s32] 若≠0), 9×s32 技能 (sub_527550),
+  u8 n5 + 7×s32 快速槽 (sub_527D00)`;
+  ==3: 同 ==1 的單人更新 (以 slot 定址)
 - **110 GL_ROOMINFOCHANGE_ACK** (sub_569240): `bool ok, u8 sub_type` +
   sub_type 1/2: room_no + 標題/密碼/規則變更組; 3..9: u8 room_no 單欄位
 - **216 GL_ENTERROOMPASS_REQ / 262 GL_JOINPASS_REQ**: `u8 room_no, str pass`

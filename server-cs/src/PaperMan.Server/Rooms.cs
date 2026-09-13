@@ -29,7 +29,15 @@ public sealed class Room
     public byte MapId { get; set; }
     public byte Rule { get; set; }                          // modeIndex
     public byte MaxPlayers { get; set; } = 16;
-    public ushort WinCount { get; set; }
+
+    /// <summary>
+    /// 房物件 +110: 上限槽位點陣 — bit 0..MaxPlayers-1 為 1。
+    /// client sub_53FB10 以 popcount 此點陣得出 +129 (最大人數) 並展開
+    /// +112..+127 逐槽旗標; 108 房單 / 112 建房 / 114 進房 / 130 開戰 /
+    /// 134 回房皆送此點陣 (全數交叉驗證, 非勝場點陣)。
+    /// </summary>
+    public ushort MaxSlotMask =>
+        (ushort)((1 << Math.Clamp(MaxPlayers, 0, 16)) - 1);
 
     /// <summary>slot → session (最多 16 人)。</summary>
     public ConcurrentDictionary<byte, Session> Members { get; } = new();
@@ -159,8 +167,7 @@ public sealed class RoomManager
     /// <summary>
     /// 成員離房共用流程 (主動離房 124 與斷線清理共用):
     /// 移除成員 → 空房回收 / 廣播 124 (u8 slot) →
-    /// 房主離開時再廣播 190 (u8 = 該 slot 的玩家識別值, 對照
-    /// client dword_F6DCF4 快取 — sub_56FBF0 卅五輪定案)。
+    /// 房主離開時再廣播 190 (u8 = 新房主的 slot 號 0..15)。
     /// </summary>
     public async ValueTask RemoveMemberAsync(Room room, Session member)
     {
@@ -182,10 +189,12 @@ public sealed class RoomManager
 
         if (wasMaster && room.ElectNewMaster() is { } newMaster)
         {
-            // 190 的 u8 = client F6DCF4[slot] 快取值 = 我方 114 寫入的 uid
-            var masterSession = room.Members[newMaster];
+            // 190 的 u8 = client dword_F6DCF4[slot] 快取值 = 該槽的 slot 號
+            // (112 寫 0=房主 / 114 寫 server 送的 slot 號 / 136 換位時更新)。
+            // sub_56FBF0 以 sub_592940 讀 u8 後對照 F6DCF4 找出新房主 slot
+            // 並戴皇冠 — 故送「新房主的 slot 號」, 而非 uid 低 8 位。
             var masterNotice = new Packet(Opcode.GR_CHANGEMASTER_ACK)
-                .WriteU8(unchecked((byte)masterSession.UserId));
+                .WriteU8(newMaster);
             await BroadcastAsync(room, masterNotice);
         }
     }

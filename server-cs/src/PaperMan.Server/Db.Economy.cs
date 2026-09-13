@@ -266,6 +266,21 @@ public sealed partial class Db
         }
     }
 
+    /// <summary>
+    /// 198 MyInfo 尾段的 u16 = 禮物盒 pending 數 (client i_23 / F0C100;
+    /// 299 寫入 CClientData+36117, 301 收下/刪除時遞減 — sub_57AFE0)。
+    /// </summary>
+    public ushort GetGiftCount(long userId)
+    {
+        lock (_gate)
+        {
+            using var cmd = Cmd(
+                "SELECT COUNT(*) FROM gifts WHERE to_user_id=@u AND state=0",
+                ("@u", userId));
+            return Convert.ToUInt16(Convert.ToInt64(cmd.ExecuteScalar() ?? 0L));
+        }
+    }
+
     // ------------------------------------------------------------- messages
     public sealed record MailMsg(long MsgId, string From, string Title, string Body, bool IsRead, ushort DateCode);
 

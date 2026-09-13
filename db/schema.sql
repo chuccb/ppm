@@ -158,15 +158,19 @@ CREATE TABLE IF NOT EXISTS weapon_groups (
 ) STRICT, WITHOUT ROWID;
 
 -- ----------------------------------------------------------------------------
--- 6. 技能 / 快速槽 — sub_527550 & sub_527D00: 各 7×s32 (0x1C bytes)
+-- 6. 技能 / 快速槽 (卅六輪逐函數直查):
+--    sub_527550 → sub_522480: 9×s32 技能槽 (無前導 count)
+--    sub_527D00 → sub_527AF0: u8 n5 + 7×s32 (0x1C = 28B) 快速槽
 --    (GI_CHANGE_SKILLITEMSLOT 466 / GL_COMBISKILLITEM 724)
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS skill_slots (
     user_id   INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-    slot_kind INTEGER NOT NULL CHECK (slot_kind IN (0,1)),  -- 0=skill(sub_527550) 1=quick(sub_527D00)
-    idx       INTEGER NOT NULL CHECK (idx BETWEEN 0 AND 6),
+    slot_kind INTEGER NOT NULL CHECK (slot_kind IN (0,1)),  -- 0=skill(sub_527550, 9 槽) 1=quick(sub_527D00, 7 槽)
+    idx       INTEGER NOT NULL,
     item_id   INTEGER NOT NULL DEFAULT 0,
-    PRIMARY KEY (user_id, slot_kind, idx)
+    PRIMARY KEY (user_id, slot_kind, idx),
+    CHECK ((slot_kind = 0 AND idx BETWEEN 0 AND 8) OR        -- sub_522480 讀 9×s32
+           (slot_kind = 1 AND idx BETWEEN 0 AND 6))          -- sub_527AF0 讀 7×s32 (0x1C)
 ) STRICT, WITHOUT ROWID;
 
 -- ----------------------------------------------------------------------------

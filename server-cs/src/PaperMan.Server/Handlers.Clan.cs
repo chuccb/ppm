@@ -65,7 +65,7 @@ public static class ClanHandlers
     // 583 隧道: s32 sub_opcode + 子內容
     private static async ValueTask Tunnel(Session session, Packet packet, ServerContext context)
     {
-        var sub = ClanTunnel.ReadSubOp(p);
+        var sub = ClanTunnel.ReadSubOp(packet);
         switch (sub)
         {
             // 187 Info: REQ = s32 clan_id; 未入隊 → 回 0 即可

@@ -144,6 +144,73 @@ public sealed partial class Db
         }
     }
 
+    // ------------------------------------------------------------- loadout
+    /// <summary>sub_524660 武器編組 — equipped(與 sub1..3) 為 u16 類別內索引, 0=空。</summary>
+    public sealed record WeaponGroup(
+        byte GroupNo, ushort Equipped, ushort Sub1, ushort Sub2, ushort Sub3, int[] Parts);
+
+    /// <summary>sub_527550/sub_527D00 的技能(9)與快速(7)槽 — item_id 為完整 id, 0=空。</summary>
+    public sealed record Slots(int[] Skill, int[] Quick);
+
+    public List<WeaponGroup> GetWeaponGroups(long userId)
+    {
+        lock (_gate)
+        {
+            List<WeaponGroup> list = [];
+            using var cmd = Cmd("""
+                SELECT group_no, equipped, sub1, sub2, sub3,
+                       part0, part1, part2, part3, part4, part5, part6, part7
+                FROM weapon_groups WHERE user_id=@u ORDER BY group_no
+                """, ("@u", userId));
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+            {
+                var parts = new int[8];
+                for (int i = 0; i < parts.Length; i++)
+                {
+                    parts[i] = r.GetInt32(5 + i);
+                }
+
+                list.Add(new(
+                    (byte)r.GetInt32(0), (ushort)r.GetInt32(1),
+                    (ushort)r.GetInt32(2), (ushort)r.GetInt32(3), (ushort)r.GetInt32(4),
+                    parts));
+            }
+
+            return list;
+        }
+    }
+
+    public Slots GetSlots(long userId)
+    {
+        lock (_gate)
+        {
+            var skill = new int[9];                         // sub_522480 讀 9×s32
+            var quick = new int[7];                         // sub_527AF0 讀 7×s32 (0x1C)
+            using var cmd = Cmd("""
+                SELECT slot_kind, idx, item_id
+                FROM skill_slots WHERE user_id=@u
+                """, ("@u", userId));
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+            {
+                int kind = r.GetInt32(0);
+                int idx = r.GetInt32(1);
+                int item = r.GetInt32(2);
+                if (kind == 0 && idx is >= 0 and < 9)
+                {
+                    skill[idx] = item;
+                }
+                else if (kind == 1 && idx is >= 0 and < 7)
+                {
+                    quick[idx] = item;
+                }
+            }
+
+            return new Slots(skill, quick);
+        }
+    }
+
     // ------------------------------------------------------------- stats/misc
     /// <summary>
     /// GP_CH*C: client REQ 帶「新的絕對累計值」(sub_5567F0 等) — 只允許

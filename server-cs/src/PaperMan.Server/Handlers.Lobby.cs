@@ -68,11 +68,13 @@ public static class LobbyHandlers
     private static Packet BuildClientInfoAck(Db.MyInfo info, List<Db.CharSlot> chars)
     {
         var st = info.Stats;
+        // wire 第 2 欄是 char_type (+88), 不是 slot (與 198 首段同構)。
+        byte currentCharType = chars.FirstOrDefault(c => c.SlotNo == info.CurrentChar)?.CharType ?? (byte)0;
         var ack = new Packet(Opcode.GL_CLIENTINFO_ACK)
             .WriteU8(1)
             // sub_523BF0 — 與 198 首段完全同構 (佈局見 BuildMyInfoAck)
             .WriteStr(info.Nickname)
-            .WriteU8(info.CurrentChar)
+            .WriteU8(currentCharType)
             .WriteS32(info.Level)
             .WriteS32((int)info.Exp)
             .WriteS32(0)
@@ -102,8 +104,8 @@ public static class LobbyHandlers
 
         // sub_524360: u8 slot + u8 char_type + 12×u16 外觀
         var slot = chars.FirstOrDefault(c => c.SlotNo == info.CurrentChar) ?? chars.FirstOrDefault();
-        ack.WriteU8(slot?.SlotNo ?? 0)
-           .WriteU8(slot?.CharType ?? 1);
+        ack.WriteU8(slot?.SlotNo ?? (byte)0)
+           .WriteU8(slot?.CharType ?? (byte)1);
         for (int i = 0; i < 12; i++)
         {
             ack.WriteU16(slot?.Equip.ElementAtOrDefault(i) ?? (ushort)0);
@@ -154,12 +156,15 @@ public static class LobbyHandlers
     private static async ValueTask UserList(Session session, Packet packet, ServerContext context) =>
         await session.SendAsync(new Packet(Opcode.GL_USERLIST_ACK).WriteU16(0));
 
-    // ACK(108) sub_568CE0 (五輪完整讀畢):
+    // ACK(108) sub_568CE0 (卅七輪逐欄定案):
     //   u8 mode (3=錦標賽樹 sub_580A80); 其他: u8 count, repeat{
-    //     u8 room_no(<210), s8 state;
-    //     state>=0 → u8 map, bool, u8 rule, u16 win, u8 max, bool pass, u8[1]
-    //     state<0  → str title + 同欄位;
-    //     共同尾段 bool,bool,u8,u8,u8; mode==2 加 2×{s32,u32 crc,str,u8} }
+    //     u8 room_no(<210), s8 state (state>=0 → 標題查 client 字串表 state+309;
+    //     state<0 → str title), 之後 12 欄:
+    //     u8 cur_players(+105), bool has_pass(+106), u8 max_players(+129 冗餘,
+    //     client 以 +110 popcount 重算), u16 max_slot_mask(+110),
+    //     u8 game_mode(→sub_53FBB0), bool room_type_A(+108), u8 mode_param_a(+12),
+    //     bool room_type_B(+109), bool double_damage(+128), bool flag130(+130),
+    //     u8 mode_param_b(+4), bool no_skill_bg(+185) }
     private static async ValueTask RoomList(Session session, Packet packet, ServerContext context)
     {
         var rooms = context.Rooms.All.Take(50).ToList();
@@ -171,19 +176,20 @@ public static class LobbyHandlers
         foreach (var room in rooms)
         {
             ack.WriteU8(room.RoomNo)
-               .WriteS8(-1)                                 // state<0 → str title 版條目
+               .WriteS8(-1)                                 // state<0 → 自訂標題 (str 版條目)
                .WriteStr(room.Title)
-               .WriteU8(room.MapId)
-               .WriteBool(false)
-               .WriteU8(room.Rule)
-               .WriteU16(room.WinCount)
-               .WriteU8(room.MaxPlayers)
-               .WriteBool(room.Password is not null)
-               .WriteBool(false)                            // title0
-               .WriteBool(false).WriteBool(false)           // b2, b3 共同尾段
-               .WriteU8((byte)room.Members.Count)
-               .WriteU8(0)
-               .WriteU8(0);
+               .WriteU8((byte)room.Members.Count)           // +105 cur_players
+               .WriteBool(room.Password is not null)        // +106 has_pass
+               .WriteU8(room.MaxPlayers)                    // +129 max_players (client 以 +110 重算)
+               .WriteU16(room.MaxSlotMask)                  // +110 上限槽位點陣 (popcount = 最大人數)
+               .WriteU8(room.Rule)                          // game_mode → sub_53FBB0 (0..15)
+               .WriteBool(false)                            // +108 room_type bit A
+               .WriteU8(0)                                  // mode+12 (mode 參數)
+               .WriteBool(false)                            // +109 room_type bit B
+               .WriteBool(false)                            // +128 double_damage
+               .WriteBool(false)                            // +130 flag
+               .WriteU8(0)                                  // mode+4 (mode 參數)
+               .WriteBool(false);                           // +185 no_skill_bg
         }
 
         await session.SendAsync(ack);
@@ -199,12 +205,21 @@ public static class LobbyHandlers
             return;
         }
 
-        await session.SendAsync(BuildMyInfoAck(info, context.Db.GetCharacters(info.UserId)));
+        await session.SendAsync(BuildMyInfoAck(
+            info,
+            context.Db.GetCharacters(info.UserId),
+            context.Db.GetWeaponGroups(info.UserId),
+            context.Db.GetSlots(info.UserId),
+            context.Db.GetGiftCount(info.UserId)));
     }
 
-    private static Packet BuildMyInfoAck(Db.MyInfo info, List<Db.CharSlot> chars)
+    private static Packet BuildMyInfoAck(
+        Db.MyInfo info, List<Db.CharSlot> chars, List<Db.WeaponGroup> weaponGroups, Db.Slots slots,
+        ushort giftCount)
     {
         var st = info.Stats;
+        // wire 第 2 欄是 char_type (+88; §3.98 總圖), 不是 slot — 查當前角色槽的型別。
+        byte currentCharType = chars.FirstOrDefault(c => c.SlotNo == info.CurrentChar)?.CharType ?? (byte)0;
 
         // 統計欄位佈局 — 十二輪以任務條件檢查器 sub_9252D0 逐欄破解:
         //   cond5→dword[37]=wins, cond6→[38]=losses, cond3→[39]=kills,
@@ -222,7 +237,7 @@ public static class LobbyHandlers
             .WriteS32((int)info.UserId)
             // --- sub_523BF0 基本資料 ---
             .WriteStr(info.Nickname)
-            .WriteU8(info.CurrentChar)                             // char_type (+88)
+            .WriteU8(currentCharType)                              // char_type (+88, 1..14 ICT_*)
             .WriteS32(info.Level)                                  // [23]
             .WriteS32((int)info.Exp)                               // [24] (level 由 client 查表重算)
             .WriteS32(0)                                           // [27] 任務 cond1 計數
@@ -248,13 +263,13 @@ public static class LobbyHandlers
             .WriteS32((int)st.ZKill)                               // [49] cond15
             .WriteS32((int)st.KKill)                               // [50] cond16
             .WriteS32((int)st.DdKill)                              // [51] cond17
-            .WriteU8(0).WriteU8(0).WriteU8(0)                      // flags (+304..306)
+            .WriteU8(0).WriteU8(0).WriteU8(0)                      // flags (+76/+305/+306 dword, 閒置 0 安全)
             .WriteS32(info.Cash)                                   // [26] (+104)
             .WriteS32(0).WriteS32(0)                               // [28],[29] (+112,116)
             .WriteRaw(BuildPlayModeBlob(st))                       // [52..63] 模式別計數 blob
             .WriteU8(info.CurrentChar);                            // slot_current (+4)
 
-        return FinishMyInfoAck(ack, chars, info);
+        return FinishMyInfoAck(ack, chars, weaponGroups, slots, info, giftCount);
     }
 
     /// <summary>
@@ -269,9 +284,11 @@ public static class LobbyHandlers
         return blob;
     }
 
-    private static Packet FinishMyInfoAck(Packet ack, List<Db.CharSlot> chars, Db.MyInfo info)
+    private static Packet FinishMyInfoAck(
+        Packet ack, List<Db.CharSlot> chars, List<Db.WeaponGroup> weaponGroups, Db.Slots slots,
+        Db.MyInfo info, ushort giftCount)
     {
-        // --- sub_524010 角色槽 (≤20, 每個 1 type + 12 裝備 u16) ---
+        // --- sub_524010 角色槽 (≤20, 每個 u8 type + 12×u16 裝備) ---
         ack.WriteU8((byte)Math.Min(chars.Count, 20));
         foreach (var c in chars.Take(20))
         {
@@ -282,37 +299,50 @@ public static class LobbyHandlers
             }
         }
 
-        // --- sub_524660 武器編組 (4 組, equipped=0 → 不帶 8×parts) ---
+        // --- sub_524660 武器編組: u8 count(4) + 每組
+        //     u8 kind + u16 equipped + (kind!=3 → 3×u16 sub) + (equipped!=0 → 8×s32 parts)
+        //     無記錄的組別以空組回退 (equipped=0 → 不帶 parts) ---
         ack.WriteU8(4);
         for (byte g = 0; g < 4; g++)
         {
-            ack.WriteU8(g).WriteU16(0);
+            var wg = weaponGroups.FirstOrDefault(x => x.GroupNo == g);
+            ack.WriteU8(g)
+               .WriteU16(wg?.Equipped ?? (ushort)0);
             if (g != 3)
             {
-                ack.WriteU16(0).WriteU16(0).WriteU16(0);    // 非第 4 組 → 3 個 sub-slot
+                ack.WriteU16(wg?.Sub1 ?? (ushort)0)
+                    .WriteU16(wg?.Sub2 ?? (ushort)0)
+                    .WriteU16(wg?.Sub3 ?? (ushort)0);
+            }
+
+            if (wg is { Equipped: not 0 })
+            {
+                foreach (var part in wg.Parts)
+                {
+                    ack.WriteS32(part);
+                }
             }
         }
 
-        // --- sub_527550 (sub_522480): 9×s32 稱號槽 (十九輪: 驗證段
-        //     15,304,001..15,306,000 = 稱號段), 無前導 count!
-        //     每個非零 id 都要過 sub_535020 目錄驗證, 否則 client 錯誤 10
-        for (int i = 0; i < 9; i++)
+        // --- sub_527550 (sub_522480): 9×s32 技能槽 (無前導 count; 每個非零
+        //     id 都要過 sub_535020 目錄驗證, 否則 client 錯誤 10) ---
+        foreach (var item in slots.Skill)
         {
-            ack.WriteS32(0);
+            ack.WriteS32(item);
         }
 
-        // --- sub_527D00: u8 n5 + 7×s32 ヘアパズル槽 (十九輪: 驗證段
-        //     11,010,001..11,070,000 = 髮型拼圖段), 失敗 → client 錯誤 9
+        // --- sub_527D00: u8 n5(預設 5) + 7×s32 快速槽 (0x1C) ---
         ack.WriteU8(5);                                            // n5 預設值 5
-        for (int i = 0; i < 7; i++)
+        foreach (var item in slots.Quick)
         {
-            ack.WriteS32(0);
+            ack.WriteS32(item);
         }
 
-        // --- sub_570550 尾段 (u16 → i_23, s32 → sub_5392A0 GP,
+        // --- sub_570550 尾段 (u16 → i_23 = 禮物盒 pending 數,
+        //     s32 → sub_5392A0 GP,
         //     u8 count + count×u8 教學旗標 → sub_5A9B30, 最多 20) ---
         return ack
-            .WriteU16(0)                                           // i_23 (clan/channel)
+            .WriteU16(giftCount)                                   // i_23 (禮物盒數, F0C100)
             .WriteS32((int)info.Gp)                                // game_point
             .WriteU8(0);                                           // tutorial flag count
     }
