@@ -30,6 +30,53 @@ public static class RoomHandlers
         add(Opcode.GL_MAKEROOM_REQ, MakeRoom);
         add(Opcode.GL_ENTERROOM_REQ, EnterRoom);
         add(Opcode.GR_LEAVE_REQ, LeaveRoom);
+        add(Opcode.GR_CHATTING_REQ, RoomChat);
+        add(Opcode.GR_MAPCHANGE_REQ, MapChange);
+    }
+
+    // 125 REQ (與 119 同構) → 126 ACK (sub_56EA80):
+    //   s32 custom_tex, u8 slot, wstr message — 房內廣播
+    private static async ValueTask RoomChat(Session s, Packet p, ServerContext ctx)
+    {
+        if (s.RoomNo is not { } roomNo || ctx.Rooms.Find(roomNo) is not { } room)
+        {
+            return;
+        }
+
+        // 廿八輪自動表: 125 = s32 tex, u8 slot, wstr msg (次變體 str)
+        int tex = p.ReadS32();
+        _ = p.ReadU8();                                     // client 附 slot (以 server 記錄為準)
+
+        var message = p.Remaining >= 2 && p.Remaining % 2 == 0
+            ? p.ReadWStr()
+            : p.ReadStr();
+
+        if (message.Length == 0)
+        {
+            return;
+        }
+
+        var slot = room.Members.FirstOrDefault(kv => ReferenceEquals(kv.Value, s)).Key;
+        var notice = new Packet(Opcode.GR_CHATTING_ACK)
+            .WriteS32(tex)
+            .WriteU8(slot)
+            .WriteWStr(message);
+        await RoomManager.BroadcastAsync(room, notice);
+    }
+
+    // 121 REQ: u8 map → 122 ACK (sub_56E530): u8 map — 房主換圖廣播
+    private static async ValueTask MapChange(Session s, Packet p, ServerContext ctx)
+    {
+        if (s.RoomNo is not { } roomNo || ctx.Rooms.Find(roomNo) is not { } room)
+        {
+            return;
+        }
+
+        byte mapId = p.ReadU8();
+        room.MapId = mapId;
+
+        await RoomManager.BroadcastAsync(room,
+            new Packet(Opcode.GR_MAPCHANGE_ACK).WriteU8(mapId));
     }
 
     // 111 → 112 (+108 更新大廳清單由 client 重拉)
