@@ -6,7 +6,7 @@
 ## 1. 完整生命週期 (實測定案的因果鏈)
 
 ```
-【帳號伺服器 TCP :40200】
+【登入伺服器 TCP :40200 (握手=694 GL_ACCOUNTCONNSUCC)】
 connect ──► server 發 694 (門檻 0x2580) ──► client 送 682 (帳密+MAC指紋)
         ──► server 回 681 (result=1 + 伺服器清單 + ext 等級gate + Tricod)
         ──► client 進帳號大廳 (state 2)
@@ -20,7 +20,7 @@ connect ──► server 發 694 (門檻 0x2580) ──► client 送 682 (帳�
 125 房聊→126廣播 121 換圖→122 127 ready→128 135 換位→136
 129 開戰→130廣播(17欄+16×s32) → 各員 183 載入完→184 → 187→188 開打
 
-【頻道伺服器 (卅一輪正名)】
+【頻道伺服器 TCP :40201 (握手=693 GL_TCPCONNSUCC; 681 清單指向此 port)】
 connect → server 發 693 GL_TCPCONNSUCC → client 送 143 (nick +
   n100/ext_count 雙 token 回送) → 144 PM_UDPSTART_ACK
   (n108 狀態機: 0=OK 3=踢出 — token 不符可踢)

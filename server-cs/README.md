@@ -39,6 +39,7 @@ dotnet build                                   # 需要 nuget 還原兩個套件
                                                #   System.Text.Encoding.CodePages
 dotnet run --project src/PaperMan.SelfTest     # 先跑自測 (codec round-trip)
 dotnet run --project src/PaperMan.Server -- ../db/paperman.db 40200
+# 40200 = 登入伺服器 (握手 694); 40201 = 頻道伺服器 (握手 693, 自動 +1)
 ```
 
 - **AES 金鑰已內建**: 客戶端硬編碼金鑰 = EUC-KR 字串「트렁크점령전머지」

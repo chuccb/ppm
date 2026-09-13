@@ -25,9 +25,16 @@ Console.WriteLine(
      [paperman] compress : threshold 0x{config.CompressThreshold:X4}{(config.CompressThreshold >= PacketCodec.NeverCompress ? " (停用)" : "")}
      """);
 
-var listener = new TcpListener(IPAddress.Parse(config.ListenHost), config.Port);
-listener.Start();
-Console.WriteLine($"[paperman] listening on {config.ListenHost}:{config.Port}");
+// 雙 listener 架構 (卅一輪定案): client 登入後會「另開連線」到 681
+// 指示的頻道 host:port — 單機模式用兩個 port 區分角色:
+//   config.Port     → 登入伺服器 (握手 694 GL_ACCOUNTCONNSUCC)
+//   config.Port + 1 → 頻道伺服器 (握手 693 GL_TCPCONNSUCC)
+var loginListener = new TcpListener(IPAddress.Parse(config.ListenHost), config.Port);
+var channelListener = new TcpListener(IPAddress.Parse(config.ListenHost), config.ChannelPort);
+loginListener.Start();
+channelListener.Start();
+Console.WriteLine($"[paperman] login   server on {config.ListenHost}:{config.Port}");
+Console.WriteLine($"[paperman] channel server on {config.ListenHost}:{config.ChannelPort}");
 
 using var cts = new CancellationTokenSource();
 Console.CancelKeyPress += (_, e) =>
@@ -37,31 +44,40 @@ Console.CancelKeyPress += (_, e) =>
 };
 
 long nextSessionId = 0;
-while (!cts.IsCancellationRequested)
+
+Task AcceptLoopAsync(TcpListener listener, ServerRole role) => Task.Run(async () =>
 {
-    TcpClient client;
-    try
+    while (!cts.IsCancellationRequested)
     {
-        client = await listener.AcceptTcpClientAsync(cts.Token);
-    }
-    catch (OperationCanceledException)
-    {
-        break;
-    }
+        TcpClient client;
+        try
+        {
+            client = await listener.AcceptTcpClientAsync(cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            break;
+        }
 
-    _ = RunSessionAsync(client, Interlocked.Increment(ref nextSessionId), cts.Token);
-}
+        _ = RunSessionAsync(client, Interlocked.Increment(ref nextSessionId), role, cts.Token);
+    }
+});
 
-listener.Stop();
+await Task.WhenAll(
+    AcceptLoopAsync(loginListener, ServerRole.Login),
+    AcceptLoopAsync(channelListener, ServerRole.Channel));
+
+loginListener.Stop();
+channelListener.Stop();
 Console.WriteLine("[paperman] bye");
 return;
 
-async Task RunSessionAsync(TcpClient client, long sessionId, CancellationToken cancellationToken)
+async Task RunSessionAsync(TcpClient client, long sessionId, ServerRole role, CancellationToken cancellationToken)
 {
     // codec 為 per-session (壓縮門檻是 per-connection 協商值)
     using var codec = new PacketCodec(config.AesKey, config.CompressThreshold);
     using var session = new Session(client, codec, sessionId);
-    Console.WriteLine($"[s{sessionId}] connect {session.Remote}");
+    Console.WriteLine($"[s{sessionId}] connect {session.Remote} ({role})");
 
     // 心跳: 伺服器主動發 102, client 以 101 回應 (sub_58D6F0; 方向十輪定案)
     using var pingCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -75,7 +91,7 @@ async Task RunSessionAsync(TcpClient client, long sessionId, CancellationToken c
         //   頻道伺服器 → 693 GL_TCPCONNSUCC (client 收到後顯示訊息 0xFF
         //     並呼叫 sub_555C60 送 143 PM_UDPSTART — 卅一輪 sub_57CAE0)
         // 兩者都只在連線建立時發一次, 之後不可重發 (會觸發 client 重跑握手)。
-        var greeting = config.Role switch
+        var greeting = role switch
         {
             ServerRole.Channel => new Packet(Opcode.GL_TCPCONNSUCC),
             _ => new Packet(Opcode.GL_ACCOUNTCONNSUCC)

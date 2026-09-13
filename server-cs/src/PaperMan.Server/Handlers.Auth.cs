@@ -88,7 +88,7 @@ public static class AuthHandlers
             ack.WriteS16(1)                                //   ch_count
                .WriteU8(0)                                 //   ch_type (≠3 → 無 extra byte)
                .WriteStr("Ch.1")
-               .WriteS16((short)cfg.Port)
+               .WriteS16((short)cfg.ChannelPort)           //   頻道 port (握手 693!)
                .WriteU8(0);
         }
 
