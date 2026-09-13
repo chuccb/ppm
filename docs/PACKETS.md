@@ -768,6 +768,32 @@ raw44 = {…, [12]=命中, [7]/[8]/[9]=擊殺分類, [5]=fever} 11×s32
 配對/錦標賽/GameCenter 全部家族皆有佈局記錄; 未逐條展開者僅餘
 GG 戰鬥事件中繼 (server 原樣轉發即可) 與 MASTER_* GM 工具組。
 
+### 3.15d5 GC_ENTERCHANNEL 195/196 — 頻道選擇完整協定 (卅三輪)
+```
+195 REQ (sub_56FF40; 由 CLobbyChannel 於 144 成功後自動送):
+    u8 group    (頻道群組 = 681 清單 3 組之序, CLobbyChannel+129)
+    u8 channel  (組內頻道編號, +131)
+    u8 replay   (回放模組啟用 flag — sub_7338D0/sub_735DE0 檢查)
+
+196 ACK (CLobbyChannel::sub_4179D0 case 196 — 不在 dispatcher!
+         經 vtable 場景層分發):
+    u8  result   (1=成功; 0→訊息0xDA 頻道滿, 2→0x148 維護中)
+    s32 v15      (→ sub_417D00()[1] 頻道 id)
+    u8  v17      (與 result 一起進 sub_4177B0 錯誤表)
+    result==1 續讀:
+      str  udp_host      ⭐ UDP 打洞伺服器位址!
+      s32  udp_port      (sub_58ED30 存 + sub_596E60 直填 sockaddr)
+      u8   → 1D0CFE4
+      u8   n2 (頻道類型; ==3 → 續讀 AI multi 大塊 sub_875680:
+              s32×2, str, f32×4, u8×3, s32×2, u8×6, s32×2... —
+              AI 協力頻道的關卡/波次參數!)
+      f32  v11 (bit0 → byte_1D0D21B 旗標)
+      u8   n5 → sub_417D00()[8] (預設 5)
+```
+festival: 681 的 3 頻道組 ↔ 195 的 group 序號互證; 頻道類型 n2==3
+= AI 頻道 (bitmask 1024 段地圖) — 與 ch_type==3 讀 extra byte
+(二輪 681 佈局) 同源!
+
 ### 3.15e GL_JOINPLAY_ACK (269) — sub_574B20, 1524 行巨型函數 (十輪讀畢)
 中途加入/觀戰的「全房間快照」。頂層: `u8 n7` switch:
 - 0: 失敗, 通知 UI (sub_406F20(0))
@@ -829,22 +855,30 @@ GG 戰鬥事件中繼 (server 原樣轉發即可) 與 MASTER_* GM 工具組。
 ```
 103 GE_LOGOUT_REQ (sub_58D660): 無 payload — client 登出通知
 141 PM_CONNECT_REQ (sub_556530): 無 payload — 進房 TCP 握手
-142 PM_CONNECT_ACK (sub_5565D0, 卅二輪深挖): str host, s32 port,
-    u8, f32→word_1D0D1F8 (更新率?) — host/port 經 sub_596E60 直填
-    **UDP sockaddr** (inet_addr+htons) = UDP 打洞伺服器目標!
-    完整頻道進入鏈 (卅二輪定案):
-    connect → 693 → 143 (token) → 144 (n108=0) →
-    **client 續送 141** (144 handler 尾端 ctor(141)) →
-    142 (UDP host/port) → client 開始 UDP session (打洞 2→4→5/6)
-143 PM_UDPSTART_REQ (sub_555C60): str nick, s32 n100 (login 681 的
-    n100 原樣回送), s8 1, s32 ext_count (⚠ 十三輪定案:
-    dword_231800C = dword_2318008[1] = 681 ext 塊的 count, 由
-    sub_A1C870 第4參數寫入 — 即 681 的兩個值都會被 143 回送,
-    可作雙重 session 驗證)
-144 PM_UDPSTART_ACK (sub_555D50): u8 n108 (0=正常 1/2=模式切換
-    3=踢出), u8 flag65, s32 → 1D0D23C, str(64), s32, s32, s32, f32;
-    u8 flag66!=0 → {u8, u8, u8, u8, 8×s32} (延伸參數塊 →
-    sub_A1C800); n108 1/2/3 各自進不同狀態機
+142 PM_CONNECT_ACK (sub_5565D0): str host, s32 port, u8→1D0CFE4?,
+    f32→word_1D0D1F8 — host/port 經 sub_596E60 直填 UDP sockaddr。
+    141 REQ 的觸發 = **UDP op 18** (sub_596300, n0x3E8_1 一次性
+    latch) — 屬 UDP session 建立後的位址再確認/重連路徑。
+    **頻道進入正鏈 (卅三輪定案, 取代卅二輪誤讀)**:
+    connect → 693 → 143 (token) → 144 (n108=0, 雙層處理) →
+    [CLobbyChannel 層] 195 GC_ENTERCHANNEL(group,channel,replay) →
+    196 (result==1: **UDP host/port 在這裡!** sub_596E60) →
+    UDP session 開始 (2→4→5/6 打洞) → UDP op18 → 141 → 142 (再確認)
+143 PM_UDPSTART_REQ (sub_555C60; 卅三輪全鏈定案):
+    str nick, s32 n100 (681 回送), s8 1, s32 ext_count (681 回送)
+    — **唯一觸發點 = 693 handler sub_57CAE0** (兩個 caller: 自身
+    wrapper + 693)。雙 token 可作 session 驗證 (十三輪)
+144 PM_UDPSTART_ACK — **雙層處理** (卅三輪精讀):
+    dispatcher 層 sub_555D50 讀:
+      u8 n108, u8 flag65, s32→1D0D23C, str(64) 頻道名, s32×3, f32,
+      f32/s32, u8 flag66 [flag66≠0: u8×4 + 8×s32 → sub_A1C800]
+      n108≠0 錯誤碼: 1→0xA4(格式7082 重複登入) 2→0xCF(53)
+      3→0x11B(54 踢出) — 各自彈窗
+    第二層 CLobbyChannel::sub_4179D0 case 144 (n108==0 才會走到):
+      **呼叫 sub_56FF40(group@this+129, channel@this+131) = 送出
+      195 GC_ENTERCHANNEL_REQ** — 144 成功的真正下一步!
+    (⚠ 卅二輪「144 尾端 ctor(141)」為誤讀 — 141 由 UDP op18
+     一次性 latch 觸發 sub_596300, 屬 UDP 建立後的補充回報)
 ```
 
 ### 3.15b2 房間管理/戰場雜項 (廿二輪掃畢)
