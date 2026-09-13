@@ -220,6 +220,22 @@ UDP_TCP_DEAD_ACK 兩個註冊表編號)。UDP 戰鬥協定的編號與 TCP 註�
 count×{u8 room_slot, u8 ping_grade}` — 以 slot 對照房間成員表更新
 ping 顯示; **158 UDP_TCP_DEAD_ACK** (sub_596910) = 無 payload 的
 斷線通知。
+九輪補 (CUDPManager 打洞/測延遲層, 物件 0x1324330):
+- 通用條目頭: `u8 slot_uid` + 16B blob (sub_592C40) 或 `u8 + f32/u32`
+- **4** (sub_593AB0): `u8 count, count×{u8 uid, 16B addr_blob}` —
+  對方地址表; 回覆時 ctor(5) 帶 `u8 my_slot(n2==2 時 -2), u32 tick`
+- **5** (sub_593E60): `u8 uid, f32 tick` — 打洞探測; 首見該 uid 記錄
+  來源位址 (recvfrom 的 sockaddr @1326944) 並回 ctor(6)
+- **6** (sub_5940E0): `u8 uid, f32 tick` — 打洞回應確認
+- **8/24** (sub_596940): 空 payload keep-alive
+- **10/12/13/14** (sub_594460/5946C0/594A10/594CA0): `u8 uid, 16B blob`
+  + 回覆 `u8 slot, u32 tick, 3×...` — 中繼協商序列
+- **15** (sub_593DF0) / **29** (sub_593E20): 短探測
+- **22** (sub_5964E0): `u8, u8 count, count×{u8 uid, f32 rtt}` —
+  RTT 表回報
+- 18/20/26/28/31/33/34: 狀態機推進 (無/極短 payload)
+私服結論: 這層只做 P2P 打洞與測速, 中繼伺服器只需回聲/轉發,
+不需理解 16B blob 內容 (原樣轉發即可)。
 
 **戰隊隧道協定 (五輪發現)**: `GC_CLAN_PROTOCOL_REQ(583)/_ACK(584)` 是
 **容器封包** — payload 第一個欄位是 `s32 sub_opcode`, 之後才是子協定
