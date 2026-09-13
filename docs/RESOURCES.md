@@ -177,6 +177,12 @@ FilterWord / ExceptionWord / soundprops 同模式。
   kind 9 = 武器 (永久型白名單) ✓ sub_570B00 互證
 - 日版無 kind 17 條目 (空集), kind 12 = 服務類 (シャウトチャット等)
 
+## 5c. 角色表 (十七輪終驗)
+19,900,001..19,900,015 = 15 位角色: ハヤテ/ティナ/ミリィ/サイラス/
+ドッドン/ガイ/テリシア/アルル/ヴァン/フッド/リカ/レム/エリス/
+ルコット/ルーシー。推薦套裝 char_type 1..14 與角色段序號一一對應
+(198 wire 的 u8 char_type 即此編號) — 第六次互證。
+
 ## 6. 其他已知資源
 
 - `system/map_StartIndex.xml`, `SelectRandomMap.xml`: 地圖選擇
