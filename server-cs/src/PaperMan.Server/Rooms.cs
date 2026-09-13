@@ -11,13 +11,38 @@
 //   114 GL_ENTERROOM_ACK: u8 sub_type 多態 (docs §3.15)
 //
 // 房號上限 210 (0xD2 — client 陣列硬上限); rule 用官方 modeIndex
-// (0=TeamDeath 1=FreeForAll 2=TeamHacking 3=TeamSurvival 4=TeamSteal
-//  8=PNR 9=GunShooting 12=SOCCER — map_StartIndex.xml)。
+// (權威清單見下方 GameMode — sub_53FBB0 mode factory 的 16 路 switch)。
 // =============================================================================
 using System.Collections.Concurrent;
 using PaperMan.Protocol;
 
 namespace PaperMan.Server;
+
+/// <summary>
+/// 官方 modeIndex — sub_53FBB0 (PaperMan.exe.c 139113) 依此值 new 出對應
+/// CyGameModes::Cy*ModeLobbyUI (各 0x10 位元組) 存入 room+33, 並以
+/// room+132 指向 16 位元組的 mode rule 物件 (vtable + 規則旗標)。
+/// 14 在 switch 中無分支 (落 default → +33=null, 等同無效值);
+/// 16 為 sub_53FBB0 的「不做任何事」哨兵 (預設 ctor 用之)。
+/// </summary>
+public enum GameMode : byte
+{
+    TeamDeath = 0,      // CyTeamMatchModeLobbyUI         (TD_ 地圖前綴)
+    FreeForAll = 1,     // CyIndividualSurvivalModeLobbyUI (PS_)
+    DefuseBomb = 2,     // CyDefuseBombModeLobbyUI        (資源稱 TeamHacking, TH_)
+    TeamSurvival = 3,   // CyTeamSurvivalModeLobbyUI      (TS_)
+    Steal = 4,          // CyStealModeLobbyUI             (資源稱 TeamSteal, TW_)
+    Practice = 5,       // CyPracticeModeLobbyUI
+    Tutorial = 6,       // CyTutorialModeLobbyUI
+    Chatting = 7,       // CyChattingRoomModeLobbyUI
+    PulpNRoll = 8,      // CyPulpnRollModeLobbyUI         (PNR)
+    GunShooting = 9,    // CyGunShootingModeLobbyUI
+    Occupy = 10,        // CyOccupyModeLobbyUI
+    AiMulti = 11,       // CyAIMultiModeLobbyUI
+    Soccer = 12,        // CyTeamSoccerModeLobbyUI        (SOCCER)
+    OccupyRenewal = 13, // CyOccupyRenewalModeLobbyUI
+    WeaponTest = 15,    // CyWeaponTestModeLobbyUI
+}
 
 /// <summary>單一房間的即時狀態 (記憶體為主, DB rooms 表為快照)。</summary>
 public sealed class Room
@@ -27,7 +52,7 @@ public sealed class Room
     public required string Title { get; set; }
     public string? Password { get; set; }
     public byte MapId { get; set; }
-    public byte Rule { get; set; }                          // modeIndex (0..16)
+    public byte Rule { get; set; }                          // modeIndex (GameMode, 0..16)
 
     /// <summary>
     /// 房物件 +110: 開放槽位點陣 (bit 0..15 為 1 = 可入座)。
@@ -52,6 +77,9 @@ public sealed class Room
     public bool NoSkillBg { get; set; }                     // +185 (712/713)
     public bool TeamBalance { get; set; }                   // +186 (364/365; 一般房僅 client UI, 錦標賽才上 wire)
     public bool DoubleDamage { get; set; }                  // +128 (990/991)
+    public bool LocalRoom { get; set; }                     // 區域限定房 (366/367; GAMEROOM_LOCALROOM)
+    public bool TeamShuffle { get; set; }                   // 隊打散開關 (368/369; GAMEROOM_TEAMSHUFFLE)
+    public bool Soccer { get; set; }                        // 足球模式開關 (969/970; GAMEROOM_SOCCER → mode+14)
 
     /// <summary>slot → session (最多 16 人)。</summary>
     public ConcurrentDictionary<byte, Session> Members { get; } = new();
@@ -129,6 +157,55 @@ public sealed class Room
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// 隊打散 (894 GR_TEAMSHUFFLE): 把現有成員隨機重排到已佔用槽位,
+    /// ready/loaded/房主旗標跟著成員走。回傳新的 (slot, member) 對照
+    /// (以 slot 排序), 供 895 ACK 逐欄寫 (u8 slot, s32 uid)。
+    /// </summary>
+    public List<(byte Slot, Session Member)> ShuffleSlots()
+    {
+        var members = Members.OrderBy(kv => kv.Key).ToList();
+        var newSlots = members.Select(m => m.Key).OrderBy(_ => Random.Shared.Next()).ToList();
+
+        var next = new ConcurrentDictionary<byte, Session>();
+        var slotMap = new Dictionary<byte, byte>(members.Count);       // 舊槽 → 新槽
+        for (int i = 0; i < members.Count; i++)
+        {
+            byte oldSlot = members[i].Key;
+            byte newSlot = newSlots[i];
+            slotMap[oldSlot] = newSlot;
+            next[newSlot] = members[i].Value;
+            if (oldSlot == MasterSlot)
+            {
+                MasterSlot = newSlot;
+            }
+        }
+
+        byte Remap(byte oldSlot) => slotMap.TryGetValue(oldSlot, out var s) ? s : oldSlot;
+
+        lock (_ready)
+        {
+            var remapped = _ready.Select(Remap).ToArray();
+            _ready.Clear();
+            _ready.UnionWith(remapped);
+        }
+
+        lock (_loaded)
+        {
+            var remapped = _loaded.Select(Remap).ToArray();
+            _loaded.Clear();
+            _loaded.UnionWith(remapped);
+        }
+
+        Members.Clear();
+        foreach (var (slot, member) in next)
+        {
+            Members[slot] = member;
+        }
+
+        return next.OrderBy(kv => kv.Key).Select(kv => (kv.Key, kv.Value)).ToList();
     }
 }
 

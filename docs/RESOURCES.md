@@ -266,10 +266,10 @@ hand*.tga 互證: 那是「試衣間手部貼圖」快取)
 | GAMEROOM_ITEM (checkbox) | 道具開關 | 175/176 (bit0/bit1 → mode+4/+8) |
 | GAMEROOM_DAMAGEROOM (checkbox) | 雙倍傷害 | 990/991 (u8 → room+128) |
 | GAMEROOM_TEAMBALANCE (checkbox) | 隊伍平衡 | 364/365 (僅切 UI) |
-| GAMEROOM_TEAMSHUFFLE (checkbox) | 隊伍打散 | 368/369 (u8)、894/895 (u8 u8) |
+| GAMEROOM_TEAMSHUFFLE (checkbox) | 隊伍打散 | 368/369 (u8 → mode+13)、894/895 (u8 room_no + u8 map; ACK 逐槽重排) |
 | GAMEROOM_NORMAL_NOSKILL / CLAN_NOSKILL | 無技背景 | 712/713 (u8 → room+185) |
-| GAMEROOM_LOCALROOM (checkbox) | 區域限定房 | (UI 過濾) |
-| GAMEROOM_SOCCER (checkbox) | 足球模式開關 | (mode 12) |
+| GAMEROOM_LOCALROOM (checkbox) | 區域限定房 | 366/367 (u8 → 房內旗標) |
+| GAMEROOM_SOCCER (checkbox) | 足球模式開關 | 969/970 (u8 → mode rule +14) |
 | CUSTOMMAP_ON_BTN | 自訂地圖 | SelectRandomMap 點陣 |
 
 **roommake.xml** (建房 UI) 下拉值域:
@@ -296,4 +296,11 @@ client 實際載入的是 `system/map_StartIndex.xml` (sub_717E50 路徑),
 **mode 枚舉正名 (sub_53FBB0 factory)**: 0=TeamMatch 1=IndividualSurvival
 2=DefuseBomb(駭入) 3=TeamSurvival 4=Steal 5=Practice 6=Tutorial
 7=ChattingRoom 8=Pulp'n'Roll 9=GunShooting 10=Occupy 11=AIMulti
-12=TeamSoccer 13=OccupyRenewal 15=WeaponTest — 14 無 (default→null)。
+12=TeamSoccer 13=OccupyRenewal 15=WeaponTest — 14 無 (default→null),
+16=「不改」哨兵 (預設 ctor 用)。
+
+**mode rule 物件 (+132, 16B 含 vtable) 欄位總圖** — 房設定簇落地處:
+`+4=item bit0 (sub_74F450, 175/176)`、`+8=item bit1 (sub_74F430)`、
+`+12=rule param (wire 直寫; 112 本地初始化以 sub_438990 隊伍房寫 1/0)`、
+`+13=隊打散 (368/369)`、`+14=足球 (sub_74F4D0 寫/sub_74F4B0 讀, 969/970)`。
+`sub_438990` = 「是否兩隊制」: mode∈{0,2,3,4,8,10,11,12,13} → true。

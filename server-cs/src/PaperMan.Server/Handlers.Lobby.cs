@@ -183,12 +183,12 @@ public static class LobbyHandlers
                .WriteU8(room.OpenSlotCount)                    // +129 max_players (client 以 +110 重算)
                .WriteU16(room.MaxSlotMask)                  // +110 上限槽位點陣 (popcount = 最大人數)
                .WriteU8(room.Rule)                          // game_mode → sub_53FBB0 (0..15)
-               .WriteBool(false)                            // +108 room_type bit A
-               .WriteU8(0)                                  // mode+12 (mode 參數)
-               .WriteBool(false)                            // +109 room_type bit B
+               .WriteBool(false)                            // +108 room_type bit A (server 側未定)
+               .WriteU8(0)                                  // mode+12 rule param (server 側語意未定)
+               .WriteBool(false)                            // +109 room_type bit B (server 側未定)
                .WriteBool(room.DoubleDamage)                // +128 double_damage (990/991)
                .WriteU8(room.MapId)                         // +130 map (sub_540280/540260; 122 亦寫此欄)
-               .WriteU8(0)                                  // mode+4 (mode 參數)
+               .WriteU8((byte)(room.ItemMode & 1))          // mode+4 = item bit0 (sub_74F450; 175/176)
                .WriteBool(room.NoSkillBg);                  // +185 no_skill_bg (712/713)
         }
 

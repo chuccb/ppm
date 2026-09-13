@@ -1,7 +1,7 @@
 # Server handler 待辦清單 (廿四輪自動盤點)
 
 > 「client 有 builder、server 尚無 handler」的 REQ 全表 — 附自動抽出
-> 的寫入序列, 按此實作 handler 即可。已實作 63 個 REQ handler
+> 的寫入序列, 按此實作 handler 即可。已實作 67 個 REQ handler
 > (Auth/Lobby/Shop/Stats/Clan/Quest/Friend/Room/Channel/Voice)。
 >
 > 本輪 (房間設定/聊天簇) 新增: 139 GG_EXITGAME、167/169/171/173/175
@@ -11,7 +11,15 @@
 >
 > 四十輪: 169/170 已鏡像 mode→預設圖 (system/map_StartIndex.xml);
 > +146/+150 定案為「wire 送、client 存而不讀」的 mode param (送 0 安全)。
-> 下一輪可做: 368/894 隊打散 (u8 / u8 u8)、366 (未註冊, u8, n2_0!=3)。
+>
+> 卌二輪 (隊打散簇落地): 368/369 (u8→mode+13)、894/895 (u8 room_no +
+> u8 map; ACK status 1 逐槽重排 u8 slot + u32 uid)、366/367 區域房、
+> 969/970 足球開關 — 全數限房主、ACK 同值/逐槽廣播。112 GL_MAKEROOM_ACK
+> 補完 15 欄 (尾 9 欄 team_mode + 2×team 資料必送)。895 的 u16「讀後
+> 丟棄」欄與 366 在 n2_0==3 才送的語意仍未完全定案。
+>
+> 下一輪可做: 190 GR_CHANGEMASTER_ACK 新房主廣播、191/192 CALLUSER、
+> 194 GC_CHANNEL_ACK; 130/134 的 +146/+150 原服語意 (client 存而不讀);
 
 | op | 名稱 | REQ 寫入序列 |
 |---|---|---|
@@ -59,7 +67,6 @@
 | 350 | GG_TEAMDEADCHAT_REQ | `s32 u8 str` |
 | 358 | GS_BUYCASHITEM_REQ | `u8 s32 s32` |
 | 360 | GG_TSURRESPON_REQ | `s32` |
-| 368 | GR_TEAMSHUFFLECHANGE_REQ | `s8` |
 | 370 | GL_CHANGECHANNEL_REQ | `u8` |
 | 374 | GR_GETCRYSTAL_REQ | `u8` |
 | 378 | GR_RADIOMSG_REQ | `u8 u8 u8 u8 rawN` |
@@ -159,7 +166,6 @@
 | 887 | GX_XIGNCODE_DATA_REQ | `rawN` |
 | 890 | GC_QUERY_CLANRANKING_REQ | `(空)` |
 | 892 | MASTER_RELOAD_CLANRANKING_REQ | `(空)` |
-| 894 | GR_TEAMSHUFFLE_REQ | `u8 u8` |
 | 900 | GS_CAPSULEMACHINE_START_REQ | `u8 s32` |
 | 902 | GG_OCC_START_REQ | `u8 u8 s32` |
 | 904 | GG_OCC_SUCC_REQ | `u8 u8 s32` |

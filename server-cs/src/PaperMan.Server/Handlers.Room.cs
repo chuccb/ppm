@@ -15,7 +15,8 @@
 //   房設定簇 (REQ 限房主, ACK 同值廣播): 139/140 退場, 167/168 槽位點陣,
 //   169/170 模式, 171/172 勝場, 173/174 時間, 175/176 道具, 177 死碼吸收,
 //   340/341 擊殺, 364/365 平衡, 712/713 無技背景, 728/729 觀戰聊天,
-//   990/991 雙倍傷害 — 對應 room 欄位見 Rooms.cs 與 §3.15b2 總圖。
+//   990/991 雙倍傷害, 366/367 區域房, 368/369 隊打散開關, 969/970 足球,
+//   894/895 隊打散執行 — 對應 room 欄位見 Rooms.cs 與 §3.15b2 總圖。
 // =============================================================================
 using System.Collections.Frozen;
 using PaperMan.Protocol;
@@ -83,6 +84,10 @@ public static class RoomHandlers
         add(Opcode.GR_NOSKILL_REQ, NoSkillChange);
         add(Opcode.GR_OBSERVERCHAT_REQ, ObserverChat);
         add(Opcode.GR_DAMAGEROOM_REQ, DamageRoomChange);
+        add(Opcode.GR_LOCALROOM_REQ, LocalRoomChange);
+        add(Opcode.GR_TEAMSHUFFLECHANGE_REQ, TeamShuffleChange);
+        add(Opcode.GR_TEAMSHUFFLE_REQ, TeamShuffle);
+        add(Opcode.GR_SOCCER_REQ, SoccerChange);
     }
 
     // 129 REQ: u8 n125 → 130 ACK (sub_562870 讀序):
@@ -104,19 +109,19 @@ public static class RoomHandlers
 
         var ack = new Packet(Opcode.GR_START_ACK)
             .WriteU8(1)                                     // result: 開戰
-            .WriteS8(0)                                     // mode+14 隊旗 (sub_74F4D0)
+            .WriteBool(room.Soccer)                         // mode+14 隊旗 (sub_74F4D0; 969/970)
             .WriteS32(0)                                    // elapsed_ms 基準 (新局=0; sub_537670 存 timeGetTime()-x)
             .WriteU8(roomNo)                                // room_no (client 定址房物件)
             .WriteU8((byte)room.Members.Count)              // +105 cur_players
-            .WriteU8(room.OpenSlotCount)                       // +129 max_players (client 以 +110 重算)
+            .WriteU8(room.OpenSlotCount)                    // +129 max_players (client 以 +110 重算)
             .WriteU16(room.MaxSlotMask)                     // +110 上限槽位點陣
             .WriteU8(room.MapId)                            // +130 map (sub_540280)
             .WriteU8(room.Rule)                             // mode → sub_53FBB0
             .WriteU16(room.WinCount)                        // +144 勝場目標 (171/172)
             .WriteU8(room.ItemMode)                         // flags bit0→mode+4, bit1→mode+8 (175/176)
-            .WriteU8(0)                                     // mode+12 (未確認)
-            .WriteU8(0)                                     // +109 (未確認)
-            .WriteU8(0)                                     // mode+13 (未確認)
+            .WriteU8(0)                                     // mode+12 rule param (client 僅鏡像, server 側語意未定)
+            .WriteU8(0)                                     // +109 room_type_B (client 僅鏡像)
+            .WriteBool(room.TeamShuffle)                    // mode+13 隊打散開關 (368/369)
             .WriteBool(room.NoSkillBg)                      // +185 noskillbg (712/713)
             .WriteBool(room.DoubleDamage);                  // +128 double_damage (990/991)
         for (int i = 0; i < 16; i++)
@@ -193,12 +198,12 @@ public static class RoomHandlers
             .WriteU8(room.TimeLimit)                        // +136 時間 (173/174)
             .WriteU16(room.WinCount)                        // +144 勝場目標 (171/172)
             .WriteU8(room.ItemMode)                         // flags bit0→mode+4, bit1→mode+8
-            .WriteU8(0)                                     // +146 (未確認)
+            .WriteU8(0)                                     // +146 (server 側語意未定, client 僅鏡像)
             .WriteU16(room.KillCount)                       // +148 擊殺目標 (340/341)
-            .WriteU8(0)                                     // +150 (未確認)
-            .WriteU8(0)                                     // mode+12
-            .WriteU8(0)                                     // +109
-            .WriteU8(0);                                    // mode+13
+            .WriteU8(0)                                     // +150 (server 側語意未定, client 僅鏡像)
+            .WriteU8(0)                                     // mode+12 rule param (client 僅鏡像)
+            .WriteU8(0)                                     // +109 room_type_B (client 僅鏡像)
+            .WriteBool(room.TeamShuffle);                   // mode+13 隊打散開關 (368/369)
         await RoomManager.BroadcastAsync(room, ack);
     }
 
@@ -540,7 +545,88 @@ public static class RoomHandlers
         await RoomManager.BroadcastAsync(room, new Packet(Opcode.GR_DAMAGEROOM_ACK).WriteU8(on));
     }
 
-    // 111 → 112 (+108 更新大廳清單由 client 重拉)
+    // 366 GR_LOCALROOM_REQ (sub_585FD0): u8 — 房主切換區域限定房
+    //   (n2_0==3 TeamSurvival 時 client 不送; 名稱表未註冊, 由
+    //   GAMEROOM_LOCALROOM UI 字串補名, 同 990/991 之例)
+    // → 367 ACK (sub_586090→sub_437B50): u8 — 寫 GAMEROOM_LOCALROOM 勾選
+    private static async ValueTask LocalRoomChange(Session session, Packet packet, ServerContext context)
+    {
+        byte on = packet.ReadU8();
+        if (!TryGetRoom(session, context, out var room, out var slot) || !IsMaster(room, slot))
+        {
+            return;
+        }
+
+        room.LocalRoom = on != 0;
+        await RoomManager.BroadcastAsync(room, new Packet(Opcode.GR_LOCALROOM_ACK).WriteU8(on));
+    }
+
+    // 368 GR_TEAMSHUFFLECHANGE_REQ (sub_585CE0): u8 — 房主切換隊打散開關
+    // → 369 ACK (sub_585D90→sub_4354B0): u8 — 寫 mode rule 物件 +13 並
+    //   勾選 GAMEROOM_TEAMSHUFFLE
+    private static async ValueTask TeamShuffleChange(Session session, Packet packet, ServerContext context)
+    {
+        byte on = packet.ReadU8();
+        if (!TryGetRoom(session, context, out var room, out var slot) || !IsMaster(room, slot))
+        {
+            return;
+        }
+
+        room.TeamShuffle = on != 0;
+        await RoomManager.BroadcastAsync(room, new Packet(Opcode.GR_TEAMSHUFFLECHANGE_ACK).WriteU8(on));
+    }
+
+    // 969 GR_SOCCER_REQ (sub_5860C0): u8 — 房主切換足球模式
+    //   (名稱表未註冊, 由 GAMEROOM_SOCCER UI 字串補名)
+    // → 970 ACK (sub_586180→sub_437D00): u8 — 寫 mode rule 物件 +14
+    //   (sub_74F4D0) 並勾選 GAMEROOM_SOCCER
+    private static async ValueTask SoccerChange(Session session, Packet packet, ServerContext context)
+    {
+        byte on = packet.ReadU8();
+        if (!TryGetRoom(session, context, out var room, out var slot) || !IsMaster(room, slot))
+        {
+            return;
+        }
+
+        room.Soccer = on != 0;
+        await RoomManager.BroadcastAsync(room, new Packet(Opcode.GR_SOCCER_ACK).WriteU8(on));
+    }
+
+    // 894 GR_TEAMSHUFFLE_REQ (sub_585DC0): u8 room_no, u8 map — 房主執行
+    //   隊打散 (map 為 client 目前地圖, server 不重驗)
+    // → 895 ACK (sub_585E70→sub_435680): u8 result; ==1 → u16(讀後丟棄),
+    //   u8 count, count×(u8 slot, s32 uid) — 全房依 uid 重排槽位
+    private static async ValueTask TeamShuffle(Session session, Packet packet, ServerContext context)
+    {
+        _ = packet.ReadU8();                                     // room_no (client 附自己房號)
+        _ = packet.ReadU8();                                     // map (client 附目前地圖)
+
+        if (!TryGetRoom(session, context, out var room, out var slot) || !IsMaster(room, slot))
+        {
+            return;
+        }
+
+        var assignment = room.ShuffleSlots();
+        var ack = new Packet(Opcode.GR_TEAMSHUFFLE_ACK)
+            .WriteU8(1)                                          // result: 已打散
+            .WriteU16(0)                                         // client 讀後丟棄
+            .WriteU8((byte)assignment.Count);
+        foreach (var (newSlot, member) in assignment)
+        {
+            ack.WriteU8(newSlot)
+               .WriteS32((int)member.UserId);
+        }
+
+        await RoomManager.BroadcastAsync(room, ack);
+    }
+
+    // 111 → 112 (sub_56A7B0 卌二輪補完 — 前 6 欄恆送, err==0 另加 9 欄):
+    //   u8 err(0=OK), u8 room_no(<210), u16 slot_mask, s32 room_uid,
+    //   u8 +185 no_skill_bg, u8 mode+13 隊打散, [成功:] u8 team_mode
+    //   (2=隊伍房), 2×{u32 team_uid, u32 team_crc, str team_name,
+    //   u8 team_flag}
+    //   — 後 9 欄 client 在 err==0 時無條件讀取 (sub_592730 一路讀到
+    //   NUL), 故 server 必送 (空隊伍 = uid/crc 0 + 空字串 + flag 0)。
     private static async ValueTask MakeRoom(Session session, Packet packet, ServerContext context)
     {
         byte mapId = packet.ReadU8();
@@ -555,20 +641,36 @@ public static class RoomHandlers
             : null;
 
         var err = room is null ? MakeRoomError.Full : MakeRoomError.Ok;
-        var ack = new Packet(Opcode.GL_MAKEROOM_ACK).WriteU8((byte)err);
+        var ack = new Packet(Opcode.GL_MAKEROOM_ACK)
+            .WriteU8((byte)err)
+            .WriteU8(room?.RoomNo ?? 0)                     // room_no (失敗時為 0)
+            .WriteU16(room?.MaxSlotMask ?? 0)               // v52 → +110 上限槽位點陣
+            .WriteS32(room?.RoomUid ?? 0)                   // v57 → dword_F2A65C
+            .WriteBool(room?.NoSkillBg ?? false)            // v50 → +185 no_skill_bg
+            .WriteBool(room?.TeamShuffle ?? false);         // v53 → mode+13 隊打散
 
         if (room is not null)
         {
             session.RoomNo = room.RoomNo;
-            ack.WriteU8(room.RoomNo)
-               .WriteU16(room.MaxSlotMask)                  // v52 → +110 上限槽位點陣 (popcount = 最大人數)
-               .WriteS32(room.RoomUid)                      // v57 → dword_F2A65C
-               .WriteU8(0)                                  // v50 → +185 no_skill_bg (server 不開)
-               .WriteS8(0);                                 // v53 → mode+13
+            ack.WriteU8(IsTeamMode(rule) ? (byte)2 : (byte)0) // n2_1 team_mode (2=隊伍房 → CCustomTexture)
+               .WriteU32(0)                                 // team A uid (新房間尚無分隊)
+               .WriteU32(0)                                 // team A crc
+               .WriteStr("")                                // team A name
+               .WriteU8(0)                                  // team A flag
+               .WriteU32(0)                                 // team B uid
+               .WriteU32(0)                                 // team B crc
+               .WriteStr("")                                // team B name
+               .WriteU8(0);                                 // team B flag
         }
 
         await session.SendAsync(ack);
     }
+
+    /// <summary>
+    /// sub_438990 的 server 側對照: 兩隊制的模式 (0/2/3/4/8/10/11/12/13)
+    /// 才是隊伍房; 1/5/6/7/9/15 為個人/無分隊模式。
+    /// </summary>
+    private static bool IsTeamMode(byte mode) => mode is 0 or 2 or 3 or 4 or 8 or 10 or 11 or 12 or 13;
 
     // 113 → 114 (sub_56B360 完整佈局, 卅七輪逐欄定案):
     //   u8 sub_type; 0=失敗回大廳; 1=單人進房通知 (給既有成員);
@@ -718,15 +820,15 @@ public static class RoomHandlers
            .WriteU8(room.TimeLimit)                        // v167 → +136 時間
            .WriteU16(room.WinCount)                        // v178 → +144 勝場目標
            .WriteU8(room.ItemMode)                         // v187 flags (bit0→mode+4, bit1→mode+8)
-           .WriteU8(0)                                     // v193 → +146 (未確認)
+           .WriteU8(0)                                     // v193 → +146 (server 側語意未定, client 僅鏡像)
            .WriteU16(room.KillCount)                       // v191[3] → +148 擊殺目標
-           .WriteU8(0)                                     // v169 → +150 (未確認)
-           .WriteU8(0)                                     // v173 → mode+12
-           .WriteU8(0)                                     // v185 → +109
-           .WriteU8(0)                                     // v141[0] → mode+13
+           .WriteU8(0)                                     // v169 → +150 (server 側語意未定, client 僅鏡像)
+           .WriteU8(0)                                     // v173 → mode+12 rule param (client 僅鏡像)
+           .WriteU8(0)                                     // v185 → +109 room_type_B (client 僅鏡像)
+           .WriteBool(room.TeamShuffle)                    // v141[0] → mode+13 隊打散開關 (368/369)
            .WriteBool(room.NoSkillBg)                      // v177 → +185 no_skill_bg
            .WriteBool(room.DoubleDamage)                   // v171 → +128 double_damage
-           .WriteU8(0);                                    // v142 → mode+14 (sub_74F4D0)
+           .WriteBool(room.Soccer);                        // v142 → mode+14 (sub_74F4D0; 969/970)
     }
 
     // 123 GR_LEAVE_REQ → 124 ACK (u8 result + u8 slot 廣播)

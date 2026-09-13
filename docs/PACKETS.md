@@ -54,14 +54,17 @@ offset 8   ...  payload (小端, 緊湊, 無對齊)
 
 | 函數 | 型別 | 大小 |
 |------|------|------|
-| sub_592920 / sub_592940 | u8 (write/read) | 1 |
-| sub_5928E0 / sub_592900 | s8 / bool | 1 |
-| sub_5929A0,sub_5929E0 / sub_592A00,sub_5929C0 | u16/s16 | 2 |
-| sub_592A20,sub_592A60,sub_592B20 / sub_592A40,sub_592AC0,sub_592A80 | s32/u32/float | 4 |
+| sub_592920,sub_5928E0,sub_592960 (寫) / sub_592900,sub_592940,sub_592980 (讀) | u8 (1B) | 1 |
+| sub_5929A0,sub_5929E0 (寫) / sub_592A00,sub_5929C0 (讀) | u16/s16 | 2 |
+| sub_592A20,sub_592A60,sub_592B20 (寫) / sub_592A40,sub_592AC0,sub_592A80 (讀) | s32/u32/float | 4 |
 | sub_592AE0 / sub_592B00 | u64 | 8 |
 | sub_5926F0 / sub_592730 | ANSI 字串 (lstrlenA+1, 含 NUL) | 變長 |
 | sub_592770 / sub_5927B0 | UTF-16 字串 (2*len+2) | 變長 |
 | sub_5927F0 / sub_592850 | 內嵌整個 Packet (u16 opcode + u32 size + bytes) | 變長 |
+
+> 8 個 u8 讀取別名 (592900/940/980) 底層都是 `sub_592500(this,a2,1)`;
+> 寫入別名同理 (592920/8E0/960 → `sub_592580`)。Hex-Rays 的 `char` 參數
+> 只是 byte 寬度, wire 寬度以 size 為準 (u16=2B/u32=4B 亦然)。
 
 **字串一律以 NUL 結尾直接寫進 payload，沒有長度前綴** (讀出端靠 lstrlenA)。
 
@@ -1003,12 +1006,29 @@ festival: 681 的 3 頻道組 ↔ 195 的 group 序號互證; 頻道類型 n2==3
 364 GR_BALANCECHANGE_REQ (sub_56FA30, UI sub_431130/432170): u8(1)
 365 GR_BALANCECHANGE_ACK (sub_56FAE0→sub_431160): u8 — 寫
                        GAMEROOM_TEAMBALANCE UI (room 欄位不變)
-368 GR_TEAMSHUFFLECHANGE_REQ (sub_585CE0): u8 — GAMEROOM_TEAMSHUFFLE
-369 GR_TEAMSHUFFLECHANGE_ACK (sub_585D90→sub_4354B0): u8
-                       (隊打散; server 尚缺 — 見 TODO)
-894 GR_TEAMSHUFFLE_REQ  (sub_585DC0): u8 u8 — 隊打散變體
-895 GR_TEAMSHUFFLE_ACK  (sub_585E70→sub_435680): — (server 尚缺)
-366 (未註冊名稱, sub_585FD0): u8, 僅 n2_0!=3 送 — 隊相關 (待定)
+368 GR_TEAMSHUFFLECHANGE_REQ (sub_585CE0): u8 — 房主切隊打散開關
+                       (發送前置 sub_435480: *(this+112)=27 後送)
+369 GR_TEAMSHUFFLECHANGE_ACK (sub_585D90→sub_4354B0): u8 — 寫
+                       mode rule 物件 +13 並 sub_436730 重繪 USERSLOTS
+894 GR_TEAMSHUFFLE_REQ  (sub_585DC0): u8 room_no, u8 map — 房主執行
+                       隊打散 (發送前置 sub_435520: 房主檢查 + mode rule
+                       vtable+28 非零 + sub_437060 取目前地圖後送出)
+895 GR_TEAMSHUFFLE_ACK  (sub_585E70→sub_435680): u8 status,
+                       u16 (client 讀後丟棄), u8 count,
+                       count×(u8 slot, u32 uid) — status 1=逐槽重排
+                       (dword_F3312C 比對 uid, dword_F6DCF4 寫新 slot,
+                       sub_4360B0 更新 USERSLOTS; 若 uid=自己則
+                       sub_537610 記我的新 slot); 2=shuffle 忙碌
+                       (*(this+344)=1+sub_436E70); 3..16=錯誤碼播
+                       訊息 0x4B5/0x87/0x4B6/0x178/0x4B7/0x2CE/0x111/0xD9
+366 GR_LOCALROOM_REQ   (sub_585FD0): u8, 僅 n2_0!=3 送 — 區域限定房
+                       (名稱表未註冊, 由 GAMEROOM_LOCALROOM UI 字串補名;
+                       server 現已實作同 990/991 之例)
+367 GR_LOCALROOM_ACK   (sub_586090→sub_437B50): u8 — 勾選
+                       GAMEROOM_LOCALROOM
+969 GR_SOCCER_REQ      (sub_5860C0): u8, 僅 n2_0!=3 送 — 足球模式開關
+970 GR_SOCCER_ACK      (sub_586180→sub_437D00): u8 — 寫 mode rule +14
+                       (sub_74F4D0) 並勾選 GAMEROOM_SOCCER
 712 GR_NOSKILL_REQ     (sub_56FB10, UI sub_431290): u8
 713 GR_NOSKILL_ACK     (sub_56FBC0→sub_4312C0): u8 — room+185
                        (noskillbg) + GAMEROOM_{NORMAL,CLAN}_NOSKILL UI
@@ -1049,10 +1069,25 @@ sub_568CE0/sub_53F830/sub_53F920/sub_53F9F0 三 ctor 交叉驗證):
 +186  team_balance (僅錦標賽 ctor sub_53F9F0 寫; 一般房 364/365
       只切 GAMEROOM_TEAMBALANCE UI)
 +33   mode LobbyUI 物件 (sub_53FBB0 建, modeIndex 0..15)
-+132  mode rule 物件 (其 +4=item bit0(sub_74F450), +8=item bit1
-      (sub_74F430), +12/+13=rule param (wire 直寫), +14=team flag
-      (sub_74F4D0 寫/sub_74F4B0 讀))
++132  mode rule 物件 (16B, 有 vtable — 卌二輪逐欄定案):
+        +4  = item bit0 (sub_74F450; 175/176)
+        +8  = item bit1 (sub_74F430; 175/176)
+        +12 = rule param (u8, wire 直寫; 112 本地初始化以 sub_438990
+              「是否隊伍房」寫 1/0 — server 側語意仍待原服確認)
+        +13 = 隊打散開關 (u8; 368/369)
+        +14 = 足球旗標 (u8; sub_74F4D0 寫/sub_74F4B0 讀; 969/970)
 ```
+
+**112 GL_MAKEROOM_ACK 補完 (卌二輪 — sub_56A7B0 重讀, 先前 6 欄漏了尾 9 欄):**
+```
+u8 err(0=OK), u8 room_no(<210), u16 slot_mask, s32 room_uid,
+u8 +185 no_skill_bg, u8 mode+13 隊打散            ← 6 欄恆送 (err!=0 亦然)
+[err==0:] u8 team_mode(2=隊伍房),
+2×{u32 team_uid, u32 team_crc, str team_name, u8 team_flag}
+```
+後 9 欄 err==0 時 client 無條件讀取 (team_name 走 sub_592730 直到
+NUL), 故 server 必送 — 新房間 = team_mode(2 若 mode∈{0,2,3,4,8,10,
+11,12,13}, 否則 0) + 兩組空隊伍 (uid/crc 0, 空字串, flag 0)。
 模式變更 (169/170) 後 client 以 mode 設定表 `sub_426930(mode)` 回推
 預設地圖寫 +130 (sub_540280)。server 現已鏡像 (RoomHandlers.ModeDefaultMap,
 client 實際載入的 `system/map_StartIndex.xml` — ⚠ ui/ 根目錄另有一份
