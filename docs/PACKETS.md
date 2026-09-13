@@ -210,9 +210,22 @@ _REQ = client→server, _ACK = server→client, _NOTIFY/_NOTICE = server 推播�
      ×3 組), **809** (s32)
    - `IVotingNetwork::sub_9BF430`: **719/720/722/723** (投票系統)
 2. `CGameRule::sub_67CF90(n9_0, pkt)` — 遊戲規則層攔截。
-房間/戰鬥期間另有 `sub_54D040` (CLobbyGameRoom 狀態機) 以自己的
-switch 處理 182/184/185/186/189/192/193/194/198... 的**場景轉換**副作用
-(不重複解 payload, 只驅動 UI 狀態)。
+**UDP 私有 opcode 空間 (五輪確認)**: `sub_595A60` (CUDPManager 收包:
+recvfrom ≤9600 → 同一 Packet 檢核 `sub_591D50` + AES 解密 `sub_5930C0`)
+→ `sub_595E80` 的 switch 用**獨立編號 2–34** (2,4,5,6,8,10,12,13,14,15,
+18,20,22,24,26,28,29,31,33,34 + 154 UDP_ALL_PING_ACK / 158
+UDP_TCP_DEAD_ACK 兩個註冊表編號)。UDP 戰鬥協定的編號與 TCP 註冊表
+**不共用**, 私服做 relay 時不可混淆兩個空間。
+
+**戰隊隧道協定 (五輪發現)**: `GC_CLAN_PROTOCOL_REQ(583)/_ACK(584)` 是
+**容器封包** — payload 第一個欄位是 `s32 sub_opcode`, 之後才是子協定
+內容。ACK 端 `sub_54D040` (case 584) 依 sub_opcode 分發:
+182/184/185/186/189/192/193/194/198–201/203–207/210–215/218/219/381–383
+(這些數字與頂層 opcode 空間**無關**, 是戰隊系統私有編號)。
+REQ 端 24 個 builder 全部 `ctor(583)` + `WriteS32(sub_op)`:
+182,184–189,191–193,195–197,200,202,203,205,208–212 (196/197 帶
+`s32 count + raw(4*count)` 的成員 id 陣列)。伺服器實作戰隊功能時
+必須解析/產生這層內嵌結構。
 
 ---
 
@@ -286,10 +299,16 @@ repeat until sentinel:
   float f2
   s32   period     (剩餘天數)
   u8    extra      ⚠ 四輪修正: 200 有 extra (sub_570AB0 呼叫 sub_524B70(cd,pkt,1));
-                   202 走 sub_95AE40 (GameNetwork), 而 sub_523A50 (myinfo 內嵌
-                   路徑) 的 sub_524B70(...,0) 不帶 — 先前記反
+                   無-extra 版 (a3=0) 屬 290/294 MASTER_USERINFO 系
   u16   durability (寫入 *2 個 word: current=max)
 ```
+相鄰 opcode (五輪讀畢, GameNetwork 物件 0x2313148):
+- **201 GL_MYPARTSUP_ACK** (sub_95A3B0): `s32 count` +
+  count×`{f32, f32, u8, f32, f32}` (each → 20B part-up 條目, sub_95A4A0
+  插入排序容器; 完成後 sub_538470 通知)
+- **202 GL_EXPIRE_PARTSUP_ACK** (sub_95AE40): 同 201 佈局
+  `s32 count` + count×`{f32 a, f32 b, u8, f32, f32}` — 但只取 (b,a) 呼叫
+  sub_95A800 移除對應條目
 額外驗證: start<=0 → 背包游標歸 0; start>=5020 → 夾到 5020; item_id 需通過
 sub_535020 目錄檢查, 失敗即 sub_528960(6,...) 錯誤處理並中止本包。
 
