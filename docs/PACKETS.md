@@ -631,6 +631,25 @@ kind 0/1/14 與 12/13/17 (可覆寫類) 走覆寫路徑, 其他 kind 重複購�
 194 GC_CHANNEL_ACK     (sub_56FE90): u8 — 頻道確認
 ```
 
+### 3.15b3 TeamHacking 駭入/炸彈協定 317-333 (廿二輪 — TH 模式核心)
+```
+317 GG_HACKSTART_ACK  (sub_557040): u8 team, u8 slot — 開始駭入
+319 GG_HACKSUCC_ACK   (sub_557400): u8 n2 + 4×f32 (爆點座標/計時) —
+                      駭入成功, 炸彈啟動
+321 GG_HACKFAIL_ACK   (sub_557730): u8 — 駭入失敗
+323 GG_BOMBSUCC_ACK   (sub_5579A0): u8 n2 — 爆炸成功 (回合結束)
+325 GG_BOMBEND_ACK    (unknown_libname_88): — 拆除/結束
+327/329/331 GG_UNHACK*(sub_557D30/557F90/558250): 拆彈三階段
+333 GG_KILLJJ_ACK     (sub_561E40): u8 slot, u8 n9, u8 + [s32] —
+                      擊殺 JJ (寵物/目標)
+341 GR_KILLCHANGE_ACK (sub_56F870): u16 kill_target — 目標擊殺數變更
+343 GG_SOLORESPON_ACK (sub_558AB0): u8 slot, u8, s16 x3 (復活點) —
+                      個人重生
+345/347 GX_*          (sub_58D870/58D8A0): 極短 — 心跳/回應層
+```
+(303-309 GG_JJ* 為 JJ 寵物系統 create/change/get/gameend — 同構
+u8+slot 系列)
+
 ### 3.15c2 禮物操作 299/301/315 (廿二輪)
 ```
 299 GS_TAKEGIFT_ACK  (sub_57AEF0 → sub_524DB0): 禮物箱分頁:
