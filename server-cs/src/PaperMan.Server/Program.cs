@@ -56,39 +56,46 @@ listener.Stop();
 Console.WriteLine("[paperman] bye");
 return;
 
-async Task RunSessionAsync(TcpClient client, long sid, CancellationToken ct)
+async Task RunSessionAsync(TcpClient client, long sessionId, CancellationToken cancellationToken)
 {
     // codec 為 per-session (壓縮門檻是 per-connection 協商值)
     using var codec = new PacketCodec(config.AesKey, config.CompressThreshold);
-    using var session = new Session(client, codec, sid);
-    Console.WriteLine($"[s{sid}] connect {session.Remote}");
+    using var session = new Session(client, codec, sessionId);
+    Console.WriteLine($"[s{sessionId}] connect {session.Remote}");
 
     // 心跳: 伺服器主動發 102, client 以 101 回應 (sub_58D6F0; 方向十輪定案)
-    using var pingCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+    using var pingCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
     _ = PingLoopAsync(session, pingCts.Token);
 
     try
     {
-        // 694 GL_ACCOUNTCONNSUCC = 「連上帳號伺服器」歡迎包 (十一輪定案):
-        // client 的 694 handler 收下 u16 門檻後呼叫 sub_43DF00 → 送出 682
-        // 登入 REQ。所以 694 必須在連線建立時發一次 (登入的觸發器),
-        // 且登入成功後不可再發 (否則 client 再送 682 → 無限迴圈)。
-        await session.SendAsync(new Packet(Opcode.GL_ACCOUNTCONNSUCC)
-            .WriteU16(config.CompressThreshold), ct);
+        // 握手分流 (卅一輪, 使用者釐清 + 逐行證據):
+        //   登入伺服器 → 694 GL_ACCOUNTCONNSUCC (u16 門檻; client 收到
+        //     後呼叫 sub_43DF00 送 682 登入 — 十一輪定案)
+        //   頻道伺服器 → 693 GL_TCPCONNSUCC (client 收到後顯示訊息 0xFF
+        //     並呼叫 sub_555C60 送 143 PM_UDPSTART — 卅一輪 sub_57CAE0)
+        // 兩者都只在連線建立時發一次, 之後不可重發 (會觸發 client 重跑握手)。
+        var greeting = config.Role switch
+        {
+            ServerRole.Channel => new Packet(Opcode.GL_TCPCONNSUCC),
+            _ => new Packet(Opcode.GL_ACCOUNTCONNSUCC)
+                    .WriteU16(config.CompressThreshold),
+        };
+        await session.SendAsync(greeting, cancellationToken);
 
-        await foreach (var packet in session.ReceiveAsync(ct))
+        await foreach (var packet in session.ReceiveAsync(cancellationToken))
         {
             db.LogPacket(packet.OpcodeRaw, rx: true, packet.Length);
             try
             {
                 if (!await router.DispatchAsync(session, packet, ctx))
                 {
-                    Console.WriteLine($"[s{sid}] unhandled {packet}");
+                    Console.WriteLine($"[s{sessionId}] unhandled {packet}");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[s{sid}] handler {packet.Opcode} error: {ex.Message}");
+                Console.WriteLine($"[s{sessionId}] handler {packet.Opcode} error: {ex.Message}");
             }
         }
     }
@@ -98,25 +105,25 @@ async Task RunSessionAsync(TcpClient client, long sid, CancellationToken ct)
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"[s{sid}] session error: {ex.Message}");
+        Console.WriteLine($"[s{sessionId}] session error: {ex.Message}");
     }
     finally
     {
         pingCts.Cancel();
     }
 
-    Console.WriteLine($"[s{sid}] disconnect {session.Remote}");
+    Console.WriteLine($"[s{sessionId}] disconnect {session.Remote}");
 }
 
 // 30 秒一次的 102 GT_PING_ACK 心跳; client 收到即回 101 (sub_58D6F0)。
-static async Task PingLoopAsync(Session session, CancellationToken ct)
+static async Task PingLoopAsync(Session session, CancellationToken cancellationToken)
 {
     using var timer = new PeriodicTimer(TimeSpan.FromSeconds(30));
     try
     {
-        while (await timer.WaitForNextTickAsync(ct))
+        while (await timer.WaitForNextTickAsync(cancellationToken))
         {
-            await session.SendAsync(new Packet(Opcode.GT_PING_ACK), ct);
+            await session.SendAsync(new Packet(Opcode.GT_PING_ACK), cancellationToken);
         }
     }
     catch (Exception)

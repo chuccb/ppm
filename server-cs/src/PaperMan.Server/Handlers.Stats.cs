@@ -59,18 +59,18 @@ public static class StatHandlers
     }
 
     private static PacketHandler MakeCounter(Opcode ack, string column, AckShape shape) =>
-        async (s, p, ctx) =>
+        async (session, packet, context) =>
         {
             // REQ = client 的新絕對累計值 (sub_5567F0 等: a1>=0 才送)
-            long total = p.Remaining >= 4 ? p.ReadS32() : 0;
+            long total = packet.Remaining >= 4 ? packet.ReadS32() : 0;
             if (total < 0)
             {
                 total = 0;
             }
 
-            if (s.UserId != 0)
+            if (session.UserId != 0)
             {
-                total = ctx.Db.SetStatMax(s.UserId, column, total);   // 只允許單調遞增
+                total = context.Db.SetStatMax(session.UserId, column, total);   // 只允許單調遞增
             }
 
             var reply = new Packet(ack).WriteS32((int)total);
@@ -79,18 +79,18 @@ public static class StatHandlers
                 reply.WriteS32(0);                                    // extra (UI 顯示用)
             }
 
-            await s.SendAsync(reply);
+            await session.SendAsync(reply);
         };
 
     /// <summary>882 推播: s32 累計總遊玩秒數 (client 自行差分, 無 REQ)。</summary>
-    public static async ValueTask PushPlayTime(Session s, ServerContext ctx)
+    public static async ValueTask PushPlayTime(Session session, ServerContext context)
     {
-        if (s.UserId == 0)
+        if (session.UserId == 0)
         {
             return;
         }
 
-        long total = ctx.Db.SetStatMax(s.UserId, "play_time_s", 0);
-        await s.SendAsync(new Packet(Opcode.GP_CHPLAYTIMEC_ACK).WriteS32((int)total));
+        long total = context.Db.SetStatMax(session.UserId, "play_time_s", 0);
+        await session.SendAsync(new Packet(Opcode.GP_CHPLAYTIMEC_ACK).WriteS32((int)total));
     }
 }

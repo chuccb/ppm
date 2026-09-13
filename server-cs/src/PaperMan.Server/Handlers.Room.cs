@@ -44,11 +44,11 @@ public static class RoomHandlers
     // 129 REQ: u8 n125 → 130 ACK (sub_562870 讀序, 廿九輪逐變數):
     //   u8 result(1=開戰), s8, s32 elapsed_ms(新局=0), u8 slot, u8, u8,
     //   u16, u8, u8 host_slot, u16, u8 flags, s8×3, u8, s8, 16×s32
-    private static async ValueTask StartGame(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask StartGame(Session session, Packet packet, ServerContext context)
     {
-        _ = p.ReadU8();                                     // n125 (倒數參數)
+        _ = packet.ReadU8();                                     // n125 (倒數參數)
 
-        if (s.RoomNo is not { } roomNo || ctx.Rooms.Find(roomNo) is not { } room)
+        if (session.RoomNo is not { } roomNo || context.Rooms.Find(roomNo) is not { } room)
         {
             return;
         }
@@ -80,9 +80,9 @@ public static class RoomHandlers
 
     // 183 REQ 空 → 184 ACK (sub_563B00): u8 n2(1), u8 slot, u8 slot2, u8
     //   — 每位成員載入完成後廣播; 全員到齊由 client 觸發 187
-    private static async ValueTask EndLoading(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask EndLoading(Session session, Packet packet, ServerContext context)
     {
-        if (s.RoomNo is not { } roomNo || ctx.Rooms.Find(roomNo) is not { } room)
+        if (session.RoomNo is not { } roomNo || context.Rooms.Find(roomNo) is not { } room)
         {
             return;
         }
@@ -99,9 +99,9 @@ public static class RoomHandlers
 
     // 187 REQ 空 → 188 ACK (sub_563D60): u8 n2==1, u8 count, count×u8 slot
     //   — 開打廣播 (帶已載入成員名單)
-    private static async ValueTask BeginBattle(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask BeginBattle(Session session, Packet packet, ServerContext context)
     {
-        if (s.RoomNo is not { } roomNo || ctx.Rooms.Find(roomNo) is not { } room)
+        if (session.RoomNo is not { } roomNo || context.Rooms.Find(roomNo) is not { } room)
         {
             return;
         }
@@ -119,9 +119,9 @@ public static class RoomHandlers
     }
 
     // 133 REQ 空 → 134 ACK (sub_562EA0, 與 130 鏡像): 回房重置
-    private static async ValueTask EndGame(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask EndGame(Session session, Packet packet, ServerContext context)
     {
-        if (s.RoomNo is not { } roomNo || ctx.Rooms.Find(roomNo) is not { } room)
+        if (session.RoomNo is not { } roomNo || context.Rooms.Find(roomNo) is not { } room)
         {
             return;
         }
@@ -147,9 +147,9 @@ public static class RoomHandlers
 
     // 127 REQ 空 → 128 ACK (sub_5626D0): u8 ready_flag, u8 slot —
     // ready 狀態翻轉廣播 (server 維護 per-slot ready 集合)
-    private static async ValueTask Ready(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask Ready(Session session, Packet packet, ServerContext context)
     {
-        if (s.RoomNo is not { } roomNo || ctx.Rooms.Find(roomNo) is not { } room)
+        if (session.RoomNo is not { } roomNo || context.Rooms.Find(roomNo) is not { } room)
         {
             return;
         }
@@ -163,15 +163,15 @@ public static class RoomHandlers
     }
 
     // 135 REQ: u8 n254, u8 target_slot → 136 ACK: u8 ok + from/to 廣播
-    private static async ValueTask ChangeSlot(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask ChangeSlot(Session session, Packet packet, ServerContext context)
     {
-        _ = p.ReadU8();                                     // n254 (模式參數)
-        byte target = p.ReadU8();
+        _ = packet.ReadU8();                                     // n254 (模式參數)
+        byte target = packet.ReadU8();
 
-        if (s.RoomNo is not { } roomNo || ctx.Rooms.Find(roomNo) is not { } room
+        if (session.RoomNo is not { } roomNo || context.Rooms.Find(roomNo) is not { } room
             || target >= 16 || room.Members.ContainsKey(target))
         {
-            await s.SendAsync(new Packet(Opcode.GR_CHANGESLOT_ACK).WriteU8(0));
+            await session.SendAsync(new Packet(Opcode.GR_CHANGESLOT_ACK).WriteU8(0));
             return;
         }
 
@@ -186,35 +186,35 @@ public static class RoomHandlers
     }
 
     // 216 REQ: u8 room_no, str pass → 217 ACK: u8 result → 成功後 client 送 113
-    private static async ValueTask EnterRoomPass(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask EnterRoomPass(Session session, Packet packet, ServerContext context)
     {
-        byte roomNo = p.ReadU8();
-        var pass = p.ReadStr();
-        var room = ctx.Rooms.Find(roomNo);
+        byte roomNo = packet.ReadU8();
+        var pass = packet.ReadStr();
+        var room = context.Rooms.Find(roomNo);
 
         bool ok = room is not null
             && (room.Password is null || room.Password == pass);
 
-        await s.SendAsync(new Packet(Opcode.GL_ENTERROOMPASS_ACK)
+        await session.SendAsync(new Packet(Opcode.GL_ENTERROOMPASS_ACK)
             .WriteU8(ok ? (byte)1 : (byte)0));
     }
 
     // 125 REQ (與 119 同構) → 126 ACK (sub_56EA80):
     //   s32 custom_tex, u8 slot, wstr message — 房內廣播
-    private static async ValueTask RoomChat(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask RoomChat(Session session, Packet packet, ServerContext context)
     {
-        if (s.RoomNo is not { } roomNo || ctx.Rooms.Find(roomNo) is not { } room)
+        if (session.RoomNo is not { } roomNo || context.Rooms.Find(roomNo) is not { } room)
         {
             return;
         }
 
         // 廿八輪自動表: 125 = s32 tex, u8 slot, wstr msg (次變體 str)
-        int tex = p.ReadS32();
-        _ = p.ReadU8();                                     // client 附 slot (以 server 記錄為準)
+        int tex = packet.ReadS32();
+        _ = packet.ReadU8();                                     // client 附 slot (以 server 記錄為準)
 
-        var message = p.Remaining >= 2 && p.Remaining % 2 == 0
-            ? p.ReadWStr()
-            : p.ReadStr();
+        var message = packet.Remaining >= 2 && packet.Remaining % 2 == 0
+            ? packet.ReadWStr()
+            : packet.ReadStr();
 
         if (message.Length == 0)
         {
@@ -230,14 +230,14 @@ public static class RoomHandlers
     }
 
     // 121 REQ: u8 map → 122 ACK (sub_56E530): u8 map — 房主換圖廣播
-    private static async ValueTask MapChange(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask MapChange(Session session, Packet packet, ServerContext context)
     {
-        if (s.RoomNo is not { } roomNo || ctx.Rooms.Find(roomNo) is not { } room)
+        if (session.RoomNo is not { } roomNo || context.Rooms.Find(roomNo) is not { } room)
         {
             return;
         }
 
-        byte mapId = p.ReadU8();
+        byte mapId = packet.ReadU8();
         room.MapId = mapId;
 
         await RoomManager.BroadcastAsync(room,
@@ -245,17 +245,17 @@ public static class RoomHandlers
     }
 
     // 111 → 112 (+108 更新大廳清單由 client 重拉)
-    private static async ValueTask MakeRoom(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask MakeRoom(Session session, Packet packet, ServerContext context)
     {
-        byte mapId = p.ReadU8();
-        sbyte hasPass = p.ReadS8();
-        var title = p.ReadStr();
-        var pass = hasPass != 0 ? p.ReadStr() : null;
-        byte rule = p.Remaining > 0 ? p.ReadU8() : (byte)0;
-        byte max = p.Remaining > 0 ? p.ReadU8() : (byte)16;
+        byte mapId = packet.ReadU8();
+        sbyte hasPass = packet.ReadS8();
+        var title = packet.ReadStr();
+        var pass = hasPass != 0 ? packet.ReadStr() : null;
+        byte rule = packet.Remaining > 0 ? packet.ReadU8() : (byte)0;
+        byte max = packet.Remaining > 0 ? packet.ReadU8() : (byte)16;
 
-        var room = s.UserId != 0
-            ? ctx.Rooms.Create(s, mapId, title, pass, rule, max)
+        var room = session.UserId != 0
+            ? context.Rooms.Create(s, mapId, title, pass, rule, max)
             : null;
 
         var err = room is null ? MakeRoomError.Full : MakeRoomError.Ok;
@@ -263,7 +263,7 @@ public static class RoomHandlers
 
         if (room is not null)
         {
-            s.RoomNo = room.RoomNo;
+            session.RoomNo = room.RoomNo;
             ack.WriteU8(room.RoomNo)
                .WriteU16(0)                                 // v52 (保留)
                .WriteS32(room.RoomUid)                      // v57 → dword_F2A65C
@@ -271,54 +271,54 @@ public static class RoomHandlers
                .WriteS8(0);                                 // v53 obs flag
         }
 
-        await s.SendAsync(ack);
+        await session.SendAsync(ack);
     }
 
     // 113 → 114 (sub_type==1 單人通知) + 房內廣播
-    private static async ValueTask EnterRoom(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask EnterRoom(Session session, Packet packet, ServerContext context)
     {
-        byte roomNo = p.ReadU8();
-        var room = ctx.Rooms.Find(roomNo);
+        byte roomNo = packet.ReadU8();
+        var room = context.Rooms.Find(roomNo);
         byte? slot = room?.TakeFreeSlot();
 
-        if (room is null || slot is null || s.UserId == 0)
+        if (room is null || slot is null || session.UserId == 0)
         {
             // sub_type==0 = 失敗回大廳
-            await s.SendAsync(new Packet(Opcode.GL_ENTERROOM_ACK).WriteU8(0));
+            await session.SendAsync(new Packet(Opcode.GL_ENTERROOM_ACK).WriteU8(0));
             return;
         }
 
         room.Members[slot.Value] = s;
-        s.RoomNo = roomNo;
+        session.RoomNo = roomNo;
 
         // 廣播單人進房通知給房內其他人 (sub_type==1)
         var notice = new Packet(Opcode.GL_ENTERROOM_ACK)
             .WriteU8(1)
-            .WriteS32((int)s.UserId)
+            .WriteS32((int)session.UserId)
             .WriteU8(slot.Value)
-            .WriteStr(s.Nickname);
+            .WriteStr(session.Nickname);
         await RoomManager.BroadcastAsync(room, notice, except: s);
 
         // 給進房者自己也發 sub_type==1 (client 依 uid 判斷是否本人)
-        await s.SendAsync(Packet.FromPayload(notice.Opcode, notice.Payload));
+        await session.SendAsync(Packet.FromPayload(notice.Opcode, notice.Payload));
     }
 
     // 123 GR_LEAVE_REQ → 124 ACK (u8 result + u8 slot 廣播)
-    private static async ValueTask LeaveRoom(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask LeaveRoom(Session session, Packet packet, ServerContext context)
     {
-        if (s.RoomNo is not { } roomNo || ctx.Rooms.Find(roomNo) is not { } room)
+        if (session.RoomNo is not { } roomNo || context.Rooms.Find(roomNo) is not { } room)
         {
-            await s.SendAsync(new Packet(Opcode.GR_LEAVE_ACK).WriteU8(0));
+            await session.SendAsync(new Packet(Opcode.GR_LEAVE_ACK).WriteU8(0));
             return;
         }
 
         var slot = room.Members.FirstOrDefault(kv => ReferenceEquals(kv.Value, s)).Key;
         room.Members.TryRemove(slot, out _);
-        s.RoomNo = null;
+        session.RoomNo = null;
 
         if (room.Members.IsEmpty)
         {
-            ctx.Rooms.Remove(roomNo);                       // 空房回收
+            context.Rooms.Remove(roomNo);                       // 空房回收
         }
         else
         {
@@ -328,6 +328,6 @@ public static class RoomHandlers
             await RoomManager.BroadcastAsync(room, notice);
         }
 
-        await s.SendAsync(new Packet(Opcode.GR_LEAVE_ACK).WriteU8(0));
+        await session.SendAsync(new Packet(Opcode.GR_LEAVE_ACK).WriteU8(0));
     }
 }

@@ -33,14 +33,14 @@ public sealed class Session(TcpClient client, PacketCodec codec, long id) : IDis
     private int _rxLen;
     private readonly SemaphoreSlim _sendGate = new(1, 1);
 
-    public async Task SendAsync(Packet p, CancellationToken ct = default)
+    public async Task SendAsync(Packet packet, CancellationToken cancellationToken = default)
     {
-        var frame = codec.Encode(p);
+        var frame = codec.Encode(packet);
 
-        await _sendGate.WaitAsync(ct).ConfigureAwait(false);
+        await _sendGate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            await _stream.WriteAsync(frame, ct).ConfigureAwait(false);
+            await _stream.WriteAsync(frame, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
@@ -50,14 +50,14 @@ public sealed class Session(TcpClient client, PacketCodec codec, long id) : IDis
 
     /// <summary>讀 socket 並逐 frame 產出封包; 連線關閉時自然結束。</summary>
     public async IAsyncEnumerable<Packet> ReceiveAsync(
-        [EnumeratorCancellation] CancellationToken ct = default)
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        while (!ct.IsCancellationRequested)
+        while (!cancellationToken.IsCancellationRequested)
         {
             int n;
             try
             {
-                n = await _stream.ReadAsync(_rxBuf.AsMemory(_rxLen), ct).ConfigureAwait(false);
+                n = await _stream.ReadAsync(_rxBuf.AsMemory(_rxLen), cancellationToken).ConfigureAwait(false);
             }
             catch (Exception e) when (e is IOException or SocketException)
             {

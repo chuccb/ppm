@@ -26,11 +26,11 @@ public static class ShopHandlers
     //   ok → s32 v11, s32 gp_after(→PG 顯示), s32 item_id
     //   (client 以 item_id 掃背包快取移除該件; 單件交易無迴圈 —
     //    四/六輪的 count+repeat 版為誤讀, dispatcher 直查定案)
-    private static async ValueTask SellItem(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask SellItem(Session session, Packet packet, ServerContext context)
     {
-        int slot = p.ReadS32();
-        var r = s.UserId != 0
-            ? ctx.Db.SellItem(s.UserId, slot)
+        int slot = packet.ReadS32();
+        var r = session.UserId != 0
+            ? context.Db.SellItem(session.UserId, slot)
             : ((bool Ok, int ItemId, long GpAfter))(false, 0, 0);
 
         var ack = new Packet(Opcode.GS_SELLITEM_ACK).WriteBool(r.Ok);
@@ -41,13 +41,13 @@ public static class ShopHandlers
                .WriteS32(r.ItemId);                         // 背包快取移除鍵
         }
 
-        await s.SendAsync(ack);
+        await session.SendAsync(ack);
     }
 
-    private static async ValueTask Cash(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask Cash(Session session, Packet packet, ServerContext context)
     {
-        int cash = s.UserId != 0 ? ctx.Db.GetCash(s.UserId) : 0;
-        await s.SendAsync(new Packet(Opcode.GS_CASH_ACK).WriteBool(true).WriteS32(cash));
+        int cash = session.UserId != 0 ? context.Db.GetCash(session.UserId) : 0;
+        await session.SendAsync(new Packet(Opcode.GS_CASH_ACK).WriteBool(true).WriteS32(cash));
     }
 
     // ACK(205) sub_571910 — ⚠ 交叉驗證修正的完整結構:
@@ -59,76 +59,76 @@ public static class ShopHandlers
     // REQ(204) builder @0x570A2C (六輪逐行驗證):
     //   u8 count; repeat count {s32 item_id, u8 kind, s16 period,
     //   [s16 -(idx+1) 只在 kind 12/13/17 = 顏色/貼圖類]}
-    private static async ValueTask BuyItems(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask BuyItems(Session session, Packet packet, ServerContext context)
     {
-        byte count = p.ReadU8();
+        byte count = packet.ReadU8();
         var ack = new Packet(Opcode.GS_BUYITEM_ACK).WriteU8(count);
-        for (int i = 0; i < count && p.Remaining > 0; i++)
+        for (int i = 0; i < count && packet.Remaining > 0; i++)
         {
-            int itemId = p.ReadS32();
-            byte kind = p.ReadU8();
-            short period = p.ReadS16();
-            if (kind is 12 or 13 or 17 && p.Remaining >= 2)
+            int itemId = packet.ReadS32();
+            byte kind = packet.ReadU8();
+            short period = packet.ReadS16();
+            if (kind is 12 or 13 or 17 && packet.Remaining >= 2)
             {
-                _ = p.ReadS16();                            // 變體索引 (負編碼)
+                _ = packet.ReadS16();                            // 變體索引 (負編碼)
             }
 
-            WriteResult(ack, Buy(s, ctx, itemId, (byte)period, useCash: true));
+            WriteResult(ack, Buy(session, context, itemId, (byte)period, useCash: true));
         }
 
-        await s.SendAsync(WriteTail(ack, s, ctx));
+        await session.SendAsync(WriteTail(ack, session, context));
     }
 
     // REQ(695) builder sub_570B00 (廿四輪自動抽取定案):
     //   s32 item_id, u8 kind, u8 period, u16 variant
     //   (七輪的 str(64) 版是誤讀 String 緩衝宣告 — 三個 builder 呼叫點
     //    序列一致: 592A20+592920+592920+5929A0, 無字串寫入)
-    private static async ValueTask BuyOnceItem(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask BuyOnceItem(Session session, Packet packet, ServerContext context)
     {
-        int itemId = p.ReadS32();
-        _ = p.ReadU8();                                    // kind (server 以 catalog 為準)
-        byte period = p.Remaining > 0 ? p.ReadU8() : (byte)0;
+        int itemId = packet.ReadS32();
+        _ = packet.ReadU8();                                    // kind (server 以 catalog 為準)
+        byte period = packet.Remaining > 0 ? packet.ReadU8() : (byte)0;
 
-        if (p.Remaining >= 2)
+        if (packet.Remaining >= 2)
         {
-            _ = p.ReadU16();                               // 顏色/貼圖變體 (負編碼)
+            _ = packet.ReadU16();                               // 顏色/貼圖變體 (負編碼)
         }
 
         var ack = new Packet(Opcode.GS_BUYITEM_ACK).WriteU8(1);
-        WriteResult(ack, Buy(s, ctx, itemId, period, useCash: true));
-        await s.SendAsync(WriteTail(ack, s, ctx));
+        WriteResult(ack, Buy(session, context, itemId, period, useCash: true));
+        await session.SendAsync(WriteTail(ack, session, context));
     }
 
-    private static Db.BuyResult Buy(Session s, ServerContext ctx, int itemId, byte period, bool useCash) =>
-        s.UserId != 0
-            ? ctx.Db.BuyItem(s.UserId, itemId, period, useCash)
+    private static Db.BuyResult Buy(Session session, ServerContext context, int itemId, byte period, bool useCash) =>
+        session.UserId != 0
+            ? context.Db.BuyItem(session.UserId, itemId, period, useCash)
             : Db.BuyResult.Fail(itemId);
 
     // REQ(296) 完整版 builder @0x57A6xx (七輪讀畢):
     //   str to_nick, u8 has_msg, [str message], s32 item_id, u8 kind,
     //   u8 period, [u16 變體 只在 kind 12/13/17]
     // ACK(297) sub_57AA50: u8 result (0=成功 → 另 5×s32; 1..11 = 錯誤碼)
-    private static async ValueTask GiveGift(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask GiveGift(Session session, Packet packet, ServerContext context)
     {
-        var toNick = p.ReadStr();
-        var message = p.ReadBool() ? p.ReadStr() : null;
-        int itemId = p.ReadS32();
-        byte kind = p.ReadU8();
-        byte period = p.Remaining > 0 ? p.ReadU8() : (byte)0;
+        var toNick = packet.ReadStr();
+        var message = packet.ReadBool() ? packet.ReadStr() : null;
+        int itemId = packet.ReadS32();
+        byte kind = packet.ReadU8();
+        byte period = packet.Remaining > 0 ? packet.ReadU8() : (byte)0;
 
-        if (kind is 12 or 13 or 17 && p.Remaining >= 2)
+        if (kind is 12 or 13 or 17 && packet.Remaining >= 2)
         {
-            _ = p.ReadU16();                                // 顏色/貼圖變體 (負編碼)
+            _ = packet.ReadU16();                                // 顏色/貼圖變體 (負編碼)
         }
 
-        byte result = s.UserId != 0
-            ? ctx.Db.GiveGift(s.UserId, toNick, itemId, period, message)
+        byte result = session.UserId != 0
+            ? context.Db.GiveGift(session.UserId, toNick, itemId, period, message)
             : (byte)1;
 
         var ack = new Packet(Opcode.GS_GIVEGIFT_ACK).WriteU8(result);
         if (result == 0)
         {
-            int cash = ctx.Db.GetCash(s.UserId);
+            int cash = context.Db.GetCash(session.UserId);
             ack.WriteS32(cash)                              // 扣款後餘額顯示組
                .WriteS32(0)
                .WriteS32(0)
@@ -136,7 +136,7 @@ public static class ShopHandlers
                .WriteS32(0);
         }
 
-        await s.SendAsync(ack);
+        await session.SendAsync(ack);
     }
 
     private static void WriteResult(Packet ack, Db.BuyResult r)
@@ -162,10 +162,10 @@ public static class ShopHandlers
     ///   v20 → ArgList → 商店 "CASH" 欄位 (現金)
     ///   v27 → *EE8D1C → 商店 "CP" 欄位 (第三貨幣)
     /// </summary>
-    private static Packet WriteTail(Packet ack, Session s, ServerContext ctx)
+    private static Packet WriteTail(Packet ack, Session session, ServerContext context)
     {
-        int cash = s.UserId != 0 ? ctx.Db.GetCash(s.UserId) : 0;
-        var info = s.UserId != 0 ? ctx.Db.GetMyInfo(s.UserId) : null;
+        int cash = session.UserId != 0 ? context.Db.GetCash(session.UserId) : 0;
+        var info = session.UserId != 0 ? context.Db.GetMyInfo(session.UserId) : null;
         int gp = (int)(info?.Gp ?? 0);
 
         return ack

@@ -81,28 +81,28 @@ public static class BattleRelayHandlers
     }
 
     private static PacketHandler MakeSlotRelay(Opcode ack) =>
-        async (s, p, ctx) =>
+        async (session, packet, context) =>
         {
-            if (FindRoomSlot(s, ctx) is not var (room, slot))
+            if (FindRoomSlot(session, context) is not var (room, slot))
             {
                 return;
             }
 
             var notice = new Packet(ack)
                 .WriteU8(slot)
-                .WriteRaw(p.Payload[p.ReadPos..]);          // REQ 原 payload 續接
+                .WriteRaw(packet.Payload[packet.ReadPos..]);          // REQ 原 payload 續接
             await RoomManager.BroadcastAsync(room, notice);
         };
 
     private static PacketHandler MakeRespawn(Opcode ack) =>
-        async (s, p, ctx) =>
+        async (session, packet, context) =>
         {
-            if (FindRoomSlot(s, ctx) is not var (room, slot))
+            if (FindRoomSlot(session, context) is not var (room, slot))
             {
                 return;
             }
 
-            _ = p.Remaining >= 4 ? p.ReadS32() : 0;         // respawn token
+            _ = packet.Remaining >= 4 ? packet.ReadS32() : 0;         // respawn token
 
             // 座標 0,0,0 = client 使用地圖預設重生點
             var notice = new Packet(ack)
@@ -114,20 +114,20 @@ public static class BattleRelayHandlers
 
     // 344-350: REQ = s32 tex, u8 slot, str msg — 原樣轉發
     // (team/dead 過濾需戰場狀態; 單機版全房廣播)
-    private static async ValueTask ChatRelay(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask ChatRelay(Session session, Packet packet, ServerContext context)
     {
-        if (FindRoomSlot(s, ctx) is not var (room, _))
+        if (FindRoomSlot(session, context) is not var (room, _))
         {
             return;
         }
 
-        var notice = Packet.FromPayload(p.Opcode, p.Payload);
+        var notice = Packet.FromPayload(packet.Opcode, packet.Payload);
         await RoomManager.BroadcastAsync(room, notice, except: s);
     }
 
-    private static (Room Room, byte Slot)? FindRoomSlot(Session s, ServerContext ctx)
+    private static (Room Room, byte Slot)? FindRoomSlot(Session session, ServerContext context)
     {
-        if (s.RoomNo is not { } roomNo || ctx.Rooms.Find(roomNo) is not { } room)
+        if (session.RoomNo is not { } roomNo || context.Rooms.Find(roomNo) is not { } room)
         {
             return null;
         }

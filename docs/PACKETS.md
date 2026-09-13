@@ -814,10 +814,15 @@ GG 戰鬥事件中繼 (server 原樣轉發即可) 與 MASTER_* GM 工具組。
     差分推播 (期限到期/耐久歸零時 server 主動通知)
 686 GL_TUTORIALINDEX_ACK (sub_55C790): 教學進度
 ⭐ 693 GL_TCPCONNSUCC (sub_57CAE0) = **直接呼叫 sub_555C60 = 143
-    PM_UDPSTART_REQ builder**! 戰鬥伺服器握手鏈完整版:
-    client 連上戰鬥 TCP → server 發 693 → client 送 143 (帶 nick +
-    n100 + ext_count 回送) → server 回 144 — 與大廳 694→682→681
-    完全平行的第二握手!
+    PM_UDPSTART_REQ builder**! **頻道伺服器**握手鏈 (卅一輪正名 —
+    使用者釐清 + PM 家族=頻道管理語意):
+    client 連上頻道 TCP → server 發 693 → client 顯示 0xFF 訊息並
+    送 143 (nick + n100 + ext_count 回送) → server 回 144。
+    完整雙握手: **登入伺服器 = 694 GL_ACCOUNTCONNSUCC → 682 → 681**;
+    **頻道伺服器 = 693 GL_TCPCONNSUCC → 143 → 144**。
+    681 的伺服器清單 (host+port+3頻道組) 就是頻道伺服器的位址來源;
+    登入成功後 sub_43E450 → sub_5374F0 存頻道位址 → 使用者選頻道
+    即連線 → 693 觸發。
 ```
 
 ### 3.15d 連線生命週期 103/141-144 (九輪讀畢)

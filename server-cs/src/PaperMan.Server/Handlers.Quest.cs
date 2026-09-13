@@ -34,15 +34,15 @@ public static class QuestHandlers
     }
 
     // 865 (sub_585AB0): s32 unix_time — client 用來對時每日任務重置
-    private static async ValueTask ServerDateTime(Session s, Packet p, ServerContext ctx) =>
-        await s.SendAsync(new Packet(Opcode.GL_SERVER_DATETIME_ACK)
+    private static async ValueTask ServerDateTime(Session session, Packet packet, ServerContext context) =>
+        await session.SendAsync(new Packet(Opcode.GL_SERVER_DATETIME_ACK)
             .WriteS32((int)DateTimeOffset.UtcNow.ToUnixTimeSeconds()));
 
     // 867 → 868: u8 result (0=OK); OK 時附 13B 快照
-    private static async ValueTask Accept(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask Accept(Session session, Packet packet, ServerContext context)
     {
-        int questIndex = p.ReadS32();
-        bool ok = s.UserId != 0 && ctx.Db.AcceptQuest(s.UserId, questIndex);
+        int questIndex = packet.ReadS32();
+        bool ok = session.UserId != 0 && context.Db.AcceptQuest(session.UserId, questIndex);
 
         var ack = new Packet(Opcode.GQ_QUEST_ACCEPT_ACK);
         if (ok)
@@ -56,14 +56,14 @@ public static class QuestHandlers
                .WriteS32(questIndex);                       // result!=0 → s32 idx
         }
 
-        await s.SendAsync(ack);
+        await session.SendAsync(ack);
     }
 
     // 869 → 870 (sub_91D290): u8 result; !=0 → s32 idx, s32
-    private static async ValueTask Cancel(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask Cancel(Session session, Packet packet, ServerContext context)
     {
-        int questIndex = p.ReadS32();
-        bool ok = s.UserId != 0 && ctx.Db.CancelQuest(s.UserId, questIndex);
+        int questIndex = packet.ReadS32();
+        bool ok = session.UserId != 0 && context.Db.CancelQuest(session.UserId, questIndex);
 
         var ack = new Packet(Opcode.GQ_QUEST_CANCEL_ACK);
         if (ok)
@@ -77,7 +77,7 @@ public static class QuestHandlers
                .WriteS32(0);
         }
 
-        await s.SendAsync(ack);
+        await session.SendAsync(ack);
     }
 
     /// <summary>13-byte 線上快照 (sub_592500(a2, &v4, 0xD))。</summary>

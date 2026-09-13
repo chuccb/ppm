@@ -39,18 +39,18 @@ public static class FriendHandlers
     // REQ(419): s32, str to, str title, str body, str, u16 date, u8
     // ACK(420) sub_559810: str to_nick, u8, u8 result
     //   (0=成功 1=拒收 2=信箱滿 — 九輪逐分支)
-    private static async ValueTask MsgSend(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask MsgSend(Session session, Packet packet, ServerContext context)
     {
-        _ = p.ReadS32();
-        var to = p.ReadStr();
-        var title = p.ReadStr();
-        var body = p.ReadStr();
+        _ = packet.ReadS32();
+        var to = packet.ReadStr();
+        var title = packet.ReadStr();
+        var body = packet.ReadStr();
 
-        byte result = s.UserId != 0 && ctx.Db.SendMessage(s.UserId, to, title, body)
+        byte result = session.UserId != 0 && context.Db.SendMessage(session.UserId, to, title, body)
             ? (byte)0
             : (byte)1;
 
-        await s.SendAsync(new Packet(Opcode.GL_MSG_ADD_ACK)
+        await session.SendAsync(new Packet(Opcode.GL_MSG_ADD_ACK)
             .WriteStr(to)
             .WriteU8(0)
             .WriteU8(result));
@@ -59,15 +59,15 @@ public static class FriendHandlers
     // REQ(425): s32 page → ACK(426) sub_55A630:
     //   u16 x, str self, u8 count, count×{str from, u8, str title,
     //   u32 msg_id, str body(≤201), str, u16 date}
-    private static async ValueTask MsgList(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask MsgList(Session session, Packet packet, ServerContext context)
     {
-        var messages = s.UserId != 0
-            ? ctx.Db.GetMessages(s.UserId)
+        var messages = session.UserId != 0
+            ? context.Db.GetMessages(session.UserId)
             : [];
 
         var ack = new Packet(Opcode.GL_MSG_RECVLIST_ACK)
             .WriteU16(0)
-            .WriteStr(s.Nickname)
+            .WriteStr(session.Nickname)
             .WriteU8((byte)Math.Min(messages.Count, 50));
 
         foreach (var m in messages.Take(50))
@@ -81,30 +81,30 @@ public static class FriendHandlers
                .WriteU16(m.DateCode);
         }
 
-        await s.SendAsync(ack);
+        await session.SendAsync(ack);
     }
 
     // REQ(421): str msg_key → ACK(422) sub_55A310: u8 ok, str key
-    private static async ValueTask MsgDelete(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask MsgDelete(Session session, Packet packet, ServerContext context)
     {
-        var key = p.ReadStr();
-        bool ok = s.UserId != 0
+        var key = packet.ReadStr();
+        bool ok = session.UserId != 0
             && long.TryParse(key, out long msgId)
-            && ctx.Db.DeleteMessage(s.UserId, msgId);
+            && context.Db.DeleteMessage(session.UserId, msgId);
 
-        await s.SendAsync(new Packet(Opcode.GL_MSG_DEL_ACK)
+        await session.SendAsync(new Packet(Opcode.GL_MSG_DEL_ACK)
             .WriteU8(ok ? (byte)1 : (byte)0)
             .WriteStr(key));
     }
 
-    private static async ValueTask Add(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask Add(Session session, Packet packet, ServerContext context)
     {
-        var nick = p.ReadStr();
+        var nick = packet.ReadStr();
 
-        var result = s.UserId switch
+        var result = session.UserId switch
         {
             0 => AddResult.Refused,
-            _ => ctx.Db.AddFriend(s.UserId, nick) switch
+            _ => context.Db.AddFriend(session.UserId, nick) switch
             {
                 Db.FriendAdd.Ok => AddResult.Ok,
                 Db.FriendAdd.Duplicate => AddResult.AlreadyFriend,
@@ -113,31 +113,31 @@ public static class FriendHandlers
             },
         };
 
-        await s.SendAsync(new Packet(Opcode.GL_FRIEND_ADD_ACK)
+        await session.SendAsync(new Packet(Opcode.GL_FRIEND_ADD_ACK)
             .WriteU8((byte)result)
             .WriteStr(nick));
     }
 
-    private static async ValueTask Delete(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask Delete(Session session, Packet packet, ServerContext context)
     {
-        var nick = p.ReadStr();
-        bool ok = s.UserId != 0 && ctx.Db.DeleteFriend(s.UserId, nick);
+        var nick = packet.ReadStr();
+        bool ok = session.UserId != 0 && context.Db.DeleteFriend(session.UserId, nick);
 
-        await s.SendAsync(new Packet(Opcode.GL_FRIEND_DEL_ACK)
+        await session.SendAsync(new Packet(Opcode.GL_FRIEND_DEL_ACK)
             .WriteU8(ok ? (byte)0 : (byte)1)
             .WriteStr(nick));
     }
 
     // 434 (sub_55AFC0): u16 x, str self, u8 count, count×{str nick, s32 status}
-    private static async ValueTask List(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask List(Session session, Packet packet, ServerContext context)
     {
-        var friends = s.UserId != 0
-            ? ctx.Db.GetFriends(s.UserId)
+        var friends = session.UserId != 0
+            ? context.Db.GetFriends(session.UserId)
             : [];
 
         var ack = new Packet(Opcode.GL_FRIEND_LIST_ACK)
             .WriteU16(0)
-            .WriteStr(s.Nickname)
+            .WriteStr(session.Nickname)
             .WriteU8((byte)Math.Min(friends.Count, 255));
 
         foreach (var (nick, status) in friends.Take(255))
@@ -146,17 +146,17 @@ public static class FriendHandlers
                .WriteS32(status);
         }
 
-        await s.SendAsync(ack);
+        await session.SendAsync(ack);
     }
 
     // 436 (sub_55B2C0): u8 count, count×{str nick, u8 online,
     //   [online==1: str where, u8 channel]}
-    private static async ValueTask Info(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask Info(Session session, Packet packet, ServerContext context)
     {
-        var nick = p.ReadStr();
+        var nick = packet.ReadStr();
 
         // 單機伺服器: 查詢對象一律回「離線」(online=0 → 不帶 where/ch)
-        await s.SendAsync(new Packet(Opcode.GL_FRIEND_INFO_ACK)
+        await session.SendAsync(new Packet(Opcode.GL_FRIEND_INFO_ACK)
             .WriteU8(1)
             .WriteStr(nick)
             .WriteU8(0));

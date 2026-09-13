@@ -5,6 +5,17 @@ using PaperMan.Protocol;
 
 namespace PaperMan.Server;
 
+/// <summary>
+/// 伺服器角色 — 決定連線建立時送哪個握手包 (卅一輪, 使用者釐清):
+///   Login   → 694 GL_ACCOUNTCONNSUCC (client 收到後送 682 登入)
+///   Channel → 693 GL_TCPCONNSUCC     (client 收到後送 143 PM_UDPSTART)
+/// </summary>
+public enum ServerRole
+{
+    Login,
+    Channel,
+}
+
 public sealed record ServerContext(Db Db, ServerConfig Config)
 {
     /// <summary>全服房間表 (廿八輪)。</summary>
@@ -28,6 +39,12 @@ public sealed record ServerConfig
 
     public string ServerName { get; init; } = "PaperMan Private";
     public string PublicHost { get; init; } = "127.0.0.1";
+
+    /// <summary>本進程角色 (單機模式 = Login+Channel 合一, 兩個握手都由同一連線發)。</summary>
+    public ServerRole Role { get; init; } = ServerRole.Login;
+
+    /// <summary>單機合一模式: 登入成功後同連線直接當頻道伺服器用。</summary>
+    public bool SingleProcessMode { get; init; } = true;
 
     public static ServerConfig FromArgs(string[] args) => new()
     {

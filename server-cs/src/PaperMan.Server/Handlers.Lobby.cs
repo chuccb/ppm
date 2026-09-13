@@ -30,7 +30,7 @@ public static class LobbyHandlers
     // 250 GL_LOBBYIN / 252 GL_SHOPIN / 254 GL_INVENIN — 場景切換通知
     // (廿五輪: dispatcher 無 251/253 case → client 不解析回包;
     //  255 GL_INVENIN_ACK 存在但僅刷新 UI 座標 — 靜默吸收最穩)
-    private static ValueTask SceneEnter(Session s, Packet p, ServerContext ctx)
+    private static ValueTask SceneEnter(Session session, Packet packet, ServerContext context)
     {
         // client 狀態機自行推進 (sub_537710); server 只需記錄場景
         return ValueTask.CompletedTask;
@@ -39,20 +39,20 @@ public static class LobbyHandlers
     // 246 GL_CLIENTINFO_REQ: str nick → 247 ACK (sub_573EB0):
     //   u8 ok(==1) + sub_523BF0 基本資料塊 + sub_524360 單角色外觀
     //   (十一輪: 與 198 首段同構 — 重用 BuildMyInfoAck 的統計佈局)
-    private static async ValueTask ClientInfo(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask ClientInfo(Session session, Packet packet, ServerContext context)
     {
-        var nick = p.ReadStr();
-        var info = ctx.Db.GetMyInfoByNick(nick);
+        var nick = packet.ReadStr();
+        var info = context.Db.GetMyInfoByNick(nick);
 
         if (info is null)
         {
-            await s.SendAsync(new Packet(Opcode.GL_CLIENTINFO_ACK).WriteU8(0));
+            await session.SendAsync(new Packet(Opcode.GL_CLIENTINFO_ACK).WriteU8(0));
             return;
         }
 
-        var chars = ctx.Db.GetCharacters(info.UserId);
+        var chars = context.Db.GetCharacters(info.UserId);
         var ack = BuildClientInfoAck(info, chars);
-        await s.SendAsync(ack);
+        await session.SendAsync(ack);
     }
 
     /// <summary>247 = sub_523BF0 統計塊 + sub_524360 單角色外觀。</summary>
@@ -107,32 +107,32 @@ public static class LobbyHandlers
     // ACK(120) sub_56E300: s32 custom_tex, str nick, wstr message
     //   ⚠ 訊息回送用「寬字串」(sub_5927B0 讀 UTF-16LE) — 與 REQ 的 ANSI 不對稱!
     //   client 端還會拿 nick 過 sub_539320 黑名單 (忽略清單) 過濾
-    private static async ValueTask Chat(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask Chat(Session session, Packet packet, ServerContext context)
     {
         // 兩變體 (廿四輪): 完整版 s32 tex + str nick + wstr msg (與 ACK 同構);
         // 簡版只有 str。以剩餘長度判別。
         int tex = 0;
-        string nick = s.Nickname;
+        string nick = session.Nickname;
         string message;
 
-        if (p.Remaining > 8)
+        if (packet.Remaining > 8)
         {
-            tex = p.ReadS32();
-            nick = p.ReadStr();
-            message = p.ReadWStr();
+            tex = packet.ReadS32();
+            nick = packet.ReadStr();
+            message = packet.ReadWStr();
         }
         else
         {
-            message = p.ReadStr();
+            message = packet.ReadStr();
         }
 
-        if (s.UserId == 0 || message.Length == 0)
+        if (session.UserId == 0 || message.Length == 0)
         {
             return;
         }
 
         // 單人大廳: 回聲給自己 (多人時原樣廣播 — client 已附 nick+tex)
-        await s.SendAsync(new Packet(Opcode.GL_CHATTING_ACK)
+        await session.SendAsync(new Packet(Opcode.GL_CHATTING_ACK)
             .WriteS32(tex)
             .WriteStr(nick)
             .WriteWStr(message));
@@ -142,8 +142,8 @@ public static class LobbyHandlers
     // repeat n{s32 uid, str nick, s32 exp; uid>0 時 +s32 custom_tex, str(64)}
     // ⚠ 第三個 s32 = exp (sub_588560 → sub_403360 exp→level 查表, 十二輪);
     // count==0 → 之後不再讀任何欄位 (交叉驗證確認)
-    private static async ValueTask UserList(Session s, Packet p, ServerContext ctx) =>
-        await s.SendAsync(new Packet(Opcode.GL_USERLIST_ACK).WriteU16(0));
+    private static async ValueTask UserList(Session session, Packet packet, ServerContext context) =>
+        await session.SendAsync(new Packet(Opcode.GL_USERLIST_ACK).WriteU16(0));
 
     // ACK(108) sub_568CE0 (五輪完整讀畢):
     //   u8 mode (3=錦標賽樹 sub_580A80); 其他: u8 count, repeat{
@@ -151,9 +151,9 @@ public static class LobbyHandlers
     //     state>=0 → u8 map, bool, u8 rule, u16 win, u8 max, bool pass, u8[1]
     //     state<0  → str title + 同欄位;
     //     共同尾段 bool,bool,u8,u8,u8; mode==2 加 2×{s32,u32 crc,str,u8} }
-    private static async ValueTask RoomList(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask RoomList(Session session, Packet packet, ServerContext context)
     {
-        var rooms = ctx.Rooms.All.Take(50).ToList();
+        var rooms = context.Rooms.All.Take(50).ToList();
 
         var ack = new Packet(Opcode.GL_GAMEROOMINFO_ACK)
             .WriteU8(0)                                     // mode 0 = 一般清單
@@ -177,20 +177,20 @@ public static class LobbyHandlers
                .WriteU8(0);
         }
 
-        await s.SendAsync(ack);
+        await session.SendAsync(ack);
     }
 
     // ACK(198): 完整 CClientData 序列化 (docs/PACKETS.md §3.2)
-    private static async ValueTask MyInfo(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask MyInfo(Session session, Packet packet, ServerContext context)
     {
-        var info = s.UserId != 0 ? ctx.Db.GetMyInfo(s.UserId) : null;
+        var info = session.UserId != 0 ? context.Db.GetMyInfo(session.UserId) : null;
         if (info is null)
         {
-            await s.SendAsync(new Packet(Opcode.GL_MYINFO_ACK).WriteBool(false));
+            await session.SendAsync(new Packet(Opcode.GL_MYINFO_ACK).WriteBool(false));
             return;
         }
 
-        await s.SendAsync(BuildMyInfoAck(info, ctx.Db.GetCharacters(info.UserId)));
+        await session.SendAsync(BuildMyInfoAck(info, context.Db.GetCharacters(info.UserId)));
     }
 
     private static Packet BuildMyInfoAck(Db.MyInfo info, List<Db.CharSlot> chars)
@@ -313,14 +313,14 @@ public static class LobbyHandlers
     //   s32 period, u8 extra(200 專屬), u16 dura}
     //   (a3=0 的無-extra 版本屬 290/294 MASTER_USERINFO 系 sub_523A50 —
     //    GM 查他人資料, 與一般玩家路徑無關; 五輪驗證定案)
-    private static async ValueTask MyItems(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask MyItems(Session session, Packet packet, ServerContext context)
     {
-        int start = p.Remaining >= 4 ? p.ReadS32() : 0;
+        int start = packet.Remaining >= 4 ? packet.ReadS32() : 0;
         var ack = new Packet(Opcode.GL_MYITEM_ACK).WriteBool(true).WriteS32(start);
 
-        if (s.UserId != 0)
+        if (session.UserId != 0)
         {
-            foreach (var it in ctx.Db.GetInventoryPage(s.UserId, start))
+            foreach (var it in context.Db.GetInventoryPage(session.UserId, start))
                 ack.WriteS32(it.Slot).WriteS32(it.ItemId)
                    .WriteF32(it.F1).WriteF32(it.F2)
                    .WriteS32(it.PeriodDaysLeft)
@@ -328,46 +328,46 @@ public static class LobbyHandlers
                    .WriteU16(it.DuraCur);
         }
 
-        await s.SendAsync(ack.WriteS32(-1));                       // sentinel
+        await session.SendAsync(ack.WriteS32(-1));                       // sentinel
     }
 
     // 210 REQ builder @0x572D30: 只有 str nick (u8+str 是 216/262 的格式)
     // → 211 ACK sub_572D80 → sub_41BBB0 (十輪逐分支讀出):
     //   1 = 可用 (訊息 0xE0), 2 = 已被使用 (格式訊息 0xDF 帶名字),
     //   0 = 一般錯誤 (彈窗 0x70/17) — 三種都停在暱稱畫面 (state:=2)
-    private static async ValueTask CheckNick(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask CheckNick(Session session, Packet packet, ServerContext context)
     {
-        var nick = p.ReadStr();
+        var nick = packet.ReadStr();
 
-        byte result = (IsValidNick(nick), ctx.Db.IsNickTaken(nick)) switch
+        byte result = (IsValidNick(nick), context.Db.IsNickTaken(nick)) switch
         {
             (false, _) => 0,                                // 非法 → 一般錯誤
             (_, true) => 2,                                 // 重複 → 0xDF 訊息
             _ => 1,                                         // 可用 → 0xE0 訊息
         };
 
-        await s.SendAsync(new Packet(Opcode.GM_CHECKNICK_ACK).WriteU8(result));
+        await session.SendAsync(new Packet(Opcode.GM_CHECKNICK_ACK).WriteU8(result));
     }
 
     // 212 REQ builder sub_572DC0: 只有 str nick
     // → 213 ACK sub_572E70 → sub_41BD40 (十輪重大更正):
     //   ⚠ 1 = 成功 (拷貝統計欄位, state:=5 進大廳), 0 = 失敗 (state:=4)
     //   — 舊實作成功回 0 會讓 client 卡在失敗畫面!
-    private static async ValueTask CreateNick(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask CreateNick(Session session, Packet packet, ServerContext context)
     {
-        var nick = p.ReadStr();
+        var nick = packet.ReadStr();
         byte result = 0;
 
-        if (s.Authenticated && IsValidNick(nick))
+        if (session.Authenticated && IsValidNick(nick))
         {
-            long uid = ctx.Db.CreateNick(s.AccountId, nick);
+            long uid = context.Db.CreateNick(session.AccountId, nick);
             if (uid != 0)
             {
-                (s.UserId, s.Nickname, result) = (uid, nick, (byte)1);
+                (session.UserId, session.Nickname, result) = (uid, nick, (byte)1);
             }
         }
 
-        await s.SendAsync(new Packet(Opcode.GM_CREATENICK_ACK).WriteU8(result));
+        await session.SendAsync(new Packet(Opcode.GM_CREATENICK_ACK).WriteU8(result));
     }
 
     private static bool IsValidNick(string nick) => nick.Length is >= 2 and <= 16;

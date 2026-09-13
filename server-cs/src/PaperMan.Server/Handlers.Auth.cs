@@ -19,9 +19,9 @@ public static class AuthHandlers
 
     // 101 = client 對伺服器 102 的回應 (sub_58D6F0: 收 102 → ctor(101) 送出)。
     // 靜默吸收即可; 週期性發 102 屬 keepalive 機制 (Session 層可選)。
-    private static ValueTask PingReply(Session s, Packet p, ServerContext ctx)
+    private static ValueTask PingReply(Session session, Packet packet, ServerContext context)
     {
-        s.LastPongAt = DateTimeOffset.UtcNow;
+        session.LastPongAt = DateTimeOffset.UtcNow;
         return ValueTask.CompletedTask;
     }
 
@@ -31,30 +31,30 @@ public static class AuthHandlers
     // hw 混淆 (交叉驗證修正): v5 = (u64)hw32 << 32;
     //   wire = sub_592AE0(pkt, (v5|0xAA)^0xA4, HIDWORD(v5)^0xB1A9D7C7)
     //   → lo32(wire) = 0xAA^0xA4 = 0x0E (恆定), hi32(wire) = hw32^0xB1A9D7C7
-    private static async ValueTask Login(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask Login(Session session, Packet packet, ServerContext context)
     {
-        var account = p.ReadStr();
-        var token = p.ReadStr();
-        ulong hwObf = p.ReadU64();
-        _ = p.ReadU8();                                    // security_state
-        _ = p.ReadRaw(Math.Min(24, p.Remaining));          // 版本/指紋塊
+        var account = packet.ReadStr();
+        var token = packet.ReadStr();
+        ulong hwObf = packet.ReadU64();
+        _ = packet.ReadU8();                                    // security_state
+        _ = packet.ReadRaw(Math.Min(24, packet.Remaining));          // 版本/指紋塊
 
         // 還原: hw32 = hi32 ^ 0xB1A9D7C7; lo32 恆 0x0E 可作完整性檢查
         uint hw32 = (uint)(hwObf >> 32) ^ 0xB1A9D7C7;
         bool hwValid = (uint)hwObf == 0x0E;
         ulong hwKey = hwValid ? hw32 : hwObf;              // 異常時保留原始值供記錄
 
-        var r = ctx.Db.Login(account, token, hwKey);
+        var r = context.Db.Login(account, token, hwKey);
 
         if (r.Result is LoginCode.Ok)
         {
-            (s.AccountId, s.UserId, s.Nickname) = (r.AccountId, r.UserId, r.Nickname);
+            (session.AccountId, session.UserId, session.Nickname) = (r.AccountId, r.UserId, r.Nickname);
         }
 
         // ⚠ 694 絕不可在此重發 — client 的 694 handler (0x43F...) 讀完門檻
         //   會呼叫 sub_43DF00 再送一次 682 → 無限登入迴圈。
         //   694 屬連線建立時的歡迎包 (見 Program.RunSessionAsync)。
-        await s.SendAsync(BuildLoginAck(r, ctx.Config));
+        await session.SendAsync(BuildLoginAck(r, context.Config));
     }
 
     /// <summary>681 結構: 見 docs/PACKETS.md §1.4 GL_LOGIN_ACK。</summary>

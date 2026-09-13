@@ -165,6 +165,6 @@ public sealed class RoomManager
         }
     }
 
-    private static Packet Clone(Packet p) =>
-        Packet.FromPayload(p.Opcode, p.Payload);
+    private static Packet Clone(Packet packet) =>
+        Packet.FromPayload(packet.Opcode, packet.Payload);
 }

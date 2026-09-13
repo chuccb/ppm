@@ -8,7 +8,7 @@ using PaperMan.Protocol;
 
 namespace PaperMan.Server;
 
-public delegate ValueTask PacketHandler(Session session, Packet packet, ServerContext ctx);
+public delegate ValueTask PacketHandler(Session session, Packet packet, ServerContext context);
 
 public sealed class Router
 {
@@ -33,11 +33,12 @@ public sealed class Router
         FriendHandlers.Register(Add);
         RoomHandlers.Register(Add);
         BattleRelayHandlers.Register(Add);
+        ChannelHandlers.Register(Add);
         return new(table);
     }
 
     /// <summary>回傳 false = 無 handler (原版 default: return)。</summary>
-    public async ValueTask<bool> DispatchAsync(Session session, Packet packet, ServerContext ctx)
+    public async ValueTask<bool> DispatchAsync(Session session, Packet packet, ServerContext context)
     {
         if (!_table.TryGetValue(packet.OpcodeRaw, out var handler))
         {

@@ -34,18 +34,18 @@ public static class ClanHandlers
     }
 
     // REQ(585) sub_5505F0: str name, str slogan, str intro, u8 emblem
-    private static async ValueTask Create(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask Create(Session session, Packet packet, ServerContext context)
     {
-        var name = p.ReadStr();
-        var slogan = p.ReadStr();
-        var intro = p.ReadStr();
-        int emblem = p.Remaining >= 4 ? p.ReadS32() : 0;    // s32 (廿四輪修正)
+        var name = packet.ReadStr();
+        var slogan = packet.ReadStr();
+        var intro = packet.ReadStr();
+        int emblem = packet.Remaining >= 4 ? packet.ReadS32() : 0;    // s32 (廿四輪修正)
         _ = (slogan, intro);                                // schema 暫存於 notice 欄位外
 
-        var result = s.UserId switch
+        var result = session.UserId switch
         {
             0 => CreateResult.Failed,
-            _ => ctx.Db.CreateClan(s.UserId, name, (byte)Math.Clamp(emblem, 0, 255)) switch
+            _ => context.Db.CreateClan(session.UserId, name, (byte)Math.Clamp(emblem, 0, 255)) switch
             {
                 > 0 => CreateResult.Ok,
                 _ => CreateResult.DuplicateName,
@@ -55,15 +55,15 @@ public static class ClanHandlers
         var ack = new Packet(Opcode.GC_CLAN_CREATE_ACK).WriteS8((sbyte)result);
         if (result is CreateResult.Ok)
         {
-            var info = ctx.Db.GetMyInfo(s.UserId);
+            var info = context.Db.GetMyInfo(session.UserId);
             ack.WriteS32((int)(info?.Gp ?? 0));             // sub_54DD70 → EE8D18
         }
 
-        await s.SendAsync(ack);
+        await session.SendAsync(ack);
     }
 
     // 583 隧道: s32 sub_opcode + 子內容
-    private static async ValueTask Tunnel(Session s, Packet p, ServerContext ctx)
+    private static async ValueTask Tunnel(Session session, Packet packet, ServerContext context)
     {
         var sub = ClanTunnel.ReadSubOp(p);
         switch (sub)
@@ -71,7 +71,7 @@ public static class ClanHandlers
             // 187 Info: REQ = s32 clan_id; 未入隊 → 回 0 即可
             case ClanSubOp.Info:
             {
-                await s.SendAsync(ClanTunnel.Ack(sub, body => body.WriteS32(0)));
+                await session.SendAsync(ClanTunnel.Ack(sub, body => body.WriteS32(0)));
                 break;
             }
 
@@ -80,22 +80,22 @@ public static class ClanHandlers
             //       str nick, str, s32 status} (sub_54EE70)
             case ClanSubOp.MemberList:
             {
-                await s.SendAsync(ClanTunnel.Ack(sub, body => body.WriteS32(0)));
+                await session.SendAsync(ClanTunnel.Ack(sub, body => body.WriteS32(0)));
                 break;
             }
 
             // 203 戰隊聊天: REQ = str message (rank>1 才可送, sub_54F2D0);
             // 廣播由房間/頻道層做, 單人伺服器先回聲給自己
-            case ClanSubOp.Chat when s.UserId != 0:
+            case ClanSubOp.Chat when session.UserId != 0:
             {
-                var message = p.ReadStr();
-                await s.SendAsync(ClanTunnel.Ack(sub, body => body.WriteStr(message)));
+                var message = packet.ReadStr();
+                await session.SendAsync(ClanTunnel.Ack(sub, body => body.WriteStr(message)));
                 break;
             }
 
             default:
             {
-                Console.WriteLine($"[clan] 未實作 sub={sub} ({(int)sub}) from user={s.UserId}");
+                Console.WriteLine($"[clan] 未實作 sub={sub} ({(int)sub}) from user={session.UserId}");
                 break;
             }
         }

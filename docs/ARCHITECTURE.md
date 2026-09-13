@@ -20,9 +20,13 @@ connect ──► server 發 694 (門檻 0x2580) ──► client 送 682 (帳�
 125 房聊→126廣播 121 換圖→122 127 ready→128 135 換位→136
 129 開戰→130廣播(17欄+16×s32) → 各員 183 載入完→184 → 187→188 開打
 
+【頻道伺服器 (卅一輪正名)】
+connect → server 發 693 GL_TCPCONNSUCC → client 送 143 (nick +
+  n100/ext_count 雙 token 回送) → 144 PM_UDPSTART_ACK
+  (n108 狀態機: 0=OK 3=踢出 — token 不符可踢)
 【戰鬥 (P2P + relay)】
-戰鬥伺服器: connect → 693 → client 143 (回送 n100+ext_count 雙token)
-  → 144 → UDP 打洞 (私有編號 2-34, sub_595E80)
+UDP 打洞 (私有編號 2-34, sub_595E80; 32→33/34 移動同步);
+UDP 失敗 → TCP 備援 165/166 (第六層戰場引擎 subtype 1-9)
 GG 中繼三模式: slot前綴轉發 / 復活六模式同構 / 聊天過濾
 戰後: 133→134 回房; GP_CH*C 戰績上報 (絕對值+MAX單調);
   ACK 自動推進任務 (sub_92EF00 事件)
