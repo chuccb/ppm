@@ -605,6 +605,51 @@ kind 0/1/14 與 12/13/17 (可覆寫類) 走覆寫路徑, 其他 kind 重複購�
     sub_A1C800); n108 1/2/3 各自進不同狀態機
 ```
 
+### 3.15b2 房間管理/戰場雜項 (廿二輪掃畢)
+```
+122 GR_MAPCHANGE_ACK   (sub_56E530): u8 map_id — 房主換圖廣播
+124 GR_LEAVE_ACK       (sub_5607C0): u8 result; ≠0 → u8 slot 迴圈
+                       比對並移除成員 (n11==6 觀戰特判)
+126 GR_CHATTING_ACK    (sub_56EA80): s32 custom_tex, u8 slot,
+                       wstr message — 房內聊天 (與 120 大廳同構,
+                       但以 slot 而非 nick 定位)
+140 GG_EXITGAME_ACK    (sub_563430): u8 n2 (1→u8 slot 單人退場;
+                       2→回房重置)
+168 GR_CHANGEUSER_ACK  (sub_56F410): u16 — 房員數變更
+170 GR_RULECHANGE_ACK  (sub_56F4F0): u8 rule (modeIndex!)
+172 GR_WINCHANGE_ACK   (sub_56F5D0): u16 win_count
+174 GR_TIMECHANGE_ACK  (sub_56F6B0): u8 time_idx
+176 GR_ITEMCHANGE_ACK  (sub_56F790): u8 item_mode
+184 GR_ENDLOADING_ACK  (sub_563B00): u8 n2; 迴圈 u8 slot ×2
+                       (n2==2 特判) + u8 — 載入完成同步
+188 GG_STARTGAME_ACK   (sub_563D60): u8 n2 (1→u8 count+slots 清單;
+                       2→...) — 開戰廣播
+190 GR_CHANGEMASTER_ACK(sub_56FBF0): u8 new_master_slot
+                       (n0x10 比對自己 → 房主 UI 切換)
+192 GR_CALLUSER_ACK    (sub_56FE10): n2==2 時 u8 slot + str nick
+                       — 呼叫玩家
+194 GC_CHANNEL_ACK     (sub_56FE90): u8 — 頻道確認
+```
+
+### 3.15c2 禮物操作 299/301/315 (廿二輪)
+```
+299 GS_TAKEGIFT_ACK  (sub_57AEF0 → sub_524DB0): 禮物箱分頁:
+    s32 start; ≤50 條 × {s32 gift_id(-1=結束; <1024 槽上限),
+    str from_nick(21B), str message(52B), s32 item_id, s32 period,
+    f32} — 進 CClientData +36119 禮物陣列
+301 GS_MOVEGIFT_ACK  (sub_57AFE0): u8 n2(1=收下/2=刪除), u8 n5,
+    s32 gift_id(段檢 E7EF01..E7EF64), s32 count; n2==1 → count×條目
+    搬進背包; n2==2 → 從清單移除
+315 GS_MOVEONEGIFT_ACK (sub_57B500): u8, u8, s32, s32 item_id
+    (==E975A1 特殊分支: str + f32×2 + s32 + u8 — 單件轉移含技能值)
+311 GS_BUYCHAR_ACK   (sub_5728A0): u8 ok; ok → 6×s32 (角色解鎖
+    +餘額組), u8 char_type, s32×2 — 買角色
+313 GI_CHANGESLOT_ACK(sub_573320): 空 handler (只刷 UI) — 換槽免驗證
+207 GS_BUY_WEAPONPARTS_ACK (sub_571B60): u8 ok; ok → (n11==20 特判)
+    s32 gun_id, s32, u8, f32×2 + s32 balance×2 — 買改裝件
+    (對應 weapon_parts_catalog 10,648 條)
+```
+
 ### 3.15c 好友/訊息家族 419-441 (九輪讀畢)
 ```
 419 GL_MSG_ADD_REQ → 420 ACK (sub_559810): str to_nick, u8 x, u8 result
