@@ -25,6 +25,12 @@ public static class ShopHandlers
         await s.SendAsync(new Packet(Opcode.GS_CASH_ACK).WriteBool(true).WriteS32(cash));
     }
 
+    // ACK(205) sub_571910 — ⚠ 交叉驗證修正的完整結構:
+    //   u8 count
+    //   repeat count: bool ok; ok 時 {s32 item, f32, f32, s32 period, u8 kind, u16 dura}
+    //   若 count==0: 額外 bool + u8 (錯誤碼對)
+    //   尾端固定 7×s32: pair(?,cash) pair(?,gp) pair(?,x) + s32 last
+    //   (count!=0 時 v16→EE8D18=cash 顯示, v20→GP, v27→EE8D1C)
     private static async ValueTask BuyItems(Session s, Packet p, ServerContext ctx)
     {
         byte count = p.ReadU8();
@@ -36,7 +42,7 @@ public static class ShopHandlers
             bool useCash = p.Remaining > 0 && p.ReadU8() != 0;
             WriteResult(ack, Buy(s, ctx, itemId, period, useCash));
         }
-        await s.SendAsync(ack);
+        await s.SendAsync(WriteTail(ack, s, ctx));
     }
 
     private static async ValueTask BuyOnceItem(Session s, Packet p, ServerContext ctx)
@@ -48,7 +54,7 @@ public static class ShopHandlers
 
         var ack = new Packet(Opcode.GS_BUYITEM_ACK).WriteU8(1);
         WriteResult(ack, Buy(s, ctx, itemId, period, useCash: true));
-        await s.SendAsync(ack);
+        await s.SendAsync(WriteTail(ack, s, ctx));
     }
 
     private static Db.BuyResult Buy(Session s, ServerContext ctx, int itemId, byte period, bool useCash) =>
@@ -62,5 +68,18 @@ public static class ShopHandlers
         if (r.Ok)
             ack.WriteS32(r.ItemId).WriteF32(r.F1).WriteF32(r.F2)
                .WriteS32(r.Period).WriteU8(r.Kind).WriteU16(r.Dura);
+    }
+
+    /// <summary>205 尾端 7×s32 (client 無條件讀取, 順序見 sub_571910 v22/v16/v26/v20/v15/v27/v18)。</summary>
+    private static Packet WriteTail(Packet ack, Session s, ServerContext ctx)
+    {
+        int cash = s.UserId != 0 ? ctx.Db.GetCash(s.UserId) : 0;
+        var info = s.UserId != 0 ? ctx.Db.GetMyInfo(s.UserId) : null;
+        int gp = (int)(info?.Gp ?? 0);
+        return ack
+            .WriteS32(0).WriteS32(cash)     // v22, v16 → EE8D18 (CASH 顯示)
+            .WriteS32(0).WriteS32(gp)       // v26, v20 → GP 顯示
+            .WriteS32(0).WriteS32(0)        // v15, v27 → EE8D1C
+            .WriteS32(0);                   // v18 (旗標, 進 UI callback)
     }
 }

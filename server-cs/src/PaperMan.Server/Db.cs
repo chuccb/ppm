@@ -340,14 +340,18 @@ public sealed class Db : IDisposable
     }
 
     // ------------------------------------------------------------- stats/misc
-    /// <summary>GP_CH*C: 累計後回傳新值。column 由 StatHandlers 白名單提供。</summary>
-    public long BumpStat(long userId, string column, long delta)
+    /// <summary>
+    /// GP_CH*C: client REQ 帶「新的絕對累計值」(sub_5567F0 等) — 只允許
+    /// 單調遞增 (MAX), 防倒退/重播; 回傳確認後的 total。
+    /// column 由 StatHandlers 白名單提供, 不接受外部字串。
+    /// </summary>
+    public long SetStatMax(long userId, string column, long newTotal)
     {
         lock (_gate)
         {
             using var cmd = Cmd(
-                $"UPDATE user_stats SET {column}={column}+@d WHERE user_id=@u RETURNING {column}",
-                ("@d", delta), ("@u", userId));
+                $"UPDATE user_stats SET {column}=MAX({column},@v) WHERE user_id=@u RETURNING {column}",
+                ("@v", newTotal), ("@u", userId));
             return Convert.ToInt64(cmd.ExecuteScalar() ?? 0L);
         }
     }

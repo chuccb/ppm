@@ -143,12 +143,13 @@ s32  result           1=成功, 2=帳密錯, 0xC8..0xD6=各種封鎖/維護錯�
     u8   flag
     s16  group
     repeat 3:                          ← 每台 3 個頻道分組
-      s16  ch_count (>0 才有後續)
-      u8   ch_type
-      str  ch_name
-      s16  ch_port
-      u8   ch_flag
-      若 ch_type==3: u8 extra
+      s16  ch_count
+      若 ch_count > 0 (⚠ 即使 >1 也只讀一個條目 — 四輪驗證確認):
+        u8   ch_type
+        str  ch_name
+        s16  ch_port
+        u8   ch_flag
+        若 ch_type==3: u8 extra
   u32  x2 (v142,v137 → 帳號計費/會員資訊)
 ```
 
@@ -191,14 +192,18 @@ _REQ = client→server, _ACK = server→client, _NOTIFY/_NOTICE = server 推播�
 
 ## 3. 關鍵 payload 結構 (伺服器必須產生/解析)
 
-### 3.1 GL_LOGIN_REQ (682) — 客戶端 0x43E0F0 附近組包
+### 3.1 GL_LOGIN_REQ (682) — 客戶端 builder (30873 行附近)
 ```
 string  account          (sub_401B50 回傳, ANSI)
 string  account2/token   (同上再寫一次)
-u64     hw_key XOR 混淆  (v << 32 | 0xAA) ^ 0xA4 / hi ^ 0xB1A9D7C7
-u8      n2               (安全模組狀態 0/1/2)
-byte[24] 版本/機器指紋   (0x18 raw)
+u64     hw 混淆值        (見下)
+u8      n2               (安全模組狀態: 2=未檢, 0/1=sub_9A86A0 結果)
+byte[24] 版本/機器指紋   (0x18 raw, builder 中全零初始化)
 ```
+hw 混淆 (四輪交叉驗證精確化): `v5 = (u64)hw32 << 32` (hw32 來自 this+396),
+`wire = sub_592AE0(pkt, (v5|0xAA)^0xA4, HIDWORD(v5)^0xB1A9D7C7)`
+→ **lo32(wire) = 0x0E 恆定** (0xAA^0xA4), **hi32(wire) = hw32 ^ 0xB1A9D7C7**。
+伺服器還原: `hw32 = hi32(wire) ^ 0xB1A9D7C7`, 並可用 lo32==0x0E 驗完整性。
 
 ### 3.2 GL_MYINFO_ACK (198) — handler sub_570550 → CClientData 反序列化
 ```
@@ -248,29 +253,45 @@ repeat until sentinel:
   float f1         (耐久?)
   float f2
   s32   period     (剩餘天數)
-  [u8   extra]     (僅 202 GL_EXPIRE_PARTSUP_ACK 帶)
+  u8    extra      ⚠ 四輪修正: 200 有 extra (sub_570AB0 呼叫 sub_524B70(cd,pkt,1));
+                   202 走 sub_95AE40 (GameNetwork), 而 sub_523A50 (myinfo 內嵌
+                   路徑) 的 sub_524B70(...,0) 不帶 — 先前記反
   u16   durability (寫入 *2 個 word: current=max)
 ```
+額外驗證: start<=0 → 背包游標歸 0; start>=5020 → 夾到 5020; item_id 需通過
+sub_535020 目錄檢查, 失敗即 sub_528960(6,...) 錯誤處理並中止本包。
 
-### 3.4 GS_BUYITEM_ACK (205) — handler sub_571910
+### 3.4 GS_BUYITEM_ACK (205) — handler sub_571910 (四輪修正: 完整結構)
 ```
 u8      count
 repeat count:
   bool  ok
   若 ok: s32 item_id, float f1, float f2, s32 period_days,
          u8 item_kind, u16 durability
+若 count==0: bool err, u8 err2     (錯誤碼對, sub_468470 顯示)
+尾端固定 7×s32 (無條件讀取):
+  s32 a, s32 cash    (cash → dword_EE8D18, CASH UI 顯示 "%10d")
+  s32 b, s32 gp      (gp → GP UI)
+  s32 c, s32 d       (d → dword_EE8D1C)
+  s32 flag           (進 sub_468470 最後參數)
 ```
 GS_BUY_ONCEITEM_REQ (695): u8/s32 item_id, string opt, u8 kind, u8 period。
 period 合法值: 1/7/15/30/60/90 天 (kind 0,1,3,14)、0 = 永久型 (kind 2,4,9,15,10,11,16)。
 
 ### 3.5 GS_CASH_ACK (357) — sub_572420: `bool ok, s32 cash`。
 ### 3.6 GS_SELLITEM/DESTROY (209) — sub_5725D0: `u8 count, s32 money; repeat{bool ok, s32 item_id, float, float}`。
-### 3.7 GM_CHECKNICK_ACK (211) / GM_CREATENICK_ACK (213) — sub_572D80/572E70: `u8 result`。
-### 3.8 GL_USERLIST_ACK (106) — sub_56A250:
+### 3.7 GM_CHECKNICK (210/211) / GM_CREATENICK (212/213)
+REQ (builder @0x572D30 / sub_572DC0): **只有 `str nick`** (⚠ 四輪修正:
+u8+str 是 216/262 的格式 sub_56B180/56B230, 先前誤植)。
+ACK (sub_572D80/572E70): `u8 result`。
+### 3.8 GL_USERLIST_ACK (106) — sub_56A250 (四輪修正):
 ```
 u16    count
-u8     flags, u8 n
-repeat n: s32 user_id, string nick, s32 x; if user_id>0 { s32 custom_tex_id, string }
+若 count != 0:      ← count==0 時後面什麼都沒有
+  u8   flags        (bit0: 開啟清單 UI; bit0|bit2: 關閉)
+  u8   n
+  repeat n: s32 user_id, string nick, s32 status
+            if user_id>0 { s32 custom_tex_id, string tex_name }
 ```
 ### 3.9 GL_GAMEROOMINFO_ACK (108) — sub_568CE0:
 ```
@@ -292,10 +313,18 @@ u16 x, string self, u8 count; repeat: string nick, s32 status
 u16 x, string self, u8 count
 repeat: string from, u8, string title, u32 msg_id, string body(≤201), string, u16 date
 ```
-### 3.12 GP_CH*C_ACK (223–245, 363, 381–389, 882) — sub_556730 系列:
-全部是 `s32 new_value` (server 端累計後回推)。對應欄位:
-playc/roundc/disc/winc/lossc/killc/deadc/headsc/acomboc/heartc/dkillc/tkillc/
-criticalc/mkillc/ukillc/zkillc/kkillc/ddkillc/playtimec。
+### 3.12 GP_CH*C 家族 (222–245, 362–363, 380–389, 882) — 四輪交叉驗證修正:
+**REQ** (builder sub_5567F0@230 / sub_5568E0@232 / sub_556B90@244 等):
+`s32 新的絕對累計值` — client 送 **total 而非增量** (a1<0 時不送)。
+**ACK 分兩型**:
+- 223/225/227/229/231/233/235 (playc/roundc/disc/winc/lossc/killc/deadc):
+  `s32 total` (sub_556730/556780/5567A0/5567C0/5568B0/5569A0/5569E0)
+- 237/239/241/243/245/363/381/383/385/387/389 (headsc/acomboc/heartc/dkillc/
+  tkillc/criticalc/mkillc/ukillc/zkillc/kkillc/ddkillc):
+  `s32 total, s32 extra` — sub_556A00 讀**兩個** s32 (extra 進 EE8DB0..
+  顯示區, 送 0 安全)
+- 882 (playtimec): **無 REQ**, server 推播 `s32 總秒數`, client case 882
+  自行差分 (dword_EE8D7C)。
 ### 3.13 GQ_QUEST_ACCEPT_ACK (868) — sub_91CC70:
 ```
 u8 result (0=OK, 7=特殊錯誤); result!=0: s32 quest_index_type

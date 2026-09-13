@@ -18,7 +18,12 @@ public static class AuthHandlers
     private static async ValueTask Ping(Session s, Packet p, ServerContext ctx) =>
         await s.SendAsync(new Packet(Opcode.GT_PING_ACK));
 
-    // REQ: str account, str token, u64 hw_key(混淆), u8 sec_state, byte[24]
+    // REQ builder (0x43DFxx, sub_401B50 取帳號):
+    //   str account ×2, u64 hw(混淆), u8 sec_state(0/1/2, sub_9A8790/9A86A0),
+    //   byte[24] 指紋塊 (0x18, 全零初始化)
+    // hw 混淆 (交叉驗證修正): v5 = (u64)hw32 << 32;
+    //   wire = sub_592AE0(pkt, (v5|0xAA)^0xA4, HIDWORD(v5)^0xB1A9D7C7)
+    //   → lo32(wire) = 0xAA^0xA4 = 0x0E (恆定), hi32(wire) = hw32^0xB1A9D7C7
     private static async ValueTask Login(Session s, Packet p, ServerContext ctx)
     {
         var account = p.ReadStr();
@@ -27,8 +32,10 @@ public static class AuthHandlers
         _ = p.ReadU8();                                    // security_state
         _ = p.ReadRaw(Math.Min(24, p.Remaining));          // 版本/指紋塊
 
-        // 還原混淆: (v<<32|0xAA)^0xA4, hi^0xB1A9D7C7 (組包處 0x43E0F0)
-        ulong hwKey = ((hwObf ^ 0xA4) & 0xFFFFFFFF) | (((hwObf >> 32) ^ 0xB1A9D7C7) << 32);
+        // 還原: hw32 = hi32 ^ 0xB1A9D7C7; lo32 恆 0x0E 可作完整性檢查
+        uint hw32 = (uint)(hwObf >> 32) ^ 0xB1A9D7C7;
+        bool hwValid = (uint)hwObf == 0x0E;
+        ulong hwKey = hwValid ? hw32 : hwObf;              // 異常時保留原始值供記錄
 
         var r = ctx.Db.Login(account, token, hwKey);
         await s.SendAsync(BuildLoginAck(r, ctx.Config));

@@ -22,12 +22,15 @@ public static class LobbyHandlers
         add(Opcode.GM_CREATENICK_REQ, CreateNick);
     }
 
-    // ACK(106): u16 count, u8 flags, u8 n, repeat n{s32 uid, str nick, s32, ...}
+    // ACK(106) sub_56A250: u16 count; 若 count!=0 才有 u8 flags, u8 n,
+    // repeat n{s32 uid, str nick, s32 status; uid>0 時 +s32 custom_tex, str}
+    // count==0 → 之後不再讀任何欄位 (交叉驗證確認)
     private static async ValueTask UserList(Session s, Packet p, ServerContext ctx) =>
-        await s.SendAsync(new Packet(Opcode.GL_USERLIST_ACK)
-            .WriteU16(0).WriteU8(0).WriteU8(0));
+        await s.SendAsync(new Packet(Opcode.GL_USERLIST_ACK).WriteU16(0));
 
-    // ACK(108): u8 mode, u8 count, repeat{...}
+    // ACK(108) sub_568CE0: u8 mode (3=委派 sub_580A80), 其他: u8 count, repeat{
+    //   u8 room_no, s8 state; state>=0 → 定長塊 (u8,s8,u8,u16,u8,s8,s8[100],s8,s8,u8,u8,u8)
+    //                        state<0  → str title + 同組欄位 }
     private static async ValueTask RoomList(Session s, Packet p, ServerContext ctx) =>
         await s.SendAsync(new Packet(Opcode.GL_GAMEROOMINFO_ACK)
             .WriteU8(0).WriteU8(0));
@@ -99,8 +102,10 @@ public static class LobbyHandlers
             .WriteU8(0);                                           // tutorial_count
     }
 
-    // ACK(200): bool ok, s32 start, repeat{s32 slot(<0 結束), s32 item, f32, f32,
-    //           s32 period, u16 dura}  (sub_570AB0)
+    // ACK(200) sub_570AB0 → sub_524B70(cd, pkt, extra=1):
+    //   bool ok; ok 時: s32 start, repeat{s32 slot(<0 結束), s32 item, f32, f32,
+    //   s32 period, u8 extra(僅 200 帶; 202 走 sub_523A50 → extra=0), u16 dura}
+    //   ⚠ 交叉驗證修正: 200 有 u8 extra, 202 反而沒有 (先前記反了)
     private static async ValueTask MyItems(Session s, Packet p, ServerContext ctx)
     {
         int start = p.Remaining >= 4 ? p.ReadS32() : 0;
@@ -111,24 +116,25 @@ public static class LobbyHandlers
             foreach (var it in ctx.Db.GetInventoryPage(s.UserId, start))
                 ack.WriteS32(it.Slot).WriteS32(it.ItemId)
                    .WriteF32(it.F1).WriteF32(it.F2)
-                   .WriteS32(it.PeriodDaysLeft).WriteU16(it.DuraCur);
+                   .WriteS32(it.PeriodDaysLeft)
+                   .WriteU8(0)                                     // extra (sub_524B70 a3=1)
+                   .WriteU16(it.DuraCur);
         }
         await s.SendAsync(ack.WriteS32(-1));                       // sentinel
     }
 
-    // 210 REQ: u8, str nick → 211 ACK: u8 (0=可用 1=重複 2=非法)
+    // 210 REQ builder @0x572D30: 只有 str nick (u8+str 是 216/262 的格式)
+    // → 211 ACK sub_572D80: u8 result
     private static async ValueTask CheckNick(Session s, Packet p, ServerContext ctx)
     {
-        _ = p.ReadU8();
         var nick = p.ReadStr();
         byte result = IsValidNick(nick) ? ctx.Db.CheckNick(nick) : (byte)2;
         await s.SendAsync(new Packet(Opcode.GM_CHECKNICK_ACK).WriteU8(result));
     }
 
-    // 212 REQ: u8, str nick → 213 ACK: u8 (0=成功)
+    // 212 REQ builder sub_572DC0: 只有 str nick → 213 ACK sub_572E70: u8 result
     private static async ValueTask CreateNick(Session s, Packet p, ServerContext ctx)
     {
-        _ = p.ReadU8();
         var nick = p.ReadStr();
         byte result = 1;
         if (s.Authenticated && IsValidNick(nick))
