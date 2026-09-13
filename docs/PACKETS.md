@@ -583,6 +583,29 @@ kind 0/1/14 與 12/13/17 (可覆寫類) 走覆寫路徑, 其他 kind 重複購�
 **ACK 297** (sub_57AA50): `u8 result` — 0=成功, 之後 5×s32
 (cash/餘額顯示組); 1..11 = 錯誤碼 (11 種禮物失敗訊息)。
 
+### 3.15d1 高欄位數漏網 opcode (廿三輪自動表定位)
+```
+765 CLAN_TNMT_ENTERROOM_ACK (25欄): 前綴與 114 進房完全同構
+    (u8+s32+u8+str...) — 錦標賽進房 = 114 的克隆
+265 GL_JOININFO_ACK (25欄): {u8 map,u8,u8,u16 win,u8 max,u8,u16,u8,
+    u16,u8,str title} ×2 組 — 跨頻道跟隨好友的目標房資訊
+257 GL_ENTERROOMOB_ACK (19欄): 觀戰進房 (114 的觀戰版)
+486 GAMEROOM_PROGRESSTIME (23欄): 房間進行時間+成員狀態同步
+986 GR_MATCHINGROOM_START_ACK (17欄): 與 130 GR_START_ACK 完全同構
+    (配對房開戰 = 130 克隆)
+734 GG_SPAWNPULP_ACK (25欄): PVE 怪物生成 (座標+屬性+HP)
+740 GG_DESTROY_SUCC_ACK (24欄): PVE 破壞成功結算
+959/961/963 GG_DROPWEAPON 三連 (10-13欄): 掉落武器系統
+    {u16 drop_id, u8, s32 item, u16 dura, s16×3 座標, u16×2, f32}
+    — create/info/get&drop 三態同構
+919 GR_AI_GET_REWARD_ITEM_ACK: u8+{u8,s32}×4 — AI 模式獎勵
+    (對應 AiMultiCompensation.xml 的難度×等級表!)
+725 GL_COMBISKILLITEM_ACK: u8 + 10×s32 + f32×2 + u8 + bool —
+    組合技能 (COMBI 表, NewSkillLevTable 的 COMBI 節點對應)
+```
+同構鏈總結: 114⇔257⇔765⇔985 (進房四變體), 130⇔986 (開戰),
+959⇔961⇔963 (掉落) — client 重用解析器的鐵證。
+
 ### 3.15d2 剩餘家族速覽 (廿二輪終掃)
 ```
 984 GL_MATCHINGROOM_MAKE_ACK  (sub_5865A0): u8 result — 配對房建立
