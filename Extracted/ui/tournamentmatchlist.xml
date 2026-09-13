@@ -1,0 +1,101 @@
+<UIDEFINE>
+
+	<image name="Tournament_MatchList" filename="l_tournament_mr.dds"/>
+	<image name="Tournament_MatchList_03" filename="l_tournament_mr03.dds"/>
+
+	<column name="DEBUG_MATCHLIST_CURRENT_STATE" x="800" y="4" w="64" h="18" color="FFFFFFFF" shadow="FF000000" format="VCENTER LEFT"/>
+	<column name="A_EMBLEM_BACK_1" x="0" y="0" w="46" h="56" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_BACK_2" x="0" y="0" w="46" h="56" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_BACK_3" x="0" y="0" w="46" h="56" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_BACK_4" x="0" y="0" w="46" h="56" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_BACK_5" x="0" y="0" w="46" h="56" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_BACK_6" x="0" y="0" w="46" h="56" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_BACK_7" x="0" y="0" w="46" h="56" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_BACK_8" x="0" y="0" w="46" h="56" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_BACK_9" x="0" y="0" w="46" h="56" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_BACK_10" x="0" y="0" w="46" h="56" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_BACK_11" x="0" y="0" w="46" h="56" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_BACK_12" x="0" y="0" w="46" h="56" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_BACK_13" x="0" y="0" w="46" h="56" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_BACK_14" x="0" y="0" w="46" h="56" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_BACK_15" x="0" y="0" w="46" h="56" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_BACK_16" x="0" y="0" w="46" h="56" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_1" x="0" y="0" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_2" x="0" y="0" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_3" x="0" y="0" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_4" x="0" y="0" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_5" x="0" y="0" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_6" x="0" y="0" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_7" x="0" y="0" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_8" x="0" y="0" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_9" x="0" y="0" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_10" x="0" y="0" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_11" x="0" y="0" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_12" x="0" y="0" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_13" x="0" y="0" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_14" x="0" y="0" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_15" x="0" y="0" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="A_EMBLEM_16" x="0" y="0" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="FAIL_EMBLEM_1" x="0" y="0"/>
+	<column name="FAIL_EMBLEM_2" x="0" y="0"/>
+	<column name="FAIL_EMBLEM_3" x="0" y="0"/>
+	<column name="FAIL_EMBLEM_4" x="0" y="0"/>
+	<column name="FAIL_EMBLEM_5" x="0" y="0"/>
+	<column name="FAIL_EMBLEM_6" x="0" y="0"/>
+	<column name="FAIL_EMBLEM_7" x="0" y="0"/>
+	<column name="FAIL_EMBLEM_8" x="0" y="0"/>
+	<column name="FAIL_EMBLEM_9" x="0" y="0"/>
+	<column name="FAIL_EMBLEM_10" x="0" y="0"/>
+	<column name="FAIL_EMBLEM_11" x="0" y="0"/>
+	<column name="FAIL_EMBLEM_12" x="0" y="0"/>
+	<column name="FAIL_EMBLEM_13" x="0" y="0"/>
+	<column name="FAIL_EMBLEM_14" x="0" y="0"/>
+	<column name="FAIL_EMBLEM_15" x="0" y="0"/>
+	<column name="FAIL_EMBLEM_16" x="0" y="0"/>
+
+	<select name="MATCHGROUP_ABCD" count="4" OffX="0" OffY="0">
+		<rect l="532" t="78" r="570" b="100"/>
+		<rect l="571" t="78" r="609" b="100"/>
+		<rect l="610" t="78" r="648" b="100"/>
+		<rect l="649" t="78" r="687" b="100"/>
+		<column name="STATUS" x="0" y="0" w="26" h="26"/>
+	</select>
+
+	<sprite name="A_KUMI" l="130" t="855" r="168" b="877" texture="Tournament_MatchList"/>
+	<sprite name="B_KUMI" l="130" t="878" r="168" b="900" texture="Tournament_MatchList"/>
+	<sprite name="C_KUMI" l="130" t="901" r="168" b="923" texture="Tournament_MatchList"/>
+	<sprite name="D_KUMI" l="130" t="924" r="168" b="946" texture="Tournament_MatchList"/>
+	
+	<sprite name="A_KUMI_DIS" l="91" t="855" r="129" b="877" texture="Tournament_MatchList"/>
+	<sprite name="B_KUMI_DIS" l="91" t="878" r="129" b="900" texture="Tournament_MatchList"/>
+	<sprite name="C_KUMI_DIS" l="91" t="901" r="129" b="923" texture="Tournament_MatchList"/>
+	<sprite name="D_KUMI_DIS" l="91" t="924" r="129" b="946" texture="Tournament_MatchList"/>
+	
+	<sprite name="DIE_EMBLEM_32" l="634" t="855" r="666" b="887" texture="Tournament_MatchList"/>
+	<sprite name="DIE_EMBLEM_64" l="569" t="855" r="633" b="919" texture="Tournament_MatchList"/>
+	
+	<select name="MATCHGROUP_ABCD_IMAGE" count="1" OffX="0" OffY="0">
+		<rect l="102" t="94" r="192" b="119"/>
+		<column name="STATUS_IMAGE" x="0" y="0" w="104" h="24"/>
+	</select>
+	
+	<sprite name="A_KUMI_IMAGE"  l="0" t="855" r="90" b="880" texture="Tournament_MatchList"/> 
+	<sprite name="B_KUMI_IMAGE"  l="0" t="881" r="90" b="906" texture="Tournament_MatchList"/>
+	<sprite name="C_KUMI_IMAGE"  l="0" t="907" r="90" b="932" texture="Tournament_MatchList"/>
+	<sprite name="D_KUMI_IMAGE"  l="0" t="933" r="90" b="958" texture="Tournament_MatchList"/>
+	<sprite name="NO_KUMI_IMAGE" l="0" t="959" r="90" b="984" texture="Tournament_MatchList"/>
+	
+	<sprite name="EMBLEM_BACK32_SHILD_YELLOW" l="791" t="0" r="837" b="56" texture="Tournament_MatchList"/>
+	<sprite name="EMBLEM_BACK32_SHILD_BLUE"   l="837" t="0" r="883" b="56" texture="Tournament_MatchList"/>
+	<sprite name="EMBLEM_BACK32_SHILD_RED"    l="883" t="0" r="929" b="56" texture="Tournament_MatchList"/>
+	<sprite name="EMBLEM_BACK32_SHILD_LOSE"   l="929" t="0" r="975" b="56" texture="Tournament_MatchList"/>
+		
+	<sprite name="EMBLEM_BACK64_SHILD_LOSE"   l="629" t="141" r="735" b="264" texture="Tournament_MatchList"/>
+	<sprite name="EMBLEM_BACK64_SHILD_RED"    l="629" t="265" r="735" b="388" texture="Tournament_MatchList"/>
+	<sprite name="EMBLEM_BACK64_SHILD_BLUE"   l="629" t="389" r="735" b="512" texture="Tournament_MatchList"/>
+	<sprite name="EMBLEM_BACK64_SHILD_YELLOW" l="629" t="513" r="735" b="636" texture="Tournament_MatchList"/>
+	
+	<column name="MY_EMBLEM_SIGN_BACK" x="0" y="0"/>
+	<sprite name="MY_EMBLEM_SIGN_32" l="917" t="0" r="953"  b="36" texture="Tournament_MatchList_03"/> 
+	<sprite name="MY_EMBLEM_SIGN_64" l="954" t="0" r="1022" b="68" texture="Tournament_MatchList_03"/> 
+</UIDEFINE>

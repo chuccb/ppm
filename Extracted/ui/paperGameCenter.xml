@@ -1,0 +1,290 @@
+<UIDEFINE>
+	<bgmfile filename="bgm/bgm_gamecenter.mp3"/>
+	<bot_image name="Paper_Game_Center_UI" filename="gs_ui.dds"/>
+	<bot_image name="Paper_Game_Center_UI02" filename="gs_ui02.dds"/>
+	<bot_image name="Paper_Game_Center_PopUp" filename="gs_popup.dds"/>
+	<game_image name="Paper_Game_Center_Observer" filename="observer_01.dds"/>
+
+	<msprite sx='421' sy='18' ex='421' ey='18' l='341' t='1' r='353' b='13' texture="Paper_Game_Center_UI"/>
+	<ssprite  tl='433'    tt='18'   tr='964' tb='30' l='355' t='1' r='365' b='13' texture="Paper_Game_Center_UI"/>
+	<msprite sx='964' sy='18' ex='964' ey='18' l='367' t='1' r='379' b='13' texture="Paper_Game_Center_UI"/>
+
+	<ssprite tl='421' tt='30'   tr='433' tb='203' l='341' t='15' r='353' b='25' texture="Paper_Game_Center_UI"/>
+	<ssprite tl='433' tt='30'   tr='964' tb='203' l='355' t='15' r='365' b='25' texture="Paper_Game_Center_UI"/>
+	<ssprite tl='964' tt='30'   tr='976' tb='203' l='367' t='15' r='379' b='25' texture="Paper_Game_Center_UI"/>
+
+	<msprite sx='421' sy='203' ex='421' ey='203' l='341' t='27' r='352' b='39' texture="Paper_Game_Center_UI"/>
+	<ssprite   tl='432'  tt='203'    tr='964'   tb='215' l='355' t='27' r='365' b='39' texture="Paper_Game_Center_UI"/>
+	<msprite sx='964' sy='203' ex='964' ey='203' l='367' t='27' r='379' b='39' texture="Paper_Game_Center_UI"/>
+
+	<msprite sx='421' sy='217' ex='421' ey='217' l='341' t='1' r='353' b='13' texture="Paper_Game_Center_UI"/>
+	<ssprite  tl='433'    tt='217'   tr='964' tb='229' l='355' t='1' r='365' b='13' texture="Paper_Game_Center_UI"/>
+	<msprite sx='964' sy='217' ex='964' ey='217' l='367' t='1' r='379' b='13' texture="Paper_Game_Center_UI"/>
+
+	<ssprite tl='421' tt='229'   tr='433' tb='573' l='341' t='15' r='353' b='25' texture="Paper_Game_Center_UI"/>
+	<ssprite tl='433' tt='229'   tr='964' tb='573' l='355' t='15' r='365' b='25' texture="Paper_Game_Center_UI"/>
+	<ssprite tl='964' tt='229'   tr='976' tb='573' l='367' t='15' r='379' b='25' texture="Paper_Game_Center_UI"/>
+
+	<msprite sx='421' sy='573' ex='421' ey='573' l='341' t='27' r='352' b='39' texture="Paper_Game_Center_UI"/>
+	<ssprite   tl='432'  tt='573'    tr='964'   tb='585' l='355' t='27' r='365' b='39' texture="Paper_Game_Center_UI"/>
+	<msprite sx='964' sy='573' ex='964' ey='573' l='367' t='27' r='379' b='39' texture="Paper_Game_Center_UI"/>
+
+	<msprite sx='421' sy='587' ex='421' ey='587' l='341' t='1' r='353' b='13' texture="Paper_Game_Center_UI"/>
+	<ssprite  tl='433'    tt='587'   tr='964' tb='599' l='355' t='1' r='365' b='13' texture="Paper_Game_Center_UI"/>
+	<msprite sx='964' sy='587' ex='964' ey='587' l='367' t='1' r='379' b='13' texture="Paper_Game_Center_UI"/>
+
+	<ssprite tl='421' tt='599'   tr='433' tb='741' l='341' t='15' r='353' b='25' texture="Paper_Game_Center_UI"/>
+	<ssprite tl='433' tt='599'   tr='964' tb='741' l='355' t='15' r='365' b='25' texture="Paper_Game_Center_UI"/>
+	<ssprite tl='964' tt='599'   tr='976' tb='741' l='367' t='15' r='379' b='25' texture="Paper_Game_Center_UI"/>
+
+	<msprite sx='421' sy='741' ex='421' ey='741' l='341' t='27' r='352' b='39' texture="Paper_Game_Center_UI"/>
+	<ssprite   tl='432'  tt='741'    tr='964'   tb='753' l='355' t='27' r='365' b='39' texture="Paper_Game_Center_UI"/>
+	<msprite sx='964' sy='741' ex='964' ey='741' l='367' t='27' r='379' b='39' texture="Paper_Game_Center_UI"/>
+
+	<ssprite tl='32' tt='685'   tr='44' tb='741' l='341' t='15' r='353' b='25' texture="Paper_Game_Center_UI"/>
+	<ssprite tl='44' tt='685'   tr='401' tb='741' l='355' t='15' r='365' b='25' texture="Paper_Game_Center_UI"/>
+	<ssprite tl='401' tt='685'   tr='413' tb='741' l='367' t='15' r='379' b='25' texture="Paper_Game_Center_UI"/>
+
+	<msprite sx='32' sy='741' ex='32' ey='741' l='341' t='27' r='352' b='39' texture="Paper_Game_Center_UI"/>
+	<ssprite   tl='43'  tt='741'    tr='401'   tb='753' l='355' t='27' r='365' b='39' texture="Paper_Game_Center_UI"/>
+	<msprite sx='401' sy='741' ex='401' ey='741' l='367' t='27' r='379' b='39' texture="Paper_Game_Center_UI"/>
+	
+	<msprite name="BRIEF_WINDOW"    sx='32'  sy='357' ex='32'  ey='357'      l='0'  t='380'    r='381'  b='708'  texture="Paper_Game_Center_UI"/>
+	<msprite name="LIMIT_TIME"  	sx='280' sy='331' ex='280' ey='331'	l='0' t='993'  r='129'  b='1015'   texture="Paper_Game_Center_UI"/>
+
+	<msprite name="BESTRANKING"         sx='433' sy='29'  ex='430' ey='29'  l='129' t='1'    r='241'  b='19'   texture="Paper_Game_Center_UI"/>
+	<msprite name="BEST_1ST_WINDOW"     sx='428' sy='49'  ex='428' ey='49'  l='0'   t='833'  r='285'  b='992'  texture="Paper_Game_Center_UI"/>
+	<msprite name="BEST_1ST_NAME"       sx='588' sy='74'  ex='588' ey='74'  l='764' t='613'  r='882'  b='637'  texture="Paper_Game_Center_UI"/>
+	<msprite name="BEST_1ST_CLASS"      sx='588' sy='100'  ex='588' ey='100'  l='883' t='613'  r='1001'  b='665'  texture="Paper_Game_Center_UI"/>
+	<msprite name="BEST_1ST_SCORE"      sx='588' sy='154'  ex='588' ey='154'  l='764' t='613'  r='882'  b='637'  texture="Paper_Game_Center_UI"/>
+	<msprite name="BEST_1ST_TIME"       sx='588' sy='180'  ex='588' ey='180'  l='764' t='613'  r='882'  b='637'  texture="Paper_Game_Center_UI"/>
+
+	<msprite name="BEST_2ND_WINDOW"   sx='718' sy='49'  ex='718' ey='49'  l='286' t='833'  r='537'  b='912'  texture="Paper_Game_Center_UI"/>
+	<msprite name="BEST_2ND_NAME"     sx='804' sy='50'  ex='804' ey='50'  l='764' t='588'  r='925'  b='612'  texture="Paper_Game_Center_UI"/>
+	<msprite name="BEST_2ND_CLASS"    sx='804' sy='76'  ex='804' ey='76'  l='764' t='588'  r='925'  b='612'  texture="Paper_Game_Center_UI"/>
+	<msprite name="BEST_2ND_TIME"     sx='804' sy='102'  ex='804' ey='102'  l='764' t='588'  r='925'  b='612'  texture="Paper_Game_Center_UI"/>
+	<msprite name="BEST_3RD_WINDOW"   sx='718' sy='129'  ex='718' ey='129'  l='286' t='913'  r='537'  b='992'  texture="Paper_Game_Center_UI"/>
+	<msprite name="BEST_3RD_NAME"     sx='804' sy='130'  ex='804' ey='130'  l='764' t='588'  r='925'  b='612'  texture="Paper_Game_Center_UI"/>
+	<msprite name="BEST_3RD_NAME"     sx='804' sy='156'  ex='804' ey='156'  l='764' t='588'  r='925'  b='612'  texture="Paper_Game_Center_UI"/>
+	<msprite name="BEST_3RD_NAME"     sx='804' sy='182'  ex='804' ey='182'  l='764' t='588'  r='925'  b='612'  texture="Paper_Game_Center_UI"/>
+
+	<column name="NO1_CHAR_IMAGE"  x='431'  y='54'    w='150'   h='150' shadow='FF000000'/>
+	<column name="NO1_NAME"        x='587'  y='78'    w='120'   h='18' fontsize ='14' color='FFf3ea65' shadow='FF000000' format='CENTER'/>
+	<column name="NO1_CLASS"       x='587'  y='108'   w='122'   h='41' format='CENTER'/>
+	<column name="NO1_SCORE"       x='587'  y='157'   w='122'   h='22' format='CENTER'/>
+	<column name="NO1_DAY"         x='587'  y='185'   w='112'   h='22' fontsize ='14' color='FF90f4f8' shadow='FF000000' format='RIGHT'/>
+
+	<column name="NO2_CHAR_IMAGE"  x='723'  y='51'  w='75'   h='75' shadow='FF000000'/>
+	<column name="NO2_NAME"        x='807'  y='53'  w='157'  h='18' fontsize ='14' color='FFf3ea65' shadow='FF000000' format='CENTER'/>
+	<column name="NO2_CLASS"       x='807'  y='79'  w='120'  h='22' format='LEFT'/>
+	<column name="NO2_SCORE"       x='852'  y='79'  w='180'  h='22' format='LEFT'/>
+	<column name="NO2_DAY"         x='805'  y='107' w='157'  h='17' fontsize ='14' color='FF90f4f8' shadow='FF000000' format='RIGHT'/>
+
+	<column name="NO3_CHAR_IMAGE"  x='723'  y='131' w='75'   h='75' shadow='FF000000'/>
+	<column name="NO3_NAME"        x='807'  y='134' w='157'  h='18' fontsize ='14' color='FFf3ea65' shadow='FF000000' format='CENTER'/>
+	<column name="NO3_CLASS"       x='807'  y='158' w='120'  h='22' format='LEFT'/>
+	<column name="NO3_SCORE"       x='852'  y='159' w='180'  h='22' format='LEFT'/>
+	<column name="NO3_DAY"         x='805'  y='187' w='157'  h='17' fontsize ='14' color='FF90f4f8' shadow='FF000000' format='RIGHT'/>
+
+	<msprite name="TODAYRANKING" sx='433' sy='224'  ex='433' ey='224'  l='129' t='21'   r='249'  b='39'   texture="Paper_Game_Center_UI"/>
+	<msprite name="TODAY_TABLE"  sx='433' sy='243' ex='433' ey='243' l='0'   t='709'  r='529'  b='730'  texture="Paper_Game_Center_UI"/>
+	<msprite name="TODAY_1"      sx='433' sy='271' ex='433' ey='271' l='0'   t='731'  r='529'  b='757'  texture="Paper_Game_Center_UI"/>
+	<msprite name="TODAY_2"      sx='433' sy='302' ex='433' ey='302' l='0'   t='731'  r='529'  b='757'  texture="Paper_Game_Center_UI"/>
+	<msprite name="TODAY_3"      sx='433' sy='333' ex='433' ey='333' l='0'   t='731'  r='529'  b='757'  texture="Paper_Game_Center_UI"/>
+	<msprite name="TODAY_4"      sx='433' sy='364' ex='433' ey='364' l='0'   t='731'  r='529'  b='757'  texture="Paper_Game_Center_UI"/>
+	<msprite name="TODAY_5"      sx='433' sy='395' ex='433' ey='395' l='0'   t='731'  r='529'  b='757'  texture="Paper_Game_Center_UI"/>
+	<msprite name="TODAY_6"      sx='433' sy='426' ex='433' ey='426' l='0'   t='731'  r='529'  b='757'  texture="Paper_Game_Center_UI"/>
+	<msprite name="TODAY_7"      sx='433' sy='457' ex='433' ey='457' l='0'   t='731'  r='529'  b='757'  texture="Paper_Game_Center_UI"/>
+	<msprite name="TODAY_8"      sx='433' sy='488' ex='433' ey='488' l='0'   t='731'  r='529'  b='757'  texture="Paper_Game_Center_UI"/>
+	<msprite name="TODAY_9"      sx='433' sy='519' ex='433' ey='519' l='0'   t='731'  r='529'  b='757'  texture="Paper_Game_Center_UI"/>
+	<msprite name="TODAY_10"     sx='433' sy='550' ex='433' ey='550' l='0'   t='731'  r='529'  b='757'  texture="Paper_Game_Center_UI"/>
+
+	<msprite name="MYRANK"          sx='433' sy='593' ex='435' ey='593' l='340' t='759'  r='461'  b='777'   texture="Paper_Game_Center_UI"/>
+	<msprite name="MYRANK_DAY"      sx='433' sy='613' ex='433' ey='613' l='242' t='0'    r='340'  b='19'   texture="Paper_Game_Center_UI"/>
+	<msprite name="MYRANK_CHAR"     sx='433' sy='641' ex='433' ey='641' l='917' t='723'  r='1015'  b='821'  texture="Paper_Game_Center_UI"/>
+	<msprite name="MYRANK_CLASS"    sx='543' sy='613' ex='543' ey='613' l='0'   t='0'    r='128'  b='19'   texture="Paper_Game_Center_UI"/>
+	<msprite name="MYRANK_SCORE"    sx='543' sy='677' ex='543' ey='677' l='0'   t='20'   r='128'  b='39'   texture="Paper_Game_Center_UI"/>
+	<msprite name="MYRANK_SHOTBACK" sx='684' sy='591' ex='684' ey='591' l='0' t='833'  r='285'  b='991'  texture="Paper_Game_Center_UI"/>
+	<msprite name="MYRANK_SHOT"     sx='686' sy='618' ex='686' ey='618' l='764' t='174'  r='930'  b='303'  texture="Paper_Game_Center_UI"/>
+	<msprite name="MYRANK_MAX"      sx='686' sy='593' ex='686' ey='593' l='340' t='803'  r='515'  b='828'  texture="Paper_Game_Center_UI"/>
+	<msprite name="MYRANK_BG1"      sx='544' sy='633' ex='544' ey='633' l='356' t='372'  r='484'  b='414'  texture="Paper_Game_Center_PopUp"/>
+	<msprite name="MYRANK_BG2"      sx='544' sy='697' ex='544' ey='697' l='356' t='372'  r='484'  b='414'  texture="Paper_Game_Center_PopUp"/>
+    
+ 	<column name="MYRANK_CHAR_IMAGE"       x='435'  y='641'  w='94'     h='96' shadow='FF000000' format='VCENTER CENTER'/>
+  	<column name="MYRANK_CLASS_IMAGE"     x='546'  y='636'  w='122'   h='41' format='VCENTER CENTER'/>
+  	<column name="MYRANK_SCORE_IMAGE"    x='546'  y='708'  w='160'   h='28' format='VCENTER CENTER'/>
+
+  	<column name="MYRANK_SPECIALCOUNT_0"         x='891'  y='599'  w='112'     h='20'   format='RIGHT'/>
+  	<column name="MYRANK_SPECIALCOUNT_1"         x='891'  y='624'  w='112'     h='20'   format='RIGHT'/>
+  	<column name="MYRANK_SPECIALCOUNT_2"         x='891'  y='649'  w='112'     h='20'   format='RIGHT'/>
+  	<column name="MYRANK_SPECIALCOUNT_3"         x='891'  y='675'  w='112'     h='20'   format='RIGHT'/>
+  	<column name="MYRANK_SPECIALCOUNT_4"         x='891'  y='701'  w='112'     h='20'   format='RIGHT'/>
+  	<column name="MYRANK_SPECIALCOUNT_5"         x='891'  y='726'  w='112'     h='20'   format='RIGHT'/>
+
+  	<column name="MYRANK_SCORE_TIME"    x='433'  y='614'  w='98'   h='18' color='FF90f4f8' shadow='FF000000'  format='VCENTER CENTER'/>
+
+	<msprite name="MISSION_CLEARED"  sx='277' sy='230' ex='277' ey='230' l='828' t='496'   r='958'  b='588' texture="Paper_Game_Center_UI"/>
+	<msprite name="SCROLLBAR"  sx='944' sy='242' ex='944' ey='242' l='993' t='187' r='1020'  b='522' texture="Paper_Game_Center_UI"/>
+
+	<button name="EASY_START" x="82" y="697" w="89" h="42">
+		<sprite l="833" t="468" r="921" b="510" texture="Paper_Game_Center_PopUp"/>
+		<sprite l="833" t="511" r="921" b="553" texture="Paper_Game_Center_PopUp"/>
+		<sprite l="833" t="554" r="921" b="596" texture="Paper_Game_Center_PopUp"/>
+	</button>
+
+	<button name="FREE_START" x="179" y="697" w="89" h="42">
+		<sprite l="743" t="468" r="831" b="510" texture="Paper_Game_Center_PopUp"/>
+		<sprite l="743" t="511" r="831" b="553" texture="Paper_Game_Center_PopUp"/>
+		<sprite l="743" t="554" r="831" b="596" texture="Paper_Game_Center_PopUp"/>
+	</button>
+
+	<button name="EXIT" x="276" y="697" w="89" h="42">
+		<sprite l="866" t="40" r="967" b="82" texture="Paper_Game_Center_UI"/>
+		<sprite l="866" t="83" r="967" b="125" texture="Paper_Game_Center_UI"/>
+		<sprite l="866" t="126" r="967" b="168" texture="Paper_Game_Center_UI"/>
+	</button>
+
+  	<eventrect name="1ST_EVENTRECT" x="425" y="50"  w="293" h="160"/>
+  	<eventrect name="2ND_EVENTRECT" x="718" y="49"  w="250" h="78"/>
+  	<eventrect name="3RD_EVENTRECT" x="718" y="129" w="250" h="78"/>
+
+  	<column name="1ST_ROLLOVER"  x='428' y='49'  w='0' h='0' />
+  	<column name="2ND_ROLLOVER"  x='718' y='49'  w='0' h='0' />
+  	<column name="3RD_ROLLOVER"  x='718' y='129' w='0' h='0' />
+
+	<button name="UP" x="946" y="243" w="23" h="28">
+		<sprite l="917" t="863" r="940" b="891" texture="Paper_Game_Center_UI"/>
+		<sprite l="941" t="863" r="964" b="891" texture="Paper_Game_Center_UI"/>
+		<sprite l="965" t="863" r="988" b="891" texture="Paper_Game_Center_UI"/>
+	</button>
+
+	<button name="DN" x="946" y="548" w="23" h="28">
+		<sprite l="917" t="892" r="940" b="920" texture="Paper_Game_Center_UI"/>
+		<sprite l="941" t="892" r="964" b="920" texture="Paper_Game_Center_UI"/>
+		<sprite l="965" t="892" r="988" b="920" texture="Paper_Game_Center_UI"/>
+	</button>
+
+	<hscroll name="MAP_SELECT" l="98" t="29" r="345" b="53">
+		<button name="LEFT" x="65" y="27" w="29" h="29">
+			<sprite l="768" t="497" r="797" b="526" texture="Paper_Game_Center_UI"/>
+			<sprite l="768" t="527" r="797" b="556" texture="Paper_Game_Center_UI"/>
+			<sprite l="768" t="557" r="797" b="586" texture="Paper_Game_Center_UI"/>
+		</button>
+
+		<button name="RIGHT" x="350" y="27" w="29" h="53">
+			<sprite l="798" t="497" r="827" b="526" texture="Paper_Game_Center_UI"/>
+			<sprite l="798" t="527" r="827" b="556" texture="Paper_Game_Center_UI"/>
+			<sprite l="798" t="557" r="827" b="586" texture="Paper_Game_Center_UI"/>
+		</button>
+	</hscroll>
+	
+
+	<column name="GAME_LIMIT_TIME" x='286' y='334' w='118' h='18' fontsize="14" color='FFf7f032' shadow='FF000000' format='VCENTER CENTER'/>
+
+	<select name="TODAY_RANK" count='10' OffX='0' OffY='0' >
+		<rect l='433' t='271' r='945' b='297'/>
+		<rect l='433' t='302' r='945' b='328'/>
+		<rect l='433' t='333' r='945' b='359'/>
+		<rect l='433' t='364' r='945' b='390'/>
+		<rect l='433' t='395' r='945' b='421'/>
+		<rect l='433' t='426' r='945' b='452'/>
+		<rect l='433' t='457' r='945' b='483'/>
+		<rect l='433' t='488' r='945' b='514'/>
+		<rect l='433' t='519' r='945' b='545'/>
+		<rect l='433' t='550' r='945' b='576'/>
+    
+  		<column name="GS_RANKING" x='22' y='4'  w='18' h='18' color='FFFFFFF' shadow='FF444444' format='VCENTER CENTER'/>
+		<column name="GS_CHAR" x='70' y='-7' w='22' h='22'  format='VCENTER CENTER'/>
+		<column name="GS_NICKNAME" x='85' y='4' w='130' h='18' color='FFf3ea65' shadow='FF000000' format='VCENTER CENTER'/>
+		<column name="GS_SCORE" x='222' y='4' w='84' h='18' color='FFFFFFF' shadow='FF444444' format='VCENTER CENTER'/>
+		<column name="GS_CLASS" x='328 ' y='2' w='62' h='22' />
+		<column name="GS_DAY_TIME" x='386' y='4' w='138' h='18' color='FF90f4f8' shadow='FF000000' format='VCENTER CENTER'/>
+		<column name="NORECORD_TODAY" x='231 ' y='8' w='66' h='11' />
+
+    	<sprite l='1'   t='451' r='509'  b='477'  texture="Paper_Game_Center_PopUp"/>
+    	<sprite l='0'   t='0' r='0'  b='0'  texture="Paper_Game_Center_PopUp"/>
+    	<sprite l='1'   t='478 ' r='509'  b='504'  texture="Paper_Game_Center_PopUp"/>
+
+		<eventrect name="SCROLL_RECT" x="433" y="271" w="508" h="305" />
+
+	</select>
+
+	<column name="MISSION_BRIEF" x='43' y='360' w='360' h='204' color='FFa13333'  format='LEFT'/>
+
+	<column name="BEST_NO1" x='432' y='175'  w='53' h='32'/>
+	<column name="BEST_NO2" x='721' y='107' w='42' h='20' />
+	<column name="BEST_NO3" x='721' y='188' w='39' h='20' />
+
+    	<column name="NORECORD_1" x='473'  y='124'  w='66' h='11' />
+     	<column name="NORECORD_2" x='729'  y='85'  w='66' h='11' />
+     	<column name="NORECORD_3" x='729'  y='162'  w='66' h='11' />
+     	<column name="NORECORD_MYCHAR" x='449'  y='682'  w='66' h='11'/>
+
+	<sprite l='0' t='40' r='381'  b='378' texture="Paper_Game_Center_UI"/>
+	<sprite l='0' t='1' r='381'  b='340' texture="Paper_Game_Center_UI02"/>
+
+	<sprite name="SMALL_CHAR1" l='1'   t='222'   r='33'  b='255' texture="Paper_Game_Center_Observer"/>	
+	<sprite name="SMALL_CHAR2" l='1'   t='256'   r='33'  b='288' texture="Paper_Game_Center_Observer"/>	
+	<sprite name="SMALL_CHAR3" l='1'   t='289'   r='33'  b='321' texture="Paper_Game_Center_Observer"/>	
+	<sprite name="SMALL_CHAR4" l='1'   t='322'   r='33'  b='355' texture="Paper_Game_Center_Observer"/>	
+	<sprite name="SMALL_CHAR5" l='1'   t='356'   r='33'  b='388' texture="Paper_Game_Center_Observer"/>	
+	<sprite name="SMALL_CHAR6" l='67'  t='222'   r='99'  b='255' texture="Paper_Game_Center_Observer"/>	
+	<sprite name="SMALL_CHAR7" l='67'  t='256'   r='99'  b='288' texture="Paper_Game_Center_Observer"/>	
+	<sprite name="SMALL_CHAR8" l='67'  t='289'   r='99'  b='321' texture="Paper_Game_Center_Observer"/>	
+	<sprite name="SMALL_CHAR9" l='67'  t='322'   r='99'  b='355' texture="Paper_Game_Center_Observer"/>	
+	<sprite name="SMALL_CHAR10" l='67' t='356'   r='99'  b='388' texture="Paper_Game_Center_Observer"/>	
+	<sprite name="SMALL_CHAR11" l='86' t='391'   r='118' b='423' texture="Paper_Game_Center_Observer"/>
+	<sprite name="SMALL_CHAR12" l='1'  t='492'   r='33'  b='524' texture="Paper_Game_Center_Observer"/>	
+	<sprite name="SMALL_CHAR13" l='1'  t='591'   r='33'  b='623' texture="Paper_Game_Center_Observer"/>
+	<sprite name="SMALL_CHAR14" l='1'  t='624'   r='33'  b='656' texture="Paper_Game_Center_Observer"/>
+	<sprite name="SMALL_CHAR15" l='1'  t='656'   r='33'  b='688' texture="Paper_Game_Center_Observer"/>
+
+	<sprite name="SMALL_RANK8" l='441' t='19' r='485'  b='39' texture="Paper_Game_Center_UI"/>	
+	<sprite name="SMALL_RANK7" l='486' t='19' r='517'  b='39' texture="Paper_Game_Center_UI"/>	
+	<sprite name="SMALL_RANK6" l='518' t='19' r='534'  b='39' texture="Paper_Game_Center_UI"/>	
+	<sprite name="SMALL_RANK5" l='535' t='19' r='553'  b='39' texture="Paper_Game_Center_UI"/>	
+	<sprite name="SMALL_RANK4" l='554' t='19' r='572'  b='39' texture="Paper_Game_Center_UI"/>	
+	<sprite name="SMALL_RANK3" l='573' t='19' r='590'  b='39' texture="Paper_Game_Center_UI"/>	
+	<sprite name="SMALL_RANK2" l='591' t='19' r='608'  b='39' texture="Paper_Game_Center_UI"/>	
+	<sprite name="SMALL_RANK1" l='609' t='19' r='626'  b='39' texture="Paper_Game_Center_UI"/>	
+	<sprite name="SMALL_RANK0" l='627' t='19' r='644'  b='39' texture="Paper_Game_Center_UI"/>	
+
+	<sprite name="BIG_RANK8" l='645' t='3' r='728'  b='39' texture="Paper_Game_Center_UI"/>			
+	<sprite name="BIG_RANK7" l='729' t='3' r='786'  b='39' texture="Paper_Game_Center_UI"/>			
+	<sprite name="BIG_RANK6" l='787' t='3' r='817'  b='39' texture="Paper_Game_Center_UI"/>			
+	<sprite name="BIG_RANK5" l='818' t='3' r='852'  b='39' texture="Paper_Game_Center_UI"/>			
+	<sprite name="BIG_RANK4" l='853' t='3' r='885'  b='39' texture="Paper_Game_Center_UI"/>			
+	<sprite name="BIG_RANK3" l='886' t='3' r='918'  b='39' texture="Paper_Game_Center_UI"/>			
+	<sprite name="BIG_RANK2" l='919' t='3' r='951'  b='39' texture="Paper_Game_Center_UI"/>			
+	<sprite name="BIG_RANK1" l='952' t='3' r='982'  b='39' texture="Paper_Game_Center_UI"/>			
+	<sprite name="BIG_RANK0" l='983' t='3' r='1014'  b='39' texture="Paper_Game_Center_UI"/>		
+
+	<sprite name="BIG_CHAR1" l='489'   t='1'     r='639'  b='151' texture="Paper_Game_Center_Observer"/>			
+	<sprite name="BIG_CHAR2" l='489'   t='152'   r='639'  b='302' texture="Paper_Game_Center_Observer"/>		
+	<sprite name="BIG_CHAR3" l='640'   t='1'     r='790'  b='151' texture="Paper_Game_Center_Observer"/>	
+	<sprite name="BIG_CHAR4" l='640'   t='152'   r='790'  b='302' texture="Paper_Game_Center_Observer"/>			
+	<sprite name="BIG_CHAR5" l='791'   t='1'     r='941'  b='151' texture="Paper_Game_Center_Observer"/>			  
+	<sprite name="BIG_CHAR6" l='791'   t='152'   r='941'  b='302' texture="Paper_Game_Center_Observer"/>	
+	<sprite name="BIG_CHAR7" l='489'   t='303'   r='639'  b='453' texture="Paper_Game_Center_Observer"/>			    
+	<sprite name="BIG_CHAR8" l='489'   t='454'   r='639'  b='604' texture="Paper_Game_Center_Observer"/>			
+	<sprite name="BIG_CHAR9" l='640'   t='303'   r='790'  b='453' texture="Paper_Game_Center_Observer"/>	
+	<sprite name="BIG_CHAR10" l='640'  t='454'   r='790'  b='604' texture="Paper_Game_Center_Observer"/>		
+	<sprite name="BIG_CHAR11" l='791'  t='303'   r='941'  b='453' texture="Paper_Game_Center_Observer"/>	
+	<sprite name="BIG_CHAR12" l='791'  t='454'   r='941'  b='604' texture="Paper_Game_Center_Observer"/>	
+  	<sprite name="BIG_CHAR13" l='489'  t='605'   r='639'  b='755' texture="Paper_Game_Center_Observer"/>
+	<sprite name="BIG_CHAR14" l='640'  t='605'   r='790'  b='755' texture="Paper_Game_Center_Observer"/>
+	<sprite name="BIG_CHAR15" l='791'  t='605'   r='941'  b='755' texture="Paper_Game_Center_Observer"/>
+
+	<sprite name="BEST_1" l='386' t='7' r='438' b='38' texture="Paper_Game_Center_UI"/>		
+	<sprite name="BEST_2" l='251' t='20' r='292' b='39' texture="Paper_Game_Center_UI"/>		
+	<sprite name="BEST_3" l='293' t='20' r='331' b='39' texture="Paper_Game_Center_UI"/>		
+
+	<sprite name="NORECORD"  l='930' t='594' r='996'  b='606'  texture="Paper_Game_Center_UI"/>			
+
+	<sprite name="1ST_SELECT" l='103' t='211' r='388'  b='370'  texture="Paper_Game_Center_PopUp"/>			
+	<sprite name="2ND_SELECT" l='103' t='371' r='354'  b='450'  texture="Paper_Game_Center_PopUp"/>
+
+	<sprite name="GAMECENTER_CHAR_IMG_1" l='768' t='304' r='993' b='496' texture="Paper_Game_Center_UI"/>
+	<sprite name="GAMECENTER_CHAR_IMG_2" l='768' t='2' r='996' b='196' texture="Paper_Game_Center_UI02"/>	
+ 
+</UIDEFINE>

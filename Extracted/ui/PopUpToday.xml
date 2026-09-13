@@ -1,0 +1,87 @@
+<UIDEFINE>
+
+	<image name="TODAY_POPUP" filename="medalOFhonor_back.dds"/>
+	<image name="TODAY_BACK" filename="tuto_back.dds"/>
+
+	<msprite name="TODAY_BACKGROUND" sx='0' sy='0' ex='0' ey='0' l='0' t='0' r='1024' b='768' texture="TODAY_BACK"/>
+	
+	<msprite name="TODAY_WINDOW_LEFT" sx='167' sy='173' ex='167' ey='173' l='0' t='458' r='15' b='875' texture="TODAY_POPUP"/>	
+	<msprite name="TODAY_WINDOW_CENTER01" sx='182' sy='173' ex='182' ey='173' l='16' t='458' r='177' b='875' texture="TODAY_POPUP"/>	
+	<msprite name="TODAY_WINDOW_CENTER02" sx='343' sy='173' ex='343' ey='173' l='16' t='458' r='177' b='875' texture="TODAY_POPUP"/>	
+	<msprite name="TODAY_WINDOW_CENTER03" sx='504' sy='173' ex='504' ey='173' l='16' t='458' r='177' b='875' texture="TODAY_POPUP"/>	
+	<msprite name="TODAY_WINDOW_CENTER04" sx='665' sy='173' ex='665' ey='173' l='16' t='458' r='33' b='875' texture="TODAY_POPUP"/>	
+	<msprite name="TODAY_WINDOW_CENTER05" sx='682' sy='173' ex='682' ey='173' l='16' t='458' r='177' b='875' texture="TODAY_POPUP"/>	
+	<msprite name="TODAY_WINDOW_RIGHT" sx='843' sy='173' ex='843' ey='173' l='178' t='458' r='193' b='875' texture="TODAY_POPUP"/>	
+
+	<msprite name="TODAY_TITLE" sx='199' sy='191' ex='199' ey='191' l='1' t='427' r='146' b='455' texture="TODAY_POPUP"/>	
+
+
+
+	<button name="TODAY_1STAR" x='205' y='225' w='199' h='299'>
+		<sprite l='0' t='1' r='199' b='300' texture="TODAY_POPUP"/>
+		<sprite l='200' t='1' r='399' b='300' texture="TODAY_POPUP"/>
+		<sprite l='0' t='1' r='199' b='300' texture="TODAY_POPUP"/>
+	</button>
+	<button name="TODAY_2STAR" x='415' y='225' w='199' h='299'>
+		<sprite l='0' t='1' r='199' b='300' texture="TODAY_POPUP"/>
+		<sprite l='200' t='1' r='399' b='300' texture="TODAY_POPUP"/>
+		<sprite l='0' t='1' r='199' b='300' texture="TODAY_POPUP"/>
+	</button>
+	<button name="TODAY_3STAR" x='625' y='225' w='199' h='299'>
+		<sprite l='0' t='1' r='199' b='300' texture="TODAY_POPUP"/>
+		<sprite l='200' t='1' r='399' b='300' texture="TODAY_POPUP"/>
+		<sprite l='0' t='1' r='199' b='300' texture="TODAY_POPUP"/>
+	</button>
+
+	<button name="TODAY_WINDOW_EXIT" x='748' y='539' w='77' h='34'>
+		<sprite l='0' t='301' r='77' b='335' texture="TODAY_POPUP"/>
+		<sprite l='0' t='336' r='77' b='370' texture="TODAY_POPUP"/>
+		<sprite l='0' t='371' r='77' b='405' texture="TODAY_POPUP"/>
+	</button>
+
+     	<msprite name="YELLOW_STAR_1_1" sx='298' sy='395' ex='298' ey='395' l='1' t='876' r='18' b='893' texture="TODAY_POPUP"/>
+     	<msprite name="YELLOW_STAR_1_2" sx='288' sy='395' ex='288' ey='395' l='1' t='894' r='37' b='911' texture="TODAY_POPUP"/>
+     	<msprite name="YELLOW_STAR_1_3" sx='278' sy='395' ex='278' ey='395' l='19' t='876' r='75' b='893' texture="TODAY_POPUP"/>
+     	<msprite name="YELLOW_STAR_2_1" sx='510' sy='395' ex='510' ey='395' l='1' t='876' r='18' b='893' texture="TODAY_POPUP"/>
+     	<msprite name="YELLOW_STAR_2_2" sx='500' sy='395' ex='500' ey='395' l='1' t='894' r='37' b='911' texture="TODAY_POPUP"/>
+     	<msprite name="YELLOW_STAR_2_3" sx='490' sy='395' ex='490' ey='395' l='19' t='876' r='75' b='893' texture="TODAY_POPUP"/>
+
+     	<msprite name="YELLOW_STAR_3_1" sx='721' sy='395' ex='721' ey='395' l='1' t='876' r='18' b='893' texture="TODAY_POPUP"/>
+     	<msprite name="YELLOW_STAR_3_2" sx='711' sy='395' ex='711' ey='395' l='1' t='894' r='37' b='911' texture="TODAY_POPUP"/>
+     	<msprite name="YELLOW_STAR_3_3" sx='701' sy='395' ex='701' ey='395' l='19' t='876' r='75' b='893' texture="TODAY_POPUP"/>
+
+
+  	<column name="TODAY_MISSION_DESC_1" x='213' y='425' w='194' h='92' color='FFFFFFFF' fontsize ='10' format='VFEFT LEFT'/>
+  	<column name="TODAY_MISSION_DESC_2" x='423' y='425' w='194' h='92' color='FFFFFFFF' fontsize ='10' format='VFEFT LEFT'/>
+  	<column name="TODAY_MISSION_DESC_3" x='633' y='425' w='194' h='92' color='FFFFFFFF' fontsize ='10' format='VFEFT LEFT'/>
+
+  	<column name="TODAY_ICON_1" x='247' y='273' w='110' h='110'/>
+  	<column name="TODAY_ICON_2" x='458' y='273' w='110' h='110'/>
+  	<column name="TODAY_ICON_3" x='669' y='273' w='110' h='110'/>
+
+  	<column name="TODAY_NAME_1" x='245' y='248' w='114' h='14'/>
+  	<column name="TODAY_NAME_2" x='456' y='248' w='114' h='14'/>
+  	<column name="TODAY_NAME_3" x='667' y='248' w='114' h='14'/>
+
+	<sprite name="TODAY_KILL" l='80' t='303' r='194' b='316' texture="TODAY_POPUP"/>
+	<sprite name="TODAY_DEATH" l='80' t='317' r='194' b='330' texture="TODAY_POPUP"/>
+	<sprite name="TODAY_WIN" l='80' t='331' r='194' b='344' texture="TODAY_POPUP"/>
+	<sprite name="TODAY_LOSE" l='80' t='345' r='194' b='358' texture="TODAY_POPUP"/>
+	<sprite name="TODAY_SPECIAL_SHOT" l='80' t='359' r='194' b='372' texture="TODAY_POPUP"/>
+	<sprite name="TODAY_MULTI_SHOT" l='80' t='373' r='194' b='386' texture="TODAY_POPUP"/>
+	<sprite name="TODAY_GET_ITEM" l='80' t='387' r='194' b='400' texture="TODAY_POPUP"/>
+	<sprite name="TODAY_PLAY_TIME" l='80' t='401' r='194' b='414' texture="TODAY_POPUP"/>
+	<sprite name="TODAY_PLAY_COUNT" l='195' t='303' r='309' b='316' texture="TODAY_POPUP"/>
+	<sprite name="TODAY_FREE_FOR ALL" l='195' t='317' r='309' b='330' texture="TODAY_POPUP"/>
+	<sprite name="TODAY_TEAM_SURVIVAL" l='195' t='331' r='309' b='344' texture="TODAY_POPUP"/>
+	<sprite name="TODAY_TACTICAL_TEAM" l='195' t='345' r='309' b='358' texture="TODAY_POPUP"/>
+	<sprite name="TODAY_BOMB_MISSION" l='195' t='359' r='309' b='372' texture="TODAY_POPUP"/>
+	<sprite name="TODAY_TEAM_STEAL" l='195' t='373' r='309' b='386' texture="TODAY_POPUP"/>
+	<sprite name="TODAY_PULP_ROLL" l='195' t='387' r='309' b='400' texture="TODAY_POPUP"/>
+	<sprite name="TODAY_GUNSHOOTING" l='195' t='401' r='309' b='414' texture="TODAY_POPUP"/>
+	<sprite name="TODAY_OCCUPATION" l='310' t='303' r='424' b='316' texture="TODAY_POPUP"/>
+	<sprite name="TODAY_PVE" l='310' t='317' r='424' b='330' texture="TODAY_POPUP"/>
+	<sprite name="TODAY_SOCCER" l='310' t='331' r='424' b='344' texture="TODAY_POPUP"/>
+	<sprite name="TODAY_ASSIST" l='310' t='345' r='424' b='358' texture="TODAY_POPUP"/>
+
+</UIDEFINE>

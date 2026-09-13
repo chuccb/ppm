@@ -1,0 +1,62 @@
+<UIDEFINE>
+	<!-- PEPACHI Start -->
+	<image name="New_Skill_Pepachi" filename="pepachi.dds"/>
+	<msprite sx='0' sy='0' ex='456' ey='138' l='0' t='0' r='519' b='506' texture="New_Skill_Pepachi"/>
+
+	<!-- OATARI Item Icon -->
+	<msprite name ="ARARI_ITEM_CASH" sx='0' sy='0' ex='492' ey='176' l='0' t='0' r='52' b='52' texture="New_Skill_Pepachi"/>
+	<msprite name ="ARARI_ITEM_PG" sx='0' sy='0' ex='556' ey='176' l='0' t='0' r='52' b='52' texture="New_Skill_Pepachi"/>
+	
+
+	<msprite name ="ARARI_ICON" sx='0' sy='0' ex='471' ey='193' l='750' t='0' r='910' b='40' texture="New_Skill_Pepachi"/>
+
+	<!-- Background Movie Layer -->
+	<msprite name ="MOVIE_LAYER" sx='0' sy='0' ex='475' ey='242' l='0' t='0' r='480' b='360' texture="New_Skill_Pepachi"/>
+	
+
+	<msprite name ="REEL_BACK_NOMAL" sx='0' sy='0' ex='612' ey='458' l='0' t='520' r='210' b='660' texture="New_Skill_Pepachi"/>
+	<msprite name ="REEL_BACK_P1" sx='0' sy='0' ex='611' ey='458' l='209' t='520' r='420' b='660' texture="New_Skill_Pepachi"/>
+	<msprite name ="REEL_BACK_P2" sx='0' sy='0' ex='612' ey='458' l='540' t='650' r='750' b='800' texture="New_Skill_Pepachi"/>
+	<msprite name ="REEL_BACK_P3" sx='0' sy='0' ex='612' ey='458' l='540' t='800' r='750' b='950' texture="New_Skill_Pepachi"/>
+
+	<msprite name ="REEL_TOP_REPLAY" sx='0' sy='0' ex='840' ey='250' l='848' t='651' r='960' b='680' texture="New_Skill_Pepachi"/>
+	<msprite name ="REEL_TOP_PMARK_2" sx='0' sy='0' ex='840' ey='250' l='848' t='681' r='960' b='710' texture="New_Skill_Pepachi"/>
+	<msprite name ="REEL_TOP_PMARK_3" sx='0' sy='0' ex='840' ey='250' l='848' t='711' r='960' b='740' texture="New_Skill_Pepachi"/>
+
+	<!-- Reel Item Movie Layer-->
+	<msprite name ="REEL_LAYER" sx='0' sy='0' ex='618' ey='462' l='162' t='324' r='356' b='454' texture="New_Skill_Pepachi"/>
+	
+
+	<msprite name ="REEL_COVER" sx='0' sy='0' ex='616' ey='462' l='650' t='130' r='849' b='260' texture="New_Skill_Pepachi"/>
+
+	<button name="START_PG" x='868' y='657' w='99' h='39'>
+		<sprite l='540' t='0' r='640' b='40' texture="New_Skill_Pepachi"/>
+		<sprite l='540' t='41' r='640' b='80' texture="New_Skill_Pepachi"/>
+		<sprite l='540' t='80' r='640' b='120' texture="New_Skill_Pepachi"/>
+	</button>
+
+	<button name="START_CASH" x='757' y='657' w='99' h='39'>
+		<sprite l='540' t='130' r='640' b='170' texture="New_Skill_Pepachi"/>
+		<sprite l='540' t='170' r='640' b='210' texture="New_Skill_Pepachi"/>
+		<sprite l='540' t='210' r='640' b='250' texture="New_Skill_Pepachi"/>
+	</button>
+
+	<button name="STOP_0" x='625' y='614' w='50' h='30'>
+		<sprite l='540' t='291' r='590' b='315' texture="New_Skill_Pepachi"/>
+		<sprite l='590' t='291' r='640' b='315' texture="New_Skill_Pepachi"/>
+		<sprite l='640' t='291' r='690' b='315' texture="New_Skill_Pepachi"/>
+	</button>
+
+	<button name="STOP_1" x='690' y='614' w='50' h='30'>
+		<sprite l='540' t='291' r='590' b='315' texture="New_Skill_Pepachi"/>
+		<sprite l='590' t='291' r='640' b='315' texture="New_Skill_Pepachi"/>
+		<sprite l='640' t='291' r='690' b='315' texture="New_Skill_Pepachi"/>
+	</button>
+
+	<button name="STOP_2" x='755' y='614' w='50' h='30'>
+		<sprite l='540' t='291' r='590' b='315' texture="New_Skill_Pepachi"/>
+		<sprite l='590' t='291' r='640' b='315' texture="New_Skill_Pepachi"/>
+		<sprite l='640' t='291' r='690' b='315' texture="New_Skill_Pepachi"/>
+	</button>
+  
+</UIDEFINE>

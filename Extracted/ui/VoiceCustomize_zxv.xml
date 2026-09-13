@@ -1,0 +1,207 @@
+﻿<UIDEFINE>
+
+	<image name="Voice_ZXV" filename="voice001.dds"/>
+
+	<column name="USER_ITEM_NAME" x="565" y="216" w="144" h="14" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER" widthoverdrawDOT="1"/>
+	<column name="USER_ITEM_EXPLAIN" x="565" y="239" w="152" h="36" fontsize="12" color="FFFFFFFF" format="VCENTER CENTER" widthoverdrawDOT="1"/>
+	<column name="USER_ITEM_SCRIPT_1" x="536" y="307" w="122" h="20" fontsize="12" color="FFFFFFFF" format="VCENTER LEFT"/>
+	<column name="USER_ITEM_SCRIPT_2" x="536" y="339" w="122" h="20" fontsize="12" color="FFFFFFFF" format="VCENTER LEFT"/>
+	<column name="USER_ITEM_SCRIPT_3" x="536" y="371" w="122" h="20" fontsize="12" color="FFFFFFFF" format="VCENTER LEFT"/>
+	<column name="USER_ITEM_SCRIPT_4" x="536" y="403" w="122" h="20" fontsize="12" color="FFFFFFFF" format="VCENTER LEFT"/>
+	<column name="USER_ITEM_SCRIPT_5" x="536" y="435" w="122" h="20" fontsize="12" color="FFFFFFFF" format="VCENTER LEFT"/>
+	<column name="USER_ITEM_SCRIPT_6" x="536" y="467" w="122" h="20" fontsize="12" color="FFFFFFFF" format="VCENTER LEFT"/>
+	<column name="USER_ITEM_SCRIPT_7" x="536" y="499" w="122" h="20" fontsize="12" color="FFFFFFFF" format="VCENTER LEFT"/>
+	<column name="USER_ITEM_SCRIPT_8" x="536" y="531" w="122" h="20" fontsize="12" color="FFFFFFFF" format="VCENTER LEFT"/>
+	<column name="USER_ITEM_SCRIPT_9" x="536" y="563" w="122" h="20" fontsize="12" color="FFFFFFFF" format="VCENTER LEFT"/>
+
+	<column name="USER_ITEM_SCRIPT_VOICE_CONTENTS" x="559" y="255" w="170" h="20" fontsize="12" color="FFFFFFFF" format="VCENTER LEFT" widthoverdrawDOT="1"/>
+
+	<column name="CHANGE_ITEM_NAME" x="752" y="282" w="144" h="14" fontsize="12" color="FFFFFFFF" format="VCENTER LEFT" widthoverdrawDOT="1"/>
+	<column name="CHANGE_ITEM_SCRIPT_1" x="752" y="307" w="122" h="20" fontsize="12" color="FFFFFFFF" format="VCENTER LEFT"/>
+	<column name="CHANGE_ITEM_SCRIPT_2" x="752" y="339" w="122" h="20" fontsize="12" color="FFFFFFFF" format="VCENTER LEFT"/>
+	<column name="CHANGE_ITEM_SCRIPT_3" x="752" y="371" w="122" h="20" fontsize="12" color="FFFFFFFF" format="VCENTER LEFT"/>
+	<column name="CHANGE_ITEM_SCRIPT_4" x="752" y="403" w="122" h="20" fontsize="12" color="FFFFFFFF" format="VCENTER LEFT"/>
+	<column name="CHANGE_ITEM_SCRIPT_5" x="752" y="435" w="122" h="20" fontsize="12" color="FFFFFFFF" format="VCENTER LEFT"/>
+	<column name="CHANGE_ITEM_SCRIPT_6" x="752" y="467" w="122" h="20" fontsize="12" color="FFFFFFFF" format="VCENTER LEFT"/>
+	<column name="CHANGE_ITEM_SCRIPT_7" x="752" y="499" w="122" h="20" fontsize="12" color="FFFFFFFF" format="VCENTER LEFT"/>
+	<column name="CHANGE_ITEM_SCRIPT_8" x="752" y="531" w="122" h="20" fontsize="12" color="FFFFFFFF" format="VCENTER LEFT"/>
+	<column name="CHANGE_ITEM_SCRIPT_9" x="752" y="563" w="122" h="20" fontsize="12" color="FFFFFFFF" format="VCENTER LEFT"/>
+	
+	
+	<select name="VOICE_USER_ITEM" count="9" OffX="0" OffY="0">
+		<rect l="491" t="302" r="649" b="327"/>
+		<rect l="491" t="334" r="649" b="359"/>
+		<rect l="491" t="366" r="649" b="391"/>
+		<rect l="491" t="398" r="649" b="423"/>
+		<rect l="491" t="430" r="649" b="455"/>
+		<rect l="491" t="462" r="649" b="487"/>
+		<rect l="491" t="494" r="649" b="519"/>
+		<rect l="491" t="526" r="649" b="551"/>
+		<rect l="491" t="558" r="649" b="583"/>
+		<!-- rect l="491" t='590' r='649' b='615'/ -->
+		<sprite l="517" t="242" r="746" b="272" texture="Voice_ZXV"/>
+		<sprite l="517" t="273" r="746" b="303" texture="Voice_ZXV"/>
+	</select>
+	
+	<select name="VOICE_CHANGE_ITEM" count="9" OffX="0" OffY="0">
+		<rect l="748" t="302" r="919" b="327"/>
+		<rect l="748" t="334" r="919" b="359"/>
+		<rect l="748" t="366" r="919" b="391"/>
+		<rect l="748" t="398" r="919" b="423"/>
+		<rect l="748" t="430" r="919" b="455"/>
+		<rect l="748" t="462" r="919" b="487"/>
+		<rect l="748" t="494" r="919" b="519"/>
+		<rect l="748" t="526" r="919" b="551"/>
+		<rect l="748" t="558" r="919" b="583"/>
+		<!-- rect l="491" t='590' r='649' b='615'/ -->
+		<sprite l="747" t="242" r="976" b="272" texture="Voice_ZXV"/>
+		<sprite l="747" t="273" r="976" b="303" texture="Voice_ZXV"/>
+	</select>
+	
+	<select name="VOICE_TOTAL_USER_ITEM" count="1" OffX="0" OffY="0">
+		<rect l="491" t="302" r="720" b="620"/>
+		<sprite l="564" t="387" r="793" b="673" texture="Voice_ZXV"/>
+		<sprite l="564" t="706" r="793" b="992" texture="Voice_ZXV"/>
+	</select>
+	
+	<select name="VOICE_TOTAL_CHANGE_ITEM" count="1" OffX="0" OffY="0">
+		<rect l="748" t="302" r="977" b="620"/>
+		<sprite l="795" t="387" r="1024" b="673" texture="Voice_ZXV"/>
+		<sprite l="795" t="706" r="1024" b="992" texture="Voice_ZXV"/>
+	</select>
+
+	
+	<msprite name="NUMBER_1" sx="495" sy="310" ex="495" ey="310" l="529" t="325" r="538" b="338" texture="Voice_ZXV"/>
+	<msprite name="NUMBER_2" sx="495" sy="342" ex="495" ey="342" l="539" t="325" r="548" b="338" texture="Voice_ZXV"/>
+	<msprite name="NUMBER_3" sx="495" sy="373" ex="495" ey="373" l="549" t="325" r="558" b="338" texture="Voice_ZXV"/>
+	<msprite name="NUMBER_4" sx="495" sy="405" ex="495" ey="405" l="559" t="325" r="568" b="338" texture="Voice_ZXV"/>
+	<msprite name="NUMBER_5" sx="495" sy="437" ex="495" ey="437" l="569" t="325" r="578" b="338" texture="Voice_ZXV"/>
+	<msprite name="NUMBER_6" sx="495" sy="469" ex="495" ey="469" l="579" t="325" r="588" b="338" texture="Voice_ZXV"/>
+	<msprite name="NUMBER_7" sx="495" sy="501" ex="495" ey="501" l="589" t="325" r="598" b="338" texture="Voice_ZXV"/>
+	<msprite name="NUMBER_8" sx="495" sy="533" ex="495" ey="533" l="599" t="325" r="608" b="338" texture="Voice_ZXV"/>
+	<msprite name="NUMBER_9" sx="495" sy="565" ex="495" ey="565" l="609" t="325" r="618" b="338" texture="Voice_ZXV"/>
+	
+	<msprite name="NUMBER_1" sx="506" sy="304" ex="506" ey="304" l="528" t="340" r="554" b="366" texture="Voice_ZXV"/>
+	<msprite name="NUMBER_2" sx="506" sy="336" ex="506" ey="336" l="528" t="340" r="554" b="366" texture="Voice_ZXV"/>
+	<msprite name="NUMBER_3" sx="506" sy="368" ex="506" ey="368" l="528" t="340" r="554" b="366" texture="Voice_ZXV"/>
+	<msprite name="NUMBER_4" sx="506" sy="400" ex="506" ey="400" l="528" t="340" r="554" b="366" texture="Voice_ZXV"/>
+	<msprite name="NUMBER_5" sx="506" sy="432" ex="506" ey="432" l="528" t="340" r="554" b="366" texture="Voice_ZXV"/>
+	<msprite name="NUMBER_6" sx="506" sy="464" ex="506" ey="464" l="528" t="340" r="554" b="366" texture="Voice_ZXV"/>
+	<msprite name="NUMBER_7" sx="506" sy="496" ex="506" ey="496" l="528" t="340" r="554" b="366" texture="Voice_ZXV"/>
+	<msprite name="NUMBER_8" sx="506" sy="528" ex="506" ey="528" l="528" t="340" r="554" b="366" texture="Voice_ZXV"/>
+	<msprite name="NUMBER_9" sx="506" sy="560" ex="506" ey="560" l="528" t="340" r="554" b="366" texture="Voice_ZXV"/>
+	
+	<button name="USER_PLAY_BUTTON_01" x="664" y="305" w="53" h="24">
+		<sprite l="517" t="0"  r="570" b="24" texture="Voice_ZXV"/>
+		<sprite l="517" t="25" r="570" b="49" texture="Voice_ZXV"/>
+		<sprite l="517" t="50" r="570" b="74" texture="Voice_ZXV"/>
+	</button>
+	<button name="USER_PLAY_BUTTON_02" x="664" y="337" w="53" h="24">
+		<sprite l="517" t="0"  r="570" b="24" texture="Voice_ZXV"/>
+		<sprite l="517" t="25" r="570" b="49" texture="Voice_ZXV"/>
+		<sprite l="517" t="50" r="570" b="74" texture="Voice_ZXV"/>
+	</button>
+	<button name="USER_PLAY_BUTTON_03" x="664" y="369" w="53" h="24">
+		<sprite l="517" t="0"  r="570" b="24" texture="Voice_ZXV"/>
+		<sprite l="517" t="25" r="570" b="49" texture="Voice_ZXV"/>
+		<sprite l="517" t="50" r="570" b="74" texture="Voice_ZXV"/>
+	</button>
+	<button name="USER_PLAY_BUTTON_04" x="664" y="401" w="53" h="24">
+		<sprite l="517" t="0"  r="570" b="24" texture="Voice_ZXV"/>
+		<sprite l="517" t="25" r="570" b="49" texture="Voice_ZXV"/>
+		<sprite l="517" t="50" r="570" b="74" texture="Voice_ZXV"/>
+	</button>
+	<button name="USER_PLAY_BUTTON_05" x="664" y="433" w="53" h="24">
+		<sprite l="517" t="0"  r="570" b="24" texture="Voice_ZXV"/>
+		<sprite l="517" t="25" r="570" b="49" texture="Voice_ZXV"/>
+		<sprite l="517" t="50" r="570" b="74" texture="Voice_ZXV"/>
+	</button>
+	<button name="USER_PLAY_BUTTON_06" x="664" y="465" w="53" h="24">
+		<sprite l="517" t="0"  r="570" b="24" texture="Voice_ZXV"/>
+		<sprite l="517" t="25" r="570" b="49" texture="Voice_ZXV"/>
+		<sprite l="517" t="50" r="570" b="74" texture="Voice_ZXV"/>
+	</button>
+	<button name="USER_PLAY_BUTTON_07" x="664" y="497" w="53" h="24">
+		<sprite l="517" t="0"  r="570" b="24" texture="Voice_ZXV"/>
+		<sprite l="517" t="25" r="570" b="49" texture="Voice_ZXV"/>
+		<sprite l="517" t="50" r="570" b="74" texture="Voice_ZXV"/>
+	</button>
+	<button name="USER_PLAY_BUTTON_08" x="664" y="529" w="53" h="24">
+	<sprite l="517" t="0"  r="570" b="24" texture="Voice_ZXV"/>
+		<sprite l="517" t="25" r="570" b="49" texture="Voice_ZXV"/>
+		<sprite l="517" t="50" r="570" b="74" texture="Voice_ZXV"/>
+	</button>
+	<button name="USER_PLAY_BUTTON_09" x="664" y="561" w="53" h="24">
+		<sprite l="517" t="0"  r="570" b="24" texture="Voice_ZXV"/>
+		<sprite l="517" t="25" r="570" b="49" texture="Voice_ZXV"/>
+		<sprite l="517" t="50" r="570" b="74" texture="Voice_ZXV"/>
+	</button>
+
+	
+	<button name="ITEM_PLAY_BUTTON_01" x="921" y="305" w="53" h="24">
+		<sprite l="843" t="0"  r="896" b="24" texture="Voice_ZXV"/>
+		<sprite l="843" t="25" r="896" b="49" texture="Voice_ZXV"/>
+		<sprite l="843" t="50" r="896" b="74" texture="Voice_ZXV"/>
+	</button>
+	<button name="ITEM_PLAY_BUTTON_02" x="921" y="337" w="53" h="24">
+		<sprite l="843" t="0"  r="896" b="24" texture="Voice_ZXV"/>
+		<sprite l="843" t="25" r="896" b="49" texture="Voice_ZXV"/>
+		<sprite l="843" t="50" r="896" b="74" texture="Voice_ZXV"/>
+	</button>
+	<button name="ITEM_PLAY_BUTTON_03" x="921" y="369" w="53" h="24">
+		<sprite l="843" t="0"  r="896" b="24" texture="Voice_ZXV"/>
+		<sprite l="843" t="25" r="896" b="49" texture="Voice_ZXV"/>
+		<sprite l="843" t="50" r="896" b="74" texture="Voice_ZXV"/>
+	</button>
+	<button name="ITEM_PLAY_BUTTON_04" x="921" y="401" w="53" h="24">
+		<sprite l="843" t="0"  r="896" b="24" texture="Voice_ZXV"/>
+		<sprite l="843" t="25" r="896" b="49" texture="Voice_ZXV"/>
+		<sprite l="843" t="50" r="896" b="74" texture="Voice_ZXV"/>
+	</button>
+	<button name="ITEM_PLAY_BUTTON_05" x="921" y="433" w="53" h="24">
+		<sprite l="843" t="0"  r="896" b="24" texture="Voice_ZXV"/>
+		<sprite l="843" t="25" r="896" b="49" texture="Voice_ZXV"/>
+		<sprite l="843" t="50" r="896" b="74" texture="Voice_ZXV"/>
+	</button>
+	<button name="ITEM_PLAY_BUTTON_06" x="921" y="465" w="53" h="24">
+		<sprite l="843" t="0"  r="896" b="24" texture="Voice_ZXV"/>
+		<sprite l="843" t="25" r="896" b="49" texture="Voice_ZXV"/>
+		<sprite l="843" t="50" r="896" b="74" texture="Voice_ZXV"/>
+	</button>
+	<button name="ITEM_PLAY_BUTTON_07" x="921" y="497" w="53" h="24">
+		<sprite l="843" t="0"  r="896" b="24" texture="Voice_ZXV"/>
+		<sprite l="843" t="25" r="896" b="49" texture="Voice_ZXV"/>
+		<sprite l="843" t="50" r="896" b="74" texture="Voice_ZXV"/>
+	</button>
+	<button name="ITEM_PLAY_BUTTON_08" x="921" y="529" w="53" h="24">
+		<sprite l="843" t="0"  r="896" b="24" texture="Voice_ZXV"/>
+		<sprite l="843" t="25" r="896" b="49" texture="Voice_ZXV"/>
+		<sprite l="843" t="50" r="896" b="74" texture="Voice_ZXV"/>
+	</button>
+	<button name="ITEM_PLAY_BUTTON_09" x="921" y="561" w="53" h="24">
+		<sprite l="843" t="0"  r="896" b="24" texture="Voice_ZXV"/>
+		<sprite l="843" t="25" r="896" b="49" texture="Voice_ZXV"/>
+		<sprite l="843" t="50" r="896" b="74" texture="Voice_ZXV"/>
+	</button>
+
+	
+	<button name="ITEM_LEFT_BUTTON" x="803" y="233" w="18" h="20">
+		<sprite l="805"  t="0" r="823" b="20" texture="Voice_ZXV"/>
+		<sprite l="805" t="21" r="823" b="41" texture="Voice_ZXV"/>
+		<sprite l="805" t="42" r="823" b="62" texture="Voice_ZXV"/>
+	</button>
+	<button name="ITEM_RIGHT_BUTTON" x="903" y="233" w="18" h="20">
+		<sprite l="824"  t="0" r="842" b="20" texture="Voice_ZXV"/>
+		<sprite l="824"  t="21" r="842" b="41" texture="Voice_ZXV"/>
+		<sprite l="824"  t="42" r="842" b="62" texture="Voice_ZXV"/>
+	</button>
+	
+	<button name="DEFAULT_BUTTON" x="869" y="631" w="116" h="46">
+		<sprite l="571" t="0"  r="687" b="46" texture="Voice_ZXV"/>
+		<sprite l="571" t="47" r="687" b="93" texture="Voice_ZXV"/>
+		<sprite l="571" t="94" r="687" b="140" texture="Voice_ZXV"/>
+	</button>
+
+	<msprite name="CHANGE_VOICE_CUSTOMIZE" sx="489" sy="212" ex="489" ey="212" l="517" t="142" r="749" b="210" texture="Voice_ZXV"/>
+	<msprite name="VOICE_PLAYING" sx="0" sy="0" ex="0" ey="0" l="517" t="75" r="570" b="99" texture="Voice_ZXV"/>
+</UIDEFINE>

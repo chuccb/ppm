@@ -1,0 +1,18 @@
+<UIDEFINE>
+	<image name="Store_Code_IMG" filename="present_code.DDS" />
+  	<image name="Store_Code_Back" filename="store_codeback.jpg" />
+  
+	<msprite name="STORECODE_1" sx='454' sy='131' ex='454' ey='131' l='0' t='0' r='523' b='518' texture="Store_Code_IMG"/>
+
+ 	<!-- Background Image -->
+
+ 	<msprite name="STORECODE_3" sx='0' sy='0' ex='532' ey='577' l='0' t='530' r='283' b='555' texture="Store_Code_IMG"/>
+ 	<editbox name="PAPERCODE" l="560" t="583" r="800" b="603" linelimit="1" textlimit="17" forceConvert="true" english="true" />
+
+	<button name="OK" x="820" y="577" w="80" h="33">
+		<sprite l="700" t="480" r="776" b="504" texture="Store_Code_IMG"/>
+		<sprite l="700" t="505" r="776" b="529" texture="Store_Code_IMG"/>
+		<sprite l="700" t="530" r="776" b="554" texture="Store_Code_IMG"/>
+	</button>
+
+</UIDEFINE>

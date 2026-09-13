@@ -1,0 +1,6 @@
+﻿<UIDEFINE>
+	<image name="UI_Button" filename="button.dds" />
+	<image name="UI_Popup_1" filename="popup_1.dds" />
+	<image name="UI_Back1" filename="BACK1.dds"/>
+	<image name="UI_Back0" filename="BACK0.dds"/>
+</UIDEFINE>

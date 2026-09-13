@@ -1,0 +1,62 @@
+<UIDEFINE>
+	<bot_image name="Game_Center_Start" filename="gs_popup02.dds"/>
+  
+	<msprite name="RANK_START_BG" sx='311' sy='128' ex='311' ey='128' l='0' t='0' r='421' b='573' texture="Game_Center_Start"/>
+
+	<msprite name="FREE_ICON_1" sx='348' sy='360' ex='348' ey='360' l='422' t='67' r='449' b='93' texture="Game_Center_Start"/>
+	<msprite name="FREE_ICON_2" sx='383' sy='360' ex='383' ey='360' l='422' t='67' r='449' b='93' texture="Game_Center_Start"/>
+	<msprite name="FREE_ICON_3" sx='418' sy='360' ex='418' ey='360' l='422' t='67' r='449' b='93' texture="Game_Center_Start"/>
+	<msprite name="FREE_ICON_4" sx='453' sy='360' ex='453' ey='360' l='422' t='67' r='449' b='93' texture="Game_Center_Start"/>
+	<msprite name="FREE_ICON_5" sx='488' sy='360' ex='488' ey='360' l='422' t='67' r='449' b='93' texture="Game_Center_Start"/>
+
+
+  	<button name="COIN_BUY_01" x='470' y='475' w='78' h='33'>
+  	<sprite l='422' t='1' r='469' b='22' texture="Game_Center_Start"/>
+    	<sprite l='422' t='23' r='469' b='44' texture="Game_Center_Start"/>
+    	<sprite l='422' t='45' r='469' b='66' texture="Game_Center_Start"/>
+  	</button>
+
+  	<button name="COIN_BUY_02" x='650' y='475' w='78' h='33'>
+  	<sprite l='422' t='1' r='469' b='22' texture="Game_Center_Start"/>
+    	<sprite l='422' t='23' r='469' b='44' texture="Game_Center_Start"/>
+    	<sprite l='422' t='45' r='469' b='66' texture="Game_Center_Start"/>
+  	</button>
+
+  	<button name="COIN_BUY_03" x='470' y='514' w='78' h='33'>
+  	<sprite l='422' t='1' r='469' b='22' texture="Game_Center_Start"/>
+    	<sprite l='422' t='23' r='469' b='44' texture="Game_Center_Start"/>
+    	<sprite l='422' t='45' r='469' b='66' texture="Game_Center_Start"/>
+  	</button>
+
+  	<button name="COIN_BUY_04" x='650' y='514' w='78' h='33'>
+  	<sprite l='422' t='1' r='469' b='22' texture="Game_Center_Start"/>
+    	<sprite l='422' t='23' r='469' b='44' texture="Game_Center_Start"/>
+    	<sprite l='422' t='45' r='469' b='66' texture="Game_Center_Start"/>
+  	</button>
+
+  	<button name="START" x='560' y='659' w='78' h='33'>
+  	<sprite l='422' t='100' r='500' b='133' texture="Game_Center_Start"/>
+    	<sprite l='422' t='134' r='500' b='167' texture="Game_Center_Start"/>
+    	<sprite l='422' t='168' r='500' b='201' texture="Game_Center_Start"/>
+  	</button>
+
+  	<button name="EXIT" x='643' y='659' w='78' h='33'>
+    	<sprite l='422' t='202' r='500' b='235' texture="Game_Center_Start"/>
+    	<sprite l='422' t='236' r='500' b='269' texture="Game_Center_Start"/>
+    	<sprite l='422' t='270' r='500' b='303' texture="Game_Center_Start"/>
+  	</button>
+
+	<column name="VIS_NEXT_REFRESH_COIN_TIME" x='462' y='399' w='75' h='18' fontsize ="13" color='FFFFd428' shadow='FF000000' format='VCENTER CENTER'/>
+	<column name="VIS_CASH" x='589' y='563' w='70' h='18' fontsize ="15" color='FF000000'  format='VCENTER RIGHT'/>
+
+	<column name="VIS_COIN_COUNT_1" x='387' y='477' w='22' h='18' />
+	<column name="VIS_COIN_COUNT_2" x='567' y='477' w='22' h='18' />
+	<column name="VIS_COIN_COUNT_3" x='387' y='516' w='22' h='18' />
+	<column name="VIS_COIN_COUNT_4" x='567' y='516' w='22' h='18' />
+
+	<column name="VIS_CASH_TEXT_1" x='416' y='477' w='26' h='18' fontsize ="13" color='FFFFd428' shadow='FF000000' format='VCENTER RIGHT'/>
+	<column name="VIS_CASH_TEXT_2" x='596' y='477' w='26' h='18' fontsize ="13" color='FFFFd428' shadow='FF000000' format='VCENTER RIGHT'/>
+	<column name="VIS_CASH_TEXT_3" x='416' y='516' w='26' h='18' fontsize ="13" color='FFFFd428' shadow='FF000000' format='VCENTER RIGHT'/>
+	<column name="VIS_CASH_TEXT_4" x='596' y='516' w='26' h='18' fontsize ="13" color='FFFFd428' shadow='FF000000' format='VCENTER RIGHT'/>
+
+</UIDEFINE>

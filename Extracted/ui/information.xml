@@ -1,0 +1,59 @@
+<UIDEFINE>
+	<image name="Information_Lobby" filename="lobby_02.dds" />
+
+	<msprite name="INFO_USER_POPUP" sx='218' sy='227' ex='218' ey='227' l='302' t='695' r='884' b='1018' texture="Information_Lobby"/>
+
+	<column name="AVATA" x="233" y="253" w="259" h="264" />
+	<column name="CLASS" x="228" y="524" w="16" h="16" />
+	<column name="NICKNAME" x="248" y="522" w="108" h="20" fontsize="13" color="FFFFFFFF" shadow="FF333333" format="VCENTER CENTER"/>
+	<column name="CLANEMBLEM" x="364" y="524" w="16" h="16" shadow="FF000000" />
+	<column name="CLAN" x="385" y="522" w="108" h="20" fontsize="13" color="FFFFFFFF" shadow="FF333333" format="VCENTER CENTER"/>
+
+
+	<tab name="RECORD_TAB" count="2">
+	<page name="WAITER_RECORD" x="496" y="251" default="true">
+	<column name="MY_KILL" x="573" y="253" w="73" h="20" fontsize="13" color="FFFFFFFF"  shadow="FF333333" format="VCENTER RIGHT"/>
+	<column name="MY_DEATH" x="711" y="253" w="73" h="20" fontsize="13" color="FFFFFFFF" shadow="FF333333" format="VCENTER RIGHT"/>
+	<column name="TOTAL_WIN" x="527" y="275" w="73" h="20" fontsize="13" color="FFFFFFFF" shadow="FF333333" format="VCENTER RIGHT"/>
+	<column name="TOTAL_LOSE" x="619" y="275" w="73" h="20" fontsize="13" color="FFFFFFFF"  shadow="FF333333" format="VCENTER RIGHT"/>
+	<column name="TOTAL_ASSIST" x="711" y="275" w="73" h="20" fontsize="13" color="FFFFFFFF" shadow="FF333333" format="VCENTER RIGHT"/>
+
+
+	<column name="HEADSHOT" 	x="703" y="317" w="73" h="20" fontsize="13" color="FFFFFFFF" shadow="FF333333" format="VCENTER RIGHT"/>
+	<column name="HEARTBREAK" 	x="703" y="335" w="73" h="20" fontsize="13" color="FFFFFFFF" shadow="FF333333" format="VCENTER RIGHT"/>
+	<column name="CRITCALSHOT" 	x="703" y="353" w="73" h="20" fontsize="13" color="FFFFFFFF" shadow="FF333333" format="VCENTER RIGHT"/>
+	<column name="AIRCOMBO"		x="703" y="371" w="73" h="20" fontsize="13" color="FFFFFFFF" shadow="FF333333" format="VCENTER RIGHT"/>
+	<column name="DOUBLEKILL"	x="703" y="389" w="73" h="20" fontsize="13" color="FFFFFFFF" shadow="FF333333" format="VCENTER RIGHT"/>
+	<column name="TRIPLEKILL"	x="703" y="407" w="73" h="20" fontsize="13" color="FFFFFFFF" shadow="FF333333" format="VCENTER RIGHT"/>
+	<column name="MULTIKILL" 	x="703" y="425" w="73" h="20" fontsize="13" color="FFFFFFFF" shadow="FF333333" format="VCENTER RIGHT"/>
+	<column name="ULTRAKILL" 	x="703" y="443" w="73" h="20" fontsize="13" color="FFFFFFFF" shadow="FF333333" format="VCENTER RIGHT"/>
+	<column name="GENOCIDE" 	x="703" y="461" w="73" h="20" fontsize="13" color="FFFFFFFF" shadow="FF333333" format="VCENTER RIGHT"/>
+	<column name="KILLINGMACHINE"   x="703" y="479" w="73" h="20" fontsize="13" color="FFFFFFFF" shadow="FF333333" format="VCENTER RIGHT"/>
+	<column name="DIABLO"		x="703" y="497" w="73" h="20" fontsize="13" color="FFFFFFFF" shadow="FF333333" format="VCENTER RIGHT"/>
+	</page>
+	</tab>
+
+	<button name="FRONT" x="468" y="458" w="28" h="28">
+		<sprite l="0" t="521" r="28" b="549" texture="UI_Button" />
+		<sprite l="0" t="550" r="28" b="578" texture="UI_Button" />
+		<sprite l="0" t="579" r="28" b="607" texture="UI_Button" />
+	</button>
+
+	<button name="BACK" x="468" y="488" w="28" h="28">
+		<sprite l="29" t="521" r="57" b="549" texture="UI_Button" />
+		<sprite l="29" t="550" r="57" b="578" texture="UI_Button" />
+		<sprite l="29" t="579" r="57" b="607" texture="UI_Button" />
+	</button>
+
+	<button name="SENDMESSAGE" x="604" y="524" w="93" h="20">
+		<sprite l="170" t="348" r="263" b="368" texture="UI_Button" />
+		<sprite l="170" t="369" r="263" b="389" texture="UI_Button" />
+		<sprite l="170" t="390" r="263" b="410" texture="UI_Button" />
+	</button>
+	<button name="CLOSE" x="699" y="524" w="93" h="20">
+		<sprite l="265" t="348" r="358" b="368" texture="UI_Button" />
+		<sprite l="265" t="369" r="358" b="389" texture="UI_Button" />
+		<sprite l="265" t="390" r="358" b="410" texture="UI_Button" />
+	</button>
+ 
+</UIDEFINE>

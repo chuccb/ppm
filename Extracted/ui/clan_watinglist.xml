@@ -1,0 +1,54 @@
+<UIDEFINE>
+	<bgmfile filename="bgm/bgm_character.mp3"/>
+	<image name="C_POP05" filename="C_JI.DDS"/>
+	<image name="C_Main" filename="C_MAIN.DDS"/>
+	
+	<msprite name="CLANWAITINGLIST_1" sx="304" sy="173" ex="304" ey="173" l="0" t="0" r="415" b="374" texture="C_POP05"/>
+	<listcontrol name="WATINGLIST" useclick="1">
+		<rect l="321" t="240" r="677" b="265"/>
+		<rect l="321" t="267" r="677" b="292"/>
+		<rect l="321" t="294" r="677" b="319"/>
+		<rect l="321" t="321" r="677" b="346"/>
+		<rect l="321" t="348" r="677" b="372"/>
+		
+		<column name="PLAYERCLASS" x="27" y="5"/>
+		<column name="NICKNAME" x="74" y="3" w="204" h="19" color="FFFFFFFF" fontsize='15' format="VCENTER CENTER"/>
+		<column name="USERSTATE" x="286" y="3" w="67" h="19"/>
+		
+		<sprite name="C_POP05_OVER" l="0" t="375" r="356" b="400" texture="C_POP05"/> 
+		<sprite name="C_POP05_CLICK" l="0" t="401" r="356" b="426" texture="C_POP05"/> 
+		
+		<sprite l="923" t="57" r="990" b="76" texture="C_Main"/>
+		<sprite l="923" t="77" r="990" b="96" texture="C_Main"/>
+		<sprite l="923" t="97" r="990" b="116" texture="C_Main"/>
+		
+		<eventrect name="SCROLL_RECT" x="321" y="240" w="356" h="133"/>
+		
+		<button name="UP" x="679" y="240" w="23" h="28">
+			<sprite l="258" t="461" r="281" b="489" texture="UI_Button"/>
+			<sprite l="282" t="461" r="305" b="489" texture="UI_Button"/>
+			<sprite l="306" t="461" r="329" b="489" texture="UI_Button"/>
+		</button>
+
+		<button name="DN" x="679" y="345" w="23" h="28">
+			<sprite l="258" t="490" r="281" b="518" texture="UI_Button"/>
+			<sprite l="282" t="490" r="305" b="518" texture="UI_Button"/>
+			<sprite l="306" t="490" r="329" b="518" texture="UI_Button"/>
+		</button>
+	</listcontrol>
+	
+	<column name="SCORE" x="398" y="418" w="64" h="18" color="FFFFFFFF" format="CENTER"/>
+	<column name="KILLDEATH" x="398" y="418" w="64" h="18" color="FFFFFFFF"  format="CENTER"/>
+	<column name="GREETING" x="398" y="386" w="279" h="105" color="FFFFFFFF"  format="WORDBREAK"/>
+	
+	<button name="OK" x="532" y="515"  w="84" h="28">
+		<sprite l="777" t="881" r="861" b="909" texture="UI_Button" />
+		<sprite l="777" t="910" r="861" b="938" texture="UI_Button" />
+		<sprite l="777" t="939" r="861" b="967" texture="UI_Button" />
+	</button>
+	<button name="CANCEL" x="618" y="515"  w="84" h="28">
+		<sprite l="85" t="347" r="169" b="375" texture="UI_Button" />
+		<sprite l="85" t="376" r="169" b="404" texture="UI_Button" />
+		<sprite l="85" t="405" r="169" b="433" texture="UI_Button" />
+	</button>
+</UIDEFINE>

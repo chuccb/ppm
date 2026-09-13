@@ -1,0 +1,892 @@
+﻿<UIDEFINE>
+
+	<bgmfile filename="bgm/bgm_LOBBY.mp3" />
+
+	<image name="Lobby_Main_01" filename="lobby_01.dds" />
+	<image name="Lobby_Main_02" filename="lobby_02.dds" />
+	<image name="Lobby_Main_03" filename="lobby_03.dds" />
+	
+
+	<msprite name="BACKGROUND" sx="0" sy="0" ex="0" ey="0" l="0" t="0" r="1024" b="768" texture="UI_Back1" />
+	<msprite name="LOBBYMAIN_TITLE" sx="76" sy="0" ex="76" ey="0" l="0" t="999" r="628" b="1024" texture="UI_Button" />
+	<msprite name="LOBBYMAIN_NETCAFE" sx="709" sy="0" ex="709" ey="0" l="629" t="999" r="936" b="1024" texture="UI_Button" />
+
+	<column name="TITLE_SERVER"      x="287" y="6" w="406" h="13" fontsize="12" color="FFFFFFFF" format="VCENTER RIGHT" />
+	<column name="TITLE_SERVER_TYPE" x="646" y="6" w="146" h="13" fontsize="12" color="FFFFFFFF" format="VCENTER CENTER" />
+
+	<column name="ONLINE_COUNT"     x="729" y="699" w="39" h="17" fontsize="13" color="FF00FF66" format="VCENTER RIGHT" />
+	<column name="ALL_COUNT" 	x="778" y="699" w="31" h="17" fontsize="13" color="FFFFFFFF" format="VCENTER LEFT" />
+	
+	<msprite name="PANNEL_ROOMLIST" sx="76" sy="33" ex="76" ey="33" l="0" t="0" r="628" b="474" texture="Lobby_Main_01" />
+	<msprite name="PANNEL_MYINFO" sx="709" sy="33" ex="709" ey="33" l="629" t="0" r="936" b="722" texture="Lobby_Main_01" /> 
+	<msprite name="PANNEL_CHAT" sx="76" sy="511" ex="76" ey="511" l="0" t="475" r="628" b="719" texture="Lobby_Main_01" />
+
+	<msprite name="CHANNEL_TABLIST_1" sx="76"  sy="33" ex="76"  ey="33" l="915" t="821" r="998" b="851" texture="Lobby_Main_01" />
+	<msprite name="CHANNEL_TABLIST_2" sx="160" sy="33" ex="160" ey="33" l="915" t="852" r="998" b="882" texture="Lobby_Main_01" />	
+	<msprite name="CHANNEL_TABLIST_3" sx="244" sy="33" ex="244" ey="33" l="915" t="883" r="998" b="913" texture="Lobby_Main_01" />
+	<msprite name="CHANNEL_TABLIST_4" sx="328" sy="33" ex="328" ey="33" l="915" t="914" r="998" b="944" texture="Lobby_Main_01" />
+	<msprite name="CHANNEL_TABLIST_5" sx="412" sy="33" ex="412" ey="33" l="915" t="945" r="998" b="975" texture="Lobby_Main_01" />
+
+	<column name="NEW_MSG_ICON" x="990" y="27" w="27" h="20" />
+
+	<msprite name="FASTROOM_TIME_PANNEL" sx="322" sy="458" ex="322" ey="458" l='670' t='899' r='776' b='943' texture="UI_Button" />
+	<msprite name="FASTROOM_TIME__ROTATE_UI" sx="342" sy="481" ex="342" ey="481" l='637' t='899' r='669' b='931' texture="UI_Button" />
+	<column name="FASTROOM_TIME" x="361" y="477" w="63" h="20" fontsize="16" color="FFFFFFFF" shadow="FF000000" format="VCENTER LEFT" />
+
+  	<button name="STORE" x="9" y="33" w="62" h="68">
+		<sprite l="0" t="0" r="62" b="68" texture="UI_Button" />
+		<sprite l="0" t="69" r="62" b="137" texture="UI_Button" />
+		<sprite l="0" t="138" r="62" b="206" texture="UI_Button" />
+	</button>
+
+	<button name="SHOP" x="9" y="104" w="62" h="68">
+		<sprite l="62" t="0" r="124" b="68" texture="UI_Button" />
+		<sprite l="62" t="69" r="124" b="137" texture="UI_Button" />
+		<sprite l="62" t="138" r="124" b="206" texture="UI_Button" />
+	</button>
+
+	<button name="Clan" x="9" y="175" w="62" h="68">
+		<sprite l="124" t="0" r="186" b="68" texture="UI_Button" />
+		<sprite l="124" t="69" r="186" b="137" texture="UI_Button" />
+		<sprite l="124" t="138" r="186" b="206" texture="UI_Button" />
+	</button>
+
+	<button name="QUEST" x="9" y="246" w="62" h="68">
+		<sprite l="186" t="0" r="248" b="68" texture="UI_Button" />
+		<sprite l="186" t="69" r="248" b="137" texture="UI_Button" />
+		<sprite l="186" t="138" r="248" b="206" texture="UI_Button" />
+	</button>
+
+	<button name="RANK" x="9" y="317" w="62" h="68">
+		<sprite l="248" t="0" r="310" b="68" texture="UI_Button" />
+		<sprite l="248" t="69" r="310" b="137" texture="UI_Button" />
+		<sprite l="248" t="138" r="310" b="206" texture="UI_Button" />
+	</button>
+
+	<button name="CHANNEL" x="9" y="388" w="62" h="68">
+		<sprite l="310" t="0" r="372" b="68" texture="UI_Button" />
+		<sprite l="310" t="69" r="372" b="137" texture="UI_Button" />
+		<sprite l="310" t="138" r="372" b="206" texture="UI_Button" />
+	</button>
+
+	<button name="OPTION" x="9" y="656" w="62" h="48">
+		<sprite l="372" t="0" r="434" b="48" texture="UI_Button" />
+		<sprite l="372" t="49" r="434" b="97" texture="UI_Button" />
+		<sprite l="372" t="98" r="434" b="142" texture="UI_Button" />
+	</button>
+
+	<button name="EXIT" x="9" y="708" w="62" h="48">
+		<sprite l="434" t="0" r="496" b="48" texture="UI_Button" />
+		<sprite l="434" t="49" r="496" b="97" texture="UI_Button" />
+		<sprite l="434" t="98" r="496" b="142" texture="UI_Button" />
+	</button>
+
+	
+	
+	<button name="TUTORIAL" x="81" y="457" w="116" h="46">
+		<sprite l="0" t="207" r="116" b="253" texture="UI_Button" />
+		<sprite l="0" t="254" r="116" b="300" texture="UI_Button" />
+		<sprite l="0" t="301" r="116" b="347" texture="UI_Button" />
+	</button>
+
+	<button name="GUNSHOOTING" x="198" y="457" w="116" h="46">
+		<sprite l="117" t="207" r="233" b="253" texture="UI_Button" />
+		<sprite l="117" t="254" r="233" b="300" texture="UI_Button" />
+		<sprite l="117" t="301" r="233" b="347" texture="UI_Button" />
+	</button>
+
+	<button name="FASTROOM" x="423" y="457" w="80" h="46">
+		<sprite l="432" t="207" r="512" b="253" texture="UI_Button" />
+		<sprite l="432" t="254" r="512" b="300" texture="UI_Button" />
+		<sprite l="432" t="301" r="512" b="347" texture="UI_Button" />
+	</button>
+	
+	<button name="FASTROOM_CANCEL" x="423" y="457" w="80" h="46 ">
+		<sprite l='875' t="0" r="955" b="46" texture="UI_Button" />
+		<sprite l='875' t="47" r="955" b="93" texture="UI_Button" />
+		<sprite l='875' t="94" r="955" b="140" texture="UI_Button" />
+	</button>
+
+	
+	<sprite name="ROOM_WAIT" l="980" t="261" r="1024" b="282" texture="Lobby_Main_01" />
+	<sprite name="ROOM_PLAY" l="980" t="283" r="1024" b="304" texture="Lobby_Main_01" />
+
+	<sprite l="936" t="334" r="964" b="357" texture="Lobby_Main_01" />
+
+	
+	<sprite name="CLANFRAME_PANNEL"  l="965" t="579" r="1009" b="600" texture="Lobby_Main_01" />
+
+	<sprite name="ROOMSTART_PANNEL"  l="965" t="600" r="1009" b="621" texture="Lobby_Main_01" />
+
+	<sprite name="NOSKILLBG_PANNEL"  l="994" t="310" r="1020" b="331" texture="Lobby_Main_01" />
+	
+	<sprite l="994" t="310" r="1020" b="331" texture="Lobby_Main_01" />
+
+	<sprite l="965" t="334" r="993" b="357" texture="Lobby_Main_01" />
+	
+	<sprite l="994" t="334" r="1022" b="357" texture="Lobby_Main_01" />
+
+	<sprite l='965' t='621' r='996' b='629' texture="Lobby_Main_01" />
+
+	<column name="GIFT_ICON"  x="4" y="24" w="32" h="33" /> 
+
+	<button name="MAKEROOM" x="504" y="457" w="80" h="46">
+		<sprite l="351" t="207" r="431" b="253" texture="UI_Button" />
+		<sprite l="351" t="254" r="431" b="300" texture="UI_Button" />
+		<sprite l="351" t="301" r="431" b="347" texture="UI_Button" />
+	</button>
+
+	<button name="ENTERROOM" x="585" y="457" w="116" h="46">
+		<sprite l="234" t="207" r="350" b="253" texture="UI_Button" />
+		<sprite l="234" t="254" r="350" b="300" texture="UI_Button" />
+		<sprite l="234" t="301" r="350" b="347" texture="UI_Button" />
+	</button>
+
+	<tab name="INFORMATION" count="4">
+		<page name="MYINFO" x="709" y="33" default="true">
+			<sprite name="MYINFO_TAB" l="937" t="150" r="1000" b="180" texture="Lobby_Main_01" />
+			<msprite name="MAIN_GUN_80" sx="968" sy="74" ex="968" ey="74" l="670" t="420" r="706" b="459" texture="UI_Button" />
+			<msprite name="MAIN_GUN_70" sx="968" sy="74" ex="968" ey="74" l="707" t="420" r="743" b="459" texture="UI_Button" />
+			<msprite name="MAIN_GUN_60" sx="968" sy="74" ex="968" ey="74" l="744" t="420" r="780" b="459" texture="UI_Button" />
+			<msprite name="MAIN_GUN_50" sx="968" sy="74" ex="968" ey="74" l="781" t="420" r="817" b="459" texture="UI_Button" />
+			<msprite name="MAIN_GUN_40" sx="968" sy="74" ex="968" ey="74" l="818" t="420" r="854" b="459" texture="UI_Button" />
+			<msprite name="MAIN_GUN_30" sx="968" sy="74" ex="968" ey="74" l="855" t="420" r="891" b="459" texture="UI_Button" />
+			<msprite name="MAIN_GUN_20" sx="968" sy="74" ex="968" ey="74" l="892" t="420" r="928" b="459" texture="UI_Button" />
+			<msprite name="MAIN_GUN_10" sx="968" sy="74" ex="968" ey="74" l="929" t="420" r="965" b="459" texture="UI_Button" />
+			<msprite name="SUB_GUN_80" sx="968" sy="115" ex="968" ey="115" l="670" t="460" r="706" b="499" texture="UI_Button" />
+			<msprite name="SUB_GUN_70" sx="968" sy="115" ex="968" ey="115" l="707" t="460" r="743" b="499" texture="UI_Button" />
+			<msprite name="SUB_GUN_60" sx="968" sy="115" ex="968" ey="115" l="744" t="460" r="780" b="499" texture="UI_Button" />
+			<msprite name="SUB_GUN_50" sx="968" sy="115" ex="968" ey="115" l="781" t="460" r="817" b="499" texture="UI_Button" />
+			<msprite name="SUB_GUN_40" sx="968" sy="115" ex="968" ey="115" l="818" t="460" r="854" b="499" texture="UI_Button" />
+			<msprite name="SUB_GUN_30" sx="968" sy="115" ex="968" ey="115" l="855" t="460" r="891" b="499" texture="UI_Button" />
+			<msprite name="SUB_GUN_20" sx="968" sy="115" ex="968" ey="115" l="892" t="460" r="928" b="499" texture="UI_Button" />
+			<msprite name="SUB_GUN_10" sx="968" sy="115" ex="968" ey="115" l="929" t="460" r="965" b="499" texture="UI_Button" />
+			
+			<button name="FRONT" x="832" y="412" w="28" h="28">
+				<sprite l="0" t="521" r="28" b="549" texture="UI_Button" />
+				<sprite l="0" t="550" r="28" b="578" texture="UI_Button" />
+				<sprite l="0" t="579" r="28" b="607" texture="UI_Button" />
+			</button>
+			<button name="BACK" x="865" y="412" w="28" h="28">
+				<sprite l="29" t="521" r="57" b="549" texture="UI_Button" />
+				<sprite l="29" t="550" r="57" b="578" texture="UI_Button" />
+				<sprite l="29" t="579" r="57" b="607" texture="UI_Button" />
+			</button>
+
+			<msprite name="SKILL_PANNEL" sx="715" sy="453" ex="715" ey="453" l="592" t="909" r="887" b="962" texture="Lobby_Main_01" />
+			<column name="AVATAR" x="711" y="81" w="303" h="322" />
+			<column name="ITEMABILITYCOMBINATIONNAME" x="720" y="467" w="95" h="18" fontsize="15" color="FFFFFFFF" shadow="FF444444" format="VCENTER LEFT" />
+			<column name="ITEMABILITYCOMBINATIONLEV" x="722" y="486" w="64" h="15" fontsize="13" color="FFFFFFFF" format="VTOP LEFT" />
+			<column name="ITEMLEVNUM_0" x="853" y="458" w="30" h="19" fontsize="15" color="FFFFFFFF" shadow="FF444444" format="VCENTER CENTER" />
+			<column name="ITEMLEVNUM_1" x="914" y="458" w="30" h="19" fontsize="15" color="FFFFFFFF" shadow="FF444444" format="VCENTER CENTER" />
+			<column name="ITEMLEVNUM_2" x="975" y="458" w="30" h="19" fontsize="15" color="FFFFFFFF" shadow="FF444444" format="VCENTER CENTER" />
+			<column name="ITEMLEVNUM_3" x="853" y="482" w="30" h="19" fontsize="15" color="FFFFFFFF" shadow="FF444444" format="VCENTER CENTER" />
+			<column name="ITEMLEVNUM_4" x="914" y="482" w="30" h="19" fontsize="15" color="FFFFFFFF" shadow="FF444444" format="VCENTER CENTER" />
+			
+			<tab name="RECORD_TAB" count="2">
+				<page name="MYRECORD_01" x="715" y="510" default="true">
+					<sprite name="MYINFO_TAB" l="0" t="941" r="147" b="960" texture="Lobby_Main_01" />
+					<msprite name="MYIFNO_PANNEL"  sx="715" sy="529" ex="715" ey="529" l="0" t="720" r="295" b="940" texture="Lobby_Main_01" />
+					<msprite name="MYSHOT_TAB_OFF" sx="863" sy="510" ex="863" ey="510" l="444" t="941" r="591" b="960" texture="Lobby_Main_01" />
+
+					<column name="NICKNAME"   x="729" y="545" w="126" h="20" fontsize="12" color="CCCCCC" shadow="FF000000"  format="VCENTER LEFT" />
+					<column name="CLASS"	  x="893" y="547" />
+					<column name="EXP" 	  x="913" y="548" />
+					<column name="CLANEMBLEM" x="756" y="570" w="16" h="16" shadow="FF333333" />
+					<column name="CLAN" 	  x="777" y="568" w="223" h="20" fontsize="13" color="CCCCCC" format="VCENTER LEFT" />
+					<column name="WEAPON_EXP" x="913" y="571" />
+					<column name="TOTAL_WIN"  x="712" y="611" w="100" h="20" fontsize="12" color="CCCCCC" format="VCENTER RIGHT" />
+					<column name="TOTAL_LOSE" x="806" y="611" w="100" h="20" fontsize="12" color="CCCCCC" format="VCENTER RIGHT" />
+					<column name="MY_KILL"    x="758" y="634" w="100" h="20" fontsize="13" color="CCCCCC" format="VCENTER RIGHT" />
+					<column name="MY_DEATH"   x="899" y="634" w="100" h="20" fontsize="13" color="CCCCCC" format="VCENTER RIGHT" />
+					<column name="CASH"       x="758" y="675" w="100" h="20" fontsize="13" color="CCCCCC" format="VCENTER RIGHT" />
+					<column name="PG" 	  x="899" y="675" w="100" h="20" fontsize="13" color="CCCCCC" format="VCENTER RIGHT" />
+					<column name="CP" 	  x="758" y="698" w="100" h="20" fontsize="13" color="CCCCCC" format="VCENTER RIGHT" />
+					<column name="COIN" 	  x="899" y="698" w="100" h="20" fontsize="13" color="CCCCCC" format="VCENTER RIGHT" />
+					<column name="TOTAL_ASSIST"  x="900" y="611" w="100" h="20" fontsize="12" color="CCCCCC" format="VCENTER RIGHT" />
+
+					<radiobox name="OPEN_INFO" x="849" y="726" w="13" h="13">
+						<sprite l="402" t="162" r="415" b="175" texture="UI_Button" />
+					</radiobox>
+					<radiobox name="CLOSE_INFO" x="925" y="726" w="13" h="13">
+						<sprite l="402" t="162" r="415" b="175" texture="UI_Button" />
+					</radiobox>
+				</page>
+				<page name="MYRECORD_02" x="863" y="510">
+					<sprite name="MYINFO_TAB" l="148" t="941" r="295" b="960" texture="Lobby_Main_01" />
+					<msprite name="MYSHOT_PANNEL"   ssx="715" sy="529" ex="715" ey="529" l="296" t="720" r="591" b="940" texture="Lobby_Main_01" />
+					<msprite name="MYIFNO_TAB_OFF" sx="715" sy="510" ex="715" ey="510" l="296" t="941" r="443" b="960" texture="Lobby_Main_01" />
+					
+					
+					<column name="HEADSHOT"     x="884" y="541" w="107" h="17" fontsize="13" color="FFCCCCCC" format="VCENTER RIGHT" />
+					<column name="HEARTBREAK"    x="884" y="559" w="107" h="17" fontsize="13" color="FFCCCCCC" format="VCENTER RIGHT" />
+					<column name="CRITCALSHOT"   x="884" y="577" w="107" h="17" fontsize="13" color="FFCCCCCC" format="VCENTER RIGHT" />
+					<column name="AIRCOMBO"      x="884" y="595" w="107" h="17" fontsize="13" color="FFCCCCCC" format="VCENTER RIGHT" />
+					<column name="DOUBLEKILL"    x="884" y="613" w="107" h="17" fontsize="13" color="FFCCCCCC" format="VCENTER RIGHT" />
+					<column name="TRIPLEKILL"    x="884" y="631" w="107" h="17" fontsize="13" color="FFCCCCCC" format="VCENTER RIGHT" />
+					<column name="MULTIKILL"    x="884" y="649" w="107" h="17" fontsize="13" color="FFCCCCCC" format="VCENTER RIGHT" />
+					<column name="ULTRAKILL"    x="884" y="667" w="107" h="17" fontsize="13" color="FFCCCCCC" format="VCENTER RIGHT" />
+					<column name="GENOCIDE"     x="884" y="685" w="107" h="17" fontsize="13" color="FFCCCCCC" format="VCENTER RIGHT" />
+					<column name="KILLINGMACHINE"    x="884" y="703" w="107" h="17" fontsize="13" color="FFCCCCCC" format="VCENTER RIGHT" />
+					<column name="DIABLO"     x="884" y="721" w="107" h="17" fontsize="13" color="FFCCCCCC" format="VCENTER RIGHT" />
+				</page>
+			</tab>
+		</page>
+		<page name="WAITERS" x="773" y="33">
+			<sprite name="WAIT_TAB" l="937" t="180" r="1000" b="210" texture="Lobby_Main_01" />
+			<msprite name="WAIT_PANEL"  sx="709" sy="61" ex="709" ey="61" l="0" t="0" r="307" b="694" texture="Lobby_Main_02" />
+			<button name="WAIT_REFRESH" x="718" y="71" w="30" h="28">
+				<sprite l="58" t="521" r="88" b="549" texture="UI_Button" />
+				<sprite l="58" t="550" r="88" b="578" texture="UI_Button" />
+				<sprite l="58" t="579" r="88" b="607" texture="UI_Button" />
+			</button>
+
+			<waiter name="WAITERLIST" l="718" t="119" r="1007" b="693" >
+
+				<sprite name="SLOT_SIZE" l="718" t="119" r="1007" b="141" texture="Lobby_Main_03" />
+				<sprite name="WAIT_MOUSE_OVER" l="0" t="0" r="289" b="22" texture="Lobby_Main_03" />
+				<column name="LEVEL"      x="3" y="3" w="16" h="16" format="VCENTER CENTER" /> 
+				<column name="NAME"       x="23" y="2" w="120" h="18" fontsize="12" color="FFFFFFFF" format="VCENTER CENTER" />
+				<column name="CLANEMBLEM" x="146" y="3" w="16" h="16"  shadow="FF000000" />
+				<column name="CLANNAME"   x="166" y="2" w="120" h="18" fontsize="12" color="FFFFFFFF" format="VCENTER CENTER" />
+
+				<eventrect name="SCROLL_RECT" x="718" y="119" w="289" h="574" />
+				<button name="UP" x="988" y="98" w="17" h="17">
+					<sprite l="372" t="147" r="389" b="164" texture="UI_Button" />
+					<sprite l="372" t="165" r="389" b="182" texture="UI_Button" />
+					<sprite l="372" t="183" r="389" b="200" texture="UI_Button" />
+				</button>
+				<button name="DN" x="988" y="697" w="17" h="17">
+					<sprite l="417" t="147" r="434" b="164" texture="UI_Button" />
+					<sprite l="417" t="165" r="434" b="182" texture="UI_Button" />
+					<sprite l="417" t="183" r="434" b="200" texture="UI_Button" />
+				</button>
+			</waiter>
+		</page>
+
+		<page name="FRIEND" x="837" y="33">
+			<sprite name="FRIEND_TAB" l="937" t="210" r="1000" b="240" texture="Lobby_Main_01" />
+			<msprite name="FRIEND_PANNEL"  sx="709" sy="61" ex="709" ey="61" l="308" t="0" r="615" b="694" texture="Lobby_Main_02" />
+
+			<button name="REFRESH_FRIEND" x="718" y="71" w="30" h="28">
+				<sprite l="58" t="521" r="88" b="549" texture="UI_Button" />
+				<sprite l="58" t="550" r="88" b="578" texture="UI_Button" />
+				<sprite l="58" t="579" r="88" b="607" texture="UI_Button" />
+			</button>
+			<button name="ADDFRIEND" x="750" y="71" w="79" h="28">
+				<sprite l="359" t="348" r="438" b="376" texture="UI_Button" />
+				<sprite l="359" t="377" r="438" b="405" texture="UI_Button" />
+				<sprite l="359" t="406" r="438" b="434" texture="UI_Button" />
+			</button>
+			<button name="SENDMESSAGE" x="831" y="71" w="104" h="28">
+				<sprite l="439" t="348" r="543" b="376" texture="UI_Button" />
+				<sprite l="439" t="377" r="543" b="405" texture="UI_Button" />
+				<sprite l="439" t="406" r="543" b="434" texture="UI_Button" />
+			</button>
+			
+			<friend name="FRIENDLIST" l="718" t="119" r="1007" b="693" >
+				<template>
+					<sprite name="FRIEND_MOUSE_OVER" l="0" t="23" r="289" b="45" texture="Lobby_Main_03" />
+					<sprite name="FRIEND_ONLINE" l="937" t="511" r="1004" b="529" texture="Lobby_Main_01" />
+					<sprite name="FRIEND_OFFLINE" l="937" t="530" r="1004" b="548" texture="Lobby_Main_01" />
+					<column name="STATE" x="220" y="2" />
+					<column name="LEVEL" x="3" y="3" w="16" h="16" format="VCENTER CENTER" />
+					<column name="NAME" x="23" y="2" w="168" h="18" fontsize="12" color="FFFFFFFF" format="VCENTER CENTER" />
+					
+					<button name="FRIEND_POP_OPEN" x="195" y="4" w="17" h="17">
+						<sprite l="417" t="147" r="434" b="164" texture="UI_Button" />
+						<sprite l="417" t="165" r="434" b="182" texture="UI_Button" />
+						<sprite l="417" t="183" r="434" b="200" texture="UI_Button" />
+					</button>
+				</template>
+
+				<friendcolumn maxline="24" gap="24" name="FRIENDCOL" l="718" t="119" r="1007" b="141" />
+
+				<eventrect name="SCROLL_RECT" x="718" y="119" w="289" h="574" />
+				<button name="UP" x="988" y="98" w="17" h="17">
+					<sprite l="372" t="147" r="389" b="164" texture="UI_Button" />
+					<sprite l="372" t="165" r="389" b="182" texture="UI_Button" />
+					<sprite l="372" t="183" r="389" b="200" texture="UI_Button" />
+				</button>
+				<button name="DN" x="988" y="697" w="17" h="17">
+					<sprite l="417" t="147" r="434" b="164" texture="UI_Button" />
+					<sprite l="417" t="165" r="434" b="182" texture="UI_Button" />
+					<sprite l="417" t="183" r="434" b="200" texture="UI_Button" />
+				</button>
+			</friend>
+		</page>
+		
+
+		<page name="BLOCK" x="901" y="33">
+			<sprite name="BLOCK_TAB" l="954" t="664" r="1017" b="694" texture="Lobby_Main_01" />
+			<msprite name="BLOCK_PANNEL"  sx="709" sy="61" ex="709" ey="61" l="308" t="0" r="615" b="694" texture="Lobby_Main_02" />
+
+			<button name="ADDBLOCK" x="718" y="71" w="104" h="28">
+				<sprite l="85" t="430" r="189" b="458" texture="Lobby_Main_03" />
+				<sprite l="85" t="459" r="189" b="487" texture="Lobby_Main_03" />
+				<sprite l="85" t="488" r="189" b="516" texture="Lobby_Main_03" />
+			</button>
+
+			<block name="BLOCKLIST" l="718" t="119" r="1007" b="693" >
+				<template>
+					<sprite name="SLOT_SIZE" l="718" t="119" r="1007" b="141" texture="Lobby_Main_03" />
+					<sprite name="BLOCK_MOUSE_OVER" l="0" t="23" r="289" b="45" texture="Lobby_Main_03" />
+
+					<column name="LEVEL" x="3" y="3" w="16" h="16" format="VCENTER CENTER" />
+					<column name="NAME" x="23" y="2" w="168" h="18" fontsize="12" color="FFFFFFFF" format="VCENTER CENTER" />
+	
+					<button name="BLOCK_DELETE" x="219" y="2" w="68" h="18">
+						<sprite l="85" t="372" r="153" b="390" texture="Lobby_Main_03" />
+						<sprite l="85" t="391" r="153" b="409" texture="Lobby_Main_03" />
+						<sprite l="85" t="410" r="153" b="428" texture="Lobby_Main_03" />
+					</button>
+
+				</template>
+
+				<blockcolumn maxline="24" gap="24" name="BLOCKCOL" l="718" t="119" r="1007" b="141" />
+
+				<eventrect name="SCROLL_RECT" x="718" y="119" w="289" h="574" />
+				<button name="UP" x="988" y="98" w="17" h="17">
+					<sprite l="372" t="147" r="389" b="164" texture="UI_Button" />
+					<sprite l="372" t="165" r="389" b="182" texture="UI_Button" />
+					<sprite l="372" t="183" r="389" b="200" texture="UI_Button" />
+				</button>
+				<button name="DN" x="988" y="697" w="17" h="17">
+					<sprite l="417" t="147" r="434" b="164" texture="UI_Button" />
+					<sprite l="417" t="165" r="434" b="182" texture="UI_Button" />
+					<sprite l="417" t="183" r="434" b="200" texture="UI_Button" />
+				</button>
+			</block>
+		</page>
+
+		<page name="MESSAGE" x="965" y="33">
+			<sprite name="MESSAGE_TAB" l="937" t="240" r="979" b="270" texture="Lobby_Main_01" />
+			<msprite name="MESSAGE_PANNEL" sx="709" sy="61" ex="709" ey="61" l="616" t="0" r="923" b="694" texture="Lobby_Main_02" />
+			
+			<button name="SENDMESSAGE" x="750" y="71" w="104" h="28">
+				<sprite l="439" t="348" r="543" b="376" texture="UI_Button" />
+				<sprite l="439" t="377" r="543" b="405" texture="UI_Button" />
+				<sprite l="439" t="406" r="543" b="434" texture="UI_Button" />
+			</button>
+		
+			<button name="REFRESH_INBOX" x="718" y="71" w="30" h="28">
+				<sprite l="58" t="521" r="88" b="549" texture="UI_Button" />
+				<sprite l="58" t="550" r="88" b="578" texture="UI_Button" />
+				<sprite l="58" t="579" r="88" b="607" texture="UI_Button" />
+			</button>
+
+			<message name="MESSAGELIST" l="718" t="119" r="1007" b="477">
+				<template>
+					<sprite name="MESSAGE_MOUSE_OVER" l="0" t="0" r="0" b="0" texture="Lobby_Main_03" />
+					<sprite name="MESSAGE_MOUSE_CLICK" l="0" t="46" r="289" b="68" texture="Lobby_Main_03" />
+					<sprite name="MESSAGE_READ_BEFORE" l="937" t="270" r="955" b="283" texture="Lobby_Main_01" /> <!-- x194 y4 -->
+					<sprite name="MESSAGE_READ_AFTER" l="937" t="283" r="955" b="296" texture="Lobby_Main_01" /> <!-- x194 y4 -->
+					<sprite name="MESSAGE_FRIEND_ICON"  l="937" t="664" r="953" b="680" texture="Lobby_Main_01" />
+    					<sprite name="MESSAGE_MESSAGE_ICON" l="937" t="681" r="953" b="697" texture="Lobby_Main_01" />
+					<column name="CLASS"	  x="3" y="3" w='16' h='16' shadow="FF333333"/>
+					
+					<column name="NAME" x="23" y="2" w="122" h="18" fontsize="12" color="FFFFFFFF" format="VCENTER LEFT" />
+					<column name="MSGTYPE" x="3" y="3" w="16" h="16" />
+					<column name="TIME" x="222" y="3" w="63" h="18" fontsize="12" color="FFFFFFFF" format="VCENTER LEFT" />
+								
+					<button name="DELETE" x="163" y="1" w="20" h="20">
+						<sprite l="89" t="521" r="109" b="541" texture="UI_Button" />
+						<sprite l="89" t="542" r="109" b="562" texture="UI_Button" />
+						<sprite l="89" t="563" r="109" b="583" texture="UI_Button" />
+					</button>
+				</template>
+
+				<column name="MSG_MSGTYPE" x="721" y="541" w="16" h="16" fontsize="12" color="CCCCCC" format="VLEFT CENTER" />
+				<column name="MSG_NAME" x="742" y="539" w="122" h="20" fontsize="12" color="CCCCCC" format="VCENTER LEFT" />
+				<column name="MSG_TIME" x="932" y="539" w="70" h="20" fontsize="12" color="CCCCCC" format="VCENTER LEFT" />
+				<column name="MESSAGE" x="742" y="582" w="243" h="112" fontsize="12" color="CCCCCC" format="VLEFT TOP" />
+
+				<msgcolumn maxline="24" gap="24" name="MSGCOL" l="718" t="119" r="1007" b="141" />
+
+				<eventrect name="SCROLL_RECT" x="718" y="119" w="289" h="358" />
+				<button name="UP" x="988" y="98" w="17" h="17">
+					<sprite l="372" t="147" r="389" b="164" texture="UI_Button" />
+					<sprite l="372" t="165" r="389" b="182" texture="UI_Button" />
+					<sprite l="372" t="183" r="389" b="200" texture="UI_Button" />
+				</button>
+				<button name="DN" x="988" y="481" w="17" h="17">
+					<sprite l="417" t="147" r="434" b="164" texture="UI_Button" />
+					<sprite l="417" t="165" r="434" b="182" texture="UI_Button" />
+					<sprite l="417" t="183" r="434" b="200" texture="UI_Button" />
+				</button>
+
+ 				<button name="FRIEND_APPLY" x="834" y="717" w="84" h="32">
+ 					<sprite l="862" t="794" r="946" b="822" texture="UI_Button" />
+					<sprite l="862" t="823" r="946" b="851" texture="UI_Button" />
+					<sprite l="862" t="852" r="946" b="880" texture="UI_Button" />
+				</button>
+
+				<button name="FRIEND_REFUSE" x="920" y="717" w="84" h="32">
+					<sprite l="862" t="881" r="946" b="909" texture="UI_Button" />
+					<sprite l="862" t="910" r="946" b="938" texture="UI_Button" />
+					<sprite l="862" t="939" r="946" b="967" texture="UI_Button" />
+				</button>
+	
+				<button name="REPLY" x="834" y="717" w="84" h="28">
+					<sprite l="85" t="434" r="169" b="462" texture="UI_Button" />
+					<sprite l="85" t="463" r="169" b="491" texture="UI_Button" />
+					<sprite l="85" t="492" r="169" b="520" texture="UI_Button" />
+				</button>
+
+				<button name="MESSAGE_DELETE" x="920" y="717" w="84" h="28">
+					<sprite l="0" t="434" r="84" b="462" texture="UI_Button" />
+					<sprite l="0" t="463" r="84" b="491" texture="UI_Button" />
+					<sprite l="0" t="492" r="84" b="520" texture="UI_Button" />
+				</button>
+			</message>
+		</page>
+	</tab>
+
+	<tab name="MAINROOM_INFORMATION" count="5">
+		<page name="MYROOM_1" x="76" y="33">
+			<sprite l="937" t="0" r="1020" b="30" texture="Lobby_Main_01" />
+			<togglebutton name="MODETOGGLE" x="357" y="101" w="114" h="16" count="11">
+				<sprite name="ALLMODE" 		l="0" t="961" r="114" b="977" texture="Lobby_Main_01" />
+				<sprite name="SINGLESURVMODE"   l="115" t="961" r="229" b="977" texture="Lobby_Main_01" />
+				<sprite name="BOMBMODE" 	l="230" t="961" r="344" b="977" texture="Lobby_Main_01" />
+				<sprite name="TEAMSURVMODE"	l="345" t="961" r="459" b="977" texture="Lobby_Main_01" />
+				<sprite name="STILLMODE" 	l="460" t="961" r="574" b="977" texture="Lobby_Main_01" />
+
+				<sprite name="TEAMDEATHMODE" 	l="0" t="978" r="114" b="994" texture="Lobby_Main_01" />
+				<sprite name="CHATMODE" 	l="115" t="978" r="229" b="994" texture="Lobby_Main_01" />
+				<sprite name="PNRMODE" 		l="230" t="978" r="344" b="994" texture="Lobby_Main_01" />
+				<sprite name="OCCUPYMODERENEWAL" 	l="115" t="995" r="229" b='1011' texture="Lobby_Main_01" />
+				<sprite name="AIMODE" 		l="460" t="978" r="574" b="994" texture="Lobby_Main_01" />				
+				<sprite name="SOCCERMODE" 	l="0" t="995" r="114" b='1011' texture="Lobby_Main_01" />				
+			</togglebutton>
+
+			<togglebutton name="PRIVATETOGGLE" x='85' y='101' w='28' h='16' count='6'>
+				<sprite name="ALLMODE" 		l='937' t='579' r='965' b='595' texture="Lobby_Main_01" />
+				<sprite name="SECRETMODE" 	l='937' t='613' r='965' b='629' texture="Lobby_Main_01" />
+				<sprite name="NORMALMODE" 	l='937' t='596' r='965' b='612' texture="Lobby_Main_01" />
+				<sprite name="LOCALMODE" 	l='937' t='630' r='965' b='646' texture="Lobby_Main_01" />
+				<sprite name="LOCALMODE_SECRET" l='937' t='647' r='965' b='663' texture="Lobby_Main_01" />
+				<sprite name="NOSKILLMODE" 	l='966' t='647' r='993' b='663' texture="Lobby_Main_01" />
+			</togglebutton>
+
+			<select name="ROOMS" count="13" OffX="0" OffY="0">
+				<rect l="85" t="119" r="679" b="143" />
+				<rect l="85" t="144" r="679" b="168" />
+				<rect l="85" t="169" r="679" b="193" />
+				<rect l="85" t="194" r="679" b="218" />
+				<rect l="85" t="219" r="679" b="243" />
+				<rect l="85" t="244" r="679" b="268" />
+				<rect l="85" t="269" r="679" b="293" />
+				<rect l="85" t="294" r="679" b="318" />
+				<rect l="85" t="319" r="679" b="343" />
+				<rect l="85" t="344" r="679" b="368" />
+				<rect l="85" t="369" r="679" b="393" />
+				<rect l="85" t="394" r="679" b="418" />
+				<rect l="85" t="419" r="679" b="442" />
+
+				<column name="ROOMTYPE" x="0" y="0" />
+				<column name="ROOMNO" x="32" y="1" w="24" h="21" fontsize="13" color="CCCCCC" format="VCENTER CENTER" />
+				<column name="ROOMNAME" x="70" y="1" w="189" h="21" fontsize="13" color="CCCCCC" format="VCENTER CENTER" />
+				<column name="MODE" x="282" y="2" w="94" h="21" fontsize="12" color="CCCCCC" format="VCENTER CENTER" />
+				<column name="MAP" x="398" y="1" w="94" h="21" fontsize="13" color="CCCCCC" format="VCENTER CENTER" />
+				<column name="USERS" x="506  " y="2" w="38" h="21" fontsize="12" color="CCCCCC" format="VCENTER CENTER" />
+				<column name="STATE" x="549" y="1" />
+				
+				<column name="CLANFRAME" x="549" y="1" />
+				<column name="ROOMSTART" x="549" y="1" />
+				<column name="NOSKILLBG" x="1" y="1" />
+				
+				<column name="ATEAMEMBLEM" x="552" y="3" w="16" h="16" shadow="FF333333" />
+				<column name="BTEAMEMBLEM" x="575" y="3" w="16" h="16" shadow="FF333333" />
+				<column name="DOUBLE_DAMAGE" x="239" y="0" />
+
+				<sprite name="MYROOM_MOUSE_OVER" l="290" t="0" r="884" b="23" texture="Lobby_Main_03" />
+				<sprite name="MYROOM_MOUSE_CLICK" l="290" t="24" r="884" b="47" texture="Lobby_Main_03" />
+
+				<eventrect name="SCROLL_RECT" x="85" y="119" w="594" h="323" />
+				<button name="UP" x="683" y="119" w="11" h="11">
+					<sprite l="390" t="147" r="401" b="158" texture="UI_Button" />
+					<sprite l="390" t="159" r="401" b="170" texture="UI_Button" />
+					<sprite l="390" t="171" r="401" b="182" texture="UI_Button" />
+				</button>
+				<button name="DN" x="683" y="430" w="11" h="11">
+					<sprite l="435" t="147" r="446" b="158" texture="UI_Button" />
+					<sprite l="435" t="159" r="446" b="170" texture="UI_Button" />
+					<sprite l="435" t="171" r="446" b="182" texture="UI_Button" />
+				</button>
+			</select>
+		</page>
+
+		<page name="MYROOM_2" x="160" y="33">
+			<sprite l="937" t="30" r="1020" b="60" texture="Lobby_Main_01" />
+			<togglebutton name="MODETOGGLE" x="357" y="101" w="114" h="16" count="11">
+				<sprite name="ALLMODE" 		l="0" t="961" r="114" b="977" texture="Lobby_Main_01" />
+				<sprite name="SINGLESURVMODE"   l="115" t="961" r="229" b="977" texture="Lobby_Main_01" />
+				<sprite name="BOMBMODE" 	l="230" t="961" r="344" b="977" texture="Lobby_Main_01" />
+				<sprite name="TEAMSURVMODE"	l="345" t="961" r="459" b="977" texture="Lobby_Main_01" />
+				<sprite name="STILLMODE" 	l="460" t="961" r="574" b="977" texture="Lobby_Main_01" />
+
+				<sprite name="TEAMDEATHMODE" 	l="0" t="978" r="114" b="994" texture="Lobby_Main_01" />
+				<sprite name="CHATMODE" 	l="115" t="978" r="229" b="994" texture="Lobby_Main_01" />
+				<sprite name="PNRMODE" 		l="230" t="978" r="344" b="994" texture="Lobby_Main_01" />
+				<sprite name="OCCUPYMODE" 	l="345" t="978" r="459" b="994" texture="Lobby_Main_01" />
+				<sprite name="AIMODE" 		l="460" t="978" r="574" b="994" texture="Lobby_Main_01" />
+				
+				<sprite name="SOCCERMODE" 	l="0" t="995" r="114" b='1011' texture="Lobby_Main_01" />
+			</togglebutton>
+
+				<togglebutton name="PRIVATETOGGLE" x='85' y='101' w='28' h='16' count='6'>
+				<sprite name="ALLMODE" 		l='937' t='579' r='965' b='595' texture="Lobby_Main_01" />
+				<sprite name="SECRETMODE" 	l='937' t='613' r='965' b='629' texture="Lobby_Main_01" />
+				<sprite name="NORMALMODE" 	l='937' t='596' r='965' b='612' texture="Lobby_Main_01" />
+				<sprite name="LOCALMODE" 	l='937' t='630' r='965' b='646' texture="Lobby_Main_01" />
+				<sprite name="LOCALMODE_SECRET" l='937' t='647' r='965' b='663' texture="Lobby_Main_01" />
+				<sprite name="NOSKILLMODE" 	l='966' t='647' r='993' b='663' texture="Lobby_Main_01" />
+			</togglebutton>
+
+
+			<select name="ROOMS" count="13" OffX="0" OffY="0">
+				<rect l="85" t="119" r="679" b="143" />
+				<rect l="85" t="144" r="679" b="168" />
+				<rect l="85" t="169" r="679" b="193" />
+				<rect l="85" t="194" r="679" b="218" />
+				<rect l="85" t="219" r="679" b="243" />
+				<rect l="85" t="244" r="679" b="268" />
+				<rect l="85" t="269" r="679" b="293" />
+				<rect l="85" t="294" r="679" b="318" />
+				<rect l="85" t="319" r="679" b="343" />
+				<rect l="85" t="344" r="679" b="368" />
+				<rect l="85" t="369" r="679" b="393" />
+				<rect l="85" t="394" r="679" b="418" />
+				<rect l="85" t="419" r="679" b="442" />
+
+				<column name="ROOMTYPE" x="0" y="0" />
+				<column name="ROOMNO" x="32" y="1" w="24" h="21" fontsize="13" color="CCCCCC" format="VCENTER CENTER" />
+				<column name="ROOMNAME" x="70" y="1" w="189" h="21" fontsize="13" color="CCCCCC" format="VCENTER CENTER" />
+				<column name="MODE" x="282" y="2" w="94" h="21" fontsize="12" color="CCCCCC" format="VCENTER CENTER" />
+				<column name="MAP" x="398" y="1" w="94" h="21" fontsize="13" color="CCCCCC" format="VCENTER CENTER" />
+				<column name="USERS" x="506  " y="2" w="38" h="21" fontsize="12" color="CCCCCC" format="VCENTER CENTER" />
+				<column name="STATE" x="549" y="1" />
+				
+				<column name="CLANFRAME" x="549" y="1" />
+				<column name="ROOMSTART" x="549" y="1" />
+				<column name="NOSKILLBG" x="1" y="1" />
+				
+				<column name="ATEAMEMBLEM" x="552" y="3" w="16" h="16" shadow="FF333333" />
+				<column name="BTEAMEMBLEM" x="575" y="3" w="16" h="16" shadow="FF333333" />
+				<column name="DOUBLE_DAMAGE" x="239" y="0" />
+
+				<sprite name="MYROOM_MOUSE_OVER" l="290" t="0" r="884" b="23" texture="Lobby_Main_03" />
+				<sprite name="MYROOM_MOUSE_CLICK" l="290" t="24" r="884" b="47" texture="Lobby_Main_03" />
+
+				<eventrect name="SCROLL_RECT" x="85" y="119" w="594" h="323" />
+				<button name="UP" x="683" y="119" w="11" h="11">
+					<sprite l="390" t="147" r="401" b="158" texture="UI_Button" />
+					<sprite l="390" t="159" r="401" b="170" texture="UI_Button" />
+					<sprite l="390" t="171" r="401" b="182" texture="UI_Button" />
+				</button>
+				<button name="DN" x="683" y="430" w="11" h="11">
+					<sprite l="435" t="147" r="446" b="158" texture="UI_Button" />
+					<sprite l="435" t="159" r="446" b="170" texture="UI_Button" />
+					<sprite l="435" t="171" r="446" b="182" texture="UI_Button" />
+				</button>
+			</select>
+		</page>
+
+		<page name="MYROOM_3" x="244" y="33">
+			<sprite l="937" t="60" r="1020" b="90" texture="Lobby_Main_01" />
+			<togglebutton name="MODETOGGLE" x="357" y="101" w="114" h="16" count="11">
+				<sprite name="ALLMODE" 		l="0" t="961" r="114" b="977" texture="Lobby_Main_01" />
+				<sprite name="SINGLESURVMODE"   l="115" t="961" r="229" b="977" texture="Lobby_Main_01" />
+				<sprite name="BOMBMODE" 	l="230" t="961" r="344" b="977" texture="Lobby_Main_01" />
+				<sprite name="TEAMSURVMODE"	l="345" t="961" r="459" b="977" texture="Lobby_Main_01" />
+				<sprite name="STILLMODE" 	l="460" t="961" r="574" b="977" texture="Lobby_Main_01" />
+
+				<sprite name="TEAMDEATHMODE" 	l="0" t="978" r="114" b="994" texture="Lobby_Main_01" />
+				<sprite name="CHATMODE" 	l="115" t="978" r="229" b="994" texture="Lobby_Main_01" />
+				<sprite name="PNRMODE" 		l="230" t="978" r="344" b="994" texture="Lobby_Main_01" />
+				<sprite name="OCCUPYMODE" 	l="345" t="978" r="459" b="994" texture="Lobby_Main_01" />
+				<sprite name="AIMODE" 		l="460" t="978" r="574" b="994" texture="Lobby_Main_01" />
+				
+				<sprite name="SOCCERMODE" 	l="0" t="995" r="114" b='1011' texture="Lobby_Main_01" />
+			</togglebutton>
+
+				<togglebutton name="PRIVATETOGGLE" x='85' y='101' w='28' h='16' count='6'>
+				<sprite name="ALLMODE" 		l='937' t='579' r='965' b='595' texture="Lobby_Main_01" />
+				<sprite name="SECRETMODE" 	l='937' t='613' r='965' b='629' texture="Lobby_Main_01" />
+				<sprite name="NORMALMODE" 	l='937' t='596' r='965' b='612' texture="Lobby_Main_01" />
+				<sprite name="LOCALMODE" 	l='937' t='630' r='965' b='646' texture="Lobby_Main_01" />
+				<sprite name="LOCALMODE_SECRET" l='937' t='647' r='965' b='663' texture="Lobby_Main_01" />
+				<sprite name="NOSKILLMODE" 	l='966' t='647' r='993' b='663' texture="Lobby_Main_01" />
+			</togglebutton>
+
+
+			<select name="ROOMS" count="13" OffX="0" OffY="0">
+				<rect l="85" t="119" r="679" b="143" />
+				<rect l="85" t="144" r="679" b="168" />
+				<rect l="85" t="169" r="679" b="193" />
+				<rect l="85" t="194" r="679" b="218" />
+				<rect l="85" t="219" r="679" b="243" />
+				<rect l="85" t="244" r="679" b="268" />
+				<rect l="85" t="269" r="679" b="293" />
+				<rect l="85" t="294" r="679" b="318" />
+				<rect l="85" t="319" r="679" b="343" />
+				<rect l="85" t="344" r="679" b="368" />
+				<rect l="85" t="369" r="679" b="393" />
+				<rect l="85" t="394" r="679" b="418" />
+				<rect l="85" t="419" r="679" b="442" />
+			
+				<column name="ROOMTYPE" x="0" y="0" />
+				<column name="ROOMNO" x="32" y="1" w="24" h="21" fontsize="13" color="CCCCCC" format="VCENTER CENTER" />
+				<column name="ROOMNAME" x="70" y="1" w="189" h="21" fontsize="13" color="CCCCCC" format="VCENTER CENTER" />
+				<column name="MODE" x="282" y="2" w="94" h="21" fontsize="12" color="CCCCCC" format="VCENTER CENTER" />
+				<column name="MAP" x="398" y="1" w="94" h="21" fontsize="13" color="CCCCCC" format="VCENTER CENTER" />
+				<column name="USERS" x="506  " y="2" w="38" h="21" fontsize="12" color="CCCCCC" format="VCENTER CENTER" />
+				<column name="STATE" x="549" y="1" />
+				
+				<column name="CLANFRAME" x="549" y="1" />
+				<column name="ROOMSTART" x="549" y="1" />
+				<column name="NOSKILLBG" x="1" y="1" />
+				
+				<column name="ATEAMEMBLEM" x="552" y="3" w="16" h="16" shadow="FF333333" />
+				<column name="BTEAMEMBLEM" x="575" y="3" w="16" h="16" shadow="FF333333" />
+				<column name="DOUBLE_DAMAGE" x="239" y="0" />
+
+				<sprite name="MYROOM_MOUSE_OVER" l="290" t="0" r="884" b="23" texture="Lobby_Main_03" />
+				<sprite name="MYROOM_MOUSE_CLICK" l="290" t="24" r="884" b="47" texture="Lobby_Main_03" />
+
+				<eventrect name="SCROLL_RECT" x="85" y="119" w="594" h="323" />
+				<button name="UP" x="683" y="119" w="11" h="11">
+					<sprite l="390" t="147" r="401" b="158" texture="UI_Button" />
+					<sprite l="390" t="159" r="401" b="170" texture="UI_Button" />
+					<sprite l="390" t="171" r="401" b="182" texture="UI_Button" />
+				</button>
+				<button name="DN" x="683" y="430" w="11" h="11">
+					<sprite l="435" t="147" r="446" b="158" texture="UI_Button" />
+					<sprite l="435" t="159" r="446" b="170" texture="UI_Button" />
+					<sprite l="435" t="171" r="446" b="182" texture="UI_Button" />
+				</button>
+			</select>
+		</page>
+
+		<page name="MYROOM_4" x="328" y="33">
+			<sprite l="937" t="90" r="1020" b="120" texture="Lobby_Main_01" />
+			<togglebutton name="MODETOGGLE" x="357" y="101" w="114" h="16" count="11">
+				<sprite name="ALLMODE" 		l="0" t="961" r="114" b="977" texture="Lobby_Main_01" />
+				<sprite name="SINGLESURVMODE"   l="115" t="961" r="229" b="977" texture="Lobby_Main_01" />
+				<sprite name="BOMBMODE" 	l="230" t="961" r="344" b="977" texture="Lobby_Main_01" />
+				<sprite name="TEAMSURVMODE"	l="345" t="961" r="459" b="977" texture="Lobby_Main_01" />
+				<sprite name="STILLMODE" 	l="460" t="961" r="574" b="977" texture="Lobby_Main_01" />
+
+				<sprite name="TEAMDEATHMODE" 	l="0" t="978" r="114" b="994" texture="Lobby_Main_01" />
+				<sprite name="CHATMODE" 	l="115" t="978" r="229" b="994" texture="Lobby_Main_01" />
+				<sprite name="PNRMODE" 		l="230" t="978" r="344" b="994" texture="Lobby_Main_01" />
+				<sprite name="OCCUPYMODE" 	l="345" t="978" r="459" b="994" texture="Lobby_Main_01" />
+				<sprite name="AIMODE" 		l="460" t="978" r="574" b="994" texture="Lobby_Main_01" />
+				
+				<sprite name="SOCCERMODE" 	l="0" t="995" r="114" b='1011' texture="Lobby_Main_01" />
+			</togglebutton>
+
+				<togglebutton name="PRIVATETOGGLE" x='85' y='101' w='28' h='16' count='6'>
+				<sprite name="ALLMODE" 		l='937' t='579' r='965' b='595' texture="Lobby_Main_01" />
+				<sprite name="SECRETMODE" 	l='937' t='613' r='965' b='629' texture="Lobby_Main_01" />
+				<sprite name="NORMALMODE" 	l='937' t='596' r='965' b='612' texture="Lobby_Main_01" />
+				<sprite name="LOCALMODE" 	l='937' t='630' r='965' b='646' texture="Lobby_Main_01" />
+				<sprite name="LOCALMODE_SECRET" l='937' t='647' r='965' b='663' texture="Lobby_Main_01" />
+				<sprite name="NOSKILLMODE" 	l='966' t='647' r='993' b='663' texture="Lobby_Main_01" />
+			</togglebutton>
+
+
+			<select name="ROOMS" count="13" OffX="0" OffY="0">
+				<rect l="85" t="119" r="679" b="143" />
+				<rect l="85" t="144" r="679" b="168" />
+				<rect l="85" t="169" r="679" b="193" />
+				<rect l="85" t="194" r="679" b="218" />
+				<rect l="85" t="219" r="679" b="243" />
+				<rect l="85" t="244" r="679" b="268" />
+				<rect l="85" t="269" r="679" b="293" />
+				<rect l="85" t="294" r="679" b="318" />
+				<rect l="85" t="319" r="679" b="343" />
+				<rect l="85" t="344" r="679" b="368" />
+				<rect l="85" t="369" r="679" b="393" />
+				<rect l="85" t="394" r="679" b="418" />
+				<rect l="85" t="419" r="679" b="442" />
+
+				<column name="ROOMTYPE" x="0" y="0" />
+				<column name="ROOMNO" x="32" y="1" w="24" h="21" fontsize="13" color="CCCCCC" format="VCENTER CENTER" />
+				<column name="ROOMNAME" x="70" y="1" w="189" h="21" fontsize="13" color="CCCCCC" format="VCENTER CENTER" />
+				<column name="MODE" x="282" y="2" w="94" h="21" fontsize="12" color="CCCCCC" format="VCENTER CENTER" />
+				<column name="MAP" x="398" y="1" w="94" h="21" fontsize="13" color="CCCCCC" format="VCENTER CENTER" />
+				<column name="USERS" x="506  " y="2" w="38" h="21" fontsize="12" color="CCCCCC" format="VCENTER CENTER" />
+				<column name="STATE" x="549" y="1" />
+				
+				<column name="CLANFRAME" x="549" y="1" />
+				<column name="ROOMSTART" x="549" y="1" />
+				<column name="NOSKILLBG" x="1" y="1" />
+				
+				<column name="ATEAMEMBLEM" x="552" y="3" w="16" h="16" shadow="FF333333" />
+				<column name="BTEAMEMBLEM" x="575" y="3" w="16" h="16" shadow="FF333333" />
+				<column name="DOUBLE_DAMAGE" x="239" y="0" />
+
+				<sprite name="MYROOM_MOUSE_OVER" l="290" t="0" r="884" b="23" texture="Lobby_Main_03" />
+				<sprite name="MYROOM_MOUSE_CLICK" l="290" t="24" r="884" b="47" texture="Lobby_Main_03" />
+
+				<eventrect name="SCROLL_RECT" x="85" y="119" w="594" h="323" />
+				<button name="UP" x="683" y="119" w="11" h="11">
+					<sprite l="390" t="147" r="401" b="158" texture="UI_Button" />
+					<sprite l="390" t="159" r="401" b="170" texture="UI_Button" />
+					<sprite l="390" t="171" r="401" b="182" texture="UI_Button" />
+				</button>
+				<button name="DN" x="683" y="430" w="11" h="11">
+					<sprite l="435" t="147" r="446" b="158" texture="UI_Button" />
+					<sprite l="435" t="159" r="446" b="170" texture="UI_Button" />
+					<sprite l="435" t="171" r="446" b="182" texture="UI_Button" />
+				</button>
+			</select>
+		</page>
+
+		<page name="MYROOM_5" x="412" y="33">
+			<sprite l="937" t="120" r="1020" b="150" texture="Lobby_Main_01" />
+			<togglebutton name="MODETOGGLE" x="357" y="101" w="114" h="16" count="11">
+				<sprite name="ALLMODE" 		l="0" t="961" r="114" b="977" texture="Lobby_Main_01" />
+				<sprite name="SINGLESURVMODE"   l="115" t="961" r="229" b="977" texture="Lobby_Main_01" />
+				<sprite name="BOMBMODE" 	l="230" t="961" r="344" b="977" texture="Lobby_Main_01" />
+				<sprite name="TEAMSURVMODE"	l="345" t="961" r="459" b="977" texture="Lobby_Main_01" />
+				<sprite name="STILLMODE" 	l="460" t="961" r="574" b="977" texture="Lobby_Main_01" />
+
+				<sprite name="TEAMDEATHMODE" 	l="0" t="978" r="114" b="994" texture="Lobby_Main_01" />
+				<sprite name="CHATMODE" 	l="115" t="978" r="229" b="994" texture="Lobby_Main_01" />
+				<sprite name="PNRMODE" 		l="230" t="978" r="344" b="994" texture="Lobby_Main_01" />
+				<sprite name="OCCUPYMODE" 	l="345" t="978" r="459" b="994" texture="Lobby_Main_01" />
+				<sprite name="AIMODE" 		l="460" t="978" r="574" b="994" texture="Lobby_Main_01" />
+				
+				<sprite name="SOCCERMODE" 	l="0" t="995" r="114" b='1011' texture="Lobby_Main_01" />
+			</togglebutton>
+
+				<togglebutton name="PRIVATETOGGLE" x='85' y='101' w='28' h='16' count='6'>
+				<sprite name="ALLMODE" 		l='937' t='579' r='965' b='595' texture="Lobby_Main_01" />
+				<sprite name="SECRETMODE" 	l='937' t='613' r='965' b='629' texture="Lobby_Main_01" />
+				<sprite name="NORMALMODE" 	l='937' t='596' r='965' b='612' texture="Lobby_Main_01" />
+				<sprite name="LOCALMODE" 	l='937' t='630' r='965' b='646' texture="Lobby_Main_01" />
+				<sprite name="LOCALMODE_SECRET" l='937' t='647' r='965' b='663' texture="Lobby_Main_01" />
+				<sprite name="NOSKILLMODE" 	l='966' t='647' r='993' b='663' texture="Lobby_Main_01" />
+			</togglebutton>
+
+
+			<select name="ROOMS" count="13" OffX="0" OffY="0">
+				<rect l="85" t="119" r="679" b="143" />
+				<rect l="85" t="144" r="679" b="168" />
+				<rect l="85" t="169" r="679" b="193" />
+				<rect l="85" t="194" r="679" b="218" />
+				<rect l="85" t="219" r="679" b="243" />
+				<rect l="85" t="244" r="679" b="268" />
+				<rect l="85" t="269" r="679" b="293" />
+				<rect l="85" t="294" r="679" b="318" />
+				<rect l="85" t="319" r="679" b="343" />
+				<rect l="85" t="344" r="679" b="368" />
+				<rect l="85" t="369" r="679" b="393" />
+				<rect l="85" t="394" r="679" b="418" />
+				<rect l="85" t="419" r="679" b="442" />
+				
+				<column name="ROOMTYPE" x="0" y="0" />
+				<column name="ROOMNO" x="32" y="1" w="24" h="21" fontsize="13" color="CCCCCC" format="VCENTER CENTER" />
+				<column name="ROOMNAME" x="70" y="1" w="189" h="21" fontsize="13" color="CCCCCC" format="VCENTER CENTER" />
+				<column name="MODE" x="282" y="2" w="94" h="21" fontsize="12" color="CCCCCC" format="VCENTER CENTER" />
+				<column name="MAP" x="398" y="1" w="94" h="21" fontsize="13" color="CCCCCC" format="VCENTER CENTER" />
+				<column name="USERS" x="506  " y="2" w="38" h="21" fontsize="12" color="CCCCCC" format="VCENTER CENTER" />
+				<column name="STATE" x="549" y="1" />
+				
+				<column name="CLANFRAME" x="549" y="1" />
+				<column name="ROOMSTART" x="549" y="1" />
+				<column name="NOSKILLBG" x="1" y="1" />
+				
+				<column name="ATEAMEMBLEM" x="552" y="3" w="16" h="16" shadow="FF333333" />
+				<column name="BTEAMEMBLEM" x="575" y="3" w="16" h="16" shadow="FF333333" />
+				<column name="DOUBLE_DAMAGE" x="239" y="0" />
+
+				<sprite name="MYROOM_MOUSE_OVER" l="290" t="0" r="884" b="23" texture="Lobby_Main_03" />
+				<sprite name="MYROOM_MOUSE_CLICK" l="290" t="24" r="884" b="47" texture="Lobby_Main_03" />
+
+				<eventrect name="SCROLL_RECT" x="85" y="119" w="594" h="323" />
+				<button name="UP" x="683" y="119" w="11" h="11">
+					<sprite l="390" t="147" r="401" b="158" texture="UI_Button" />
+					<sprite l="390" t="159" r="401" b="170" texture="UI_Button" />
+					<sprite l="390" t="171" r="401" b="182" texture="UI_Button" />
+				</button>
+				<button name="DN" x="683" y="430" w="11" h="11">
+					<sprite l="435" t="147" r="446" b="158" texture="UI_Button" />
+					<sprite l="435" t="159" r="446" b="170" texture="UI_Button" />
+					<sprite l="435" t="171" r="446" b="182" texture="UI_Button" />
+				</button>
+			</select>
+		</page>
+	</tab>
+
+	<select name="CHATMODE" count="3" oneVone="1" OffX="0" OffY="0">
+		<rect name="CHAT_CHANNEL" 	l="83" t="517" r="125" b="567" />
+		<rect name="CHAT_CLAN" 		l="83" t="572" r="125" b="622" />
+		<rect name="CHAT_SHOUT" 	l="83" t="627" r="125" b="677" />
+
+		<sprite name="CHAT_CHANNEL_MOUSE_OVER"  l="937" t="358" r="979" b="408" texture="Lobby_Main_01" />
+	<sprite name="CHAT_CHANNEL_MOUSE_CLICK" l="979" t="358" r="1021" b="408" texture="Lobby_Main_01" />
+
+		<sprite name="CHAT_CLAN_MOUSE_OVER"     l="937" t="409" r="979" b="459" texture="Lobby_Main_01" />
+		<sprite name="CHAT_CLAN_MOUSE_CLICK"    l="979" t="409" r="1021" b="459" texture="Lobby_Main_01" />
+		
+		<sprite name="CHAT_SHOUT_MOUSE_OVER"    l="937" t="460" r="979" b="510" texture="Lobby_Main_01" />
+		<sprite name="CHAT_SHOUT_MOUSE_CLICK"   l="979" t="460" r="1021" b="510" texture="Lobby_Main_01" />
+	</select>
+
+
+	<list name="CHAT" l="144" t="548" r="660" b="708">
+		<eventrect name="SCROLL_RECT" x="144" y="548" w="516" h="160" />
+		<button name="UP" x="683" y="552" w="11" h="11">
+			<sprite l="390" t="147" r="401" b="158" texture="UI_Button" />
+			<sprite l="390" t="159" r="401" b="170" texture="UI_Button" />
+			<sprite l="390" t="171" r="401" b="182" texture="UI_Button" />
+		</button>
+
+		<button name="DN" x="683" y="697" w="11" h="11">
+			<sprite l="435" t="147" r="446" b="158" texture="UI_Button" />
+			<sprite l="435" t="159" r="446" b="170" texture="UI_Button" />
+			<sprite l="435" t="171" r="446" b="182" texture="UI_Button" />
+		</button>
+	</list>
+
+	<checkbox name="CHAT_LOBBY" x="144" y="524" w="13" h="13">
+		<sprite l="0" t="0" r="0" b="0" texture="UI_Button"/>
+		<sprite l="402" t="162" r="415" b="175" texture="UI_Button" />
+	</checkbox>
+
+	<checkbox name="CHAT_CLAN" x="232" y="524" w="13" h="13">
+		<sprite l="0" t="0" r="0" b="0" texture="UI_Button"/>
+		<sprite l="402" t="162" r="415" b="175" texture="UI_Button" />
+	</checkbox>
+
+	<checkbox name="CHAT_WHISPER" x="319" y="524" w="13" h="13">
+		<sprite l="0" t="0" r="0" b="0" texture="UI_Button"/>
+		<sprite l="402" t="162" r="415" b="175" texture="UI_Button" />
+	</checkbox>
+
+	<checkbox name="CHAT_SHOUT" x="379" y="524" w="13" h="13">
+		<sprite l="0" t="0" r="0" b="0" texture="UI_Button"/>
+		<sprite l="402" t="162" r="415" b="175" texture="UI_Button" />
+	</checkbox>
+
+	<radiobox name="ALL_ROOM_LIST" x="83" y="77" w="65" h="13">
+		<sprite l="402" t="147" r="415" b="161" texture="UI_Button" />
+	</radiobox>
+
+	<radiobox name="MY_ROOM_LIST" x="166" y="77" w="90" h="13">
+		<sprite l="402" t="147" r="415" b="161" texture="UI_Button" />
+	</radiobox>
+
+	<msprite name="TUTO_NEW" sx="167" sy="450" ex="167" ey="450" l="447" t="177" r="479" b="203" texture="UI_Button" /> 
+
+	<msprite name="RANK_CLOSEBACK" sx="0" sy="718" ex="0" ey="718" l="0" t="974" r="1024" b="1024" texture="Lobby_Main_03" />
+	<button name="RANK_CLOSE" x="907" y="720" w="116" h="46">
+		<sprite l="864" t="207" r="980" b="253" texture="UI_Button" />
+		<sprite l="864" t="254" r="980" b="300" texture="UI_Button" />
+		<sprite l="864" t="301" r="980" b="347" texture="UI_Button" />
+	</button>
+</UIDEFINE>

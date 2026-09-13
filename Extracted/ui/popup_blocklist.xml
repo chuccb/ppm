@@ -1,0 +1,19 @@
+<UIDEFINE>
+
+  	<msprite name="BLOCK_BOX" sx="355" sy="283" ex="355" ey="283" l="0" t="168" r="315" b="371" texture="Lobby_Main_03" />
+  	<editbox name="BLOCK_NICK" l="423" t="360" r="605" b="380" linelimit="1" textlimit="17" TCR='255' TCG='255' TCB='255' TCA='255'/>
+
+	<button name="OK" x="496" y="453" w="84" h="28">
+		<sprite l="0" t="372" r="84" b="400" texture="Lobby_Main_03" />
+		<sprite l="0" t="401" r="84" b="429" texture="Lobby_Main_03" />
+		<sprite l="0" t="430" r="84" b="458" texture="Lobby_Main_03" />
+	</button>
+
+	<button name="CANCEL" x="581" y="453" w="84" h="28">
+		<sprite l="0" t="459" r="84" b="487" texture="Lobby_Main_03" />
+		<sprite l="0" t="488" r="84" b="516" texture="Lobby_Main_03" />
+		<sprite l="0" t="517" r="84" b="545" texture="Lobby_Main_03" />
+	</button>
+  
+  	<column name="BLOCK_MESSEGE" x='374' y='385' w='277' h='48' color='FF000000'  format='VCENTER CENTER'/>
+</UIDEFINE>

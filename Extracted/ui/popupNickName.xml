@@ -1,0 +1,19 @@
+<UIDEFINE>
+
+  	<msprite name="NNAMEBOX" sx="353" sy="281" ex="353" ey="281" l="709" t="561" r="1024" b="764" texture="UI_Popup_1" />
+  	<editbox name="NNAMEID" l="415" t="370" r="607" b="385" linelimit="1" textlimit="17" />
+
+	<button name="OK" x="426" y="396" w="84" h="28">
+		<sprite l="777" t="881" r="861" b="909" texture="UI_Button" />
+		<sprite l="777" t="910" r="861" b="938" texture="UI_Button" />
+		<sprite l="777" t="939" r="861" b="967" texture="UI_Button" />
+	</button>
+
+	<button name="CANCEL" x="511" y="396" w="84" h="28">
+		<sprite l="85" t="347" r="169" b="375" texture="UI_Button" />
+		<sprite l="85" t="376" r="169" b="404" texture="UI_Button" />
+		<sprite l="85" t="405" r="169" b="433" texture="UI_Button" />
+	</button>
+  
+  	<column name="LOGINLOGMESSEGE" x='387' y='389' w='250' h='15' color='FFFFFFFF' shadow='FF444444' format='VCENTER CENTER'/>
+</UIDEFINE>

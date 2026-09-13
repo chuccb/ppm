@@ -1,0 +1,24 @@
+<UIDEFINE>
+	<image name="Clan_Rank" filename="c_se.dds"/>
+
+	<msprite name="POPUP_CLAN_RANK" sx="291" sy="116" ex="291" ey="116" l="416" t="0" r="617" b="286" texture="Clan_Rank"/>
+
+	<button name="POPUP_CLAN_RANK_OK" x="403" y="369" w="84" h="28">
+		<sprite l="777" t="794" r="861" b="822" texture="UI_Button" />
+		<sprite l="777" t="823" r="861" b="851" texture="UI_Button" />
+		<sprite l="777" t="852" r="861" b="880" texture="UI_Button" />
+	</button>
+
+
+	<sprite name="CLAN_RANK_S" 	l="416" t="287" r="440" b="309" texture="Clan_Rank"/>    
+	<sprite name="CLAN_RANK_A"	l="441" t="287" r="465" b="309" texture="Clan_Rank"/>    
+	<sprite name="CLAN_RANK_B" 	l="466" t="287" r="490" b="309" texture="Clan_Rank"/>   
+	<sprite name="CLAN_RANK_C" 	l="491" t="287" r="515" b="309" texture="Clan_Rank"/>     
+	<sprite name="CLAN_RANK_HYPHEN" l="516" t="287" r="540" b="309" texture="Clan_Rank"/>   	
+
+	<column name="CLAN_RANK_MARK_1" x="454" y="165" w="24" h="22" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="CLAN_RANK_MARK_2" x="454" y="195" w="24" h="22" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="CLAN_RANK_MARK_3" x="454" y="225" w="24" h="22" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="CLAN_RANK_MARK_4" x="454" y="255" w="24" h="22" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="CLAN_RANK_MARK_5" x="454" y="285" w="24" h="22" color="FFFFFFFF" shadow="FF444444"/>
+</UIDEFINE>

@@ -1,0 +1,224 @@
+<UIDEFINE>
+
+	
+	<msprite name="OPTIONSYSYS_CROSSHAIR_1" sx="202" sy="193" ex="202" ey="193" l="0" t="86" r="16" b="106" texture="UI_Popup_1"/>
+	<ssprite name="OPTIONSYSYS_CROSSHAIR_2" tl="218" tt="193" tr="492" tb="213" l="18" t="86" r="32" b="106" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_3" sx="492" sy="193" ex="492" ey="193" l="34" t="86" r="50" b="106" texture="UI_Popup_1"/>
+
+  	<ssprite name="OPTIONSYSYS_CROSSHAIR_4" tl="202" tt="213" tr="218" tb="313" l="0" t="108" r="16" b="122" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONSYSYS_CROSSHAIR_5" tl="218" tt="213" tr="492" tb="313" l="18" t="108" r="32" b="122" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONSYSYS_CROSSHAIR_6" tl="492" tt="213" tr="508" tb="313" l="34" t="108" r="50" b="122" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_7" sx="202" sy="313" ex="202" ey="313" l="0" t="124" r="16" b="140" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONSYSYS_CROSSHAIR_8" tl="218" tt="313" tr="492" tb="329" l="18" t="124" r="32" b="140" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_9" sx="492" sy="313" ex="492" ey="313" l="34" t="124" r="50" b="140" texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_10" sx="213" sy="197" ex="213" ey="197" l="432" t="104" r="484" b="116" texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_11" sx="212" sy="235" ex="212" ey="235" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_12" sx="212" sy="275" ex="212" ey="275" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_13" sx="229" sy="236" ex="229" ey="236" l="400" t="286" r="471" b="297" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_14" sx="229" sy="276" ex="229" ey="276" l="400" t="297" r="471" b="308" texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_15" sx="310" sy="228" ex="310" ey="228" l="298" t="201" r="342" b="225" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_16" sx="356" sy="234" ex="356" ey="234" l="163" t="0" r="306" b="13" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_17" sx="310" sy="268" ex="310" ey="268" l="298" t="201" r="342" b="225" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_18" sx="356" sy="274" ex="356" ey="274" l="163" t="0" r="306" b="13" texture="UI_Popup_1"/>
+
+  	<hslider name="EFFECTSOUND" x="356" y="228" w="143" h="13">
+    		<sprite l="163" t="14" r="174" b="25" texture="UI_Popup_1"/>
+  	</hslider>
+
+  	<column name="EFFECTSOUNDVALUE" x="310" y="228" w="44" h="24" color="FF696969" shadow="FFE5E1D4" format="VCENTER CENTER"/>
+
+  	<hslider name="BACKSOUND" x="356" y="268" w="143" h="13">
+   		<sprite l="163" t="14" r="174" b="25" texture="UI_Popup_1"/>
+  	</hslider>
+
+  	<column name="BACKSOUNDVALUE" x="310" y="268" w="44" h="24" color="FF696969" shadow="FFE5E1D4" format="VCENTER CENTER"/>
+
+  	
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_19" sx="202" sy="338" ex="202" ey="338" l="0" t="86" r="16" b="106" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONSYSYS_CROSSHAIR_20" tl="218" tt="338" tr="492" tb="358" l="18" t="86" r="32" b="106" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_21" sx="492" sy="338" ex="492" ey="338" l="34" t="86" r="50" b="106" texture="UI_Popup_1"/>
+
+  	<ssprite name="OPTIONSYSYS_CROSSHAIR_22" tl="202" tt="358" tr="218" tb="458" l="0" t="108" r="16" b="122" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONSYSYS_CROSSHAIR_23" tl="218" tt="358" tr="492" tb="458" l="18" t="108" r="32" b="122" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONSYSYS_CROSSHAIR_24" tl="492" tt="358" tr="508" tb="458" l="34" t="108" r="50" b="122" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_25" sx="202" sy="458" ex="202" ey="458" l="0" t="124" r="16" b="140" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONSYSYS_CROSSHAIR_26" tl="218" tt="458" tr="492" tb="474" l="18" t="124" r="32" b="140" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_27" sx="492" sy="458" ex="492" ey="458" l="34" t="124" r="50" b="140" texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_28" sx="213" sy="342" ex="213" ey="342" l="432" t="130" r="469" b="142" texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_29" sx="212" sy="375" ex="212" ey="375" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_30" sx="212" sy="415" ex="212" ey="415" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_31" sx="212" sy="450" ex="212" ey="450" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_32" sx="229" sy="376" ex="229" ey="376" l="400" t="330" r="471" b="340" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_33" sx="229" sy="416" ex="229" ey="416" l="400" t="341" r="471" b="352" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_34" sx="229" sy="451" ex="229" ey="451" l="400" t="352" r="471" b="363" texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_35" sx="310" sy="368" ex="310" ey="368" l="298" t="201" r="342" b="225" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_36" sx="356" sy="374" ex="356" ey="374" l="163" t="0" r="306" b="13" texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_37" sx="324" sy="411" ex="324" ey="411" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_38" sx="418" sy="411" ex="418" ey="411" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_39" sx="324" sy="446" ex="324" ey="446" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_40" sx="418" sy="446" ex="418" ey="446" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_41" sx="355" sy="415" ex="355" ey="415" l="449" t="209" r="470" b="219" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_42" sx="451" sy="415" ex="451" ey="415" l="471" t="209" r="492" b="219" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_43" sx="355" sy="450" ex="355" ey="450" l="449" t="209" r="470" b="219" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_44" sx="451" sy="450" ex="451" ey="450" l="471" t="209" r="492" b="219" texture="UI_Popup_1"/>
+
+  	<hslider name="MOUSE" x="356" y="368" w="143" h="13">
+    		<sprite l="163" t="14" r="174" b="25" texture="UI_Popup_1"/>
+  	</hslider>
+
+  	<column name="MOUSEVALUE" x="310" y="368" w="44" h="24" color="FF696969" shadow="FFE5E1D4" format="VCENTER CENTER"/>
+
+  	<radiobox name="ACCELON" x="324" y="411" w="20" h="20">
+    		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+  	</radiobox>
+
+  	<radiobox name="ACCELOFF" x="418" y="411" w="20" h="20">
+    		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+  	</radiobox>
+
+  	<radiobox name="INVERSEON" x="324" y="446" w="20" h="20">
+    		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+  	</radiobox>
+
+  	<radiobox name="INVERSEOFF" x="418" y="446" w="20" h="20">
+    		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+  	</radiobox>
+
+  	
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_45" sx="516" sy="193" ex="516" ey="193" l="0" t="86" r="16" b="106" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONSYSYS_CROSSHAIR_46" tl="532" tt="193" tr="806" tb="213" l="18" t="86" r="32" b="106" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_47" sx="806" sy="193" ex="806" ey="193" l="34" t="86" r="50" b="106" texture="UI_Popup_1"/>
+
+  	<ssprite name="OPTIONSYSYS_CROSSHAIR_48" tl="516" tt="213" tr="532" tb="313" l="0" t="108" r="16" b="122" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONSYSYS_CROSSHAIR_49" tl="532" tt="213" tr="806" tb="313" l="18" t="108" r="32" b="122" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONSYSYS_CROSSHAIR_50" tl="806" tt="213" tr="822" tb="313" l="34" t="108" r="50" b="122" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_51" sx="516" sy="313" ex="516" ey="313" l="0" t="124" r="16" b="140" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONSYSYS_CROSSHAIR_52" tl="532" tt="313" tr="806" tb="329" l="18" t="124" r="32" b="140" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_53" sx="806" sy="313" ex="806" ey="313" l="34" t="124" r="50" b="140" texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_54" sx="527" sy="198" ex="527" ey="198" l="880" t="979" r="946" b="990" texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_55" sx="526" sy="235" ex="526" ey="235" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_56" sx="526" sy="275" ex="526" ey="275" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_57" sx="552" sy="235" ex="552" ey="235" l="880" t="991" r="946" b="1003" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_58" sx="552" sy="275" ex="552" ey="275" l="880" t="1004" r="946" b="1016" texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_59" sx="638" sy="231" ex="638" ey="231" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_60" sx="696" sy="231" ex="696" ey="231" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_61" sx="754" sy="231" ex="754" ey="231" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_62" sx="638" sy="271" ex="638" ey="271" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_63" sx="732" sy="271" ex="732" ey="271" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_64" sx="665" sy="235" ex="665" ey="235" l="485" t="26" r="497" b="38" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_65" sx="723" sy="235" ex="723" ey="235" l="485" t="39" r="497" b="51" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_66" sx="781" sy="235" ex="781" ey="235" l="485" t="52" r="497" b="64" texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_67" sx="672" sy="275" ex="672" ey="275" l="449" t="209" r="470" b="219" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_68" sx="766" sy="275" ex="766" ey="275" l="471" t="209" r="492" b="219" texture="UI_Popup_1"/>
+
+  	<radiobox name="RECHIGH" x="638" y="231" w="20" h="20">
+    		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+  	</radiobox>
+
+  	<radiobox name="RECMID" x="696" y="231" w="20" h="20">
+    		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+  	</radiobox>
+
+  	<radiobox name="RECLOW" x="754" y="231" w="20" h="20">
+    		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+  	</radiobox>
+
+  	<radiobox name="SHOWIDRECON" x="638" y="271" w="20" h="20">
+    		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+  	</radiobox>
+
+  	<radiobox name="SHOWIDRECOFF" x="732" y="271" w="20" h="20">
+    		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+  	</radiobox>
+
+  	
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_69" sx="516" sy="338" ex="516" ey="338" l="0" t="86" r="16" b="106" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONSYSYS_CROSSHAIR_70" tl="532" tt="338" tr="806" tb="358" l="18" t="86" r="32" b="106" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_71" sx="806" sy="338" ex="806" ey="338" l="34" t="86" r="50" b="106" texture="UI_Popup_1"/>
+
+  	<ssprite name="OPTIONSYSYS_CROSSHAIR_72" tl="516" tt="358" tr="532" tb="458" l="0" t="108" r="16" b="122" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONSYSYS_CROSSHAIR_73" tl="532" tt="358" tr="806" tb="458" l="18" t="108" r="32" b="122" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONSYSYS_CROSSHAIR_74" tl="806" tt="358" tr="822" tb="458" l="34" t="108" r="50" b="122" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_75" sx="516" sy="458" ex="516" ey="458" l="0" t="124" r="16" b="140" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONSYSYS_CROSSHAIR_76" tl="532" tt="458" tr="806" tb="474" l="18" t="124" r="32" b="140" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_77" sx="806" sy="458" ex="806" ey="458" l="34" t="124" r="50" b="140" texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_78" sx="527" sy="342" ex="527" ey="342" l="26" t="720" r="92" b="732" texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_79" sx="526" sy="375" ex="526" ey="375" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_80" sx="526" sy="415" ex="526" ey="415" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+
+	
+	<msprite name="OPTIONSYSYS_CROSSHAIR_81" sx="552" sy="376" ex="552" ey="376" l="26" t="733" r="92" b="745" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_82" sx="552" sy="416" ex="552" ey="416" l="26" t="746" r="92" b="758" texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_83" sx="638" sy="372" ex="638" ey="372" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_84" sx="732" sy="372" ex="732" ey="372" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_85" sx="638" sy="412" ex="638" ey="412" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_86" sx="732" sy="412" ex="732" ey="412" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_87" sx="672" sy="376" ex="672" ey="376" l="449" t="209" r="470" b="219" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_88" sx="766" sy="376" ex="766" ey="376" l="471" t="209" r="492" b="219" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_89" sx="672" sy="416" ex="672" ey="416" l="449" t="209" r="470" b="219" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONSYSYS_CROSSHAIR_90" sx="766" sy="416" ex="766" ey="416" l="471" t="209" r="492" b="219" texture="UI_Popup_1"/>
+
+	<radiobox name="QUESTCLEAR_ON" x="638" y="372" w="20" h="20">
+		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+	</radiobox>
+
+	<radiobox name="QUESTCLEAR_OFF" x="732" y="372" w="20" h="20">
+		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+	</radiobox>
+
+
+	<radiobox name="QUESTING_ON" x="638" y="412" w="20" h="20">
+		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+	</radiobox>
+
+	<radiobox name="QUESTING_OFF" x="732" y="412" w="20" h="20">
+		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+	</radiobox>
+
+</UIDEFINE>

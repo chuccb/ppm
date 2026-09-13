@@ -1,0 +1,11 @@
+<UIDEFINE>  
+
+	<msprite name ="PEPACHI_NOTICE" sx='0' sy='0' ex='300' ey='230' l='520' t='209' r='1024' b='506' texture="PEPAGACHA"/>
+
+	<button name="GACCHA_NOTICE_OK" x='720' y='485' w="80" h="39">
+		<sprite l="868" t="0" r="944" b="32" texture="PEPAGACHA"/>
+		<sprite l="868" t="33" r="944" b="65" texture="PEPAGACHA"/>
+		<sprite l="868" t="66" r="944" b="98" texture="PEPAGACHA"/>
+	</button>  
+
+</UIDEFINE>

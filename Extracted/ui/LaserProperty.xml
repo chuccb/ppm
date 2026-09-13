@@ -1,0 +1,60 @@
+<TUTORIALDEFINE>
+
+<!--
+	type 설명
+
+	gunindex : 레이저건 인덱스
+	guntype  : 기본 레이저는 0, 특수레이저는 1
+	CenterLength  : 중심레이저 지름
+	SideLength    : 중간레이저 지름
+	OutSideLength : 외곽레이저 지름
+	centerTextureName : 중심레이저 텍스쳐
+	sideTextureName : 중간레이저 텍스쳐
+	outsideTextureName : 외곽레이저 텍스쳐
+-->
+	<LASER gunindex="1400" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="1401" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="1402" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="1403" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="1997" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="1998" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="1999" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2000" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2001" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2002" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2003" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2004" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2106" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2107" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2108" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2109" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2110" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2111" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2112" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2129" guntype = "1" CenterLength = "5" SideLength = "7" OutSideLength = "13" centerTextureName="coin1.dds" sideTextureName="coin2.dds" outsideTextureName="coin3.dds"/>
+	<LASER gunindex="2130" guntype = "1" CenterLength = "5" SideLength = "7" OutSideLength = "13" centerTextureName="coin1.dds" sideTextureName="coin2.dds" outsideTextureName="coin3.dds"/>
+	<LASER gunindex="2281" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2282" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2283" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2284" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2393" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBow.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2394" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBow.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2395" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBow.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2396" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBow.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2397" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBow.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2398" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBow.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2399" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBow.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2400" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBow.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2612" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBow.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2613" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBow.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2614" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBow.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2615" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBow.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2736" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2737" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2738" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2739" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2760" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2761" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2762" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+	<LASER gunindex="2763" guntype = "0" CenterLength = "" SideLength = "" OutSideLength = "" centerTextureName="LaiserGunBeam.dds" sideTextureName="" outsideTextureName=""/>
+</TUTORIALDEFINE>

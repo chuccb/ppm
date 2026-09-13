@@ -1,0 +1,40 @@
+<UIDEFINE>
+	<bgmfile filename="bgm/bgm_character.mp3"/>
+	<image name="Clan_Change_Pop02" filename="C_CL.DDS"/>
+
+	<msprite name="CLANCLASSCHANGE_1" sx='383' sy='261' ex='383' ey='261' l='0' t='0' r='258' b='030' texture="Clan_Change_Pop02"/>
+
+	<editbox name="NICKNAME" l='457' t='314' r='626' b='333' linelimit='1' textlimit='20' TCR='255' TCG='255' TCB='255' TCA='255'/>
+
+	<button name="OK" x='513' y='422' w="84" h="28">
+		<sprite l="777" t="881" r="861" b="909" texture="UI_Button" />
+		<sprite l="777" t="910" r="861" b="938" texture="UI_Button" />
+		<sprite l="777" t="939" r="861" b="967" texture="UI_Button" />
+	</button>
+
+	<button name="CANCEL" x='427' y='422' w="84" h="28">
+		<sprite l="85" t="347" r="169" b="375" texture="UI_Button" />
+		<sprite l="85" t="376" r="169" b="404" texture="UI_Button" />
+		<sprite l="85" t="405" r="169" b="433" texture="UI_Button" />
+	</button>
+
+	<hscroll name="CLAN_POSITION_CHANGED" l='483' t='341' r='600' b='360' >
+
+	<element name="master" value='3' color='ffffffff'/>
+	<element name="general" value='2' color='ffffffff'/>
+
+	<button name="LEFT" x="458" y="339" w="23" h="23">
+		<sprite l="952" t="348" r="975" b="371" texture="UI_Button" />
+		<sprite l="952" t="372" r="975" b="395" texture="UI_Button" />
+		<sprite l="952" t="396" r="975" b="419" texture="UI_Button" />
+	</button>
+
+	<button name="RIGHT" x="602" y="339" w="23" h="23">
+		<sprite l="976" t="348" r="999" b="371" texture="UI_Button" />
+		<sprite l="976" t="372" r="999" b="395" texture="UI_Button" />
+		<sprite l="976" t="396" r="999" b="419" texture="UI_Button" />
+	</button>
+	</hscroll>
+
+
+</UIDEFINE>

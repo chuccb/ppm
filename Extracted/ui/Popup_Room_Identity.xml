@@ -1,0 +1,74 @@
+﻿ <UIDEFINE>
+    	<image name="Room_Identity" filename="lobby_01.dds"/>
+	<image name="Room_Identity_Back" filename="tuto_back.dds"/>
+	<image name="Room_Identity03" filename="lobby_03.dds"/>
+
+	<msprite name="USERMATCHING_BACKGROUND" sx="0" sy="0" ex="0" ey="0" l="0" t="0" r="1024" b="768" texture="Room_Identity_Back" />
+
+	
+  	<msprite name="BackGround_IMG" sx='357' sy='144' ex='357' ey='144' l='592' t='723' r='914' b='909' texture="Room_Identity"/>
+
+	
+	<msprite name="PRIVATE" sx='363' sy='167' ex='363' ey='167' l='937' t='596' r='965' b='612' texture="Room_Identity"/>
+	
+	
+	<msprite name="LOCAL" sx='363' sy='167' ex='363' ey='167' l='937' t='630' r='965' b='646' texture="Room_Identity"/>
+
+	
+	<msprite name="ALLMODE" sx='363' sy='167' ex='363' ey='167' l='937' t='579' r='965' b='595' texture="Room_Identity"/>
+
+	
+	<msprite name="LOCALMODE_SECRET" sx='363' sy='167' ex='363' ey='167' l='937' t='647' r='965' b='663' texture="Room_Identity"/>
+
+	
+	
+	<msprite name="ITEMCHECK" 	 sx='522' sy='230' ex='522' ey='230' l='402' t='176' r="416" b="190" texture="UI_Button"/>
+	
+	
+	<msprite name="TEAMBALANCECHECK" sx='522' sy='249' ex='522' ey='249' l='402' t='176' r="416" b="190" texture="UI_Button"/>
+
+	
+	<msprite name="SHUFFLECHECK"	 sx='522' sy='268' ex='522' ey='268' l='402' t='176' r="416" b="190" texture="UI_Button"/>
+	
+	
+	<msprite name="DOUBLEDAMAGE" 	 sx='522' sy='287' ex='522' ey='287' l='402' t='176' r="416" b="190" texture="UI_Button"/>
+
+	
+	<msprite name="LOCALECHECK" 	 sx='522' sy='306' ex='522' ey='306' l='402' t='176' r="416" b="190" texture="UI_Button"/>
+
+	
+	<msprite name="KNIFECHECK" 	 sx='606' sy='230' ex='608' ey='230' l='402' t='176' r="416" b="190" texture="UI_Button"/>
+
+	
+	<msprite name="AI_CHECK" 	 sx='519' sy='226' ex='519' ey='226' l='0' t='69' r='154' b='167' texture="Room_Identity03"/>
+
+	<msprite name="NOSKILL_CHECK" 	 sx='606' sy='249' ex='606' ey='249' l='402' t='176' r="416" b="190" texture="UI_Button"/>
+
+
+	
+	<column name="ROOMNO" x="397" y="167" w="20" h="16" fontsize="12" color="CCCCCC"  format="VCENTER CENTER"/>
+
+	
+	<column name="ROOMNAME" x="428" y="167" w="240" h="16" fontsize="12" color="CCCCCC" format="VCENTER CENTER"/>
+
+	<column name="ROOMMODE" x="406" y="187" w="102" h="16" fontsize="12" color="CCCCCC"  format="VCENTER RIGHT"/>
+	
+	
+	<column name="ROOMMAP" x="363" y="307" w="154" h="15" fontsize="12" color="CCCCCC"  format="VCENTER CENTER"/>
+
+
+	<column name="ROOMMAPIMAGE" x="368" y="230" w="144" h="90" />
+
+	
+	<column name="ROOMPURPOSE" x="562" y="187" w="102" h="16" fontsize="12" color="CCCCCC" format="VCENTER RIGHT"/>
+
+	
+	<column name="ROOMTIME" x="406" y="207" w="102" h="16" fontsize="12" color="CCCCCC"  format="VCENTER RIGHT"/>
+
+	
+	<column name="ROOMREMAINING" x="562" y="207" w="102" h="16" fontsize="12" color="CCCCCC" format="VCENTER RIGHT"/>
+
+	
+	<column name="USERMATCHING_VIS_INFO" x="0" y="147"  w="322" h="186" />
+	<column name="USERMATCHING_ROOMMAPIMAGE" x="368" y="377" w="144" h="90" />
+ </UIDEFINE>

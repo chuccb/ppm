@@ -1,0 +1,67 @@
+<UIDEFINE>
+	<bgmfile filename="bgm/bgm_character.mp3"/>
+	<image name="Clan_Search" filename="C_SE.DDS"/>
+
+	<msprite name="CLANSEARCH_1" sx='304' sy='144' ex='304' ey='144' l='0' t='0' r='415' b='430' texture="Clan_Search"/>
+
+	<editbox name="CLANNAMESEARCH" l='395' t='191' r='498' b='209' linelimit='1' textlimit='20' TCR='255' TCG='255' TCB='255' TCA='255'/>
+	<editbox name="CLANMASTERSEARCH" l='395' t='220' r='498' b='238' linelimit='1' textlimit='20' TCR='255' TCG='255' TCB='255' TCA='255'/>
+
+	<button name="SEARCH" x='448' y='243' w='54' h='22'>
+		<sprite l='416' t='310' r='470' b='332' texture="Clan_Search"/>
+		<sprite l='416' t='333' r='470' b='355' texture="Clan_Search"/>
+		<sprite l='416' t='356' r='470' b='378' texture="Clan_Search"/>
+	</button>
+	
+	<select name="RESULTLIST" count='7' OffX='0' OffY='0'>
+		<rect l='321' t='302' r='473' b='327'/>
+		<rect l='321' t='329' r='473' b='354'/>
+		<rect l='321' t='356' r='473' b='381'/>
+		<rect l='321' t='383' r='473' b='408'/>
+		<rect l='321' t='410' r='473' b='435'/>
+		<rect l='321' t='437' r='473' b='462'/>
+		<rect l='321' t='464' r='473' b='489'/>
+
+		<eventrect name="SCROLL_RECT" x="321" y="302" w="152" h="187"/>
+
+		<column name="SEARCHRESULT" x='3' y='3' w='152' h='19' fontsize='15' color='FFFFFFFF' format='VCENTER CENTER'/>
+
+		<sprite l='416' t='379' r='568' b='404' texture="Clan_Search"/>
+		<sprite l='416' t='405' r='568' b='430' texture="Clan_Search"/>
+		
+		<button name="UP" x='476' y='301' w='18' h='26'>
+			<sprite l="258" t="461" r="281" b="489" texture="UI_Button"/>
+			<sprite l="282" t="461" r="305" b="489" texture="UI_Button"/>
+			<sprite l="306" t="461" r="329" b="489" texture="UI_Button"/>
+		</button>
+
+		<button name="DN" x='476' y='461' w='18' h='26'>
+			<sprite l="258" t="490" r="281" b="518" texture="UI_Button"/>
+			<sprite l="282" t="490" r="305" b="518" texture="UI_Button"/>
+			<sprite l="306" t="490" r="329" b="518" texture="UI_Button"/>
+		</button>
+
+	</select>
+
+	<column name="CLANEMBLEM" x='671' y='186' w='34' h='34' shadow='FF333333'/>
+	<column name="CLANNAME"   x='589' y='230' w='112' h='19' color='FFFFFFFF' format='VCENTER LEFT'/>
+	<column name="CLANMASTER" x='589' y='259' w='110' h='15' color='FFFFFFFF' format='VCENTER LEFT'/>
+	<column name="CLANMEMBER" x='589' y='289' w='110' h='15' color='FFFFFFFF' format='VCENTER LEFT'/>
+	<column name="CLANLEVEL"  x='589' y='319' w='110' h='15' color='FFFFFFFF' format='VCENTER LEFT'/>
+	<column name="CLANSCORE"  x='589' y='349' w='110' h='15' color='FFFFFFFF' format='VCENTER LEFT'/>
+	<column name="CLANNOTICE" x='526' y='406' w='172' h='79' color='FFFFFFFF' format='VTOP  LEFT'/>
+
+
+	<button name="OK" x='624' y='507'  w="84" h="28">
+		<sprite l="777" t="881" r="861" b="909" texture="UI_Button" />
+		<sprite l="777" t="910" r="861" b="938" texture="UI_Button" />
+		<sprite l="777" t="939" r="861" b="967" texture="UI_Button" />
+	</button>
+
+	<button name="CANCEL" x='624' y='537'  w="84" h="28">
+		<sprite l="85" t="347" r="169" b="375" texture="UI_Button" />
+		<sprite l="85" t="376" r="169" b="404" texture="UI_Button" />
+		<sprite l="85" t="405" r="169" b="433" texture="UI_Button" />
+	</button>
+
+</UIDEFINE>

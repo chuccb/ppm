@@ -1,0 +1,15 @@
+<UIDEFINE>
+	<image name="WareHouse_Popup" filename="warehouse.dds"/>
+   	<image name="WareHouse_Popup_Back" filename="tuto_back.dds" />
+
+ 	<msprite name="BG" sx='0' sy='0' ex='0' ey='0' l='0' t='0' r='1024' b='768' texture="WareHouse_Popup_Back"/>
+	<msprite name="POPUP_WARE" sx='276' sy='241' ex='276' ey='241' l='474' t='724 ' r='947' b='1012' texture="WareHouse_Popup"/>
+
+   	<column name ="NOTICE" x ='354' y ='332' w ='317' h ='90' fontsize ='12' color='FF000000'  format='VCENTER LEFT'/>
+
+  	<button name="EXIT" x='666' y='488' w='78' h='34'>
+    		<sprite l='575' t='654' r='652' b='688' texture="WareHouse_Popup"/>
+    		<sprite l='575' t='689' r='652' b='723' texture="WareHouse_Popup"/>
+    		<sprite l='653' t='654' r='730' b='688' texture="WareHouse_Popup"/>
+  	</button>
+</UIDEFINE>

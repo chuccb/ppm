@@ -1,0 +1,25 @@
+<UIDEFINE>
+	<image name="SENDMESSAGE_02" filename="lobby_02.dds"/>		
+	
+	<msprite sx='361' sy='264' ex='361' ey='264' l='0' t='695' r='299' b='937' texture="SENDMESSAGE_02"/>
+	
+
+	<editbox name="FRIENDNAME" l='465' t='313' r='641' b='329' linelimit='1' textlimit='20'  TCR="255" TCG="255" TCB="255" TCA="255" />
+	
+	<editbox name="MESSAGE" l='384' t='344' r='637' b='452' linelimit='5' textlimit='200'  TCR="255" TCG="255" TCB="255" TCA="255" />
+
+	<button name="OK" x='485' y='473' w="84" h="28">
+		<sprite l="777" t="881" r="861" b="909" texture="UI_Button" />
+		<sprite l="777" t="910" r="861" b="938" texture="UI_Button" />
+		<sprite l="777" t="939" r="861" b="967" texture="UI_Button" />
+	</button>
+	
+	<button name="CANCEL" x='571' y='473' w="84" h="28">
+		<sprite l="85" t="347" r="169" b="375" texture="UI_Button" />
+		<sprite l="85" t="376" r="169" b="404" texture="UI_Button" />
+		<sprite l="85" t="405" r="169" b="433" texture="UI_Button" />
+	</button>
+
+
+	
+</UIDEFINE>

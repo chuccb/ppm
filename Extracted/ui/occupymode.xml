@@ -1,0 +1,163 @@
+<UIDEFINE>
+	<image name="OCCUPY" filename="ocuppy_01.dds"/>
+
+	
+	<sprite name="OCCUPY_STATE" x='1' y='1' w='408' h='47' texture="OCCUPY"/>
+
+	
+	<sprite name="A_STATE_DEFULT" x='1' y='154' w='55' h='58' texture="OCCUPY"/>
+	
+	<sprite name="A_STATE_SELECT" x='1 ' y='95' w='55' h='58' texture="OCCUPY"/>
+	
+	<sprite name="B_STATE_DEFULT" x='1' y='272' w='55' h='58' texture="OCCUPY"/>
+
+	<sprite name="B_STATE_SELECT" x='1 ' y='213' w='55' h='58' texture="OCCUPY"/>
+
+	
+	<sprite name="FLAG_IMG_A" x='637' y='567' w='38' h='42' texture="OCCUPY"/>
+	
+	<sprite name="SHIELD_IMG_A" x='677' y='567' w='38' h='42' texture="OCCUPY"/>
+	
+	<sprite name="FLAG_IMG_B" x='637' y='610' w='38' h='42' texture="OCCUPY"/>
+	
+	<sprite name="SHIELD_IMG_B" x='677' y='610' w='38' h='42' texture="OCCUPY"/>
+
+	
+	<sprite name="1ROUND" x='3 ' y='50' w='52' h='14' texture="OCCUPY"/>
+	
+	<sprite name="2ROUND" x='3 ' y='65' w='52' h='14' texture="OCCUPY"/>
+	
+	<sprite name="3ROUND" x='3 ' y='80' w='52' h='14' texture="OCCUPY"/>
+	
+	<sprite name="4ROUND" x='245 ' y='50' w='52' h='14' texture="OCCUPY"/>
+	
+	<sprite name="5ROUND" x='298 ' y='50' w='52' h='14' texture="OCCUPY"/>
+
+	
+	<sprite name="A_A_ICON" x='84' y='50' w='26' h='26' texture="OCCUPY"/>
+	
+	<sprite name="A_B_ICON" x='111' y='50' w='26' h='26' texture="OCCUPY"/>
+	
+	<sprite name="A_C_ICON" x='138' y='50' w='26' h='26' texture="OCCUPY"/>
+
+	
+	<sprite name="B_A_ICON" x='84' y='77' w='26' h='26' texture="OCCUPY"/>
+	
+	<sprite name="B_B_ICON" x='111' y='77' w='26' h='26' texture="OCCUPY"/>
+	
+	<sprite name="B_C_ICON" x='138' y='77' w='26' h='26' texture="OCCUPY"/>
+
+	
+	<sprite name="LEFT_ARROW" x='56' y='50' w='13' h='13' texture="OCCUPY"/>
+	
+	<sprite name="RIGHT_ARROW" x='70' y='50' w='13' h='13' texture="OCCUPY"/>
+	
+	<sprite name="1HALF_TEXT" x='56' y='64' w='27' h='14' texture="OCCUPY"/>
+	
+	<sprite name="2HALF_TEXT" x='56' y='79' w='27' h='14' texture="OCCUPY"/>
+
+	
+	<sprite name="STATE_WINDOW" x='57' y='104' w='347' h='119' texture="OCCUPY"/>
+	
+	<sprite name="NOTICE_WINDOW" x='57' y='224' w='347' h='119' texture="OCCUPY"/>
+
+	
+	<sprite name="A_OCUPPY_TEXT" x='608' y='370' w='202' h='20' texture="OCCUPY"/>
+	
+	<sprite name="B_OCUPPY_TEXT" x='608' y='391' w='202' h='20' texture="OCCUPY"/>
+	
+	<sprite name="C_OCUPPY_TEXT" x='608' y='412' w='202' h='20' texture="OCCUPY"/>
+
+	
+	<sprite name="A_FALL_TEXT" x='405' y='370' w='202' h='20' texture="OCCUPY"/>
+	
+	<sprite name="B_FALL_TEXT" x='405' y='391' w='202' h='20' texture="OCCUPY"/>
+	
+	<sprite name="C_FALL_TEXT" x='405' y='412' w='202' h='20' texture="OCCUPY"/>
+	
+	
+	<sprite name="AB_OCUPPY_TEXT" x='410' y='1' w='229' h='50' texture="OCCUPY"/>
+	
+	<sprite name="AB_FALL_TEXT" x='399' y='52' w='229' h='50' texture="OCCUPY"/>
+
+	
+	<sprite name="E_OCUPPY_TEXT" x='640' y='1' w='210' h='96' texture="OCCUPY"/>
+	
+	<sprite name="OCUPPY_FLAG" x='851' y='1' w='95' h='96' texture="OCCUPY"/>
+
+	
+	<sprite name="LIMITED_WINDOW" x='810' y='104' w='212' h='42' texture="OCCUPY"/>
+	
+	<sprite name="LIMITED_TEXT" x='405' y='271' w='404' h='32' texture="OCCUPY"/>
+
+	
+	<sprite name="DEFENCE_SUCESS_TEXT" x='405' y='104' w='404' h='66' texture="OCCUPY"/>
+
+	<sprite name="DEFENCE_FAIL_TEXT" x='405' y='171' w='404' h='66' texture="OCCUPY"/>
+
+	
+	<sprite name="OCUPPY_SUCESS_TEXT" x='445' y='433' w='404' h='66' texture="OCCUPY"/>
+	
+	<sprite name="OCUPPY_FAIL_TEXT" x='445' y='500' w='404' h='66' texture="OCCUPY"/>
+
+	
+	<sprite name="TIMEOVER_TEXT" x='405' y='238' w='404' h='32' texture="OCCUPY"/>
+
+	
+	<sprite name="OCUPPY_SUCESS_TEXT" x='405' y='304' w='404' h='32' texture="OCCUPY"/>
+
+	
+	<sprite name="OCUPPY_IMAGE" x='810' y='147' w='95' h='96' texture="OCCUPY"/>
+	
+	<sprite name="OCUPPY_IMAGE_A" x='445' y='567' w='95' h='96' texture="OCCUPY"/>
+	
+	<sprite name="OCUPPY_IMAGE_B" x='541' y='567' w='95' h='96' texture="OCCUPY"/>
+	
+	<sprite name="OCUPPY_IMAGE_AB" x='541' y='664' w='95' h='96' texture="OCCUPY"/>
+	
+	<sprite name="OCUPPY_FAIL_IMAGE" x='906' y='341' w='95' h='96' texture="OCCUPY"/>
+	
+	<sprite name="CHANGE_IMAGE" x='906' y='147' w='95' h='96' texture="OCCUPY"/>
+
+	
+	<sprite name="RESPAWN_IMAGE" x='810' y='244' w='95' h='96' texture="OCCUPY"/>
+	
+	<sprite name="LIMITOVER_IMAGE" x='906' y='244' w='95' h='96' texture="OCCUPY"/>
+
+	
+	<sprite name="CENTER_WINDOW" x='0' y='886' w='1024' h='138' texture="OCCUPY"/>
+
+	
+	<sprite name="OCUPPY_GAUGE_BACK" x='1' y='344' w='403' h='43' texture="OCCUPY"/>
+	
+	<sprite name="OCUPPY_GAUGE_BACK_LIGHT" x='1' y='388' w='403' h='43' texture="OCCUPY"/>
+
+	<sprite name="OCUPPY_GAUGE" x='57' y='432' w='347' h='43' texture="OCCUPY"/>
+
+
+	
+	<sprite name="START_ATTACK_TEXT" x='1' y='476' w='443' h='96' texture="OCCUPY"/>
+	
+	<sprite name="START_DEFFENCE_TEXT" x='1' y='573' w='443' h='96' texture="OCCUPY"/>
+	
+
+	<sprite name="OCC_FLAG_RED" x='214' y='65' w='30' h='35' texture="OCCUPY"/>
+	<sprite name="OCC_FLAG_BLUE" x='245' y='65' w='30' h='35' texture="OCCUPY"/>
+	<sprite name="OCC_FLAG_Gray_A"  x='276' y='65' w='30' h='35' texture="OCCUPY"/>
+	<sprite name="OCC_FLAG_Gray_B"  x='307' y='65' w='30' h='35' texture="OCCUPY"/>
+	<sprite name="OCC_FLAG_Gray_C"  x='338' y='65' w='30' h='35' texture="OCCUPY"/>
+
+	
+	<sprites name="OCCUPY_ATTACK_COUNT" w='172' h='132'>
+		<element x='850' y='438' texture="OCCUPY"/>
+    		<element x='850' y='571' texture="OCCUPY"/>
+    		<element x='850' y='704' texture="OCCUPY"/>
+	</sprites>
+
+	
+	<sprites name="OCCUPY_DEF_COUNT" w='172' h='132'>
+		<element x='1' y='670' texture="OCCUPY"/>
+    		<element x='174' y='670' texture="OCCUPY"/>
+    		<element x='347' y='670' texture="OCCUPY"/>
+	</sprites>
+</UIDEFINE>

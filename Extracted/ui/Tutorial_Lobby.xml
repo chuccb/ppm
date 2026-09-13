@@ -1,0 +1,105 @@
+<UIDEFINE>
+	<image name="Tutorial_Lobby_Back" filename="TUTO_BACK.DDS" />
+	<image name="Tutorial_Lobby" filename="tuto_lobby.dds" />
+
+	<msprite name="Tutorial_Lobby_Back" sx='0' sy='0' ex='0' ey='0' l='0' t='0' r='1024' b='768' texture="Tutorial_Lobby_Back"/> 
+	<msprite name="MISSIONMAIN" sx='305' sy='129' ex='305' ey='129' l='0' t='0' r='441' b='481' texture="Tutorial_Lobby" />
+
+	<msprite name="TECH_LIST_FRAME" sx='505' sy='325' ex='505' ey='325' l='623' t='0' r='823' b='222' texture="Tutorial_Lobby" />
+	<msprite name="MODE_LIST_FRAME" sx='505' sy='325' ex='505' ey='325' l='824' t='0' r='1024' b='222' texture="Tutorial_Lobby" />
+	<msprite name="BOOK_LIST_FRAME" sx='505' sy='325' ex='505' ey='325' l='0' t='0' r='0' b='0' texture="Tutorial_Lobby" />
+  
+	<tab name="TUTORIAL_TAP" count ='3' >
+		<page name="TAP_BOOK" x='322' y='325'>
+			<sprite l='442' t='0' r='622' b='72' texture="Tutorial_Lobby" />
+		</page>
+		<page name="TAP_TECH" x='322' y='400' >
+			<sprite l='442' t='73' r='622' b='145' texture="Tutorial_Lobby" />
+			<sprite l='0' t='604' r='180' b='676' texture="Tutorial_Lobby" />
+		</page>
+                <page name="TAP_MODE" x='322' y='475' >
+			<sprite l='442' t='146' r='622' b='218' texture="Tutorial_Lobby" />
+			<sprite l='442' t='219' r='622' b='291' texture="Tutorial_Lobby" />
+		</page>
+	</tab>
+
+	<button name="BOOK_1" x='510' y='330' w='190' h='40' >
+		<sprite l='0' t='482' r='190' b='522' texture="Tutorial_Lobby" />
+		<sprite l='0' t='523' r='190' b='563' texture="Tutorial_Lobby" />
+		<sprite l='0' t='564' r='190' b='604' texture="Tutorial_Lobby" />
+	</button>
+
+	<button name="TECH_1" x='510' y='330' w='190' h='40' >
+		<sprite l='628' t='5' r='818' b='45' texture="Tutorial_Lobby" />
+		<sprite l='628' t='228' r='818' b='268' texture="Tutorial_Lobby" />
+		<sprite l='628' t='451' r='818' b='491' texture="Tutorial_Lobby" />
+	</button>
+	
+	<button name="TECH_2" x='510' y='373' w='190' h='40' >
+		<sprite l='628' t='48' r='818' b='88' texture="Tutorial_Lobby" />
+		<sprite l='628' t='271' r='818' b='311' texture="Tutorial_Lobby" />
+		<sprite l='628' t='494' r='818' b='534' texture="Tutorial_Lobby" />
+		<sprite l='628' t='717' r='818' b='757' texture="Tutorial_Lobby" />
+	</button>
+	
+	<button name="TECH_3" x='510' y='416' w='190' h='40' >
+		<sprite l='628' t='91' r='818' b='131' texture="Tutorial_Lobby" />
+		<sprite l='628' t='314' r='818' b='354' texture="Tutorial_Lobby" />
+		<sprite l='628' t='537' r='818' b='577' texture="Tutorial_Lobby" />
+		<sprite l='628' t='760' r='818' b='800' texture="Tutorial_Lobby" />
+	</button>
+	
+	<button name="TECH_4" x='510' y='459' w='190' h='40' >
+		<sprite l='628' t='134' r='818' b='174' texture="Tutorial_Lobby" />
+		<sprite l='628' t='357' r='818' b='397' texture="Tutorial_Lobby" />
+		<sprite l='628' t='580' r='818' b='620' texture="Tutorial_Lobby" />
+		<sprite l='628' t='803' r='818' b='843' texture="Tutorial_Lobby" />
+	</button>
+	<button name="TECH_5" x='510' y='502' w='190' h='40' >
+		<sprite l='628' t='177' r='818' b='217' texture="Tutorial_Lobby" />
+		<sprite l='628' t='400' r='818' b='440' texture="Tutorial_Lobby" />
+		<sprite l='628' t='623' r='818' b='663' texture="Tutorial_Lobby" />
+		<sprite l='628' t='846' r='818' b='886' texture="Tutorial_Lobby" />
+	</button>
+
+
+	<button name="MODE_1" x='510' y='330' w='190' h='40' >
+		<sprite l='829' t='5' r='1019' b='45' texture="Tutorial_Lobby" />
+		<sprite l='829' t='228' r='1019' b='268' texture="Tutorial_Lobby" />
+		<sprite l='829' t='451' r='1019' b='491' texture="Tutorial_Lobby" />
+	</button>
+	
+	<button name="MODE_2" x='510' y='373' w='190' h='40' >
+		<sprite l='829' t='48' r='1019' b='88' texture="Tutorial_Lobby" />
+		<sprite l='829' t='271' r='1019' b='311' texture="Tutorial_Lobby" />
+		<sprite l='829' t='494' r='1019' b='534' texture="Tutorial_Lobby" />
+		<sprite l='829' t='717' r='1019' b='757' texture="Tutorial_Lobby" />
+	</button>
+	
+	<button name="MODE_3" x='510' y='416'  w='190' h='40' >
+		<sprite l='829' t='91' r='1019' b='131' texture="Tutorial_Lobby" />
+		<sprite l='829' t='314' r='1019' b='354' texture="Tutorial_Lobby" />
+		<sprite l='829' t='537' r='1019' b='577' texture="Tutorial_Lobby" />
+		<sprite l='829' t='760' r='1019' b='800' texture="Tutorial_Lobby" />
+	</button>
+
+	<button name="MODE_4" x='510' y='459'  w='190' h='40' >
+		<sprite l='829' t='134' r='1019' b='174' texture="Tutorial_Lobby" />
+		<sprite l='829' t='357' r='1019' b='397' texture="Tutorial_Lobby" />
+		<sprite l='829' t='580' r='1019' b='620' texture="Tutorial_Lobby" />
+		<sprite l='829' t='803' r='1019' b='843' texture="Tutorial_Lobby" />
+	</button>
+
+	<button name="CLOSE" x='603' y='562' w='110' h='36' >
+		<sprite l='0' t='0' r='0' b='0' texture="Tutorial_Lobby" />
+		<sprite l='191' t='482' r='301' b='518' texture="Tutorial_Lobby" />
+		<sprite l='191' t='520' r='301' b='556' texture="Tutorial_Lobby" />
+	</button>
+
+	<msprite name="COMPLETE_MARK_1" sx='518' sy='341' ex='518' ey='341' l='0' t='980' r='18' b='998' texture="Tutorial_Lobby" />
+	<msprite name="COMPLETE_MARK_2" sx='518' sy='384' ex='518' ey='384' l='0' t='980' r='18' b='998' texture="Tutorial_Lobby" />
+	<msprite name="COMPLETE_MARK_3" sx='518' sy='426' ex='518' ey='426' l='0' t='980' r='18' b='998' texture="Tutorial_Lobby" />
+	<msprite name="COMPLETE_MARK_4" sx='518' sy='470' ex='518' ey='470' l='0' t='980' r='18' b='998' texture="Tutorial_Lobby" />
+	<msprite name="COMPLETE_MARK_5" sx='518' sy='513' ex='518' ey='513' l='0' t='980' r='18' b='998' texture="Tutorial_Lobby" />
+ 
+</UIDEFINE>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- edited with XMLSPY v2004 rel. 3 U (http://www.xmlspy.com) by S-->
+<TUTORIALDEFINE>
+  <image name="TUTO_GAME_TEXT_IMAGE" filename="tuto_game_text.dds"/>
+  <image name="TUTO_T_TEXT_IMAGE" filename="tuto_t_text.dds"/>
+
+  <!-- Pre GameMessage -->
+  <msprite name="TUTO_T_TEXT_BACK" sx='164' sy='581' ex='164' ey='581' l='0' t='850' r='614' b='978' texture="TUTO_T_TEXT_IMAGE"/>
+  <msprite name="TUTO_T_MOVE_CHAR_IMAGE" sx='644' sy='481' ex='644' ey='481' l='0' t='0' r='236' b='228' texture="TUTO_T_TEXT_IMAGE"/>
+  <msprite name="TUTO_T_ATTACK_CHAR_IMAGE" sx='617' sy='481' ex='617' ey='481' l='300' t='0' r='563' b='228' texture="TUTO_T_TEXT_IMAGE"/>
+
+  <msprite name="TUTO_T_MOVE_1_MSG" sx='219' sy='585' ex='219' ey='585' l='0' t='250' r='500' b='370' texture="TUTO_T_TEXT_IMAGE"/>
+  <msprite name="TUTO_T_MOVE_2_MSG" sx='219' sy='585' ex='219' ey='585' l='500' t='250' r='1000' b='370' texture="TUTO_T_TEXT_IMAGE"/>
+  <msprite name="TUTO_T_MOVE_3_MSG" sx='219' sy='585' ex='219' ey='585' l='500' t='370' r='1000' b='490' texture="TUTO_T_TEXT_IMAGE"/>
+  <msprite name="TUTO_T_MOVE_4_MSG" sx='0' sy='0' ex='219' ey='585' l='0' t='490' r='500' b='610' texture="TUTO_T_TEXT_IMAGE"/>
+
+  <msprite name="TUTO_T_ATTACK_1_MSG" sx='0' sy='0' ex='219' ey='585' l='500' t='490' r='1000' b='610' texture="TUTO_T_TEXT_IMAGE"/>
+  <msprite name="TUTO_T_ATTACK_2_MSG" sx='0' sy='0' ex='219' ey='585' l='0' t='610' r='500' b='730' texture="TUTO_T_TEXT_IMAGE"/>
+  <msprite name="TUTO_T_ATTACK_3_MSG" sx='0' sy='0' ex='219' ey='585' l='500' t='610' r='1000' b='730' texture="TUTO_T_TEXT_IMAGE"/>
+  <msprite name="TUTO_T_ATTACK_4_MSG" sx='0' sy='0' ex='219' ey='585' l='0' t='730' r='500' b='850' texture="TUTO_T_TEXT_IMAGE"/>
+  <msprite name="TUTO_T_ATTACK_5_MSG" sx='0' sy='0' ex='219' ey='585' l='500' t='730' r='1000' b='850' texture="TUTO_T_TEXT_IMAGE"/>
+  
+  <!-- Start -->
+  <msprite name="TUTO_START" sx='0' sy='0' ex='205' ey='300' l='301' t='601' r='900' b='750' texture="TUTO_GAME_TEXT_IMAGE"/>
+  
+  <!-- Game Message -->
+  <msprite name="TUTO_T_GMOVE_1_MSG" sx='0' sy='0' ex='715' ey='310' l='300' t='150' r='600' b='300' texture="TUTO_GAME_TEXT_IMAGE"/>
+  <msprite name="TUTO_T_GMOVE_1-1_MSG" sx='0' sy='0' ex='715' ey='310' l='0' t='0' r='300' b='150' texture="TUTO_GAME_TEXT_IMAGE"/>
+  <msprite name="TUTO_T_GMOVE_1-2_MSG" sx='0' sy='0' ex='715' ey='310' l='300' t='0' r='600' b='150' texture="TUTO_GAME_TEXT_IMAGE"/>
+  <msprite name="TUTO_T_GMOVE_1-3_MSG" sx='0' sy='0' ex='715' ey='310' l='600' t='0' r='900' b='150' texture="TUTO_GAME_TEXT_IMAGE"/>
+  <msprite name="TUTO_T_GMOVE_1-4_MSG" sx='0' sy='0' ex='715' ey='310' l='0' t='150' r='300' b='300' texture="TUTO_GAME_TEXT_IMAGE"/>
+
+  <msprite name="TUTO_T_GMOVE_2_MSG" sx='0' sy='0' ex='715' ey='310' l='600' t='150' r='900' b='300' texture="TUTO_GAME_TEXT_IMAGE"/>
+  <msprite name="TUTO_T_GMOVE_3_MSG" sx='0' sy='0' ex='715' ey='310' l='0' t='300' r='300' b='450' texture="TUTO_GAME_TEXT_IMAGE"/>
+  <msprite name="TUTO_T_GMOVE_4_MSG" sx='0' sy='0' ex='715' ey='310' l='300' t='300' r='600' b='450' texture="TUTO_GAME_TEXT_IMAGE"/>
+
+  <msprite name="TUTO_T_GATTACK_1_MSG" sx='0' sy='0' ex='715' ey='310' l='600' t='300' r='900' b='450' texture="TUTO_GAME_TEXT_IMAGE"/>
+  <msprite name="TUTO_T_GATTACK_2_MSG" sx='0' sy='0' ex='715' ey='310' l='0' t='450' r='300' b='600' texture="TUTO_GAME_TEXT_IMAGE"/>
+  <msprite name="TUTO_T_GATTACK_3_MSG" sx='0' sy='0' ex='715' ey='310' l='300' t='450' r='600' b='600' texture="TUTO_GAME_TEXT_IMAGE"/>
+  <msprite name="TUTO_T_GATTACK_4_MSG" sx='0' sy='0' ex='715' ey='310' l='600' t='450' r='900' b='600' texture="TUTO_GAME_TEXT_IMAGE"/>
+  <msprite name="TUTO_T_GATTACK_5_MSG" sx='0' sy='0' ex='715' ey='310' l='0' t='600' r='300' b='750' texture="TUTO_GAME_TEXT_IMAGE"/>  
+</TUTORIALDEFINE>

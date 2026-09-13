@@ -1,0 +1,194 @@
+﻿<UIDEFINE>
+
+	<image name="Store_Weapon_Parts" filename="PARTS.dds"/>
+  
+  	<rect name="INFOIMAGE" l="487" t="588" r="639" b="673"/> 
+	<rect name="INFONAME" l="483" t="554" r="746" b="577"/>  
+	<rect name="INFOEXPLAIN" l="757" t="558" r="978" b="669"/>
+
+	
+	
+	<msprite name="STOREWEAPON_3" sx="92" sy="84" ex="92" ey="84" l="0" t="0" r="361" b="511" texture="MAIN_STORE_2"/>
+	
+	<msprite name="FREE_WEAPON" sx="112" sy="150" ex="112" ey="150" l="705" t="1000" r="1024" b="1024" texture="MAIN_STORE_2"/>
+	<column name="FREE_WEAPON_TIME" x="297" y="156" w="114" h="13" fontsize="12" color="#FFFFCC" shadow="ff000000" format="VLEFT CENTER"/>
+
+	<msprite name="SWITCH_LOCK" sx="356" sy="131" ex="356" ey="131" l="579" t="796" r="645" b="862" texture="MAIN_STORE_2"/>
+	<column name="SWITCH_UNLOCK_TIME" x="349" y="202" w="80" h="17" fontsize="12" color="FFFFFFFF" format="VCENTER CENTER"/>
+
+
+	
+	<weaponslot name="PRIMARYSLOT">
+		<slot name="slot1" x="125" y="141" w="64" h="64">
+			<sprite l="579" t="518" r="643" b="582" texture="UI_Button"/>
+			<sprite l="644" t="518" r="708" b="582" texture="UI_Button"/>
+		</slot>
+		<slot name="slot2" x="197" y="141" w="64" h="64">
+			<sprite l="579" t="518" r="643" b="582" texture="UI_Button"/> 
+			<sprite l="644" t="518" r="708" b="582" texture="UI_Button"/> 
+		</slot>
+		<slot name="slot3" x="269" y="141" w="64" h="64">
+			<sprite l="579" t="518" r="643" b="582" texture="UI_Button"/> 
+			<sprite l="644" t="518" r="708" b="582" texture="UI_Button"/> 
+		</slot>
+	</weaponslot>
+
+	<weaponslot name="SWITCHWEAPONSLOT">		
+		<slot name="slot1" x="357" y="132" w="64" h="64"> 
+			<sprite l="579" t="518" r="643" b="582" texture="UI_Button"/> 
+			<sprite l="644" t="518" r="708" b="582" texture="UI_Button"/> 
+		</slot>
+	</weaponslot>
+
+	<weaponslot name="SECONDARYSLOT">
+		<slot name="slot1" x="132" y="263" w="64" h="64">
+			<sprite l="579" t="518" r="643" b="582" texture="UI_Button"/> 
+			<sprite l="644" t="518" r="708" b="582" texture="UI_Button"/> 
+		</slot>
+		<slot name="slot2" x="204" y="263" w="64" h="64">
+			<sprite l="579" t="518" r="643" b="582" texture="UI_Button"/> 
+			<sprite l="644" t="518" r="708" b="582" texture="UI_Button"/> 
+		</slot>
+		<slot name="slot3" x="276" y="263" w="64" h="64">
+			<sprite l="579" t="518" r="643" b="582" texture="UI_Button"/> 
+			<sprite l="644" t="518" r="708" b="582" texture="UI_Button"/> 
+		</slot>
+		<slot name="slot4" x="348" y="263" w="64" h="64">
+			<sprite l="579" t="518" r="643" b="582" texture="UI_Button"/> 
+			<sprite l="644" t="518" r="708" b="582" texture="UI_Button"/> 
+		</slot>
+	</weaponslot>
+
+	<weaponslot name="MELEESLOT">
+		<slot name="slot1" x="132" y="384" w="64" h="64">
+			<sprite l="579" t="518" r="643" b="582" texture="UI_Button"/> 
+			<sprite l="644" t="518" r="708" b="582" texture="UI_Button"/> 
+		</slot>
+		<slot name="slot2" x="204" y="384" w="64" h="64">
+			<sprite l="579" t="518" r="643" b="582" texture="UI_Button"/> 
+			<sprite l="644" t="518" r="708" b="582" texture="UI_Button"/> 
+		</slot>
+		<slot name="slot3" x="276" y="384" w="64" h="64">
+			<sprite l="579" t="518" r="643" b="582" texture="UI_Button"/> 
+			<sprite l="644" t="518" r="708" b="582" texture="UI_Button"/> 
+		</slot>
+		<slot name="slot4" x="348" y="384" w="64" h="64">
+			<sprite l="579" t="518" r="643" b="582" texture="UI_Button"/> 
+			<sprite l="644" t="518" r="708" b="582" texture="UI_Button"/> 
+		</slot>
+	</weaponslot>
+
+	<weaponslot name="THROWSLOT">
+		<slot name="slot1" x="132" y="505" w="64" h="64">
+			<sprite l="579" t="518" r="643" b="582" texture="UI_Button"/> 
+			<sprite l="644" t="518" r="708" b="582" texture="UI_Button"/> 
+		</slot>
+		<slot name="slot2" x="204" y="505" w="64" h="64">
+			<sprite l="579" t="518" r="643" b="582" texture="UI_Button"/> 
+			<sprite l="644" t="518" r="708" b="582" texture="UI_Button"/> 
+		</slot>
+		<slot name="slot3" x="276" y="505" w="64" h="64">
+			<sprite l="579" t="518" r="643" b="582" texture="UI_Button"/> 
+			<sprite l="644" t="518" r="708" b="582" texture="UI_Button"/> 
+		</slot>
+		<slot name="slot4" x="348" y="505" w="64" h="64">
+			<sprite l="579" t="518" r="643" b="582" texture="UI_Button"/> 
+			<sprite l="644" t="518" r="708" b="582" texture="UI_Button"/> 
+		</slot>
+	</weaponslot>
+
+	<itemslot name="ITEMSLOT">
+		<template>
+			
+			<button name="DURABLE" x="147" y="48" w="38" h="20"> 
+				<sprite l="751" t="348" r="790" b="371" texture="UI_Button"/> 
+				<sprite l="751" t="372" r="790" b="395" texture="UI_Button"/> 
+				<sprite l="751" t="396" r="790" b="419" texture="UI_Button"/> 
+			</button>
+			<button name="ENTERRECYCLEPOPUP" x="187" y="48" w="38" h="20">
+				<sprite l="704" t="348" r="750" b="371" texture="UI_Button"/> 
+				<sprite l="704" t="372" r="750" b="395" texture="UI_Button"/> 
+				<sprite l="704" t="396" r="750" b="419" texture="UI_Button"/> 
+			</button>    
+			<column name="NAME" x="78" y="7"/>
+			<sprite l="0" t="796" r="237" b="872"  texture="MAIN_STORE_1"/>
+			<sprite l="0" t="873" r="237" b="949"  texture="MAIN_STORE_1"/> 
+
+			<sprite l="644" t="518" r="708" b="582" texture="UI_Button"/> 
+			<sprite l="384" t="518" r="448" b="582" texture="UI_Button"/>	
+			<sprite l="449" t="518" r="513" b="582" texture="UI_Button"/>	
+			
+			<sprite l="913" t="0" r="985" b="23" texture="MAIN_STORE_1"/>
+			<sprite l="913" t="24" r="985" b="47" texture="MAIN_STORE_1"/>
+			<sprite l="913" t="48" r="985" b="71" texture="MAIN_STORE_1"/>
+			<sprite l="913" t="72" r="985" b="95" texture="MAIN_STORE_1"/>
+			<sprite l="913" t="96" r="985" b="119" texture="MAIN_STORE_1"/>
+			<sprite l="913" t="120" r="985" b="143" texture="MAIN_STORE_1"/>
+			<sprite l="913" t="144" r="985" b="167" texture="MAIN_STORE_1"/>
+			<sprite l="913" t="168" r="985" b="191" texture="MAIN_STORE_1"/>
+			<sprite l="913" t="192" r="985" b="215" texture="MAIN_STORE_1"/>
+			<sprite l="913" t="216" r="985" b="239" texture="MAIN_STORE_1"/>
+			
+	
+     			<sprite name="RECYCLE_OUTLINE" l="774" t="518" r="838" b="582" texture="UI_Button"/> 
+			<sprite name="ENTER_RECYCLE"  l="576" t="420" r="622" b="443" texture="UI_Button"/>	 
+
+			<sprite name="PARTS01" l='913' t='628' r='925' b='637' texture="Store_Weapon_Parts"/>
+			<sprite name="PARTS02" l='925' t='628' r='937' b='637' texture="Store_Weapon_Parts"/>
+			<sprite name="PARTS03" l='937' t='628' r='949' b='637' texture="Store_Weapon_Parts"/>
+			<sprite name="PARTS04" l='949' t='628' r='961' b='637' texture="Store_Weapon_Parts"/>
+			<sprite name="PARTS05" l='961' t='628' r='973' b='637' texture="Store_Weapon_Parts"/>
+			<sprite name="DOTSIGHT" l='913' t='639' r='925' b='648' texture="Store_Weapon_Parts"/>
+			<sprite name="PARTS06" l='925' t='639' r='937' b='649' texture="Store_Weapon_Parts"/>
+			<sprite name="PARTS07" l='939' t='639' r='948' b='648' texture="Store_Weapon_Parts"/>
+			
+			<sprite name="FREE_WEAPON_SLOT_MARK" l="869" t="978" r="1024" b="1000" texture="MAIN_STORE_2"/> 
+			<sprite name="FREE_WEAPON_SLOT_FULL" l="752" t="978" r="868" b="1000" texture="MAIN_STORE_2"/>
+		</template>
+		
+		<eventrect name="SCROLL_RECT" x="483" y="158" w="474" h="384"/>
+		<slot name="slot1"  x="483" y="158" w="237" h="76"/>
+		<slot name="slot2"  x="721" y="158" w="237" h="76"/>
+		<slot name="slot3"  x="483" y="235" w="237" h="76"/>
+		<slot name="slot4"  x="721" y="235" w="237" h="76"/>
+		<slot name="slot5"  x="483" y="312" w="237" h="76"/>
+		<slot name="slot6"  x="721" y="312" w="237" h="76"/>
+		<slot name="slot7"  x="483" y="389" w="237" h="76"/>
+		<slot name="slot8"  x="721" y="389" w="237" h="76"/>
+		<slot name="slot9"  x="483" y="466" w="237" h="76"/>
+		<slot name="slot10" x="721" y="466" w="237" h="76"/>
+		<button name="UP" x="962" y="158" w="23" h="28">
+			<sprite l="258" t="461" r="281" b="489" texture="UI_Button"/>
+			<sprite l="282" t="461" r="305" b="489" texture="UI_Button"/>
+			<sprite l="306" t="461" r="329" b="489" texture="UI_Button"/>
+		</button>
+		<button name="DN" x="962" y="514" w="23" h="28">
+			<sprite l="258" t="490" r="281" b="518" texture="UI_Button"/>
+			<sprite l="282" t="490" r="305" b="518" texture="UI_Button"/>
+			<sprite l="306" t="490" r="329" b="518" texture="UI_Button"/>
+		</button>   
+	</itemslot>
+
+
+	
+
+	
+	<button name="SYURUI" x="826" y="91" w="63" h="24">
+		<sprite l="385" t="443" r="439" b="467" texture="UI_Button" /> 
+		<sprite l="385" t="468" r="439" b="492" texture="UI_Button" />
+		<sprite l="385" t="493" r="439" b="517" texture="UI_Button" /> 
+	</button>
+
+	<button name="NAME" x="882" y="91" w="54" h="24">
+		<sprite l="330" t="443" r="384" b="467" texture="UI_Button" /> 
+		<sprite l="330" t="468" r="384" b="492" texture="UI_Button" />
+		<sprite l="330" t="493" r="384" b="517" texture="UI_Button" /> 
+	</button>
+
+	<button name="TIME" x="938" y="91" w="54" h="24">
+		<sprite l="615" t="443" r="669" b="467" texture="UI_Button" /> 
+		<sprite l="615" t="468" r="669" b="492" texture="UI_Button" />
+		<sprite l="615" t="493" r="669" b="517" texture="UI_Button" /> 
+	</button>
+
+</UIDEFINE>

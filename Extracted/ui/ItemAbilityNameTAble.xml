@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<AbilityNameSystem_JP>
+  <speed speed="迅速系&#xD;&#xA;" agility="乱戦系" hp="鎮圧系" defence="運搬系" hit="Hit&amp;Run系"></speed>
+  <agility speed="乱戦系" agility="敏捷系" hp="撹乱系" defence="突撃系" hit="連射系" />
+  <hp speed="鎮圧系" agility="撹乱系" hp="強靭系" defence="生存系" hit="対応射撃系" />
+  <defence speed="運搬系" agility="突撃系" hp="生存系" defence="鉄壁系" hit="狙撃系" />
+  <hit speed="Hit&amp;Run系" agility="連射系" hp="対応射撃系" defence="狙撃系" hit="集中系" />
+</AbilityNameSystem_JP>

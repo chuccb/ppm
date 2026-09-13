@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- edited with XMLSPY v2004 rel. 3 U (http://www.xmlspy.com) by Setsu (IMCGames Co., Ltd) -->
+<Gaccha_Scenario>
+	<Play>
+		<Type01 First="0_1" Second="1_0"/>
+		<Type02 First="0_1" Second="1_1"/>
+		<Type03 First="0_1" Second="1_2"/>
+		<Type04 First="0_1" Second="1_3"/>
+		<Type05 First="0_1" Second="1_4"/>
+	</Play>	
+</Gaccha_Scenario>

@@ -1,0 +1,49 @@
+<UITUTORIALANIMATION>
+
+	<IMAGES>
+		<image name="OCCUPY_UI_ANI" texture="ui/game/main02.dds" />
+	</IMAGES>
+
+	<ANIMATION>
+		<TUTORIAL_OCCUPY_SUCCESS>
+			<MSG index='0' position="230, 475, 0" scale="0.7, 0.7, 1.0" rot="0" alpha='10' loop='0' stay='0' elapsTime="100" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />		
+			<MSG index='1' position="230, 475, 0" scale="0.8, 0.8, 1.0" rot="0" alpha='80' loop='0' stay='0' elapsTime="50" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />	
+			<MSG index='2' position="230, 475, 0" scale="1.0, 1.0, 1.0" rot="0.15" alpha='120' loop='0' stay='0' elapsTime="70" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />			
+			<MSG index='3' position="230, 475, 0" scale="1.1, 1.1, 1.0" rot="-0.15" alpha='140' loop='0' stay='0' elapsTime="70" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />	
+			<MSG index='4' position="230, 475, 0" scale="1.0, 1.0, 1.0" rot="0.15" alpha='160' loop='0' stay='0' elapsTime="70" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />			
+			<MSG index='5' position="230, 475, 0" scale="1.1, 1.1, 1.0" rot="-0.15" alpha='180' loop='0' stay='0' elapsTime="70" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />	
+			<MSG index='6' position="230, 475, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='180' loop='0' stay='0' elapsTime="30" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />	
+			<MSG index='7' position="230, 475, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='240' loop='0' stay='0' elapsTime="200" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />	
+			<MSG index='8' position="230, 475, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='240' loop='0' stay='0' elapsTime="200" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />
+			<MSG index='9' position="230, 475, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='180' loop='0' stay='0' elapsTime="80" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />			
+			<MSG index='10' position="230, 475, 0" scale="0.7, 0.7, 1.0" rot="0" alpha='30' loop='0' stay='0' elapsTime="30" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />		
+		</TUTORIAL_OCCUPY_SUCCESS>
+		<TUTORIAL_PULP_CATCH>
+			<MSG index='0' position="230, 475, 0" scale="0.7, 0.7, 1.0" rot="0" alpha='10' loop='0' stay='0' elapsTime="100" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />		
+			<MSG index='1' position="230, 475, 0" scale="0.8, 0.8, 1.0" rot="0" alpha='80' loop='0' stay='0' elapsTime="50" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />	
+			<MSG index='2' position="230, 475, 0" scale="1.0, 1.0, 1.0" rot="0.15" alpha='120' loop='0' stay='0' elapsTime="70" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />			
+			<MSG index='3' position="230, 475, 0" scale="1.1, 1.1, 1.0" rot="-0.15" alpha='140' loop='0' stay='0' elapsTime="70" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />	
+			<MSG index='4' position="230, 475, 0" scale="1.0, 1.0, 1.0" rot="0.15" alpha='160' loop='0' stay='0' elapsTime="70" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />			
+			<MSG index='5' position="230, 475, 0" scale="1.1, 1.1, 1.0" rot="-0.15" alpha='180' loop='0' stay='0' elapsTime="70" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />	
+			<MSG index='6' position="230, 475, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='180' loop='0' stay='0' elapsTime="30" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />	
+			<MSG index='7' position="230, 475, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='240' loop='0' stay='0' elapsTime="200" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />	
+			<MSG index='8' position="230, 475, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='240' loop='0' stay='0' elapsTime="200" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />
+			<MSG index='9' position="230, 475, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='180' loop='0' stay='0' elapsTime="80" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />			
+			<MSG index='10' position="230, 475, 0" scale="0.7, 0.7, 1.0" rot="0" alpha='30' loop='0' stay='0' elapsTime="30" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />		
+		</TUTORIAL_PULP_CATCH>
+		<TUTORIAL_PULP_DESTROY>
+			<MSG index='0' position="230, 475, 0" scale="0.7, 0.7, 1.0" rot="0" alpha='10' loop='0' stay='0' elapsTime="100" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />		
+			<MSG index='1' position="230, 475, 0" scale="0.8, 0.8, 1.0" rot="0" alpha='80' loop='0' stay='0' elapsTime="50" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />	
+			<MSG index='2' position="230, 475, 0" scale="1.0, 1.0, 1.0" rot="0.15" alpha='120' loop='0' stay='0' elapsTime="70" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />			
+			<MSG index='3' position="230, 475, 0" scale="1.1, 1.1, 1.0" rot="-0.15" alpha='140' loop='0' stay='0' elapsTime="70" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />	
+			<MSG index='4' position="230, 475, 0" scale="1.0, 1.0, 1.0" rot="0.15" alpha='160' loop='0' stay='0' elapsTime="70" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />			
+			<MSG index='5' position="230, 475, 0" scale="1.1, 1.1, 1.0" rot="-0.15" alpha='180' loop='0' stay='0' elapsTime="70" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />	
+			<MSG index='6' position="230, 475, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='180' loop='0' stay='0' elapsTime="30" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />	
+			<MSG index='7' position="230, 475, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='240' loop='0' stay='0' elapsTime="200" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />	
+			<MSG index='8' position="230, 475, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='240' loop='0' stay='0' elapsTime="200" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />
+			<MSG index='9' position="230, 475, 0" scale="1.2, 1.2, 1.0" rot="0" alpha='180' loop='0' stay='0' elapsTime="80" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />			
+			<MSG index='10' position="230, 475, 0" scale="0.7, 0.7, 1.0" rot="0" alpha='30' loop='0' stay='0' elapsTime="30" mustShow="1" linkMsgTableID="1132" isCharacter='0' l='1' t='987' r='538' b='1024' spriteName="OCCUPY_UI_ANI" soundName="" />		
+		</TUTORIAL_PULP_DESTROY>
+	</ANIMATION>
+
+</UITUTORIALANIMATION>

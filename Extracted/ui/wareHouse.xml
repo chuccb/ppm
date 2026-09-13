@@ -1,0 +1,255 @@
+<UIDEFINE>
+	<bgmfile filename="bgm/bgm_character.mp3"/>
+	<image name="WareHouse_IMG" filename="warehouse.dds" />
+
+	<msprite name="WAREHOUSE_BG" sx="0" sy="0" ex="0" ey="0" l="0" t="0" r="1024" b="768" texture="UI_Back1"/>
+	<msprite name="WAREHOUSE_BASE" sx="90" sy="80" ex="90" ey="80" l="0" t="0" r="889" b="626" texture="WareHouse_IMG"/>
+
+	
+	
+	<msprite sx="90" sy="0" ex="90" ey="0" l="0" t="999" r="365" b="1024" texture="WareHouse_IMG"/>
+	<msprite name="WAREHOUSE_NETCAFE" sx="461" sy="0" ex="461" ey="0" l="0" t="973" r="546" b="998" texture="UI_Button" />
+	
+
+	<column name="MAINTITLE" x="0" y="0" w="0" h="0" fontsize="12" color="FFFFFFFF" format="VCENTER CENTER" />
+	
+	
+
+	<combobox name="CATEGORY1" maxcount="20" x='542' y='95' w='114' h='20' >
+		<sprite l="0" t="627" r="116" b="649" texture="WareHouse_IMG" />
+		<sprite l="117" t="627" r="233" b="649" texture="WareHouse_IMG" />
+		<column name="ROWTEXT" x='0' y='0' w='116' h='20' color='FF696969' shadow='FFE5E1D4' format='VCENTER CENTER'/>
+		<button name="DROPLIST" x="659" y="94" w="22" h="22">
+			<sprite l="890" t="104" r="912" b="126" texture="WareHouse_IMG"/>
+			<sprite l="913" t="104" r="935" b="126" texture="WareHouse_IMG"/>
+			<sprite l="913" t="104" r="935" b="126" texture="WareHouse_IMG"/>
+		</button>
+	</combobox>
+
+	<combobox name="CATEGORY2" maxcount="20" x='687' y='95' w='114' h='20' >
+		<sprite l="0" t="627" r="116" b="649" texture="WareHouse_IMG" />
+		<sprite l="117" t="627" r="233" b="649" texture="WareHouse_IMG" />
+		<column name="ROWTEXT" x='0' y='0' w='116' h='20' color='FF696969' shadow='FFE5E1D4' format='VCENTER CENTER'/>
+		<button name="DROPLIST" x="804" y="94" w="22" h="22">
+			<sprite l="890" t="104" r="912" b="126" texture="WareHouse_IMG"/>
+			<sprite l="913" t="104" r="935" b="126" texture="WareHouse_IMG"/>
+			<sprite l="913" t="104" r="935" b="126" texture="WareHouse_IMG"/>
+		</button>
+	</combobox>
+
+	<combobox name="CATEGORY3" maxcount="20" x='831' y='95' w='114' h='20' >
+		<sprite l="0" t="627" r="116" b="649" texture="WareHouse_IMG" />
+		<sprite l="117" t="627" r="233" b="649" texture="WareHouse_IMG" />
+		<column name="ROWTEXT" x='0' y='0' w='116' h='20' color='FF696969' shadow='FFE5E1D4' format='VCENTER CENTER'/>
+		<button name="DROPLIST" x="948" y="94" w="22" h="22">
+			<sprite l="890" t="104" r="912" b="126" texture="WareHouse_IMG"/>
+			<sprite l="913" t="104" r="935" b="126" texture="WareHouse_IMG"/>
+			<sprite l="913" t="104" r="935" b="126" texture="WareHouse_IMG"/>
+		</button>
+	</combobox>
+
+	<itemslot	name="WAREHOUSE" showOnlyThumbnail="1" >
+		<template>
+			<sprite name="MOUSE_OVER" l='1' t='650' r='67' b='716' texture="WareHouse_IMG"/>
+		</template>
+		<slot name="slot1" x="96" y="164" w="64" h="64" />
+		<slot name="slot2" x="164" y="164" w="64" h="64" />
+		<slot name="slot3" x="232" y="164" w="64" h="64" />
+		<slot name="slot4" x="300" y="164" w="64" h="64" />
+		<slot name="slot5" x="368" y="164" w="64" h="64" />
+		<slot name="slot6" x="436" y="164" w="64" h="64" />
+		<slot name="slot7" x="96" y="232" w="64" h="64" />
+		<slot name="slot8" x="164" y="232" w="64" h="64" />
+		<slot name="slot9" x="232" y="232" w="64" h="64" />
+		<slot name="slot10" x="300" y="232" w="64" h="64" />
+		<slot name="slot11" x="368" y="232" w="64" h="64" />
+		<slot name="slot12" x="436" y="232" w="64" h="64" />
+		<slot name="slot13" x="96" y="300" w="64" h="64" />
+		<slot name="slot14" x="164" y="300" w="64" h="64" />
+		<slot name="slot15" x="232" y="300" w="64" h="64" />
+		<slot name="slot16" x="300" y="300" w="64" h="64" />
+		<slot name="slot17" x="368" y="300" w="64" h="64" />
+		<slot name="slot18" x="436" y="300" w="64" h="64" />
+		<slot name="slot19" x="96" y="368" w="64" h="64" />
+		<slot name="slot20" x="164" y="368" w="64" h="64" />
+		<slot name="slot21" x="232" y="368" w="64" h="64" />
+		<slot name="slot22" x="300" y="368" w="64" h="64" />
+		<slot name="slot23" x="368" y="368" w="64" h="64" />
+		<slot name="slot24" x="436" y="368" w="64" h="64" />
+		<slot name="slot25" x="96" y="436" w="64" h="64" />
+		<slot name="slot26" x="164" y="436" w="64" h="64" />
+		<slot name="slot27" x="232" y="436" w="64" h="64" />
+		<slot name="slot28" x="300" y="436" w="64" h="64" />
+		<slot name="slot29" x="368" y="436" w="64" h="64" />
+		<slot name="slot30" x="436" y="436" w="64" h="64" />
+		<column name="REMAIN_TIME" x="337" y="134" w="147" h="23" fontsize="12" color="FF000000" shadow="FFFFFFFF" format="VCENTER CENTER"/>
+		<eventrect name="SCROLL_RECT" x="100" y="168" w="430" h="338"/>
+		<button name="UP" x="509" y="168" w="20" h="34">
+			<sprite l="890" t="0" r="909" b="33" texture="WareHouse_IMG"/>
+			<sprite l="890" t="35" r="909" b="68" texture="WareHouse_IMG"/>
+			<sprite l="890" t="70" r="909" b="103" texture="WareHouse_IMG"/>
+		</button>
+		<button name="DN" x="509" y="472" w="20" h="34">
+			<sprite l="911" t="0" r="930" b="33" texture="WareHouse_IMG"/>
+			<sprite l="911" t="35" r="930" b="68" texture="WareHouse_IMG"/>
+			<sprite l="911" t="70" r="930" b="103" texture="WareHouse_IMG"/>
+		</button>
+	</itemslot>
+
+	<itemslot name="INVEN" showOnlyThumbnail="1" >
+		<template>
+			<sprite name="MOUSE_OVER" l='1' t='650' r='67' b='716' texture="WareHouse_IMG"/>
+		</template>
+		<slot name="slot1" x="540" y="164" w="64" h="64" />
+		<slot name="slot2" x="608" y="164" w="64" h="64" />
+		<slot name="slot3" x="676" y="164" w="64" h="64" />
+		<slot name="slot4" x="744" y="164" w="64" h="64" />
+		<slot name="slot5" x="812" y="164" w="64" h="64" />
+		<slot name="slot6" x="880" y="164" w="64" h="64" />
+		<slot name="slot7" x="540" y="232" w="64" h="64" />
+		<slot name="slot8" x="608" y="232" w="64" h="64" />
+		<slot name="slot9" x="676" y="232" w="64" h="64" />
+		<slot name="slot10" x="744" y="232" w="64" h="64" />
+		<slot name="slot11" x="812" y="232" w="64" h="64" />
+		<slot name="slot12" x="880" y="232" w="64" h="64" />
+		<slot name="slot13" x="540" y="300" w="64" h="64" />
+		<slot name="slot14" x="608" y="300" w="64" h="64" />
+		<slot name="slot15" x="676" y="300" w="64" h="64" />
+		<slot name="slot16" x="744" y="300" w="64" h="64" />
+		<slot name="slot17" x="812" y="300" w="64" h="64" />
+		<slot name="slot18" x="880" y="300" w="64" h="64" />
+		<slot name="slot19" x="540" y="368" w="64" h="64" />
+		<slot name="slot20" x="608" y="368" w="64" h="64" />
+		<slot name="slot21" x="676" y="368" w="64" h="64" />
+		<slot name="slot22" x="744" y="368" w="64" h="64" />
+		<slot name="slot23" x="812" y="368" w="64" h="64" />
+		<slot name="slot24" x="880" y="368" w="64" h="64" />
+		<slot name="slot25" x="540" y="436" w="64" h="64" />
+		<slot name="slot26" x="608" y="436" w="64" h="64" />
+		<slot name="slot27" x="676" y="436" w="64" h="64" />
+		<slot name="slot28" x="744" y="436" w="64" h="64" />
+		<slot name="slot29" x="812" y="436" w="64" h="64" />
+		<slot name="slot30" x="880" y="436" w="64" h="64" />
+		<eventrect name="SCROLL_RECT" x="543" y="168" w="430" h="338"/>
+		<button name="UP" x="952" y="168" w="20" h="34">
+			<sprite l="890" t="0" r="909" b="33" texture="WareHouse_IMG"/>
+			<sprite l="890" t="35" r="909" b="68" texture="WareHouse_IMG"/>
+			<sprite l="890" t="70" r="909" b="103" texture="WareHouse_IMG"/>
+		</button>
+		<button name="DN" x="952" y="472" w="20" h="34">
+			<sprite l="911" t="0" r="930" b="33" texture="WareHouse_IMG"/>
+			<sprite l="911" t="35" r="930" b="68" texture="WareHouse_IMG"/>
+			<sprite l="911" t="70" r="930" b="103" texture="WareHouse_IMG"/>
+		</button>
+	</itemslot>
+
+	<button name="PURCHASE" x='484' y='135' w='42' h='21'>
+		<sprite l='890' t='338' r='932' b='359' texture="WareHouse_IMG"/>
+		<sprite l='890' t='360' r='932' b='381' texture="WareHouse_IMG"/>
+		<sprite l='890' t='382' r='932' b='403' texture="WareHouse_IMG"/>
+	</button>
+
+	<button name="ENCHOU_WAREHOUSE" x='484' y='135' w='42' h='21'>
+		<sprite l='933' t='338' r='975' b='359' texture="WareHouse_IMG"/>
+		<sprite l='933' t='360' r='975' b='381' texture="WareHouse_IMG"/>
+		<sprite l='933' t='382' r='975' b='403' texture="WareHouse_IMG"/>
+	</button>
+
+	<button name="EXIT" x="9" y="33" w="62" h="68">
+		<sprite l="0" t="0" r="62" b="68" texture="UI_Button" />
+		<sprite l="0" t="69" r="62" b="137" texture="UI_Button" />
+		<sprite l="0" t="138" r="62" b="206" texture="UI_Button" />
+	</button>
+
+	<button name="WAREHOUSE_1" x="9" y="104" w="62" h="68">
+		<sprite l='890' t='128' r='952' b='196' texture="WareHouse_IMG"/>
+		<sprite l='890' t='197' r='952' b='265' texture="WareHouse_IMG"/>
+		<sprite l='890' t='266' r='952' b='334' texture="WareHouse_IMG"/>
+	</button>
+
+	<button name="WAREHOUSE_2" x="9" y="175" w="62" h="68">
+		<sprite l='953' t='128' r='1015' b='196' texture="WareHouse_IMG"/>
+		<sprite l='953' t='197' r='1015' b='265' texture="WareHouse_IMG"/>
+		<sprite l='953' t='266' r='1015' b='334' texture="WareHouse_IMG"/>
+	</button>
+
+	<button name="WAREHOUSE_3" x="9" y="246" w="62" h="68">
+		<sprite l='953' t='128' r='1015' b='196' texture="WareHouse_IMG"/>
+		<sprite l='953' t='197' r='1015' b='265' texture="WareHouse_IMG"/>
+		<sprite l='953' t='266' r='1015' b='334' texture="WareHouse_IMG"/>
+	</button>
+
+	<button name="WAREHOUSE_4" x="9" y="317" w="62" h="68">
+		<sprite l='953' t='128' r='1015' b='196' texture="WareHouse_IMG"/>
+		<sprite l='953' t='197' r='1015' b='265' texture="WareHouse_IMG"/>
+		<sprite l='953' t='266' r='1015' b='334' texture="WareHouse_IMG"/>
+	</button>
+
+	<button name="WAREHOUSE_5" x="9" y="388" w="62" h="68">
+		<sprite l='890' t='404' r='952' b='472' texture="WareHouse_IMG"/>
+		<sprite l='890' t='473' r='952' b='541' texture="WareHouse_IMG"/>
+		<sprite l='890' t='542' r='952' b='610' texture="WareHouse_IMG"/>
+	</button>
+
+	<button name="WAREHOUSE_6" x="9" y='459' w="62" h="68">
+		<sprite l='890' t='404' r='952' b='472' texture="WareHouse_IMG"/>
+		<sprite l='890' t='473' r='952' b='541' texture="WareHouse_IMG"/>
+		<sprite l='890' t='542' r='952' b='610' texture="WareHouse_IMG"/>
+	</button>
+
+	<rect name="INFOIMAGE" l="482" t="602" r="634" b="687"/>
+	<rect name="INFONAME" l="484" t="579" r="735" b="595"/>
+	<rect name="INFOEXPLAIN" l="752" t="584" r="954" b="678"/>
+
+	<column name="WAREHOUSE_USE_INFO" x="265 " y="133" w="217" h="26" fontsize="12" color="FF000000" format="VCENTER CENTER"/>
+	<column name="WAREHOUSE_PAGE" x="273 " y="518" w="83" h="25" fontsize="14" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="INVENTORY_PAGE" x="716" y="518" w="83" h="25" fontsize="14" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+
+	<column name="AVATAR_SUM" x="174" y="591" w="84" h="16" fontsize="12" color="FFFFFFFF" shadow="FF000000" format="VCENTER RIGHT"/>
+	<column name="WEAPON_SUM" x="174" y="614" w="84" h="16" fontsize="12" color="FFFFFFFF" shadow="FF000000" format="VCENTER RIGHT"/>
+	<column name="VOICE_SUM" x="174" y="637" w="84" h="16" fontsize="12" color="FFFFFFFF" shadow="FF000000" format="VCENTER RIGHT"/>
+	<column name="ETC_SUM" x="174" y="660" w="84" h="16" fontsize="12" color="FFFFFFFF" shadow="FF000000" format="VCENTER RIGHT"/>
+	<column name="USER_TOTAL" x="292" y="634" w="85" h="30" color="FFFFFFFF" shadow="FF000000" format="VCENTER RIGHT"/>
+	<column name="WARE_TOTAL" x="388" y="654" w="72" h="20" color="FFFFFFFF" shadow="FF000000" format="VCENTER RIGHT"/>
+
+
+	<column name="PRECHARABIL0" x="619" y="617" w="28" h="11" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="PRECHARABIL1" x="619" y="631" w="28" h="11" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="PRECHARABIL2" x="619" y="645" w="28" h="11" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="PRECHARABIL3" x="619" y="659" w="28" h="11" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="PRECHARABIL4" x="619" y="673" w="28" h="11" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="ITEMABILITY0" x="662" y="617" w="28" h="11" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="ITEMABILITY1" x="662" y="631" w="28" h="11" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="ITEMABILITY2" x="662" y="645" w="28" h="11" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="ITEMABILITY3" x="662" y="659" w="28" h="11" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="ITEMABILITY4" x="662" y="673" w="28" h="11" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="AFTERCHARABIL0" x="705" y="617" w="28" h="11" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="AFTERCHARABIL1" x="705" y="631" w="28" h="11" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="AFTERCHARABIL2" x="705" y="645" w="28" h="11" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="AFTERCHARABIL3" x="705" y="659" w="28" h="11" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="AFTERCHARABIL4" x="705" y="673" w="28" h="11" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+
+	<column name="ICON_OUT_1" x='9' y='104'  w='62' h='68' shadow='FF000000' />
+	<column name="ICON_OUT_2" x='9' y='175'  w='62' h='68' shadow='FF000000' />
+	<column name="ICON_OUT_3" x='9' y='246'  w='62' h='68' shadow='FF000000' />
+	<column name="ICON_OUT_4" x='9' y='317'  w='62' h='68' shadow='FF000000' />
+	<column name="ICON_OUT_5" x='9' y='388'  w='62' h='68' shadow='FF000000' />
+	<column name="ICON_OUT_6" x='9' y='459'  w='62' h='68' shadow='FF000000' />
+
+	<sprite name="ICON_OUT" l='932' t='0' r='994' b='68' texture="WareHouse_IMG"/>
+
+	<sprite name="ICON_GAUGE" l='664' t='627' r='704' b='631' texture="WareHouse_IMG"/>
+
+	<column name="WARE_TAB_COLUMN" x='105' y='134'  w='85' h='26' shadow='FF000000' />
+
+	<sprite name="WARE_TAB_1" l='234' t='627' r='319' b='653' texture="WareHouse_IMG"/>
+	<sprite name="WARE_TAB_2" l='320' t='627' r='405' b='653' texture="WareHouse_IMG"/>
+	<sprite name="WARE_TAB_3" l='406' t='627' r='491' b='653' texture="WareHouse_IMG"/>
+	<sprite name="WARE_TAB_4" l='492' t='627' r='577' b='653' texture="WareHouse_IMG"/>
+	<sprite name="WARE_TAB_5" l='578' t='627' r='663' b='653' texture="WareHouse_IMG"/>
+	<sprite name="WARE_TAB_6" l='578' t='627' r='663' b='653' texture="WareHouse_IMG"/>
+
+	<column name="NOT_AVAIL_COLUMN" x='98' y='168'  w='407' h='339' shadow='FF000000' />
+	<sprite name="NOT_AVAIL" l="68" t="654" r="474" b="992" texture="WareHouse_IMG"/>
+
+</UIDEFINE>

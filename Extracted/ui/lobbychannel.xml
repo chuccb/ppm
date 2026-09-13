@@ -1,0 +1,82 @@
+<UIDEFINE>
+	<bgmfile filename="bgm/bgm_title.mp3"/>
+	<image name="Lobby_Channel" filename="L_NOTICE.DDS"/>
+	<image name="Lobby_Channel_Banner" filename="BANNER.jpg"/>
+
+	<msprite name="MAIN_BACKGROUND" sx="0" sy="0" ex="0" ey="0" l="0" t="0" r="1024" b="768" texture="UI_Back0"/>
+
+	<msprite name="SERVER_BACKGROUND" sx="64" sy="84" ex="64" ey="84" l="0" t="0" r="912" b="620" texture="Lobby_Channel"/>
+
+	<msprite name="CHANNEL_TITLE"	 sx="64"  sy="77" ex="64"  ey="77" l="54" t="767" r="403" b="794" texture="Lobby_Channel"/>
+	<msprite name="CHANNEL_NETCAFE"  sx="415" sy="77" ex="415" ey="77" l="54" t="795" r="615" b="822" texture="Lobby_Channel"/>
+
+	<button name="SELECT" x="164" y="648" w="151" h="46">
+		<sprite l="0" t="0" r="0" b="0" texture="Lobby_Channel"/>
+		<sprite l="0" t="621" r="151" b="667" texture="Lobby_Channel"/>
+		<sprite l="0" t="668" r="151" b="714" texture="Lobby_Channel"/>
+	</button>
+
+	<button name="EXIT" x="317" y="648" w="86" h="46">
+		<sprite l="0" t="0" r="0" b="0" texture="Lobby_Channel"/>
+		<sprite l="152" t="621" r="238" b="667" texture="Lobby_Channel"/>
+		<sprite l="152" t="668" r="238" b="714" texture="Lobby_Channel"/>
+	</button>
+
+	<button name="GOTOLOGIN" x="76" y="648" w="86" h="46">
+		<sprite l="239" t="621" r="325" b="667" texture="Lobby_Channel"/>
+		<sprite l="239" t="621" r="325" b="667" texture="Lobby_Channel"/>
+		<sprite l="239" t="668" r="325" b="714" texture="Lobby_Channel"/>
+	</button>
+
+	<select name="SERVERS" count="8" OffX="15" OffY="0">
+		<rect l="72" t="138" r="403" b="163"/>
+		<rect l="72" t="165" r="403" b="190"/>
+		<rect l="72" t="192" r="403" b="217"/>
+		<rect l="72" t="219" r="403" b="244"/>
+		<rect l="72" t="246" r="403" b="271"/>
+		<rect l="72" t="273" r="403" b="298"/>
+		<rect l="72" t="300" r="403" b="325"/>
+		<rect l="72" t="327" r="403" b="352"/>
+
+
+		<sprite l="54" t="715" r="385" b="740" texture="Lobby_Channel"/>
+		<sprite l="54" t="741" r="385" b="766" texture="Lobby_Channel"/>
+
+		<column name="ICON"	    x="0" y="0"/>
+		<column name="SERVERNAME"   x="29" y="5" w="105" h="15" color="FFFFFFFF" fontsize="12" format="VCENTER LEFT"/>
+		<column name="KINDOFSERVER" x="145" y="5" w="58" h="15" color="FFFFFFFF" fontsize="13" format="VCENTER CENTER"/>
+		<column name="USERS" 	    x="211" y="5" w="63" h="15" color="FFFFFFFF" fontsize="12" format="VCENTER CENTER"/>
+		<column name="STATE"	    x="277" y="1"/>
+	</select>
+
+	<msprite name="UP_BANNER" sx="417" sy="139" ex="417" ey="139" l="0" t="0" r="550" b="366" texture="Lobby_Channel_Banner"/>
+	<msprite name="DOWN_BANNER" sx="417" sy="512" ex="417" ey="512" l="0" t="400" r="550" b="579" texture="Lobby_Channel_Banner"/>
+
+	<sprite name="CHANNEL_GOOD" 		l="0" t="715" r="53" b="738" texture="Lobby_Channel"/>
+	<sprite name="CHANNEL_BUSY" 		l="0" t="739" r="53" b="762" texture="Lobby_Channel"/>
+	<sprite name="CHANNEL_FULL" 		l="0" t="763" r="53" b="786" texture="Lobby_Channel"/>
+
+	<sprite name="CHANNEL_TNMT_RECEIVE"     l="0" t="787" r="53" b="810" texture="Lobby_Channel"/>	
+	<sprite name="CHANNEL_TNMT_PLAYING"     l="0" t="811" r="53" b="834" texture="Lobby_Channel"/>	
+	<sprite name="CHANNEL_TNMT_END" 	l="0" t="835" r="53" b="858" texture="Lobby_Channel"/>	
+	<sprite name="CHANNEL_TNMT_ADMISSION"   l="0" t="859" r="53" b="882" texture="Lobby_Channel"/>	
+	<sprite name="CHANNEL_TNMT_INFO"	l="0" t="883" r="53" b="906" texture="Lobby_Channel"/>	
+	<sprite name="CHANNEL_TNMT_WAIT"  	l="0" t="907" r="53" b="930" texture="Lobby_Channel"/>
+
+	<sprite name="FACE_1" l="326" t="621" r="353" b="646" texture="Lobby_Channel"/>
+	<sprite name="FACE_2" l="354" t="621" r="381" b="646" texture="Lobby_Channel"/>
+	<sprite name="FACE_3" l="382" t="621" r="409" b="646" texture="Lobby_Channel"/>
+	<sprite name="FACE_4" l="410" t="621" r="437" b="646" texture="Lobby_Channel"/>
+	<sprite name="FACE_5" l="438" t="621" r="465" b="646" texture="Lobby_Channel"/>
+	<sprite name="FACE_6" l="466" t="621" r="493" b="646" texture="Lobby_Channel"/>
+	<sprite name="FACE_7" l="494" t="621" r="521" b="646" texture="Lobby_Channel"/>
+	<sprite name="FACE_8" l="522" t="621" r="549" b="646" texture="Lobby_Channel"/>
+	<sprite name="FACE_9"  l="326" t="647" r="353" b="672" texture="Lobby_Channel"/>
+	<sprite name="FACE_10" l="354" t="647" r="381" b="672" texture="Lobby_Channel"/>
+	<sprite name="FACE_11" l="382" t="647" r="409" b="672" texture="Lobby_Channel"/>
+	<sprite name="FACE_12" l="410" t="647" r="437" b="672" texture="Lobby_Channel"/>
+	<sprite name="FACE_13" l="438" t="647" r="465" b="672" texture="Lobby_Channel"/>
+
+
+
+</UIDEFINE>

@@ -1,0 +1,317 @@
+﻿<UIDEFINE>
+	<bgmfile filename="bgm/bgm_character.mp3"/>
+
+  	<image name="MAIN_STORE_1" filename="STORE_01.dds"/>
+	<image name="MAIN_STORE_2" filename="STORE_02.dds"/>
+	
+
+  	<msprite name="BACKGROUND" sx='0' sy='0' ex='0' ey='0' l='0' t='0' r='1024' b='768' texture="UI_Back1"/>
+ 
+	
+	<msprite name="STORE_TITLE" sx="90" sy="0" ex="90" ey="0" l="0" t="941" r="365" b="966" texture="MAIN_STORE_2"/>
+	<msprite name="STORE_NETCAFE" sx="461" sy="0" ex="461" ey="0" l="0" t="973" r="546" b="998" texture="UI_Button" />
+  	  	
+
+	<column name="TITLE_SERVER"      x="560" y="7" w="61" h="11" fontsize="12" color="FFFFFFFF" format="VCENTER CENTER" />
+	<column name="TITLE_SERVER_TYPE" x="650" y="7" w="41" h="11" fontsize="12" color="FFFFFFFF" format="VCENTER CENTER" />
+
+	
+	<msprite name="SHOP_L" sx="90" sy="33" ex="90" ey="33" l="0" t="0" r="365" b="722" texture="MAIN_STORE_1"/> 
+	<msprite name="SHOP_R" sx="461" sy="33" ex="461" ey="33" l="366" t="0" r="912" b="722" texture="MAIN_STORE_1"/> 
+
+  	<button name="PRESENT_BOX" x="9" y="33" w="62" h="68">
+    		<sprite l="497" t="0" r="559" b="68" texture="UI_Button" />
+		<sprite l="497" t="69" r="559" b="137" texture="UI_Button" />
+		<sprite l="497" t="138" r="559" b="206" texture="UI_Button" />
+  	</button>
+	
+	<column name="GIFT_ICON"  x="4" y="24" w="32" h="33" /> 
+  
+	<button name="LOBBY" x="9" y="104" w="62" h="68">
+		<sprite l="560" t="0" r="622" b="68" texture="UI_Button" />
+		<sprite l="560" t="69" r="622" b="137" texture="UI_Button" />
+		<sprite l="560" t="138" r="622" b="206" texture="UI_Button" />
+	</button>
+
+  	<button name="SHOP" x="9" y="175" w="62" h="68">
+		<sprite l="62" t="0" r="124" b="68" texture="UI_Button" />
+		<sprite l="62" t="69" r="124" b="137" texture="UI_Button" />
+		<sprite l="62" t="138" r="124" b="206" texture="UI_Button" />
+	</button>
+
+	<button name="PARTS" x="9" y="246" w="62" h="68">
+    		<sprite l="686" t="0" r="748" b="68" texture="UI_Button" />
+		<sprite l="686" t="69" r="748" b="137" texture="UI_Button" />
+		<sprite l="686" t="138" r="748" b="206" texture="UI_Button" />
+	</button>
+
+
+	<button name="MIX_SKILL" x="9" y="317" w="62" h="68">
+    		<sprite l="749" t="0" r="811" b="68" texture="UI_Button" />
+		<sprite l="749" t="69" r="811" b="137" texture="UI_Button" />
+		<sprite l="749" t="138" r="811" b="206" texture="UI_Button" />
+  	</button>
+
+	<button name="WAREHOUSE" x="9" y="388" w="62" h="68">
+    		<sprite l="812" t="0" r="874" b="68" texture="UI_Button" />
+		<sprite l="812" t="69" r="874" b="137" texture="UI_Button" />
+		<sprite l="812" t="138" r="874" b="206" texture="UI_Button" />
+  	</button>
+
+
+	
+	<button name="GOTO_GAMEWAITROOM" x="9" y="33" w="62" h="68">
+		<sprite l="956" t="0" r="1018" b="68" texture="UI_Button" />
+		<sprite l="956" t="69" r="1018" b="137" texture="UI_Button" />
+		<sprite l="956" t="138" r="1018" b="206" texture="UI_Button" />
+	</button>
+
+
+  	
+	
+	<tab name="STORETYPE" count='6' basetab="1">
+		<page name="PAPER" x='94' y='42' default='true'>
+			<sprite l='0' t='723' r='57' b='765' texture="MAIN_STORE_1"/>
+
+			<button name="CAT_PAPER_FACE" x='476' y='42' w='80' h='33'>
+				<sprite l="348" t="723" r="431" b="757" texture="MAIN_STORE_1" /> 
+				<sprite l="348" t="758" r="431" b="792" texture="MAIN_STORE_1" />
+				<sprite l="348" t="793" r="431" b="827" texture="MAIN_STORE_1" />
+				<sprite l="348" t="758" r="431" b="792" texture="MAIN_STORE_1" />
+			</button>
+
+			<button name="CAT_PAPER_HAIR" x='562' y='42' w='80' h='33'>
+				<sprite l="432" t="723" r="515" b="757" texture="MAIN_STORE_1" /> 
+				<sprite l="432" t="758" r="515" b="792" texture="MAIN_STORE_1" />
+				<sprite l="432" t="793" r="515" b="827" texture="MAIN_STORE_1" />
+				<sprite l="432" t="758" r="515" b="792" texture="MAIN_STORE_1" />
+			</button>
+
+			<button name="PAPER_VOICE" x='648' y='42' w='80' h='33'>
+		    		<sprite l="516" t="723" r="599" b="757" texture="MAIN_STORE_1" /> 
+				<sprite l="516" t="758" r="599" b="792" texture="MAIN_STORE_1" />
+				<sprite l="516" t="793" r="599" b="827" texture="MAIN_STORE_1" />
+				<sprite l="516" t="758" r="599" b="792" texture="MAIN_STORE_1" />
+		  	</button>
+		</page>
+
+		<page name="DRESS" x='153' y='42'>
+			<sprite l='58' t='723' r='115' b='765' texture="MAIN_STORE_1"/>
+
+			<button name="CAT_DRESS_SET" x="476" y="42" w="83" h="34">
+				<sprite l="600" t="723" r="683" b="757" texture="MAIN_STORE_1" /> 
+				<sprite l="600" t="758" r="683" b="792" texture="MAIN_STORE_1" />
+				<sprite l="600" t="793" r="683" b="827" texture="MAIN_STORE_1" />
+				<sprite l="600" t="758" r="683" b="792" texture="MAIN_STORE_1" />
+			</button>
+
+			<button name="CAT_DRESS_UPPER" x="562" y="42" w="83" h="34">
+				<sprite l="684" t="723" r="767" b="757" texture="MAIN_STORE_1" /> 
+				<sprite l="684" t="758" r="767" b="792" texture="MAIN_STORE_1" />
+				<sprite l="684" t="793" r="767" b="827" texture="MAIN_STORE_1" />
+				<sprite l="684" t="758" r="767" b="792" texture="MAIN_STORE_1" />		
+			</button>
+
+			<button name="CAT_DRESS_PANTS" x="648" y="42" w="83" h="34">
+				<sprite l="768" t="723" r="851" b="757" texture="MAIN_STORE_1" /> 
+				<sprite l="768" t="758" r="851" b="792" texture="MAIN_STORE_1" />
+				<sprite l="768" t="793" r="851" b="827" texture="MAIN_STORE_1" />
+				<sprite l="768" t="758" r="851" b="792" texture="MAIN_STORE_1" />
+			</button>
+
+			<button name="CAT_DRESS_SHOES" x="734" y="42" w="83" h="34">
+				<sprite l="852" t="723" r="935" b="757" texture="MAIN_STORE_1" /> 
+				<sprite l="852" t="758" r="935" b="792" texture="MAIN_STORE_1" />
+				<sprite l="852" t="793" r="935" b="827" texture="MAIN_STORE_1" />
+				<sprite l="852" t="758" r="935" b="792" texture="MAIN_STORE_1" />
+			</button>
+
+			<button name="CAT_DRESS_ACCESSORY" x="820" y="42" w="83" h="34">
+				<sprite l="936" t="723" r="1019" b="757" texture="MAIN_STORE_1" /> 
+				<sprite l="936" t="758" r="1019" b="792" texture="MAIN_STORE_1" />
+				<sprite l="936" t="793" r="1019" b="827" texture="MAIN_STORE_1" />
+				<sprite l="936" t="758" r="1019" b="792" texture="MAIN_STORE_1" />
+			</button>
+		</page>
+
+    		<page name="NEWSKILLSYS" x='212' y='42'>
+      			<sprite l='116' t='723' r='173' b='765' texture="MAIN_STORE_1"/>
+
+			<button name="BTN_NEWSKILL_HEAD" x="476" y="42" w="83" h="34">
+				<sprite l='348' t='828' r='431' b='862' texture="MAIN_STORE_1"/>
+				<sprite l='348' t='863' r='431' b='897' texture="MAIN_STORE_1"/>
+				<sprite l='348' t='898' r='431' b='932' texture="MAIN_STORE_1"/>
+				<sprite l='348' t='863' r='431' b='897' texture="MAIN_STORE_1"/>
+			</button>
+
+			<button name="BTN_NEWSKILL_CLOTH_UP" x="562" y="42" w="83" h="34">
+    				<sprite l="684" t="723" r="767" b="757" texture="MAIN_STORE_1" /> 
+				<sprite l="684" t="758" r="767" b="792" texture="MAIN_STORE_1" />
+				<sprite l="684" t="793" r="767" b="827" texture="MAIN_STORE_1" />
+				<sprite l="684" t="758" r="767" b="792" texture="MAIN_STORE_1" />
+		  	</button>
+
+		  	<button name="BTN_NEWSKILL_CLOTH_DOWN" x="648" y="42" w="83" h="34">
+      				<sprite l="768" t="723" r="851" b="757" texture="MAIN_STORE_1" /> 
+				<sprite l="768" t="758" r="851" b="792" texture="MAIN_STORE_1" />
+				<sprite l="768" t="793" r="851" b="827" texture="MAIN_STORE_1" />
+				<sprite l="768" t="758" r="851" b="792" texture="MAIN_STORE_1" />
+		    	</button>
+
+		  	<button name="BTN_NEWSKILL_SHOES" x="734" y="42" w="83" h="34">
+      				<sprite l="852" t="723" r="935" b="757" texture="MAIN_STORE_1" /> 
+				<sprite l="852" t="758" r="935" b="792" texture="MAIN_STORE_1" />
+				<sprite l="852" t="793" r="935" b="827" texture="MAIN_STORE_1" />
+				<sprite l="852" t="758" r="935" b="792" texture="MAIN_STORE_1" />
+		    	</button>
+
+			<button name="BTN_NEWSKILL_SET" x="820" y="42" w="83" h="34">
+    				<sprite l='432' t='828' r='515' b='862' texture="MAIN_STORE_1"/>
+				<sprite l='432' t='863' r='515' b='897' texture="MAIN_STORE_1"/>
+				<sprite l='432' t='898' r='515' b='932' texture="MAIN_STORE_1"/>
+				<sprite l='432' t='863' r='515' b='897' texture="MAIN_STORE_1"/>
+		  	</button>
+
+			<button name="BTN_NEWSKILL_ACCESSORY" x="906" y="42" w="83" h="34">
+    				<sprite l='516' t='828' r='599' b='862' texture="MAIN_STORE_1"/>
+				<sprite l='516' t='863' r='599' b='897' texture="MAIN_STORE_1"/>
+				<sprite l='516' t='898' r='599' b='932' texture="MAIN_STORE_1"/>
+				<sprite l='516' t='863' r='599' b='897' texture="MAIN_STORE_1"/>
+		  	</button>
+    		</page>   
+ 
+		<page name="WEAPON" x='271' y='42'>
+			<sprite l='174' t='723' r='231' b='765' texture="MAIN_STORE_1"/>
+
+		<button name="PRIMARY" x="476" y="42" w="83" h="34">
+			<sprite l="913" t="240" r="996" b="274" texture="MAIN_STORE_1" /> 
+			<sprite l="913" t="275" r="996" b="309" texture="MAIN_STORE_1" />
+			<sprite l="913" t="310" r="996" b="344" texture="MAIN_STORE_1" /> 
+			<sprite l="913" t="275" r="996" b="309" texture="MAIN_STORE_1" />
+		</button>
+
+		<button name="SECONDARY" x="562" y="42" w="83" h="34">
+			<sprite l="913" t="345" r="996" b="379" texture="MAIN_STORE_1" /> 
+			<sprite l="913" t="380" r="996" b="414" texture="MAIN_STORE_1" />
+			<sprite l="913" t="415" r="996" b="449" texture="MAIN_STORE_1" />
+			<sprite l="913" t="380" r="996" b="414" texture="MAIN_STORE_1" />
+		</button>
+		
+		<button name="MELEE" x="648" y="42" w="83" h="34">
+			<sprite l="913" t="450" r="996" b="484" texture="MAIN_STORE_1" /> 
+			<sprite l="913" t="485" r="996" b="519" texture="MAIN_STORE_1" />
+			<sprite l="913" t="520" r="996" b="554" texture="MAIN_STORE_1" />
+			<sprite l="913" t="485" r="996" b="519" texture="MAIN_STORE_1" />
+		</button>
+		
+		<button name="THROWING" x="734" y="42" w="83" h="34">
+			<sprite l="913" t="555" r="996" b="589" texture="MAIN_STORE_1" /> 
+			<sprite l="913" t="590" r="996" b="624" texture="MAIN_STORE_1" />
+			<sprite l="913" t="625" r="996" b="659" texture="MAIN_STORE_1" /> 
+			<sprite l="913" t="590" r="996" b="624" texture="MAIN_STORE_1" />
+		</button>
+		
+		</page> 
+
+		<page name="PAPERCARD" x='330' y='42'>
+			<sprite l='232' t='723' r='289' b='765' texture="MAIN_STORE_1"/>
+
+			<button name="BTN_CROSSHAIR" x="476" y="42" w="83" h="34">
+				<sprite l="264" t="828" r="347" b="862" texture="MAIN_STORE_1"/>
+				<sprite l="264" t="863" r="347" b="897" texture="MAIN_STORE_1"/>
+				<sprite l="264" t="898" r="347" b="932" texture="MAIN_STORE_1"/>
+				<sprite l="264" t="863" r="347" b="897" texture="MAIN_STORE_1"/>
+			</button>
+
+			<button name="BTN_NAME" x="562" y="42" w="83" h="34">
+				<sprite l="264" t="933" r="347" b="967" texture="MAIN_STORE_1"/>
+				<sprite l="348" t="933" r="431" b="967" texture="MAIN_STORE_1"/>
+				<sprite l="432" t="933" r="515" b="967" texture="MAIN_STORE_1"/>
+				<sprite l="348" t="933" r="431" b="967" texture="MAIN_STORE_1"/>
+			</button>
+		  	<button name="BTN_BOOST" x="648" y="42" w="83" h="34">
+				<sprite l="516" t="933" r="599" b="967" texture="MAIN_STORE_1"/>
+				<sprite l="600" t="933" r="683" b="967" texture="MAIN_STORE_1"/>
+				<sprite l="684" t="933" r="767" b="967" texture="MAIN_STORE_1"/>
+				<sprite l="600" t="933" r="683" b="967" texture="MAIN_STORE_1"/>
+			</button>
+			<button name="BTN_EXTRAABILITY" x="734" y="42" w="83" h="34">
+				<sprite l="768" t="933" r="851" b="967" texture="MAIN_STORE_1"/>
+				<sprite l="852" t="933" r="935" b="967" texture="MAIN_STORE_1"/>
+				<sprite l="936" t="933" r="1019" b="967" texture="MAIN_STORE_1"/>
+				<sprite l="852" t="933" r="935" b="967" texture="MAIN_STORE_1"/>
+			</button>
+		</page> 
+
+		
+	</tab>
+
+	<button name="RECYCLE BUTTON" x="877" y="700" w="116" h="46">
+    		<sprite l="747" t="207" r="863" b="253" texture="UI_Button" />
+		<sprite l="747" t="254" r="863" b="300" texture="UI_Button" />
+		<sprite l="747" t="301" r="863" b="347" texture="UI_Button" />
+  	</button>
+
+        <msprite name="RECYCLE_MESSAGE" sx='963' sy='672' ex='963' ey='672' l='101' t='956' r='133' b='989' texture="MAIN_STORE_1"/> 
+
+  	<column name="CASH" x='162' y='634' w='102' h='20' fontsize="13" color="FFFFFFFF" format='VCENTER RIGHT'/>
+	<column name="PG" x='330' y='634' w='102' h='20' fontsize="13" color="FFFFFFFF"  format='VCENTER RIGHT'/>
+  	<column name="COUPON" x='162' y='658' w='102' h='20' fontsize="13" color="FFFFFFFF"  format='VCENTER RIGHT'/>
+	<column name="COIN" x='330' y='658' w='102' h='20' fontsize="13" color="FFFFFFFF"  format='VCENTER RIGHT'/>
+	
+	
+
+	
+	<editbox name="SEARCH" l='617' t='133' r='759' b='154' linelimit='1' textlimit='22' TCR='255' TCG='255' TCB='255' TCA='255'/>
+	<button name="SEARCH_BTN" x="777" y="129" w="54" h="22" >
+		<sprite l="0" t="956" r="54" b="978" texture="MAIN_STORE_1"/>
+		<sprite l="0" t="979" r="54" b="1001" texture="MAIN_STORE_1"/>
+		<sprite l="0" t="1002" r="54" b="1024" texture="MAIN_STORE_1"/>
+	</button>
+	<button name="SEARCH_DELETE_BTN" x="833" y="129" w="45" h="22" >
+		<sprite l="55" t="956" r="100" b="978" texture="MAIN_STORE_1"/>
+		<sprite l="55" t="979" r="100" b="1001" texture="MAIN_STORE_1"/>
+		<sprite l="55" t="1002" r="100" b="1024" texture="MAIN_STORE_1"/>
+	</button>
+
+
+	
+	<column name="ITEMABILITYCOMBINATIONNAME" x="195" y="472" w="169" h="25" fontsize="22" color="FF000000" shadow='FFCCCCCC' format="VCENTER LEFT"/>
+	<column name="ITEMABILITYCOMBINATIONLEV"  x="369" y="472" w="72" h="25" fontsize="15" color="FF000000" shadow='FFCCCCCC' format="VCENTER CENTER"/>
+
+	
+	<column name="ITEMLEVNUM_0" x="273" y="513" w="20" h="13" fontsize="12" color="FF330000"  format="VCENTER CENTER"/>
+	<column name="ITEMLEVNUM_1" x="273" y="528" w="20" h="13" fontsize="12" color="FF330000"  format="VCENTER CENTER"/>
+	<column name="ITEMLEVNUM_2" x="273" y="543" w="20" h="13" fontsize="12" color="FF330000"  format="VCENTER CENTER"/>
+	<column name="ITEMLEVNUM_3" x="273" y="558" w="20" h="13" fontsize="12" color="FF330000"  format="VCENTER CENTER"/>
+	<column name="ITEMLEVNUM_4" x="273" y="573" w="20" h="13" fontsize="12" color="FF330000"  format="VCENTER CENTER"/>
+
+	
+	<column name="ITEMLEVNAME_0" x="371" y="514" w="66" h="13" fontsize="13" color="FF330000"  format="VCENTER CENTER"/>
+	<column name="ITEMLEVNAME_1" x="371" y="528" w="66" h="13" fontsize="13" color="FF330000"  format="VCENTER CENTER"/>
+	<column name="ITEMLEVNAME_2" x="371" y="543" w="66" h="13" fontsize="13" color="FF330000"  format="VCENTER CENTER"/>
+	<column name="ITEMLEVNAME_3" x="371" y="558" w="66" h="13" fontsize="13" color="FF330000"  format="VCENTER CENTER"/>
+	<column name="ITEMLEVNAME_4" x="371" y="573" w="66" h="13" fontsize="13" color="FF330000"  format="VCENTER CENTER"/>
+
+	<column name="SKILL_GRAPH_PLUS_0" x="295" y="513"  w="74" h="13"/>
+	<column name="SKILL_GRAPH_PLUS_1" x="295" y="528"  w="74" h="13"/>
+	<column name="SKILL_GRAPH_PLUS_2" x="295" y="543"  w="74" h="13"/>
+	<column name="SKILL_GRAPH_PLUS_3" x="295" y="558"  w="74" h="13"/>
+	<column name="SKILL_GRAPH_PLUS_4" x="295" y="573"  w="74" h="13"/>
+
+	<column name="SKILL_GRAPH_MINUS_0" x="243" y="513"  w="74" h="13"/> 
+	<column name="SKILL_GRAPH_MINUS_1" x="243" y="528"  w="74" h="13"/>
+	<column name="SKILL_GRAPH_MINUS_2" x="243" y="543"  w="74" h="13"/>
+	<column name="SKILL_GRAPH_MINUS_3" x="243" y="558"  w="74" h="13"/>
+	<column name="SKILL_GRAPH_MINUS_4" x="243" y="573"  w="74" h="13"/>
+
+	<sprite name="SKILL_GRAPH_0" l='0' t='860' r='74' b='873' texture="UI_Button"/>
+	<sprite name="SKILL_GRAPH_1" l='0' t='873' r='74' b='886' texture="UI_Button"/>
+	<sprite name="SKILL_GRAPH_2" l='0' t='886' r='74' b='899' texture="UI_Button"/>
+	<sprite name="SKILL_GRAPH_3" l='0' t='899' r='74' b='912' texture="UI_Button"/>
+	<sprite name="SKILL_GRAPH_4" l='0' t='912' r='74' b='925' texture="UI_Button"/>
+	<sprite name="SKILL_GRAPH_MINUS" l='0' t='925' r='74' b='938' texture="UI_Button"/>
+	
+	
+	
+</UIDEFINE>

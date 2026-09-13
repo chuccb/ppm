@@ -1,0 +1,11 @@
+<List>
+	<DataList key="BulletHole" />
+	<DataList key="effect" />
+	<DataList key="ui" />
+	<DataList key="ui_temp" />
+	<DataList key="0.xml" />
+	<DataList key="convars.pat" />
+	<DataList key="data.pat" />
+	<DataList key="datarevision.txt" />
+	<DataList key="ClientDataList.xml" />
+</List>

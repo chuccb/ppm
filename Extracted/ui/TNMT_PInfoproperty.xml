@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- edited with XMLSPY v2004 rel. 3 U (http://www.xmlspy.com) by S-->
+<tournamentlistTable>
+	<tournament_8_up comment="tournament 8kang." index="0" size="32">
+		<state pos_1="150 ,120" pos_2="520 ,120" pos_3="150 ,170" pos_4="520 ,170" pos_5="150 ,220" pos_6="520 ,220" pos_7="150 ,270" pos_8="520 ,270" pos_9="150 ,320" pos_10="520 ,320" pos_11="150 ,370" pos_12="520 ,370" pos_13="150 ,420" pos_14="520 ,420" pos_15="150 ,470" pos_16="520 ,470"/>
+	</tournament_8_up>
+	<tournament_8_down comment="tournament 4kang." index="1" size="32">
+		<state pos_1="150 ,120" pos_2="520 ,120" pos_3="150 ,170" pos_4="520 ,170" pos_5="150 ,220" pos_6="520 ,220" pos_7="150 ,270" pos_8="520 ,270" pos_9="150 ,320" pos_10="520 ,320" pos_11="150 ,370" pos_12="520 ,370" pos_13="150 ,420" pos_14="520 ,420" pos_15="150 ,470" pos_16="520 ,470"/>
+	</tournament_8_down>
+</tournamentlistTable>

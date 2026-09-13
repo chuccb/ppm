@@ -1,0 +1,11 @@
+<TUTORIALDEFINE>
+  	<all_loading_image name="GAMEINQUESTIMG" filename="GameInQuestImg.dds"/>
+
+	<msprite name="CLEAR_QUESTS" sx='760' sy='13' ex='760' ey='13' l='0' t='0' r='227' b='54' texture="GAMEINQUESTIMG"/>
+
+	<sprite name="DOING_QUEST_BACK" l='1' t='1' r='60' b='16' texture="GAMEINQUESTIMG"/>
+	<sprite name="DOING_QUEST_FRONT" l='61' t='1' r='116' b='14' texture="GAMEINQUESTIMG"/>
+
+	<column name="CLEAR_QUEST_FINISH_POSITION"  x='150' y='50' w='59' h='15'/>
+
+</TUTORIALDEFINE>

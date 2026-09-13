@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<NewSkillColorTable>
+  <Color_0 speed="90 ,90 ,250" agility="125 ,170 ,250" hp="168 ,75 ,155" def="70 ,155 ,150" hit="173 ,173 ,160" />
+  <Color_1 speed="90 ,90 ,250" agility="160 ,250 ,250" hp="203 ,155 ,155" def="105 ,235 ,150" hit="208 ,253 ,160" />
+  <Color_2 speed="90 ,90 ,250" agility="160 ,250 ,250" hp="245 ,60 ,60" def="148 ,140 ,55" hit="250 ,158 ,65" />
+  <Color_3 speed="90 ,90 ,250" agility="160 ,250 ,250" hp="245 ,60 ,60" def="50 ,220 ,50" hit="250 ,158 ,65" />
+  <Color_4 speed="90 ,90 ,250" agility="160 ,250 ,250" hp="245 ,60 ,60" def="50 ,220 ,50" hit="255 ,255 ,70" />
+</NewSkillColorTable>

@@ -1,0 +1,72 @@
+<UIDEFINE>
+
+	<msprite name="OPTION_1" sx='192' sy='128' ex='192' ey='128' l='0' t='0' r='128' b='34' texture="UI_Popup_1"/>
+	<ssprite name="OPTION_2" tl='320' tt='128' tr='816' tb='162' l='130' t='0' r='144' b='34' texture="UI_Popup_1"/>
+	<msprite name="OPTION_3" sx='816' sy='128' ex='816' ey='128' l='146' t='0' r='162' b='34' texture="UI_Popup_1"/>
+	<msprite name="OPTION_4" sx='201' sy='137' ex='201' ey='137' l='351' t='19' r='398' b='35' texture="UI_Popup_1"/>
+ 
+	<msprite name="OPTION_5" sx='192' sy='162' ex='192' ey='162' l='0' t='35' r='16' b='51' texture="UI_Popup_1"/>
+	<ssprite name="OPTION_6" tl='208' tt='162' tr='816' tb='178' l='18' t='35' r='32' b='51' texture="UI_Popup_1"/>
+	<msprite name="OPTION_7" sx='816' sy='162' ex='816' ey='162' l='34' t='35' r='50' b='51' texture="UI_Popup_1"/>
+	<ssprite name="OPTION_8" tl='192' tt='178' tr='208' tb='577' l='0' t='53' r='16' b='67' texture="UI_Popup_1"/>
+	<ssprite name="OPTION_9" tl='208' tt='178' tr='816' tb='577' l='18' t='53' r='32' b='67' texture="UI_Popup_1"/>
+	<ssprite name="OPTION_10" tl='816' tt='178' tr='832' tb='577' l='34' t='53' r='50' b='67' texture="UI_Popup_1"/>
+	<msprite name="OPTION_11" sx='192' sy='577' ex='192' ey='577' l='0' t='69' r='16' b='85' texture="UI_Popup_1"/>
+	<ssprite name="OPTION_12" tl='208' tt='577' tr='816' tb='593' l='18' t='69' r='32' b='85' texture="UI_Popup_1"/>
+	<msprite name="OPTION_13" sx='816' sy='577' ex='816' ey='577' l='34' t='69' r='50' b='85' texture="UI_Popup_1"/>
+
+	<ssprite name="OPTION_23" tl='197' tt='181' tr='827' tb='183' l='308' t='1' r='322' b='2' texture="UI_Popup_1"/>
+
+
+
+	<msprite name="OPTION_14" sx='197' sy='163' ex='197' ey='163' l='833' t='765' r='928' b='785' texture="UI_Popup_1"/>
+	<msprite name="OPTION_15" sx='294' sy='163' ex='294' ey='163' l='833' t='786' r='928' b='806' texture="UI_Popup_1"/>	
+	<msprite name="OPTION_16" sx='391' sy='163' ex='391' ey='163' l='833' t='807' r='928' b='827' texture="UI_Popup_1"/>	
+	<msprite name="OPTION_17" sx='488' sy='163' ex='488' ey='163' l='833' t='828' r='928' b='848' texture="UI_Popup_1"/>	
+	<msprite name="OPTION_18" sx='585' sy='163' ex='585' ey='163' l='833' t='849' r='928' b='869' texture="UI_Popup_1"/>	
+	<msprite name="OPTION_19" sx='682' sy='163' ex='682' ey='163' l='833' t='870' r='928' b='890' texture="UI_Popup_1"/>	
+
+	<msprite name="OPTION_20" sx='192' sy='592' ex='192' ey='592' l='51' t='35' r='67' b='82' texture="UI_Popup_1"/>
+	<ssprite name="OPTION_21" tl='208' tt='592' tr='816' tb='639' l='69' t='35' r='83' b='82' texture="UI_Popup_1"/>
+	<msprite name="OPTION_22" sx='816' sy='592' ex='816' ey='592' l='85' t='35' r='101' b='82' texture="UI_Popup_1"/>
+
+
+	<tab name="OPTIONTYPE" count='5'>
+		<page name="SYSTEM1" x='197' y='163' default='true'>
+			<sprite l='929' t='765' r='1024' b='785' texture="UI_Popup_1"/>
+		</page>
+		<page name="SYSTEM2" x='294' y='163' default='true'>
+			<sprite l='929' t='786' r='1024' b='806' texture="UI_Popup_1"/>
+		</page>
+		<page name="KEY1" x='391' y='163' default='true'>
+			<sprite l='929' t='807' r='1024' b='827' texture="UI_Popup_1"/>
+		</page>
+		<page name="KEY2" x='488' y='163' default='true'>
+			<sprite l='929' t='828' r='1024' b='848' texture="UI_Popup_1"/>
+		</page>
+		<page name="MACRO" x='585' y='163' default='true'>
+			<sprite l='929' t='849' r='1024' b='869' texture="UI_Popup_1"/>
+		</page>
+		<page name="QUICKJOIN" x='682' y='163' default='true'>
+			<sprite l='929' t='870' r='1024' b='890' texture="UI_Popup_1"/>
+		</page>
+	</tab>
+	
+	<button name="DEFAULT" x='571' y='606' w='84' h='28'>
+		<sprite l='655' t='390' r='739' b='418' texture="UI_Popup_1"/>
+		<sprite l='655' t='419' r='739' b='447' texture="UI_Popup_1"/>
+		<sprite l='655' t='448' r='739' b='476' texture="UI_Popup_1"/>
+	</button>
+	<button name="SAVE" x='657' y='606' w='84' h='28'>
+		<sprite l='570' t='390' r='654' b='418' texture="UI_Popup_1"/>
+		<sprite l='570' t='419' r='654' b='447' texture="UI_Popup_1"/>
+		<sprite l='570' t='448' r='654' b='476' texture="UI_Popup_1"/>
+	</button>
+	<button name="CLOSE" x='743' y='606' w='84' h='28'>
+		<sprite l='740' t='390' r='824' b='418' texture="UI_Popup_1"/>
+		<sprite l='740' t='419' r='824' b='447' texture="UI_Popup_1"/>
+		<sprite l='740' t='448' r='824' b='476' texture="UI_Popup_1"/>
+	</button>
+	
+</UIDEFINE>
+

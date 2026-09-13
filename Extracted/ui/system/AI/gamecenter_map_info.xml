@@ -1,0 +1,18 @@
+﻿<GAMECENTER_MAP_INFO>
+	<GUNSHOOTING_MAP_INFO index="81" time="5" angle="0" langScenarioID="1085" langDialogueID="1084" langClearID="1128" startPos="28, 11, -570" shieldPos="32, -60, -580" shieldhp="1000" feverTime="3000" mapname="ロボットたちの反乱" botlaserTex="0" botplasmaTex="0">
+    <WARNING_LIGHT_POS pos0="-153, -52, -320" pos1="147, -52, -320" pos2="-153, -52, -50" pos3="147, -52, -50" pos4="-153, -52, 300" pos5="147, -52, 300"/>
+    <SHILD_NAME  shild_1="shiled0.dds" shild_2="shiled2.dds" shild_3="shiled3.dds"/>
+  </GUNSHOOTING_MAP_INFO>
+  <GUNSHOOTING_MAP_INFO index="89" time="5" angle="0" langScenarioID="1212"  langDialogueID="1211" langClearID="1213" startPos="5, 130, 172" shieldPos="1, 123, 7" shieldhp="1100" feverTime="3000" mapname="記憶の手掛かり" botlaserTex="1" botplasmaTex="1">
+    <WARNING_LIGHT_POS pos0="-38, 1011, 1217" pos1="26, 1012, 1211" pos2="-4, 1322, 830" pos3="-604, 1334, 592" pos4="583, 1334, 585" pos5="2, 579, 457"/>
+    <SHILD_NAME  shild_1="shiled1_AI2.dds" shild_2="shiled2_AI2.dds" shild_3="shiled3_AI2.dds"/>
+  </GUNSHOOTING_MAP_INFO>
+  <GUNSHOOTING_MAP_INFO_EASY index="81" time="3" angle="0" langScenarioID="1085" langDialogueID="1084" langClearID="1128" startPos="28, 11, -570" shieldPos="32, -60, -580" shieldhp="1000" feverTime="3000" mapname="ロボットたちの反乱" botlaserTex="0" botplasmaTex="0">
+    <WARNING_LIGHT_POS pos0="-153, -52, -320" pos1="147, -52, -320" pos2="-153, -52, -50" pos3="147, -52, -50" pos4="-153, -52, 300" pos5="147, -52, 300"/>
+    <SHILD_NAME  shild_1="shiled0.dds" shild_2="shiled2.dds" shild_3="shiled3.dds"/>
+  </GUNSHOOTING_MAP_INFO_EASY>
+  <GUNSHOOTING_MAP_INFO_EASY index="89" time="3" angle="0" langScenarioID="1212"  langDialogueID="1211" langClearID="1213" startPos="5, 130, 172" shieldPos="1, 123, 7" shieldhp="1100" feverTime="3000" mapname="記憶の手掛かり" botlaserTex="1" botplasmaTex="1">
+    <WARNING_LIGHT_POS pos0="-38, 1011, 1217" pos1="26, 1012, 1211" pos2="-302, 802, 1266" pos3="313, 813, 1270" pos4="311, 356, 1323" pos5="-295, 372, 1292"/>
+    <SHILD_NAME  shild_1="shiled1_AI2.dds" shild_2="shiled2_AI2.dds" shild_3="shiled3_AI2.dds"/>
+  </GUNSHOOTING_MAP_INFO_EASY>
+</GAMECENTER_MAP_INFO>

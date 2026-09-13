@@ -1,0 +1,142 @@
+<UIDEFINE>
+	<bot_image name="Gunshooting_Main" filename="gunshooting.dds"/>
+
+	<sprite name="GRAPH_01" x='0' y='867' w='381' h='157' texture="Gunshooting_Main"/>
+
+	<sprite name="BACK" x='432' y='0' w='40' h='319' texture="Gunshooting_Main"/>
+
+	<sprite name="GAUGE" x='483' y='9' w='20' h='300' texture="Gunshooting_Main"/>
+	
+	<sprite name="FEVER_STAR" x='2' y='48' w='74' h='74' texture="Gunshooting_Main"/>
+	
+	<sprite name="PRESS_F" x='73' y='24' w='87' h='22' texture="Gunshooting_Main"/>
+
+	<sprite name="FEVER_START" x='73' y='1' w='87' h='22' texture="Gunshooting_Main"/>
+
+  
+	<sprite name="GS_TIME" x='0' y='220' w='170' h='30' texture="Gunshooting_Main"/>
+
+  
+	<font name="TIME_Font" w='18' h='18' texture="Gunshooting_Main" >
+		<digit0 x='1' y='124' />
+		<digit1 x='20' y='124' />
+		<digit2 x='39' y='124' />
+		<digit3 x='40' y='124' />
+		<digit4 x='1'  y='143' />
+		<digit5 x='20' y='143' />
+		<digit6 x='39' y='143' />
+		<digit7 x='40' y='143' />
+		<digit8 x='1'  y='162' />
+		<digit9 x='20' y='162' />
+	</font>
+
+  
+	<sprite name="SCORE" x='1' y='251' w='74' h='18' texture="Gunshooting_Main"/>
+
+  
+	<font name="BotScoreFont" w='18' h='18' texture="Gunshooting_Main" >
+		<digit0 x='76' y='251' />
+		<digit1 x='95' y='251' />
+		<digit2 x='114' y='251' />
+		<digit3 x='133' y='251' />
+		<digit4 x='152' y='251' />
+		<digit5 x='76' y='270' />
+		<digit6 x='95' y='270' />
+		<digit7 x='114' y='270' />
+		<digit8 x='133' y='270' />
+		<digit9 x='152' y='270' />
+		<comma x='19' y='270' />
+	</font>
+
+ 
+	<sprite name="ICON_BACK" x='514' y='1' w='223' h='50' texture="Gunshooting_Main"/>
+	<sprite name="ICON_GRAY_QUICK" x='179' y='21' w='42' h='42' texture="Gunshooting_Main"/>
+	<sprite name="ICON_QUICK_LV1" x='224' y='23' w='38' h='38' texture="Gunshooting_Main"/>
+	<sprite name="ICON_QUICK_LV2" x='267' y='23' w='38' h='38' texture="Gunshooting_Main"/>
+	<sprite name="ICON_QUICK_LV3" x='310' y='23' w='38' h='38' texture="Gunshooting_Main"/>
+	<sprite name="ICON_GRAY_WEAK" x='179' y='63' w='42' h='42' texture="Gunshooting_Main"/>
+	<sprite name="ICON_WEAK_LV1" x='224' y='65' w='38' h='38' texture="Gunshooting_Main"/>
+	<sprite name="ICON_WEAK_LV2" x='267' y='65' w='38' h='38' texture="Gunshooting_Main"/>
+	<sprite name="ICON_WEAK_LV3" x='310' y='65' w='38' h='38' texture="Gunshooting_Main"/>
+	<sprite name="ICON_GRAY_FEVER" x='179' y='105' w='42' h='42' texture="Gunshooting_Main"/>
+	<sprite name="ICON_FEVER_LV1" x='224' y='107' w='38' h='38' texture="Gunshooting_Main"/>
+	<sprite name="ICON_FEVER_LV2" x='267' y='107' w='38' h='38' texture="Gunshooting_Main"/>
+	<sprite name="ICON_FEVER_LV3" x='310' y='107' w='38' h='38' texture="Gunshooting_Main"/>
+	<sprite name="ICON_GRAY_COMBO" x='179' y='147' w='42' h='42' texture="Gunshooting_Main"/>
+	<sprite name="ICON_COMBO_LV1" x='224' y='149' w='38' h='38' texture="Gunshooting_Main"/>
+	<sprite name="ICON_COMBO_LV2" x='267' y='149' w='38' h='38' texture="Gunshooting_Main"/>
+	<sprite name="ICON_COMBO_LV3" x='310' y='149' w='38' h='38' texture="Gunshooting_Main"/>
+	<sprite name="ICON_COMBO_LV4" x='135' y='91' w='38' h='38' texture="Gunshooting_Main"/>
+	<sprite name="ICON_COMBO_LV5" x='135' y='133' w='38' h='38' texture="Gunshooting_Main"/>
+	<sprite name="ICON_COMBO_LV6" x='135' y='175' w='38' h='38' texture="Gunshooting_Main"/>
+	<sprite name="ICON_COMBO_LV7" x='181' y='192' w='38' h='38' texture="Gunshooting_Main"/>
+	<sprite name="ICON_COMBO_LV8" x='224' y='192' w='38' h='38' texture="Gunshooting_Main"/>
+	<sprite name="ICON_COMBO_LV9" x='267' y='192' w='38' h='38' texture="Gunshooting_Main"/>
+	<sprite name="ICON_COMBO_LV10" x='310' y='192' w='38' h='38' texture="Gunshooting_Main"/>
+
+ 
+	<sprite name="MAIN" x='1' y='301' w='73' h='95' texture="Gunshooting_Main"/>
+	<sprite name="SUB" x='1' y='397' w='73' h='95' texture="Gunshooting_Main"/>
+	<sprite name="CLOSE" x='75' y='397' w='73' h='95' texture="Gunshooting_Main"/>
+	<sprite name="THROW" x='149' y='397' w='73' h='95' texture="Gunshooting_Main"/>
+	<sprite name="BODY" x='75' y='301' w='356' h='95' texture="Gunshooting_Main"/>
+	<sprite name="SELECT" x='223' y='397' w='68' h='68' texture="Gunshooting_Main"/>
+	<sprite name="NOT_AVA" x='351' y='1' w='66' h='66' texture="Gunshooting_Main"/>
+
+
+	<sprite name="DEFENCE_BACK" x='514' y='52' w='218' h='80' texture="Gunshooting_Main"/>
+	<sprite name="DEFENCE_1" x='514' y='133' w='38' h='34' texture="Gunshooting_Main"/>
+	<sprite name="DEFENCE_2" x='553' y='133' w='38' h='34' texture="Gunshooting_Main"/>
+	<sprite name="DEFENCE_3" x='592' y='133' w='38' h='34' texture="Gunshooting_Main"/>
+	<sprite name="DEFENCE_4" x='514' y='168' w='38' h='34' texture="Gunshooting_Main"/>
+	<sprite name="DEFENCE_5" x='553' y='168' w='38' h='34' texture="Gunshooting_Main"/>
+	<sprite name="DEFENCE_6" x='592' y='168' w='38' h='34' texture="Gunshooting_Main"/>
+	<sprite name="DEFENCE_7" x='514' y='203' w='38' h='34' texture="Gunshooting_Main"/>
+	<sprite name="DEFENCE_8" x='553' y='203' w='38' h='34' texture="Gunshooting_Main"/>
+	<sprite name="DEFENCE_9" x='592' y='203' w='38' h='34' texture="Gunshooting_Main"/>
+	<sprite name="DEFENCE_10" x='514' y='238' w='38' h='34' texture="Gunshooting_Main"/>
+
+	<sprite name="DEFENCE_DIS" x='553' y='238' w='38' h='34' texture="Gunshooting_Main"/>
+
+
+
+	<sprite name="WEAPON_INFIN" x='337' y='256' w='45' h='23' texture="Gunshooting_Main"/>
+
+
+	<sprite name="COMBO" x='292' y='397' w='130' h='29' texture="Gunshooting_Main"/>
+
+ 
+	<sprite name="COMBO_BLUE" x='1' y='591' w='246' h='246' texture="Gunshooting_Main"/>
+
+ 
+	<sprite name="COMBO_WHITE" x='248' y='591' w='283' h='220' texture="Gunshooting_Main"/>
+  
+
+	<font name="COMBO_Font" w='26' h='30' texture="Gunshooting_Main" >
+		<digit0 x='292' y='427' />
+		<digit1 x='319' y='427' />
+		<digit2 x='346' y='427' />
+		<digit3 x='373' y='427' />
+		<digit4 x='292' y='458' />
+		<digit5 x='319' y='458' />
+		<digit6 x='346' y='458' />
+		<digit7 x='292' y='489' />
+		<digit8 x='319' y='489' />
+		<digit9 x='346' y='489' />
+	</font>
+
+	
+	<sprite name="RATIO_COMMA" x='347' y='231' w='16' h='22' texture="Gunshooting_Main"/>
+
+	
+	<sprite name="RATIO_MULTI" x='330' y='231' w='16' h='22' texture="Gunshooting_Main"/>
+
+
+	<sprite name="FEVER_EFFECT" x='717' y='363' w='103' h='102' texture="Gunshooting_Main"/>
+
+	<sprite name="GS_SHOT_TYPE1" x='0' y='541' w='180' h='24' texture="Gunshooting_Main"/>
+	<sprite name="GS_SHOT_TYPE2" x='0' y='493' w='180' h='24' texture="Gunshooting_Main"/>
+	<sprite name="GS_SHOT_TYPE3" x='0' y='565' w='180' h='24' texture="Gunshooting_Main"/>
+	<sprite name="GS_SHOT_TYPE4" x='0' y='517' w='180' h='24' texture="Gunshooting_Main"/>
+
+</UIDEFINE>

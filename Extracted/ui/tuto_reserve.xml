@@ -1,0 +1,15 @@
+<UIDEFINE>
+	<image name="TUTO_MISSION" filename="TUTO_MISSION.dds" />
+	<msprite name="SELECTFRAME_UP" sx='490' sy='311' ex='490' ey='311' l='624' t='908' r='823' b='1022' texture="TUTO_MISSION" />
+	<msprite name="SELECTFRAME_DOWN" sx='490' sy='421' ex='490' ey='421' l='825' t='908' r='1024' b='1022' texture="TUTO_MISSION" />
+
+	<msprite name="RESERVELISTFRAME" sx='495' sy='316' ex='495' ey='316' l='424' t='656' r='613' b='871' texture="TUTO_MISSION" />
+
+	<button name="RESERVE1" x='503' y='325' w='173' h='36' >
+		<sprite l='432' t='665' r='605' b='701' texture="TUTO_MISSION" />
+		<sprite l='622' t='665' r='796' b='701' texture="TUTO_MISSION" />
+		<sprite l='812' t='665' r='985' b='701' texture="TUTO_MISSION" />
+	</button>	
+
+  	<msprite name="RESERVE_COMPLETE_MARK_1" sx='510' sy='335' ex='510' ey='335' l='0' t='980' r='18' b='998' texture="TUTO_MISSION" />
+</UIDEFINE>

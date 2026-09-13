@@ -1,0 +1,135 @@
+﻿<UIDEFINE>
+
+	<image name="OCCUPY2" filename="ocuppy_02.dds"/>
+	<image name="OB" filename="observer_01.dds"/>
+
+
+	
+	
+	<sprite name="GAME_SETTING" x='717' y='567' w='78' h='56' texture="OCCUPY2"/>
+
+	<sprite name="NEW_A_STATE_DEFULT" x='520' y='766' w='81' h='48' texture="OCCUPY2"/>
+	
+	<sprite name="NEW_A_STATE_SELECT" x='602 ' y='766' w='81' h='48' texture="OCCUPY2"/>
+	
+	<sprite name="NEW_B_STATE_DEFULT" x='684' y='766' w='81' h='48' texture="OCCUPY2"/>
+
+	<sprite name="NEW_B_STATE_SELECT" x='766 ' y='766' w='81' h='48' texture="OCCUPY2"/>
+
+	<sprite name="POINT_1000" x='796' y='567' w='37' h='17' texture="OCCUPY2"/> <!-- x479 y31 -->
+  	<sprite name="POINT_700" x='796' y='585' w='37' h='17' texture="OCCUPY2"/>
+	<sprite name="POINT_500" x='796' y='603' w='37' h='17' texture="OCCUPY2"/>
+	<sprite name="POINT_300" x='796' y='621' w='37' h='17' texture="OCCUPY2"/>
+
+	<sprite name="POINT_PLUS_01" x='285' y='837' w='38' h='20' texture="OCCUPY2"/>
+	<sprite name="POINT_PLUS_02" x='324' y='837' w='38' h='20' texture="OCCUPY2"/>
+	<sprite name="POINT_PLUS_03" x='363' y='837' w='38' h='20' texture="OCCUPY2"/>
+	<sprite name="POINT_PLUS_04" x='402' y='837' w='38' h='20' texture="OCCUPY2"/>
+	
+	<sprite name="POINT_PLUS_05" x='285' y='858' w='38' h='20' texture="OCCUPY2"/>
+	<sprite name="POINT_PLUS_06" x='324' y='858' w='38' h='20' texture="OCCUPY2"/>
+	<sprite name="POINT_PLUS_07" x='363' y='858' w='38' h='20' texture="OCCUPY2"/>
+	<sprite name="POINT_PLUS_08" x='402' y='858' w='38' h='20' texture="OCCUPY2"/>
+	<sprite name="POINT_PLUS_10" x='285' y='879' w='38' h='20' texture="OCCUPY2"/>
+
+	<column name="POINT_SCORE_A" x="394" y="36" w="16" h="16" />
+	<column name="POINT_SCORE_B" x="585" y="36" w="16" h="16" />
+
+	<sprite name="SCORE_FLAG_BACK" x='561' y='817' w='58' h='18' texture="OCCUPY2"/>	<!--x='377' y='71' -->
+	
+	<sprite name="SCORE_FLAG_TEAM_A" x='561' y='836' w='21' h='18' texture="OCCUPY2"/> 
+	<sprite name="SCORE_FLAG_TEAM_B" x='583' y='836' w='21' h='18' texture="OCCUPY2"/> 
+	<sprite name="SCORE_FLAG_ALL" x='561' y='855' w='58' h='18' texture="OCCUPY2"/> 
+	
+	<column name="SCORE_FLAG_A" x="377" y="71" w='21' h='18' />
+	<column name="SCORE_FLAG_B" x="568" y="71" w='21' h='18' />
+	
+	
+
+
+
+
+
+	<sprite name="NEW_OCCUPY_STATE" x='637' y='653' w='186' h='82' texture="OCCUPY2"/> <!-- 미니맵아래 게이지 배경 x8 y198 -->
+	
+	<sprite name="OCUPPY_GAUGE_MINI_ING_BLUE" x='130' y='75' w='140' h='8' texture="OCCUPY2"/> <!--미니맵아래 게이지 x42 y210 간격24 -->
+	<sprite name="OCUPPY_GAUGE_MINI_ING_RED" x='130' y='84' w='140' h='8' texture="OCCUPY2"/>
+	
+	<sprite name="OCUPPY_GAUGE_MINI_BLUE" x='130' y='93' w='140' h='8' texture="OCCUPY2"/>
+	<sprite name="OCUPPY_GAUGE_MINI_RED" x='130' y='102' w='140' h='8' texture="OCCUPY2"/>
+
+	
+	
+	<sprite name="MINI_A_A_ICON" x='441' y='817' w='39' h='30' texture="OCCUPY2"/>
+	
+	<sprite name="MINI_A_B_ICON" x='481' y='817' w='39' h='30' texture="OCCUPY2"/>
+	
+	<sprite name="MINI_A_C_ICON" x='521' y='817' w='39' h='30' texture="OCCUPY2"/>
+
+	
+	<sprite name="MINI_B_A_ICON" x='441' y='848' w='39' h='30' texture="OCCUPY2"/>
+	
+	<sprite name="MINI_B_B_ICON" x='481' y='848' w='39' h='30' texture="OCCUPY2"/>
+	
+	<sprite name="MINI_B_C_ICON" x='521' y='848' w='39' h='30' texture="OCCUPY2"/>
+
+	
+	
+	<!-- 점령게이지 -->
+	<sprite name="OCUPPY_GAUGE_BACK_A" x='0' y='0' w='357' h='24' texture="OCCUPY2"/> <!-- x330 y142 -->
+	<sprite name="OCUPPY_GAUGE_BACK_B" x='0' y='25' w='357' h='24' texture="OCCUPY2"/>
+	<sprite name="OCUPPY_GAUGE_BACK_C" x='0' y='50' w='357' h='24' texture="OCCUPY2"/>
+	
+		<!-- x392 y152 -->
+	<sprite name="OCUPPY_GAUGE_ING_BLUE" x='0' y='75' w='270' h='8' texture="OCCUPY2"/>
+	<sprite name="OCUPPY_GAUGE_ING_RED" x='0' y=84' w='270' h='8' texture="OCCUPY2"/>
+
+	<sprite name="OCUPPY_GAUGE_BLUE" x='0' y='93' w='270' h='8' texture="OCCUPY2"/>
+	<sprite name="OCUPPY_GAUGE_RED" x='0' y='102' w='270' h='8' texture="OCCUPY2"/>
+
+	<!-- 점령 게이지용 깃발아이콘 -->
+
+	<sprite name="TEAM_neutral_ICON" x='285' y='804' w='39' h='33' texture="OCCUPY2"/> <!-- x666 y129 -->
+	<sprite name="TEAM_A_ICON" x='325' y='804' w='39' h='33' texture="OCCUPY2"/> 
+	<sprite name="TEAM_B_ICON" x='365' y='804' w='39' h='33' texture="OCCUPY2"/>
+	
+	
+
+	<sprite name="LEFT_ARROW" x='717' y='623' w='14' h='10' texture="OCCUPY2"/>
+	
+	<sprite name="RIGHT_ARROW" x='717' y='634' w='14' h='10' texture="OCCUPY2"/>
+
+	
+	
+	<!-- text -->
+	
+	<sprite name="NEW_A_OCUPPY_TEXT" x='0' y='690' w='200' h='20' texture="OB"/>
+	
+	<sprite name="NEW_B_OCUPPY_TEXT" x='0' y='711' w='200' h='20' texture="OB"/> 
+	
+	<sprite name="NEW_C_OCUPPY_TEXT" x='0' y='732' w='200' h='20' texture="OB"/> 
+
+	
+	<sprite name="NEW_A_FALL_TEXT" x='0' y='754' w='200' h='20' texture="OB"/>
+	
+	<sprite name="NEW_B_FALL_TEXT" x='0' y='774' w='200' h='20' texture="OB"/> 
+	
+	<sprite name="NEW_C_FALL_TEXT" x='0' y='795' w='200' h='20' texture="OB"/> 
+
+	
+	<sprite name="NEW_A_neutral_TEXT" x='0' y='816' w='200' h='20' texture="OB"/>
+	
+	<sprite name="NEW_B_neutral_TEXT" x='0' y='837' w='200' h='20' texture="OB"/> 
+	
+	<sprite name="NEW_C_neutral_TEXT" x='0' y='858' w='200' h='20' texture="OB"/> 
+	
+	
+	
+	<sprite name="NEW_ABC_OCUPPY_TEXT" x='201' y='690' w='236' h='41' texture="OB"/> 
+	<sprite name="NEW_ABC_FALL_TEXT" x='201' y='732' w='236' h='41' texture="OB"/> 
+
+	
+
+	
+	
+</UIDEFINE>

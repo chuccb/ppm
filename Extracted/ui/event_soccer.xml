@@ -1,0 +1,68 @@
+﻿<TUTORIALDEFINE>
+	<image name="SC" filename="soccer.dds" />
+
+	<column name="COUNT_BEFORE" x='501' y='188' w='22' h='28'/>	
+
+	<msprite name="TEAM_B" sx='340' sy='123' ex='340' ey='123' l='0' t='0' r='344' b='395' texture="SC"/>
+	<msprite name="TEAM_A" sx='340' sy='123' ex='340' ey='123' l='0' t='396' r='344' b='791' texture="SC"/>
+	
+	<column name="TEAM_A_MARK" x='479' y='278' w='64' h='64'/>
+	<column name="TEAM_B_MARK" x='479' y='275' w='64' h='64'/>
+
+	<msprite name="GOAL_PANNEL" sx='420' sy='2' ex='420' ey='2' l='0' t='792' r='184' b='876' texture="SC"/>
+	<msprite name="TEAM_AB_BACKGROUND" sx='355' sy='33' ex='355' ey='33' l='345' t='0' r='660' b='38' texture="SC"/> 
+	
+	<msprite name="GOAL_POINT_5"  sx='431' sy='12' ex='431' ey='12'  l="675" t="0" r='695' b='14' texture="SC"/> 
+	<msprite name="GOAL_POINT_7"  sx='431' sy='12' ex='431' ey='12'  l="696" t="0" r='716' b='14' texture="SC"/> 
+	<msprite name="GOAL_POINT_10" sx='431' sy='12' ex='431' ey='12'  l="717" t="0" r='737' b='14' texture="SC"/> 
+	<msprite name="GOAL_POINT_15" sx='431' sy='12' ex='431' ey='12'  l="675" t="33" r='695' b='47' texture="SC"/> 
+	
+	<msprite name="GOAL_M_LINE_A" sx='422' sy='72' ex='422' ey='72'  l="185" t="792" r='365' b='804' texture="SC"/>
+	<msprite name="GOAL_M_LINE_B" sx='422' sy='72' ex='422' ey='72'  l="185" t="805" r='365' b='817' texture="SC"/> 
+	<column name="GOAL_M" x='511' y='73' w='22' h='13'/> 
+	
+	<column name="GOAL_POINT" x='311' y='39' w='24' h='17'/>
+	<column name="TEAM_MARK_A" x='417' y='36' w='32' h='32'/>
+	<column name="TEAM_MARK_B" x='576' y='36' w='32' h='32'/>
+	<column name="GOAL_SCORE_L_0" x='465' y='42' w='18' h='20'/>
+	<column name="GOAL_SCORE_L_1" x='484' y='42' w='18' h='20'/>
+	<column name="GOAL_SCORE_R_0" x='522' y='42' w='18' h='20'/>
+	<column name="GOAL_SCORE_R_1" x='541' y='42' w='18' h='20'/>
+
+	<column name="MIN_10" x='524' y='12' w='12' h='14'/>
+	<column name="MIN_01" x='537' y='12' w='12' h='14'/>
+	<column name="SEC_10" x='566' y='12' w='12' h='14'/>
+	<column name="SEC_01" x='579' y='12' w='12' h='14'/>
+
+	<msprite name="BALL_RESPON" sx='390' sy='116' ex='390' ey='116' l='345' t='39' r='589' b='73' texture="SC"/>
+
+	<msprite name="MY_BALL" sx='8' sy='350' ex='8' ey='350' l="739" t="0" r='883' b='91' texture="SC"/>
+
+	<msprite name="GOAL_DEFAULT_PNNEL" sx='402' sy='145' ex='402' ey='145' l='345' t='125' r='565' b='172' texture="SC"/>		
+
+	<column name="GOAL_LEVEL_MARK" x='8' y='262' w='16' h='16'/>
+	<column name="GOAL_NAME" x='25' y='264' w='120' h='11'/>  
+
+	<column name="GOALS_10" x='48' y='409' w='11' h='15'/>
+	<column name="GOALS_01" x='59' y='409' w='11' h='15'/>
+	
+	<column name="GOAL_PENDANT" x='9' y='259' w='142' h='142'/>
+	<msprite name="GOAL_PENDANT_BG"  sx='8' sy='250' ex='8' ey='250' l='345' t='285' r='489' b='476' texture="SC"/>
+
+	<msprite name="TEAM_MARK_PENDANT_A" sx='11' sy='363' ex='11' ey='363' l='426' t='506' r='462' b='542' texture="SC"/>
+	<msprite name="TEAM_MARK_PENDANT_B" sx='11' sy='363' ex='11' ey='363' l='389' t='506' r='425' b='542' texture="SC"/>
+
+	<msprite name="SRURU" sx='8' sy='412' ex='8' ey='412' l='591' t='41' r='641' b='94' texture="SC"/>
+	<msprite name="SRURU_GOAL" sx='8' sy='412' ex='8' ey='412' l='591' t='95' r='641' b='148' texture="SC"/>
+
+	<msprite name="GOAL_SUCCESS_TEXT" sx='446' sy='199' ex='446' ey='199' l='345' t='101' r='477' b='123' texture="SC"/>
+	
+	<msprite name="GOAL_FAIL_TEXT" sx='446' sy='199' ex='446' ey='199' l='345' t='78' r='477' b='100' texture="SC"/>
+
+	<msprite name="MY_TEAM_MARK_A" sx='357' sy='35' ex='357' ey='35'  l="884" t="0" r='982' b='34' texture="SC"/> 
+	<msprite name="MY_TEAM_MARK_B" sx='570' sy='35' ex='570' ey='35'  l="884" t="35" r='982' b='69' texture="SC"/> 
+
+	<msprite name="TEAM_GOAL_A" sx='322' sy='25' ex='322' ey='25'  l="490" t="368" r='544' b='422' texture="SC"/> 
+	<msprite name="TEAM_GOAL_B" sx='649' sy='25' ex='649' ey='25'  l="490" t="423" r='544' b='477' texture="SC"/> 
+
+</TUTORIALDEFINE>

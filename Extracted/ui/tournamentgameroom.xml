@@ -1,0 +1,223 @@
+﻿<UIDEFINE>
+	<bgmfile filename="bgm/bgm_room.mp3"/>
+	<image name="Tournament_GameRoom01" filename="L_GR.dds"/>
+	<image name="Tournament_GameRoom02" filename="l_gr_02.dds"/>
+	<image name="Tournament_GameRoom_Lobby03" filename="lobby_03.dds"/>
+		
+	<msprite name="GAMEROOM_TOP"      sx="87" sy="0" ex="87" ey="0" 	l="81" t="0" r="616" b="25" texture="Tournament_GameRoom01"/>
+	<msprite name="TNMT_GAME_NETCAFE" sx="624" sy="0" ex="624" ey="0" l="629" t="999" r="936" b="1024" texture="UI_Button" />	
+
+
+	<column name="GAMEROOM_TITLE" x="195" y="5" w="350" h="15" fontsize="12" color="FFFFFFFF" format="VCENTER RIGHT" />
+	<column name="RECORDBACK" x="402" y="297"/>
+	<column name="AVATAR" x="397" y="84" w="222" h="306"/>
+	
+	<column name="RECORDWIN" 	x="428" y="304" w="74" h="16" fontsize="15" color="FFFFFFFF" format="VCENTER RIGHT"/>
+	<column name="RECORDLOSE" 	x="530" y="304" w="74" h="16" fontsize="15" color="FFFFFFFF" format="VCENTER RIGHT"/>
+	<column name="KILL"		x="440" y="348" w="62" h="16" fontsize="15" color="FFFFFFFF" format="VCENTER RIGHT"/>
+	<column name="DEATH" 		x="542" y="348" w="62" h="16" fontsize="15" color="FFFFFFFF" format="VCENTER RIGHT"/>
+	<column name="EXPERIENCE" 	x="458" y="370" w="146" h="16" fontsize="15" color="FFFFFFFF" format="VCENTER RIGHT"/>
+	
+	<column name="CLAN_ATEAM_NAME" x="237" y="41" w="186" h="16" color="FFFFFFFFF" font="11" format="VCENTER CENTER"/>
+	<column name="CLAN_BTEAM_NAME" x="601" y="41" w="186" h="16" color="FFFFFFFFF" font="11" format="VCENTER CENTER"/>
+
+	<column name="DEBUG_STATEPACKET" x='530' y='20' w='600' h='18' color='FFFFFFFF' shadow='FF000000' format='VCENTER LEFT'/>
+	<column name="DEBUG_STATEPACKET_DETAIL" x='530' y='40' w='600' h='18' color='FFFFFFFF' shadow='FF000000' format='VCENTER LEFT'/>
+
+	<column name = "ATEAMEMBLEM"  x='10' y='285' />
+	<column name = "BTEAMEMBLEM"  x='945' y='285' />
+
+	<msprite name="ATEAM_EM_FRAME" sx='0' sy='192' ex='0' ey='192' l='929' t='73' r='1016' b='324' texture="Tournament_GameRoom01"/>
+	<msprite name="BTEAM_EM_FRAME" sx='927' sy='190' ex='927' ey='190' l='925' t='328' r='1018' b='582' texture="Tournament_GameRoom01"/>
+
+	<sprite l="274" t="782" r="484" b="876" texture="Tournament_GameRoom01"/>
+	<sprite l="160" t="299" r="295" b="368" texture="Tournament_GameRoom02"/>
+	
+	<msprite name="BACKGROUND" sx='0' sy='0' ex='0' ey='0' l='0' t='0' r='1024' b='768' texture="UI_Back0"/>
+	<msprite name="BACK1" sx='0' sy='0' ex='87' ey='57' l='81' t='74' r='925' b='589' texture="Tournament_GameRoom01"/>
+	<msprite name="BACK2" sx='0' sy='0' ex='87' ey='573' l='0' t='782' r='844' b='974' texture="Tournament_GameRoom_Lobby03"/>
+	
+	<msprite name="TOP" sx="87" sy="0" ex="87" ey="0" l="81" t="0" r="616" b="25" texture="Tournament_GameRoom01"/>
+	<msprite name="NETCAFE"	     sx="624" sy="0" ex="624" ey="0"    l="618" t="0" r="925" b="25" texture="Tournament_GameRoom01"/>
+
+	<msprite name="CLAN_NAME_FRAME"  sx="0" sy="0" ex="184" ey="40" l="175" t="57" r="827" b="73" texture="Tournament_GameRoom01"/>
+	
+	<msprite name="NEXTROUNDTIME" sx='636' sy='728' ex='636' ey='728' l='603' t='951' r='796' b='979' texture="Tournament_GameRoom01"/>
+	<column name="TIMEOFNEXTROUNDTIME" x='743' y='725' w='80' h='35' color='FFFFFF33' shadow='FF000000' format='VCENTER CENTER'/>
+
+	
+	<msprite name="WAIT_GAME_IN_UI" sx='402' sy='395' ex='402' ey='395' l='663' t='123' r='873' b='253' texture="Tournament_GameRoom02"/>
+	<msprite name="GAMEROOM_MAIN_GUN_80" sx="576" sy="216" ex="576" ey="216" l="670" t="420" r="706" b="459" texture="UI_Button" />
+	<msprite name="GAMEROOM_MAIN_GUN_70" sx="576" sy="216" ex="576" ey="216" l="707" t="420" r="743" b="459" texture="UI_Button" />
+	<msprite name="GAMEROOM_MAIN_GUN_60" sx="576" sy="216" ex="576" ey="216" l="744" t="420" r="780" b="459" texture="UI_Button" />
+	<msprite name="GAMEROOM_MAIN_GUN_50" sx="576" sy="216" ex="576" ey="216" l="781" t="420" r="817" b="459" texture="UI_Button" />
+	<msprite name="GAMEROOM_MAIN_GUN_40" sx="576" sy="216" ex="576" ey="216" l="818" t="420" r="854" b="459" texture="UI_Button" />
+	<msprite name="GAMEROOM_MAIN_GUN_30" sx="576" sy="216" ex="576" ey="216" l="855" t="420" r="891" b="459" texture="UI_Button" />
+	<msprite name="GAMEROOM_MAIN_GUN_20" sx="576" sy="216" ex="576" ey="216" l="892" t="420" r="928" b="459" texture="UI_Button" />
+	<msprite name="GAMEROOM_MAIN_GUN_10" sx="576" sy="216" ex="576" ey="216" l="929" t="420" r="965" b="459" texture="UI_Button" />
+	<msprite name="GAMEROOM_SUB_GUN_80" sx="576" sy="256" ex="576" ey="256" l="670" t="460" r="706" b="499" texture="UI_Button" />
+	<msprite name="GAMEROOM_SUB_GUN_70" sx="576" sy="256" ex="576" ey="256" l="707" t="460" r="743" b="499" texture="UI_Button" />
+	<msprite name="GAMEROOM_SUB_GUN_60" sx="576" sy="256" ex="576" ey="256" l="744" t="460" r="780" b="499" texture="UI_Button" />
+	<msprite name="GAMEROOM_SUB_GUN_50" sx="576" sy="256" ex="576" ey="256" l="781" t="460" r="817" b="499" texture="UI_Button" />
+	<msprite name="GAMEROOM_SUB_GUN_40" sx="576" sy="256" ex="576" ey="256" l="818" t="460" r="854" b="499" texture="UI_Button" />
+	<msprite name="GAMEROOM_SUB_GUN_30" sx="576" sy="256" ex="576" ey="256" l="855" t="460" r="891" b="499" texture="UI_Button" />
+	<msprite name="GAMEROOM_SUB_GUN_20" sx="576" sy="256" ex="576" ey="256" l="892" t="460" r="928" b="499" texture="UI_Button" />
+	<msprite name="GAMEROOM_SUB_GUN_10" sx="576" sy="256" ex="576" ey="256" l="929" t="460" r="965" b="499" texture="UI_Button" />
+
+
+	<rect name="map0" l='0' t='0' r='206' b='128'/>
+	<rect name="map1" l='0' t='128' r='206' b='256'/>
+	<rect name="map2" l='0' t='256' r='206' b='384'/>
+	<rect name="map3" l='0' t='384' r='206' b='511'/>
+	<rect name="map4" l='206' t='0' r='412' b='128'/>
+	<rect name="map5" l='206' t='128' r='412' b='256'/>
+	<userslot name="USERSLOTS">
+		<template>
+			<button name="GAMEROOM_USEROUT" x='3' y='3' w='24' h='24'>
+				<sprite l='178' t='790' r='202' b='814' texture="Tournament_GameRoom01"/>
+				<sprite l='178' t='815' r='202' b='839' texture="Tournament_GameRoom01"/>
+				<sprite l='178' t='840' r='202' b='864' texture="Tournament_GameRoom01"/>
+			</button>
+
+			<column name="GAMEROOM_USERIDBACK" x='0' y='94'/>
+			<column name="GAMEROOM_USERID" x='25' y='104' w='110' h='13' color='FFFFFFFF' shadow='FF000000' format='VCENTER LEFT' />
+
+			<column name="USERSLOTNAMEID" x='30' y='4' w='110' h='18' color='FFFFFFFF' shadow='FF000000' format='VCENTER RIGHT' fontsize='12' />
+
+			<column name="USERCLASS" x='2' y='94'/>
+			<column name="USERSTATS" x='2' y='82'/>
+			<column name="GAMEROOM_CHATBACK" x='28' y='-55'/>
+			<column name="GAMEROOM_HOUTCHATBACK" x="5" y="-55"/>
+			<column name="GAMEROOM_CHATMSG" x="33" y="-50" w="120" h="51" color="FF000000" format="VCENTER LEFT WORDBREAK"/>
+			<column name="GAMEROOM_LEVELUP" x="5" y="20"/>			
+			<sprite l='630' t='781' r='775' b='903' texture="Tournament_GameRoom01"/>
+			<sprite l='485' t='781' r='630' b='903' texture="Tournament_GameRoom01"/>
+			<sprite l="874" t="0" r="1019" b="122" texture="Tournament_GameRoom02"/>
+			<sprite l="874" t="123" r="1019" b="245" texture="Tournament_GameRoom02"/>
+			<sprite l="0" t="808" r="141" b="825" texture="Tournament_GameRoom01"/>
+			<sprite l="0" t="826" r="40" b="850" texture="Tournament_GameRoom01"/>
+			<sprite l="160" t="299" r="295" b="368" texture="Tournament_GameRoom02"/>
+			<sprite l="0" t="853" r="145" b="874" texture="Tournament_GameRoom01"/>
+			<sprite name="LEVELUP_BACKGROUND" l="874" t="246" r="1019" b="368" texture="Tournament_GameRoom02"/>
+			<sprite name="WEAPON_CHANGE_BLUE" l="145" t="0" r="290" b="122" texture="Tournament_GameRoom02"/>
+			<sprite name="WEAPON_CHANGE_RED" l="0" t="0" r="145" b="122" texture="Tournament_GameRoom02"/>
+			<sprite name="WEAPON_CHANGE_YELLOW" l="290" t="0" r="435" b="122" texture="Tournament_GameRoom02"/>
+			<sprite name="SHOUT_SPEECH_BALLON" l="114" t="124" r="295" b="203" texture="Tournament_GameRoom02"/>
+			<sprite name="SMILE_SPEECH_BALLON" l="296" t="296" r="477" b="385" texture="Tournament_GameRoom02"/>
+			<sprite name="ANGRY_SPEECH_BALLON" l="114" t="204" r="295" b="298" texture="Tournament_GameRoom02"/>
+			<sprite name="GLOOMY_SPEECH_BALLON" l="296" t="206" r="477" b="295" texture="Tournament_GameRoom02"/>
+			<sprite name="SAD_SPEECH_BALLON" l="296" t="124" r="477" b="205" texture="Tournament_GameRoom02"/>
+
+		</template>
+
+		<slot x='93'  y='63'  w='145' h='122'/>
+		<slot x='630' y='63'  w='145' h='122'/>
+		<slot x='243' y='63'  w='145' h='122'/>
+		<slot x='780' y='63'  w='145' h='122'/>
+		<slot x='93'  y='189' w='145' h='122'/>
+		<slot x='630' y='189' w='145' h='122'/>
+		<slot x='243' y='189' w='145' h='122'/>
+		<slot x='780' y='189' w='145' h='122'/>
+		<slot x='93'  y='315' w='145' h='122'/>
+		<slot x='630' y='315' w='145' h='122'/>
+		<slot x='243' y='315' w='145' h='122'/>
+		<slot x='780' y='315' w='145' h='122'/>
+		<slot x='93'  y='441' w='145' h='122'/>
+		<slot x='630' y='441' w='145' h='122'/>
+		<slot x='243' y='441' w='145' h='122'/>
+		<slot x='780' y='441' w='145' h='122'/>
+
+	</userslot>	
+
+	<button name="EXIT" x="839" y="724" w="88" h="36">
+		<sprite l="267" t="914" r="355" b="950" texture="Tournament_GameRoom01"/>
+		<sprite l="267" t="951" r="355" b="987" texture="Tournament_GameRoom01"/>
+		<sprite l="267" t="988" r="355" b="1024" texture="Tournament_GameRoom01"/>
+	</button>
+
+	<button name="FRONT" x="402" y="267" w="28" h="28">
+		<sprite l="0" t="521" r="28" b="549" texture="UI_Button" />
+		<sprite l="0" t="550" r="28" b="578" texture="UI_Button" />
+		<sprite l="0" t="579" r="28" b="607" texture="UI_Button" />
+	</button>
+
+	<button name="BACK" x="433" y="267" w="28" h="28">
+		<sprite l="29" t="521" r="57" b="549" texture="UI_Button" />
+		<sprite l="29" t="550" r="57" b="578" texture="UI_Button" />
+		<sprite l="29" t="579" r="57" b="607" texture="UI_Button" />
+	</button>
+
+	<msprite name="HIDE_BALANCE" sx="681" sy="676" ex="681" ey="676" l="776" t="884" r="1022" b="927" texture="Tournament_GameRoom01"/>
+
+	<checkbox name="ITEM" x="681" y="682" w="14" h="14">
+		<sprite l="0" t="0" r="0" b="0" texture="Tournament_GameRoom01"/>
+		<sprite l="251" t="791" r="265" b="805" texture="Tournament_GameRoom01"/> 
+	</checkbox>
+
+	<checkbox name="GAMEROOM_DAMAGEROOM" x="834" y="682" w="14" h="14">
+		<sprite l="0" t="0" r="0" b="0" texture="Tournament_GameRoom01"/>
+		<sprite l="251" t="791" r="265" b="805" texture="Tournament_GameRoom01"/> 
+	</checkbox>
+
+	<checkbox name="NOSKILL" x="758" y="682" w="14" h="14">
+		<sprite l="0" t="0" r="0" b="0" texture="Tournament_GameRoom01"/>
+		<sprite l="251" t="791" r="265" b="805" texture="Tournament_GameRoom01"/> 
+	</checkbox>
+
+	<checkbox name="TN_GR1_SOCCER" x="591" y="492" w="16" h="16">
+		<sprite l='479' t='206' r='495' b='222' texture="Tournament_GameRoom02"/>
+		<sprite l='496' t='206' r='512' b='222' texture="Tournament_GameRoom02"/>
+	</checkbox>	
+
+	<select name="CHATMODE" count='2' oneVone="1" OffX='0' OffY='0'>
+		<rect l="92" t="582" r="134" b="632"/>
+		<rect l="92" t="634" r="134" b="683"/>
+
+		<sprite l="776" t="782" r="818" b="832" texture="Tournament_GameRoom01"/>
+		<sprite l="776" t="833" r="818" b="883" texture="Tournament_GameRoom01"/>
+		<sprite l="819" t="782" r="861" b="832" texture="Tournament_GameRoom01"/>
+		<sprite l="819" t="833" r="861" b="883" texture="Tournament_GameRoom01"/>
+	</select>
+
+	<list name="CHAT" l="151" t="593" r="577" b="715">
+   		<eventrect name="SCROLL_RECT" x="151" y="593" w="426" h="122"/>
+		<button name="UP" x="589" y="587" w="29" h="50">
+			<sprite l="258" t="461" r="281" b="489" texture="UI_Button"/>
+			<sprite l="282" t="461" r="305" b="489" texture="UI_Button"/>
+			<sprite l="306" t="461" r="329" b="489" texture="UI_Button"/>
+		</button>
+		<button name="DN" x="589" y="723" w="29" h="50">
+			<sprite l="258" t="490" r="281" b="518" texture="UI_Button"/>
+			<sprite l="282" t="490" r="305" b="518" texture="UI_Button"/>
+			<sprite l="306" t="490" r="329" b="518" texture="UI_Button"/>
+		</button>
+	</list>
+
+	<hscroll name="MAP" l="432" t="533" r="582" b="554">		
+	</hscroll>
+
+	<hscroll name="RULE" l="744" t="586" r="895" b="607">
+	</hscroll>
+
+	<hscroll name="OBJECT" l="744" t="615" r="895" b="636">
+	</hscroll>
+
+	<hscroll name="TIME" l="744" t="644" r="895" b="665">
+	</hscroll>
+
+	<column name="GIFT_ICON_AVATA" x="399" y="87" w="32" h="33" /> 
+
+	<column name = "ATEAMEMBLEM"  x='10' y='285' />
+	<column name = "BTEAMEMBLEM"  x='945' y='285' />
+
+	<msprite name="ATEAM_EM_FRAME" sx='0' sy='192' ex='0' ey='192' l='929' t='73' r='1016' b='324' texture="Tournament_GameRoom01"/>
+	<msprite name="BTEAM_EM_FRAME" sx='927' sy='190' ex='927' ey='190' l='925' t='328' r='1018' b='582' texture="Tournament_GameRoom01"/>
+
+	
+	 <checkbox name="TN_GAMEROOM_SOCCER" x="591" y="499" w="16" h="16">
+		<sprite l='479' t='206' r='495' b='222' texture="Tournament_GameRoom_Lobby03"/>
+		<sprite l='496' t='206' r='512' b='222' texture="Tournament_GameRoom_Lobby03"/>
+	</checkbox>
+	<msprite name="TN_SOCCER_CHECK_TEXT" sx="566" sy="509" ex="566" ey="509" l='479' t="223" r="520" b="236" texture="Tournament_GameRoom02"/>
+
+</UIDEFINE>

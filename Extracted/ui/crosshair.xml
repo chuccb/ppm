@@ -1,0 +1,26 @@
+<UIDEFINE>
+	<image name="CROSSHAIR" filename="crosshair.dds"/>
+
+	<sprite name="CROSSHAIR_FIX_1" x='0' y='0' w='300' h='301' texture="CROSSHAIR"/>
+	<sprite name="CROSSHAIR_FIX_2" x='302' y='0' w='300' h='301' texture="CROSSHAIR"/>
+	<sprite name="CROSSHAIR_FIX_3" x='604' y='0' w='300' h='301' texture="CROSSHAIR"/>
+	<sprite name="CROSSHAIR_FIX_4" x='0' y='302' w='31' h='31' texture="CROSSHAIR"/>
+	<sprite name="CROSSHAIR_FIX_5" x='32' y='302' w='31' h='31' texture="CROSSHAIR"/>
+	<sprite name="CROSSHAIR_FIX_6" x='64' y='302' w='31' h='31' texture="CROSSHAIR"/>
+	<sprite name="CROSSHAIR_FIX_7" x='96' y='302' w='31' h='31' texture="CROSSHAIR"/>
+	<sprite name="CROSSHAIR_FIX_8" x='128' y='302' w='31' h='31' texture="CROSSHAIR"/>
+	<sprite name="CROSSHAIR_FIX_9" x='160' y='302' w='31' h='31' texture="CROSSHAIR"/>
+	<sprite name="CROSSHAIR_FIX_10" x='192' y='302' w='31' h='31' texture="CROSSHAIR"/>
+	<sprite name="CROSSHAIR_FIX_11" x='224' y='302' w='31' h='31' texture="CROSSHAIR"/>
+	<sprite name="CROSSHAIR_FIX_12" x='256' y='302' w='55' h='55' texture="CROSSHAIR"/>
+	<sprite name="CROSSHAIR_FIX_13" x='312' y='302' w='31' h='31' texture="CROSSHAIR"/>
+	<sprite name="CROSSHAIR_FIX_14" x='344' y='302' w='31' h='31' texture="CROSSHAIR"/>
+ 
+	<sprite name="CROSSHAIR_COMMON_1" x='905' y='0' w='51' h='51' texture="CROSSHAIR"/>
+	<sprite name="CROSSHAIR_COMMON_2" x='905' y='52' w='51' h='51' texture="CROSSHAIR"/>
+	<sprite name="CROSSHAIR_COMMON_3" x='905' y='104' w='47' h='47' texture="CROSSHAIR"/>
+	<sprite name="CROSSHAIR_COMMON_4" x='905' y='152' w='47' h='47' texture="CROSSHAIR"/>
+	<sprite name="CROSSHAIR_COMMON_5" x='905' y='200' w='47' h='47' texture="CROSSHAIR"/>
+	<sprite name="CROSSHAIR_COMMON_6" x='905' y='248' w='47' h='47' texture="CROSSHAIR"/>
+
+</UIDEFINE>

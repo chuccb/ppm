@@ -1,0 +1,17 @@
+<TUTORIALDEFINE>
+
+	<list name="GAMEINCHAT" GameInChat='1' l='140' t='577' r='584' b='706'>
+		<button name="UP" x='0' y='0' w='0' h='0'>
+		</button>
+		<button name="DN" x='0' y='0' w='0' h='0'>
+		</button>
+	</list>
+
+	<list name="GAMEINPVECHAT" GameInChat='1' l='0' t='625' r='444' b='754'>
+		<button name="UP" x='0' y='0' w='0' h='0'>
+		</button>
+		<button name="DN" x='0' y='0' w='0' h='0'>
+		</button>
+	</list>
+
+</TUTORIALDEFINE>

@@ -1,0 +1,134 @@
+<UIDEFINE>
+
+	<msprite name="OPTIONMACRO_1" sx='202' sy='193' ex='202' ey='193' l='0' t='86' r='16' b='106' texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONMACRO_2" tl='218' tt='193' tr='788' tb='213' l='18' t='86' r='32' b='106' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_3" sx='788' sy='193' ex='788' ey='193' l='34' t='86' r='50' b='106' texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONMACRO_4" tl='202' tt='213' tr='218' tb='565' l='0' t='108' r='16' b='122' texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONMACRO_5" tl='218' tt='213' tr='788' tb='565' l='18' t='108' r='32' b='122' texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONMACRO_6" tl='788' tt='213' tr='804' tb='565' l='34' t='108' r='50' b='122' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_7" sx='202' sy='565' ex='202' ey='565' l='0' t='124' r='16' b='140' texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONMACRO_8" tl='218' tt='565' tr='788' tb='581' l='18' t='124' r='32' b='140' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_9" sx='788' sy='565' ex='788' ey='565' l='34' t='124' r='50' b='140' texture="UI_Popup_1"/>
+
+  	
+
+  	<msprite name="OPTIONMACRO_10" sx='253' sy='228' ex='253' ey='228' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_11" sx='253' sy='264' ex='253' ey='264' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_12" sx='253' sy='300' ex='253' ey='300' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_13" sx='253' sy='336' ex='253' ey='336' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_14" sx='253' sy='372' ex='253' ey='372' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_15" sx='253' sy='408' ex='253' ey='408' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_16" sx='253' sy='444' ex='253' ey='444' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_17" sx='253' sy='480' ex='253' ey='480' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_18" sx='253' sy='516' ex='253' ey='516' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_19" sx='253' sy='552' ex='253' ey='552' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+
+  	
+
+  	<msprite name="OPTIONMACRO_20" sx='278' sy='229' ex='278' ey='229' l='351' t='286' r='399' b='296' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_21" sx='278' sy='265' ex='278' ey='265' l='351' t='297' r='399' b='307' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_22" sx='278' sy='301' ex='278' ey='301' l='351' t='308' r='399' b='318' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_23" sx='278' sy='337' ex='278' ey='337' l='351' t='319' r='399' b='329' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_24" sx='278' sy='373' ex='278' ey='373' l='351' t='330' r='399' b='340' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_25" sx='278' sy='409' ex='278' ey='409' l='351' t='341' r='399' b='351' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_26" sx='278' sy='445' ex='278' ey='445' l='351' t='352' r='399' b='362' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_27" sx='278' sy='481' ex='278' ey='481' l='351' t='363' r='399' b='373' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_28" sx='278' sy='517' ex='278' ey='517' l='351' t='374' r='399' b='384' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_29" sx='278' sy='553' ex='278' ey='553' l='351' t='385' r='399' b='395' texture="UI_Popup_1"/>
+
+
+ 	
+
+  	<msprite name="OPTIONMACRO_30" sx='363' sy='222' ex='363' ey='222' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONMACRO_31" tl='387' tt='222' tr='757' tb='246' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_32" sx='757' sy='222' ex='757' ey='222' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONMACRO_33" sx='363' sy='258' ex='363' ey='258' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONMACRO_34" tl='387' tt='258' tr='757' tb='282' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_35" sx='757' sy='258' ex='757' ey='258' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONMACRO_36" sx='363' sy='294' ex='363' ey='294' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONMACRO_37" tl='387' tt='294' tr='757' tb='318' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_38" sx='757' sy='294' ex='757' ey='294' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONMACRO_39" sx='363' sy='330' ex='363' ey='330' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONMACRO_40" tl='387' tt='330' tr='757' tb='354' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_41" sx='757' sy='330' ex='757' ey='330' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONMACRO_42" sx='363' sy='366' ex='363' ey='366' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONMACRO_43" tl='387' tt='366' tr='757' tb='390' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_44" sx='757' sy='366' ex='757' ey='366' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONMACRO_45" sx='363' sy='402' ex='363' ey='402' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONMACRO_46" tl='387' tt='402' tr='757' tb='426' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_47" sx='757' sy='402' ex='757' ey='402' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONMACRO_48" sx='363' sy='438' ex='363' ey='438' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONMACRO_49" tl='387' tt='438' tr='757' tb='462' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_50" sx='757' sy='438' ex='757' ey='438' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONMACRO_51" sx='363' sy='474' ex='363' ey='474' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONMACRO_52" tl='387' tt='474' tr='757' tb='498' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_53" sx='757' sy='474' ex='757' ey='474' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONMACRO_54" sx='363' sy='510' ex='363' ey='510' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONMACRO_55" tl='387' tt='510' tr='757' tb='534' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_56" sx='757' sy='510' ex='757' ey='510' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONMACRO_57" sx='363' sy='546' ex='363' ey='546' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONMACRO_58" tl='387' tt='546' tr='757' tb='570' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONMACRO_59" sx='757' sy='546' ex='757' ey='546' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONMACRO_60" sx='213' sy='197' ex='213' ey='197' l='432' t='78' r='484' b='90' texture="UI_Popup_1"/>
+
+	<edit name="MACRO1"		l='393' t='227' r='773' b='241' >
+		<sprite l='0' t='0' r='0' b='0' texture="UI_Popup_1"/>
+		<sprite l='0' t='0' r='0' b='0' texture="UI_Popup_1"/>
+	</edit>
+	
+	<edit name="MACRO2"		l='393' t='263' r='753' b='277'>
+		<sprite l='0' t='0' r='0' b='0' texture="UI_Popup_1"/>
+		<sprite l='0' t='0' r='0' b='0' texture="UI_Popup_1"/>
+	</edit>
+	
+	<edit name="MACRO3"		l='393' t='299' r='753' b='313'>
+		<sprite l='0' t='0' r='0' b='0' texture="UI_Popup_1"/>
+		<sprite l='0' t='0' r='0' b='0' texture="UI_Popup_1"/>
+	</edit>	
+	
+	<edit name="MACRO4"		l='393' t='335' r='753' b='349'>
+		<sprite l='0' t='0' r='0' b='0' texture="UI_Popup_1"/>
+		<sprite l='0' t='0' r='0' b='0' texture="UI_Popup_1"/>
+	</edit>	
+	
+	<edit name="MACRO5"			l='393' t='371' r='753' b='385'>
+		<sprite l='0' t='0' r='0' b='0' texture="UI_Popup_1"/>
+		<sprite l='0' t='0' r='0' b='0' texture="UI_Popup_1"/>
+	</edit>	
+	
+	<edit name="MACRO6"			l='393' t='407' r='753' b='421'>
+		<sprite l='0' t='0' r='0' b='0' texture="UI_Popup_1"/>
+		<sprite l='0' t='0' r='0' b='0' texture="UI_Popup_1"/>
+	</edit>	
+	
+	<edit name="MACRO7"	l='393' t='443' r='753' b='457'>
+		<sprite l='0' t='0' r='0' b='0' texture="UI_Popup_1"/>
+		<sprite l='0' t='0' r='0' b='0' texture="UI_Popup_1"/>
+	</edit>	
+	
+	<edit name="MACRO8"	l='393' t='479' r='753' b='493'>
+		<sprite l='0' t='0' r='0' b='0' texture="UI_Popup_1"/>
+		<sprite l='0' t='0' r='0' b='0' texture="UI_Popup_1"/>
+	</edit>	
+	
+	<edit name="MACRO9"			l='393' t='515' r='753' b='529'>
+		<sprite l='0' t='0' r='0' b='0' texture="UI_Popup_1"/>
+		<sprite l='0' t='0' r='0' b='0' texture="UI_Popup_1"/>
+	</edit>	
+	
+	<edit name="MACRO10"			l='393' t='551' r='753' b='565'>
+		<sprite l='0' t='0' r='0' b='0' texture="UI_Popup_1"/>
+		<sprite l='0' t='0' r='0' b='0' texture="UI_Popup_1"/>
+	</edit>	
+	
+</UIDEFINE>

@@ -1,0 +1,97 @@
+<UIDEFINE>
+	<image name="Gaccha_Get_Back" filename="TUTO_BACK.DDS" />
+	<image name="Gaccha_Get_Shop" filename="shop_02.dds"/>
+
+	<msprite name="Gaccha_Get_Back" sx='0' sy='0' ex='0' ey='0' l='0' t='0' r='1024' b='768' texture="Gaccha_Get_Back"/>  
+
+	
+	<msprite name="RED_ITEM" sx="388" sy="211" ex="388" ey="211" l="0" t="676" r="248" b="1024" texture="PEPAGACHA"/>
+	<msprite name="BLUE_ITEM" sx="388" sy="211" ex="388" ey="211" l="249" t="676" r="497" b="1024" texture="PEPAGACHA"/>
+	<msprite name="GREEN_ITEM" sx="388" sy="211" ex="388" ey="211" l="498" t="676" r="746" b="1024" texture="PEPAGACHA"/>
+	<msprite name="YELLOW_ITEM" sx="388" sy="211" ex="388" ey="211" l="747" t="676" r="995" b="1024" texture="PEPAGACHA"/>
+
+	<msprite name="GET_ITEM" sx="480" sy="267" ex="480" ey="267" l="0" t="0" r="64" b="64" texture="PEPAGACHA"/>
+
+        <column name="GET_ITEM_CHAR" x="462" y="198" cx="0" cy="0" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/> 
+	<column name="GET_ITEM_NAME" x="463" y="314" cx="0" cy="0" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="GET_ITEM_KIND" x="421" y="355" cx="0" cy="0" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="GET_ITEM_COUNT" x="505" y="355" cx="0" cy="0" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+
+	<button name="GET_ITEM_NOTICE_OK" x="474" y="515" w="80" h="39">
+		<sprite l="868" t="0" r="944" b="32" texture="PEPAGACHA"/>
+		<sprite l="868" t="33" r="944" b="65" texture="PEPAGACHA"/>
+		<sprite l="868" t="66" r="944" b="98" texture="PEPAGACHA"/>
+	</button>
+
+
+	
+	<msprite name="GACCHA_TITLE" sx='396' sy='85' ex='396' ey='85' l='0' t='871' r='247' b='974' texture="Gaccha_Get_Shop"/>  	
+
+	<msprite name="MSPRITE_10_RD_CARD" sx='152' sy='208' ex='152' ey='208' l="470" t="529" r="607" b="695" texture="Gaccha_Get_Shop"/>  	
+	<msprite name="MSPRITE_10_BL_CARD" sx='152' sy='208' ex='152' ey='208' l="608" t="529" r="745" b="695" texture="Gaccha_Get_Shop"/> 
+	<msprite name="MSPRITE_10_GR_CARD" sx='152' sy='208' ex='152' ey='208' l="746" t="529" r="883" b="695" texture="Gaccha_Get_Shop"/> 
+	<msprite name="MSPRITE_10_YL_CARD" sx='152' sy='208' ex='152' ey='208' l="884" t="529" r="1021" b="695" texture="Gaccha_Get_Shop"/>
+
+	<column name="GACCHA_CARD_0" x="152" y="208" w="137" h="166" />
+	<column name="GACCHA_CARD_1" x="298" y="208" w="137" h="166" />
+	<column name="GACCHA_CARD_2" x="444" y="208" w="137" h="166" />
+	<column name="GACCHA_CARD_3" x="590" y="208" w="137" h="166" />
+	<column name="GACCHA_CARD_4" x="736" y="208" w="137" h="166" />
+	<column name="GACCHA_CARD_5" x="152" y="382" w="137" h="166" />
+	<column name="GACCHA_CARD_6" x="298" y="382" w="137" h="166" />
+	<column name="GACCHA_CARD_7" x="444" y="382" w="137" h="166" />
+	<column name="GACCHA_CARD_8" x="590" y="382" w="137" h="166" />
+	<column name="GACCHA_CARD_9" x="736" y="382" w="137" h="166" />
+
+  	<column name="GACCHA_THUMNAIL_0" x="188" y="224" w="64" h="64" />
+  	<column name="GACCHA_THUMNAIL_1" x="334" y="224" w="64" h="64" />
+  	<column name="GACCHA_THUMNAIL_2" x="480" y="224" w="64" h="64" />
+  	<column name="GACCHA_THUMNAIL_3" x="626" y="224" w="64" h="64" />
+  	<column name="GACCHA_THUMNAIL_4" x="772" y="224" w="64" h="64" /> 	
+	<column name="GACCHA_THUMNAIL_5" x="188" y="398" w="64" h="64" />
+  	<column name="GACCHA_THUMNAIL_6" x="334" y="398" w="64" h="64" />
+  	<column name="GACCHA_THUMNAIL_7" x="480" y="398" w="64" h="64" />
+  	<column name="GACCHA_THUMNAIL_8" x="626" y="398" w="64" h="64" />
+  	<column name="GACCHA_THUMNAIL_9" x="772" y="398" w="64" h="64" />
+	
+	<column name="GACCHA_NAME_0" x="161" y="304"   w="119" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GACCHA_NAME_1" x="307" y="304"   w="119" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GACCHA_NAME_2" x="453" y="304"   w="119" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GACCHA_NAME_3" x="599" y="304"   w="119" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GACCHA_NAME_4" x="745" y="304"   w="119" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GACCHA_NAME_5" x="161" y="478"   w="119" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GACCHA_NAME_6" x="307" y="478"   w="119" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GACCHA_NAME_7" x="453" y="478"   w="119" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GACCHA_NAME_8" x="599" y="478"   w="119" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GACCHA_NAME_9" x="745" y="478"   w="119" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+
+  	<column name="GACCHA_KIND_0" x="161" y="343"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GACCHA_KIND_1" x="307" y="343"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GACCHA_KIND_2" x="453" y="343"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GACCHA_KIND_3" x="599" y="343"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GACCHA_KIND_4" x="745" y="343"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GACCHA_KIND_5" x="161" y="517"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GACCHA_KIND_6" x="307" y="517"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GACCHA_KIND_7" x="453" y="517"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GACCHA_KIND_8" x="599" y="517"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GACCHA_KIND_9" x="745" y="517"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+
+  	<column name="GACCHA_PERIOD_0" x="223" y="343"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GACCHA_PERIOD_1" x="369" y="343"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GACCHA_PERIOD_2" x="515" y="343"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GACCHA_PERIOD_3" x="661" y="343"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GACCHA_PERIOD_4" x="807" y="343"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GACCHA_PERIOD_5" x="223" y="517"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GACCHA_PERIOD_6" x="369" y="517"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GACCHA_PERIOD_7" x="515" y="517"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GACCHA_PERIOD_8" x="661" y="517"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GACCHA_PERIOD_9" x="807" y="517"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+
+
+	<button name="GACHA_CLOSE"  x="757" y="570" w="116" h="46">
+		<sprite l="864" t="207" r="980" b="253" texture="UI_Button" />
+		<sprite l="864" t="254" r="980" b="300" texture="UI_Button" />
+		<sprite l="864" t="301" r="980" b="347" texture="UI_Button" />
+	</button>
+
+</UIDEFINE>

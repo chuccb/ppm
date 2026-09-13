@@ -1,0 +1,405 @@
+<TUTORIALDEFINE>
+	<image name="MULTI_RESULT" filename="result.dds"/>
+	<image name="MULTI_NPG" filename="N_PG.dds"/>
+	<bot_image name="MULTI_POPUP_AI_02" filename="gs_popup02.dds"/>
+	<bot_image name="MULTI_AI2" filename="ai2.dds"/>
+	<bot_image name="MULTI_TUTO_BACK" filename="tuto_back.dds" />
+	<bot_image name="MULTI_GS_02" filename="gs_ui02.dds" />
+	<bot_image name="MULTI_SPB" filename="specialabilityslot.dds" />
+	<bot_image name="MULTI_GS_POP" filename="gs_popup.dds" />
+	<image name="MULTI_MS2" filename="message02.dds" />
+	<image name="MULTI_HELP" filename="help.dds" />
+	<image name="MULTI_CRH" filename="crosshair.dds" />
+
+
+
+	<msprite name="CONNECTING_TEXT"   sx='299' sy='371' ex='299' ey='371' l='546' t='964' r='990' b='1024' texture="MULTI_GS_POP"/>
+	<msprite name="CONNECTING_CIRCLE" sx='405' sy='219' ex='405' ey='219' l='332' t='798' r='545' b='1011' texture="MULTI_GS_POP"/> 
+	<msprite name="CONNECTING_BACK" sx='0' sy='0' ex='0' ey='0' l='102' t='0' r='118' b='768' texture="MULTI_AI2"/>
+
+
+
+	<msprite name="RIKA_FACE_0" sx='743' sy='240' ex='743' ey='240' l='468' t='341' r='614' b='487' texture="MULTI_GS_02"/>
+	<msprite name="RIKA_FACE_1" sx='743' sy='240' ex='743' ey='240' l='878' t='584' r='1024' b='730' texture="MULTI_GS_02"/> 
+	<msprite name="RIKA_FACE_2" sx='743' sy='240' ex='743' ey='240' l='878' t='878' r='1024' b='1024' texture="MULTI_GS_02"/>
+	<msprite name="RIKA_FACE_3" sx='743' sy='240' ex='743' ey='240' l='878' t='731' r='1024' b='877' texture="MULTI_GS_02"/> 
+	
+
+
+	<msprite name="SOMEBODY_FACE_0" sx='103' sy='310' ex='103' ey='310' l='870' t='675' r='951' b='756' texture="MULTI_AI2"/> 
+	<msprite name="SOMEBODY_FACE_1" sx='103' sy='310' ex='103' ey='310' l='870' t='757' r='951' b='838' texture="MULTI_AI2"/> 
+	<msprite name="SOMEBODY_FACE_2" sx='103' sy='310' ex='103' ey='310' l='870' t='839' r='951' b='920' texture="MULTI_AI2"/>
+
+
+	<button name="CHAT_SPACE" x='18' y='740' w='449' h='23'>
+ 	<sprite l='0' t='0' r='0' b='0' texture="MULTI_AI2"/>
+  	<sprite l='0' t='0' r='0' b='0' texture="MULTI_AI2"/>
+  	<sprite l='0' t='0' r='0' b='0' texture="MULTI_AI2"/>
+  	</button>
+
+					
+
+	<msprite name="MULTI_TUTO_BACK" sx='0' sy='0' ex='0' ey='0' l='0' t='0' r='1024' b='768' texture="MULTI_TUTO_BACK"/>
+	<msprite name="SOMEBODY" sx='14' sy='238' ex='14' ey='238' l='435' t='398' r='718' b='752'  texture="MULTI_MS2"/>
+
+
+
+	
+	<msprite name="WAVE_BG" sx='183' sy='59' ex='183' ey='59' l='0' t='525' r='828' b='1024' texture="MULTI_GS_02"/>
+	<msprite name="RIKA_IMG" sx='590' sy='180' ex='590' ey='180' l='0' t='436' r='434' b='1024' texture="MULTI_MS2"/> 
+	
+	<msprite name="WAVE_TEXT_BG_0" sx='40' sy='601' ex='40' ey='601' l='501' t='144' r='567' b='280' texture="MULTI_POPUP_AI_02"/> 
+	<msprite name="WAVE_TEXT_BG_1" sx='106' sy='601' ex='106' ey='601' l='569' t='144' r='589' b='280' texture="MULTI_POPUP_AI_02"/> 
+	<msprite name="WAVE_TEXT_BG_2" sx='706' sy='601' ex='706' ey='601' l='591' t='144' r='658' b='280' texture="MULTI_POPUP_AI_02"/> 
+		
+	<column name="WAVE_TEXT" x='154' y='620' w='560' h='92'/> 
+
+	
+	
+	<msprite name="STAGE_1F" sx='212' sy='125' ex='212' ey='125' l='435' t='753' r='918' b='1020'  texture="MULTI_MS2"/>
+	<msprite name="STAGE_2F" sx='331' sy='140' ex='331' ey='140' l='591' t='675' r='869' b='1024'  texture="MULTI_AI2"/>
+ 	<msprite name="STAGE_3F" sx='331' sy='140' ex='331' ey='140' l='591' t='325' r='869' b='674'  texture="MULTI_AI2"/>
+ 	<msprite name="STAGE_4F" sx='331' sy='140' ex='331' ey='140' l='735' t='0' r='1024' b='349'  texture="MULTI_POPUP_AI_02"/> 
+	
+	
+
+
+	
+	<column name="WAVE_CLEAR_WAIT_TIME" x='205' y='96' w='0' h='0'/>
+
+	<msprite name="STAGE_BG"   sx='211' sy='217' ex='211' ey='217' l='0' t='0' r='0' b='0' texture="MULTI_GS_POP"/> 
+
+
+
+	
+	<msprite name="WAVECLEAR_0" sx='8' sy='253' ex='8' ey='253' l='719' t='424' r='963' b='752' texture="MULTI_MS2"/>
+
+
+
+	
+	<msprite name="LEADER_0" sx='273' sy='187' ex='237' ey='187' l='355' t='1' r='367' b='258' texture="MULTI_AI2"/>
+	<msprite name="LEADER_1" sx='285' sy='187' ex='285' ey='187' l='371' t='1' r='381' b='258' texture="MULTI_AI2"/> 
+	<msprite name="LEADER_2" sx='725' sy='187' ex='725' ey='187' l='385' t='1' r='397' b='258' texture="MULTI_AI2"/>
+
+	<msprite name="LEADER_IMG" sx='486' sy='239' ex='486' ey='239' l='223' t='306' r='256' b='366' texture="MULTI_AI2"/>
+	<msprite name="LEADER_TEXT" sx='385' sy='327' ex='385' ey='327' l='400' t='41' r='642' b='90' texture="MULTI_AI2"/>
+
+	<msprite name="LEADER_LANG" sx='446' sy='392' ex='446' ey='392' l='257' t='306' r='373' b='323' texture="MULTI_AI2"/>
+
+		
+	
+
+	
+	
+	<msprite name="BOSS_CLEAR_SL_0" sx='530' sy='246' ex='530' ey='246' l='244' t='181' r='355' b='292' texture="MULTI_AI2"/>
+	<msprite name="BOSS_CLEAR_SL_1" sx='747' sy='246' ex='747' ey='246' l='244' t='181' r='355' b='292' texture="MULTI_AI2"/>
+	<msprite name="BOSS_CLEAR_SL_2" sx='530' sy='418' ex='530' ey='418' l='244' t='181' r='355' b='292' texture="MULTI_AI2"/>
+	<msprite name="BOSS_CLEAR_SL_3" sx='747' sy='418' ex='747' ey='418' l='244' t='181' r='355' b='292' texture="MULTI_AI2"/>
+
+	
+	<msprite name="BOSS_BG_0" sx='347' sy='97' ex='347' ey='97' l='0' t='525' r='475' b='1024' texture="MULTI_GS_02"/>
+	<msprite name="BOSS_BG_1" sx='822' sy='104' ex='822' ey='104' l='446' t='532' r='503' b='1024' texture="MULTI_GS_02"/>
+	<msprite name="BOSS_BG_2" sx='879' sy='104' ex='879' ey='104' l='830' t='532' r='865' b='1024' texture="MULTI_GS_02"/>	
+
+	
+	<msprite name="BOSS_SLOT_TITLE_0" sx='607' sy='136' ex='607' ey='136' l='445' t='629' r='504' b='654' texture="MULTI_POPUP_AI_02"/>		
+	
+
+	
+	<msprite name="BOSS_SLOT_CHOICE_0" sx='432' sy='192' ex='432' ey='192' l='0' t='0' r='220' b='184' texture="MULTI_AI2"/>
+	<msprite name="BOSS_SLOT_CHOICE_1" sx='650' sy='192' ex='650' ey='192' l='0' t='0' r='220' b='184' texture="MULTI_AI2"/>
+	<msprite name="BOSS_SLOT_CHOICE_2" sx='432' sy='364' ex='432' ey='364' l='0' t='0' r='220' b='184' texture="MULTI_AI2"/>
+	<msprite name="BOSS_SLOT_CHOICE_3" sx='650' sy='364' ex='650' ey='364' l='0' t='0' r='220' b='184' texture="MULTI_AI2"/>
+
+	
+	
+	<column name = "MY_REWARD_INFO_NAME" x='226' y='466' w='159' h='15' />
+	<column name = "MY_REWARD_INFO_TYPE" x='226' y='520' w='72' h='15' />
+	<column name = "MY_REWARD_INFO_DATE" x='314' y='520' w='72' h='15' /> 
+	<column name = "MY_REWARD_INFO_THUM" x='274' y='351' w='64' h='64' />
+	
+	<msprite name = "MY_REWARD_INFO_PANNEL"     sx='197' sy='291' ex='197' ey='291' l='0' t='531' r='218' b='803' texture="MULTI_HELP"/>
+	<msprite name = "MY_REWARD_INFO_PANNEL_OFF" sx='197' sy='291' ex='197' ey='291' l='219' t='531' r='437' b='803' texture="MULTI_HELP"/>
+
+
+	
+	<column name = "BOSS_PENDANT_1" x='530' y='246' w='111' h='111' />									
+	<column name = "BOSS_PENDANT_2" x='747' y='246' w='111' h='111' />										
+	<column name = "BOSS_PENDANT_3" x='530' y='418' w='111' h='111' />										
+	<column name = "BOSS_PENDANT_4" x='747' y='418' w='111' h='111' />										
+
+
+	
+	<column name = "BOSS_THUMB_1" x='446' y='262' w='64' h='64' />										
+	<column name = "BOSS_THUMB_2" x='664' y='262' w='64' h='64' />										
+	<column name = "BOSS_THUMB_3" x='446' y='434' w='64' h='64' />										
+	<column name = "BOSS_THUMB_4" x='664' y='434' w='64' h='64' />	
+
+	
+	<column name = "BOSS_THUMB_NAME_1" x='505' y='211' w='130' h='11' />								
+	<column name = "BOSS_THUMB_NAME_2" x='718' y='211' w='130' h='11' />									
+	<column name = "BOSS_THUMB_NAME_3" x='505' y='383' w='130' h='11' />										
+	<column name = "BOSS_THUMB_NAME_4" x='718' y='383' w='130' h='11' />									
+
+
+	
+	<column name = "BOSS_ID_1" x='505' y='226' w='130' h='11' />								
+	<column name = "BOSS_ID_2" x='718' y='226' w='130' h='11' />
+	<column name = "BOSS_ID_3" x='505' y='390' w='130' h='11' />
+	<column name = "BOSS_ID_4" x='718' y='390' w='130' h='11' />
+
+
+	<button name="BOSS_SLOT_1" x='432' y='192' w='209' h='166'>
+		<sprite l='0' t='0' r='0' b='0' texture="MULTI_AI2"/>
+		<sprite l='0' t='185' r='220' b='369' texture="MULTI_AI2"/>
+		<sprite l='0' t='185' r='220' b='369' texture="MULTI_AI2"/>
+  	</button>
+
+	<button name="BOSS_SLOT_2" x='650' y='192' w='209' h='166'>
+		<sprite l='0' t='0' r='0' b='0' texture="MULTI_AI2"/>
+		<sprite l='0' t='185' r='220' b='369' texture="MULTI_AI2"/>
+		<sprite l='0' t='185' r='220' b='369' texture="MULTI_AI2"/>
+  	</button>
+
+	<button name="BOSS_SLOT_3" x='432' y='364' w='209' h='166'>
+		<sprite l='0' t='0' r='0' b='0' texture="MULTI_AI2"/>
+		<sprite l='0' t='185' r='220' b='369' texture="MULTI_AI2"/>
+		<sprite l='0' t='185' r='220' b='369' texture="MULTI_AI2"/>
+  	</button>
+
+	<button name="BOSS_SLOT_4" x='650' y='364' w='209' h='166'>
+		<sprite l='0' t='0' r='0' b='0' texture="MULTI_AI2"/>
+		<sprite l='0' t='185' r='220' b='369' texture="MULTI_AI2"/>
+		<sprite l='0' t='185' r='220' b='369' texture="MULTI_AI2"/>
+  	</button>
+
+	
+
+	
+	<column name="TEAM_BOSS_CLEAR_USER_ICON" x='320' y='182' w='0'  h='0'/>
+	<column name="TEAM_BOSS_CLEAR_RANK" x='106' y='185' w='15' h='15' /> 
+	<column name="TEAM_BOSS_CLEAR_TEXT_ID" x='131'  y='185' w='88' h='15' /> 
+ 	<column name="TEAM_BOSS_CLEAR_TEXT_SCORE" x='223' y='185' w='88' h='15'/>
+		
+	<msprite name = "BOSS_USER_PANNEL" sx='92' sy='149' ex='92' ey='149' l='274' t='820' r='589' b='979' texture="MULTI_AI2"/>
+
+
+
+
+		
+	
+
+	
+	<msprite name="CONTINUE_PANNEL_0" sx='232' sy='115' ex='232' ey='115' l='0'   t='525' r='475' b='1024' texture="MULTI_GS_02"/>
+	<msprite name="CONTINUE_PANNEL_1" sx='707' sy='115' ex='707' ey='115' l='446' t='525' r='503' b='1024' texture="MULTI_GS_02"/>
+	<msprite name="CONTINUE_PANNEL_2" sx='764' sy='115' ex='764' ey='115' l='830' t='525' r='865' b='1024' texture="MULTI_GS_02"/>
+
+	
+	<msprite name = "CONTINUE_STATE_PANNEL" sx='376' sy='561' ex='376' ey='561' l='733' t='444' r='1024' b='454' texture="MULTI_CRH"/> 
+	<msprite name = "CONTINUE_STATE_TEXT" sx='420' sy='448' ex='420' ey='448' l='257' t='368' r='463' b='410' texture="MULTI_AI2"/> 
+
+	
+	<msprite name="COIN_BUY_PANNEL" sx='706' sy='148' ex='706' ey='148' l='726' t='0' r='970' b='375' texture="MULTI_HELP"/>
+
+
+	<column name="WANT_COIN_0" x='827' y='214' w='0' h='0'/>
+	<column name="WANT_COIN_1" x='847' y='214' w='0' h='0'/> 
+
+
+	
+	<msprite name = "PENDANT_EFFECT_OFF" sx='355' sy='157' ex='355' ey='157' l='689' t='455' r='1024' b='739' texture="MULTI_CRH"/>
+	<column name="CONTINUE_PENDANT_RENDER"  x='383' y='242' w='280' h='280' /> 
+
+
+	
+
+	<msprite name = "CONTINUE_SUCCESS_TITLE" sx='355' sy='157' ex='355' ey='157' l='689' t='740' r='1024' b='1024' texture="MULTI_CRH"/>
+	<msprite name = "CONTINUE_SUCCESS_USER" sx='398' sy='519' ex='398' ey='519' l='257' t='328' r='507' b='366' texture="MULTI_AI2"/>
+	<column name="CONTINUE_SUCCESS_USER_NAME"  x='450' y='530' w='104' h='11' /> 
+		
+	<button name="CONTINUE_NO" x='452' y='497' w='66' h='30'>
+		<sprite l='223' t='0' r='289' b='30' texture="MULTI_AI2"/>
+		<sprite l='223' t='31' r='289' b='61' texture="MULTI_AI2"/>
+		<sprite l='223' t='62' r='289' b='92' texture="MULTI_AI2"/>
+  	</button>
+
+	<button name="CONTINUE_YES" x='524' y='497' w='66' h='30'>
+		<sprite l='289' t='0' r='355' b='30' texture="MULTI_AI2"/>
+		<sprite l='289' t='31' r='355' b='61' texture="MULTI_AI2"/>
+		<sprite l='289' t='62' r='355' b='92' texture="MULTI_AI2"/>
+  	</button>
+
+
+	<column name="MY_COIN_TEXT" x='798' y='283' w='59' h='12' /> 
+	<column name="MY_CASH_TEXT" x='793' y='327' w='69' h='14' />
+	
+	
+	<column name="BUY_CASH_1" x='820' y='384' w='0' h='0' /> <!-- 05 -->
+	<column name="BUY_CASH_2" x='820' y='411' w='0' h='0' /> <!-- 10 -->
+	<column name="BUY_CASH_3" x='820' y='438' w='0' h='0' /> <!-- 20 -->
+	<column name="BUY_CASH_4" x='820' y='466' w='0' h='0' /> <!-- 50 -->
+
+
+
+
+  	<button name="COIN_BUY_1" x='876' y='379' w='47' h='21'>
+		<sprite l='0' t='0' r='0' b='0' texture="MULTI_POPUP_AI_02"/>
+		<sprite l='422' t='23' r='469' b='44' texture="MULTI_POPUP_AI_02"/>
+		<sprite l='422' t='45' r='469' b='66' texture="MULTI_POPUP_AI_02"/>
+  	</button>
+
+
+	<button name="COIN_BUY_2" x='876' y='406' w='47' h='21'>
+		<sprite l='0' t='0' r='0' b='0' texture="MULTI_POPUP_AI_02"/>
+		<sprite l='422' t='23' r='469' b='44' texture="MULTI_POPUP_AI_02"/>
+		<sprite l='422' t='45' r='469' b='66' texture="MULTI_POPUP_AI_02"/>
+  	</button>
+	
+
+	<button name="COIN_BUY_3" x='876' y='433' w='47' h='21'>
+		<sprite l='0' t='0' r='0' b='0' texture="MULTI_POPUP_AI_02"/>
+		<sprite l='422' t='23' r='469' b='44' texture="MULTI_POPUP_AI_02"/>
+		<sprite l='422' t='45' r='469' b='66' texture="MULTI_POPUP_AI_02"/>
+  	</button>
+
+
+	<button name="COIN_BUY_4" x='876' y='461' w='47' h='21'>
+		<sprite l='0' t='0' r='0' b='0' texture="MULTI_POPUP_AI_02"/>
+		<sprite l='422' t='23' r='469' b='44' texture="MULTI_POPUP_AI_02"/>
+		<sprite l='422' t='45' r='469' b='66' texture="MULTI_POPUP_AI_02"/>
+  	</button>
+	
+	
+	
+	<column name="COIN_POPUP" x='365' y='340' w='290' h='130' /> 
+	<msprite name="CONTINUE_FAILED" sx="351" sy="297" ex='351' ey='297' l='0' t='0' r='315' b='172' texture="MULTI_NPG"/>
+	
+	<button name="WARNING_OK" x='576' y='426' w='78' h='33'>
+		<sprite l='318' t='0' r='395' b='34' texture="MULTI_NPG"/> 
+		<sprite l='318' t='0' r='395' b='34' texture="MULTI_NPG"/> 
+    		<sprite l='318' t='34' r='395' b='68' texture="MULTI_NPG"/> 
+  	</button>
+	
+
+	<msprite name="CONTINUE_SUCCESS" sx="351" sy="297" ex='351' ey='297' l='0' t='174' r='315' b='346' texture="MULTI_NPG"/>
+
+	
+	<button name="CONTINUE_BUY" x='495' y='426' w='78' h='33'>
+		<sprite l='318' t='174' r='395' b='208' texture="MULTI_NPG"/> 
+		<sprite l='318' t='174' r='395' b='208' texture="MULTI_NPG"/> 
+    		<sprite l='318' t='208' r='395' b='242' texture="MULTI_NPG"/> 
+  	</button>
+	
+	<button name="CONTINUE_CANCEL" x='576' y='426' w='78' h='33'>
+		<sprite l='395' t='174' r='472' b='208' texture="MULTI_NPG"/> 
+		<sprite l='395' t='174' r='472' b='208' texture="MULTI_NPG"/> 
+    		<sprite l='395' t='208' r='472' b='242' texture="MULTI_NPG"/> 
+  	</button>
+
+
+
+
+
+
+	
+	<msprite name="LEFT_TITLE_0" sx='13' sy='171' ex='13' ey='171' l='221' t='412' r='381' b='456' texture="MULTI_AI2"/>
+	<msprite name="LEFT_TITLE_1" sx='163' sy='171' ex='163' ey='171' l='367' t='412' r='377' b='456' texture="MULTI_AI2"/>
+	<msprite name="LEFT_TITLE_2" sx='313' sy='171' ex='313' ey='171' l='383' t='412' r='394' b='456' texture="MULTI_AI2"/>
+
+	
+	<msprite name="TOP_USER" sx='13' sy='218' ex='13' ey='218' l='274' t='709' r='586' b='819' texture="MULTI_AI2"/>
+
+	<column name="TOP_HIGHSCORE_PENDANT" x='22' y='225' w='96' h='96' />
+  	<column name="TOP_HIGHSCORE" x='131' y='288' w='0' h='0' /> 
+	<column name="TOP_EMBLEM"  x='139' y='243' w='16' h='16' />
+	<column name="TOP_CLASS"  x='156' y='243' w='16' h='16' />
+	<column name="TOP_USER_ID"   x='206' y='246' w='88' h='13' /> 
+
+	
+	<msprite name = "USER_LIST" sx='13' sy='330' ex='13' ey='330' l='0' t='556' r='312' b='708' texture="MULTI_AI2"/>
+	
+	<column name="USER_RANK"	x='29' y='359' w='18' h='18' /> 
+	<column name="USER_TEXT_ID"	x='67'  y='359' w='88' h='14' /> 
+ 	<column name="USER_TEXT_SCORE"	x='166' y='359' w='56'  h='14' />
+	<column name="USER_ICON"	x='255' y='357' w='0'  h='0' />
+
+
+
+
+	<msprite name="TAB_TITLE_0" sx='750' sy='171' ex='750' ey='171' l='221' t='457' r='371' b='501' texture="MULTI_AI2"/>
+	<msprite name="TAB_TITLE_1" sx='900' sy='171' ex='900' ey='171'  l='344' t='457' r='354' b='501' texture="MULTI_AI2"/>
+	<msprite name="TAB_TITLE_2" sx='1000' sy='171' ex='1000' ey='171' l='373' t='457' r='384' b='501' texture="MULTI_AI2"/>
+	
+	
+	<msprite name="TAB_MY_SCORE" sx='750' sy='218' ex='750' ey='218' l='0' t='900' r='261'  b='1010' texture="MULTI_AI2"/>
+
+	
+	<msprite name="TAB_COMBO_L" sx='750' sy='330' ex='750' ey='330' l='313' t='532' r='513' b='694' texture="MULTI_AI2"/>
+	<msprite name="TAB_COMBO_R" sx='950' sy='330' ex='950' ey='330' l='525' t='532' r='586' b='694' texture="MULTI_AI2"/>
+
+
+	
+	<column name="PENDANT_RENDER"  x='752' y='472' w='256' h='246' />
+
+
+	
+	<msprite name="PENDANT_0" sx='750' sy='494' ex='750' ey='494' l='0' t='900' r='261' b='906' texture="MULTI_AI2"/>
+	<msprite name="PENDANT_1" sx='750' sy='500' ex='750' ey='500' l='0' t='919' r='261' b='929' texture="MULTI_AI2"/> 
+	<msprite name="PENDANT_2" sx='750' sy='710' ex='750' ey='710' l='0' t='999' r='261' b='1010' texture="MULTI_AI2"/>
+
+
+	<column name="TAB_EMBLEM" x='789' y='243' w='16' h='16' />
+  	<column name="TAB_CLASS" x='806' y='243' w='16' h='16' />
+	<column name="TAB_ID" x='879' y='246' w='88' h='13' />
+	<column name="TAB_SCORE" x='795' y='288' w='0' h='0' /> 
+	
+	
+	<column name="TAB_HEADSHOT" x='927' y='336' w='0' h='0' />
+	<column name="TAB_HERAT" x='927' y='361' w='0' h='0' />
+	<column name="TAB_CRITICAL" x='927' y='387' w='0' h='0' />
+	<column name="TAB_AIRCOMBO" x='927' y='413' w='0' h='0' />
+	<column name="TAB_MAXCOMBO" x='927' y='438' w='0' h='0' />
+	<column name="TAB_RAPIDKILL" x='927' y='462' w='0' h='0' />	
+
+
+
+
+	<msprite name="RESULT_BG" sx='0' sy='0' ex='0' ey='0' l='101' t='0' r='109' b='768' texture="MULTI_RESULT"/>
+									
+	
+	
+	
+	<msprite name="RESULT_TITLE_0" sx='498' sy='158' ex='498' ey='158' l='601' t='232' r='721' b='265' texture="MULTI_RESULT"/>
+	<msprite name="RESULT_TITLE_1" sx='618' sy='158' ex='618' ey='158' l='732' t='232' r='742' b='265' texture="MULTI_RESULT"/> 
+	<msprite name="RESULT_TITLE_2" sx='998' sy='158' ex='998' ey='158' l='750' t='232' r='763' b='265' texture="MULTI_RESULT"/>
+
+	
+	
+	<msprite name="RESULT_MY_SCORE_0" sx='498' sy='194' ex='498' ey='194' l='0' t='900' r='200' b='1010' texture="MULTI_AI2"/>	
+	<msprite name="RESULT_MY_SCORE_1" sx='698' sy='194' ex='698' ey='194' l='224' t='900' r='261' b='1010' texture="MULTI_AI2"/>
+	<msprite name="RESULT_COMBO_SCORE" sx='738' sy='194' ex='738' ey='194' l='313' t='532' r='586' b='694' texture="MULTI_AI2"/>
+	<msprite name="RESULT_GET_PG_EXP" sx='738' sy='359' ex='738' ey='359' l='0' t='709' r='273' b='899' texture="MULTI_AI2"/>
+
+
+	<column name="RESULT_EMBLEM" x='530' y='218' w='16' h='16' />
+  	<column name="RESULT_CLASS" x='547' y='218' w='16' h='16' />
+	<column name="RESULT_ID" x='608' y='221' w='88' h='13' /> 
+	<column name="RESULT_SCORE" x='530' y='263' w='0' h='0' /> 
+	
+	
+	<column name="RESULT_HEADSHOT" x='927' y='200' w='0' h='0' /> 
+	<column name="RESULT_HERAT" x='927' y='225' w='0' h='0' />
+	<column name="RESULT_CRITICAL" x='927' y='251' w='0' h='0' />
+	<column name="RESULT_AIRCOMBO" x='927' y='277' w='0' h='0' />
+	<column name="RESULT_MAXCOMBO" x='927' y='302' w='0' h='0' />
+	<column name="RESULT_RAPIDKILL" x='927' y='326' w='0' h='0' />	
+
+	<column name="RESULT_MY_PG" x='807' y='393' w='0' h='0' /> 
+	<column name="RESULT_GET_PG" x='744' y='393' w='0' h='0' /> 
+	<column name="RESULT_GET_EXP" x='762' y='450' w='0' h='0' /> 
+	
+	<column name="RESULT_MY_CLASS" x='791' y='518' w='0' h='0' />
+	<column name="RESULT_EXP_GRAPH" x='823' y='518' w='0' h='0' />
+
+	
+</TUTORIALDEFINE>

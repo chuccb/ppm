@@ -1,0 +1,10 @@
+<UIDEFINE>
+	<image name="Game_Room_Shuffle" filename="L_GR_02.dds"/>
+
+	<msprite name="SHUFFLEING" sx="87" sy="57" ex="87" ey="57" l="0" t="387" r="844" b="899" texture="Game_Room_Shuffle"/>
+
+	<column name="WAITING" x='508' y='293'  w='82' h='82' />
+
+	<sprite name="SHUFFLE_WAITING" l="479" t="123" r="561" b="205" texture="Game_Room_Shuffle"/>
+										
+</UIDEFINE>

@@ -1,0 +1,65 @@
+<TUTORIALDEFINE>
+	<image name="Level_Up_IMG" filename="level_exp.dds"/>
+
+	
+	<column name="GAME_GAGE_POS" x="768" y="385" w='166' h='18' />
+	<column name="AI_MULTI_GAGE_POS" x='823' y='518' w='166' h='18' />
+	<column name="GAME_GAGE_POS_SOLO" x="811" y="385" w='166' h='18' /> 
+	<column name="GAME_GAGE_POS_SINGLE" x="810" y="558" w='166' h='18' />
+
+	
+	<column name="LEVELUP_FIRST_START_POS"  x="792" y="401" w="50" h="50"/>
+	<column name="LEVELUP_FIRST_FINISH_POS" x="792" y="385" w="10" h="10"/>
+	
+	<column name="LEVELUP_FIRST_START_POS_SOLO"  x="835" y="401" w="50" h="50" />
+	<column name="LEVELUP_FIRST_FINISH_SOLO" x="835" y="385" w="10" h="10" />
+
+	<column name="AI_LEVELUP_FIRST_START_POS"  x="850" y="534" w="50" h="50"/>
+ 	<column name="AI_LEVELUP_FIRST_FINISH_POS" x="850"  y="518" w="10" h="10"/>
+
+	<column name="LEVELUP_FIRST_START_POS_SINGLE"  x="834" y="576" w="50" h="50"/>
+	<column name="LEVELUP_FIRST_FINISH_POS_SINGLE" x="834" y="558" w="10" h="10"/>
+	
+	<msprite name="GAGE_25"  sx='1' sy='69' ex='1' ey='69' l='1'  t='69' r='164' b='85' texture="Level_Up_IMG"/>
+	<msprite name="GAGE_50"  sx='1' sy='52' ex='1' ey='52' l='1'  t='52' r='164' b='68' texture="Level_Up_IMG"/>
+	<msprite name="GAGE_75"  sx='1' sy='35' ex='1' ey='35' l='1'  t='35' r='164' b='51' texture="Level_Up_IMG"/>
+	<msprite name="GAGE_100" sx='1' sy='18' ex='1' ey='18' l='1'  t='18' r='164' b='34' texture="Level_Up_IMG"/>
+	<msprite name="GAGE_MAX" sx='1' sy='1'  ex='1' ey='1' l='1'   t='1'  r='164' b='17' texture="Level_Up_IMG"/>
+
+	
+        <msprite name="LEVELUP_COLOR_0" sx='553' sy='853' ex='553' ey='853' l='1' t='86' r='110' b='104'  texture="Level_Up_IMG"/>
+        <msprite name="LEVELUP_COLOR_1" sx='553' sy='853' ex='553' ey='853' l='1' t='105' r='110' b='123'  texture="Level_Up_IMG"/>
+	<msprite name="LEVELUP_COLOR_2" sx='553' sy='853' ex='553' ey='853' l='1' t='124' r='110' b='142'  texture="Level_Up_IMG"/>
+	<msprite name="LEVELUP_COLOR_3" sx='553' sy='853' ex='553' ey='853' l='1' t='143' r='110' b='161'  texture="Level_Up_IMG"/>
+	<msprite name="LEVELUP_COLOR_4" sx='553' sy='853' ex='553' ey='853' l='1' t='162' r='110' b='180'  texture="Level_Up_IMG"/>
+        <msprite name="LEVELUP_COLOR_5" sx='553' sy='853' ex='553' ey='853' l='1' t='181' r='110' b='199'  texture="Level_Up_IMG"/>
+	<msprite name="LEVELUP_COLOR_6" sx='553' sy='853' ex='553' ey='853' l='1' t='200' r='110' b='218'  texture="Level_Up_IMG"/>
+	<msprite name="LEVELUP_COLOR_7" sx='553' sy='853' ex='553' ey='853' l='1' t='219' r='110' b='237'  texture="Level_Up_IMG"/>
+        <msprite name="LEVELUP_COLOR_8" sx='553' sy='853' ex='553' ey='853' l='1' t='238' r='110' b='256'  texture="Level_Up_IMG"/>
+        <msprite name="LEVELUP_COLOR_9" sx='553' sy='853' ex='553' ey='853' l='1' t='257' r='110' b='276'  texture="Level_Up_IMG"/>
+
+	
+	<column name="LEVEL_VALUE_GAME" x='768' y='385' w='166' h='18' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>  
+	<column name="LEVEL_VALUE_GAME_SOLO" x='811' y='385' w='166' h='18' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>  
+	<column name="LEVEL_VALUE_GUNSHOOTING" x='810' y='558' w='166' h='18' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>  
+	<column name="LEVEL_VALUE_AI" x='826' y='519' w='166' h='18' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>
+	   
+
+	<column name="CLANEMBLEM" x='773' y='385' w='16' h='16' shadow='FF000000'/>
+	<column name="AI_MULTI_CLANEMBLEM" x='791' y='518' w='16' h='16' shadow='FF000000'/>
+	<column name="GUNSHOOTING_CLANEMBLEM"   x='811' y='558' w='16' h='16' shadow='FF000000'/>
+
+	
+	<column name="LOBBY_GAGE_POS" 		x="913" y="548"  w="86" h="14"/>
+	<column name="LEVEL_VALUE_LOBBY"	 x='913' y='548' w='86' h='14' fontsize="11"  color='FFFFFFFF' format='VCENTER CENTER'/> 
+	
+	<msprite name="LOBBY_GAGE_25"  sx='913' sy='548' ex='913' ey='548' l='165'  t='0' r='251' b='14' texture="Level_Up_IMG"/>
+	<msprite name="LOBBY_GAGE_50"  sx='913' sy='548' ex='913' ey='548' l='165'  t='15' r='251' b='29' texture="Level_Up_IMG"/>
+	<msprite name="LOBBY_GAGE_75"  sx='913' sy='548' ex='913' ey='548' l='165'  t='30' r='251' b='44' texture="Level_Up_IMG"/>
+	<msprite name="LOBBY_GAGE_100"  sx='913' sy='548' ex='913' ey='548' l='165'  t='45' r='251' b='59' texture="Level_Up_IMG"/>
+	<msprite name="LOBBY_GAGE_MAX"  sx='913' sy='548' ex='913' ey='548' l='165'  t='60'  r='251' b='74' texture="Level_Up_IMG"/>
+
+	<msprite name="LOBBY_LEVELUP_COLOR_0" sx='553' sy='853' ex='553' ey='853' l='252' t='0' r='338' b='14' texture="Level_Up_IMG"/>
+	<msprite name="LOBBY_LEVELUP_COLOR_1" sx='553' sy='853' ex='553' ey='853' l='252' t='15' r='338' b='29' texture="Level_Up_IMG"/>
+
+</TUTORIALDEFINE>

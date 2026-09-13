@@ -1,0 +1,120 @@
+<UIDEFINE>
+
+	<rect name="INFOIMAGE" l="487" t="588" r="639" b="673"/> 
+	<rect name="INFONAME" l="483" t="554" r="746" b="577"/>  
+	<rect name="INFOEXPLAIN" l="757" t="558" r="978" b="669"/>
+
+	
+ 	<column name="AVATAR" x="101" y="105" w="238" h="320"/>
+
+	<column name="ITEMMAINTEXT" x="490" y="560" cx="146" cy="30" fontsize="15" color="FFFFFFFF" shadow="FF000000"/>
+	<column name="ITEMMAINLV" x="517" y="587" cx="171" cy="30" format="VTOP LEFT" fontsize="18" shadow="FF000000"/>
+	
+	<column name="PRECHARABIL0" x="589" y="558" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PRECHARABIL1" x="589" y="572" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PRECHARABIL2" x="589" y="586" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PRECHARABIL3" x="589" y="600" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PRECHARABIL4" x="589" y="614" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="ITEMABILITY0" x="632" y="558" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="ITEMABILITY1" x="632" y="572" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="ITEMABILITY2" x="632" y="586" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="ITEMABILITY3" x="632" y="600" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="ITEMABILITY4" x="632" y="614" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="AFTERCHARABIL0" x="675" y="558" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="AFTERCHARABIL1" x="675" y="572" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="AFTERCHARABIL2" x="675" y="586" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="AFTERCHARABIL3" x="675" y="600" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="AFTERCHARABIL4" x="675" y="614" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+ 
+	<button name="FRONT" x="274" y="422" w="28" h="28">
+		<sprite l="0" t="521" r="28" b="549" texture="UI_Button" />
+		<sprite l="0" t="550" r="28" b="578" texture="UI_Button" />
+		<sprite l="0" t="579" r="28" b="607" texture="UI_Button" />
+	</button>
+	<button name="BACK" x="305" y="422" w="28" h="28">
+		<sprite l="29" t="521" r="57" b="549" texture="UI_Button" />
+		<sprite l="29" t="550" r="57" b="578" texture="UI_Button" />
+		<sprite l="29" t="579" r="57" b="607" texture="UI_Button" />
+	</button>
+
+	<charslot name="CHARSLOT">
+		<template>
+			<sprite l="709" t="518" r="773" b="582" texture="UI_Button"/> 
+			<sprite l="579" t="518" r="643" b="582" texture="UI_Button"/>
+		</template>
+		<slot name="char1" x="350" y="117" w="64" h="64"/>
+		<slot name="char2" x="350" y="184" w="64" h="64"/>
+		<slot name="char3" x="350" y="251" w="64" h="64"/>
+		<slot name="char4" x="350" y="318" w="64" h="64"/>
+		<slot name="char5" x="350" y="385 " w="64" h="64"/>
+    		<eventrect name="SCROLL_RECT" x="349" y="116" w="66" h="334"/>
+		<button name="UP" x="419" y="116" w="23" h="28">
+			<sprite l="258" t="461" r="281" b="489" texture="UI_Button"/>
+			<sprite l="282" t="461" r="305" b="489" texture="UI_Button"/>
+			<sprite l="306" t="461" r="329" b="489" texture="UI_Button"/>
+		</button>
+		<button name="DN" x="419" y="422" w="23" h="28">
+			<sprite l="258" t="490" r="281" b="518" texture="UI_Button"/>
+			<sprite l="282" t="490" r="305" b="518" texture="UI_Button"/>
+			<sprite l="306" t="490" r="329" b="518" texture="UI_Button"/>
+		</button>
+	</charslot>
+	
+	<itemslot name="ITEMSLOT">
+		<template>
+			
+			<button name="ENTERRECYCLEPOPUP" x="187" y="48" w="38" h="20">
+				<sprite l="704" t="348" r="750" b="371" texture="UI_Button"/> 
+				<sprite l="704" t="372" r="750" b="395" texture="UI_Button"/> 
+				<sprite l="704" t="396" r="750" b="419" texture="UI_Button"/> 
+			</button>   
+
+			<column name="NAME" x="78" y="7"/>
+			<sprite l="0" t="796" r="237" b="872"  texture="MAIN_STORE_1"/>
+			<sprite l="0" t="873" r="237" b="949"  texture="MAIN_STORE_1"/> 
+
+			<sprite l="644" t="518" r="708" b="582" texture="UI_Button"/> 
+			<sprite l="384" t="518" r="448" b="582" texture="UI_Button"/>	
+			<sprite l="449" t="518" r="513" b="582" texture="UI_Button"/>	
+			<sprite name="RECYCLE_OUTLINE" l="774" t="518" r="838" b="582" texture="UI_Button"/>
+			<sprite name="ENTER_RECYCLE"  l="576" t="420" r="622" b="443" texture="UI_Button"/>
+ 
+		</template>
+		
+		<slot name="slot1"  x="483" y="158" w="237" h="76"/>
+		<slot name="slot2"  x="721" y="158" w="237" h="76"/>
+		<slot name="slot3"  x="483" y="235" w="237" h="76"/>
+		<slot name="slot4"  x="721" y="235" w="237" h="76"/>
+		<slot name="slot5"  x="483" y="312" w="237" h="76"/>
+		<slot name="slot6"  x="721" y="312" w="237" h="76"/>
+		<slot name="slot7"  x="483" y="389" w="237" h="76"/>
+		<slot name="slot8"  x="721" y="389" w="237" h="76"/>
+		<slot name="slot9"  x="483" y="466" w="237" h="76"/>
+		<slot name="slot10" x="721" y="466" w="237" h="76"/>
+    		<eventrect name="SCROLL_RECT" x="483" y="158" w="474" h="384"/>
+		<button name="UP" x="962" y="158" w="23" h="28">
+			<sprite l="258" t="461" r="281" b="489" texture="UI_Button"/>
+			<sprite l="282" t="461" r="305" b="489" texture="UI_Button"/>
+			<sprite l="306" t="461" r="329" b="489" texture="UI_Button"/>
+		</button>
+		<button name="DN" x="962" y="514" w="23" h="28">
+			<sprite l="258" t="490" r="281" b="518" texture="UI_Button"/>
+			<sprite l="282" t="490" r="305" b="518" texture="UI_Button"/>
+			<sprite l="306" t="490" r="329" b="518" texture="UI_Button"/>
+		</button>   
+	</itemslot>
+
+
+	<button name="NAME" x="882" y="91" w="54" h="24">
+		<sprite l="330" t="443" r="384" b="467" texture="UI_Button" /> 
+		<sprite l="330" t="468" r="384" b="492" texture="UI_Button" />
+		<sprite l="330" t="493" r="384" b="517" texture="UI_Button" /> 
+	</button>
+
+	<button name="TIME" x="938" y="91" w="54" h="24">
+		<sprite l="615" t="443" r="669" b="467" texture="UI_Button" /> 
+		<sprite l="615" t="468" r="669" b="492" texture="UI_Button" />
+		<sprite l="615" t="493" r="669" b="517" texture="UI_Button" /> 
+	</button>
+			
+</UIDEFINE>

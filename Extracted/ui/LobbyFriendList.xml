@@ -1,0 +1,44 @@
+<UIDEFINE>
+	<image name="Lobby_FriendList" filename="lobby_03.dds" />
+
+	<msprite name="FRIEND_POPUP" sx="0" sy="0" ex="0" ey="0" l="290" t="48" r="506" b="142" texture="Lobby_FriendList" />
+	<column name="LEVEL" x="6" y="6" w="16" h="16" format="VCENTER CENTER" />
+	<column name="NAME" x="23" y="6" w="168" h="16" fontsize="12" color="FF000000" format="VCENTER CENTER" />
+
+	<button name="FRIEND_CLOSE_BTN" x="193" y="4" w="17" h="17">
+		<sprite l="372" t="147" r="389" b="164" texture="UI_Button" />
+		<sprite l="372" t="165" r="389" b="182" texture="UI_Button" />
+		<sprite l="372" t="183" r="389" b="200" texture="UI_Button" />
+	</button>
+
+	<button name="FRIEND_CHAT_BTN" x="4" y="26" w="104" h="20">
+		<sprite l="0" t="608" r="104" b="628" texture="UI_Button" />
+		<sprite l="0" t="629" r="104" b="649" texture="UI_Button" />
+		<sprite l="0" t="650" r="104" b="670" texture="UI_Button" />
+	</button>
+
+	<button name="FRIEND_PLAYTOGETHER_BTN" x="109" y="48" w="104" h="20">
+		<sprite l="0" t="671" r="104" b="691" texture="UI_Button" />
+		<sprite l="0" t="692" r="104" b="712" texture="UI_Button" />
+		<sprite l="0" t="713" r="104" b="733" texture="UI_Button" />
+	</button>
+	
+	<button name="FRIEND_DELETE_BTN" x="4" y="48" w="104" h="20">
+		<sprite l="0" t="734" r="104" b="754" texture="UI_Button" />
+		<sprite l="0" t="755" r="104" b="775" texture="UI_Button" />
+		<sprite l="0" t="776" r="104" b="796" texture="UI_Button" />
+	</button>
+												
+	<button name="FRIEND_MESSAGE_BTN" x="109" y="26" w="104" h="20">
+		<sprite l="0" t="797" r="104" b="817" texture="UI_Button" />
+		<sprite l="0" t="818" r="104" b="838" texture="UI_Button" />
+		<sprite l="0" t="839" r="104" b="859" texture="UI_Button" />
+	</button>
+		
+	<button name="FRIEND_INFO_BTN" x="4" y="70" w="210" h="20">
+		<sprite l="173" t="521" r="383" b="541" texture="UI_Button" />
+		<sprite l="173" t="542" r="383" b="562" texture="UI_Button" />
+		<sprite l="173" t="563" r="383" b="583" texture="UI_Button" />
+	</button>
+
+</UIDEFINE>

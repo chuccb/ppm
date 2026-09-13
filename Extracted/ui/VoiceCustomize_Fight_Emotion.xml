@@ -1,0 +1,164 @@
+﻿<UIDEFINE>
+
+	<image name="Voice_Fight_Emotion" filename="voice001.dds"/>
+
+	<column name="USER_ITEM_NAME" x="565" y="216" w="144" h="14" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="USER_ITEM_EXPLAIN" x="565" y="239" w="152" h="36" fontsize="12" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="CHANGE_ITEM_NAME" x="752" y="282" w="144" h="14" fontsize="12" color="FFFFFFFF" format="VCENTER LEFT"/>
+	
+	
+	<msprite name="VOICE_CUSTOMIZE_BATTLE_EMOTION_TEXT" sx="561" sy="252" ex="561" ey="252" l="517" t="304" r="677" b="314" texture="Voice_Fight_Emotion"/>
+	
+	
+	<select name="VOICE_WAR_USER_ITEM" count="1" OffX="0" OffY="0">
+		<rect l="491" t="302" r="720" b="524"/>
+		<sprite l="564" t="387" r="793" b="609" texture="Voice_Fight_Emotion"/>
+		<sprite l="564" t="706" r="793" b="928" texture="Voice_Fight_Emotion"/>
+	</select>
+	
+	<select name="VOICE_WAR_CHANGE_ITEM" count="1" OffX="0" OffY="0">
+		<rect l="748" t="302" r="920" b="524"/>
+		<sprite l="795" t="387" r="1024" b="609" texture="Voice_Fight_Emotion"/>
+		<sprite l="795" t="706" r="1024" b="928" texture="Voice_Fight_Emotion"/>
+	</select>
+	
+	<select name="VOICE_EMOTION_USER_ITEM" count="1" OffX="0" OffY="0">
+		<rect l="491" t="302" r="720" b="620"/>
+		<sprite l="564" t="387" r="793" b="705" texture="Voice_Fight_Emotion"/>
+		<sprite l="564" t="706" r="793" b="1024" texture="Voice_Fight_Emotion"/>
+	</select>
+	
+	<select name="VOICE_EMOTION_CHANGE_ITEM" count="1" OffX="0" OffY="0">
+		<rect l="748" t="302" r="920" b="620"/>
+		<sprite l="795" t="387" r="1024" b="705" texture="Voice_Fight_Emotion"/>
+		<sprite l="795" t="706" r="1024" b="1024" texture="Voice_Fight_Emotion"/>
+	</select>
+
+	<msprite name="WAR_SCRIPTE_USER_IMAGE" sx="498" sy="310" ex="498" ey="310" l="0" t="594" r="80" b="800" texture="Voice_Fight_Emotion"/>
+	<msprite name="WAR_SCRIPTE_ITEM_IMAGE" sx="755" sy="310" ex="755" ey="310" l="0" t="594" r="80" b="800" texture="Voice_Fight_Emotion"/>
+	
+	<msprite name="EMOTION_SCRIPTE_USER_IMAGE" sx="498" sy="310" ex="498" ey="310" l="81" t="594" r="161" b="896" texture="Voice_Fight_Emotion"/>
+	<msprite name="EMOTION_SCRIPTE_ITEM_IMAGE" sx="755" sy="310" ex="755" ey="310" l="81" t="594" r="161" b="896" texture="Voice_Fight_Emotion"/>
+	
+
+	
+	<button name="USER_PLAY_BUTTON_01" x="664" y="305" w="53" h="24">
+		<sprite l="517" t="0"  r="570" b="24" texture="Voice_Fight_Emotion"/>
+		<sprite l="517" t="25" r="570" b="49" texture="Voice_Fight_Emotion"/>
+		<sprite l="517" t="50" r="570" b="74" texture="Voice_Fight_Emotion"/>
+	</button>
+	<button name="USER_PLAY_BUTTON_02" x="664" y="337" w="53" h="24">
+		<sprite l="517" t="0"  r="570" b="24" texture="Voice_Fight_Emotion"/>
+		<sprite l="517" t="25" r="570" b="49" texture="Voice_Fight_Emotion"/>
+		<sprite l="517" t="50" r="570" b="74" texture="Voice_Fight_Emotion"/>
+	</button>
+	<button name="USER_PLAY_BUTTON_03" x="664" y="369" w="53" h="24">
+		<sprite l="517" t="0"  r="570" b="24" texture="Voice_Fight_Emotion"/>
+		<sprite l="517" t="25" r="570" b="49" texture="Voice_Fight_Emotion"/>
+		<sprite l="517" t="50" r="570" b="74" texture="Voice_Fight_Emotion"/>
+	</button>
+	<button name="USER_PLAY_BUTTON_04" x="664" y="401" w="53" h="24">
+		<sprite l="517" t="0"  r="570" b="24" texture="Voice_Fight_Emotion"/>
+		<sprite l="517" t="25" r="570" b="49" texture="Voice_Fight_Emotion"/>
+		<sprite l="517" t="50" r="570" b="74" texture="Voice_Fight_Emotion"/>
+	</button>
+	<button name="USER_PLAY_BUTTON_05" x="664" y="433" w="53" h="24">
+		<sprite l="517" t="0"  r="570" b="24" texture="Voice_Fight_Emotion"/>
+		<sprite l="517" t="25" r="570" b="49" texture="Voice_Fight_Emotion"/>
+		<sprite l="517" t="50" r="570" b="74" texture="Voice_Fight_Emotion"/>
+	</button>
+	<button name="USER_PLAY_BUTTON_06" x="664" y="465" w="53" h="24">
+		<sprite l="517" t="0"  r="570" b="24" texture="Voice_Fight_Emotion"/>
+		<sprite l="517" t="25" r="570" b="49" texture="Voice_Fight_Emotion"/>
+		<sprite l="517" t="50" r="570" b="74" texture="Voice_Fight_Emotion"/>
+	</button>
+	<button name="USER_PLAY_BUTTON_07" x="664" y="497" w="53" h="24">
+		<sprite l="517" t="0"  r="570" b="24" texture="Voice_Fight_Emotion"/>
+		<sprite l="517" t="25" r="570" b="49" texture="Voice_Fight_Emotion"/>
+		<sprite l="517" t="50" r="570" b="74" texture="Voice_Fight_Emotion"/>
+	</button>
+	<button name="USER_PLAY_BUTTON_08" x="664" y="529" w="53" h="24">
+	<sprite l="517" t="0"  r="570" b="24" texture="Voice_Fight_Emotion"/>
+		<sprite l="517" t="25" r="570" b="49" texture="Voice_Fight_Emotion"/>
+		<sprite l="517" t="50" r="570" b="74" texture="Voice_Fight_Emotion"/>
+	</button>
+	<button name="USER_PLAY_BUTTON_09" x="664" y="561" w="53" h="24">
+		<sprite l="517" t="0"  r="570" b="24" texture="Voice_Fight_Emotion"/>
+		<sprite l="517" t="25" r="570" b="49" texture="Voice_Fight_Emotion"/>
+		<sprite l="517" t="50" r="570" b="74" texture="Voice_Fight_Emotion"/>
+	</button>
+	<button name="USER_PLAY_BUTTON_10" x="664" y="593" w="53" h="24">
+		<sprite l="517" t="0"  r="570" b="24" texture="Voice_Fight_Emotion"/>
+		<sprite l="517" t="25" r="570" b="49" texture="Voice_Fight_Emotion"/>
+		<sprite l="517" t="50" r="570" b="74" texture="Voice_Fight_Emotion"/>
+	</button>
+	
+	<button name="ITEM_PLAY_BUTTON_01" x="921" y="305" w="53" h="24">
+		<sprite l="843" t="0"  r="896" b="24" texture="Voice_Fight_Emotion"/>
+		<sprite l="843" t="25" r="896" b="49" texture="Voice_Fight_Emotion"/>
+		<sprite l="843" t="50" r="896" b="74" texture="Voice_Fight_Emotion"/>
+	</button>
+	<button name="ITEM_PLAY_BUTTON_02" x="921" y="337" w="53" h="24">
+		<sprite l="843" t="0"  r="896" b="24" texture="Voice_Fight_Emotion"/>
+		<sprite l="843" t="25" r="896" b="49" texture="Voice_Fight_Emotion"/>
+		<sprite l="843" t="50" r="896" b="74" texture="Voice_Fight_Emotion"/>
+	</button>
+	<button name="ITEM_PLAY_BUTTON_03" x="921" y="369" w="53" h="24">
+		<sprite l="843" t="0"  r="896" b="24" texture="Voice_Fight_Emotion"/>
+		<sprite l="843" t="25" r="896" b="49" texture="Voice_Fight_Emotion"/>
+		<sprite l="843" t="50" r="896" b="74" texture="Voice_Fight_Emotion"/>
+	</button>
+	<button name="ITEM_PLAY_BUTTON_04" x="921" y="401" w="53" h="24">
+		<sprite l="843" t="0"  r="896" b="24" texture="Voice_Fight_Emotion"/>
+		<sprite l="843" t="25" r="896" b="49" texture="Voice_Fight_Emotion"/>
+		<sprite l="843" t="50" r="896" b="74" texture="Voice_Fight_Emotion"/>
+	</button>
+	<button name="ITEM_PLAY_BUTTON_05" x="921" y="433" w="53" h="24">
+		<sprite l="843" t="0"  r="896" b="24" texture="Voice_Fight_Emotion"/>
+		<sprite l="843" t="25" r="896" b="49" texture="Voice_Fight_Emotion"/>
+		<sprite l="843" t="50" r="896" b="74" texture="Voice_Fight_Emotion"/>
+	</button>
+	<button name="ITEM_PLAY_BUTTON_06" x="921" y="465" w="53" h="24">
+		<sprite l="843" t="0"  r="896" b="24" texture="Voice_Fight_Emotion"/>
+		<sprite l="843" t="25" r="896" b="49" texture="Voice_Fight_Emotion"/>
+		<sprite l="843" t="50" r="896" b="74" texture="Voice_Fight_Emotion"/>
+	</button>
+	<button name="ITEM_PLAY_BUTTON_07" x="921" y="497" w="53" h="24">
+		<sprite l="843" t="0"  r="896" b="24" texture="Voice_Fight_Emotion"/>
+		<sprite l="843" t="25" r="896" b="49" texture="Voice_Fight_Emotion"/>
+		<sprite l="843" t="50" r="896" b="74" texture="Voice_Fight_Emotion"/>
+	</button>
+	<button name="ITEM_PLAY_BUTTON_08" x="921" y="529" w="53" h="24">
+		<sprite l="843" t="0"  r="896" b="24" texture="Voice_Fight_Emotion"/>
+		<sprite l="843" t="25" r="896" b="49" texture="Voice_Fight_Emotion"/>
+		<sprite l="843" t="50" r="896" b="74" texture="Voice_Fight_Emotion"/>
+	</button>
+	<button name="ITEM_PLAY_BUTTON_09" x="921" y="561" w="53" h="24">
+		<sprite l="843" t="0"  r="896" b="24" texture="Voice_Fight_Emotion"/>
+		<sprite l="843" t="25" r="896" b="49" texture="Voice_Fight_Emotion"/>
+		<sprite l="843" t="50" r="896" b="74" texture="Voice_Fight_Emotion"/>
+	</button>
+	<button name="ITEM_PLAY_BUTTON_10" x="921" y="593" w="53" h="24">
+	<sprite l="843" t="0"  r="896" b="24" texture="Voice_Fight_Emotion"/>
+		<sprite l="843" t="25" r="896" b="49" texture="Voice_Fight_Emotion"/>
+		<sprite l="843" t="50" r="896" b="74" texture="Voice_Fight_Emotion"/>
+	</button>
+	
+	<button name="ITEM_LEFT_BUTTON" x="803" y="233" w="18" h="20">
+		<sprite l="805"  t="0" r="823" b="20" texture="Voice_Fight_Emotion"/>
+		<sprite l="805" t="21" r="823" b="41" texture="Voice_Fight_Emotion"/>
+		<sprite l="805" t="42" r="823" b="62" texture="Voice_Fight_Emotion"/>
+	</button>
+	<button name="ITEM_RIGHT_BUTTON" x="903" y="233" w="18" h="20">
+		<sprite l="824"  t="0" r="842" b="20" texture="Voice_Fight_Emotion"/>
+		<sprite l="824"  t="21" r="842" b="41" texture="Voice_Fight_Emotion"/>
+		<sprite l="824"  t="42" r="842" b="62" texture="Voice_Fight_Emotion"/>
+	</button>
+	
+	<button name="DEFAULT_BUTTON" x="869" y="631" w="116" h="46">
+		<sprite l="571" t="0"  r="687" b="46" texture="Voice_Fight_Emotion"/>
+		<sprite l="571" t="47" r="687" b="93" texture="Voice_Fight_Emotion"/>
+		<sprite l="571" t="94" r="687" b="140" texture="Voice_Fight_Emotion"/>
+	</button>
+	<msprite name="VOICE_PLAYING" sx="0" sy="0" ex="0" ey="0" l="517" t="75" r="570" b="99" texture="Voice_Fight_Emotion"/>
+</UIDEFINE>

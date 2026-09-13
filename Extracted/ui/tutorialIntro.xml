@@ -1,0 +1,9 @@
+<UIDEFINE>
+	<image name="TUTO_GUIDE" filename="TUTO_GUIDE.dds" />
+	<msprite name="ARROW" sx='152' sy='514' ex='152' ey='514' l='369' t='724' r='688' b='830' texture="TUTO_GUIDE" />
+	<button name="GO" x='101' y='472' w='139' h='40' >
+		<sprite l='369' t='831' r='508' b='871' texture="TUTO_GUIDE" />
+		<sprite l='369' t='872' r='508' b='912' texture="TUTO_GUIDE" />
+		<sprite l='369' t='913' r='508' b='953' texture="TUTO_GUIDE" />
+	</button>
+</UIDEFINE>

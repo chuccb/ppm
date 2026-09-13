@@ -1,0 +1,18 @@
+<UIDEFINE>
+	<image name="Tournament_Popup" filename="tournament_popup.dds"/>
+
+	<msprite name="POPUP_CLAN_CONTENTS" sx="383" sy="241" ex="383" ey="241" l="0" t="0" r="258" b="286" texture="Tournament_Popup"/>
+	
+	<column name="CLAN_EMBLEM"	x="562" y="254" w="64" h="64"  fontsize='15' color="FFFFFFFF" />
+	<column name="CLAN_NAME" 	x="459" y="325" w="169" h="19" fontsize='15' color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="CLAN_MASTER_NAME" x="459" y="370" w="169" h="19" fontsize='15' color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="CLAN_COUNT" 	x="459" y="400" w="169" h="19" fontsize='15' color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="CLAN_LEVEL" 	x="459" y="430" w="169" h="19" fontsize='15' color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="CLAN_GRADE" 	x="459" y="460" w="169" h="19" fontsize='15' color="FFFFFFFF" format="VCENTER CENTER"/>
+	
+	<button name="POPUP_CLAN_OK" x="552" y="494" w="84" h="28">
+		<sprite l="777" t="881" r="861" b="909" texture="UI_Button" />
+		<sprite l="777" t="910" r="861" b="938" texture="UI_Button" />
+		<sprite l="777" t="939" r="861" b="967" texture="UI_Button" />
+	</button>
+</UIDEFINE>

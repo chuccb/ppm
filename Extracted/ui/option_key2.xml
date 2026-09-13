@@ -1,0 +1,251 @@
+<UIDEFINE>
+
+	<msprite name="OPTIONKEY2_1" sx="202" sy="193" ex="202" ey="193" l="0" t="86" r="16" b="106" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_2" tl="218" tt="193" tr="492" tb="213" l="18" t="86" r="32" b="106" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_3" sx="492" sy="193" ex="492" ey="193" l="34" t="86" r="50" b="106" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_4" tl="202" tt="213" tr="218" tb="565" l="0" t="108" r="16" b="122" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_5" tl="218" tt="213" tr="492" tb="565" l="18" t="108" r="32" b="122" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_6" tl="492" tt="213" tr="508" tb="565" l="34" t="108" r="50" b="122" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_7" sx="202" sy="565" ex="202" ey="565" l="0" t="124" r="16" b="140" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_8" tl="218" tt="565" tr="492" tb="581" l="18" t="124" r="32" b="140" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_9" sx="492" sy="565" ex="492" ey="565" l="34" t="124" r="50" b="140" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_10" sx="516" sy="193" ex="516" ey="193" l="0" t="86" r="16" b="106" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_11" tl="532" tt="193" tr="806" tb="213" l="18" t="86" r="32" b="106" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_12" sx="806" sy="193" ex="806" ey="193" l="34" t="86" r="50" b="106" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_13" tl="516" tt="213" tr="532" tb="565" l="0" t="108" r="16" b="122" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_14" tl="532" tt="213" tr="806" tb="565" l="18" t="108" r="32" b="122" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_15" tl="806" tt="213" tr="822" tb="565" l="34" t="108" r="50" b="122" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_16" sx="516" sy="565" ex="516" ey="565" l="0" t="124" r="16" b="140" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_17" tl="532" tt="565" tr="806" tb="581" l="18" t="124" r="32" b="140" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_18" sx="806" sy="565" ex="806" ey="565" l="34" t="124" r="50" b="140" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONKEY2_19" sx="345" sy="218" ex="345" ey="218" l="290" t="22" r="314" b="46" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_20" tl="369" tt="218" tr="471" tb="242" l="316" t="22" r="330" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_21" sx="471" sy="218" ex="471" ey="218" l="332" t="22" r="348" b="46" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONKEY2_22" sx="345" sy="248" ex="345" ey="248" l="290" t="22" r="314" b="46" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_23" tl="369" tt="248" tr="471" tb="272" l="316" t="22" r="330" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_24" sx="471" sy="248" ex="471" ey="248" l="332" t="22" r="348" b="46" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONKEY2_25" sx="345" sy="278" ex="345" ey="278" l="290" t="22" r="314" b="46" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_26" tl="369" tt="278" tr="471" tb="302" l="316" t="22" r="330" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_27" sx="471" sy="278" ex="471" ey="278" l="332" t="22" r="348" b="46" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONKEY2_28" sx="345" sy="308" ex="345" ey="308" l="290" t="22" r="314" b="46" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_29" tl="369" tt="308" tr="471" tb="332" l="316" t="22" r="330" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_30" sx="471" sy="308" ex="471" ey="308" l="332" t="22" r="348" b="46" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONKEY2_31" sx="345" sy="338" ex="345" ey="338" l="290" t="22" r="314" b="46" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_32" tl="369" tt="338" tr="471" tb="362" l="316" t="22" r="330" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_33" sx="471" sy="338" ex="471" ey="338" l="332" t="22" r="348" b="46" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONKEY2_34" sx="345" sy="368" ex="345" ey="368" l="290" t="22" r="314" b="46" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_35" tl="369" tt="368" tr="471" tb="392" l="316" t="22" r="330" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_36" sx="471" sy="368" ex="471" ey="368" l="332" t="22" r="348" b="46" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONKEY2_37" sx="345" sy="398" ex="345" ey="398" l="290" t="22" r="314" b="46" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_38" tl="369" tt="398" tr="471" tb="422" l="316" t="22" r="330" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_39" sx="471" sy="398" ex="471" ey="398" l="332" t="22" r="348" b="46" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONKEY2_40" sx="345" sy="428" ex="345" ey="428" l="290" t="22" r="314" b="46" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_41" tl="369" tt="428" tr="471" tb="452" l="316" t="22" r="330" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_42" sx="471" sy="428" ex="471" ey="428" l="332" t="22" r="348" b="46" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONKEY2_43" sx="345" sy="458" ex="345" ey="458" l="290" t="22" r="314" b="46" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_44" tl="369" tt="458" tr="471" tb="482" l="316" t="22" r="330" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_45" sx="471" sy="458" ex="471" ey="458" l="332" t="22" r="348" b="46" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONKEY2_46" sx="345" sy="488" ex="345" ey="488" l="290" t="22" r="314" b="46" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_47" tl="369" tt="488" tr="471" tb="512" l="316" t="22" r="330" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_48" sx="471" sy="488" ex="471" ey="488" l="332" t="22" r="348" b="46" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONKEY2_49" sx="345" sy="518" ex="345" ey="518" l="290" t="22" r="314" b="46" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_50" tl="369" tt="518" tr="471" tb="542" l="316" t="22" r="330" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_51" sx="471" sy="518" ex="471" ey="518" l="332" t="22" r="348" b="46" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONKEY2_52" sx="345" sy="548" ex="345" ey="548" l="290" t="22" r="314" b="46" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_53" tl="369" tt="548" tr="471" tb="572" l="316" t="22" r="330" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_54" sx="471" sy="548" ex="471" ey="548" l="332" t="22" r="348" b="46" texture="UI_Popup_1"/>
+
+  
+  	<msprite name="OPTIONKEY2_55" sx="659" sy="222" ex="659" ey="222" l="290" t="22" r="314" b="46" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_56" tl="683" tt="222" tr="785" tb="246" l="316" t="22" r="330" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_57" sx="785" sy="222" ex="785" ey="222" l="332" t="22" r="348" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_58" sx="659" sy="258" ex="659" ey="258" l="290" t="22" r="314" b="46" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_59" tl="683" tt="258" tr="785" tb="282" l="316" t="22" r="330" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_60" sx="785" sy="258" ex="785" ey="258" l="332" t="22" r="348" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_61" sx="659" sy="294" ex="659" ey="294" l="290" t="22" r="314" b="46" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_62" tl="683" tt="294" tr="785" tb="318" l="316" t="22" r="330" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_63" sx="785" sy="294" ex="785" ey="294" l="332" t="22" r="348" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_64" sx="659" sy="330" ex="659" ey="330" l="290" t="22" r="314" b="46" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_65" tl="683" tt="330" tr="785" tb="354" l="316" t="22" r="330" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_66" sx="785" sy="330" ex="785" ey="330" l="332" t="22" r="348" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_67" sx="659" sy="366" ex="659" ey="366" l="290" t="22" r="314" b="46" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_68" tl="683" tt="366" tr="785" tb="390" l="316" t="22" r="330" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_69" sx="785" sy="366" ex="785" ey="366" l="332" t="22" r="348" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_70" sx="659" sy="402" ex="659" ey="402" l="290" t="22" r="314" b="46" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_71" tl="683" tt="402" tr="785" tb="426" l="316" t="22" r="330" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_72" sx="785" sy="402" ex="785" ey="402" l="332" t="22" r="348" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_73" sx="659" sy="438" ex="659" ey="438" l="290" t="22" r="314" b="46" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_74" tl="683" tt="438" tr="785" tb="462" l="316" t="22" r="330" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_75" sx="785" sy="438" ex="785" ey="438" l="332" t="22" r="348" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_76" sx="659" sy="474" ex="659" ey="474" l="290" t="22" r="314" b="46" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_77" tl="683" tt="474" tr="785" tb="498" l="316" t="22" r="330" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_78" sx="785" sy="474" ex="785" ey="474" l="332" t="22" r="348" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_79" sx="659" sy="510" ex="659" ey="510" l="290" t="22" r="314" b="46" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_80" tl="683" tt="510" tr="785" tb="534" l="316" t="22" r="330" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_81" sx="785" sy="510" ex="785" ey="510" l="332" t="22" r="348" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_82" sx="659" sy="546" ex="659" ey="546" l="290" t="22" r="314" b="46" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONKEY2_83" tl="683" tt="546" tr="785" tb="570" l="316" t="22" r="330" b="46" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_84" sx="785" sy="546" ex="785" ey="546" l="332" t="22" r="348" b="46" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONKEY2_85" sx="226" sy="224" ex="226" ey="224" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_86" sx="226" sy="254" ex="226" ey="254" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_87" sx="226" sy="284" ex="226" ey="284" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_88" sx="226" sy="314" ex="226" ey="314" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_89" sx="226" sy="344" ex="226" ey="344" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_90" sx="226" sy="374" ex="226" ey="374" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_91" sx="226" sy="404" ex="226" ey="406" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_92" sx="226" sy="434" ex="226" ey="434" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_93" sx="226" sy="464" ex="226" ey="464" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_94" sx="226" sy="494" ex="226" ey="494" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_95" sx="226" sy="524" ex="226" ey="524" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_96" sx="226" sy="554" ex="226" ey="554" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONKEY2_97" sx="542" sy="228" ex="542" ey="228" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_98" sx="542" sy="264" ex="542" ey="264" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_99" sx="542" sy="300" ex="542" ey="300" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_100" sx="542" sy="336" ex="542" ey="336" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_101" sx="542" sy="372" ex="542" ey="372" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_102" sx="542" sy="408" ex="542" ey="408" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_103" sx="542" sy="444" ex="542" ey="444" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_104" sx="542" sy="480" ex="542" ey="480" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_105" sx="542" sy="516" ex="542" ey="516" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_106" sx="542" sy="552" ex="542" ey="552" l="153" t="35" r="165" b="47" texture="UI_Popup_1"/>
+	
+  	
+  	<msprite name="OPTIONKEY2_107" sx="247" sy="225" ex="247" ey="225" l="290" t="157" r="360" b="167" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_108" sx="247" sy="255" ex="247" ey="255" l="290" t="168" r="360" b="178" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_109" sx="247" sy="285" ex="247" ey="285" l="290" t="179" r="360" b="189" texture="UI_Popup_1"/>
+  	
+  	<msprite name="OPTIONKEY2_110" sx="247" sy="314" ex="247" ey="314" l="947" t="1004" r="1013" b="1017" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_111" sx="247" sy="345" ex="247" ey="345"  l="290" t="190" r="360" b="200" texture="UI_Popup_1"/>
+  	
+  	<msprite name="OPTIONKEY2_112" sx="246" sy="375" ex="246" ey="375" l="361" t="137" r="431" b="147" texture="UI_Popup_1"/>
+  	
+  	<msprite name="OPTIONKEY2_113" sx="248" sy="407" ex="248" ey="407" l="947" t="979" r="1013" b="990" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_114" sx="248" sy="435" ex="248" ey="435" l="947" t="992" r="1013" b="1002" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_131" sx="247" sy="465" ex="247" ey="465" l="361" t="148" r="431" b="158" texture="UI_Popup_1"/>
+	
+	<msprite name="OPTIONKEY2_116" sx="249" sy="495" ex="249" ey="495" l="342" t="864" r="407" b="872" texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY2_117" sx="249" sy="524" ex="249" ey="524" l="341" t="876" r="407" b="887" texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY2_118" sx="249" sy="554" ex="249" ey="554" l="341" t="889" r="407" b="900" texture="UI_Popup_1"/>
+	
+  	<msprite name="OPTIONKEY2_119" sx="562" sy="229" ex="562" ey="229" l="351" t="286" r="399" b="296" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_120" sx="562" sy="265" ex="562" ey="265" l="351" t="297" r="399" b="307" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_121" sx="562" sy="301" ex="562" ey="301" l="351" t="308" r="399" b="318" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_122" sx="562" sy="337" ex="562" ey="337" l="351" t="319" r="399" b="329" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_123" sx="562" sy="373" ex="562" ey="373" l="351" t="330" r="399" b="340" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_124" sx="562" sy="409" ex="562" ey="409" l="351" t="341" r="399" b="351" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_125" sx="562" sy="445" ex="562" ey="445" l="351" t="352" r="399" b="362" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_126" sx="562" sy="481" ex="562" ey="481" l="351" t="363" r="399" b="373" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_127" sx="562" sy="517" ex="562" ey="517" l="351" t="374" r="399" b="384" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_128" sx="562" sy="553" ex="562" ey="553" l="351" t="385" r="399" b="395" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_129" sx="213" sy="197" ex="213" ey="197" l="432" t="52" r="484" b="64" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONKEY2_130" sx="527" sy="197" ex="527" ey="197" l="432" t="65" r="484" b="77" texture="UI_Popup_1"/>
+	<column name="KeyMSG" x="278" y="516" w="400" h="15"/>
+
+	<keys name="CommandMSG" l="345" t="218" r="488" b="242">
+	 	<sprite l="154" t="201" r="297" b="225" texture="UI_Popup_1"/>
+		<sprite l="154" t="226" r="297" b="250" texture="UI_Popup_1"/>
+	</keys>
+	<keys name="TaticMsg" l="345" t="248" r="488" b="272">
+		<sprite l="154" t="201" r="297" b="225" texture="UI_Popup_1"/>
+		<sprite l="154" t="226" r="297" b="250" texture="UI_Popup_1"/>
+	</keys>
+	<keys name="BrifeMSG" l="345" t="278" r="488" b="302">
+		<sprite l="154" t="201" r="297" b="225" texture="UI_Popup_1"/>
+		<sprite l="154" t="226" r="297" b="250" texture="UI_Popup_1"/>
+	</keys>
+
+	<keys name="ShoutChat" l="345" t="308" r="488" b="332">
+		<sprite l="154" t="201" r="297" b="225" texture="UI_Popup_1"/>
+		<sprite l="154" t="226" r="297" b="250" texture="UI_Popup_1"/>
+	</keys>
+	<keys name="ChatAll" l="345" t="338" r="488" b="362">
+		<sprite l="154" t="201" r="297" b="225" texture="UI_Popup_1"/>
+		<sprite l="154" t="226" r="297" b="250" texture="UI_Popup_1"/>
+	</keys>
+	<keys name="ChatTeam" l="345" t="368" r="488" b="392">
+		<sprite l="154" t="201" r="297" b="225" texture="UI_Popup_1"/>
+		<sprite l="154" t="226" r="297" b="250" texture="UI_Popup_1"/>
+	</keys>
+	<keys name="Clanchat" l="345" t="398" r="488" b="422">
+		<sprite l="154" t="201" r="297" b="225" texture="UI_Popup_1"/>
+		<sprite l="154" t="226" r="297" b="250" texture="UI_Popup_1"/>
+	</keys>
+	<keys name="Whisper" l="345" t="428" r="488" b="452">
+		<sprite l="154" t="201" r="297" b="225" texture="UI_Popup_1"/>
+		<sprite l="154" t="226" r="297" b="250" texture="UI_Popup_1"/>
+	</keys>
+
+	<keys name="Infomation" l="345" t="458" r="488" b="482">
+		<sprite l="154" t="201" r="297" b="225" texture="UI_Popup_1"/>
+		<sprite l="154" t="226" r="297" b="250" texture="UI_Popup_1"/>
+	</keys>
+	<keys name="ViewShader" l="345" t="488" r="488" b="512">
+		<sprite l="154" t="201" r="297" b="225" texture="UI_Popup_1"/>
+		<sprite l="154" t="226" r="297" b="250" texture="UI_Popup_1"/>
+	</keys>
+
+	<keys name="KickVote" l="345" t="518" r="488" b="542">
+		<sprite l="154" t="201" r="297" b="225" texture="UI_Popup_1"/>
+		<sprite l="154" t="226" r="297" b="250" texture="UI_Popup_1"/>
+	</keys>
+	<keys name="BigMinimap" l="345" t="548" r="488" b="572">
+		<sprite l="154" t="201" r="297" b="225" texture="UI_Popup_1"/>
+		<sprite l="154" t="226" r="297" b="250" texture="UI_Popup_1"/> 
+	</keys>     
+
+	<keys name="MACRO1" l="659" t="222" r="802" b="246">
+		<sprite l="154" t="201" r="297" b="225" texture="UI_Popup_1"/>
+		<sprite l="154" t="226" r="297" b="250" texture="UI_Popup_1"/>
+	</keys>
+	<keys name="MACRO2" l="659" t="258" r="802" b="282">
+		<sprite l="154" t="201" r="297" b="225" texture="UI_Popup_1"/>
+		<sprite l="154" t="226" r="297" b="250" texture="UI_Popup_1"/>
+	</keys>
+	<keys name="MACRO3" l="659" t="294" r="802" b="318">
+		<sprite l="154" t="201" r="297" b="225" texture="UI_Popup_1"/>
+		<sprite l="154" t="226" r="297" b="250" texture="UI_Popup_1"/>
+	</keys>
+	<keys name="MACRO4" l="659" t="330" r="802" b="354">
+		<sprite l="154" t="201" r="297" b="225" texture="UI_Popup_1"/>
+		<sprite l="154" t="226" r="297" b="250" texture="UI_Popup_1"/>
+	</keys>
+	<keys name="MACRO5" l="659" t="366" r="802" b="390">
+		<sprite l="154" t="201" r="297" b="225" texture="UI_Popup_1"/>
+		<sprite l="154" t="226" r="297" b="250" texture="UI_Popup_1"/>
+	</keys>
+	<keys name="MACRO6" l="659" t="402" r="802" b="426">
+		<sprite l="154" t="201" r="297" b="225" texture="UI_Popup_1"/>
+		<sprite l="154" t="226" r="297" b="250" texture="UI_Popup_1"/>
+	</keys>
+	<keys name="MACRO7" l="659" t="438" r="802" b="462">
+		<sprite l="154" t="201" r="297" b="225" texture="UI_Popup_1"/>
+		<sprite l="154" t="226" r="297" b="250" texture="UI_Popup_1"/>
+	</keys>
+	<keys name="MACRO8" l="659" t="474" r="802" b="498">
+		<sprite l="154" t="201" r="297" b="225" texture="UI_Popup_1"/>
+		<sprite l="154" t="226" r="297" b="250" texture="UI_Popup_1"/>
+	</keys>
+	<keys name="MACRO9" l="659" t="510" r="802" b="534">
+		<sprite l="154" t="201" r="297" b="225" texture="UI_Popup_1"/>
+		<sprite l="154" t="226" r="297" b="250" texture="UI_Popup_1"/>
+	</keys>
+	<keys name="MACRO10" l="659" t="546" r="802" b="570">
+		<sprite l="154" t="201" r="297" b="225" texture="UI_Popup_1"/>
+		<sprite l="154" t="226" r="297" b="250" texture="UI_Popup_1"/>
+	</keys>
+
+</UIDEFINE>

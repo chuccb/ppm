@@ -1,0 +1,27 @@
+<UIDEFINE>
+	<image name="Tournament_Final_Award" filename="l_tournament_award.dds"/>
+
+	<msprite name="BACKGROUND_NORMAL" sx="85" sy="70" ex="85" ey="70" l="0" t="0" r="610" b="376" texture="Tournament_Final_Award"/>
+	<msprite name="BACKGROUND_ABNORMAL" sx="85" sy="70" ex="85" ey="70" l="0" t="377" r="610" b="753" texture="Tournament_Final_Award"/>
+	<column name="VICTORY_EMBLEM_1" x="0" y="0" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="VICTORY_EMBLEM_2" x="0" y="0" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="VICTORY_EMBLEM_3" x="0" y="0" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="VICTORY_EMBLEM_4" x="0" y="0" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="VICTORY_EMBLEM_5" x="0" y="0" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="VICTORY_EMBLEM_6" x="0" y="0" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="VICTORY_EMBLEM_7" x="0" y="0" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="AWARD_EMBLEM_NORMAL_CLANNAME_1" x="177" y="305" w="88" h="15" fontsize="12" color="FF000000" format="VCENTER CENTER"/>
+	<column name="AWARD_EMBLEM_NORMAL_CLANNAME_2" x="474" y="222" w="90" h="15" fontsize="12" color="FF000000" format="VCENTER CENTER"/>
+	<column name="AWARD_EMBLEM_NORMAL_CLANNAME_31" x="398" y="346" w="86" h="15" fontsize="12" color="FF000000" format="VCENTER CENTER"/>
+	<column name="AWARD_EMBLEM_NORMAL_CLANNAME_32" x="552" y="346" w="86" h="15" fontsize="12" color="FF000000" format="VCENTER CENTER"/>
+	
+	<column name="AWARD_EMBLEM_ABNORMAL_CLANNAME_1"  x="157" y="306" w="80" h="15" fontsize="12" color="FF000000" format="VCENTER CENTER"/>
+	<column name="AWARD_EMBLEM_ABNORMAL_CLANNAME_21" x="341" y="229" w="86" h="15" fontsize="12" color="FF000000" format="VCENTER CENTER"/>
+	<column name="AWARD_EMBLEM_ABNORMAL_CLANNAME_22" x="341" y="363" w="86" h="15" fontsize="12" color="FF000000" format="VCENTER CENTER"/>
+	<column name="AWARD_EMBLEM_ABNORMAL_CLANNAME_31" x="468" y="222" w="86" h="15" fontsize="12" color="FF000000" format="VCENTER CENTER"/>
+	<column name="AWARD_EMBLEM_ABNORMAL_CLANNAME_32" x="581" y="222" w="86" h="15" fontsize="12" color="FF000000" format="VCENTER CENTER"/>
+	<column name="AWARD_EMBLEM_ABNORMAL_CLANNAME_33" x="468" y="340" w="86" h="15" fontsize="12" color="FF000000" format="VCENTER CENTER"/>
+	<column name="AWARD_EMBLEM_ABNORMAL_CLANNAME_34" x="581" y="340" w="86" h="15" fontsize="12" color="FF000000" format="VCENTER CENTER"/>
+
+	<column name="TMENT_NO_AWARD" x="368" y="417" w="317" h="17" fontsize="13" color="FF000000" format="VCENTER RIGHT"/>
+</UIDEFINE>

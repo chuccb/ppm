@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TUTORIALDEFINE>
+  
+  <image name="SPEEDEFFECT_FONT" filename="speedEffect_font.dds"/>
+
+  <msprite name="seedEffect_font_1" sx='0' sy='0' ex='0' ey='0' l='0' t='0' r='153' b='186' fscalex='1.0f' fscaley='1.0f' texture="SPEEDEFFECT_FONT"/>
+  <msprite name="seedEffect_font_2" sx='0' sy='0' ex='0' ey='0' l='153' t='0' r='465' b='199' fscalex='1.0f' fscaley='1.0f' texture="SPEEDEFFECT_FONT"/>
+  <msprite name="seedEffect_font_3" sx='0' sy='0' ex='0' ey='0' l='465' t='0' r='665' b='152' fscalex='1.0f' fscaley='1.0f' texture="SPEEDEFFECT_FONT"/>
+  <msprite name="seedEffect_font_4" sx='0' sy='0' ex='0' ey='0' l='153' t='199' r='465' b='328' fscalex='1.0f' fscaley='1.0f' texture="SPEEDEFFECT_FONT"/>
+  <msprite name="seedEffect_font_5" sx='0' sy='0' ex='0' ey='0' l='153' t='328' r='465' b='566' fscalex='1.0f' fscaley='1.0f' texture="SPEEDEFFECT_FONT"/>
+  <msprite name="seedEffect_font_6" sx='0' sy='0' ex='0' ey='0' l='465' t='328' r='740' b='566' fscalex='1.0f' fscaley='1.0f' texture="SPEEDEFFECT_FONT"/>
+
+</TUTORIALDEFINE>

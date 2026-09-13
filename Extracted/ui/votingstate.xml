@@ -1,0 +1,11 @@
+﻿<UIDEFINE>
+
+  <column name="VotingAble" x='886' y='233' w='128' h='54'/>
+  <column name="VotingStatePos" x='801' y='288' w='208' h='103'/>
+
+  <column name ="1_TARGET_VOTING_REASON" x ='812' y ='310' w ='186' h ='12' fontsize ='12'color='FFFFFFFF' shadow='FF000000'/>
+   <column name ="2_APPLICANT_USER_NAME" x ='812' y ='372' w ='100' h ='12' fontsize ='12'color='FFFFFFFF' shadow='FF000000'/>
+  <column name ="2_TARGET_NICK" x ='812' y ='340' w ='100' h ='12' fontsize ='12'color='FFFFFFFF' shadow='FF000000'/>
+  <column name ="2_REASON" x ='812' y ='310' w ='186' h ='12' fontsize ='12'color='FFFFFFFF' shadow='FF000000'/>
+
+</UIDEFINE>

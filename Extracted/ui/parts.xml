@@ -1,0 +1,326 @@
+<UIDEFINE>
+	<bgmfile filename="bgm/bgm_character.mp3"/>
+	<image name="Parts" filename="PARTS.dds"/>
+	<image name="Parts_Store" filename="store_01.dds"/>
+  	<image name="Parts_CSE" filename="C_SE.dds"/>
+
+	<msprite name="BACKGROUND" sx='0' sy='0' ex='0' ey='0' l='0' t='0' r='1024' b='768' texture="UI_Back1"/>
+
+	
+	<msprite name="PARTS_MG" sx='90' sy='33' ex='90' ey='33' l='0' t='0' r='365' b='722' texture="Parts"/>
+	<msprite name="PARTS_MG_R" sx='461' sy='33' ex='461' ey='33' l='366' t='0' r='912' b='722' texture="Parts"/>
+
+	<rect name="INFONAME" l="599" t="137" r="874" b="154"/>
+	<rect name="INFOEXPLAIN" l="512" t="403" r="771" b="463"/>
+	<rect name="INFOIMAGE" l="722" t="386" r="933" b="470"/>
+
+	
+	<msprite name="PARTS_TITLE" sx="90" sy="0" ex="90" ey="0" l="547" t="973" r="912" b="998" texture="UI_Button"/>
+	<msprite name="PARTS_NETCAFE" sx="461" sy="0" ex="461" ey="0" l="0" t="973" r="546" b="998" texture="UI_Button" />
+	
+	<column name="TITLE_SERVER"      x="560" y="7" w="61" h="11" fontsize="12" color="FFFFFFFF" format="VCENTER CENTER" />
+	<column name="TITLE_SERVER_TYPE" x="650" y="7" w="41" h="11" fontsize="12" color="FFFFFFFF" format="VCENTER CENTER" />
+
+	
+	<column name="CASH" x='162' y='634' w='102' h='20' fontsize="13" color="FFFFFFFF" format='VCENTER RIGHT'/>
+	<column name="PG" x='330' y='634' w='102' h='20' fontsize="13" color="FFFFFFFF"  format='VCENTER RIGHT'/>
+  	<column name="COUPON" x='162' y='658' w='102' h='20' fontsize="13" color="FFFFFFFF"  format='VCENTER RIGHT'/>
+	<column name="COIN" x='330' y='658' w='102' h='20' fontsize="13" color="FFFFFFFF"  format='VCENTER RIGHT'/>
+
+	<button name="CHARACTER" x="9" y="33" w="62" h="68">
+		<sprite l="0" t="0" r="62" b="68" texture="UI_Button" />
+		<sprite l="0" t="69" r="62" b="137" texture="UI_Button" />
+		<sprite l="0" t="138" r="62" b="206" texture="UI_Button" />
+	</button>
+  	
+	<button name="SHOP" x="9" y="104" w="62" h="68">
+		<sprite l="62" t="0" r="124" b="68" texture="UI_Button" />
+		<sprite l="62" t="69" r="124" b="137" texture="UI_Button" />
+		<sprite l="62" t="138" r="124" b="206" texture="UI_Button" />
+	</button>
+
+	<button name="LOBBY" x="9" y="175" w="62" h="68">
+		<sprite l="560" t="0" r="622" b="68" texture="UI_Button" />
+		<sprite l="560" t="69" r="622" b="137" texture="UI_Button" />
+		<sprite l="560" t="138" r="622" b="206" texture="UI_Button" />
+	</button>
+
+	<button name="NAME" x="251" y="138" w="54" h="24">
+		<sprite l="860" t="885" r="914" b="909" texture="Parts"/>
+		<sprite l="860" t="910" r="914" b="934" texture="Parts"/>
+		<sprite l="860" t="935" r="914" b="959" texture="Parts"/>
+	</button>
+
+	<button name="SYURUI" x="306" y="138" w="54" h="24">
+		<sprite l="915" t="885" r="969" b="909" texture="Parts"/>
+		<sprite l="915" t="910" r="969" b="934" texture="Parts"/>	
+		<sprite l="915" t="935" r="969" b="959" texture="Parts"/>
+	</button>
+
+	<button name="TIME" x="363" y="138" w="54" h="24">
+		<sprite l="970" t="885" r="1024" b="909" texture="Parts"/>
+		<sprite l="970" t="910" r="1024" b="934" texture="Parts"/>
+		<sprite l="970" t="935" r="1024" b="959" texture="Parts"/>
+	</button>
+
+	
+	<itemslot name="WEAPON_SLOT">
+		<template>   
+			<column name="NAME" x="78" y="7"/>
+			<sprite l="147" t="884" r="384" b="960" texture="Parts"/>
+			<sprite l="384" t="884" r="621" b="960" texture="Parts"/>	
+			<sprite l="891" t="1" r="955" b="66" texture="UI_Button"/>
+			<sprite l="891" t="67" r="955" b="131" texture="UI_Button"/>
+
+			
+			<sprite name="PARTS_IN_MY_BOX" l="449" t="518" r="513" b="582" texture="UI_Button"/>	
+
+			<sprite l="913" t="0" r="985" b="23" texture="Parts_Store"/>
+			<sprite l="913" t="24" r="985" b="47" texture="Parts_Store"/>
+			<sprite l="913" t="48" r="985" b="71" texture="Parts_Store"/>
+			<sprite l="913" t="72" r="985" b="95" texture="Parts_Store"/>
+			<sprite l="913" t="96" r="985" b="119" texture="Parts_Store"/>
+			<sprite l="913" t="120" r="985" b="143" texture="Parts_Store"/>
+			<sprite l="913" t="144" r="985" b="167" texture="Parts_Store"/>
+			<sprite l="913" t="168" r="985" b="191" texture="Parts_Store"/>
+			<sprite l="913" t="192" r="985" b="215" texture="Parts_Store"/>
+			<sprite l="913" t="216" r="985" b="239" texture="Parts_Store"/>
+
+
+			<sprite name="PARTS_WAITING" l="621" t="884" r="858" b="960" texture="Parts"/>
+
+			<sprite name="BUYING" l="384" t="518" r="448" b="582" texture="UI_Button"/>
+
+			<sprite name="PARTS01" l='913' t='628' r='925' b='637' texture="Parts"/>
+			<sprite name="PARTS02" l='925' t='628' r='937' b='637' texture="Parts"/>
+			<sprite name="PARTS03" l='937' t='628' r='949' b='637' texture="Parts"/>
+			<sprite name="PARTS04" l='949' t='628' r='961' b='637' texture="Parts"/>
+			<sprite name="PARTS05" l='961' t='628' r='973' b='637' texture="Parts"/>
+			<sprite name="DOTSIGHT" l='913' t='639' r='925' b='648' texture="Parts"/>
+			<sprite name="PARTS06" l='925' t='639' r='937' b='649' texture="Parts"/>
+			<sprite name="PARTS07" l='939' t='639' r='948' b='648' texture="Parts"/>
+
+		</template>
+
+		<eventrect name="SCROLL_RECT" x="138" y="177" w="237" h="384"/>
+
+		<slot name="slot1" x="138" y="177" w="236" h="76"/>
+	
+		<slot name="slot2" x="138" y="254" w="236" h="76"/>
+	
+		<slot name="slot3" x="138" y="331" w="236" h="76"/>
+	
+		<slot name="slot4" x="138" y="408" w="236" h="76"/>
+
+		<slot name="slot5" x="138" y="485" w="236" h="76"/>
+
+		<button name="UP" x="384" y="177" w="23" h="28">
+			<sprite l="258" t="461" r="281" b="489" texture="UI_Button"/>
+			<sprite l="282" t="461" r="305" b="489" texture="UI_Button"/>
+			<sprite l="306" t="461" r="329" b="489" texture="UI_Button"/>
+		</button>
+		<button name="DN" x="384" y="533" w="23" h="28">
+			<sprite l="258" t="490" r="281" b="518" texture="UI_Button"/>
+			<sprite l="282" t="490" r="305" b="518" texture="UI_Button"/>
+			<sprite l="306" t="490" r="329" b="518" texture="UI_Button"/>
+		</button>   
+
+	</itemslot>
+
+	<weaponslot name="EQUIP_SLOT">
+
+		<slot name="parts_slot1" x="523" y="207" w="32" h="32">
+			<sprite l="0" t="0" r="0" b="0" texture="Parts"/>
+			<sprite l="0" t="0" r="0" b="0" texture="Parts"/>
+		</slot>
+		
+  		<slot name="parts_slot2" x="692" y="317" w="32" h="32">
+			<sprite l="0" t="0" r="0" b="0" texture="Parts"/>
+			<sprite l="0" t="0" r="0" b="0" texture="Parts"/>
+		</slot>
+
+		<slot name="parts_slot3" x="642" y="196" w="32" h="32">
+			<sprite l="0" t="0" r="0" b="0" texture="Parts"/>
+			<sprite l="0" t="0" r="0" b="0" texture="Parts"/>		
+		</slot>
+
+		<slot name="parts_slot4" x="860" y="317" w="32" h="32">
+			<sprite l="0" t="0" r="0" b="0" texture="Parts"/>
+			<sprite l="0" t="0" r="0" b="0" texture="Parts"/>
+		</slot>
+
+		<slot name="parts_slot5" x="919" y="207" w="32" h="32">
+			<sprite l="0" t="0" r="0" b="0" texture="Parts"/>
+			<sprite l="0" t="0" r="0" b="0" texture="Parts"/>
+		</slot>
+
+		<slot name="parts_slot6" x="714" y="196" w="32" h="32">
+			<sprite l="0" t="0" r="0" b="0" texture="Parts"/>
+			<sprite l="0" t="0" r="0" b="0" texture="Parts"/>
+		</slot>
+
+		<slot name="parts_slot7" x="562" y="317" w="32" h="32">
+			<sprite l="0" t="0" r="0" b="0" texture="Parts"/>
+			<sprite l="0" t="0" r="0" b="0" texture="Parts"/>
+		</slot>
+
+		<slot name="parts_slot8" x="521" y="317" w="32" h="32">
+			<sprite l="0" t="0" r="0" b="0" texture="Parts"/>
+			<sprite l="0" t="0" r="0" b="0" texture="Parts"/>
+		</slot>
+
+	</weaponslot>
+
+	<tab name="PARTS_TAB" count='2'>
+		<page name="SET_PARTS" x='482' y='488'>
+			<sprite l='0' t='885' r='73' b='915' texture="Parts"/>
+			<msprite sx="557" sy="488" ex="557" ey="488" l='74' t='885' r='147' b='915' texture="Parts"/>
+			<msprite sx="482" sy="517" ex="482" ey="517" l="0" t="723" r="504" b="884" texture="Parts"/>
+		</page>
+		<page name="BUY_PARTS" x='557' y='488'>
+			<sprite l='74' t='916' r='147' b="946" texture="Parts"/>
+			<msprite sx="482" sy="488" ex="482" ey="488" l='0' t='916' r='73' b='946' texture="Parts"/>
+			<msprite sx="482" sy="517" ex="482" ey="517" l="504" t="723" r="1008" b="884" texture="Parts"/>
+		</page>
+	</tab>
+
+	<itemslot name="PARTS_SLOT">
+
+		<template>
+			<column name="PARTSNAME" x="78" y="7"/>
+			<sprite l="148" t="884" r="383" b="958" texture="Parts"/>	
+			<sprite l="384" t="884" r="619" b="958" texture="Parts"/>	
+			<sprite l="891" t="1" r="955" b="66" texture="UI_Button"/>
+			<sprite l="891" t="67" r="955" b="131" texture="UI_Button"/>
+
+			<sprite l="449" t="518" r="513" b="582" texture="UI_Button"/>
+
+	 		<button name="PARTSCLEAR" x="181" y="48" w="52" h="23">
+	 		 	<sprite l="845" t="348" r="898" b="371" texture="UI_Button"/>
+				<sprite l="845" t="372" r="898" b="395" texture="UI_Button"/>
+				<sprite l="845" t="396" r="898" b="419" texture="UI_Button"/>
+		 	</button>
+
+			 <button name="PARTSEQUIP" x="127" y="48" w="53" h="23">
+			  	<sprite l="791" t="348" r="844" b="371" texture="UI_Button"/>
+				<sprite l="791" t="372" r="844" b="395" texture="UI_Button"/>
+				<sprite l="791" t="396" r="844" b="419" texture="UI_Button"/>	
+			 </button>
+
+			<button name="PRESHOW_START" x="74" y="48" w="52" h="23">
+				<sprite l="899" t="348" r="951" b="371" texture="UI_Button"/>
+				<sprite l="899" t="372" r="951" b="395" texture="UI_Button"/>
+				<sprite l="899" t="396" r="951" b="419" texture="UI_Button"/>
+		   	 </button>
+		</template>
+	
+		<eventrect name="SCROLL_RECT" x="485" y="521" w="475" h="153"/>	
+
+		<slot name="take_slot1" x="485" y="521" w="237" h="76"/>
+		<slot name="take_slot2" x="723" y="521" w="237" h="76"/>
+		<slot name="take_slot3" x="485" y="598" w="237" h="76"/>
+		<slot name="take_slot4" x="723" y="598" w="237" h="76"/>
+
+		<button name="UP" x="961" y="521" w="23" h="28">
+			<sprite l="258" t="461" r="281" b="489" texture="UI_Button"/>
+			<sprite l="282" t="461" r="305" b="489" texture="UI_Button"/>
+			<sprite l="306" t="461" r="329" b="489" texture="UI_Button"/>
+		</button>
+		<button name="DN" x="961" y="646" w="23" h="28">
+			<sprite l="258" t="490" r="281" b="518" texture="UI_Button"/>
+			<sprite l="282" t="490" r="305" b="518" texture="UI_Button"/>
+			<sprite l="306" t="490" r="329" b="518" texture="UI_Button"/>
+		</button>   
+	</itemslot>
+
+	<itemslot name="PARTS_BUY_SLOT">
+		<template>   
+			<sprite l="148" t="884" r="383" b="958" texture="Parts"/>	
+			<sprite l="384" t="884" r="619" b="958" texture="Parts"/>	
+			<sprite l="891" t="1" r="955" b="66" texture="UI_Button"/>	
+			<sprite l="891" t="67" r="955" b="131" texture="UI_Button"/>	
+			<sprite name="BUYING" l="384" t="518" r="448" b="582" texture="UI_Button"/>
+
+			<button name="BUY" x="181" y="48" w="52" h="23">
+				<sprite l="650" t="348" r="703" b="371" texture="UI_Button"/>
+				<sprite l="650" t="372" r="703" b="395" texture="UI_Button"/>
+				<sprite l="650" t="396" r="703" b="419" texture="UI_Button"/>
+			</button>
+
+			<button name="PRESHOW_START" x="127" y="48" w="52" h="23">
+				<sprite l="899" t="348" r="951" b="371" texture="UI_Button"/>
+				<sprite l="899" t="372" r="951" b="395" texture="UI_Button"/>
+				<sprite l="899" t="396" r="951" b="419" texture="UI_Button"/>
+	   		 </button>
+
+		</template>
+
+	    <eventrect name="SCROLL_RECT" x="485" y="521" w="475" h="153"/>	
+
+		<slot name="buy_slot1" x="485" y="521" w="237" h="76"/>
+		<slot name="buy_slot2" x="723" y="521" w="237" h="76"/>
+		<slot name="buy_slot3" x="485" y="598" w="237" h="76"/>
+		<slot name="buy_slot4" x="723" y="598" w="237" h="76"/>
+
+		<button name="UP" x="961" y="521" w="23" h="28">
+			<sprite l="258" t="461" r="281" b="489" texture="UI_Button"/>
+			<sprite l="282" t="461" r="305" b="489" texture="UI_Button"/>
+			<sprite l="306" t="461" r="329" b="489" texture="UI_Button"/>
+		</button>
+
+		<button name="DN" x="961" y="646" w="23" h="28">
+			<sprite l="258" t="490" r="281" b="518" texture="UI_Button"/>
+			<sprite l="282" t="490" r="305" b="518" texture="UI_Button"/>
+			<sprite l="306" t="490" r="329" b="518" texture="UI_Button"/>
+		</button>   
+
+	</itemslot>
+
+	<msprite name="PARTS_SET_MOUSE_1" sx='520' sy='204' ex='520' ey='204' l='913' t="1" r="951" b="65" texture="Parts"/>
+	<msprite name="PARTS_SET_MOUSE_2" sx='689' sy='295' ex='689' ey='295' l='913' t="196" r="1015" b="253" texture="Parts"/>
+	<msprite name="PARTS_SET_MOUSE_3" sx='592' sy='193' ex='592' ey='193' l='913' t="369" r="998" b="416" texture="Parts"/>
+	<msprite name="PARTS_SET_MOUSE_4" sx='820' sy='314' ex='820' ey='314' l='913' t="513" r="988" b="551" texture="Parts"/>
+	<msprite name="PARTS_SET_MOUSE_5" sx='871' sy='204' ex='871' ey='204' l="0" t="961" r="83" b="1013" texture="Parts"/> 
+	<msprite name="PARTS_SET_MOUSE_6" sx='711' sy='193' ex='711' ey='193' l="249" t="961" r="324" b="999" texture="Parts"/>
+	<msprite name="PARTS_SET_MOUSE_7" sx='560' sy='302' ex='560' ey='302' l="474" t="960" r="510" b="1009" texture="Parts"/>
+	<msprite name="PARTS_SET_MOUSE_8" sx='519' sy='302' ex='519' ey='302' l="585" t="960" r="621" b="1009" texture="Parts"/>
+
+	<msprite name="PARTS_SET_1" sx='520' sy='204' ex='520' ey='204' l='913' t="66" r="951" b="130" texture="Parts"/>
+	<msprite name="PARTS_SET_2" sx='689' sy='295' ex='689' ey='295' l='913' t="254" r="1015" b="311" texture="Parts"/>
+	<msprite name="PARTS_SET_3" sx='592' sy='193' ex='592' ey='193' l='913' t="417" r="998" b="464" texture="Parts"/>
+	<msprite name="PARTS_SET_4" sx='820' sy='314' ex='820' ey='314' l='913' t="551" r="988" b="589" texture="Parts"/>
+	<msprite name="PARTS_SET_5" sx='871' sy='204' ex='871' ey='204' l="83" t="961" r="166" b="1013" texture="Parts"/>
+	<msprite name="PARTS_SET_6" sx='711' sy='193' ex='711' ey='193' l="324" t="961" r="399" b="999" texture="Parts"/>
+	<msprite name="PARTS_SET_7" sx='560' sy='302' ex='560' ey='302' l="511" t="960" r="547" b="1009" texture="Parts"/>
+	<msprite name="PARTS_SET_8" sx='519' sy='302' ex='519' ey='302' l="622" t="960" r="658" b="1009" texture="Parts"/>
+	
+	<msprite name="PARTS_SET_EMPTY_1" sx='520' sy='204' ex='520' ey='204' l='913' t="131" r="951" b="195" texture="Parts"/>
+	<msprite name="PARTS_SET_EMPTY_2" sx='689' sy='295' ex='689' ey='295' l='913' t="312" r="1015" b="369" texture="Parts"/>
+	<msprite name="PARTS_SET_EMPTY_3" sx='592' sy='193' ex='592' ey='193' l='913' t="465" r="998" b="512" texture="Parts"/>
+	<msprite name="PARTS_SET_EMPTY_4" sx='820' sy='314' ex='820' ey='314' l='913' t="589" r="988" b="627" texture="Parts"/>
+	<msprite name="PARTS_SET_EMPTY_5" sx='871' sy='204' ex='871' ey='204' l="166" t="961" r="249" b="1013" texture="Parts"/>
+	<msprite name="PARTS_SET_EMPTY_6" sx='711' sy='193' ex='711' ey='193' l="399" t="961" r="474" b="999" texture="Parts"/>
+	<msprite name="PARTS_SET_EMPTY_7" sx='560' sy='302' ex='560' ey='302' l="548" t="960" r="584" b="1009" texture="Parts"/>	
+	<msprite name="PARTS_SET_EMPTY_8" sx='519' sy='302' ex='519' ey='302' l="658" t="960" r="694" b="1009" texture="Parts"/>
+
+	<msprite name="PRESHOW_BG_POPUP" sx='482' sy='127' ex='482' ey='127' l='0' t='431' r='504' b='789' texture="Parts_CSE"/>
+
+	<button name="BTN_LEFT" x='661' y='426' w='32' h='20'>
+		<sprite l="695" t="960" r="727" b="980" texture="Parts"/>		
+		<sprite l="695" t="981" r="727" b="1001" texture="Parts"/>
+		<sprite l="695" t="1002" r="727" b="1022" texture="Parts"/>
+	</button>
+
+  	<button name="BTN_RIGHT" x='775' y='426' w='32' h='20'>
+		<sprite l="728" t="960" r="760" b="980" texture="Parts"/>		
+		<sprite l="728" t="981" r="760" b="1001" texture="Parts"/>
+		<sprite l="728" t="1002" r="760" b="1022" texture="Parts"/>
+	</button>
+
+	<button name="PRESHOW_END" x='896' y='449' w='84' h='28'>
+		<sprite l="761" t="960" r="845" b="988" texture="Parts"/>
+		<sprite l='846' t="960" r='930' b="988" texture="Parts"/>
+		<sprite l='931' t="960" r='1015' b="988" texture="Parts"/>
+	</button>
+
+</UIDEFINE>

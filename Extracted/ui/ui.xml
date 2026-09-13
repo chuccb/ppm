@@ -1,0 +1,1845 @@
+﻿<UIDEFINE>
+
+    <image name="UI_Main" filename="Main.dds"/>
+   
+    <image name="UI_QuickSlot" filename="QuickSlot.dds"/>
+    <image name="UI_Result" filename="Result.dds"/>
+    <image name="UI_Message" filename="Message.dds"/>
+    <image name="UI_Message2" filename="Message02.dds"/>
+    <image name="UI_HelpImage" filename="Help.dds"/>
+    <image name="UI_Main2" filename="Main02.dds"/>
+    <image name="UI_Clan_Mark01" filename="C_EMICON.dds"/>
+    <image name="UI_SASLOT" filename="specialabilityslot.dds"/>
+    <image name="UI_Navi_Start" filename="tutorial_openning.dds"/>
+    <image name="UI_PULPnROLL" filename="pulpnroll.dds"/>
+    <bot_image name="UI_PAPERCENTER_FONT" filename="gs_ui.dds" />
+    <image name="UI_CrossHair" filename="crosshair.dds"/> 
+    <image name="UI_Soccer" filename="soccer.dds"/> 
+    
+   
+    <image name="C_EM_MARK101" filename="emblem_mark_101.dds" />
+    <image name="C_EM_MARK102" filename="emblem_mark_102.dds" />
+    <image name="C_EM_MARK201" filename="emblem_mark_201.dds" />
+    <image name="C_EM_MARK202" filename="emblem_mark_202.dds" />
+    <image name="C_EM_MARK301" filename="emblem_mark_301.dds" />
+    <image name="C_EM_MARK302" filename="emblem_mark_302.dds" />
+
+ 
+    <image name="C_EM_FRAME101" filename="emblem_frame_101.dds" />
+    <image name="C_EM_FRAME102" filename="emblem_frame_102.dds" />
+    <image name="C_EM_FRAME103" filename="emblem_frame_103.dds" />
+    <image name="C_EM_FRAME201" filename="emblem_frame_201.dds" />
+    <image name="C_EM_FRAME202" filename="emblem_frame_202.dds" />
+    <image name="C_EM_FRAME203" filename="emblem_frame_203.dds" />
+    <image name="C_EM_FRAME301" filename="emblem_frame_301.dds" />
+    <image name="C_EM_FRAME302" filename="emblem_frame_302.dds" />
+    <image name="C_EM_FRAME303" filename="emblem_frame_303.dds" />.
+
+    <image name="C_EM_BASE101" filename="emblem_base_101.dds" />
+    <image name="C_EM_BASE102" filename="emblem_base_102.dds" />
+    <image name="C_EM_BASE103" filename="emblem_base_103.dds" />
+    <image name="C_EM_BASE201" filename="emblem_base_201.dds" />
+    <image name="C_EM_BASE202" filename="emblem_base_202.dds" />
+    <image name="C_EM_BASE203" filename="emblem_base_203.dds" />
+    <image name="C_EM_BASE301" filename="emblem_base_301.dds" />
+    <image name="C_EM_BASE302" filename="emblem_base_302.dds" />
+    <image name="C_EM_BASE303" filename="emblem_base_303.dds" />
+
+
+    <sprite name="VotingAble" x='210' y='510' w='128' h='54' texture="UI_Main2"/>
+    <sprite name="VoterState" x='1' y='510' w='208' h='103' texture="UI_Main2"/>  
+    <sprite name="TargetUserVotingUI" x='1' y='620' w='208' h='103' texture="UI_Main2"/>
+
+
+  
+    <sprites name="TUTO_Countdown" w='49' h='49'> 
+      <element x='0' y='975' texture="UI_Main"/>    
+      <element x='50' y='975' texture="UI_Main"/>
+      <element x='100' y='975' texture="UI_Main"/>
+      <element x='150' y='975' texture="UI_Main"/>
+      <element x='200' y='975' texture="UI_Main"/>	
+    </sprites>
+    
+    
+  
+    <sprites name="SCCountdown" w='22' h='28'> 
+      <element x='575' y='535' texture="UI_Main"/>    
+      <element x='595' y='535' texture="UI_Main"/>
+      <element x='618' y='535' texture="UI_Main"/>
+    </sprites>
+
+
+    <sprites name="Class" w='16' h='16'>
+      <element x='344' y='305' texture="UI_Main"/>
+      <!-- Moon Class -->
+      <element x='361' y='305' texture="UI_Main"/>
+      <element x='378' y='305' texture="UI_Main"/>
+      <element x='395' y='305' texture="UI_Main"/>
+      <element x='412' y='305' texture="UI_Main"/>
+      <element x='429' y='305' texture="UI_Main"/>
+      <element x='446' y='305' texture="UI_Main"/>
+      <element x='463' y='305' texture="UI_Main"/>
+      <element x='480' y='305' texture="UI_Main"/>
+      <element x='497' y='305' texture="UI_Main"/>
+      <!-- Diamond Class -->
+      <element x='514' y='305' texture="UI_Main"/>
+      <element x='344' y='322' texture="UI_Main"/>
+      <element x='361' y='322' texture="UI_Main"/>
+      <element x='378' y='322' texture="UI_Main"/>
+      <element x='395' y='322' texture="UI_Main"/>
+      <element x='412' y='322' texture="UI_Main"/>
+      <element x='429' y='322' texture="UI_Main"/>
+      <element x='446' y='322' texture="UI_Main"/>
+      <element x='463' y='322' texture="UI_Main"/>
+      <!-- Star Class -->
+      <element x='480' y='322' texture="UI_Main"/>
+      <element x='497' y='322' texture="UI_Main"/>
+      <element x='514' y='322' texture="UI_Main"/>
+      <element x='304' y='339' texture="UI_Main"/>
+      <element x='321' y='339' texture="UI_Main"/>
+      <element x='338' y='339' texture="UI_Main"/>
+      <element x='355' y='339' texture="UI_Main"/>
+      <element x='372' y='339' texture="UI_Main"/>
+      <element x='389' y='339' texture="UI_Main"/>
+      <!-- Cross Class -->
+      <element x='406' y='339' texture="UI_Main"/>
+      <element x='423' y='339' texture="UI_Main"/>
+      <element x='440' y='339' texture="UI_Main"/>
+      <element x='304' y='356' texture="UI_Main"/>
+      <element x='321' y='356' texture="UI_Main"/>
+      <element x='338' y='356' texture="UI_Main"/>
+      <element x='355' y='356' texture="UI_Main"/>
+      <element x='372' y='356' texture="UI_Main"/>
+      <element x='389' y='356' texture="UI_Main"/>
+      <!-- Medal Class -->
+      <element x='406' y='356' texture="UI_Main"/>
+      <element x='423' y='356' texture="UI_Main"/>
+      <element x='440' y='356' texture="UI_Main"/>
+      <element x='456' y='135' texture="UI_Main"/>
+      <element x='473' y='135' texture="UI_Main"/>
+      <element x='490' y='135' texture="UI_Main"/>
+      <element x='507' y='135' texture="UI_Main"/>
+      <element x='456' y='152' texture="UI_Main"/>
+      <element x='473' y='152' texture="UI_Main"/>
+      <!-- Eagle Class -->
+      <element x='490' y='152' texture="UI_Main"/>
+      <element x='507' y='152' texture="UI_Main"/>
+      <element x='456' y='169' texture="UI_Main"/>
+      <element x='473' y='169' texture="UI_Main"/>
+      <element x='490' y='169' texture="UI_Main"/>
+      <element x='507' y='169' texture="UI_Main"/>
+      <element x='478' y='202' texture="UI_Main"/>
+      <element x='495' y='202' texture="UI_Main"/>
+      <element x='478' y='219' texture="UI_Main"/>
+      <!-- Dual Pistol Class -->
+      <element x='354' y='534' texture="UI_Main"/>
+      <element x='371' y='534' texture="UI_Main"/>
+      <element x='388' y='534' texture="UI_Main"/>
+      <element x='405' y='534' texture="UI_Main"/>
+      <element x='422' y='534' texture="UI_Main"/>
+      <element x='439' y='534' texture="UI_Main"/>
+      <element x='456' y='534' texture="UI_Main"/>
+      <element x='354' y='551' texture="UI_Main"/>
+      <element x='371' y='551' texture="UI_Main"/>
+      <!-- Shield Class -->
+      <element x='388' y='551' texture="UI_Main"/>
+      <element x='405' y='551' texture="UI_Main"/>
+      <element x='422' y='551' texture="UI_Main"/>
+      <element x='439' y='551' texture="UI_Main"/>
+      <element x='456' y='551' texture="UI_Main"/>
+      <element x='354' y='568' texture="UI_Main"/>
+      <element x='371' y='568' texture="UI_Main"/>
+      <element x='388' y='568' texture="UI_Main"/>
+      <element x='405' y='568' texture="UI_Main"/>
+
+    </sprites>
+
+    <customsprites name="EMBLEM" w='64' h='64'>
+      <element x='2' y='70'   key='0' texture="UI_Clan_Mark01"/>
+      <element x='70' y='70'  key='1' texture="UI_Clan_Mark01"/>
+      <element x='137' y='70' key='2' texture="UI_Clan_Mark01"/>
+      <element x='206' y='70' key='3' texture="UI_Clan_Mark01"/>
+      <element x='274' y='70' key='4' texture="UI_Clan_Mark01"/>
+      <element x='342' y='70' key='5' texture="UI_Clan_Mark01"/>
+      <element x='410' y='70' key='6' texture="UI_Clan_Mark01"/>
+      <element x='2' y='137'  key='7' texture="UI_Clan_Mark01"/>
+      <element x='70' y='137' key='8' texture="UI_Clan_Mark01"/>
+      <element x='70' y='206' key='9' texture="UI_Clan_Mark01"/>
+    </customsprites>
+
+    <!-- Texture Coordination 
+	  <element x='0' y='0' key='0' texture="" />
+	  <element x='64' y='0' key='1' texture="" />
+	  <element x='128' y='0' key='2' texture="" />
+	  <element x='192' y='0' key='3' texture="" />
+	  <element x='256' y='0' key='4' texture="" />
+	  <element x='320' y='0' key='5' texture="" />
+	  <element x='384' y='0' key='6' texture="" />
+	  <element x='448' y='0' key='7' texture="" />
+	  <element x='512' y='0' key='8' texture="" />
+	  <element x='576' y='0' key='9' texture="" />
+	  <element x='640' y='0' key='10' texture="" />
+	  <element x='704' y='0' key='11' texture="" />
+	  <element x='768' y='0' key='12' texture="" />
+	  <element x='832' y='0' key='13' texture="" />
+	  <element x='896' y='0' key='14' texture="" />
+	  <element x='960' y='0' key='15' texture="" />
+
+	  <element x='0' y='64' key='16' texture="" />
+	  <element x='64' y='64' key='17' texture="" />
+	  <element x='128' y='64' key='18' texture="" />
+	  <element x='192' y='64' key='19' texture="" />
+	  <element x='256' y='64' key='20' texture="" />
+	  <element x='320' y='64' key='21' texture="" />
+	  <element x='384' y='64' key='22' texture="" />
+	  <element x='448' y='64' key='23' texture="" />
+	  <element x='512' y='64' key='24' texture="" />
+	  <element x='576' y='64' key='25' texture="" />
+	  <element x='640' y='64' key='26' texture="" />
+	  <element x='704' y='64' key='27' texture="" />
+	  <element x='768' y='64' key='28' texture="" />
+	  <element x='832' y='64' key='29' texture="" />
+	  <element x='896' y='64' key='30' texture="" />
+	  <element x='960' y='64' key='31' texture="" />
+  -->
+    <customsprites name="EM_MARK" w='64' h='64' >
+      <!-- First Sub Tab in Mark Tab -->
+      <element x='0' y='0' key='10' texture="C_EM_MARK101" />
+      <element x='64' y='0' key='11' texture="C_EM_MARK101" />
+      <element x='128' y='0' key='12' texture="C_EM_MARK101" />
+      <element x='192' y='0' key='13' texture="C_EM_MARK101" />
+      <element x='256' y='0' key='14' texture="C_EM_MARK101" />
+      <element x='320' y='0' key='15' texture="C_EM_MARK101" />
+      <element x='384' y='0' key='16' texture="C_EM_MARK101" />
+      <element x='448' y='0' key='17' texture="C_EM_MARK101" />
+
+	  <element x='0' y='64' key='18' texture="C_EM_MARK101" />
+	  <element x='64' y='64' key='19' texture="C_EM_MARK101" />
+	  <element x='128' y='64' key='20' texture="C_EM_MARK101" />
+	  <element x='192' y='64' key='21' texture="C_EM_MARK101" />
+	  <element x='256' y='64' key='22' texture="C_EM_MARK101" />
+	  <element x='320' y='64' key='23' texture="C_EM_MARK101" />
+	  <element x='384' y='64' key='24' texture="C_EM_MARK101" />
+	  <element x='448' y='64' key='25' texture="C_EM_MARK101" />
+
+	  <element x='0' y='128' key='26' texture="C_EM_MARK101" />
+	  <element x='64' y='128' key='27' texture="C_EM_MARK101" />
+	  <element x='128' y='128' key='28' texture="C_EM_MARK101" />
+	  <element x='192' y='128' key='29' texture="C_EM_MARK101" />
+	  <element x='256' y='128' key='30' texture="C_EM_MARK101" />
+	  <element x='320' y='128' key='31' texture="C_EM_MARK101" />
+	  <element x='384' y='128' key='32' texture="C_EM_MARK101" />
+	  <element x='448' y='128' key='33' texture="C_EM_MARK101" />
+
+	  <element x='0' y='192' key='34' texture="C_EM_MARK101" />
+	  <element x='64' y='192' key='35' texture="C_EM_MARK101" />
+	  <element x='128' y='192' key='36' texture="C_EM_MARK101" />
+	  <element x='192' y='192' key='37' texture="C_EM_MARK101" />
+	  <element x='256' y='192' key='38' texture="C_EM_MARK101" />
+	  <element x='320' y='192' key='39' texture="C_EM_MARK101" />
+	  <element x='384' y='192' key='40' texture="C_EM_MARK101" />
+	  <element x='448' y='192' key='41' texture="C_EM_MARK101" />
+
+	  <element x='0' y='256' key='42' texture="C_EM_MARK101" />
+	  <element x='64' y='256' key='43' texture="C_EM_MARK101" />
+	  <element x='128' y='256' key='44' texture="C_EM_MARK101" />
+	  <element x='192' y='256' key='45' texture="C_EM_MARK101" />
+	  <element x='256' y='256' key='46' texture="C_EM_MARK101" />
+	  <element x='320' y='256' key='47' texture="C_EM_MARK101" />
+	  <element x='384' y='256' key='48' texture="C_EM_MARK101" />
+	  <element x='448' y='256' key='49' texture="C_EM_MARK101" />
+      
+   	  
+   	   <element x='0' y='320' key='50' texture="C_EM_MARK101" />
+   	   <element x='64' y='320' key='51' texture="C_EM_MARK101" />
+    	   <element x='128' y='320' key='52' texture="C_EM_MARK101" />
+    	   <element x='192' y='320' key='53' texture="C_EM_MARK101" />
+  	    <element x='256' y='320' key='54' texture="C_EM_MARK101" /> 
+
+   	 
+   	   <element x='320' y='320' key='55' texture="C_EM_MARK101" />
+   	   <element x='384' y='320' key='56' texture="C_EM_MARK101" />
+   	   <element x='448' y='320' key='57' texture="C_EM_MARK101" />
+
+   	   <element x='0' y='384' key='58' texture="C_EM_MARK101" />
+   	   <element x='64' y='384' key='59' texture="C_EM_MARK101" /> 
+   	   <element x='128' y='384' key='60' texture="C_EM_MARK101" />
+    	   <element x='192' y='384' key='61' texture="C_EM_MARK101" />
+   	   <element x='256' y='384' key='62' texture="C_EM_MARK101" />
+    	   <element x='320' y='384' key='63' texture="C_EM_MARK101" />
+    	   <element x='384' y='384' key='64' texture="C_EM_MARK101" /> 
+   	   <element x='448' y='384' key='65' texture="C_EM_MARK101" />
+
+    	   <element x='0' y='448' key='66' texture="C_EM_MARK101" />
+    	   <element x='64' y='448' key='67' texture="C_EM_MARK101" />
+    	   <element x='128' y='448' key='68' texture="C_EM_MARK101" />
+    	   <element x='192' y='448' key='69' texture="C_EM_MARK101" />
+   	  
+   	   <element x='256' y='448' key='70' texture="C_EM_MARK101" />
+    	   <element x='320' y='448' key='71' texture="C_EM_MARK101" />
+    	   <element x='384' y='448' key='72' texture="C_EM_MARK101" /> 
+   	   <element x='448' y='448' key='73' texture="C_EM_MARK101" />
+
+    	  <element x='0' y='0' key='74' texture="C_EM_MARK102" />
+   	  <element x='64' y='0' key='75' texture="C_EM_MARK102" />
+   	  <element x='128' y='0' key='76' texture="C_EM_MARK102" />
+    	  <element x='192' y='0' key='77' texture="C_EM_MARK102" />
+    	  <element x='256' y='0' key='78' texture="C_EM_MARK102" />
+   	  <element x='320' y='0' key='79' texture="C_EM_MARK102" />
+    	  <element x='384' y='0' key='80' texture="C_EM_MARK102" />
+    	  <element x='448' y='0' key='81' texture="C_EM_MARK102" />
+
+	  <element x='0' y='64' key='82' texture="C_EM_MARK102" />
+	  <element x='64' y='64' key='83' texture="C_EM_MARK102" />
+	  <element x='128' y='64' key='84' texture="C_EM_MARK102" />
+
+      <!-- Second Sub Tab in Mark Tab -->
+      <element x='0' y='0' key='21845' texture="C_EM_MARK201" />
+      <element x='64' y='0' key='21846' texture="C_EM_MARK201" />
+      <element x='128' y='0' key='21847' texture="C_EM_MARK201" />
+      <element x='192' y='0' key='21848' texture="C_EM_MARK201" />
+      <element x='256' y='0' key='21849' texture="C_EM_MARK201" />
+      <element x='320' y='0' key='21850' texture="C_EM_MARK201" />
+      <element x='384' y='0' key='21851' texture="C_EM_MARK201" />
+      <element x='448' y='0' key='21852' texture="C_EM_MARK201" />
+
+      <element x='0' y='64' key='21853' texture="C_EM_MARK201" />
+      <element x='64' y='64' key='21854' texture="C_EM_MARK201" /> 
+      <element x='128' y='64' key='21855' texture="C_EM_MARK201" />
+      <element x='192' y='64' key='21856' texture="C_EM_MARK201" />
+      <element x='256' y='64' key='21857' texture="C_EM_MARK201" />
+      <element x='320' y='64' key='21858' texture="C_EM_MARK201" />
+      <element x='384' y='64' key='21859' texture="C_EM_MARK201" />
+      <element x='448' y='64' key='21860' texture="C_EM_MARK201" />
+
+      <element x='0' y='128' key='21861' texture="C_EM_MARK201" />
+      <element x='64' y='128' key='21862' texture="C_EM_MARK201" />
+      <element x='128' y='128' key='21863' texture="C_EM_MARK201" />
+      <element x='192' y='128' key='21864' texture="C_EM_MARK201" />
+      <element x='256' y='128' key='21865' texture="C_EM_MARK201" />
+      <element x='320' y='128' key='21866' texture="C_EM_MARK201" />
+      <element x='384' y='128' key='21867' texture="C_EM_MARK201" />
+      <element x='448' y='128' key='21868' texture="C_EM_MARK201" />
+
+      <element x='0' y='192' key='21869' texture="C_EM_MARK201" />
+      <element x='64' y='192' key='21870' texture="C_EM_MARK201" /> 
+      <element x='128' y='192' key='21871' texture="C_EM_MARK201" />
+      <element x='192' y='192' key='21872' texture="C_EM_MARK201" />
+      <element x='256' y='192' key='21873' texture="C_EM_MARK201" />
+      <element x='320' y='192' key='21874' texture="C_EM_MARK201" />
+      <element x='384' y='192' key='21875' texture="C_EM_MARK201" />
+      <element x='448' y='192' key='21876' texture="C_EM_MARK201" />
+
+      <element x='0' y='256' key=  '21877' texture="C_EM_MARK201" />
+      <element x='64' y='256' key= '21878' texture="C_EM_MARK201" />
+      <element x='128' y='256' key='21879' texture="C_EM_MARK201" />
+      <element x='192' y='256' key='21880' texture="C_EM_MARK201" />
+      <element x='256' y='256' key='21881' texture="C_EM_MARK201" />
+      <element x='320' y='256' key='21882' texture="C_EM_MARK201" />
+      <element x='384' y='256' key='21883' texture="C_EM_MARK201" />
+      <element x='448' y='256' key='21884' texture="C_EM_MARK201" />
+   
+     
+      <element x='0' y='320' key='21885' texture="C_EM_MARK201" />
+      <element x='64' y='320' key='21886' texture="C_EM_MARK201" />
+      <element x='128' y='320' key='21887' texture="C_EM_MARK201" />
+      <element x='192' y='320' key='21888' texture="C_EM_MARK201" />
+      <element x='256' y='320' key='21889' texture="C_EM_MARK201" /> 
+
+     
+      <element x='320' y='320' key='21890' texture="C_EM_MARK201" />
+      <element x='384' y='320' key='21891' texture="C_EM_MARK201" />
+      <element x='448' y='320' key='21892' texture="C_EM_MARK201" />
+
+      <element x='0' y='384' key='21893' texture="C_EM_MARK201" />
+      <element x='64' y='384' key='21894' texture="C_EM_MARK201" /> 
+      <element x='128' y='384' key='21895' texture="C_EM_MARK201" />
+      <element x='192' y='384' key='21896' texture="C_EM_MARK201" />
+      <element x='256' y='384' key='21897' texture="C_EM_MARK201" />
+      <element x='320' y='384' key='21898' texture="C_EM_MARK201" />
+      <element x='384' y='384' key='21899' texture="C_EM_MARK201" /> 
+      <element x='448' y='384' key='21900' texture="C_EM_MARK201" />
+
+      <element x='0' y='448' key='21901' texture="C_EM_MARK201" />
+      <element x='64' y='448' key='21902' texture="C_EM_MARK201" />
+      <element x='128' y='448' key='21903' texture="C_EM_MARK201" />
+      <element x='192' y='448' key='21904' texture="C_EM_MARK201" /> 
+      
+   
+      <element x='256' y='448' key='21905' texture="C_EM_MARK201" />
+      <element x='320' y='448' key='21906' texture="C_EM_MARK201" />
+      <element x='384' y='448' key='21907' texture="C_EM_MARK201" /> 
+      <element x='448' y='448' key='21908' texture="C_EM_MARK201" />
+
+      <element x='0' y='0' key='21909' texture="C_EM_MARK202" />
+      <element x='64' y='0' key='21910' texture="C_EM_MARK202" />
+      <element x='128' y='0' key='21911' texture="C_EM_MARK202" />
+      <element x='192' y='0' key='21912' texture="C_EM_MARK202" />
+      <element x='256' y='0' key='21913' texture="C_EM_MARK202" />
+      <element x='320' y='0' key='21914' texture="C_EM_MARK202" />
+      <element x='384' y='0' key='21915' texture="C_EM_MARK202" />
+      <element x='448' y='0' key='21916' texture="C_EM_MARK202" />
+
+      <element x='0' y='64' key='21917' texture="C_EM_MARK202" />
+      <element x='64' y='64' key='21918' texture="C_EM_MARK202" /> 
+      <element x='128' y='64' key='21919' texture="C_EM_MARK202" />
+     
+      <!-- Third Sub Tab in Mark Tab -->
+      <element x='0' y='0' key='43691' texture="C_EM_MARK301" />
+      <element x='64' y='0' key='43692' texture="C_EM_MARK301" />
+      <element x='128' y='0' key='43693' texture="C_EM_MARK301" />
+      <element x='192' y='0' key='43694' texture="C_EM_MARK301" />
+      <element x='256' y='0' key='43695' texture="C_EM_MARK301" />
+      <element x='320' y='0' key='43696' texture="C_EM_MARK301" />
+      <element x='384' y='0' key='43697' texture="C_EM_MARK301" />
+      <element x='448' y='0' key='43698' texture="C_EM_MARK301" />
+
+      <element x='0' y='64' key='43699' texture="C_EM_MARK301" />
+      <element x='64' y='64' key='43700' texture="C_EM_MARK301" />
+      <element x='128' y='64' key='43701' texture="C_EM_MARK301" />
+      <element x='192' y='64' key='43702' texture="C_EM_MARK301" />
+      <element x='256' y='64' key='43703' texture="C_EM_MARK301" />
+      <element x='320' y='64' key='43704' texture="C_EM_MARK301" />
+      <element x='384' y='64' key='43705' texture="C_EM_MARK301" />
+      <element x='448' y='64' key='43706' texture="C_EM_MARK301" />
+
+      <element x='0' y='128' key='43707' texture="C_EM_MARK301" />
+      <element x='64' y='128' key='43708' texture="C_EM_MARK301" />
+      <element x='128' y='128' key='43709' texture="C_EM_MARK301" />
+      <element x='192' y='128' key='43710' texture="C_EM_MARK301" />
+      <element x='256' y='128' key='43711' texture="C_EM_MARK301" />
+      <element x='320' y='128' key='43712' texture="C_EM_MARK301" />
+      <element x='384' y='128' key='43713' texture="C_EM_MARK301" />
+      <element x='448' y='128' key='43714' texture="C_EM_MARK301" />
+
+      <element x='0' y='192' key='43715' texture="C_EM_MARK301" />
+      <element x='64' y='192' key='43716' texture="C_EM_MARK301" />
+      <element x='128' y='192' key='43717' texture="C_EM_MARK301" />
+      <element x='192' y='192' key='43718' texture="C_EM_MARK301" />
+      <element x='256' y='192' key='43719' texture="C_EM_MARK301" />
+      <element x='320' y='192' key='43720' texture="C_EM_MARK301" />
+      <element x='384' y='192' key='43721' texture="C_EM_MARK301" />
+      <element x='448' y='192' key='43722' texture="C_EM_MARK301" />
+
+      <element x='0' y='256' key='43723' texture="C_EM_MARK301" />
+      <element x='64' y='256' key='43724' texture="C_EM_MARK301" />
+      <element x='128' y='256' key='43725' texture="C_EM_MARK301" />
+      <element x='192' y='256' key='43726' texture="C_EM_MARK301" />
+      <element x='256' y='256' key='43727' texture="C_EM_MARK301" />
+      <element x='320' y='256' key='43728' texture="C_EM_MARK301" />
+      <element x='384' y='256' key='43729' texture="C_EM_MARK301" />
+      <element x='448' y='256' key='43730' texture="C_EM_MARK301" />
+     
+     
+      <element x='0' y='320' key='43731' texture="C_EM_MARK301" />
+      <element x='64' y='320' key='43732' texture="C_EM_MARK301" />
+      <element x='128' y='320' key='43733' texture="C_EM_MARK301" />
+      <element x='192' y='320' key='43734' texture="C_EM_MARK301" />
+      <element x='256' y='320' key='43735' texture="C_EM_MARK301" /> 
+
+     
+      <element x='320' y='320' key='43736' texture="C_EM_MARK301" />
+      <element x='384' y='320' key='43737' texture="C_EM_MARK301" />
+      <element x='448' y='320' key='43738' texture="C_EM_MARK301" />
+
+      <element x='0' y='384' key='43739' texture="C_EM_MARK301" />
+      <element x='64' y='384' key='43740' texture="C_EM_MARK301" /> 
+      <element x='128' y='384' key='43741' texture="C_EM_MARK301" />
+      <element x='192' y='384' key='43742' texture="C_EM_MARK301" />
+      <element x='256' y='384' key='43743' texture="C_EM_MARK301" />
+      <element x='320' y='384' key='43744' texture="C_EM_MARK301" />
+      <element x='384' y='384' key='43745' texture="C_EM_MARK301" /> 
+      <element x='448' y='384' key='43746' texture="C_EM_MARK301" />
+
+      <element x='0' y='448' key='43747' texture="C_EM_MARK301" />
+      <element x='64' y='448' key='43748' texture="C_EM_MARK301" />
+      <element x='128' y='448' key='43749' texture="C_EM_MARK301" />
+      <element x='192' y='448' key='43750' texture="C_EM_MARK301" /> 
+
+      
+      <element x='256' y='448' key='43751' texture="C_EM_MARK301" />
+      <element x='320' y='448' key='43752' texture="C_EM_MARK301" />
+      <element x='384' y='448' key='43753' texture="C_EM_MARK301" /> 
+      <element x='448' y='448' key='43754' texture="C_EM_MARK301" />
+
+      <element x='0' y='0' key='43755' texture="C_EM_MARK302" />
+      <element x='64' y='0' key='43756' texture="C_EM_MARK302" />
+      <element x='128' y='0' key='43757' texture="C_EM_MARK302" />
+      <element x='192' y='0' key='43758' texture="C_EM_MARK302" />
+      <element x='256' y='0' key='43759' texture="C_EM_MARK302" />
+      <element x='320' y='0' key='43760' texture="C_EM_MARK302" />
+      <element x='384' y='0' key='43761' texture="C_EM_MARK302" />
+      <element x='448' y='0' key='43762' texture="C_EM_MARK302" />
+
+      <element x='0' y='64' key='43763' texture="C_EM_MARK302" />
+      <element x='64' y='64' key='43764' texture="C_EM_MARK302" />
+      <element x='128' y='64' key='43765' texture="C_EM_MARK302" />
+
+
+    </customsprites >
+
+    <customsprites name="EM_FRAME" w='64' h='64' >
+      <!-- First Sub Tab in Frame Tab -->
+      <element x='0' y='0' key='0' texture="C_EM_FRAME101" />
+      <element x='64' y='0' key='1' texture="C_EM_FRAME101" />
+      <element x='128' y='0' key='2' texture="C_EM_FRAME101" />
+      <element x='192' y='0' key='3' texture="C_EM_FRAME101" />
+      
+      <element x='0' y='64' key='4' texture="C_EM_FRAME101" />
+      <element x='64' y='64' key='5' texture="C_EM_FRAME101" />
+      <element x='128' y='64' key='6' texture="C_EM_FRAME101" />
+      <element x='192' y='64' key='7' texture="C_EM_FRAME101" />
+
+      <element x='0' y='128' key='8' texture="C_EM_FRAME101" />
+      <element x='64' y='128' key='9' texture="C_EM_FRAME101" />
+      <element x='128' y='128' key='10' texture="C_EM_FRAME101" />
+      <element x='192' y='128' key='11' texture="C_EM_FRAME101" />
+
+      <element x='0' y='192' key='12' texture="C_EM_FRAME101" />
+      <element x='64' y='192' key='13' texture="C_EM_FRAME101" />
+      <element x='128' y='192' key='14' texture="C_EM_FRAME101" />
+      <element x='192' y='192' key='15' texture="C_EM_FRAME101" />
+
+      <element x='0' y='0' key='16' texture="C_EM_FRAME102" />
+      <element x='64' y='0' key='17' texture="C_EM_FRAME102" />
+      <element x='128' y='0' key='18' texture="C_EM_FRAME102" />
+      <element x='192' y='0' key='19' texture="C_EM_FRAME102" />
+
+      <element x='0' y='64' key='20' texture="C_EM_FRAME102" />
+      
+      <element x='64' y='64' key='21' texture="C_EM_FRAME102" />
+      <element x='128' y='64' key='22' texture="C_EM_FRAME102" />
+      <element x='192' y='64' key='23' texture="C_EM_FRAME102" />
+
+      <element x='0' y='128' key='24' texture="C_EM_FRAME102" />
+     
+      <element x='64' y='128' key='25' texture="C_EM_FRAME102" />
+      <element x='128' y='128' key='26' texture="C_EM_FRAME102" />
+      <element x='192' y='128' key='27' texture="C_EM_FRAME102" />
+
+      <element x='0' y='192' key='28' texture="C_EM_FRAME102" />
+      <element x='64' y='192' key='29' texture="C_EM_FRAME102" />
+
+   	
+    	  <element x='128' y='192' key='30' texture="C_EM_FRAME102" />
+   	  <element x='192' y='192' key='31' texture="C_EM_FRAME102" />
+
+  	   <element x='0' y='0' key='32' texture="C_EM_FRAME103" />
+    	  <element x='64' y='0' key='33' texture="C_EM_FRAME103" />
+    	  <element x='128' y='0' key='34' texture="C_EM_FRAME103" />
+    	  <element x='192' y='0' key='35' texture="C_EM_FRAME103" />
+      
+    	  <element x='0' y='64' key='36' texture="C_EM_FRAME103" />
+    	  <element x='64' y='64' key='37' texture="C_EM_FRAME103" />
+    	  <element x='128' y='64' key='38' texture="C_EM_FRAME103" />
+    	  <element x='192' y='64' key='39' texture="C_EM_FRAME103" />
+
+    	  <element x='0' y='128' key='40' texture="C_EM_FRAME103" />
+    	  <element x='64' y='128' key='41' texture="C_EM_FRAME103" />
+    	  <element x='128' y='128' key='42' texture="C_EM_FRAME103" />
+    	  <element x='192' y='128' key='43' texture="C_EM_FRAME103" />
+
+    	  <element x='0' y='192' key='44' texture="C_EM_FRAME103" />
+
+      <!-- Second Sub Tab in Frame Tab -->
+      <element x='0' y='0' key='85' texture="C_EM_FRAME201" />
+      <element x='64' y='0' key='86' texture="C_EM_FRAME201" />
+      <element x='128' y='0' key='87' texture="C_EM_FRAME201" />
+      <element x='192' y='0' key='88' texture="C_EM_FRAME201" />
+
+      <element x='0' y='64' key='89' texture="C_EM_FRAME201" />
+      <element x='64' y='64' key='90' texture="C_EM_FRAME201" />
+      <element x='128' y='64' key='91' texture="C_EM_FRAME201" />
+      <element x='192' y='64' key='92' texture="C_EM_FRAME201" />
+
+      <element x='0' y='128' key='93' texture="C_EM_FRAME201" />
+      <element x='64' y='128' key='94' texture="C_EM_FRAME201" />
+      <element x='128' y='128' key='95' texture="C_EM_FRAME201" />
+      <element x='192' y='128' key='96' texture="C_EM_FRAME201" />
+
+      <element x='0' y='192' key='97' texture="C_EM_FRAME201" />
+      <element x='64' y='192' key='98' texture="C_EM_FRAME201" />
+      <element x='128' y='192' key='99' texture="C_EM_FRAME201" />
+      <element x='192' y='192' key='100' texture="C_EM_FRAME201" />
+
+      <element x='0' y='0' key='101' texture="C_EM_FRAME202" />
+      <element x='64' y='0' key='102' texture="C_EM_FRAME202" />
+      <element x='128' y='0' key='103' texture="C_EM_FRAME202" />
+      <element x='192' y='0' key='104' texture="C_EM_FRAME202" />
+     
+     
+      <element x='0' y='64' key='105' texture="C_EM_FRAME202" />
+      <element x='64' y='64' key='106' texture="C_EM_FRAME202" />
+      <element x='128' y='64' key='107' texture="C_EM_FRAME202" />
+      <element x='192' y='64' key='108' texture="C_EM_FRAME202" />
+
+      <element x='0' y='128' key='109' texture="C_EM_FRAME202" />
+     
+      <element x='64' y='128' key='110' texture="C_EM_FRAME202" />
+      <element x='128' y='128' key='111' texture="C_EM_FRAME202" />
+      <element x='192' y='128' key='112' texture="C_EM_FRAME202" />
+
+      <element x='0' y='192' key='113' texture="C_EM_FRAME202" />
+      <element x='64' y='192' key='114' texture="C_EM_FRAME202" />
+      
+      <!-- Third Sub Tab in Frame Tab -->
+      <element x='0' y='0' key='171' texture="C_EM_FRAME301" />
+      <element x='64' y='0' key='172' texture="C_EM_FRAME301" />
+      <element x='128' y='0' key='173' texture="C_EM_FRAME301" />
+      <element x='192' y='0' key='174' texture="C_EM_FRAME301" />
+
+      <element x='0' y='64' key='175' texture="C_EM_FRAME301" />
+      <element x='64' y='64' key='176' texture="C_EM_FRAME301" />
+      <element x='128' y='64' key='177' texture="C_EM_FRAME301" />
+      <element x='192' y='64' key='178' texture="C_EM_FRAME301" />
+
+      <element x='0' y='128' key='179' texture="C_EM_FRAME301" />
+      <element x='64' y='128' key='180' texture="C_EM_FRAME301" />
+      <element x='128' y='128' key='181' texture="C_EM_FRAME301" />
+      <element x='192' y='128' key='182' texture="C_EM_FRAME301" />
+
+      <element x='0' y='192' key='183' texture="C_EM_FRAME301" />
+      <element x='64' y='192' key='184' texture="C_EM_FRAME301" />
+      <element x='128' y='192' key='185' texture="C_EM_FRAME301" />
+      <element x='192' y='192' key='186' texture="C_EM_FRAME301" />
+      
+      <element x='0' y='0' key='187' texture="C_EM_FRAME302" />
+      <element x='64' y='0' key='188' texture="C_EM_FRAME302" />
+      <element x='128' y='0' key='189' texture="C_EM_FRAME302" />
+      <element x='192' y='0' key='190' texture="C_EM_FRAME302" />
+          
+     
+      <element x='0' y='64' key='191' texture="C_EM_FRAME302" />
+      <element x='64' y='64' key='192' texture="C_EM_FRAME302" />
+      <element x='128' y='64' key='193' texture="C_EM_FRAME302" />
+      <element x='192' y='64' key='194' texture="C_EM_FRAME302" />
+
+      <element x='0' y='128' key='195' texture="C_EM_FRAME302" />
+      
+      <element x='64' y='128' key='196' texture="C_EM_FRAME302" />
+      <element x='128' y='128' key='197' texture="C_EM_FRAME302" />
+      <element x='192' y='128' key='198' texture="C_EM_FRAME302" />
+
+      <element x='0' y='192' key='199' texture="C_EM_FRAME302" />
+      <element x='64' y='192' key='200' texture="C_EM_FRAME302" />
+      
+    </customsprites >
+
+    <customsprites name="EM_BASE" w='64' h='64' >
+      <!-- First Sub Tab in Base Tab -->
+      <element x='0' y='0' key='0' texture="C_EM_BASE101" />
+      <element x='64' y='0' key='1' texture="C_EM_BASE101" />
+      <element x='128' y='0' key='2' texture="C_EM_BASE101" />
+      <element x='192' y='0' key='3' texture="C_EM_BASE101" />
+
+      <element x='0' y='64' key='4' texture="C_EM_BASE101" />
+      <element x='64' y='64' key='5' texture="C_EM_BASE101" />
+      <element x='128' y='64' key='6' texture="C_EM_BASE101" />
+      <element x='192' y='64' key='7' texture="C_EM_BASE101" />
+
+      <element x='0' y='128' key='8' texture="C_EM_BASE101" />
+      <element x='64' y='128' key='9' texture="C_EM_BASE101" />
+      <element x='128' y='128' key='10' texture="C_EM_BASE101" />
+      <element x='192' y='128' key='11' texture="C_EM_BASE101" />
+
+      <element x='0' y='192' key='12' texture="C_EM_BASE101" />
+      <element x='64' y='192' key='13' texture="C_EM_BASE101" />
+      <element x='128' y='192' key='14' texture="C_EM_BASE101" />
+      <element x='192' y='192' key='15' texture="C_EM_BASE101" />
+
+      <element x='0' y='0' key='16' texture="C_EM_BASE102" />
+      <element x='64' y='0' key='17' texture="C_EM_BASE102" />
+      <element x='128' y='0' key='18' texture="C_EM_BASE102" />
+      <element x='192' y='0' key='19' texture="C_EM_BASE102" />
+
+      <element x='0' y='64' key='20' texture="C_EM_BASE102" />
+    
+      <element x='64' y='64' key='21' texture="C_EM_BASE102" />
+      <element x='128' y='64' key='22' texture="C_EM_BASE102" />
+      <element x='192' y='64' key='23' texture="C_EM_BASE102" />
+
+      <element x='0' y='128' key='24' texture="C_EM_BASE102" />
+     
+      <element x='64' y='128' key='25' texture="C_EM_BASE102" />
+      <element x='128' y='128' key='26' texture="C_EM_BASE102" />
+      <element x='192' y='128' key='27' texture="C_EM_BASE102" />
+
+      <element x='0' y='192' key='28' texture="C_EM_BASE102" />
+      <element x='64' y='192' key='29' texture="C_EM_BASE102" />
+     
+    	  <element x='128' y='192' key='30' texture="C_EM_BASE102" />
+   	  <element x='192' y='192' key='31' texture="C_EM_BASE102" />
+
+    	  <element x='0' y='0' key='32' texture="C_EM_BASE103" />
+    	  <element x='64' y='0' key='33' texture="C_EM_BASE103" />
+   	  <element x='128' y='0' key='34' texture="C_EM_BASE103" />
+   	  <element x='192' y='0' key='35' texture="C_EM_BASE103" />
+
+   	  <element x='0' y='64' key='36' texture="C_EM_BASE103" />
+   	  <element x='64' y='64' key='37' texture="C_EM_BASE103" />
+    	  <element x='128' y='64' key='38' texture="C_EM_BASE103" />
+   	  <element x='192' y='64' key='39' texture="C_EM_BASE103" />
+
+   	  <element x='0' y='128' key='40' texture="C_EM_BASE103" />
+    	  <element x='64' y='128' key='41' texture="C_EM_BASE103" />
+    	  <element x='128' y='128' key='42' texture="C_EM_BASE103" />
+    	  <element x='192' y='128' key='43' texture="C_EM_BASE103" />
+
+   	  <element x='0' y='192' key='44' texture="C_EM_BASE103" />
+
+
+
+      <!-- Second Sub Tab in Base Tab -->
+      <element x='0' y='0' key='85' texture="C_EM_BASE201" />
+      <element x='64' y='0' key='86' texture="C_EM_BASE201" />
+      <element x='128' y='0' key='87' texture="C_EM_BASE201" />
+      <element x='192' y='0' key='88' texture="C_EM_BASE201" />
+      
+      <element x='0' y='64' key='89' texture="C_EM_BASE201" />
+      <element x='64' y='64' key='90' texture="C_EM_BASE201" />
+      <element x='128' y='64' key='91' texture="C_EM_BASE201" />
+      <element x='192' y='64' key='92' texture="C_EM_BASE201" />
+
+      <element x='0' y='128' key='93' texture="C_EM_BASE201" />
+      <element x='64' y='128' key='94' texture="C_EM_BASE201" />
+      <element x='128' y='128' key='95' texture="C_EM_BASE201" />
+      <element x='192' y='128' key='96' texture="C_EM_BASE201" />
+
+      <element x='0' y='192' key='97' texture="C_EM_BASE201" />
+      <element x='64' y='192' key='98' texture="C_EM_BASE201" />
+      <element x='128' y='192' key='99' texture="C_EM_BASE201" />
+      <element x='192' y='192' key='100' texture="C_EM_BASE201" />
+   
+      <element x='0' y='0' key='101' texture="C_EM_BASE202" />
+      <element x='64' y='0' key='102' texture="C_EM_BASE202" />
+      <element x='128' y='0' key='103' texture="C_EM_BASE202" />
+      <element x='192' y='0' key='104' texture="C_EM_BASE202" />
+      
+    
+      <element x='0' y='64' key='105' texture="C_EM_BASE202" />
+      <element x='64' y='64' key='106' texture="C_EM_BASE202" />
+      <element x='128' y='64' key='107' texture="C_EM_BASE202" />
+      <element x='192' y='64' key='108' texture="C_EM_BASE202" />
+
+      <element x='0' y='128' key='109' texture="C_EM_BASE202" />
+      
+      <element x='64' y='128' key='110' texture="C_EM_BASE202" />
+      <element x='128' y='128' key='111' texture="C_EM_BASE202" />
+      <element x='192' y='128' key='112' texture="C_EM_BASE202" />
+
+      <element x='0' y='192' key='113' texture="C_EM_BASE202" />
+      <element x='64' y='192' key='114' texture="C_EM_BASE202" />
+
+      <!-- Third Sub Tab in Base Tab -->
+      <element x='0' y='0' key='171' texture="C_EM_BASE301" />
+      <element x='64' y='0' key='172' texture="C_EM_BASE301" />
+      <element x='128' y='0' key='173' texture="C_EM_BASE301" />
+      <element x='192' y='0' key='174' texture="C_EM_BASE301" />
+
+      <element x='0' y='64' key='175' texture="C_EM_BASE301" />
+      <element x='64' y='64' key='176' texture="C_EM_BASE301" />
+      <element x='128' y='64' key='177' texture="C_EM_BASE301" />
+      <element x='192' y='64' key='178' texture="C_EM_BASE301" />
+
+      <element x='0' y='128' key='179' texture="C_EM_BASE301" />
+      <element x='64' y='128' key='180' texture="C_EM_BASE301" />
+      <element x='128' y='128' key='181' texture="C_EM_BASE301" />
+      <element x='192' y='128' key='182' texture="C_EM_BASE301" />
+
+      <element x='0' y='192' key='183' texture="C_EM_BASE301" />
+      <element x='64' y='192' key='184' texture="C_EM_BASE301" />
+      <element x='128' y='192' key='185' texture="C_EM_BASE301" />
+      <element x='192' y='192' key='186' texture="C_EM_BASE301" />
+      
+      <element x='0' y='0' key='187' texture="C_EM_BASE302" />
+      <element x='64' y='0' key='188' texture="C_EM_BASE302" />
+      <element x='128' y='0' key='189' texture="C_EM_BASE302" />
+      <element x='192' y='0' key='190' texture="C_EM_BASE302" />
+      
+    
+      <element x='0' y='64' key='191' texture="C_EM_BASE302" />
+      <element x='64' y='64' key='192' texture="C_EM_BASE302" />
+      <element x='128' y='64' key='193' texture="C_EM_BASE302" />
+      <element x='192' y='64' key='194' texture="C_EM_BASE302" />
+
+      <element x='0' y='128' key='195' texture="C_EM_BASE302" />
+    
+      <element x='64' y='128' key='196' texture="C_EM_BASE302" />
+      <element x='128' y='128' key='197' texture="C_EM_BASE302" />
+      <element x='192' y='128' key='198' texture="C_EM_BASE302" />
+
+      <element x='0' y='192' key='199' texture="C_EM_BASE302" />
+      <element x='64' y='192' key='200' texture="C_EM_BASE302" />
+      
+    </customsprites >
+
+    <sprite name="Help" x='1' y='1' w='724' h='530' texture="UI_HelpImage"/>
+    <sprite name="sub_mission_title" x='3' y='1' w='825' h='53' texture="UI_Main"/>
+    <sprite name="sub_mission_panel" x='2' y='24' w='359' h='113' texture="UI_Main"/>
+
+    <sprite name="blue_back" x='1' y='151' w='372' h='23' texture="UI_Message"/>
+    <sprite name="red_back" x='1' y='175' w='372' h='23' texture="UI_Message"/>
+    <sprite name="yellow_back" x='1' y='199' w='372' h='23' texture="UI_Message"/>
+    <sprite name="gray_back" x='1' y='223' w='372' h='23' texture="UI_Message"/>
+    <sprite name="hilight" x='471' y='350' w='376' h='27' texture="UI_Main"/>
+
+    <sprites name="GunUiRect" w='64' h='64'>
+      <element x='1' y='1' texture="UI_Main"/>
+      <element x='82' y='1' texture="UI_Main"/>
+      <element x='163' y='1' texture="UI_Main"/>
+      <element x='1' y='82' texture="UI_Main"/>
+      <element x='82' y='82' texture="UI_Main"/>
+      <element x='163' y='82' texture="UI_Main"/>
+      <element x='1' y='163' texture="UI_Main"/>
+      <element x='82' y='163' texture="UI_Main"/>
+      <element x='163' y='163' texture="UI_Main"/>
+    </sprites>
+
+    <sprites name="KillTypeBig" w='24' h='24'>
+      <element x='463' y='849' texture="UI_Main"/>
+      <element x='488' y='849' texture="UI_Main"/>
+      <element x='513' y='849' texture="UI_Main"/>
+      <element x='538' y='849' texture="UI_Main"/>
+      <element x='563' y='849' texture="UI_Main"/>
+      <element x='588' y='849' texture="UI_Main"/>
+      <element x='613' y='849' texture="UI_Main"/>
+      <element x='638' y='849' texture="UI_Main"/>
+    </sprites>
+    <!-- kill type -->
+    <sprites name="KillTypeSmall" w='24' h='24'>
+      <element x='278' y='202' texture="UI_Main"/>
+      <element x='303' y='202' texture="UI_Main"/>
+      <element x='328' y='202' texture="UI_Main"/>
+      <element x='353' y='202' texture="UI_Main"/>
+      <element x='378' y='202' texture="UI_Main"/>
+      <element x='403' y='202' texture="UI_Main"/>
+      <element x='428' y='202' texture="UI_Main"/>
+      <element x='453' y='202' texture="UI_Main"/>
+    </sprites>
+
+
+
+    <sprite name="bonuson_001" x='0' y='0' w='16' h='16' texture="UI_Result"/>
+    <sprite name="bonuson_002" x='18' y='0' w='16' h='16' texture="UI_Result"/>
+    <sprite name="bonuson_003" x='36' y='0' w='16' h='16' texture="UI_Result"/>
+
+    <sprite name="bonusoff_001" x='0' y='690' w='16' h='16' texture="UI_Result"/>
+    <sprite name="bonusoff_002" x='18' y='690' w='16' h='16' texture="UI_Result"/>
+    <sprite name="bonusoff_003" x='36' y='690' w='16' h='16' texture="UI_Result"/>
+
+    <sprite name="netcafe_on" x='54' y='0' w='16' h='16' texture="UI_Result"/>
+    <sprite name="netcafe_off" x='54' y='690' w='16' h='16' texture="UI_Result"/>  
+
+
+    <sprites name="Countdown" w='90' h='90'>
+      <element x='3' y='701' texture="UI_Main"/>
+      <element x='94' y='701' texture="UI_Main"/>
+      <element x='185' y='701' texture="UI_Main"/>
+    </sprites>
+
+    <sprites name="RespawnCount" w='90' h='90'>
+      <element x='3' y='792' texture="UI_Main"/>
+      <element x='94' y='792' texture="UI_Main"/>
+      <element x='185' y='792' texture="UI_Main"/>
+    </sprites>
+
+
+
+   
+  
+    
+    <sprite name="SC_BODY" x='161' y='857' w='259' h='48' texture="UI_QuickSlot"/> 
+    <sprite name="SC_SELECT" x='161' y='906' w='32' h='32' texture="UI_QuickSlot"/> 
+    <sprite name="SC_NOT_AVA" x='194' y='906' w='32' h='32' texture="UI_QuickSlot"/> 
+    <sprite name="SC_NO_USE" x='227' y='906' w='32' h='32' texture="UI_QuickSlot"/> 
+
+  
+    <sprite name="SlotBack" x='1' y='13' w='1022' h='444' texture="UI_QuickSlot"/>
+
+    <sprites name="Slots" w='514' h='95'>
+      <element x='10' y='466' texture="UI_QuickSlot"/>
+      <element x='10' y='561' texture="UI_QuickSlot"/>
+      <element x='10' y='656' texture="UI_QuickSlot"/>
+      <element x='10' y='751' texture="UI_QuickSlot"/>
+    </sprites>
+
+    <sprite name="SlotCursor" x='8' y='852' w='72' h='72' texture="UI_QuickSlot"/>
+    <sprite name="NetCafeNotAvailableSlotCursor" x='91' y='857' w='62' h='62' texture="UI_QuickSlot"/>
+
+    <sprite name="PlayShot" x='3' y='657' w='301' h='43' texture="UI_Main"/>
+    <sprite name="Round" x='3' y='569' w='165' h='43' texture="UI_Main"/>
+
+    <sprites name="Bullet" w='30' h='40'>
+      <element x='940' y='1' texture="UI_Main"/>
+      <element x='971' y='1' texture="UI_Main"/>
+      <element x='940' y='42' texture="UI_Main"/>
+      <element x='971' y='42' texture="UI_Main"/>
+      <element x='940' y='83' texture="UI_Main"/>
+      <element x='973' y='83' texture="UI_Main"/>
+      <element x='285' y='904' texture="UI_Main"/>
+      <element x='316' y='904' texture="UI_Main"/>
+      <element x='347' y='904' texture="UI_Main"/>
+      <element x='378' y='904' texture="UI_Main"/>
+
+    </sprites>
+
+    <sprites name="FireMode" w='101' h='23'>
+      <element x='787' y='826' texture="UI_Main"/>
+      <element x='787' y='850' texture="UI_Main"/>
+      <element x='889' y='850' texture="UI_Main"/>
+      <element x='889' y='826' texture="UI_Main"/>
+    </sprites>
+
+    <sprite name="Chat" x='5' y='896' w='441' h='23' texture="UI_Message"/>
+    <sprite name="ChatLogBack" x='1' y='768' w='449' h='126' texture="UI_Message"/>
+
+    <sprites name="CHATTO" w='39' h='19'>
+      <element x='278' y='233' texture="UI_Main"/>
+      <element x='278' y='253' texture="UI_Main"/>
+      <element x='278' y='273' texture="UI_Main"/>
+      <element x='278' y='273' texture="UI_Main"/>
+      <element x='491' y='768' texture="UI_Message"/>
+      <element x='491' y='788' texture="UI_Message"/>
+
+    </sprites>
+
+    <sprite name="QuitGame" x='524' y='57' w='406' h='197' texture="UI_Main"/>
+    <sprite name="BulletBack" x='840' y='11' w='169' h='37' texture="UI_Main"/>
+
+    <sprite name="HP" x='829' y='1' w='36' h='38' texture="UI_Main"/>
+
+    <sprites name="HONOR" w='36' h='38'>
+      <element x='169' y='569' texture="UI_Main"/>
+      <element x='206' y='569' texture="UI_Main"/>
+      <element x='243' y='569' texture="UI_Main"/>
+      <element x='280' y='569' texture="UI_Main"/>
+      <element x='317' y='569' texture="UI_Main"/>
+      <element x='169' y='608' texture="UI_Main"/>
+      <element x='206' y='608' texture="UI_Main"/>
+      <element x='243' y='608' texture="UI_Main"/>
+      <element x='280' y='608' texture="UI_Main"/>
+      <element x='317' y='608' texture="UI_Main"/>
+    </sprites>
+
+    <sprite name="JjokIcon" x='903' y='1' w='36' h='38' texture="UI_Main"/>
+
+    <sprite name="HonorGaugeBack" x='1007' y='728' w='14' h='298' texture="UI_Message"/>
+
+    <sprite name="HonorGauge1" x='911' y='990' w='8' h='32' texture="UI_Message"/>
+    <sprite name="HonorGauge2" x='920' y='958' w='8' h='64' texture="UI_Message"/>
+    <sprite name="HonorGauge3" x='929' y='926' w='8' h='96' texture="UI_Message"/>
+    <sprite name="HonorGauge4" x='938' y='894' w='8' h='128' texture="UI_Message"/>
+    <sprite name="HonorGauge5" x='947' y='862' w='8' h='160' texture="UI_Message"/>
+    <sprite name="HonorGauge6" x='956' y='830' w='8' h='192' texture="UI_Message"/>
+    <sprite name="HonorGauge7" x='965' y='798' w='8' h='224' texture="UI_Message"/>
+    <sprite name="HonorGauge8" x='974' y='766' w='8' h='256' texture="UI_Message"/>
+    <sprite name="HonorGauge9" x='983' y='734' w='8' h='288' texture="UI_Message"/>
+
+    <sprite name="HonorGaugeBlink" x='992' y='728' w='14' h='298' texture="UI_Message"/>
+
+    <sprites name="HonorLevel" w='48' h='12'>
+      <element x='862' y='1010' texture="UI_Message"/>
+      <element x='862' y='997' texture="UI_Message"/>
+      <element x='862' y='984' texture="UI_Message"/>
+      <element x='862' y='971' texture="UI_Message"/>
+      <element x='862' y='958' texture="UI_Message"/>
+      <element x='862' y='945' texture="UI_Message"/>
+      <element x='862' y='932' texture="UI_Message"/>
+      <element x='862' y='919' texture="UI_Message"/>
+      <element x='862' y='906' texture="UI_Message"/>
+    </sprites>
+
+    <sprite name="ARMOR" w='36' h='38' x='866' y='1' texture="UI_Main"/>
+
+    <sprites name="RoundStat" w='274' h='58'>
+      <element x='3' y='175' texture="UI_Main"/>
+      <element x='3' y='234' texture="UI_Main"/>
+      <element x='3' y='175' texture="UI_Main"/>
+      <element x='3' y='116' texture="UI_Main"/>
+    </sprites>
+    <sprite name="ATEAMHIGHLIGHT" x='278' y='135' w='88' h='66' texture="UI_Main"/>
+    <sprite name="BTEAMHIGHLIGHT" x='367' y='135' w='88' h='66' texture="UI_Main"/>
+
+
+
+    <sprite name="WeaponSelect" x='278' y='57' w='245' h='77' texture="UI_Main"/>
+
+    <sprites name="ShotType24x24" w='24' h='24'>
+      <element x='278' y='202' texture="UI_Main"/>
+      <element x='303' y='202' texture="UI_Main"/>
+      <element x='328' y='202' texture="UI_Main"/>
+      <element x='353' y='202' texture="UI_Main"/>
+      <element x='378' y='202' texture="UI_Main"/>
+      <element x='403' y='202' texture="UI_Main"/>
+      <element x='428' y='202' texture="UI_Main"/>
+      <element x='453' y='202' texture="UI_Main"/>
+    </sprites>
+
+    <sprite name="SubMissionResult" x='3' y='1' w='825' h='53' texture="UI_Main"/>
+
+    <sprite name="Grenade" x='940' y='83' w='30' h='40' texture="UI_Main"/>
+
+
+
+      <font name="CARD_LEVEL_Font1" w='13' h='15' texture="UI_Main"> 
+		  <digit0 x='249' y='975' />
+		  <digit1 x='263' y='975' />
+		  <digit2 x='277' y='975' />
+		  <digit3 x='291' y='975' />
+		  <digit4 x='305' y='975' />
+		  <digit5 x='319' y='975' />
+		  <digit6 x='333' y='975' />
+		  <digit7 x='347' y='975' />
+		  <digit8 x='361' y='975' />
+		  <digit9 x='375' y='975' />
+	  </font>  
+
+    
+      <font name="CARD_LEVEL_Font2" w='13' h='15' texture="UI_Main"> 
+		  <digit0 x='249' y='993' />
+		  <digit1 x='263' y='993' />
+		  <digit2 x='277' y='993' />
+		  <digit3 x='291' y='993' />
+		  <digit4 x='305' y='993' />
+		  <digit5 x='319' y='993' />
+		  <digit6 x='333' y='993' />
+		  <digit7 x='347' y='993' />
+		  <digit8 x='361' y='993' />
+		  <digit9 x='375' y='993' />
+	  </font>  
+
+
+
+     <font name="SOCCER_GOALS_Font" w='11' h='15' texture="UI_Main">
+		  <digit0 x='603' y='570' />
+		  <digit1 x='615' y='570' />
+		  <digit2 x='627' y='570' />
+		  <digit3 x='639' y='570' />
+		  <digit4 x='651' y='570' />
+		  <digit5 x='603' y='586' />
+		  <digit6 x='615' y='586' />
+		  <digit7 x='627' y='586' />
+		  <digit8 x='639' y='586' />
+		  <digit9 x='651' y='586' />
+	  </font>  
+
+    <font name="SOCCER_TIME_Font" w='12' h='14' texture="UI_Main">
+		  <digit0 x='478' y='570' />
+		  <digit1 x='494' y='570' />
+		  <digit2 x='510' y='570' />
+		  <digit3 x='526' y='570' />
+		  <digit4 x='542' y='570' />
+		  <digit5 x='478' y='588' />
+		  <digit6 x='494' y='588' />
+		  <digit7 x='510' y='588' />
+		  <digit8 x='526' y='588' />
+		  <digit9 x='542' y='588' />
+	  </font>
+
+    <font name="SOCCER_SCORE_Font" w='18' h='20' texture="UI_Main"> 
+		  <digit0 x='478' y='606' />
+		  <digit1 x='497' y='606' />
+		  <digit2 x='516' y='606' />
+		  <digit3 x='535' y='606' />
+		  <digit4 x='554' y='606' />
+		  <digit5 x='478' y='627' />
+		  <digit6 x='497' y='627' />
+		  <digit7 x='516' y='627' />
+		  <digit8 x='535' y='627' />
+		  <digit9 x='554' y='627' />
+	  </font>
+
+
+
+     <font name="AICountdown" w='90' h='90' texture="UI_Main">
+      
+      <digit0 x='0' y='0'/>
+      <digit1 x='397' y='763'/>
+      <digit2 x='488' y='763'/>
+      <digit3 x='410' y='856'/>
+      <digit4 x='0' y='0'/>
+      <digit5 x='0' y='0'/>
+      <digit6 x='0' y='0'/>
+      <digit7 x='0' y='0'/>
+      <digit8 x='0' y='0'/>
+      <digit9 x='0' y='0'/>
+     </font>
+
+    <font name="Num16x16" w='16' h='18' texture="UI_Main">
+      <digit0 x='318' y='227'/>
+      <digit1 x='334' y='227'/>
+      <digit2 x='350' y='227'/>
+      <digit3 x='366' y='227'/>
+      <digit4 x='382' y='227'/>
+      <digit5 x='398' y='227'/>
+      <digit6 x='414' y='227'/>
+      <digit7 x='430' y='227'/>
+      <digit8 x='446' y='227'/>
+      <digit9 x='462' y='227'/>
+    </font>
+    
+   <font name="RECYCLE_NUM" w='11' h='15' texture="UI_Main">
+      <digit0 x='355' y='587'/>
+      <digit1 x='366' y='587'/>
+      <digit2 x='377' y='587'/>
+      <digit3 x='388' y='587'/>
+      <digit4 x='399' y='587'/>
+      <digit5 x='410' y='587'/>
+      <digit6 x='421' y='587'/>
+      <digit7 x='432' y='587'/>
+      <digit8 x='443' y='587'/>
+      <digit9 x='454' y='587'/>
+    </font>
+    <font name="Num22x24" w='22' h='24' texture="UI_Main">
+      <digit0 x='318' y='255'/>
+      <digit1 x='341' y='255'/>
+      <digit2 x='364' y='255'/>
+      <digit3 x='387' y='255'/>
+      <digit4 x='410' y='255'/>
+      <digit5 x='433' y='255'/>
+      <digit6 x='456' y='255'/>
+      <digit7 x='479' y='255'/>
+      <digit8 x='502' y='255'/>
+      <digit9 x='525' y='255'/>
+    </font>
+
+    <font name="Num33x34" w='33' h='33' texture="UI_Main">
+      <digit0 x='571' y='255'/>
+      <digit1 x='605' y='255'/>
+      <digit2 x='639' y='255'/>
+      <digit3 x='673' y='255'/>
+      <digit4 x='707' y='255'/>
+      <digit5 x='741' y='255'/>
+      <digit6 x='775' y='255'/>
+      <digit7 x='809' y='255'/>
+      <digit8 x='843' y='255'/>
+      <digit9 x='877' y='255'/>
+
+    </font>
+
+    <font name="Num36x38" w='36' h='38' texture="UI_Main">
+      <digit0 x='541' y='521'/>
+      <digit1 x='578' y='521'/>
+      <digit2 x='615' y='521'/>
+      <digit3 x='652' y='521'/>
+      <digit4 x='689' y='521'/>
+      <digit5 x='726' y='521'/>
+      <digit6 x='763' y='521'/>
+      <digit7 x='800' y='521'/>
+      <digit8 x='837' y='521'/>
+      <digit9 x='874' y='521'/>
+    </font>
+
+    <font name="Num25x27" w='19' h='26' texture="UI_Result"> <!-- 킬수에 사용 -->
+      <digit0 x='0' y='420'/>
+      <digit1 x='0' y='447'/>
+      <digit2 x='0' y='474'/>
+      <digit3 x='0' y='501'/>
+      <digit4 x='0' y='528'/>
+      <digit5 x='0' y='555'/>
+      <digit6 x='0' y='582'/>
+      <digit7 x='0' y='609'/>
+      <digit8 x='0' y='636'/>
+      <digit9 x='0' y='663'/>
+    </font>
+
+    <font name="Num17x23" w='11' h='16' texture="UI_Result"> <!-- 샷 내역_w 싱글모드 결과창에도 사용-->
+      <digit0 x='41' y='326'/>
+      <digit1 x='41' y='343'/>
+      <digit2 x='41' y='360'/>
+      <digit3 x='41' y='377'/>
+      <digit4 x='41' y='394'/>
+      <digit5 x='41' y='411'/>
+      <digit6 x='41' y='428'/>
+      <digit7 x='41' y='445'/>
+      <digit8 x='41' y='462'/>
+      <digit9 x='41' y='479'/>
+    </font>
+
+    <font name="SOLO_HIGHSCORE_DEATH" w='11' h='16' texture="UI_Result"> <!-- 샷 내역_r -->
+      <digit0 x='73' y='326'/>
+      <digit1 x='73' y='343'/>
+      <digit2 x='73' y='360'/>
+      <digit3 x='73' y='377'/>
+      <digit4 x='73' y='394'/>
+      <digit5 x='73' y='411'/>
+      <digit6 x='73' y='428'/>
+      <digit7 x='73' y='445'/>
+      <digit8 x='73' y='462'/>
+      <digit9 x='73' y='479'/>
+    </font>
+
+    <font name="KillNum26x31" w='19' h='26' texture="UI_Result"> <!-- 데드수 표시에 사용 -->
+      <digit0 x='20' y='420'/>
+      <digit1 x='20' y='447'/>
+      <digit2 x='20' y='474'/>
+      <digit3 x='20' y='501'/>
+      <digit4 x='20' y='528'/>
+      <digit5 x='20' y='555'/>
+      <digit6 x='20' y='582'/>
+      <digit7 x='20' y='609'/>
+      <digit8 x='20' y='636'/>
+      <digit9 x='20' y='663'/>
+    </font>
+
+   <font name="AI_SCORE" w='11' h='17' texture="UI_PAPERCENTER_FONT">
+      <digit0 x='374' y='781'/>
+      <digit1 x='386' y='781'/>
+      <digit2 x='398' y='781'/>
+      <digit3 x='410' y='781'/>
+      <digit4 x='422' y='781'/>
+      <digit5 x='434' y='781'/>
+      <digit6 x='446' y='781'/>
+      <digit7 x='458' y='781'/>
+      <digit8 x='470' y='781'/>
+      <digit9 x='482' y='781'/>
+	  <comma x='494' y='781' />
+    </font>
+
+    <font name="AI_RESULT"  w='12' h='12' texture="UI_PAPERCENTER_FONT">
+      <digit0 x='917' y='823'/>
+      <digit1 x='930' y='823'/>
+      <digit2 x='943' y='823'/>
+      <digit3 x='956' y='823'/>
+      <digit4 x='969' y='823'/>
+      <digit5 x='982' y='823'/>
+      <digit6 x='917' y='836'/>
+      <digit7 x='930' y='836'/>
+      <digit8 x='943' y='836'/>
+      <digit9 x='956' y='836'/>
+	  <comma x='969' y='836' />
+    </font>
+
+    <font name="AI_FREECOIN"  w='21' h='33' texture="UI_PAPERCENTER_FONT">
+      <digit0 x='984' y='922'/>
+      <digit1 x='918' y='922'/>
+      <digit2 x='940' y='922'/>
+      <digit3 x='962' y='922'/>
+      <digit4 x='918' y='956'/>
+      <digit5 x='940' y='956'/>
+      <digit6 x='962' y='956'/>
+      <digit7 x='918' y='990'/>
+      <digit8 x='940' y='990'/>
+      <digit9 x='962' y='990'/>
+    </font>
+
+      <font name="AI_PG_RESULT" w='18' h='24' texture="UI_Result">
+      <digit0 x='53' y='420'/>
+      <digit1 x='53' y='447'/>
+      <digit2 x='53' y='474'/>
+      <digit3 x='53' y='501'/>
+      <digit4 x='53' y='528'/>
+      <digit5 x='53' y='555'/>
+      <digit6 x='53' y='582'/>
+      <digit7 x='53' y='609'/>
+      <digit8 x='53' y='636'/>
+      <digit9 x='53' y='663'/>
+      <comma x='0' y='0'/>
+    </font>
+    <font name="DeathNum26x31" w='19' h='26' texture="UI_Result"> <!-- solo tab_R 데드수 표시에 사용 -->
+      <digit0 x='0' y='420'/>
+      <digit1 x='0' y='447'/>
+      <digit2 x='0' y='474'/>
+      <digit3 x='0' y='501'/>
+      <digit4 x='0' y='528'/>
+      <digit5 x='0' y='555'/>
+      <digit6 x='0' y='582'/>
+      <digit7 x='0' y='609'/>
+      <digit8 x='0' y='636'/>
+      <digit9 x='0' y='663'/>
+    </font>
+
+    <font name="GetNum26x31" w='19' h='26' texture="UI_Result"> <!-- 미사용 -->
+      <digit0 x='0' y='420'/>
+      <digit1 x='0' y='447'/>
+      <digit2 x='0' y='474'/>
+      <digit3 x='0' y='501'/>
+      <digit4 x='0' y='528'/>
+      <digit5 x='0' y='555'/>
+      <digit6 x='0' y='582'/>
+      <digit7 x='0' y='609'/>
+      <digit8 x='0' y='636'/>
+      <digit9 x='0' y='663'/>
+    </font> 
+
+   
+    <font name="Game_Shout_Num" w='6' h='9' texture="UI_Main">
+      <digit0 x='1' y='901'/>
+      <digit1 x='8' y='901'/>
+      <digit2 x='15' y='901'/>
+      <digit3 x='22' y='901'/>
+      <digit4 x='29' y='901'/>
+      <digit5 x='36' y='901'/>
+      <digit6 x='43' y='901'/>
+      <digit7 x='50' y='901'/>
+      <digit8 x='57' y='901'/>
+      <digit9 x='64' y='901'/>
+    </font>   
+
+  
+    <font name="Lobby_Shout_Num" w='6' h='9' texture="UI_Main">
+      <digit0 x='1' y='912'/>
+      <digit1 x='8' y='912'/>
+      <digit2 x='15' y='912'/>
+      <digit3 x='22' y='912'/>
+      <digit4 x='29' y='912'/>
+      <digit5 x='36' y='912'/>
+      <digit6 x='43' y='912'/>
+      <digit7 x='50' y='912'/>
+      <digit8 x='57' y='912'/>
+      <digit9 x='64' y='912'/>
+    </font>
+
+  
+    <font name="PICKUP" w='10' h='18' texture="UI_Main">
+      <digit0 x='354' y='605'/>
+      <digit1 x='365' y='605'/>
+      <digit2 x='376' y='605'/>
+      <digit3 x='387' y='605'/>
+      <digit4 x='398' y='605'/>
+      <digit5 x='409' y='605'/>
+      <digit6 x='420' y='605'/>
+      <digit7 x='431' y='605'/>
+      <digit8 x='442' y='605'/>
+      <digit9 x='453' y='605'/>
+    </font>
+
+    <sprite name="RespawnBack" x='304' y='378' w='257' h='125' texture="UI_Main"/>
+    <sprite name="RespawnProgress" x='562' y='378' w='257' h='125' texture="UI_Main"/>
+    <sprite name="RespawnMessage" x='304' y='504' w='252' h='29' texture="UI_Main"/>
+    <sprite name="RespawnMessage_Switch" x='610' y='995' w='252' h='29' texture="UI_Main"/>
+
+    <sprite name="TimerBack" w='205' h='74' x='383' y='649' texture="UI_Main"/>
+    <sprite name="TimerBackBombBlink" w='60' h='65' x='322' y='649' texture="UI_Main"/>
+    <sprite name="BombPlanted" w='190' h='19' x='589' y='867' texture="UI_Main"/>
+    <sprite name="AttackTeamObjective" w='347' h='119' x='514' y='0' texture="UI_Message"/>
+    <sprite name="DefenceTeamObjective" w='347' h='119' x='514' y='120' texture="UI_Message"/>
+    <sprite name="BombProgressBack" w='312' h='18' x='276' y='745' texture="UI_Main"/>
+    <sprite name="InPlanting" w='92' h='20' x='276' y='724' texture="UI_Main"/>
+    <sprite name="InDisposing" w='92' h='20' x='369' y='724' texture="UI_Main"/>
+    <sprite name="ProgressElement" w='11' h='16' x='462' y='724' texture="UI_Main"/>
+
+
+    <sprite name="MissonMessage" x='532' y='175' w='347' h='119' texture="UI_Main2"/>
+    <sprite name="Steal_back" x='536' y='0' w='275' h='56' texture="UI_Main2"/>
+    <sprite name="MyTame" x='541' y='65' w='83' h='53' texture="UI_Main2"/>
+    <sprite name="Dye_back" x='814' y='0' w='172' h='34' texture="UI_Main2"/>
+    <sprite name="BlueDye" x='986' y='1' w='5' h='16' texture="UI_Main2"/>
+    <sprite name="RedDye" x='992' y='1' w='5' h='16' texture="UI_Main2"/>
+
+    <sprite name="SubMessage_get" x='532' y='295' w='374' h='62' texture="UI_Main2"/>
+    <sprite name="SubMessage_save" x='532' y='358' w='374' h='62' texture="UI_Main2"/>
+
+    <sprite name="A_Dye_icon" x='591' y='433' w='53' h='69' texture="UI_Main2"/>
+    <sprite name="B_Dye_icon" x='532' y='433' w='53' h='69' texture="UI_Main2"/>
+
+    <sprite name="Plus" x='633' y='101 ' w='26' h='36' texture="UI_Main2"/>
+    <sprite name="Minus" x='633' y='63 ' w='26' h='36' texture="UI_Main2"/>
+
+
+    <font name="StealBlue_Score" w='15' h='17' texture="UI_Main2">
+      <digit0 x='775' y='137'/>
+      <digit1 x='634' y='137'/>
+      <digit2 x='649' y='137'/>
+      <digit3 x='664' y='137'/>
+      <digit4 x='680' y='137'/>
+      <digit5 x='696' y='137'/>
+      <digit6 x='711' y='137'/>
+      <digit7 x='728' y='137'/>
+      <digit8 x='743' y='137'/>
+      <digit9 x='760' y='137'/>
+    </font>
+
+    <font name="StealRed_Score" w='15' h='17' texture="UI_Main2">
+      <digit0 x='775' y='156'/>
+      <digit1 x='634' y='156'/>
+      <digit2 x='649' y='156'/>
+      <digit3 x='664' y='156'/>
+      <digit4 x='680' y='156'/>
+      <digit5 x='696' y='156'/>
+      <digit6 x='711' y='156'/>
+      <digit7 x='728' y='156'/>
+      <digit8 x='743' y='156'/>
+      <digit9 x='760' y='156'/>
+    </font>
+
+    <font name="Taken_Score" w='24' h='36' texture="UI_Main2">
+      <digit0 x='944' y='101'/>
+      <digit1 x='667' y='101'/>
+      <digit2 x='698' y='101'/>
+      <digit3 x='728' y='101'/>
+      <digit4 x='759' y='101'/>
+      <digit5 x='791' y='101'/>
+      <digit6 x='820' y='101'/>
+      <digit7 x='853' y='101'/>
+      <digit8 x='882' y='101'/>
+      <digit9 x='915' y='101'/>
+
+    </font>
+
+    <font name="Lost_Score" w='24' h='35' texture="UI_Main2">
+      <digit0 x='944' y='63'/>
+      <digit1 x='667' y='63'/>
+      <digit2 x='698' y='63'/>
+      <digit3 x='728' y='63'/>
+      <digit4 x='759' y='63'/>
+      <digit5 x='791' y='63'/>
+      <digit6 x='820' y='63'/>
+      <digit7 x='853' y='63'/>
+      <digit8 x='882' y='63'/>
+      <digit9 x='915' y='63'/>
+
+    </font>
+
+    <font name="Vote_Digit" w='24' h='35' texture="UI_Main2">
+      <digit0 x='976' y='63'/>
+      <digit1 x='667' y='63'/>
+      <digit2 x='698' y='63'/>
+      <digit3 x='728' y='63'/>
+      <digit4 x='759' y='63'/>
+      <digit5 x='791' y='63'/>
+      <digit6 x='820' y='63'/>
+      <digit7 x='853' y='63'/>
+      <digit8 x='882' y='63'/>
+      <digit9 x='915' y='63'/>
+
+    </font>
+
+    <font name="NumBombTimer" w='22' h='24' texture="UI_Main">
+      <digit0 x='318' y='255'/>
+      <digit1 x='341' y='255'/>
+      <digit2 x='364' y='255'/>
+      <digit3 x='387' y='255'/>
+      <digit4 x='410' y='255'/>
+      <digit5 x='433' y='255'/>
+      <digit6 x='456' y='255'/>
+      <digit7 x='479' y='255'/>
+      <digit8 x='502' y='255'/>
+      <digit9 x='525' y='255'/>
+    </font>
+    <font name="NumBombTimerInRed" w='22' h='24' texture="UI_Main">
+      <digit0 x='321' y='280'/>
+      <digit1 x='344' y='280'/>
+      <digit2 x='367' y='280'/>
+      <digit3 x='390' y='280'/>
+      <digit4 x='413' y='280'/>
+      <digit5 x='436' y='280'/>
+      <digit6 x='459' y='280'/>
+      <digit7 x='482' y='280'/>
+      <digit8 x='505' y='280'/>
+      <digit9 x='321' y='305'/>
+    </font>   
+
+  <font name="GetNum36x38" w='36' h='38' texture="UI_Main">
+      <digit0 x='541' y='289'/>
+      <digit1 x='578' y='289'/>
+      <digit2 x='615' y='289'/>
+      <digit3 x='652' y='289'/>
+      <digit4 x='689' y='289'/>
+      <digit5 x='726' y='289'/>
+      <digit6 x='763' y='289'/>
+      <digit7 x='800' y='289'/>
+      <digit8 x='837' y='289'/>
+      <digit9 x='874' y='289'/>
+    </font>
+
+    
+    <sprite name="SOCCER_BOMB" w='314' h='158' x='374' y='476' texture="UI_CrossHair"/>
+    <sprite name="BombAimPointOff" w='124' h='124' x='589' y='649' texture="UI_Main"/>
+    <sprite name="BombAimPointOn" w='124' h='124' x='714' y='649' texture="UI_Main"/>
+    <sprite name="PlantbleMsgBack" w='208' h='50' x='589' y='774' texture="UI_Main"/>
+    <sprite name="PlantbleLClickOff" w='35' h='41' x='589' y='825' texture="UI_Main"/>
+    <sprite name="PlantbleLClickOn" w='35' h='41' x='625' y='825' texture="UI_Main"/>
+
+    <sprite name="RadioMsgBack" w='175' h='325' x='848' y='328' texture="UI_Main"/>
+    <sprite name="RadioMsgCommand" w='98' h='14' x='714' y='539' texture="UI_Main"/>
+    <sprite name="RadioMsgStrategy" w='98' h='14' x='714' y='554' texture="UI_Main"/>
+    <sprite name="RadioMsgStatement" w='98' h='14' x='714' y='569' texture="UI_Main"/>
+
+    <sprite name="EmotionCommand" w='68' h='14' x='647' y='539' texture="UI_Main"/>
+
+
+    <sprite name="HPRestore" w='300' h='160' x='1' y='263' texture="UI_Message"/>
+    <sprite name="HasteFootstep" w='300' h='160' x='302' y='263' texture="UI_Message"/>
+    <sprite name="GrenadeResupply" w='300' h='160' x='603' y='263' texture="UI_Message"/>
+    <sprite name="InfinityAmmo" w='300' h='160' x='1' y='424' texture="UI_Message"/>
+    <sprite name="UpgradeFirearm" w='300' h='160' x='302' y='424' texture="UI_Message"/>
+    <sprite name="Immortal" w='300' h='160' x='603' y='424' texture="UI_Message"/>
+    <sprite name="AnAccuracy" w='300' h='160' x='2' y='0 ' texture="UI_Message2"/>
+
+
+    <sprite name="HPRestoreLv1" w='104' h='60' x='1' y='585' texture="UI_Message"/>
+    <sprite name="HasteFootstepLv1" w='104' h='60' x='106' y='585' texture="UI_Message"/>
+    <sprite name="GrenadeResupplyLv1" w='104' h='60' x='211' y='585' texture="UI_Message"/>
+    <sprite name="InfinityAmmoLv1" w='104' h='60' x='316' y='585' texture="UI_Message"/>
+    <sprite name="UpgradeFirearmLv1" w='104' h='60' x='421' y='585' texture="UI_Message"/>
+    <sprite name="ImmortalLv1" w='104' h='60' x='526' y='585' texture="UI_Message"/>
+
+    <sprite name="AnAccuracyLv1" w='104' h='60' x='1' y='162 ' texture="UI_Message2"/>
+
+    <sprite name="HPRestoreLv2" w='104' h='60' x='1' y='646' texture="UI_Message"/>
+    <sprite name="HasteFootstepLv2" w='104' h='60' x='106' y='646' texture="UI_Message"/>
+    <sprite name="GrenadeResupplyLv2" w='104' h='60' x='211' y='646' texture="UI_Message"/>
+    <sprite name="InfinityAmmoLv2" w='104' h='60' x='316' y='646' texture="UI_Message"/>
+    <sprite name="UpgradeFirearmLv2" w='104' h='60' x='421' y='646' texture="UI_Message"/>
+    <sprite name="ImmortalLv2" w='104' h='60' x='526' y='646' texture="UI_Message"/>
+
+    <sprite name="AnAccuracyLv2" w='104' h='60' x='1' y='223' texture="UI_Message2"/>
+
+    <sprite name="HPRestoreLv3" w='104' h='60' x='1' y='707' texture="UI_Message"/>
+    <sprite name="HasteFootstepLv3" w='104' h='60' x='106' y='707' texture="UI_Message"/>
+    <sprite name="GrenadeResupplyLv3" w='104' h='60' x='211' y='707' texture="UI_Message"/>
+    <sprite name="InfinityAmmoLv3" w='104' h='60' x='316' y='707' texture="UI_Message"/>
+    <sprite name="UpgradeFirearmLv3" w='104' h='60' x='421' y='707' texture="UI_Message"/>
+    <sprite name="ImmortalLv3" w='104' h='60' x='526' y='707' texture="UI_Message"/>
+
+    <sprite name="AnAccuracyLv3" w='104' h='60' x='1' y='284 ' texture="UI_Message2"/>
+
+  <!--QEUST EVENT ITEM Message -->
+    <sprite name="QUESTEVENT" w='314' h='158' x='339' y='0' texture="UI_Message2"/>
+
+  <!--AI  ITEM Message -->
+    <sprite name="PG_BONUS" w='314' h='158' x='339' y='0' texture="UI_Message2"/>
+    <sprite name="TIME_BONUS" w='314' h='158' x='654' y='159 ' texture="UI_Message2"/>
+    <sprite name="FEVER_BONUS" w='314' h='158' x='654' y='0 ' texture="UI_Message2"/>
+    <sprite name="SCORE_BONUS" w='314' h='158' x='339' y='159 ' texture="UI_Message2"/>
+
+    <sprite name="BuffPanel" w='223' h='50' x='798' y='774' texture="UI_Main"/>
+
+    <sprite name="HasteFootstepBuff" w='40' h='40' x='972' y='206' texture="UI_Main"/>
+    <sprite name="InfinityAmmoBuff" w='40' h='40' x='931' y='206' texture="UI_Main"/>
+    <sprite name="UpgradeFirearmBuff" w='40' h='40' x='972' y='124' texture="UI_Main"/>
+    <sprite name="ImmortalBuff" w='40' h='40' x='931' y='165' texture="UI_Main"/>
+    <sprite name="AnAccuracyBuff" w='40' h='40' x='972' y='247' texture="UI_Main"/>
+
+    <font name="NumBuffTimer" w='5' h='7' texture="UI_Main">
+      <digit0 x='373' y='245'/>
+      <digit1 x='319' y='245'/>
+      <digit2 x='325' y='245'/>
+      <digit3 x='331' y='245'/>
+      <digit4 x='337' y='245'/>
+      <digit5 x='343' y='245'/>
+      <digit6 x='349' y='245'/>
+      <digit7 x='355' y='245'/>
+      <digit8 x='361' y='245'/>
+      <digit9 x='367' y='245'/>
+    </font>
+
+    <sprite name="WinElimination" w='374' h='62' x='451' y='828' texture="UI_Message"/>
+    <sprite name="WinDisposal" w='374' h='62' x='631' y='585' texture="UI_Message"/>
+    <sprite name="WinDefence" w='374' h='62' x='451' y='891' texture="UI_Message"/>
+    <sprite name="WinDestruction" w='374' h='62' x='631' y='648' texture="UI_Message"/>
+
+    <sprite name="MouseSensiBack" w='127' h='62' x='716' y='585' texture="UI_Main"/>
+    <sprite name="MouseSensiUp" w='17' h='17' x='830' y='567' texture="UI_Main"/>
+    <sprite name="MouseSensiDn" w='17' h='17' x='813' y='567' texture="UI_Main"/>
+    <sprite name="MouseSensiCursor" w='9' h='12' x='814' y='554' texture="UI_Main"/>
+
+    
+    <sprite name="GIFT_ICON" x='51' y='976' w='32' h='32' texture="UI_Result"/>
+    <sprite name="GIFT_ICON_AVATA" x='51' y='976' w='32' h='32' texture="UI_Result"/>
+    <sprite name="GIFT_ICON_INGAME" x='0' y='955' w='50' h='69' texture="UI_Result"/>
+    <sprite name="DEADZONEDIE" x='278' y='202' w='24' h='24' texture="UI_Main"/>
+
+    <sprite name="TEST_SKIIN_1" x='936' y='233' w='2' h='10' texture="UI_Main2"/>
+    <sprite name="TEST_SKIIN_2" x='571' y='233' w='2' h='10' texture="UI_Main2"/>
+    <sprite name="TEST_SKIIN_3" x='604' y='460' w='2' h='10' texture="UI_Main2"/>
+    <sprite name="TEST_SKIIN_4" x='677' y='113' w='2' h='10' texture="UI_Main2"/>
+
+    <!-- Clan War Result Interface -->
+    
+
+    <sprite name="HealthStatusBG" w='65' h='4' x='668' y='443' texture="UI_Main2"/>
+
+    <sprites name="LevelupGage" w='63' h='1'>    
+      <element x='668' y='466' texture="UI_Main2"/>    
+      <element x='668' y='464' texture="UI_Main2"/>
+      <element x='668' y='462' texture="UI_Main2"/>
+      <element x='668' y='460' texture="UI_Main2"/>
+      <element x='668' y='458' texture="UI_Main2"/>
+      <element x='668' y='456' texture="UI_Main2"/>
+      <element x='668' y='454' texture="UI_Main2"/>
+      <element x='668' y='452' texture="UI_Main2"/>
+      <element x='668' y='450' texture="UI_Main2"/>
+      <element x='668' y='448' texture="UI_Main2"/>
+    </sprites>
+
+   
+    <sprite name="target" x='760' y='420' w='255' h='255' texture="UI_Main2"/>
+    <!--sprite name="target" x='782' y='430' w='97' h='62' texture="UI_Main2"/-->
+
+  
+    <sprite name="NEW_MSG_ICON" x='51' y='955' w='27' h='20' texture="UI_Result"/>
+
+    <sprite name="GAME_ICON_SPIRIT" x='229' y='566' w='13' h='13' texture="UI_Main2"/>
+    <sprite name="GAME_ICON_SPEED" x='229' y='579' w='13' h='13' texture="UI_Main2"/>
+    <sprite name="GAME_ICON_AGILE" x='229' y='592' w='13' h='13' texture="UI_Main2"/>
+    <sprite name="GAME_ICON_DEFENCE" x='229' y='605' w='13' h='13' texture="UI_Main2"/>
+    <sprite name="GAME_ICON_CONCENTRATION" x='229' y='618' w='13' h='13' texture="UI_Main2"/>
+    <sprite name="GAME_ICON_PLUS" x='229' y='631' w='13' h='13' texture="UI_Main2"/>
+    <sprite name="GAME_ICON_BLIND" x='229' y='644' w='13' h='13' texture="UI_Main2"/>
+
+    <!-- Special Ability Slot -->
+    <!-- Anti Aim -->
+    <sprite name="SA_ANTIAIM" x='0' y='208' w='148' h='174' texture="UI_SASLOT"/>
+    
+    <!-- Number -->
+    <font name="SA_Number" w='7' h='8' texture="UI_SASLOT">
+      <digit0 x='1' y='1'/>
+      <digit1 x='9' y='1'/>
+      <digit2 x='17' y='1'/>
+      <digit3 x='25' y='1'/>
+      <digit4 x='33' y='1'/>
+      <digit5 x='41' y='1'/>
+      <digit6 x='49' y='1'/>
+      <digit7 x='57' y='1'/>
+      <digit8 x='65' y='1'/>
+      <digit9 x='73' y='1'/>
+    </font>
+    
+    <!-- Red_Number -->
+    <font name="Red_SA_Number" w='7' h='8' texture="UI_SASLOT">
+      <digit0 x='1' y='10'/>
+      <digit1 x='9' y='10'/>
+      <digit2 x='17' y='10'/>
+      <digit3 x='25' y='10'/>
+      <digit4 x='33' y='10'/>
+      <digit5 x='41' y='10'/>
+      <digit6 x='49' y='10'/>
+      <digit7 x='57' y='10'/>
+      <digit8 x='65' y='10'/>
+      <digit9 x='73' y='10'/>
+    </font>
+    <!-- Time -->
+    <sprite name="Watch" x='84' y='1' w='13' h='12' texture="UI_SASLOT"/>
+    <sprite name="Red_Watch" x='98' y='1' w='13' h='12' texture="UI_SASLOT"/>
+    <!-- Item_window -->
+    <sprite name="Item_window"  x="128" y="0" w='128' h='23' texture="UI_SASLOT"/>
+    <!-- AI_ONLY_window -->
+    <sprite name="AI_ONLY_WINDOW"  x="39" y="93" w='40' h='21' texture="UI_SASLOT"/>
+    <!-- over 99 count -->
+    <sprite name="over_99"  x="22" y="93" w='16' h='20' texture="UI_SASLOT"/>
+    <!-- Icons -->
+    <sprite name="15305801" x='216' y='49' w='23' h='21' texture="UI_SASLOT"/>  <!--main_magazine_up-->
+    <sprite name="15305802" x='0' y='71' w='23' h='21' texture="UI_SASLOT"/>  <!--Sub_magazine_up-->
+    <sprite name="15305803" x='0' y='27' w='23' h='21' texture="UI_SASLOT"/> <!--head_guard-->
+    <sprite name="15305804" x='24' y='27' w='23' h='21' texture="UI_SASLOT"/> <!--heartshot_guard-->
+    <sprite name="15305805" x='48' y='27' w='23' h='21' texture="UI_SASLOT"/> <!--crishot_guard-->
+    <sprite name="15305806" x='72' y='27' w='23' h='21' texture="UI_SASLOT"/>  <!--boom_guard_1-->
+    <sprite name="15305807" x='96' y='27' w='23' h='21' texture="UI_SASLOT"/>  <!--boom_guard_2-->
+    <sprite name="15305808" x='120' y='27' w='23' h='21' texture="UI_SASLOT"/>  <!--boom_guard_3-->
+    <sprite name="15305809" x='144' y='27' w='23' h='21' texture="UI_SASLOT"/>  <!--nullity-->
+    <sprite name="15305810" x='168' y='27' w='23' h='21' texture="UI_SASLOT"/>  <!--stamina_1-->
+    <sprite name="15305811" x='192' y='27' w='23' h='21' texture="UI_SASLOT"/>  <!--stamina_2-->
+    <sprite name="15305812" x='216' y='27' w='23' h='21' texture="UI_SASLOT"/>  <!--warning-->
+    <sprite name="15305813" x='0' y='49' w='23' h='21' texture="UI_SASLOT"/>  <!--respawn_1-->
+    <sprite name="15305814" x='24' y='49' w='23' h='21' texture="UI_SASLOT"/>  <!--respawn_2-->
+    <sprite name="15305815" x='120' y='49' w='23' h='21' texture="UI_SASLOT"/>  <!--armor-->
+    <sprite name="15305816" x='24' y='71' w='23' h='21' texture="UI_SASLOT"/>  <!--attack_lv1-->
+    <sprite name="15305817" x='48' y='71' w='23' h='21' texture="UI_SASLOT"/>  <!--attack_lv2-->
+    <sprite name="15305828" x='72' y='71' w='23' h='21' texture="UI_SASLOT"/>  <!--attack_lv3-->
+    <sprite name="15305819" x='48' y='49' w='23' h='21' texture="UI_SASLOT"/>  <!--guard_lv1-->
+    <sprite name="15305820" x='72' y='49' w='23' h='21' texture="UI_SASLOT"/>  <!--guard_lv2-->
+    <sprite name="15305821" x='96' y='49' w='23' h='21' texture="UI_SASLOT"/>  <!--guard_lv3-->
+    <sprite name="15305822" x='144' y='49' w='23' h='21' texture="UI_SASLOT"/>  <!--speed_1-->
+    <sprite name="15305823" x='168' y='49' w='23' h='21' texture="UI_SASLOT"/>  <!--speed_2-->
+    <sprite name="15305824" x='192' y='49' w='23' h='21' texture="UI_SASLOT"/>  <!--speed_3-->
+    <sprite name="15305827" x='120' y='71' w='23' h='21' texture="UI_SASLOT"/>  <!--AI2-->
+
+    <!-- None_Icons -->
+    <sprite name="un_15305801" x='216' y='164' w='23' h='21' texture="UI_SASLOT"/>  <!--main_magazine_up-->
+    <sprite name="un_15305802" x='0' y='186' w='23' h='21' texture="UI_SASLOT"/>  <!--Sub_magazine_up-->
+    <sprite name="un_15305803" x='0' y='142' w='23' h='21' texture="UI_SASLOT"/>  <!--head_guard-->
+    <sprite name="un_15305804" x='24' y='142' w='23' h='21' texture="UI_SASLOT"/>  <!--heartshot_guard-->
+    <sprite name="un_15305805" x='48' y='142' w='23' h='21' texture="UI_SASLOT"/>  <!--crishot_guard-->
+    <sprite name="un_15305806" x='72' y='142' w='23' h='21' texture="UI_SASLOT"/>  <!--boom_guard_1-->
+    <sprite name="un_15305807" x='96' y='142' w='23' h='21' texture="UI_SASLOT"/>  <!--boom_guard_2-->
+    <sprite name="un_15305808" x='120' y='142' w='23' h='21' texture="UI_SASLOT"/>  <!--boom_guard_3-->
+    <sprite name="un_15305809" x='144' y='142' w='23' h='21' texture="UI_SASLOT"/>  <!--nullity-->
+    <sprite name="un_15305810" x='168' y='142' w='23' h='21' texture="UI_SASLOT"/>  <!--stamina_1-->
+    <sprite name="un_15305811" x='192' y='142' w='23' h='21' texture="UI_SASLOT"/>  <!--stamina_2-->
+    <sprite name="un_15305812" x='216' y='142' w='23' h='21' texture="UI_SASLOT"/>  <!--warning-->
+    <sprite name="un_15305813" x='0' y='164' w='23' h='21' texture="UI_SASLOT"/>  <!--respawn_1-->
+    <sprite name="un_15305814" x='24' y='164' w='23' h='21' texture="UI_SASLOT"/>  <!--respawn_2-->
+    <sprite name="un_15305815" x='120' y='164' w='23' h='21' texture="UI_SASLOT"/>  <!--armor-->
+    <sprite name="un_15305816" x='24' y='186' w='23' h='21' texture="UI_SASLOT"/>  <!--attack_lv1-->
+    <sprite name="un_15305817" x='48' y='186' w='23' h='21' texture="UI_SASLOT"/>  <!--attack_lv2-->
+    <sprite name="un_15305828" x='72' y='186' w='23' h='21' texture="UI_SASLOT"/>  <!--attack_lv3-->
+    <sprite name="un_15305819" x='48' y='164' w='23' h='21' texture="UI_SASLOT"/>  <!--guard_lv1-->
+    <sprite name="un_15305820" x='72' y='164' w='23' h='21' texture="UI_SASLOT"/>  <!--guard_lv2-->
+    <sprite name="un_15305821" x='96' y='164' w='23' h='21' texture="UI_SASLOT"/>  <!--guard_lv3-->
+    <sprite name="un_15305822" x='144' y='164' w='23' h='21' texture="UI_SASLOT"/>  <!--speed_1-->
+    <sprite name="un_15305823" x='168' y='164' w='23' h='21' texture="UI_SASLOT"/>  <!--speed_2-->
+    <sprite name="un_15305824" x='192' y='164' w='23' h='21' texture="UI_SASLOT"/>  <!--speed_3-->
+    <sprite name="un_15305827" x='120' y='186' w='23' h='21' texture="UI_SASLOT"/>  <!--AI2-->
+    
+    <!-- 3rd ShotMsg -->
+    <!--  <sprite name="3rd_SpecialShot_1" x='540' y='824' w='240' h='38' texture="UI_Main2"/>  -->
+    <!--head_guard-->
+    <!--  <sprite name="3rd_SpecialShot_2" x='783' y='824' w='240' h='38' texture="UI_Main2"/>  -->
+    <!--heartshot_guard-->
+    <!--  <sprite name="3rd_SpecialShot_3" x='540' y='865' w='240' h='38' texture="UI_Main2"/>  -->
+    <!--crishot_guard-->
+    <!--  <sprite name="3rd_bomb_resistance" x='540' y='906' w='240' h='38' texture="UI_Main2"/>  -->
+    <!--bomb_resistance-->
+    <!--  <sprite name="3rd_state_invalidation" x='783' y='865' w='240' h='38' texture="UI_Main2"/>  -->
+    <!--state_invalidation-->
+
+    <!-- 3rd ShotMsg -->
+    <sprite name="3rd_SpecialShot_1" x='542' y='949' w='63' h='63' texture="UI_Main2"/>
+    <sprite name="3rd_SpecialShot_2" x='607' y='949' w='63' h='63' texture="UI_Main2"/>
+    <sprite name="3rd_SpecialShot_3" x='672' y='949' w='63' h='63' texture="UI_Main2"/>
+    <sprite name="3rd_bomb_resistance_0" x='737' y='949' w='63' h='63' texture="UI_Main2"/>
+    <sprite name="3rd_bomb_resistance_1" x='802' y='949' w='63' h='63' texture="UI_Main2"/>
+    <sprite name="3rd_bomb_resistance_2" x='867' y='949' w='63' h='63' texture="UI_Main2"/>
+    <sprite name="3rd_state_invalidation" x='932' y='949' w='63' h='63' texture="UI_Main2"/>
+
+    <!-- Weapon Large Images -->
+    <sprite name="WPLargeText_06" x="797" y="899" w="32" h="85" texture="UI_Main" />
+    <sprite name="WPLargeText_04" x="830" y="899" w="32" h="85" texture="UI_Main" />
+    <sprite name="WPLargeGauge_06" x="651" y="899" w="72" h="85" texture="UI_Main" />
+    <sprite name="WPLargeGauge_04" x="724" y="899" w="72" h="85" texture="UI_Main" />
+    <sprite name="WPGaugeColor" x="590" y="899" w="60" h="60" texture="UI_Main" />
+
+    <!-- Ping -->
+    <sprite name="Ping_0" x="1" y="705" w="5" h="25" texture="UI_Result" />
+    <sprite name="Ping_1" x="7" y="705" w="5" h="25" texture="UI_Result" />
+    <sprite name="Ping_2" x="13" y="705" w="5" h="25" texture="UI_Result" />
+    <sprite name="Ping_3" x="19" y="705" w="5" h="25" texture="UI_Result" />
+    <sprite name="Ping_4" x="25" y="705" w="5" h="25" texture="UI_Result" />
+    <sprite name="Ping_5" x="31" y="705" w="5" h="25" texture="UI_Result" />
+
+    <!-- Ping -->
+    <sprite name="NAVI_SIMPLE_OPENNING" x='0' y='0' w='1024' h='768' texture="UI_Navi_Start"/>
+
+    <!-- Big Radar -->
+    <sprite name="Bomb_Color" x='479' y='536' w='30' h='32' texture="UI_Main"/>
+    <sprite name="Bomb_Gray_A"  x='510' y='536' w='30' h='32' texture="UI_Main"/>
+    <sprite name="Bomb_Gray_B"  x='541' y='536' w='30' h='32' texture="UI_Main"/>
+    <sprite name="Paint_Blue" x='249' y='567' w='28' h='28' texture="UI_Main2"/>
+    <sprite name="Paint_Red"  x='278' y='567' w='28' h='28' texture="UI_Main2"/>
+    <sprite name="PaintBox_Blue" x='308' y='567' w='29' h='32' texture="UI_Main2"/>
+    <sprite name="PaintBox_Red"  x='338' y='567' w='29' h='32' texture="UI_Main2"/>
+    <sprite name="STEALMODE_MAP_LEGEND" x='369' y='522' w='175' h='118' texture="UI_Main2"/>
+    <sprite name="BOMBMODE_MAP_LEGEND"  x='547' y='522' w='175' h='146' texture="UI_Main2"/>
+    <sprite name="SOCCER_0" x='185' y='818' w='32' h='32' texture="UI_Soccer"/>
+    <sprite name="SOCCER_A" x='218' y='818' w='32' h='32' texture="UI_Soccer"/>
+    <sprite name="SOCCER_B" x='251' y='818' w='32' h='32' texture="UI_Soccer"/>
+
+
+    <!-- CASH MARK -->
+    <sprite name="CASH_MARK" x='72' y='901' w='64' h='64' texture="UI_Main"/>
+    <!-- see sight -->
+    <sprite name="BIGMAP_DIRECTION" x='334' y='766' w='60' h='107' texture="UI_Main"/>
+
+    <sprite name="SHOW_FULL_SIZE_MAP" x='1' y='120' w='57' h='39' texture="UI_PULPnROLL"/>
+
+    <sprite name="GunShootingPGBonus" w='314' h='158' x='339' y='1' texture="UI_Message2"/>
+    <sprite name="GunShootingScoreBonus" w='314' h='158' x='339' y='159' texture="UI_Message2"/>
+    <sprite name="GunShootingTimeBonus" w='314' h='158' x='654' y='159' texture="UI_Message2"/>
+    <sprite name="GunShootingFeverBonus" w='314' h='158' x='651' y='1' texture="UI_Message2"/>
+    <sprite name="GunShootingCrystalHPBonus" w='300' h='160' x='1' y='263' texture="UI_Message"/>
+    <sprite name="GunShootingBulletBonus" w='300' h='160' x='1' y='424' texture="UI_Message"/>
+    <sprite name="GunShootingRecoillessBonus" w='300' h='160' x='2' y='0' texture="UI_Message2"/>
+    <sprite name="GunShooting_QuickKill" x='820' y='915' w='157' h='21' texture="UI_Main2"/>
+    <sprite name="PVEFreezeBonus" w='314' h='158' x='298' y='866' texture="UI_CrossHair"/>
+    <sprite name="WeaponTestTimeBack" x='139' y='904' w='143' h='61' texture="UI_Main"/>
+   
+   
+    <sprite name="PARTSPICKUPMARK_1" x='868' y='925' w='4' h='8' texture="UI_Main"/>
+    <sprite name="PARTSPICKUPMARK_2" x='878' y='925' w='8' h='9' texture="UI_Main"/>
+    <sprite name="PARTSPICKUPMARK_3" x='888' y='925' w='11' h='9' texture="UI_Main"/>
+    <sprite name="PARTSPICKUPMARK_4" x='900' y='925' w='11' h='9' texture="UI_Main"/>
+    <sprite name="PARTSPICKUPMARK_5" x='912' y='925' w='10' h='9' texture="UI_Main"/>
+    <sprite name="PARTSPICKUPMARK_6" x='865' y='936' w='9' h='8' texture="UI_Main"/>
+    <sprite name="PARTSPICKUPMARK_7" x='877' y='936' w='11' h='10' texture="UI_Main"/>
+    <sprite name="PARTSPICKUPMARK_8" x='889' y='936' w='9' h='9' texture="UI_Main"/>
+    <sprite name="PARTSPICKUP_PANNEL" x='411' y='860' w='144' h='100' texture="UI_Main"/>
+    
+
+    
+    <sprite name="PICKUP_GRAPH_9" x='396' y='764' w='126' h='11' texture="UI_Main"/>
+    <sprite name="PICKUP_GRAPH_8" x='396' y='776' w='126' h='11' texture="UI_Main"/>
+    <sprite name="PICKUP_GRAPH_7" x='396' y='788' w='126' h='11' texture="UI_Main"/>
+    <sprite name="PICKUP_GRAPH_6" x='396' y='800' w='126' h='11' texture="UI_Main"/>
+    <sprite name="PICKUP_GRAPH_5" x='396' y='812' w='126' h='11' texture="UI_Main"/>
+    <sprite name="PICKUP_GRAPH_4" x='396' y='824' w='126' h='11' texture="UI_Main"/>
+    <sprite name="PICKUP_GRAPH_3" x='396' y='836' w='126' h='11' texture="UI_Main"/>
+    <sprite name="PICKUP_GRAPH_2" x='396' y='848' w='126' h='11' texture="UI_Main"/>
+    <sprite name="PICKUP_GRAPH_1" x='284' y='946' w='126' h='11' texture="UI_Main"/>
+    <sprite name="PICKUP_GRAPH_0" x='284' y='958' w='126' h='11' texture="UI_Main"/>
+
+    <sprite name="SWITCHWEAPON_OFF"  x='260' y='972' w='58' h='21' texture="UI_QuickSlot"/> 
+    <sprite name="SWITCHWEAPON_100"  x='260' y='906' w='58' h='21' texture="UI_QuickSlot"/> 
+    <sprite name="SWITCHWEAPON_80"  x='260' y='928' w='58' h='21' texture="UI_QuickSlot"/> 
+    <sprite name="SWITCHWEAPON_60"  x='260' y='950' w='58' h='21' texture="UI_QuickSlot"/> 
+    <sprite name="SWITCHWEAPON_50"  x='319' y='906' w='58' h='21' texture="UI_QuickSlot"/> 
+    <sprite name="SWITCHWEAPON_40"  x='319' y='928' w='58' h='21' texture="UI_QuickSlot"/> 
+    <sprite name="SWITCHWEAPON_20"  x='319' y='950' w='58' h='21' texture="UI_QuickSlot"/> 
+    <sprite name="SWITCHWEAPON_BACK"  x='421' y='857' w='68' h='68' texture="UI_QuickSlot"/> 
+
+	<sprite name="SWITCHWEAPON_GAGE_BACK"  x='389' y='998' w='93' h='26' texture="UI_Main"/>  직선게이지 -->
+    <sprite name="SWITCHWEAPON_GAGE_FRONT"  x='388' y='990' w='82' h='7' texture="UI_Main"/> 
+ 
+ <!--   <sprite name="SWITCHWEAPON_GAGE_TEXT"  x='398' y='998' w='93' h='26' texture="UI_Main"/>  직선게이지 -->
+ <!--   <sprite name="SWITCHWEAPON_GAGE"  x='398' y='990' w='1' h='7' texture="UI_Main"/>  게이지그래프, r='471' -->
+   
+    <sprite name="ASSIST_COMPLETE" x="390" y="960" w="133" h="27" texture="UI_Main" />
+
+   <sprite name="ASSIST_HP" 		x="1" y="51" w="98" h="24" texture="UI_Result" />
+   <sprite name="ASSIST_DAMAGE" 	x="1" y="76" w="98" h="24" texture="UI_Result" />
+   <sprite name="ASSIST_AIRSHOT"	x="1" y="101" w="98" h="24" texture="UI_Result" />
+   <sprite name="ASSIST_BOMB_PLANT"	x="1" y="126" w="98" h="24" texture="UI_Result" />
+   <sprite name="ASSIST_BOMB_EXPLO" 	x="1" y="151" w="98" h="24" texture="UI_Result" />
+   <sprite name="ASSIST_BOMB_DESTROY"   x="1" y="176" w="98" h="24" texture="UI_Result" />
+   <sprite name="ASSIST_DYE"		x="1" y="201" w="98" h="24" texture="UI_Result" />
+   <sprite name="ASSIST_PULP"		x="1" y="226" w="98" h="24" texture="UI_Result" />
+   <sprite name="ASSIST_PULP_DESTROY" 	x="1" y="251" w="98" h="24" texture="UI_Result" />
+   <sprite name="ASSIST_OCCUPY" 	x="1" y="276" w="98" h="24" texture="UI_Result" />
+   <sprite name="ASSIST_GOAL" 		x="1" y="301" w="98" h="24" texture="UI_Result" />
+    
+     
+	<sprite name="SENSOR_BOMB_NORMAL"  x="863" y="948" w="64" h="64" texture="UI_Main" />
+	<sprite name="SENSOR_BOMB_LUCOTTO" x="928" y="948" w="64" h="64" texture="UI_Main" />
+
+	<sprite name="HIT_EFFECT" x="964" y="971" w="60" h="53" texture="UI_QuickSlot" />
+
+	<font name="ATTACK_FONT_GREEN" w='27' h='31' texture="UI_QuickSlot"> 
+		<digit0 x='997' y='651' />
+		<digit1 x='997' y='683' />
+		<digit2 x='997' y='715' />
+		<digit3 x='997' y='747' />
+		<digit4 x='997' y='779' />
+		<digit5 x='997' y='811' />
+		<digit6 x='997' y='843' />
+		<digit7 x='997' y='875' />
+		<digit8 x='997' y='907' />
+		<digit9 x='997' y='939' />
+	</font>  
+
+	<font name="ATTACK_FONT_ORANGE" w='27' h='31' texture="UI_QuickSlot"> 
+		<digit0 x='970' y='651' />
+		<digit1 x='970' y='683' />
+		<digit2 x='970' y='715' />
+		<digit3 x='970' y='747' />
+		<digit4 x='970' y='779' />
+		<digit5 x='970' y='811' />
+		<digit6 x='970' y='843' />
+		<digit7 x='970' y='875' />
+		<digit8 x='970' y='907' />
+		<digit9 x='970' y='939' />
+	</font>  
+
+	<font name="ATTACK_FONT_RED" w='27' h='31' texture="UI_QuickSlot"> 
+		<digit0 x='943' y='651' />
+		<digit1 x='943' y='683' />
+		<digit2 x='943' y='715' />
+		<digit3 x='943' y='747' />
+		<digit4 x='943' y='779' />
+		<digit5 x='943' y='811' />
+		<digit6 x='943' y='843' />
+		<digit7 x='943' y='875' />
+		<digit8 x='943' y='907' />
+		<digit9 x='943' y='939' />
+	</font>  
+</UIDEFINE>

@@ -1,0 +1,29 @@
+<UIDEFINE>
+	<bgmfile filename="bgm/bgm_title.mp3"/>
+	<image name="LOGIN_GAMEROOM_BACK" filename="login_back.dds"/>
+	<image name="LOGIN_LOGINBOX" filename="loginwnd.dds"/>
+
+	
+	<msprite name="LOGIN_BACKGROUND" sx="0" sy="0" ex="0" ey="0" l="0" t="0" r="1024" b="768" texture="LOGIN_GAMEROOM_BACK"/>
+	<msprite name="LOGINBOX" sx="0" sy="0" ex="355" ey="480" l="0" t="0" r="315" b="203" texture="LOGIN_LOGINBOX"/>
+	
+	<editbox name="USERID" l="431" t="534" r="562" b="556" linelimit="1" textlimit="17" TCR="255" TCG="255" TCB="255" TCA="255"/>
+	<editbox name="PASSWORD" l="431" t="564" r="637" b="586" linelimit="1" textlimit="24" TCR="255" TCG="255" TCB="255" TCA="255" password="true"/>
+	
+	<checkbox name="ID_SAVE" x="617" y="529" w="25" h="25">
+		<sprite l="0" t="0" r="0" b="0" texture="LOGIN_LOGINBOX"/>
+		<sprite l="316" t="87" r="341" b="112" texture="LOGIN_LOGINBOX"/>
+	</checkbox>
+	<button name="LOGINBTN" x="495" y="650" w="84" h="28">
+		<sprite l="316" t="0" r="400" b="28" texture="LOGIN_LOGINBOX"/>
+		<sprite l="316" t="29" r="400" b="57" texture="LOGIN_LOGINBOX"/>
+		<sprite l="316" t="58" r="400" b="86" texture="LOGIN_LOGINBOX"/>
+	</button>
+	<button name="CLOSEBTN" x="581" y="650" w="84" h="28">
+		<sprite l="401" t="0" r="485" b="28" texture="LOGIN_LOGINBOX"/>
+		<sprite l="401" t="29" r="485" b="57" texture="LOGIN_LOGINBOX"/>
+		<sprite l="401" t="58" r="485" b="86" texture="LOGIN_LOGINBOX"/>
+	</button>
+	
+	<column name="LOGINLOGMESSEGE" x="336" y="612" w="353" h="28" fontsize="13" color="FF000000" format="VCENTER CENTER"/>
+</UIDEFINE>

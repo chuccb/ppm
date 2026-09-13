@@ -1,0 +1,80 @@
+<UIDEFINE>
+	<image name="Tutorial_Book_Back" filename="TUTO_BACK.DDS" />
+	<image name="Back" filename="tuto_basic_back.dds"/>
+	<image name="Basic001" filename="tuto_basic001.dds"/>
+	<image name="Basic002" filename="tuto_basic002.dds"/>
+	<image name="Basic003" filename="tuto_basic003.dds"/>
+	<image name="Basic004" filename="tuto_basic004.dds"/>
+	<image name="TUTO_OPENNING" filename="tutorial_openning.dds"/>
+
+	<msprite name="Tutorial_Book_Back" sx='0' sy='0' ex='0' ey='0' l='0' t='0' r='1024' b='768' texture="Tutorial_Book_Back"/>  
+
+	
+	<msprite name="BACKGROUNDFRAME" sx='220' sy='12' ex='220' ey='12' l='0' t='0' r='583' b='741' texture="Back"/>
+
+	<msprite name="TUTO_OPENNING" sx="0" sy="0" ex="0" ey="0" l="0" t="0" r="1024" b="768" texture="TUTO_OPENNING"/>
+  
+	<button name="PREV" x='143' y='354' w='56' h='56'>
+		<sprite l="584" t="0" r="640" b="56" texture="Back"/>
+		<sprite l="641" t="0" r="697" b="56" texture="Back"/>
+		<sprite l="698" t="0" r="754" b="56" texture="Back"/>
+		<sprite l="755" t="0" r="811" b="56" texture="Back"/>
+	</button>
+
+	<button name="NEXT" x="823" y="355" w="56" h="56">
+		<sprite l="584" t="57" r="640" b="113" texture="Back"/>
+		<sprite l="641" t="57" r="697" b="113" texture="Back"/>
+		<sprite l="698" t="57" r="754" b="113" texture="Back"/>
+	</button>
+
+	
+	<column name="NUMOFBOOKPAGE" x='7'/>
+
+	
+	<column name="BOOK_POS" x='263' y='30'/>
+
+	<msprite name="manga01_01" sx='263' sy='30' ex='263' ey='30' l='0' t='0' r='501' b='177' texture="Basic001"/>
+	<msprite name="manga01_02" sx='263' sy='207' ex='263' ey='207' l='503' t='0' r='1004' b='177' texture="Basic001"/>
+	<msprite name="manga01_03" sx='263' sy='384' ex='263' ey='384' l='0' t='178' r='501' b='355' texture="Basic001"/>
+	<msprite name="manga01_04" sx='263' sy='561' ex='263' ey='561' l='503' t='178' r='1004' b='355' texture="Basic001"/>
+
+	<msprite name="manga02_01" sx='263' sy='30' ex='263' ey='30' l='0' t='712' r='501' b='889' texture="Basic001"/>
+	<msprite name="manga02_02" sx='263' sy='207' ex='263' ey='207' l='503' t='712' r='1004' b='889' texture="Basic001"/>
+	<msprite name="manga02_03" sx='263' sy='384' ex='263' ey='384' l='0' t='0' r='501' b='177'  texture="Basic002"/>
+	<msprite name="manga02_04" sx='263' sy='561' ex='263' ey='561' l='503' t='0' r='1004' b='177'  texture="Basic002"/>
+
+	<msprite name="manga03_01" sx='263' sy='30' ex='263' ey='30' l='0' t='534' r='501' b='711' texture="Basic002"/>
+	<msprite name="manga03_02" sx='263' sy='207' ex='263' ey='207' l='503' t='534' r='1004' b='711' texture="Basic002"/>
+	<msprite name="manga03_03" sx='263' sy='384' ex='263' ey='384' l='0' t='712' r='501' b='889' texture="Basic002"/>
+	<msprite name="manga03_04" sx='263' sy='561' ex='263' ey='561' l='503' t='712' r='1004' b='889' texture="Basic002"/>
+    
+	<msprite name="manga04_01" sx='263' sy='30' ex='263' ey='30' l='0' t='178' r='501' b='355' texture="Basic002"/>
+	<msprite name="manga04_02" sx='263' sy='207' ex='263' ey='207' l='503' t='178' r='1004' b='355' texture="Basic002"/>
+	<msprite name="manga04_03" sx='263' sy='384' ex='263' ey='384' l='0' t='356' r='501' b='533' texture="Basic002"/>
+	<msprite name="manga04_04" sx='263' sy='561' ex='263' ey='561' l='503' t='356' r='1004' b='533' texture="Basic002"/>
+
+	<msprite name="manga05_01" sx='263' sy='30' ex='263' ey='30' l='0' t='0' r='501' b='177'  texture="Basic003"/>
+	<msprite name="manga05_02" sx='263' sy='207' ex='263' ey='207' l='503' t='0' r='1004' b='177'  texture="Basic003"/>
+	<msprite name="manga05_03" sx='263' sy='384' ex='263' ey='384' l='0' t='178' r='501' b='355' texture="Basic003"/>
+	<msprite name="manga05_04" sx='263' sy='561' ex='263' ey='561' l='503' t='178' r='1004' b='355' texture="Basic003"/>
+    
+	<msprite name="manga06_01" sx='263' sy='30' ex='263' ey='30' l='0' t='356' r='501' b='533' texture="Basic003"/>
+	<msprite name="manga06_02" sx='263' sy='207' ex='263' ey='207' l='503' t='356' r='1004' b='533' texture="Basic003"/>
+	<msprite name="manga06_03" sx='263' sy='384' ex='263' ey='384' l='0' t='534' r='501' b='711' texture="Basic003"/>
+	<msprite name="manga06_04" sx='263' sy='561' ex='263' ey='561' l='503' t='534' r='1004' b='711' texture="Basic003"/>
+
+	<msprite name="manga07_01" sx='263' sy='30' ex='263' ey='30' l='0' t='712' r='501' b='889' texture="Basic003"/>
+	<msprite name="manga07_02" sx='263' sy='207' ex='263' ey='207' l='503' t='712' r='1004' b='889' texture="Basic003"/>
+	<msprite name="manga07_03" sx='263' sy='384' ex='263' ey='384' l='0' t='0' r='501' b='177' texture="Basic004"/>
+	<msprite name="manga07_04" sx='263' sy='561' ex='263' ey='561' l='503' t='0' r='1004' b='177' texture="Basic004"/>
+
+	
+	<msprite name="TUTO_SHYOHIN" sx='272' sy='602' ex='272' ey='602' l='584' t='114' r='822' b='192' texture="Back"/> 
+   
+	<button name="BOOK_CLEAR" x="455" y="653" w="49" h="20">
+		<sprite l="584" t="193" r="633" b="213" texture="Back"/>
+		<sprite l="634" t="193" r="683" b="213" texture="Back"/>
+		<sprite l="684" t="193" r="733" b="213" texture="Back"/>
+	</button>
+ 
+</UIDEFINE>

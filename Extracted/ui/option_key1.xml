@@ -1,0 +1,248 @@
+<UIDEFINE>
+	
+	<msprite name="OPTIONKEY_1" sx='202' sy='193' ex='202' ey='193' l='0' t='86' r='16' b='106' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_2" tl='218' tt='193' tr='492' tb='213' l='18' t='86' r='32' b='106' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_3" sx='492' sy='193' ex='492' ey='193' l='34' t='86' r='50' b='106' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_4" tl='202' tt='213' tr='218' tb='565' l='0' t='108' r='16' b='122' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_5" tl='218' tt='213' tr='492' tb='565' l='18' t='108' r='32' b='122' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_6" tl='492' tt='213' tr='508' tb='565' l='34' t='108' r='50' b='122' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_7" sx='202' sy='565' ex='202' ey='565' l='0' t='124' r='16' b='140' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_8" tl='218' tt='565' tr='492' tb='581' l='18' t='124' r='32' b='140' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_9" sx='492' sy='565' ex='492' ey='565' l='34' t='124' r='50' b='140' texture="UI_Popup_1"/>
+
+	<msprite name="OPTIONKEY_10" sx='516' sy='193' ex='516' ey='193' l='0' t='86' r='16' b='106' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_11" tl='532' tt='193' tr='806' tb='213' l='18' t='86' r='32' b='106' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_12" sx='806' sy='193' ex='806' ey='193' l='34' t='86' r='50' b='106' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_13" tl='516' tt='213' tr='532' tb='565' l='0' t='108' r='16' b='122' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_14" tl='532' tt='213' tr='806' tb='565' l='18' t='108' r='32' b='122' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_15" tl='806' tt='213' tr='822' tb='565' l='34' t='108' r='50' b='122' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_16" sx='516' sy='565' ex='516' ey='565' l='0' t='124' r='16' b='140' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_17" tl='532' tt='565' tr='806' tb='581' l='18' t='124' r='32' b='140' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_18" sx='806' sy='565' ex='806' ey='565' l='34' t='124' r='50' b='140' texture="UI_Popup_1"/>
+
+	<msprite name="OPTIONKEY_19" sx='345' sy='222' ex='345' ey='222' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_20" tl='369' tt='222' tr='471' tb='246' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_21" sx='471' sy='222' ex='471' ey='222' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+
+	<msprite name="OPTIONKEY_220" sx='345' sy='258' ex='345' ey='258' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_22" tl='369' tt='258' tr='471' tb='282' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_23" sx='471' sy='258' ex='471' ey='258' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+	
+	<msprite name="OPTIONKEY_24" sx='345' sy='294' ex='345' ey='294' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_25" tl='369' tt='294' tr='471' tb='318' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_26" sx='471' sy='294' ex='471' ey='294' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+
+	<msprite name="OPTIONKEY_27" sx='345' sy='330' ex='345' ey='330' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_28" tl='369' tt='330' tr='471' tb='354' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_29" sx='471' sy='330' ex='471' ey='330' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+
+	<msprite name="OPTIONKEY_30" sx='345' sy='366' ex='345' ey='366' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_31" tl='369' tt='366' tr='471' tb='390' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_32" sx='471' sy='366' ex='471' ey='366' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+
+	<msprite name="OPTIONKEY_33" sx='345' sy='402' ex='345' ey='402' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_34" tl='369' tt='402' tr='471' tb='426' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_35" sx='471' sy='402' ex='471' ey='402' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+
+	<msprite name="OPTIONKEY_36" sx='345' sy='438' ex='345' ey='438' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_37" tl='369' tt='438' tr='471' tb='462' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_38" sx='471' sy='438' ex='471' ey='438' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+
+	<msprite name="OPTIONKEY_39" sx='345' sy='474' ex='345' ey='474' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_40" tl='369' tt='474' tr='471' tb='498' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_41" sx='471' sy='474' ex='471' ey='474' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+
+	<msprite name="OPTIONKEY_42" sx='345' sy='510' ex='345' ey='510' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_43" tl='369' tt='510' tr='471' tb='534' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_44" sx='471' sy='510' ex='471' ey='510' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+
+	<!--emotion-->
+	<msprite name="OPTIONKEY_45" sx='345' sy='546' ex='345' ey='546' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_46" tl='369' tt='546' tr='471' tb='570' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_47" sx='471' sy='546' ex='471' ey='546' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+
+	<msprite name="OPTIONKEY_48" sx='659' sy='222' ex='659' ey='222' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_49" tl='683' tt='222' tr='785' tb='246' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_50" sx='785' sy='222' ex='785' ey='222' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+
+	<msprite name="OPTIONKEY_51" sx='659' sy='250' ex='659' ey='250' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_52" tl='683' tt='250' tr='785' tb='274' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_53" sx='785' sy='250' ex='785' ey='250' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+
+	<msprite name="OPTIONKEY_54" sx='659' sy='278' ex='659' ey='278' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_55" tl='683' tt='278' tr='785' tb='302' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_56" sx='785' sy='278' ex='785' ey='278' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+
+	<msprite name="OPTIONKEY_57" sx='659' sy='306' ex='659' ey='306' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_58" tl='683' tt='306' tr='785' tb='330' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_59" sx='785' sy='306' ex='785' ey='306' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+
+	<msprite name="OPTIONKEY_60" sx='659' sy='334' ex='659' ey='334' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_61" tl='683' tt='334' tr='785' tb='358' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_62" sx='785' sy='334' ex='785' ey='334' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+
+	<msprite name="OPTIONKEY_63" sx='659' sy='362' ex='659' ey='362' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_64" tl='683' tt='362' tr='785' tb='386' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_65" sx='785' sy='362' ex='785' ey='362' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+	
+	<msprite name="OPTIONKEY_66" sx='659' sy='390' ex='659' ey='390' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_67" tl='683' tt='390' tr='785' tb='414' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_68" sx='785' sy='390' ex='785' ey='390' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+	
+	<msprite name="OPTIONKEY_69" sx='659' sy='418' ex='659' ey='418' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_70" tl='683' tt='418' tr='785' tb='442' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_71" sx='785' sy='418' ex='785' ey='418' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+
+	<msprite name="OPTIONKEY_72" sx='659' sy='446' ex='659' ey='446' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_73" tl='683' tt='446' tr='785' tb='470' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_74" sx='785' sy='446' ex='785' ey='446' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+
+	<msprite name="OPTIONKEY_75" sx='659' sy='474' ex='659' ey='474' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_76" tl='683' tt='474' tr='785' tb='498' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_77" sx='785' sy='474' ex='785' ey='474' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+
+	<msprite name="OPTIONKEY_122" sx='659' sy='502' ex='659' ey='502' l='290' t='22' r='314' b='46' texture="UI_Popup_1"/>
+	<ssprite name="OPTIONKEY_123" tl='683' tt='502' tr='785' tb='526' l='316' t='22' r='330' b='46' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_124" sx='785' sy='502' ex='785' ey='502' l='332' t='22' r='348' b='46' texture="UI_Popup_1"/>
+
+	
+	<msprite name="OPTIONKEY_78" sx='226' sy='228' ex='226' ey='228' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_79" sx='226' sy='264' ex='226' ey='264' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_80" sx='226' sy='300' ex='226' ey='300' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_81" sx='226' sy='336' ex='226' ey='336' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_82" sx='226' sy='372' ex='226' ey='372' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_83" sx='226' sy='408' ex='226' ey='408' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_84" sx='226' sy='444' ex='226' ey='444' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_85" sx='226' sy='480' ex='226' ey='480' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_86" sx='226' sy='516' ex='226' ey='516' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+	
+	<msprite name="OPTIONKEY_87" sx='226' sy='552' ex='226' ey='552' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+
+	<msprite name="OPTIONKEY_88" sx='542' sy='228' ex='542' ey='228' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/> 
+	<msprite name="OPTIONKEY_89" sx='542' sy='256' ex='542' ey='256' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_90" sx='542' sy='284' ex='542' ey='284' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_91" sx='542' sy='312' ex='542' ey='312' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_92" sx='542' sy='340' ex='542' ey='340' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_93" sx='542' sy='368' ex='542' ey='368' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_94" sx='542' sy='396' ex='542' ey='396' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_95" sx='542' sy='424' ex='542' ey='424' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_96" sx='542' sy='452' ex='542' ey='452' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>							               
+	<msprite 		     sx='542' sy='480' ex='542' ey='480' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_120" sx='542' sy='508' ex='542' ey='508' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+	
+	
+	<msprite name="OPTIONKEY_97" sx='247' sy='229' ex='247' ey='229' l='361' t='38' r='431' b='48' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_98" sx='247' sy='265' ex='247' ey='265' l='361' t='49' r='431' b='59' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_99" sx='247' sy='301' ex='247' ey='301' l='361' t='60' r='431' b='70' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_100" sx='247' sy='337' ex='247' ey='337' l='361' t='71' r='431' b='81' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_101" sx='247' sy='373' ex='247' ey='373' l='361' t='82' r='431' b='92' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_102" sx='247' sy='409' ex='247' ey='409' l='361' t='93' r='431' b='103' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_103" sx='247' sy='445' ex='247' ey='445' l='361' t='104' r='431' b='114' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_104" sx='247' sy='481' ex='247' ey='481' l='361' t='115' r='431' b='125' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_105" sx='247' sy='517' ex='247' ey='517' l='361' t='126' r='431' b='136' texture="UI_Popup_1"/>	
+	<msprite name="OPTIONKEY_106" sx='247' sy='553' ex='247' ey='553'  l='342' t='864' r='407' b='872' texture="UI_Popup_1"/>
+
+	
+	<msprite name="OPTIONKEY_107" sx='562' sy='229' ex='562' ey='229' l='290' t='47' r='360' b='57' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_108" sx='562' sy='257' ex='562' ey='257' l='290' t='58' r='360' b='68' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_109" sx='562' sy='285' ex='562' ey='285' l='290' t='69' r='360' b='79' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_110" sx='562' sy='313' ex='562' ey='313' l='290' t='80' r='360' b='90' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_111" sx='562' sy='341' ex='562' ey='341' l='290' t='91' r='360' b='101' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_112" sx='562' sy='369' ex='562' ey='369' l='290' t='102' r='360' b='112' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_113" sx='562' sy='397' ex='562' ey='397' l='290' t='113' r='360' b='123' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_114" sx='562' sy='425' ex='562' ey='425' l='290' t='124' r='360' b='134' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_115" sx='562' sy='453' ex='562' ey='453' l='290' t='135' r='360' b='145' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_116" sx='562' sy='481' ex='562' ey='481' l='290' t='146' r='360' b='156' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_121" sx='562' sy='509' ex='562' ey='509' l='219' t='47' r='289' b='57' texture="UI_Popup_1"/>
+
+	<msprite name="OPTIONKEY_117" sx='213' sy='197' ex='213' ey='197' l='432' t='26' r='484' b='38' texture="UI_Popup_1"/>
+	<msprite name="OPTIONKEY_118" sx='527' sy='197' ex='527' ey='197' l='432' t='39' r='484' b='51' texture="UI_Popup_1"/>
+
+	<keys name="movef"		l='345' t='222' r='488' b='246'>
+		<sprite l='154' t='201' r='297' b='225' texture="UI_Popup_1"/>
+		<sprite l='154' t='226' r='297' b='250' texture="UI_Popup_1"/>
+	</keys>
+	
+	<keys name="moveb"		l='345' t='258' r='488' b='282'>
+		<sprite l='154' t='201' r='297' b='225' texture="UI_Popup_1"/>
+		<sprite l='154' t='226' r='297' b='250' texture="UI_Popup_1"/>
+	</keys>
+	<keys name="movel"		l='345' t='294' r='488' b='318'>
+		<sprite l='154' t='201' r='297' b='225' texture="UI_Popup_1"/>
+		<sprite l='154' t='226' r='297' b='250' texture="UI_Popup_1"/>
+	</keys>	
+	<keys name="mover"		l='345' t='330' r='488' b='354'>
+		<sprite l='154' t='201' r='297' b='225' texture="UI_Popup_1"/>
+		<sprite l='154' t='226' r='297' b='250' texture="UI_Popup_1"/>
+	</keys>	
+	<keys name="sit"			l='345' t='366' r='488' b='390'>
+		<sprite l='154' t='201' r='297' b='225' texture="UI_Popup_1"/>
+		<sprite l='154' t='226' r='297' b='250' texture="UI_Popup_1"/>
+	</keys>	
+	<keys name="walk"			l='345' t='402' r='488' b='426'>
+		<sprite l='154' t='201' r='297' b='225' texture="UI_Popup_1"/>
+		<sprite l='154' t='226' r='297' b='250' texture="UI_Popup_1"/>
+	</keys>	
+	<keys name="jump"			l='345' t='438' r='488' b='462'>
+		<sprite l='154' t='201' r='297' b='225' texture="UI_Popup_1"/>
+		<sprite l='154' t='226' r='297' b='250' texture="UI_Popup_1"/>
+	</keys>	
+	<keys name="sensiup"	l='345' t='474' r='488' b='498'>
+		<sprite l='154' t='201' r='297' b='225' texture="UI_Popup_1"/>
+		<sprite l='154' t='226' r='297' b='250' texture="UI_Popup_1"/>
+	</keys>	
+	<keys name="sensidn"	l='345' t='510' r='488' b='534'>
+		<sprite l='154' t='201' r='297' b='225' texture="UI_Popup_1"/>
+		<sprite l='154' t='226' r='297' b='250' texture="UI_Popup_1"/>
+	</keys>	
+	<keys name="Emotion" l="345" t="546" r="488" b="570">
+		<sprite l="154" t="201" r="297" b="225" texture="UI_Popup_1"/>
+		<sprite l="154" t="226" r="297" b="250" texture="UI_Popup_1"/>
+	</keys>	
+	
+	<keys name="MainWeapon"		l='659' t='222' r='802' b='246'>
+		<sprite l='154' t='201' r='297' b='225' texture="UI_Popup_1"/>
+		<sprite l='154' t='226' r='297' b='250' texture="UI_Popup_1"/>
+	</keys>
+	<keys name="SubWeapon"		l='659' t='250' r='802' b='274'>
+		<sprite l='154' t='201' r='297' b='225' texture="UI_Popup_1"/>
+		<sprite l='154' t='226' r='297' b='250' texture="UI_Popup_1"/>
+	</keys>
+	<keys name="MeleeWeapon"	l='659' t='278' r='802' b='302'>
+		<sprite l='154' t='201' r='297' b='225' texture="UI_Popup_1"/>
+		<sprite l='154' t='226' r='297' b='250' texture="UI_Popup_1"/>
+	</keys>	
+	<keys name="ThrowWeapon"	l='659' t='306' r='802' b='330'>
+		<sprite l='154' t='201' r='297' b='225' texture="UI_Popup_1"/>
+		<sprite l='154' t='226' r='297' b='250' texture="UI_Popup_1"/>
+	</keys>	
+	<keys name="BombWeapon"		l='659' t='334' r='802' b='358'>
+		<sprite l='154' t='201' r='297' b='225' texture="UI_Popup_1"/>
+		<sprite l='154' t='226' r='297' b='250' texture="UI_Popup_1"/>
+	</keys>	
+	<keys name="BombDefuse"		l='659' t='362' r='802' b='386'>
+		<sprite l='154' t='201' r='297' b='225' texture="UI_Popup_1"/>
+		<sprite l='154' t='226' r='297' b='250' texture="UI_Popup_1"/>
+	</keys>	
+	<keys name="Reload"		l='659' t='390' r='802' b='414'>
+		<sprite l='154' t='201' r='297' b='225' texture="UI_Popup_1"/>
+		<sprite l='154' t='226' r='297' b='250' texture="UI_Popup_1"/>
+	</keys>	
+	<keys name="QuickChange"	l='659' t='418' r='802' b='442'>
+		<sprite l='154' t='201' r='297' b='225' texture="UI_Popup_1"/>
+		<sprite l='154' t='226' r='297' b='250' texture="UI_Popup_1"/>
+	</keys>	
+	<keys name="ChangeShotMode"	l='659' t='446' r='802' b='470'>
+		<sprite l='154' t='201' r='297' b='225' texture="UI_Popup_1"/>
+		<sprite l='154' t='226' r='297' b='250' texture="UI_Popup_1"/>
+	</keys>	
+	<keys name="OpenBackPack"	l='659' t='474' r='802' b='498'>
+		<sprite l='154' t='201' r='297' b='225' texture="UI_Popup_1"/>
+		<sprite l='154' t='226' r='297' b='250' texture="UI_Popup_1"/>
+	</keys>	
+	<keys name="SwitchWeapon"	l='659' t='502' r='802' b='526'>
+		<sprite l='154' t='201' r='297' b='225' texture="UI_Popup_1"/>
+		<sprite l='154' t='226' r='297' b='250' texture="UI_Popup_1"/>
+	</keys>	
+
+</UIDEFINE>

@@ -1,0 +1,353 @@
+﻿<UIDEFINE>
+	<image name="Mix_Skill_Combi_Store2" filename="store_02.DDS"/>
+  
+	<rect name="INFOIMAGE" l="483" t="554" r="639" b="673"/> 
+	<rect name="INFONAME" l="483" t="554" r="746" b="577"/> 
+	<rect name="INFOEXPLAIN" l="757" t="558" r="978" b="669"/> 
+
+	<msprite name="ICON_SPEED" sx='200' sy='225' ex='200' ey='225' l='1' t='614' r='20' b='635' texture="UI_Popup_1"/>
+  	<msprite name="ICON_AGILE" sx='200' sy='225' ex='200' ey='225' l='1' t='636' r='20' b='657' texture="UI_Popup_1"/>
+  	<msprite name="ICON_SPIRIT" sx='200' sy='225' ex='200' ey='225' l='1' t='592' r='20' b='613' texture="UI_Popup_1"/>
+  	<msprite name="ICON_DEFENCE" sx='200' sy='225' ex='200' ey='225' l='1' t='658' r='20' b='679' texture="UI_Popup_1"/>
+  	<msprite name="ICON_CONCENTRATION" sx='200' sy='225' ex='200' ey='225' l='1' t='680' r='20' b='701' texture="UI_Popup_1"/>
+  	<msprite name="ICON_PLUS" sx='200' sy='225' ex='200' ey='225' l='1' t='702' r='20' b='723' texture="UI_Popup_1"/>
+
+  	<msprite name="RARE1" sx='200' sy='215' ex='200' ey='230' l='25' t='592' r='56' b='603' texture="UI_Popup_1"/>
+  	<msprite name="RARE2" sx='200' sy='215' ex='200' ey='230' l='25' t='604' r='56' b='615' texture="UI_Popup_1"/>
+  	<msprite name="RARE3" sx='200' sy='215' ex='200' ey='230' l='25' t='616' r='56' b='627' texture="UI_Popup_1"/>
+  	<msprite name="RARE4" sx='200' sy='215' ex='200' ey='230' l='25' t='628' r='56' b='639' texture="UI_Popup_1"/>
+  	<msprite name="RARE5" sx='200' sy='215' ex='200' ey='230' l='25' t='640' r='56' b='651' texture="UI_Popup_1"/>
+  	<msprite name="RARE6" sx='200' sy='215' ex='200' ey='230' l='25' t='652' r='56' b='663' texture="UI_Popup_1"/>
+  	<msprite name="RARE7" sx='200' sy='215' ex='200' ey='230' l='25' t='664' r='56' b='675' texture="UI_Popup_1"/>
+  	<msprite name="RARE8" sx='200' sy='215' ex='200' ey='230' l='25' t='676' r='56' b='687' texture="UI_Popup_1"/>
+  	<msprite name="RARE9" sx='200' sy='215' ex='200' ey='230' l='25' t='688' r='56' b='699' texture="UI_Popup_1"/>
+  
+	
+
+  	<msprite name="Mix_Skill_Combi_L" sx='90' sy='33' ex='90' ey='33'   l='0' t='0' r='365' b='722'   texture="Mix_Store04"/> 
+	<msprite name="Mix_Skill_Combi_R" sx="461" sy="33" ex="461" ey="33" l="366" t="0" r="912" b="722" texture="Mix_Store01"/>
+
+	
+	<msprite name="BACK_RAIR_DOWN" 	 sx='101' sy='94' ex='101' ey='94' l='0' t='0' r='343' b='499'  texture="Mix_Store05"/>		
+ 	<msprite name="BACK_RAIR_ABILIY" sx='101' sy='94' ex='101' ey='94' l='344' t='0' r='687' b='499'  texture="Mix_Store05"/>
+	<msprite name="BACK_RAIR_UP"	 sx='101' sy='94' ex='101' ey='94' l='0' t='500' r='343' b='999' texture="Mix_Store05"/>	
+
+    	
+    	<msprite name="Mix_Skill_Combi_ARROW" sx='0' sy='0' ex='180' ey='258' l='0' t='740' r='183' b='922' texture="Mix_Store04"/>
+    	<msprite name="Mix_Skill_Combi_GRADATION" sx='0' sy='0' ex='180' ey='258' l='184' t='740' r='367' b='922' texture="Mix_Store04"/>  
+  	
+ 
+	
+  	<msprite name="Mix_Skill_Combi_MIX"  sx='0' sy='0' ex='191' ey='108' l='366' t='109' r='528' b='254' texture="Mix_Store04"/>
+	<msprite name="Mix_Skill_Combi_STRONG"  sx='0' sy='0' ex='230' ey='286' l='366' t='0' r='450' b='108' texture="Mix_Store04"/>
+	<msprite name="Mix_Skill_Combi_SLOT1"  sx='0' sy='0' ex='107' ey='440' l='366' t='255' r='528' b='398' texture="Mix_Store04"/>
+  	<msprite name="Mix_Skill_Combi_SLOT2"  sx='0' sy='0' ex='275' ey='440' l='366' t='255' r='528' b='398' texture="Mix_Store04"/>
+
+
+
+	
+	<msprite name="GAGE_BACK" sx='320' sy='116' ex='320' ey='116' l='451' t='0' r='485' b='99' texture="Mix_Store04"/>
+	<msprite name="GAGE_5" sx='320' sy='210' ex='320' ey='210' l='486' t='94' r='520' b='99' texture="Mix_Store04"/>
+	<msprite name="GAGE_10" sx='320' sy='206' ex='320' ey='206' l='486' t='90' r='520' b='99' texture="Mix_Store04"/>
+	<msprite name="GAGE_15" sx='320' sy='202' ex='320' ey='202' l='486' t='86' r='520' b='99' texture="Mix_Store04"/>
+	<msprite name="GAGE_20" sx='320' sy='198' ex='320' ey='198' l='486' t='82' r='520' b='99' texture="Mix_Store04"/>
+	<msprite name="GAGE_25" sx='320' sy='194' ex='320' ey='194' l='486' t='78' r='520' b='99' texture="Mix_Store04"/>
+	<msprite name="GAGE_30" sx='320' sy='190' ex='320' ey='190' l='486' t='74' r='520' b='99' texture="Mix_Store04"/>
+	<msprite name="GAGE_35" sx='320' sy='186' ex='320' ey='186' l='486' t='70' r='520' b='99' texture="Mix_Store04"/>
+	<msprite name="GAGE_40" sx='320' sy='182' ex='320' ey='182' l='486' t='66' r='520' b='99' texture="Mix_Store04"/>
+	<msprite name="GAGE_45" sx='320' sy='178' ex='320' ey='178' l='486' t='62' r='520' b='99' texture="Mix_Store04"/>
+	<msprite name="GAGE_50" sx='320' sy='174' ex='320' ey='174' l='486' t='58' r='520' b='99' texture="Mix_Store04"/>
+	<msprite name="GAGE_55" sx='320' sy='170' ex='320' ey='170' l='486' t='54' r='520' b='99' texture="Mix_Store04"/>
+	<msprite name="GAGE_60" sx='320' sy='166' ex='320' ey='166' l='486' t='50' r='520' b='99' texture="Mix_Store04"/>
+	<msprite name="GAGE_65" sx='320' sy='162' ex='320' ey='162' l='486' t='46' r='520' b='99' texture="Mix_Store04"/>
+	<msprite name="GAGE_70" sx='320' sy='158' ex='320' ey='158' l='486' t='42' r='520' b='99' texture="Mix_Store04"/>
+	<msprite name="GAGE_75" sx='320' sy='154' ex='320' ey='154' l='486' t='38' r='520' b='99' texture="Mix_Store04"/>
+	<msprite name="GAGE_80" sx='320' sy='150' ex='320' ey='150' l='486' t='34' r='520' b='99' texture="Mix_Store04"/>
+	<msprite name="GAGE_85" sx='320' sy='146' ex='320' ey='146' l='486' t='30' r='520' b='99' texture="Mix_Store04"/>
+	<msprite name="GAGE_90" sx='320' sy='142' ex='320' ey='142' l='486' t='26' r='520' b='99' texture="Mix_Store04"/>
+	<msprite name="GAGE_95" sx='320' sy='138' ex='320' ey='138' l='486' t='22' r='520' b='99' texture="Mix_Store04"/>
+	<msprite name="GAGE_100" sx='320' sy='116' ex='320' ey='116' l='486' t='0' r='520' b='99' texture="Mix_Store04"/>
+
+	
+	<msprite name="COMPOSE_DISABLE" sx='0' sy='0' ex='229' ey='135' l='366' t='616' r='452' b='694' texture="Mix_Store04"/>
+	<msprite name="BTN_CREATE_NEWSKILLCOMBI_DISABLE" sx='0' sy='0' ex='876' ey='700' l='366' t='540' r='482' b='586' texture="Mix_Store04"/>
+	<msprite name="TEXT_COMPOSE_DISABLE" sx='0' sy='0' ex='127' ey='264' l='0' t='723' r='297' b='739' texture="Mix_Store04"/>
+  
+	
+  	<NEWSKILLCOMBISYS name="NEWSKILLCOMBI_COMBI_1">
+		<slot name="slot1" x='156' y='474' w='64' h='64'>
+			<sprite l='872' t='131' r='936' b='194' texture="UI_Popup_1"/>
+			<sprite l='937' t='0' r='1001' b='64' texture="UI_Popup_1"/>
+			<sprite l='1' t='614' r='20' b='635' texture="UI_Popup_1"/>
+			<sprite l='1' t='636' r='20' b='657' texture="UI_Popup_1"/>
+			<sprite l='1' t='592' r='20' b='613' texture="UI_Popup_1"/>
+			<sprite l='1' t='658' r='20' b='679' texture="UI_Popup_1"/>
+			<sprite l='1' t='680' r='20' b='701' texture="UI_Popup_1"/>
+			<sprite l='1' t='702' r='20' b='723' texture="UI_Popup_1"/>
+      			<sprite l='25' t='592' r='56' b='603' texture="UI_Popup_1"/>
+		      	<sprite l='25' t='604' r='56' b='615' texture="UI_Popup_1"/>
+      			<sprite l='25' t='616' r='56' b='627' texture="UI_Popup_1"/>
+      			<sprite l='25' t='628' r='56' b='639' texture="UI_Popup_1"/>
+      			<sprite l='25' t='640' r='56' b='651' texture="UI_Popup_1"/>
+      			<sprite l='25' t='652' r='56' b='663' texture="UI_Popup_1"/>
+      			<sprite l='25' t='664' r='56' b='675' texture="UI_Popup_1"/>
+      			<sprite l='25' t='676' r='56' b='687' texture="UI_Popup_1"/>
+      			<sprite l='25' t='688' r='56' b='699' texture="UI_Popup_1"/>
+    		</slot>
+  	</NEWSKILLCOMBISYS>
+  	<NEWSKILLCOMBISYS name="NEWSKILLCOMBI_COMBI_2">
+    		<slot name="slot2" x='324' y='474' w='64' h='64'>
+      			<sprite l='872' t='131' r='936' b='194' texture="UI_Popup_1"/>
+      			<sprite l='937' t='0' r='1001' b='64' texture="UI_Popup_1"/>
+      			<sprite l='1' t='614' r='20' b='635' texture="UI_Popup_1"/>
+      			<sprite l='1' t='636' r='20' b='657' texture="UI_Popup_1"/>
+     			<sprite l='1' t='592' r='20' b='613' texture="UI_Popup_1"/>
+      			<sprite l='1' t='658' r='20' b='679' texture="UI_Popup_1"/>
+      			<sprite l='1' t='680' r='20' b='701' texture="UI_Popup_1"/>
+      			<sprite l='1' t='702' r='20' b='723' texture="UI_Popup_1"/>     
+      			<sprite l='25' t='592' r='56' b='603' texture="UI_Popup_1"/>
+      			<sprite l='25' t='604' r='56' b='615' texture="UI_Popup_1"/>
+      			<sprite l='25' t='616' r='56' b='627' texture="UI_Popup_1"/>
+      			<sprite l='25' t='628' r='56' b='639' texture="UI_Popup_1"/>
+      			<sprite l='25' t='640' r='56' b='651' texture="UI_Popup_1"/>
+      			<sprite l='25' t='652' r='56' b='663' texture="UI_Popup_1"/>
+      			<sprite l='25' t='664' r='56' b='675' texture="UI_Popup_1"/>
+      			<sprite l='25' t='676' r='56' b='687' texture="UI_Popup_1"/>
+      			<sprite l='25' t='688' r='56' b='699' texture="UI_Popup_1"/>      
+		</slot>	
+	</NEWSKILLCOMBISYS>
+	<NEWSKILLCOMBISYS name="NEWSKILLCOMBI_COMBI_STRENGTH">
+		<slot name="slot1" x='241' y='321' w='64' h='64'>
+			<sprite l='872' t='131' r='936' b='194' texture="UI_Popup_1"/>
+			<sprite l='937' t='0' r='1001' b='64' texture="UI_Popup_1"/>			
+		</slot>
+	</NEWSKILLCOMBISYS>	
+
+
+	<NEWSKILLCOMBISYSSLOT name="NEWSKILLCOMBISYSSLOT">		
+		<template>			
+			<column name="NAME" x="78" y="7"/>
+			<sprite name="Mix_Skill_MOUSEOVER"   l="0" t="796" r="237" b="872"  texture="Mix_Store01"/> 
+			<sprite name="Mix_Skill_MOUSECLICK"  l="0" t="873" r="237" b="949"  texture="Mix_Store01"/>
+
+			<sprite name="Mix_Skill_CHOICE"     l="644" t="518" r="708" b="582" texture="UI_Button"/>
+			<sprite name="Mix_Skill_IN_MY_BOX"  l="384" t="518" r="448" b="582" texture="UI_Button"/>	
+			<sprite name="Mix_Skill_USE_NOW"    l="449" t="518" r="513" b="582" texture="UI_Button"/>	
+
+			
+			<sprite l='1' t='614' r='20' b='635' texture="UI_Popup_1"/>
+			<sprite l='1' t='636' r='20' b='657' texture="UI_Popup_1"/>
+			<sprite l='1' t='592' r='20' b='613' texture="UI_Popup_1"/>
+			<sprite l='1' t='658' r='20' b='679' texture="UI_Popup_1"/>
+			<sprite l='1' t='680' r='20' b='701' texture="UI_Popup_1"/>
+			<sprite l='1' t='702' r='20' b='723' texture="UI_Popup_1"/>
+
+			
+      			<sprite l='25' t='592' r='56' b='603' texture="UI_Popup_1"/>
+      			<sprite l='25' t='604' r='56' b='615' texture="UI_Popup_1"/>
+      			<sprite l='25' t='616' r='56' b='627' texture="UI_Popup_1"/>
+      			<sprite l='25' t='628' r='56' b='639' texture="UI_Popup_1"/>
+      			<sprite l='25' t='640' r='56' b='651' texture="UI_Popup_1"/>
+      			<sprite l='25' t='652' r='56' b='663' texture="UI_Popup_1"/>
+      			<sprite l='25' t='664' r='56' b='675' texture="UI_Popup_1"/>
+      			<sprite l='25' t='676' r='56' b='687' texture="UI_Popup_1"/>
+      			<sprite l='25' t='688' r='56' b='699' texture="UI_Popup_1"/>      
+
+		
+      			<sprite l='0' t='766' r='159' b='795' texture="Mix_Store01"/>  	
+		</template>
+		
+		<eventrect name="SCROLL_RECT" x="483" y="158" w="474" h="384"/>
+		<slot name="slot1"  x="483" y="158" w="237" h="76"/>
+		<slot name="slot2"  x="721" y="158" w="237" h="76"/>
+		<slot name="slot3"  x="483" y="235" w="237" h="76"/>
+		<slot name="slot4"  x="721" y="235" w="237" h="76"/>
+		<slot name="slot5"  x="483" y="312" w="237" h="76"/>
+		<slot name="slot6"  x="721" y="312" w="237" h="76"/>
+		<slot name="slot7"  x="483" y="389" w="237" h="76"/>
+		<slot name="slot8"  x="721" y="389" w="237" h="76"/>
+		<slot name="slot9"  x="483" y="466" w="237" h="76"/>
+		<slot name="slot10" x="721" y="466" w="237" h="76"/>
+
+		<button name="UP" x="962" y="158" w="23" h="28">
+			<sprite l="258" t="461" r="281" b="489" texture="UI_Button"/>
+			<sprite l="282" t="461" r="305" b="489" texture="UI_Button"/>
+			<sprite l="306" t="461" r="329" b="489" texture="UI_Button"/>
+		</button>
+		<button name="DN" x="962" y="514" w="23" h="28">
+			<sprite l="258" t="490" r="281" b="518" texture="UI_Button"/>
+			<sprite l="282" t="490" r="305" b="518" texture="UI_Button"/>
+			<sprite l="306" t="490" r="329" b="518" texture="UI_Button"/>
+		</button>   
+	</NEWSKILLCOMBISYSSLOT>
+
+	 
+	<button name="BTN_CREATE_NEWSKILLCOMBI" x='876' y='700' w='116' h='46'>
+		<sprite l='366' t='399' r='482' b='445' texture="Mix_Store04"/>
+		<sprite l='366' t='446' r='482' b='492' texture="Mix_Store04"/>
+		<sprite l='366' t='493' r='482' b='539' texture="Mix_Store04"/>
+	</button>	
+
+			
+	<button name="BTN_NEWSKILL_HEAD" x="476" y="42" w="83" h="34">
+		<sprite l='348' t='828' r='431' b='862' texture="Mix_Store01"/>
+		<sprite l='348' t='863' r='431' b='897' texture="Mix_Store01"/>
+		<sprite l='348' t='898' r='431' b='932' texture="Mix_Store01"/>
+		<sprite l='348' t='863' r='431' b='897' texture="Mix_Store01"/>
+	</button>
+	<button name="BTN_NEWSKILL_CLOTH_UP" x="562" y="42" w="83" h="34">
+    		<sprite l="684" t="723" r="767" b="757" texture="Mix_Store01" /> 
+		<sprite l="684" t="758" r="767" b="792" texture="Mix_Store01" />
+		<sprite l="684" t="793" r="767" b="827" texture="Mix_Store01" />
+		<sprite l="684" t="758" r="767" b="792" texture="Mix_Store01" />
+  	</button>
+  	<button name="BTN_NEWSKILL_CLOTH_DOWN" x="648" y="42" w="83" h="34">
+      		<sprite l="768" t="723" r="851" b="757" texture="Mix_Store01" /> 
+		<sprite l="768" t="758" r="851" b="792" texture="Mix_Store01" />
+		<sprite l="768" t="793" r="851" b="827" texture="Mix_Store01" />
+		<sprite l="768" t="758" r="851" b="792" texture="Mix_Store01" />
+   	</button>
+  	<button name="BTN_NEWSKILL_SHOES" x="734" y="42" w="83" h="34">
+      		<sprite l="852" t="723" r="935" b="757" texture="Mix_Store01" /> 
+		<sprite l="852" t="758" r="935" b="792" texture="Mix_Store01" />
+		<sprite l="852" t="793" r="935" b="827" texture="Mix_Store01" />
+		<sprite l="852" t="758" r="935" b="792" texture="Mix_Store01" />
+    	</button>
+	<button name="BTN_NEWSKILL_SET" x="820" y="42" w="83" h="34">
+    		<sprite l='432' t='828' r='515' b='862' texture="Mix_Store01"/>
+		<sprite l='432' t='863' r='515' b='897' texture="Mix_Store01"/>
+		<sprite l='432' t='898' r='515' b='932' texture="Mix_Store01"/>
+		<sprite l='432' t='863' r='515' b='897' texture="Mix_Store01"/>
+  	</button>
+		
+	<button name="BTN_NEWSKILL_STRENTH"  x="906" y="42" w="83" h="34">
+    		<sprite l='264' t='968' r='347' b='1002' texture="Mix_Store01"/>
+		<sprite l='348' t='968' r='431' b='1002' texture="Mix_Store01"/>
+		<sprite l='432' t='968' r='515' b='1002' texture="Mix_Store01"/>
+		<sprite l='348' t='968' r='431' b='1002' texture="Mix_Store01"/>
+  	</button>
+
+	<msprite sx='476' sy='91' ex='476' ey='91' l='366' t='587' r='459' b='615' texture="Mix_Store04"/>
+
+	<tab name="NSKILL_SORTTYPE" count='6'>
+    		<page name="NSKILL_DEFAULT_SORT" x='476' y='91' default='true'>
+	      		<sprite l='0' t='879' r='63' b='909' texture="Mix_Skill_Combi_Store2"/>
+			      	<msprite sx='476' sy='91' ex='476' ey='91' l='0' t='910' r='63' b='940' texture="Mix_Skill_Combi_Store2"/>
+			      	<msprite sx='540' sy='91' ex='540' ey='91' l='64' t='910' r='127' b='940' texture="Mix_Skill_Combi_Store2"/>
+			      	<msprite sx='604' sy='91' ex='604' ey='91' l='128' t='910' r='191' b='940' texture="Mix_Skill_Combi_Store2"/>
+			      	<msprite sx='668' sy='91' ex='668' ey='91' l='192' t='910' r='255' b='940' texture="Mix_Skill_Combi_Store2"/>
+			      	<msprite sx='732' sy='91' ex='732' ey='91' l='256' t='910' r='319' b='940' texture="Mix_Skill_Combi_Store2"/>
+            			<msprite sx='796' sy='91' ex='796' ey='91' l='320' t='910' r='383' b='940' texture="Mix_Skill_Combi_Store2"/>
+    		</page>
+    		<page name="NSKILL_SPEED_SORT" x='540' y='91' default='true'>
+			<sprite l='64' t='879' r='127' b='909' texture="Mix_Skill_Combi_Store2"/>
+          		    	<msprite sx='476' sy='91' ex='476' ey='91' l='0' t='910' r='63' b='940' texture="Mix_Skill_Combi_Store2"/>
+			      	<msprite sx='540' sy='91' ex='540' ey='91' l='64' t='910' r='127' b='940' texture="Mix_Skill_Combi_Store2"/>
+			      	<msprite sx='604' sy='91' ex='604' ey='91' l='128' t='910' r='191' b='940' texture="Mix_Skill_Combi_Store2"/>
+			      	<msprite sx='668' sy='91' ex='668' ey='91' l='192' t='910' r='255' b='940' texture="Mix_Skill_Combi_Store2"/>
+			      	<msprite sx='732' sy='91' ex='732' ey='91' l='256' t='910' r='319' b='940' texture="Mix_Skill_Combi_Store2"/>
+            			<msprite sx='796' sy='91' ex='796' ey='91' l='320' t='910' r='383' b='940' texture="Mix_Skill_Combi_Store2"/>
+        	</page>
+		<page name="NSKILL_AGILE_SORT" x='604' y='91' default='true'>
+      		    	<sprite l='128' t='879' r='191' b='909' texture="Mix_Skill_Combi_Store2"/>
+      		    		<msprite sx='476' sy='91' ex='476' ey='91' l='0' t='910' r='63' b='940' texture="Mix_Skill_Combi_Store2"/>
+			      	<msprite sx='540' sy='91' ex='540' ey='91' l='64' t='910' r='127' b='940' texture="Mix_Skill_Combi_Store2"/>
+			      	<msprite sx='604' sy='91' ex='604' ey='91' l='128' t='910' r='191' b='940' texture="Mix_Skill_Combi_Store2"/>
+			      	<msprite sx='668' sy='91' ex='668' ey='91' l='192' t='910' r='255' b='940' texture="Mix_Skill_Combi_Store2"/>
+			      	<msprite sx='732' sy='91' ex='732' ey='91' l='256' t='910' r='319' b='940' texture="Mix_Skill_Combi_Store2"/>
+            			<msprite sx='796' sy='91' ex='796' ey='91' l='320' t='910' r='383' b='940' texture="Mix_Skill_Combi_Store2"/>
+    		</page>
+		<page name="NSKILL_SPIRIT_SORT" x='668' y='91' default='true'>
+      		    	<sprite l='192' t='879' r='255' b='909' texture="Mix_Skill_Combi_Store2"/>
+      		    		<msprite sx='476' sy='91' ex='476' ey='91' l='0' t='910' r='63' b='940' texture="Mix_Skill_Combi_Store2"/>
+			      	<msprite sx='540' sy='91' ex='540' ey='91' l='64' t='910' r='127' b='940' texture="Mix_Skill_Combi_Store2"/>
+			      	<msprite sx='604' sy='91' ex='604' ey='91' l='128' t='910' r='191' b='940' texture="Mix_Skill_Combi_Store2"/>
+			      	<msprite sx='668' sy='91' ex='668' ey='91' l='192' t='910' r='255' b='940' texture="Mix_Skill_Combi_Store2"/>
+			      	<msprite sx='732' sy='91' ex='732' ey='91' l='256' t='910' r='319' b='940' texture="Mix_Skill_Combi_Store2"/>
+            			<msprite sx='796' sy='91' ex='796' ey='91' l='320' t='910' r='383' b='940' texture="Mix_Skill_Combi_Store2"/>
+    		</page>
+		<page name="NSKILL_DEFENCE_SORT" x='732' y='91' default='true'>
+      		    	<sprite l='256' t='879' r='319' b='909' texture="Mix_Skill_Combi_Store2"/>
+      		    		<msprite sx='476' sy='91' ex='476' ey='91' l='0' t='910' r='63' b='940' texture="Mix_Skill_Combi_Store2"/>
+			      	<msprite sx='540' sy='91' ex='540' ey='91' l='64' t='910' r='127' b='940' texture="Mix_Skill_Combi_Store2"/>
+			      	<msprite sx='604' sy='91' ex='604' ey='91' l='128' t='910' r='191' b='940' texture="Mix_Skill_Combi_Store2"/>
+			      	<msprite sx='668' sy='91' ex='668' ey='91' l='192' t='910' r='255' b='940' texture="Mix_Skill_Combi_Store2"/>
+			      	<msprite sx='732' sy='91' ex='732' ey='91' l='256' t='910' r='319' b='940' texture="Mix_Skill_Combi_Store2"/>
+            			<msprite sx='796' sy='91' ex='796' ey='91' l='320' t='910' r='383' b='940' texture="Mix_Skill_Combi_Store2"/>
+    		</page>
+		<page name="NSKILL_CONCENTRATION_SORT" x='796' y='91' default='true'>
+      		    	<sprite l='320' t='879' r='383' b='909' texture="Mix_Skill_Combi_Store2"/>
+      		    		<msprite sx='476' sy='91' ex='476' ey='91' l='0' t='910' r='63' b='940' texture="Mix_Skill_Combi_Store2"/>
+			      	<msprite sx='540' sy='91' ex='540' ey='91' l='64' t='910' r='127' b='940' texture="Mix_Skill_Combi_Store2"/>
+			      	<msprite sx='604' sy='91' ex='604' ey='91' l='128' t='910' r='191' b='940' texture="Mix_Skill_Combi_Store2"/>
+			      	<msprite sx='668' sy='91' ex='668' ey='91' l='192' t='910' r='255' b='940' texture="Mix_Skill_Combi_Store2"/>
+			      	<msprite sx='732' sy='91' ex='732' ey='91' l='256' t='910' r='319' b='940' texture="Mix_Skill_Combi_Store2"/>
+            			<msprite sx='796' sy='91' ex='796' ey='91' l='320' t='910' r='383' b='940' texture="Mix_Skill_Combi_Store2"/>
+    		</page>    		
+  	</tab>
+
+	
+	<column name ="MIX_SKILL_SUCCESS_AVERAGE" x='318' y ='116' cx ='96' cy ='18' fontsize ='26' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>
+	
+  	<column name ="MIX_SKILL_NAME" x='226' y ='70' cx ='92' cy ='16' fontsize ='12' color='FF000000' format='VCENTER CENTER'/>
+	
+  	<column name ="POWERITEM_NAME" x='223' y ='248' cx ='84' cy ='16' fontsize ='12' color='FF000000' format='VCENTER CENTER'/>
+	
+  	<column name ="FIRST_SKILL_NAME" x='142' y ='402' cx ='96' cy ='16' fontsize ='12' color='FF000000' format='VCENTER CENTER'/>
+	
+  	<column name ="SECOND_SKILL_NAME" x='310' y ='402' cx ='96' cy ='16' fontsize ='12' color='FF000000' format='VCENTER CENTER'/>
+  	
+  
+  	
+  	<column name ="FIRST_SKILL_1" x='124' y ='556' w='15' h='21' fontsize ='13' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>
+  	<column name ="FIRST_SKILL_2" x='155' y ='556' w='15' h='21' fontsize ='13' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>
+  	<column name ="FIRST_SKILL_3" x='186' y ='556' w='15' h='21' fontsize ='13' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>
+  	<column name ="FIRST_SKILL_4" x='217' y ='556' w='15' h='21' fontsize ='13' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>
+  	<column name ="FIRST_SKILL_5" x='248' y ='556' w='15' h='21' fontsize ='13' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>
+
+  
+  	
+  	<column name ="SECOND_SKILL_1" x='292' y ='556' w='15' h='21' fontsize ='13' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>
+  	<column name ="SECOND_SKILL_2" x='323' y ='556' w='15' h='21' fontsize ='13' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>
+  	<column name ="SECOND_SKILL_3" x='354' y ='556' w='15' h='21' fontsize ='13' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>
+  	<column name ="SECOND_SKILL_4" x='385' y ='556' w='15' h='21' fontsize ='13' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>
+  	<column name ="SECOND_SKILL_5" x='416' y ='556' w='15' h='21' fontsize ='13' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>
+  	
+	
+  	<column name ="COMPOUND_SKILL_1" x='208' y ='226' w='15' h='21' fontsize ='13' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>
+  	<column name ="COMPOUND_SKILL_2" x='239' y ='226' w='15' h='21' fontsize ='13' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>
+  	<column name ="COMPOUND_SKILL_3" x='270' y ='226' w='15' h='21' fontsize ='13' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>
+  	<column name ="COMPOUND_SKILL_4" x='301' y ='226' w='15' h='21' fontsize ='13' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>
+  	<column name ="COMPOUND_SKILL_5" x='332' y ='226' w='15' h='21' fontsize ='13' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>
+
+	
+	<column name ="DEBUG_COMPOUND_ITEMNUMBER" x='347' y ='183' cx ='101' cy ='17' fontsize ='10' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>
+  	
+
+  	<column name="PRECHARABIL0" x="589" y="558" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PRECHARABIL1" x="589" y="572" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PRECHARABIL2" x="589" y="586" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PRECHARABIL3" x="589" y="600" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PRECHARABIL4" x="589" y="614" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+
+  	<column name="CASH" x='162' y='634' w='102' h='20' fontsize="13" color="FFFFFFFF" format='VCENTER RIGHT'/>
+	<column name="PG" x='330' y='634' w='102' h='20' fontsize="13" color="FFFFFFFF"  format='VCENTER RIGHT'/>
+  	<column name="COUPON" x='162' y='658' w='102' h='20' fontsize="13" color="FFFFFFFF"  format='VCENTER RIGHT'/>
+	<column name="COIN" x='330' y='658' w='102' h='20' fontsize="13" color="FFFFFFFF"  format='VCENTER RIGHT'/>
+ 	<column name="GIFT_ICON"  x="4" y="24" w="32" h="33" /> 
+
+	<editbox name="SEARCH" l='617' t='133' r='759' b='154' linelimit='1' textlimit='22' TCR='255' TCG='255' TCB='255' TCA='255'/>
+	
+	<button name="SEARCH_BTN" x="777" y="129" w="54" h="22" >
+		<sprite l="0" t="956" r="54" b="978" texture="Mix_Store01"/> 
+		<sprite l="0" t="979" r="54" b="1001" texture="Mix_Store01"/> 
+		<sprite l="0" t="1002" r="54" b="1024" texture="Mix_Store01"/> 
+	</button>
+
+	<button name="SEARCH_DELETE_BTN" x="833" y="129" w="45" h="22" >
+		<sprite l="55" t="956" r="100" b="978" texture="Mix_Store01"/> 
+		<sprite l="55" t="979" r="100" b="1001" texture="Mix_Store01"/> 
+		<sprite l="55" t="1002" r="100" b="1024" texture="Mix_Store01"/> 
+	</button>
+
+</UIDEFINE>

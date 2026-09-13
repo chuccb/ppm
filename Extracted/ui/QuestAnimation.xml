@@ -1,0 +1,99 @@
+
+<UIQUESTANIMATION>
+	<IMAGES>
+		<image name="Quest_Ani_Text" texture="ui/game/QuestComplete.dds"/>
+		<image name="Quest_Ani_Back" texture="ui/lobby/BACK1.dds"/>	
+	</IMAGES>
+
+	<ANIMATION>
+		<QUEST_ANI_1>
+			<MSG index='1' position="290, 72, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="395" mustShow="1" isCharacter='0' l='1' t='390' r='141' b='500' spriteName="Quest_Ani_Text" soundName="StartQuestComplete" />
+			<MSG index='2' position="290, 72, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='180' loop='0' stay='0' elapsTime="3000" mustShow="1" isCharacter='0' l='1' t='390' r='141' b='500' spriteName="Quest_Ani_Text" soundName="" />
+	        <MSG index='3' position="290, 72, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='180' loop='0' stay='0' elapsTime="100" mustShow="1" isCharacter='0' l='1' t='390' r='141' b='500' spriteName="Quest_Ani_Text" soundName="" />
+	        <MSG index='4' position="290, 72, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="0" mustShow="1" isCharacter='0' l='1' t='390' r='141' b='500' spriteName="Quest_Ani_Text" soundName="" />
+		</QUEST_ANI_1>
+
+		<QUEST_ANI_2>
+			<MSG index='1' position="590, 72, 0" scale="-1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="395" mustShow="1" isCharacter='0' l='1' t='390' r='141' b='500' spriteName="Quest_Ani_Text" soundName="" />
+			<MSG index='2' position="590, 72, 0" scale="-1.0, 1.0, 1.0" rot="0" alpha='180' loop='0' stay='0' elapsTime="3000" mustShow="1" isCharacter='0' l='1' t='390' r='141' b='500' spriteName="Quest_Ani_Text" soundName="" />
+	        	<MSG index='3' position="590, 72, 0" scale="-1.0, 1.0, 1.0" rot="0" alpha='180' loop='0' stay='0' elapsTime="100" mustShow="1" isCharacter='0' l='1' t='390' r='141' b='500' spriteName="Quest_Ani_Text" soundName="" />
+	        	<MSG index='4' position="590, 72, 0" scale="-1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="0" mustShow="1" isCharacter='0' l='1' t='390' r='141' b='500' spriteName="Quest_Ani_Text" soundName="" />
+		</QUEST_ANI_2>
+
+		<QUEST_ANI_3>	
+			<MSG index='1' position="290, 72, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="20" mustShow="1" isCharacter='0' l='1' t='1' r='141' b='111' spriteName="Quest_Ani_Text" soundName="" />
+			<MSG index='2' position="290, 72, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='30' loop='0' stay='0' elapsTime="25" mustShow="1" isCharacter='0' l='142' t='1' r='282' b='111' spriteName="Quest_Ani_Text" soundName="" />
+			<MSG index='3' position="290, 72, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='60' loop='0' stay='0' elapsTime="30" mustShow="1" isCharacter='0' l='283' t='1' r='423' b='111' spriteName="Quest_Ani_Text" soundName="" />
+
+			<MSG index='4' position="290, 72, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='90' loop='0' stay='0' elapsTime="35" mustShow="1" isCharacter='0' l='1' t='111' r='141' b='222' spriteName="Quest_Ani_Text" soundName="" />
+			<MSG index='5' position="290, 72, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='120' loop='0' stay='0' elapsTime="45" mustShow="1" isCharacter='0' l='142' t='111' r='282' b='222' spriteName="Quest_Ani_Text" soundName="" />
+			<MSG index='6' position="290, 72, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='140' loop='0' stay='0' elapsTime="50" mustShow="1" isCharacter='0' l='283' t='111' r='423' b='222' spriteName="Quest_Ani_Text" soundName="" />
+
+			<MSG index='7' position="290, 72, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='160' loop='0' stay='0' elapsTime="55" mustShow="1" isCharacter='0' l='1' t='223' r='141' b='333' spriteName="Quest_Ani_Text" soundName="" />
+			<MSG index='8' position="290, 72, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='180' loop='0' stay='0' elapsTime="65" mustShow="1" isCharacter='0' l='142' t='223' r='282' b='333' spriteName="Quest_Ani_Text" soundName="" />
+			<MSG index='9' position="290, 72, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='200' loop='0' stay='0' elapsTime="70" mustShow="1" isCharacter='0' l='283' t='223' r='423' b='333' spriteName="Quest_Ani_Text" soundName="" />
+
+			<MSG index='10' position="290, 72, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='230' loop='0' stay='0' elapsTime="3000" mustShow="1" isCharacter='0' l='283' t='223' r='423' b='333' spriteName="Quest_Ani_Text" soundName="" />
+	        <MSG index='11' position="290, 72, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='230' loop='0' stay='0' elapsTime="100" mustShow="1" isCharacter='0' l='283' t='223' r='423' b='333' spriteName="Quest_Ani_Text" soundName="" />
+	        <MSG index='12' position="290, 72, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='10' loop='0' stay='0' elapsTime="0" mustShow="1" isCharacter='0' l='283' t='223' r='423' b='333' spriteName="Quest_Ani_Text" soundName="" />
+
+		</QUEST_ANI_3>
+
+		<QUEST_ANI_4>	
+			<MSG index='1' position="590, 72, 0" scale="-1.0, 1.0, 1.0" rot="0" alpha='00' loop='0' stay='0' elapsTime="20" mustShow="1" isReversal="1" isCharacter='0' l='1' t='1' r='141' b='111' spriteName="Quest_Ani_Text" soundName="" />
+			<MSG index='2' position="590, 72, 0" scale="-1.0, 1.0, 1.0" rot="0" alpha='30' loop='0' stay='0' elapsTime="25" mustShow="1" isReversal="1" isCharacter='0' l='142' t='1' r='282' b='111' spriteName="Quest_Ani_Text" soundName="" />
+			<MSG index='3' position="590, 72, 0" scale="-1.0, 1.0, 1.0" rot="0" alpha='60' loop='0' stay='0' elapsTime="30" mustShow="1" isReversal="1" isCharacter='0' l='283' t='1' r='423' b='111' spriteName="Quest_Ani_Text" soundName="" />
+
+			<MSG index='4' position="590, 72, 0" scale="-1.0, 1.0, 1.0" rot="0" alpha='90' loop='0' stay='0' elapsTime="35" mustShow="1" isReversal="1" isCharacter='0' l='1' t='111' r='141' b='222' spriteName="Quest_Ani_Text" soundName="" />
+			<MSG index='5' position="590, 72, 0" scale="-1.0, 1.0, 1.0" rot="0" alpha='120' loop='0' stay='0' elapsTime="45" mustShow="1" isReversal="1" isCharacter='0' l='142' t='111' r='282' b='222' spriteName="Quest_Ani_Text" soundName="" />
+			<MSG index='6' position="590, 72, 0" scale="-1.0, 1.0, 1.0" rot="0" alpha='140' loop='0' stay='0' elapsTime="50" mustShow="1" isReversal="1" isCharacter='0' l='283' t='111' r='423' b='222' spriteName="Quest_Ani_Text" soundName="" />
+
+			<MSG index='7' position="590, 72, 0" scale="-1.0, 1.0, 1.0" rot="0" alpha='160' loop='0' stay='0' elapsTime="55" mustShow="1" isReversal="1" isCharacter='0' l='1' t='223' r='141' b='333' spriteName="Quest_Ani_Text" soundName="" />
+			<MSG index='8' position="590, 72, 0" scale="-1.0, 1.0, 1.0" rot="0" alpha='180' loop='0' stay='0' elapsTime="65" mustShow="1" isReversal="1" isCharacter='0' l='142' t='223' r='282' b='333' spriteName="Quest_Ani_Text" soundName="" />
+			<MSG index='9' position="590, 72, 0" scale="-1.0, 1.0, 1.0" rot="0" alpha='200' loop='0' stay='0' elapsTime="70" mustShow="1" isReversal="1" isCharacter='0' l='283' t='223' r='423' b='333' spriteName="Quest_Ani_Text" soundName="" />
+
+			<MSG index='10' position="590, 72, 0" scale="-1.0, 1.0, 1.0" rot="0" alpha='230' loop='0' stay='0' elapsTime="3000" mustShow="1" isReversal="1"  isCharacter='0' l='283' t='223' r='423' b='333' spriteName="Quest_Ani_Text" soundName="" />
+	        <MSG index='11' position="590, 72, 0" scale="-1.0, 1.0, 1.0" rot="0" alpha='230' loop='0' stay='0' elapsTime="100" mustShow="1" isReversal="1" isCharacter='0' l='283' t='223' r='423' b='333' spriteName="Quest_Ani_Text" soundName="" />
+	        <MSG index='12' position="590, 72, 0" scale="-1.0, 1.0, 1.0" rot="0" alpha='10' loop='0' stay='0' elapsTime="0" mustShow="1" isReversal="1" isCharacter='0' l='283' t='223' r='423' b='333' spriteName="Quest_Ani_Text" soundName="" />
+		</QUEST_ANI_4>
+
+		<QUEST_ANI_5>
+			<MSG index='1' position="412, 113, 0" scale="0.7, 0.7, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="140" mustShow="1" isCharacter='0' l='204' t='335' r='406' b='370' spriteName="Quest_Ani_Text" soundName="" />		
+			<MSG index='2' position="412, 113, 0" scale="0.9, 0.9, 1.0" rot="0" alpha='100' loop='0' stay='0' elapsTime="140" mustShow="1" isCharacter='0' l='204' t='335' r='406' b='370' spriteName="Quest_Ani_Text" soundName="" />		
+			<MSG index='3' position="412, 113, 0" scale="1.1, 1.1, 1.0" rot="0" alpha='200' loop='0' stay='0' elapsTime="3115" mustShow="1" isCharacter='0' l='204' t='335' r='406' b='370' spriteName="Quest_Ani_Text" soundName="" />		
+			<MSG index='4' position="412, 113, 0" scale="1.1, 1.1, 1.0" rot="0" alpha='200' loop='0' stay='0' elapsTime="100" mustShow="1" isCharacter='0' l='204' t='335' r='406' b='370' spriteName="Quest_Ani_Text" soundName="" />		
+			<MSG index='5' position="412, 113, 0" scale="1.1, 1.1, 1.0" rot="0" alpha='20' loop='0' stay='0' elapsTime="0" mustShow="1" isCharacter='0' l='204' t='335' r='406' b='370' spriteName="Quest_Ani_Text" soundName="" />		
+		</QUEST_ANI_5>
+
+		<QUEST_ANI_6>
+			<MSG index='1' position="412, 113, 0" scale="0.7, 0.7, 1.0" rot="0" alpha='10' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='1' t='335' r='203' b='370' spriteName="Quest_Ani_Text" soundName="" />		
+			<MSG index='2' position="412, 113, 0" scale="0.9, 0.9, 1.0" rot="0" alpha='100' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='1' t='335' r='203' b='370' spriteName="Quest_Ani_Text" soundName="" />		
+			<MSG index='3' position="412, 113, 0" scale="1.1, 1.1, 1.0" rot="0" alpha='230' loop='0' stay='0' elapsTime="3095" mustShow="1" isCharacter='0' l='1' t='335' r='203' b='370' spriteName="Quest_Ani_Text" soundName="" />		
+			<MSG index='4' position="412, 113, 0" scale="1.1, 1.1, 1.0" rot="0" alpha='240' loop='0' stay='0' elapsTime="100" mustShow="1" isCharacter='0' l='1' t='335' r='203' b='370' spriteName="Quest_Ani_Text" soundName="" />		
+			<MSG index='5' position="412, 113, 0" scale="1.1, 1.1, 1.0" rot="0" alpha='20' loop='0' stay='0' elapsTime="0" mustShow="1" isCharacter='0' l='1' t='335' r='203' b='370' spriteName="Quest_Ani_Text" soundName="" />		
+		</QUEST_ANI_6>
+
+		<QUEST_ANI_7>
+			<MSG index='1' position="0, 0, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='10' loop='0' stay='0' elapsTime="150" mustShow="1" linkMsgTableID="1132" isCharacter='2' l='339' t='154' r='682' b='170' spriteName="Quest_Ani_Text" soundName="" />		
+			<MSG index='2' position="0, 0, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='100' loop='0' stay='0' elapsTime="150" mustShow="1" linkMsgTableID="1132" isCharacter='2' l='339' t='154' r='682' b='170' spriteName="Quest_Ani_Text" soundName="" />		
+			<MSG index='3' position="0, 0, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='230' loop='0' stay='0' elapsTime="3095" mustShow="1" linkMsgTableID="1132" isCharacter='2' l='339' t='154' r='682' b='170' spriteName="Quest_Ani_Text" soundName="" />		
+			<MSG index='4' position="0, 0, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='240' loop='0' stay='0' elapsTime="100" mustShow="1" linkMsgTableID="1132" isCharacter='2' l='339' t='154' r='682' b='170' spriteName="Quest_Ani_Text" soundName="" />		
+			<MSG index='5' position="0, 0, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='10' loop='0' stay='0' elapsTime="0" mustShow="1" linkMsgTableID="1132" isCharacter='2' l='339' t='154' r='682' b='170' spriteName="Quest_Ani_Text" soundName="" />		
+		</QUEST_ANI_7>
+
+		<QUEST_ANI_8>
+			<MSG index='1' position="334, 153, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='1' t='371' r='353' b='389' spriteName="Quest_Ani_Text" soundName="" />		
+			<MSG index='2' position="334, 153, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='100' loop='0' stay='0' elapsTime="150" mustShow="1" isCharacter='0' l='1' t='371' r='353' b='389' spriteName="Quest_Ani_Text" soundName="" />		
+			<MSG index='3' position="334, 153, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='230' loop='0' stay='0' elapsTime="3095" mustShow="1" isCharacter='0' l='1' t='371' r='353' b='389' spriteName="Quest_Ani_Text" soundName="" />		
+			<MSG index='4' position="334, 153, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='240' loop='0' stay='0' elapsTime="100" mustShow="1" isCharacter='0' l='1' t='371' r='353' b='389' spriteName="Quest_Ani_Text" soundName="" />		
+			<MSG index='5' position="334, 153, 0" scale="1.0, 1.0, 1.0" rot="0" alpha='10' loop='0' stay='0' elapsTime="0" mustShow="1" isCharacter='0' l='1' t='371' r='353' b='389' spriteName="Quest_Ani_Text" soundName="" />		
+		</QUEST_ANI_8>
+
+		<QUEST_ANI_9>
+			<MSG index='0' position="796, 689, 0" scale="0.5, 0.5, 1.0" rot="0" alpha='0' loop='0' stay='0' elapsTime="100" mustShow="1"  isCharacter='0' l='138' t='768' r='164' b='794' spriteName="Quest_Ani_Back"  soundName="" />
+			<MSG index='1' position="812, 708, 0" scale="1.0, 1.0, 1.0" rot="360" alpha='255' loop='0' stay='0' elapsTime="400" mustShow="1"  isCharacter='0' l='138' t='768' r='164' b='794' spriteName="Quest_Ani_Back"  soundName="" />
+			<MSG index='2' position="796, 730, 0" scale="0.5, 0.5, 1.0" rot="-300" alpha='0' loop='1' stay='0' elapsTime="100" mustShow="1"   isCharacter='0' l='138' t='768' r='164' b='794' spriteName="Quest_Ani_Back"  soundName="" />
+		</QUEST_ANI_9>
+
+	</ANIMATION>
+</UIQUESTANIMATION>

@@ -1,0 +1,105 @@
+<UIDEFINE>
+
+	<msprite sx='352' sy='174' ex='352' ey='174' l='0' t='0' r='128' b='34' texture="UI_Popup_1"/>
+	<ssprite tl='480' tt='174' tr='656' tb='208' l='130' t='0' r='144' b='34' texture="UI_Popup_1"/>
+	<msprite sx='656' sy='174' ex='656' ey='174' l='146' t='0' r='162' b='34' texture="UI_Popup_1"/>
+
+	<msprite sx='366' sy='184' ex='366' ey='184' l='309' t='827' r='401' b='843' texture="UI_Popup_1"/>
+
+	<msprite sx='352' sy='208' ex='352' ey='208' l='0' t='35' r='16' b='51' texture="UI_Popup_1"/>
+	<ssprite tl='368' tt='208' tr='656' tb='224' l='18' t='35' r='32' b='51' texture="UI_Popup_1"/>
+	<msprite sx='656' sy='208' ex='656' ey='208' l='34' t='35' r='50' b='51' texture="UI_Popup_1"/>
+	<ssprite tl='352' tt='224' tr='368' tb='531' l='0' t='53' r='16' b='67' texture="UI_Popup_1"/>
+	<ssprite tl='368' tt='224' tr='656' tb='531' l='18' t='53' r='32' b='67' texture="UI_Popup_1"/>
+	<ssprite tl='656' tt='224' tr='672' tb='531' l='34' t='53' r='50' b='67' texture="UI_Popup_1"/>
+	<msprite sx='352' sy='531' ex='352' ey='531' l='0' t='69' r='16' b='85' texture="UI_Popup_1"/>
+	<ssprite tl='368' tt='531' tr='656' tb='547' l='18' t='69' r='32' b='85' texture="UI_Popup_1"/>
+	<msprite sx='656' sy='531' ex='656' ey='531' l='34' t='69' r='50' b='85' texture="UI_Popup_1"/>
+	<msprite sx='352' sy='547' ex='352' ey='547' l='51' t='35' r='67' b='82' texture="UI_Popup_1"/>
+	<ssprite tl='368' tt='547' tr='656' tb='594' l='69' t='35' r='83' b='82' texture="UI_Popup_1"/>
+	<msprite sx='656' sy='547' ex='656' ey='547' l='85' t='35' r='101' b='82' texture="UI_Popup_1"/>
+
+	<!-- CHANNEL INFO PANEL -->
+	<msprite sx='370' sy='225' ex='370' ey='225' l='102' t='35' r='118' b='59' texture="UI_Popup_1"/>
+	<ssprite tl='386' tt='225' tr='638' tb='249' l='120' t='35' r='134' b='59' texture="UI_Popup_1"/>
+	<msprite sx='638' sy='225' ex='638' ey='225' l='136' t='35' r='152' b='59' texture="UI_Popup_1"/>
+
+	<!-- CHANNEL PANEL -->
+
+	<msprite sx='370' sy='259' ex='370' ey='259' l='298' t='226' r='314' b='250' texture="UI_Popup_1"/>
+	<ssprite tl='386' tt='259' tr='638' tb='283' l='316' t='226' r='330' b='250' texture="UI_Popup_1"/>
+	<msprite sx='638' sy='259' ex='638' ey='259' l='332' t='226' r='348' b='250' texture="UI_Popup_1"/>
+
+	<msprite sx='370' sy='286' ex='370' ey='286' l='298' t='226' r='314' b='250' texture="UI_Popup_1"/>
+	<ssprite tl='386' tt='286' tr='638' tb='310' l='316' t='226' r='330' b='250' texture="UI_Popup_1"/>
+	<msprite sx='638' sy='286' ex='638' ey='286' l='332' t='226' r='348' b='250' texture="UI_Popup_1"/>
+
+	<msprite sx='370' sy='313' ex='370' ey='313' l='298' t='226' r='314' b='250' texture="UI_Popup_1"/>
+	<ssprite tl='386' tt='313' tr='638' tb='337' l='316' t='226' r='330' b='250' texture="UI_Popup_1"/>
+	<msprite sx='638' sy='313' ex='638' ey='313' l='332' t='226' r='348' b='250' texture="UI_Popup_1"/>
+
+	<msprite sx='370' sy='340' ex='370' ey='340' l='298' t='226' r='314' b='250' texture="UI_Popup_1"/>
+	<ssprite tl='386' tt='340' tr='638' tb='364' l='316' t='226' r='330' b='250' texture="UI_Popup_1"/>
+	<msprite sx='638' sy='340' ex='638' ey='340' l='332' t='226' r='348' b='250' texture="UI_Popup_1"/>
+
+	<msprite sx='370' sy='367' ex='370' ey='367' l='298' t='226' r='314' b='250' texture="UI_Popup_1"/>
+	<ssprite tl='386' tt='367' tr='638' tb='391' l='316' t='226' r='330' b='250' texture="UI_Popup_1"/>
+	<msprite sx='638' sy='367' ex='638' ey='367' l='332' t='226' r='348' b='250' texture="UI_Popup_1"/>
+
+	<msprite sx='370' sy='394' ex='370' ey='394' l='298' t='226' r='314' b='250' texture="UI_Popup_1"/>
+	<ssprite tl='386' tt='394' tr='638' tb='418' l='316' t='226' r='330' b='250' texture="UI_Popup_1"/>
+	<msprite sx='638' sy='394' ex='638' ey='394' l='332' t='226' r='348' b='250' texture="UI_Popup_1"/>
+
+	<msprite sx='370' sy='421' ex='370' ey='421' l='298' t='226' r='314' b='250' texture="UI_Popup_1"/>
+	<ssprite tl='386' tt='421' tr='638' tb='445' l='316' t='226' r='330' b='250' texture="UI_Popup_1"/>
+	<msprite sx='638' sy='421' ex='638' ey='421' l='332' t='226' r='348' b='250' texture="UI_Popup_1"/>
+
+	<msprite sx='370' sy='448' ex='370' ey='448' l='298' t='226' r='314' b='250' texture="UI_Popup_1"/>
+	<ssprite tl='386' tt='448' tr='638' tb='472' l='316' t='226' r='330' b='250' texture="UI_Popup_1"/>
+	<msprite sx='638' sy='448' ex='638' ey='448' l='332' t='226' r='348' b='250' texture="UI_Popup_1"/>
+
+	<msprite sx='370' sy='475' ex='370' ey='475' l='298' t='226' r='314' b='250' texture="UI_Popup_1"/>
+	<ssprite tl='386' tt='475' tr='638' tb='499' l='316' t='226' r='330' b='250' texture="UI_Popup_1"/>
+	<msprite sx='638' sy='475' ex='638' ey='475' l='332' t='226' r='348' b='250' texture="UI_Popup_1"/>
+
+	<msprite sx='370' sy='502' ex='370' ey='502' l='298' t='226' r='314' b='250' texture="UI_Popup_1"/>
+	<ssprite tl='386' tt='502' tr='638' tb='526' l='316' t='226' r='330' b='250' texture="UI_Popup_1"/>
+	<msprite sx='638' sy='502' ex='638' ey='502' l='332' t='226' r='348' b='250' texture="UI_Popup_1"/>
+
+	<msprite sx='450' sy='231' ex='450' ey='231' l='475' t='821' r='523' b='830' texture="UI_Popup_1"/>
+	<msprite sx='582' sy='229' ex='582' ey='229' l='475' t='846' r='519' b='859' texture="UI_Popup_1"/>
+ 
+	<button name="CANCEL" x='575'	y='554' w='76' h='32'>
+		<sprite l='77'	t='141'	r='153'	b='173' texture="UI_Popup_1"/>
+		<sprite l='77'	t='174'	r='153'	b='206' texture="UI_Popup_1"/>
+		<sprite l='77'	t='207'	r='153'	b='239' texture="UI_Popup_1"/>
+	</button>
+
+	<button name="CHANGE" x='478'	y='554' w='76' h='32'>
+		<sprite l='223'	t='807'	r='300'	b='840' texture="UI_Popup_1"/>
+		<sprite l='223'	t='840'	r='300'	b='872' texture="UI_Popup_1"/>
+		<sprite l='223'	t='873'	r='300'	b='905' texture="UI_Popup_1"/>
+	</button>
+	
+	<select name="CHANNELS" count='10' OffX='15' OffY='12'>
+		<rect l='370' t='259' r='753' b='282'/>
+		<rect l='370' t='286' r='753' b='309'/>
+		<rect l='370' t='313' r='753' b='336'/>	
+		<rect l='370' t='340' r='753' b='363'/>
+		<rect l='370' t='367' r='753' b='390'/>	
+      	 	<rect l='370' t='394' r='753' b='417'/>
+		<rect l='370' t='421' r='753' b='444'/>
+		<rect l='370' t='448' r='753' b='471'/>
+		<rect l='370' t='475' r='753' b='498'/>
+		<rect l='370' t='502' r='753' b='525'/>
+		
+		<sprite l='0' t='429' r='284' b='453' texture="UI_Popup_1"/>
+		<sprite l='0' t='454' r='284' b='478' texture="UI_Popup_1"/>
+		
+		<column name="CHANNELNAME" x='30' y='0' w='130' h='24' color='FF696969' shadow='FFE5E1D4' format='VCENTER CENTER'/>
+		<column name="USERS" x='200' y='0' w='60' h='24' color='FF505050' shadow='FFE5E1D4' format='VCENTER CENTER'/>
+		<column name="STATUS" x='250' y='0' w='40' h='24' />
+	</select> 
+
+</UIDEFINE>
+			

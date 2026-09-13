@@ -1,0 +1,29 @@
+<UIDEFINE>
+  <image name="EffectIcon" filename="weaponEffectIcon.dds"/>
+  
+  <customsprites name="EFFECTICON" w='20' h='24' >
+    <element x='0' y='0' key='0' texture="EffectIcon" />      <!--NONE-->
+    <element x='0' y='0' key='1' texture="EffectIcon" />      <!--NORMAL_DAMAGE-->
+    <element x='20' y='0' key='2' texture="EffectIcon" />     <!--HEAL-->
+    <element x='40' y='0' key='3' texture="EffectIcon" />     <!--SPEED_UP-->
+    <element x='60' y='0' key='4' texture="EffectIcon" />     <!--SPEED_DOWN-->
+    <element x='80' y='0' key='5' texture="EffectIcon" />     <!--FREEZE-->
+    <element x='100' y='0' key='6' texture="EffectIcon" />    <!--FLASH-->
+    <element x='0' y='24' key='7' texture="EffectIcon" />     <!--LEVITATION-->
+    <element x='20' y='24' key='8' texture="EffectIcon" />    <!--FIRE-->
+    <element x='40' y='24' key='9' texture="EffectIcon" />    <!--SMOG-->
+    <element x='60' y='24' key='10' texture="EffectIcon" />   <!--CONFUSE-->
+    <element x='80' y='24' key='11' texture="EffectIcon" />   <!--CAN'T_SHOT-->
+    <element x='100' y='24' key='12' texture="EffectIcon" />  <!--FORCE_RELOAD-->
+    <element x='0' y='48' key='13' texture="EffectIcon" />    <!--SOUND-->
+    <element x='20' y='48' key='14' texture="EffectIcon" />   <!--MUSIC-->
+    <element x='40' y='48' key='15' texture="EffectIcon" />    <!--STOP-->
+    <element x='60' y='48' key='16' texture="EffectIcon" />    <!--cookie-->
+    <element x='80' y='48' key='17' texture="EffectIcon" />    <!--NEST-->
+    <element x='100' y='48' key='18' texture="EffectIcon" />    <!--SENSOR-->
+    <element x='0' y='72' key='19' texture="EffectIcon" />    <!-- -->
+    <element x='20' y='72' key='20' texture="EffectIcon" />   <!--KANI-->
+    <element x='40' y='72' key='21' texture="EffectIcon" />    <!--POISON-->
+  </customsprites>
+  
+</UIDEFINE>

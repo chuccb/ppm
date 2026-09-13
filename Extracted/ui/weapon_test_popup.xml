@@ -1,0 +1,20 @@
+<UIDEFINE>
+  
+	<msprite name="GS_START_BG" sx='355' sy='307' ex='355' ey='307' l='422' t='828' r='737' b='985' texture="SHOP2"/>
+
+	<column name="ItemThumnail" x='372' y='343' w='64' h='64' format='VCENTER LEFT'/>
+	<column name="ItemExplain" x='452' y='344' w='214' h='74' color='FF000000' format='Left'/>
+
+
+  	<button name="START" x='495' y='431' w='84' h='28'>
+		<sprite l="777" t="881" r="861" b="909" texture="UI_Button" />
+		<sprite l="777" t="910" r="861" b="938" texture="UI_Button" />
+		<sprite l="777" t="939" r="861" b="967" texture="UI_Button" />
+	</button>
+
+	<button name="EXIT" x='581' y='431' w='84' h='28'>
+		<sprite l="85" t="347" r="169" b="375" texture="UI_Button" />
+		<sprite l="85" t="376" r="169" b="404" texture="UI_Button" />
+		<sprite l="85" t="405" r="169" b="433" texture="UI_Button" />
+	</button>
+</UIDEFINE>

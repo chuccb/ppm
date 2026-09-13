@@ -1,0 +1,35 @@
+<UIDEFINE>
+	<bgmfile filename="bgm/bgm_character.mp3"/>
+	<image name="Clan_Message" filename="C_MS.DDS"/>
+
+	<msprite name="CLANMESSAGE_1" sx='305' sy='261' ex='305' ey='261' l='0' t='0' r='415' b='216' texture="Clan_Message"/>
+
+	<column name="CLANMESSENGE" x='415' y='316' w='263' h='73' color='FFFFFFFF' />
+
+	<editbox name="MESSAGE_EDIT" l='415' t='316' r='687' b='389' linelimit='6' textlimit='200' TCR='255' TCG='255' TCB='255' TCA='255'/>
+	
+	<button name="OK" x='624' y='410' w="84" h="28">
+		<sprite l="777" t="881" r="861" b="909" texture="UI_Button" />
+		<sprite l="777" t="910" r="861" b="938" texture="UI_Button" />
+		<sprite l="777" t="939" r="861" b="967" texture="UI_Button" />
+	</button>
+
+	<button name="CANCEL" x='624' y='442' w="84" h="28">
+		<sprite l="85" t="347" r="169" b="375" texture="UI_Button" />
+		<sprite l="85" t="376" r="169" b="404" texture="UI_Button" />
+		<sprite l="85" t="405" r="169" b="433" texture="UI_Button" />
+	</button>
+
+	<msprite name="NOTICECHANGE_TITLEUI_NAME" sx='315' sy='271' ex='315' ey='271' l='0'   t='217' r='126' b='232' texture="Clan_Message"/>
+	<msprite name="NOTICECHANGE_INFUTUI_NAME" sx='315' sy='310' ex='315' ey='310' l='127' t='217' r='211' b='232' texture="Clan_Message"/>
+	<msprite name="NOTICECHANGE_MESSAGE" 	  sx='324' sy='421' ex='324' ey='421' l='212' t='217' r='475' b='232' texture="Clan_Message"/>
+
+	<msprite name="INTRODUCECHANGE_TITLEUI_NAME" sx='315' sy='271' ex='315' ey='271' l='0'	 t='233' r='126' b='248' texture="Clan_Message"/>
+	<msprite name="INTRODUCECHANGE_INFUTUI_NAME" sx='315' sy='310' ex='315' ey='310' l='127' t='233' r='211' b='248' texture="Clan_Message"/>
+	<msprite name="INTRODUCECHANGE_MESSAGE"	     sx='324' sy='421' ex='324' ey='421' l='212' t='233' r='475' b='248' texture="Clan_Message"/>
+
+	<msprite name="PAPERMESSAGE_TITLEUI_NAME" sx='315' sy='271' ex='315' ey='271' l='0'	t='249' r='126' b='264' texture="Clan_Message"/>
+	<msprite name="PAPERMESSAGE_INFUTUI_NAME" sx='315' sy='310' ex='315' ey='310' l='127' t='249' r='211' b='264' texture="Clan_Message"/>
+	<msprite name="PAPERMESSAGE_MESSAGE"	  sx='324' sy='421' ex='324' ey='421' l='212' t='249' r='475' b='264' texture="Clan_Message"/>
+
+</UIDEFINE>

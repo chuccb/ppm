@@ -1,0 +1,32 @@
+<UIDEFINE>
+	<bot_image name="Game_Center_Easy" filename="gs_popup.dds"/>
+  
+	<msprite name="GS_START_BG" sx='311' sy='214' ex='311' ey='214' l='514' t='1' r='935' b='365' texture="Game_Center_Easy"/>
+
+	<msprite name="GS_FREE_TITLE" sx='311' sy='178' ex='311' ey='178' l='1' t='505' r='422' b='541' texture="Game_Center_Easy"/>
+	<msprite name="GS_CASH_TITLE" sx='311' sy='178' ex='311' ey='178' l='1' t='542' r='422' b='578' texture="Game_Center_Easy"/>
+	<msprite name="GS_EASY_TITLE" sx='311' sy='178' ex='311' ey='178' l='362' t='597' r='783' b='797' texture="Game_Center_Easy"/>
+
+	<msprite name="GS_FREE_EXPLAIN" sx='344' sy='389' ex='344' ey='389' l='2' t='580' r='359' b='630' texture="Game_Center_Easy"/>
+	<msprite name="GS_CASH_EXPLAIN" sx='344' sy='389' ex='344' ey='389' l='2' t='606' r='359' b='631' texture="Game_Center_Easy"/>
+	<msprite name="GS_EASY_EXPLAIN" sx='344' sy='389' ex='344' ey='389' l='2' t='632' r='359 ' b='720' texture="Game_Center_Easy"/>
+
+	<msprite name="GS_FREE_STATUS" sx='478' sy='417' ex='478' ey='417' l='518' t='367' r='738' b='461' texture="Game_Center_Easy"/>
+	<msprite name="GS_CASH_STATUS" sx='478' sy='417' ex='478' ey='417' l='518' t='462' r='738' b='556' texture="Game_Center_Easy"/>
+
+	<column name="CASH_HAVE" x='572' y='426' w='90' h='18' color='FF696969' shadow='FFE5E1D4' format='VCENTER RIGHT'/>
+	<column name="CASH_BUY" x='572' y='457' w='90' h='18' color='FF696969' shadow='FFE5E1D4' format='VCENTER RIGHT'/>
+	<column name="CASH_REMAIN" x='571' y='488' w='90' h='18' color='FF696969' shadow='FFE5E1D4' format='VCENTER RIGHT'/>
+
+  	<button name="START" x='560' y='536' w='78' h='33'>
+  	  	<sprite l='741' t='366' r='819' b='399' texture="Game_Center_Easy"/>
+    	<sprite l='741' t='400' r='819' b='433' texture="Game_Center_Easy"/>
+    	<sprite l='741' t='434' r='819' b='467' texture="Game_Center_Easy"/>
+  	</button>
+
+  	<button name="EXIT" x='643' y='536' w='78' h='33'>
+    	<sprite l='820' t='366' r='898' b='399' texture="Game_Center_Easy"/>
+    	<sprite l='820' t='400' r='898' b='433' texture="Game_Center_Easy"/>
+    	<sprite l='820' t='434' r='898' b='467' texture="Game_Center_Easy"/>
+  	</button>
+</UIDEFINE>

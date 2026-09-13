@@ -1,0 +1,15 @@
+<UIDEFINE>
+
+	<all_loading_image name="gmcmdUI_ui_back" filename="tuto_back.dds"/>
+
+	<msprite name="back" sx='0' sy='0' ex='0' ey='0' l='0' t='0' r='640' b='480' texture="gmcmdUI_ui_back"/>
+
+	<!-- msprite for editbox -->
+	<msprite sx='62' sy='456' ex='62' ey='456' l='290' t='22' r='313' b='45' texture="UI_Popup_1" />
+	<ssprite tl="85" tt="456" tr="590" tb="479" l="316" t="22" r="330" b="45" texture="UI_Popup_1"/>
+	<msprite sx='590' sy='456' ex='590' ey='456' l='332' t='22' r='347' b='45' texture="UI_Popup_1" />
+
+	<list name="GMCHAT" l='0' t='0' r='640' b='480'>
+	</list>
+
+</UIDEFINE>

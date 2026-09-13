@@ -1,0 +1,42 @@
+﻿<UIDEFINE>
+  
+
+
+  <image name="popup_char_buy" filename="N_PCBUY.tga"/>
+
+  <msprite name="popup_buy" x='296' y='200' h='431' w='368' l='0' t='0' r='431' b='368'/>
+
+  <msprite name="btn_front"  index='4' x='314' y='242' h='29' w='27' l='676' t='77' r='705' b='104' tl='676' tt='105' tr='705' tb='132'/>
+  <msprite name="btn_back"   index='5' x='346' y='242' h='29' w='27' l='706' t='77' r='735' b='104' tl='706' tt='105' tr='735' tb='132'/>
+  <msprite name="btn_buy"    index='6' x='555' y='525' h='77' w='34' l='609' t='0' r='685' b='34' tl='609' tt='34' tr='685' tb='68'/>
+  <msprite name="btn_cancel" index='7' x='635' y='525' h='77' w='34' l='686' t='0' r='763' b='34' tl='686' tt='34' tr='763' tb='68'/>
+
+
+  <msprite name="char_rect_0" index='0' x='438' y='140' h='660' w='214'/>
+  <msprite name="char_rect_1" index='1' x='438' y='216' h='660' w='290'/>
+  <msprite name="char_rect_2" index='2' x='662' y='215' h='884' w='289'/>
+
+  <msprite name="char_rect_3" index='3' x='438' y='292' h='660' w='366'/>
+  <msprite name="char_rect_4" index='4' x='662' y='140' h='884' w='214'/>
+  <msprite name="char_rect_5" index='5' x='763' y='64' h='985' w='137'/>
+
+  <msprite name="char_rect_6" index='6' x='214' y='369' h='435' w='442'/>
+  <msprite name="char_rect_7" index='7' x='661' y='367' h='883' w='441'/>
+  <msprite name="char_rect_8" index='8' x='437' y='367' h='695' w='441'/>
+
+  <msprite name="char_rect_9" index='9' x='661' y='291' h='883' w='365'/>
+  <msprite name="char_rect_10" index='10' x='661' y='443' h='883' w='517'/>
+  <msprite name="char_rect_11" index='11' x='661' y='519' h='883' w='593'/>
+
+  <msprite name="char_rect_12" index='12' x='437' y='519' h='659' w='593'/>
+  <msprite name="char_rect_13" index='13' x='437' y='597' h='659' w='670'/>
+  <msprite name="char_rect_14" index='14' x='662' y='597' h='881' w='670'/>
+
+  <msprite name="char_rect_15" index='15' x='0' y='0' h='0' w='0'/>
+  <msprite name="char_rect_16" index='16' x='0' y='0' h='0' w='0'/>
+  <msprite name="char_rect_17" index='17' x='0' y='0' h='0' w='0'/>
+
+  <msprite name="char_rect_18" index='18' x='0' y='0' h='0' w='0'/>
+  <msprite name="char_rect_19" index='19' x='0' y='0' h='0' w='0'/>
+
+</UIDEFINE>

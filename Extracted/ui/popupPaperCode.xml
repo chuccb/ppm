@@ -1,0 +1,23 @@
+<UIDEFINE>
+	<image name="PaperCode" filename="present_code.DDS" />
+
+	<msprite sx='305' sy='153' ex='305' ey='153' l='543' t='0' r='936' b='463' texture="PaperCode"/>
+
+	
+	<column name="ITEM_NAME1" x='320' y='503' color='FFFFFFFF' shadow='FF444444' />
+	<column name="ITEM_NAME2" x='320' y='543' color='FFFFFFFF' shadow='FF444444' />
+	<column name="ITEM_NAME3" x='320' y='583' color='FFFFFFFF' shadow='FF444444' />
+
+	<button name="GET" x="530" y="571" w="80" h="33">
+		<sprite l="540" t="480" r="616" b="512" texture="PaperCode"/>
+		<sprite l="540" t="513" r="616" b="545" texture="PaperCode"/>
+		<sprite l="540" t="546" r="616" b="578" texture="PaperCode"/>
+	</button>
+
+	<button name="CANCEL" x="615" y="571" w="80" h="33">
+		<sprite l="620" t="480" r="696" b="512" texture="PaperCode"/>
+		<sprite l="620" t="513" r="696" b="545" texture="PaperCode"/>
+		<sprite l="620" t="546" r="696" b="578" texture="PaperCode"/>
+	</button>
+
+</UIDEFINE>

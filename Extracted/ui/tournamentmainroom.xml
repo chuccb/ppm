@@ -1,0 +1,443 @@
+<UIDEFINE>
+	<bgmfile filename="bgm/bgm_LOBBY.mp3"/>
+	<image name="Tournament_MainRoom" filename="l_tournament_mr.dds"/>
+	<image name="Tournament_MainRoom03" filename="l_tournament_mr03.dds"/>
+	<image name="Tournament_MainRoom_Lobby01" filename="lobby_01.dds" />
+	<image name="Tournament_MainRoom_Lobby02" filename="lobby_02.dds" />
+	<image name="Tournament_MainRoom_Lobby03" filename="lobby_03.dds" />
+	
+
+	<msprite name="BACKGROUND" sx="0" sy="0" ex="0" ey="0" l="0" t="0" r="1024" b="768" texture="UI_Back1"/>
+	
+	<msprite name="BACK1" sx="76" sy="33" ex="76" ey="33" l="0" t="0" r="628" b="474" texture="Tournament_MainRoom" />
+	<msprite name="BACK2" sx="76" sy="511" ex="76" ey="511" l="0" t="753" r="628" b="997" texture="Tournament_MainRoom03" /> 
+
+	
+	<msprite name="TOURNAMENT_BACK_VS4" sx="0" sy="0" ex="85" ey="70" l="0" t="377" r="610" b="753" texture="Tournament_MainRoom03"/>
+	<msprite name="TOURNAMENT_BACK_VS2" sx="0" sy="0" ex="85" ey="70" l="0" t="0" r="610" b="376" texture="Tournament_MainRoom03"/>
+	
+	<msprite name="TNMT_TITLE" sx="76" sy="0" ex="76" ey="0" l="0" t="999" r="628" b="1024" texture="UI_Button" />
+	<msprite name="TNMT_NETCAFE" sx="709" sy="0" ex="709" ey="0" l="629" t="999" r="936" b="1024" texture="UI_Button" />	
+
+	<column name="TNMT_TITLE" x="287" y="6" w="406" h="13" fontsize="12" color="FFFFFFFF" format="VCENTER RIGHT" />
+
+	<column name="DEBUG_CURTNMT_STATE" x="50" y="4" w="406" h="13" fontsize="12" color="FFFFFFFF" format="VCENTER RIGHT" />
+	<column name="DEBUG_CURTNMT_MYROOMNUMBER" x="600" y="4" w="64" h="18" color="FFFFFFFF" shadow="FF000000" format="VCENTER LEFT"/>
+	<column name="DEBUG_CURTNMT_ROUNDSTATE" x="230" y="20" w="64" h="18" color="FFFFFFFF" shadow="FF000000" format="VCENTER LEFT"/>
+	<column name="DEBUG_STATEPACKET" x="230" y="36" w="64" h="18" color="FFFFFFFF" shadow="FF000000" format="VCENTER LEFT"/>
+	<column name="DEBUG_STATEPACKET_DETAIL" x="230" y="52" w="64" h="18" color="FFFFFFFF" shadow="FF000000" format="VCENTER LEFT"/>
+	
+	<column name="ONLINE_COUNT"     x="729" y="699" w="39" h="17" fontsize="13" color="FF00FF66" format="VCENTER RIGHT" />
+	<column name="ALL_COUNT" 	x="778" y="699" w="31" h="17" fontsize="13" color="FFFFFFFF" format="VCENTER LEFT" />
+
+	<column name="NEW_MSG_ICON" x="990" y="27" w="27" h="20" />
+	
+	
+
+	<button name="ENTERROOM" x="581" y="456" w="116" h="46">
+		<sprite l="234" t="207" r="350" b="253" texture="UI_Button" />
+		<sprite l="234" t="254" r="350" b="300" texture="UI_Button" />
+		<sprite l="234" t="301" r="350" b="347" texture="UI_Button" />
+	</button>
+
+
+	<button name="STORE" x="9" y="33" w="62" h="68">
+		<sprite l="0" t="0" r="62" b="68" texture="UI_Button" />
+		<sprite l="0" t="69" r="62" b="137" texture="UI_Button" />
+		<sprite l="0" t="138" r="62" b="206" texture="UI_Button" />
+	</button>
+
+	<button name="SHOP" x="9" y="104" w="62" h="68">
+		<sprite l="62" t="0" r="124" b="68" texture="UI_Button" />
+		<sprite l="62" t="69" r="124" b="137" texture="UI_Button" />
+		<sprite l="62" t="138" r="124" b="206" texture="UI_Button" />
+	</button>
+
+	<button name="Clan" x="9" y="175" w="62" h="68">
+		<sprite l="124" t="0" r="186" b="68" texture="UI_Button" />
+		<sprite l="124" t="69" r="186" b="137" texture="UI_Button" />
+		<sprite l="124" t="138" r="186" b="206" texture="UI_Button" />
+	</button>
+
+	<button name="QUEST" x="9" y="246" w="62" h="68">
+		<sprite l="186" t="0" r="248" b="68" texture="UI_Button" />
+		<sprite l="186" t="69" r="248" b="137" texture="UI_Button" />
+		<sprite l="186" t="138" r="248" b="206" texture="UI_Button" />
+	</button>
+
+	<button name="RANK" x="9" y="317" w="62" h="68">
+		<sprite l="248" t="0" r="310" b="68" texture="UI_Button" />
+		<sprite l="248" t="69" r="310" b="137" texture="UI_Button" />
+		<sprite l="248" t="138" r="310" b="206" texture="UI_Button" />
+	</button>
+
+	<button name="CHANNEL" x="9" y="388" w="62" h="68">
+		<sprite l="310" t="0" r="372" b="68" texture="UI_Button" />
+		<sprite l="310" t="69" r="372" b="137" texture="UI_Button" />
+		<sprite l="310" t="138" r="372" b="206" texture="UI_Button" />
+	</button>
+
+	<button name="OPTION" x="9" y="656" w="62" h="48">
+		<sprite l="372" t="0" r="434" b="48" texture="UI_Button" />
+		<sprite l="372" t="49" r="434" b="97" texture="UI_Button" />
+		<sprite l="372" t="98" r="434" b="146" texture="UI_Button" />
+	</button>
+
+	<button name="EXIT" x="9" y="708" w="62" h="48">
+		<sprite l="434" t="0" r="496" b="48" texture="UI_Button" />
+		<sprite l="434" t="49" r="496" b="97" texture="UI_Button" />
+		<sprite l="434" t="98" r="496" b="146" texture="UI_Button" />
+	</button>
+
+	<button name="TOURNAMENT_CANCEL" x="616" y="456" w="80" h="46">
+		<sprite l="710" t="0"  r="790" b="46"  texture="Tournament_MainRoom"/>
+		<sprite l="710" t="47" r="790" b="93"  texture="Tournament_MainRoom"/>
+		<sprite l="710" t="94" r="790" b="140" texture="Tournament_MainRoom"/>
+	</button>
+	
+	<button name="TOURNAMENT_ENTER" x="616" y="456" w="80" h="46">
+		<sprite l="629" t="0"  r="709" b="46"  texture="Tournament_MainRoom"/>
+		<sprite l="629" t="47" r="709" b="93"  texture="Tournament_MainRoom"/>
+		<sprite l="629" t="94" r="709" b="140" texture="Tournament_MainRoom"/>
+	</button>
+
+	<msprite sx="0" sy="0" ex="709" ey="33" l="610" t="0" r="917" b="722" texture="Tournament_MainRoom03"/>
+	
+	<tab name="CLAN_MATCH" count="2">
+		<page name="MATCHLIST" x="76" y="33" default="true">
+		<sprite l="235" t="947" r="318" b="977" texture="Tournament_MainRoom"/>
+		</page>
+			
+		<page name="playerinfo" x="160" y="33" default="true">
+		<sprite l="319" t="947" r="402" b="977" texture="Tournament_MainRoom"/>
+		<msprite sx="85" sy="70" ex="85" ey="70" l="0" t="477" r="610" b="853" texture="Tournament_MainRoom"/>
+		</page>
+	</tab>
+		
+	<tab name="INFORMATION" count="4">
+		<page name="MYINFO" x="709" y="33" default="true">
+			<sprite l="151" t="947" r="214" b="977" texture="Tournament_MainRoom"/>
+			
+			<column name="TMENT_NAME" 		x="721" y="83"  w="283" h="22" fontsize='15' color="FFFFCC66" format="VCENTER CENTER"/>
+			<column name="TMENT_TIME" 		x="779" y="117" w="220" h="16" fontsize='12' color="FFFFFFFF" format="VCENTER CENTER"/>
+			<column name="TMENT_STATE" 		x="809" y="141" w="190" h="16" fontsize='12' color="FFFFFFFF" format="VCENTER CENTER"/>
+			<column name="TMENT_NEXTROUND_TIME"  	x="809" y="165" w="190" h="16" fontsize='12' color="FFFFFFFF" format="VCENTER CENTER"/>
+			
+			<column name="TMENT_MAPNAME"	   x="794" y="350" w="102" h="16"  fontsize='12' color="FFFFFFFF" format="VCENTER LEFT"/>
+			<column name="TMENT_GAMEMODE"	   x="794" y="372" w="102" h="16"  fontsize='12' color="FFFFFFFF" format="VCENTER LEFT"/>
+			<column name="TMENT_COMMON_ROUND"  x="794" y="395" w="102" h="16"  fontsize='12' color="FFFFFFFF" format="VCENTER LEFT"/>
+			<column name="TMENT_MAX_USER"      x="794" y="418" w="102" h="16"  fontsize='12' color="FFFFFFFF" format="VCENTER LEFT"/>
+			
+			<hscroll name="TMENT_MAP_IMAGE" l="794" t="218" r="1000" b="346">
+			</hscroll>
+			
+			
+			<column name="TMENT_2_1" x="721" y="505" w="34" h="16" color="FFFFFFFF" fontsize='12' format="VCENTER CENTER"/>
+			<column name="TMENT_2_2" x="756" y="505" w="94" h="16" color="FFFFFFFF" fontsize='12' format="VCENTER CENTER"/>
+			<column name="TMENT_2_3" x="851" y="505" w="78" h="16" color="FFFFFFFF" fontsize='12' format="VCENTER CENTER"/>
+			<column name="TMENT_2_5" x="930" y="505" w="74" h="16" color="FFFFFFFF" fontsize='12' format="VCENTER CENTER"/>
+					
+			<column name="TMENT_4_1" x="721" y="528" w="34" h="16" color="FFFFFFFF" fontsize='12' format="VCENTER CENTER"/>
+			<column name="TMENT_4_2" x="756" y="528" w="94" h="16" color="FFFFFFFF" fontsize='12' format="VCENTER CENTER"/>
+			<column name="TMENT_4_3" x="851" y="528" w="78" h="16" color="FFFFFFFF" fontsize='12' format="VCENTER CENTER"/>
+			<column name="TMENT_4_5" x="930" y="528" w="74" h="16" color="FFFFFFFF" fontsize='12' format="VCENTER CENTER"/>
+					
+			<column name="TMENT_8_1" x="721" y="551" w="34" h="16" color="FFFFFFFF" fontsize='12' format="VCENTER CENTER"/>
+			<column name="TMENT_8_2" x="756" y="551" w="94" h="16" color="FFFFFFFF" fontsize='12' format="VCENTER CENTER"/>
+			<column name="TMENT_8_3" x="851" y="551" w="78" h="16" color="FFFFFFFF" fontsize='12' format="VCENTER CENTER"/>
+			<column name="TMENT_8_5" x="930" y="551" w="74" h="16" color="FFFFFFFF" fontsize='12' format="VCENTER CENTER"/>
+					
+			<column name="TMENT_16_1" x="721" y="574" w="34" h="16" color="FFFFFFFF" fontsize='12' format="VCENTER CENTER"/>
+			<column name="TMENT_16_2" x="756" y="574" w="94" h="16" color="FFFFFFFF" fontsize='12' format="VCENTER CENTER"/>
+			<column name="TMENT_16_3" x="851" y="574" w="78" h="16" color="FFFFFFFF" fontsize='12' format="VCENTER CENTER"/>
+			<column name="TMENT_16_5" x="930" y="574" w="74" h="16" color="FFFFFFFF" fontsize='12' format="VCENTER CENTER"/>
+	
+ 			<column name="TMENT_32_1" x="721" y="597" w="34" h="16" color="FFFFFFFF" fontsize='12' format="VCENTER CENTER"/>
+			<column name="TMENT_32_2" x="756" y="597" w="94" h="16" color="FFFFFFFF" fontsize='12' format="VCENTER CENTER"/>
+			<column name="TMENT_32_3" x="851" y="597" w="78" h="16" color="FFFFFFFF" fontsize='12' format="VCENTER CENTER"/>
+			<column name="TMENT_32_5" x="930" y="597" w="74" h="16" color="FFFFFFFF" fontsize='12' format="VCENTER CENTER"/>		
+		</page>
+
+		<page name="WAITERS" x="773" y="33">
+			<sprite name="WAIT_TAB" l="937" t="180" r="1000" b="210" texture="Tournament_MainRoom_Lobby01" />
+			<msprite name="WAIT_PANEL"  sx="709" sy="61" ex="709" ey="61" l="0" t="0" r="307" b="694" texture="Tournament_MainRoom_Lobby02" />
+			<button name="WAIT_REFRESH" x="718" y="71" w="30" h="28">
+				<sprite l="58" t="521" r="88" b="549" texture="UI_Button" />
+				<sprite l="58" t="550" r="88" b="578" texture="UI_Button" />
+				<sprite l="58" t="579" r="88" b="607" texture="UI_Button" />
+			</button>
+
+			<waiter name="WAITERLIST" l="718" t="119" r="1007" b="693" >
+
+				
+				<sprite name="SLOT_SIZE" l="718" t="119" r="1007" b="141" texture="Tournament_MainRoom_Lobby03" />
+				<sprite name="WAIT_MOUSE_OVER" l="0" t="0" r="289" b="22" texture="Tournament_MainRoom_Lobby03" />
+				<column name="LEVEL"      x="3" y="3" w="16" h="16" format="VCENTER CENTER" /> 
+				<column name="NAME"       x="23" y="2" w="120" h="18" fontsize="12" color="FFFFFFFF" format="VCENTER CENTER" />
+				<column name="CLANEMBLEM" x="146" y="3" w="16" h="16"  shadow="FF000000" />
+				<column name="CLANNAME"   x="166" y="2" w="120" h="18" fontsize="12" color="FFFFFFFF" format="VCENTER CENTER" />
+
+				<eventrect name="SCROLL_RECT" l="718" t="119" r="1007" b="693" />
+				<button name="UP" x="988" y="98" w="17" h="17">
+					<sprite l="372" t="147" r="389" b="164" texture="UI_Button" />
+					<sprite l="372" t="165" r="389" b="182" texture="UI_Button" />
+					<sprite l="372" t="183" r="389" b="200" texture="UI_Button" />
+				</button>
+				<button name="DN" x="988" y="697" w="17" h="17">
+					<sprite l="417" t="147" r="434" b="164" texture="UI_Button" />
+					<sprite l="417" t="165" r="434" b="182" texture="UI_Button" />
+					<sprite l="417" t="183" r="434" b="200" texture="UI_Button" />
+				</button>
+			</waiter>
+		</page>
+
+		<page name="FRIEND" x="837" y="33">
+			<sprite name="FRIEND_TAB" l="937" t="210" r="1000" b="240" texture="Tournament_MainRoom_Lobby01" />
+			<msprite name="FRIEND_PANNEL"  sx="709" sy="61" ex="709" ey="61" l="308" t="0" r="615" b="694" texture="Tournament_MainRoom_Lobby02" />
+
+			<button name="REFRESH_FRIEND" x="718" y="71" w="30" h="28">
+				<sprite l="58" t="521" r="88" b="549" texture="UI_Button" />
+				<sprite l="58" t="550" r="88" b="578" texture="UI_Button" />
+				<sprite l="58" t="579" r="88" b="607" texture="UI_Button" />
+			</button>
+			<button name="ADDFRIEND" x="750" y="71" w="79" h="28">
+				<sprite l="359" t="348" r="438" b="376" texture="UI_Button" />
+				<sprite l="359" t="377" r="438" b="405" texture="UI_Button" />
+				<sprite l="359" t="406" r="438" b="434" texture="UI_Button" />
+			</button>
+			<button name="SENDMESSAGE" x="831" y="71" w="104" h="28">
+				<sprite l="439" t="348" r="543" b="376" texture="UI_Button" />
+				<sprite l="439" t="377" r="543" b="405" texture="UI_Button" />
+				<sprite l="439" t="406" r="543" b="434" texture="UI_Button" />
+			</button>
+			
+			<friend name="FRIENDLIST" l="718" t="119" r="1007" b="693" >
+				<template>
+					<sprite name="FRIEND_MOUSE_OVER" l="0" t="23" r="289" b="45" texture="Tournament_MainRoom_Lobby03" />
+					<sprite name="FRIEND_ONLINE" l="937" t="511" r="1004" b="529" texture="Tournament_MainRoom_Lobby01" />
+					<sprite name="FRIEND_OFFLINE" l="937" t="530" r="1004" b="548" texture="Tournament_MainRoom_Lobby01" />
+					<column name="STATE" x="220" y="2" />
+					<column name="LEVEL" x="3" y="3" w="16" h="16" format="VCENTER CENTER" />
+					<column name="NAME" x="23" y="2" w="168" h="18" fontsize="12" color="FFFFFFFF" format="VCENTER CENTER" />
+					
+					<button name="FRIEND_POP_OPEN" x="195" y="4" w="17" h="17">
+						<sprite l="417" t="147" r="434" b="164" texture="UI_Button" />
+						<sprite l="417" t="165" r="434" b="182" texture="UI_Button" />
+						<sprite l="417" t="183" r="434" b="200" texture="UI_Button" />
+					</button>
+				</template>
+
+				<friendcolumn maxline="24" gap="24" name="FRIENDCOL" l="718" t="119" r="1007" b="141" />
+
+				<eventrect name="SCROLL_RECT" l="718" t="119" r="1007" b="693" />
+				<button name="UP" x="988" y="98" w="17" h="17">
+					<sprite l="372" t="147" r="389" b="164" texture="UI_Button" />
+					<sprite l="372" t="165" r="389" b="182" texture="UI_Button" />
+					<sprite l="372" t="183" r="389" b="200" texture="UI_Button" />
+				</button>
+				<button name="DN" x="988" y="697" w="17" h="17">
+					<sprite l="417" t="147" r="434" b="164" texture="UI_Button" />
+					<sprite l="417" t="165" r="434" b="182" texture="UI_Button" />
+					<sprite l="417" t="183" r="434" b="200" texture="UI_Button" />
+				</button>
+			</friend>
+		</page>
+		
+		<page name="BLOCK" x="901" y="33">
+			<sprite name="BLOCK_TAB" l="954" t="664" r="1017" b="694" texture="Tournament_MainRoom_Lobby01" />
+			<msprite name="BLOCK_PANNEL"  sx="709" sy="61" ex="709" ey="61" l="308" t="0" r="615" b="694" texture="Tournament_MainRoom_Lobby02" />
+
+			<button name="ADDBLOCK" x="718" y="71" w="104" h="28">
+				<sprite l="85" t="430" r="189" b="458" texture="Tournament_MainRoom_Lobby03" />
+				<sprite l="85" t="459" r="189" b="487" texture="Tournament_MainRoom_Lobby03" />
+				<sprite l="85" t="488" r="189" b="516" texture="Tournament_MainRoom_Lobby03" />
+			</button>
+
+			<block name="BLOCKLIST" l="718" t="119" r="1007" b="693" >
+				<template>
+					<sprite name="SLOT_SIZE" l="718" t="119" r="1007" b="141" texture="Tournament_MainRoom_Lobby03" />
+					<sprite name="BLOCK_MOUSE_OVER" l="0" t="23" r="289" b="45" texture="Tournament_MainRoom_Lobby03" />
+
+					<column name="LEVEL" x="3" y="3" w="16" h="16" format="VCENTER CENTER" />
+					<column name="NAME" x="23" y="2" w="168" h="18" fontsize="12" color="FFFFFFFF" format="VCENTER CENTER" />
+	
+					<button name="BLOCK_DELETE" x="219" y="2" w="68" h="18">
+						<sprite l="85" t="372" r="153" b="390" texture="Tournament_MainRoom_Lobby03" />
+						<sprite l="85" t="391" r="153" b="409" texture="Tournament_MainRoom_Lobby03" />
+						<sprite l="85" t="410" r="153" b="428" texture="Tournament_MainRoom_Lobby03" />
+					</button>
+
+				</template>
+
+				<blockcolumn maxline="24" gap="24" name="BLOCKCOL" l="718" t="119" r="1007" b="141" />
+
+				<eventrect name="SCROLL_RECT" x="718" y="119" w="289" h="574" />
+				<button name="UP" x="988" y="98" w="17" h="17">
+					<sprite l="372" t="147" r="389" b="164" texture="UI_Button" />
+					<sprite l="372" t="165" r="389" b="182" texture="UI_Button" />
+					<sprite l="372" t="183" r="389" b="200" texture="UI_Button" />
+				</button>
+				<button name="DN" x="988" y="697" w="17" h="17">
+					<sprite l="417" t="147" r="434" b="164" texture="UI_Button" />
+					<sprite l="417" t="165" r="434" b="182" texture="UI_Button" />
+					<sprite l="417" t="183" r="434" b="200" texture="UI_Button" />
+				</button>
+			</block>
+		</page>
+
+		<page name="MESSAGE" x="965" y="33">
+			<sprite name="MESSAGE_TAB" l="937" t="240" r="979" b="270" texture="Tournament_MainRoom_Lobby01" />
+			<msprite name="MESSAGE_PANNEL" sx="709" sy="61" ex="709" ey="61" l="616" t="0" r="923" b="694" texture="Tournament_MainRoom_Lobby02" />
+					
+			<button name="SENDMESSAGE" x="750" y="71" w="104" h="28">
+				<sprite l="439" t="348" r="543" b="376" texture="UI_Button" />
+				<sprite l="439" t="377" r="543" b="405" texture="UI_Button" />
+				<sprite l="439" t="406" r="543" b="434" texture="UI_Button" />
+			</button>
+		
+			<button name="REFRESH_INBOX" x="718" y="71" w="30" h="28">
+				<sprite l="58" t="521" r="88" b="549" texture="UI_Button" />
+				<sprite l="58" t="550" r="88" b="578" texture="UI_Button" />
+				<sprite l="58" t="579" r="88" b="607" texture="UI_Button" />
+			</button>
+
+			<message name="MESSAGELIST" l="718" t="119" r="1007" b="477">
+				<template>
+					<sprite name="MESSAGE_MOUSE_OVER" l="0" t="0" r="0" b="0" texture="Tournament_MainRoom_Lobby03" />
+					<sprite name="MESSAGE_MOUSE_CLICK" l="0" t="46" r="289" b="68" texture="Tournament_MainRoom_Lobby03" />
+					<sprite name="MESSAGE_READ_BEFORE" l="937" t="270" r="955" b="283" texture="Tournament_MainRoom_Lobby01" />
+					<sprite name="MESSAGE_READ_AFTER" l="937" t="283" r="955" b="296" texture="Tournament_MainRoom_Lobby01" /> 
+					<sprite name="MESSAGE_FRIEND_ICON"  l="937" t="664" r="953" b="680" texture="Tournament_MainRoom_Lobby01" />
+    					<sprite name="MESSAGE_MESSAGE_ICON" l="937" t="681" r="953" b="697" texture="Tournament_MainRoom_Lobby01" />
+
+.					<column name="CLASS"	  x="3" y="3" w='16' h='16' shadow="FF333333"/>
+					<column name="NAME" x="23" y="2" w="122" h="18" fontsize="12" color="FFFFFFFF" format="VCENTER LEFT" />
+					<column name="MSGTYPE" x="3" y="3" w="16" h="16" />
+					<column name="TIME" x="222" y="3" w="63" h="18" fontsize="12" color="FFFFFFFF" format="VCENTER LEFT" />
+								
+					<button name="DELETE" x="163" y="1" w="20" h="20">
+						<sprite l="89" t="521" r="109" b="541" texture="UI_Button" />
+						<sprite l="89" t="542" r="109" b="562" texture="UI_Button" />
+						<sprite l="89" t="563" r="109" b="583" texture="UI_Button" />
+					</button>
+				</template>
+
+				<column name="MSG_MSGTYPE" x="721" y="541" w="16" h="16" fontsize="12" color="CCCCCC" format="VLEFT CENTER" />
+				<column name="MSG_NAME" x="740" y="541" w="122" h="16" fontsize="12" color="CCCCCC" format="VLEFT CENTER" />
+				<column name="MSG_TIME" x="940" y="541" w="57" h="16" fontsize="12" color="CCCCCC" format="VLEFT CENTER" />
+				<column name="MESSAGE" x="742" y="582" w="243" h="112" fontsize="12" color="CCCCCC" format="VLEFT TOP" />
+
+				<msgcolumn maxline="24" gap="24" name="MSGCOL" l="718" t="119" r="1007" b="141" />
+
+				<eventrect name="SCROLL_RECT" l="718" t="119" r="1007" b="477" />
+				<button name="UP" x="988" y="98" w="17" h="17">
+					<sprite l="372" t="147" r="389" b="164" texture="UI_Button" />
+					<sprite l="372" t="165" r="389" b="182" texture="UI_Button" />
+					<sprite l="372" t="183" r="389" b="200" texture="UI_Button" />
+				</button>
+				<button name="DN" x="988" y="481" w="17" h="17">
+					<sprite l="417" t="147" r="434" b="164" texture="UI_Button" />
+					<sprite l="417" t="165" r="434" b="182" texture="UI_Button" />
+					<sprite l="417" t="183" r="434" b="200" texture="UI_Button" />
+				</button>		
+
+ 				<button name="FRIEND_APPLY" x="920" y="717" w="84" h="32">
+ 					<sprite l="0" t="434" r="84" b="462" texture="UI_Button" />
+					<sprite l="0" t="463" r="84" b="491" texture="UI_Button" />
+					<sprite l="0" t="492" r="84" b="520" texture="UI_Button" />
+				</button>
+
+				<button name="FRIEND_REFUSE" x="834" y="717" w="84" h="32">
+					<sprite l="85" t="434" r="169" b="462" texture="UI_Button" />
+					<sprite l="85" t="463" r="169" b="491" texture="UI_Button" />
+					<sprite l="85" t="492" r="169" b="520" texture="UI_Button" />
+				</button>
+	
+				<button name="REPLY" x="834" y="717" w="84" h="28">
+					<sprite l="85" t="434" r="169" b="462" texture="UI_Button" />
+					<sprite l="85" t="463" r="169" b="491" texture="UI_Button" />
+					<sprite l="85" t="492" r="169" b="520" texture="UI_Button" />
+				</button>
+
+				<button name="MESSAGE_DELETE" x="920" y="717" w="84" h="28">
+					<sprite l="0" t="434" r="84" b="462" texture="UI_Button" />
+					<sprite l="0" t="463" r="84" b="491" texture="UI_Button" />
+					<sprite l="0" t="492" r="84" b="520" texture="UI_Button" />
+				</button>
+			</message>
+		</page>
+	</tab>
+
+	<select name="CHATMODE" count="3" oneVone="1" OffX="0" OffY="0">
+		<rect name="CHAT_CHANNEL" 	l="83" t="517" r="125" b="567" />
+		<rect name="CHAT_CLAN" 		l="83" t="572" r="125" b="622" />
+		
+
+		<sprite name="CHAT_CHANNEL_MOUSE_OVER"  l="937" t="358" r="979" b="408" texture="Tournament_MainRoom_Lobby01" />
+		<sprite name="CHAT_CHANNEL_MOUSE_CLICK" l="979" t="358" r="1021" b="408" texture="Tournament_MainRoom_Lobby01" />
+
+		<sprite name="CHAT_CLAN_MOUSE_OVER"     l="937" t="409" r="979" b="459" texture="Tournament_MainRoom_Lobby01" />
+		<sprite name="CHAT_CLAN_MOUSE_CLICK"    l="979" t="409" r="1021" b="459" texture="Tournament_MainRoom_Lobby01" />
+		
+		
+	</select>
+	
+
+		<list name="CHAT" l="144" t="548" r="660" b="708">
+		<eventrect name="SCROLL_RECT" x="144" y="548" w="516" h="160" />
+		<button name="UP" x="683" y="552" w="11" h="11">
+			<sprite l="390" t="147" r="401" b="158" texture="UI_Button" />
+			<sprite l="390" t="159" r="401" b="170" texture="UI_Button" />
+			<sprite l="390" t="171" r="401" b="182" texture="UI_Button" />
+		</button>
+
+		<button name="DN" x="683" y="697" w="11" h="11">
+			<sprite l="435" t="147" r="446" b="158" texture="UI_Button" />
+			<sprite l="435" t="159" r="446" b="170" texture="UI_Button" />
+			<sprite l="435" t="171" r="446" b="182" texture="UI_Button" />
+		</button>
+	</list>
+
+	<checkbox name="CHAT_LOBBY" x="144" y="524" w="13" h="13">
+		<sprite l="0" t="0" r="0" b="0" texture="UI_Button"/>
+		<sprite l="402" t="162" r="415" b="175" texture="UI_Button" />
+	</checkbox>
+
+	<checkbox name="CHAT_CLAN" x="232" y="524" w="13" h="13">
+		<sprite l="0" t="0" r="0" b="0" texture="UI_Button"/>
+		<sprite l="402" t="162" r="415" b="175" texture="UI_Button" />
+	</checkbox>
+
+	<checkbox name="CHAT_WHISPER" x="319" y="524" w="13" h="13">
+		<sprite l="0" t="0" r="0" b="0" texture="UI_Button"/>
+		<sprite l="402" t="162" r="415" b="175" texture="UI_Button" />
+	</checkbox>
+
+	
+	
+
+	
+	
+	<column name="GIFT_ICON"  x="4" y="24" w="32" h="33" /> 
+	
+	<msprite name="AWARD_ENABLE_TAB"  sx="76" sy="33" ex="76" ey="33" l="403" t="947" r="486" b="977" texture="Tournament_MainRoom"/>
+	<msprite name="AWARD_DISABLE_TAB" sx="76" sy="33" ex="76" ey="33" l="487" t="947" r="570" b="977" texture="Tournament_MainRoom"/>
+	
+	<sprite name="TNMT_PRESENT_BACK" l="494" t="855" r="568" b="929" texture="Tournament_MainRoom"/>
+	
+	<column name="NEW_MSG_ICON" x="990" y="27" w="27" h="20" />
+	
+	<!-- RANK -->
+	<msprite name="RANK_CLOSEBACK" sx="0" sy="718" ex="0" ey="718" l="0" t="974" r="1024" b="1024" texture="Tournament_MainRoom_Lobby03" />
+	<button name="RANK_CLOSE" x="907" y="720" w="116" h="46">
+		<sprite l="864" t="207" r="980" b="253" texture="UI_Button" />
+		<sprite l="864" t="254" r="980" b="300" texture="UI_Button" />
+		<sprite l="864" t="301" r="980" b="347" texture="UI_Button" />
+	</button>
+
+
+	<msprite name="UI_RECEIPT_NOTICE"  sx="726" sy="166" ex="726" ey="166" l="169" t="927" r="253" b="940" texture="Tournament_MainRoom"/>
+	<msprite name="UI_ENTRANCE_NOTICE" sx="726" sy="166" ex="726" ey="166" l="254" t="927" r="338" b="940" texture="Tournament_MainRoom"/>
+
+	<sprite name="DAMAGE_MARK" l="339" t="927" r="460" b="946" texture="Tournament_MainRoom"/>
+</UIDEFINE>

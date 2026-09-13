@@ -1,0 +1,136 @@
+<UIDEFINE>
+
+	<image name="Present_Gift" filename="gift_box.dds"/>
+
+	<column name="NICKNAME" x='494' y='578' w='126' h='16' color='FFFFFFFF'  format='VCENTER CENTER'/>
+	<column name="MESSAGE" x='494' y='604' w='481' h='66' color='FFFFFFFF' format='VTOP LEFT'/>
+  	<column name="EXPIRE_TIME" x='628' y='578' w='245' h='16' color='FFFFFFFF' format='VCENTER LEFT'/>
+
+ 	
+ 	 <msprite name="PRESENT_GIFT_1" sx="90" sy="33" ex="90" ey="33" l="0" t="0" r="365" b="722" texture="Present_Gift"/>
+	 <msprite name="PRESENT_GIFT_2" sx="461" sy="33" ex="461" ey="33" l="366" t="0" r="912" b="722" texture="Present_Gift"/>
+  
+ 	<column name="AVATAR" x="101" y="105" w="238" h="320"/>
+  	
+  	<column name="CASH" x='162' y='634' w='102' h='20' fontsize="13" color="FFFFFFFF" format='VCENTER RIGHT'/>
+	<column name="PG" x='330' y='634' w='102' h='20' fontsize="13" color="FFFFFFFF"  format='VCENTER RIGHT'/>
+  	<column name="COUPON" x='162' y='658' w='102' h='20' fontsize="13" color="FFFFFFFF"  format='VCENTER RIGHT'/>
+	<column name="COIN" x='330' y='658' w='102' h='20' fontsize="13" color="FFFFFFFF"  format='VCENTER RIGHT'/>
+  	
+	<button name="FRONT" x="274" y="422" w="28" h="28">
+		<sprite l="0" t="521" r="28" b="549" texture="UI_Button" />
+		<sprite l="0" t="550" r="28" b="578" texture="UI_Button" />
+		<sprite l="0" t="579" r="28" b="607" texture="UI_Button" />
+	</button>
+	<button name="BACK" x="305" y="422" w="28" h="28">
+		<sprite l="29" t="521" r="57" b="549" texture="UI_Button" />
+		<sprite l="29" t="550" r="57" b="578" texture="UI_Button" />
+		<sprite l="29" t="579" r="57" b="607" texture="UI_Button" />
+	</button>
+
+ 	<charslot name="CHARSLOT">
+		<template>
+			<sprite name="Present_Gift_R_BOX" l="709" t="518" r="773" b="582" texture="UI_Button"/> 
+			<sprite name="Present_Gift_WH_BOX" l="579" t="518" r="643" b="582" texture="UI_Button"/>
+		</template>
+		<slot name="char1" x="350" y="117" w="64" h="64"/>
+		<slot name="char2" x="350" y="184" w="64" h="64"/>
+		<slot name="char3" x="350" y="251" w="64" h="64"/>
+		<slot name="char4" x="350" y="318" w="64" h="64"/>
+		<slot name="char5" x="350" y="385 " w="64" h="64"/>
+    		<eventrect name="SCROLL_RECT" x="349" y="116" w="66" h="334"/>
+		<button name="UP" x="419" y="116" w="23" h="28">
+			<sprite l="258" t="461" r="281" b="489" texture="UI_Button"/>
+			<sprite l="282" t="461" r="305" b="489" texture="UI_Button"/>
+			<sprite l="306" t="461" r="329" b="489" texture="UI_Button"/>
+		</button>
+		<button name="DN" x="419" y="422" w="23" h="28">
+			<sprite l="258" t="490" r="281" b="518" texture="UI_Button"/>
+			<sprite l="282" t="490" r="305" b="518" texture="UI_Button"/>
+			<sprite l="306" t="490" r="329" b="518" texture="UI_Button"/>
+		</button>
+	</charslot>
+
+	
+  	<giftitemslot name="ITEMSLOT">
+
+  		<template>
+			<button name="MYINVENTORY" x='127' y='48' w='53' h='22'>
+    				<sprite l='237' t='788' r='290' b='811' texture="Present_Gift"/>
+				<sprite l='237' t='812' r='290' b='835' texture="Present_Gift"/>
+        			<sprite l='237' t='836' r='290' b='859' texture="Present_Gift"/>
+			</button>
+	
+			<button name="DELETE" x='180' y='48' w='53' h='22'>
+				<sprite l='237' t='860' r='290' b='883' texture="Present_Gift"/>
+				<sprite l='237' t='884' r='290' b='905' texture="Present_Gift"/>
+		        	<sprite l='237' t='906' r='290' b='931' texture="Present_Gift"/>
+			</button>
+
+			<column name="NAME" x="78" y="7"/>
+				<sprite name="Present_Gift_MOUSE_OVER" l="0" t="723" r="237" b="799" texture="Present_Gift"/> 
+				<sprite name="Present_Gift_MOUSE_CLICK" l="0" t="800" r="237" b="876" texture="Present_Gift"/> 
+   
+			 	<sprite name="Present_Gift_Y_BOX" l="644" t="518" r="708" b="582" texture="UI_Button"/> 
+				<sprite name="Present_Gift_IM_MY_BOX" l="384" t="518" r="448" b="582" texture="UI_Button"/>
+				<sprite name="Present_Gift_USE_NOW_BOX" l="449" t="518" r="513" b="582" texture="UI_Button"/>
+   
+				<sprite name="Present_Gift_STRIPE" l="0" t='877' r="237" b='953' texture="Present_Gift"/>
+				<sprite name="Present_Gift_THUM_EF" l='237' t='723' r='301' b='787' texture="Present_Gift"/>
+             
+		</template>
+    
+  		<eventrect name="SCROLL_RECT" x="483" y="158" w="474" h="384"/>
+    
+		<slot name="slot1"  x="483" y="158" w="237" h="76"/>
+		<slot name="slot2"  x="721" y="158" w="237" h="76"/>
+		<slot name="slot3"  x="483" y="235" w="237" h="76"/>
+		<slot name="slot4"  x="721" y="235" w="237" h="76"/>
+		<slot name="slot5"  x="483" y="312" w="237" h="76"/>
+		<slot name="slot6"  x="721" y="312" w="237" h="76"/>
+		<slot name="slot7"  x="483" y="389" w="237" h="76"/>
+		<slot name="slot8"  x="721" y="389" w="237" h="76"/>
+		<slot name="slot9"  x="483" y="466" w="237" h="76"/>
+		<slot name="slot10" x="721" y="466" w="237" h="76"/>
+    		
+		<button name="UP" x="962" y="158" w="23" h="28">
+			<sprite l="258" t="461" r="281" b="489" texture="UI_Button"/>
+			<sprite l="282" t="461" r="305" b="489" texture="UI_Button"/>
+			<sprite l="306" t="461" r="329" b="489" texture="UI_Button"/>
+		</button>
+		<button name="DN" x="962" y="514" w="23" h="28">
+			<sprite l="258" t="490" r="281" b="518" texture="UI_Button"/>
+			<sprite l="282" t="490" r="305" b="518" texture="UI_Button"/>
+			<sprite l="306" t="490" r="329" b="518" texture="UI_Button"/>
+		</button>   
+
+	</giftitemslot>
+
+	<button name="PRESENT_BOX" x="476" y="42" w="83" h="34">
+		<sprite l='302' t='723' r='385' b='757' texture="Present_Gift"/>
+		<sprite l='302' t='758' r='385' b='792' texture="Present_Gift"/>
+		<sprite l='302' t='793' r='385' b='827' texture="Present_Gift"/>
+		<sprite l='302' t='758' r='385' b='792' texture="Present_Gift"/>
+	</button>
+
+	<button name="PAPER_CODE" x="562" y="42" w="83" h="34">
+		<sprite l='302' t='828' r='385' b='862' texture="Present_Gift"/>
+		<sprite l='302' t='863' r='385' b='897' texture="Present_Gift"/>
+		<sprite l='302' t='898' r='385' b='932' texture="Present_Gift"/>	
+		<sprite l='302' t='863' r='385' b='897' texture="Present_Gift"/>
+	</button>
+
+	<editbox name="SEARCH" l='617' t='133' r='759' b='154' linelimit='1' textlimit='22' TCR='255' TCG='255' TCB='255' TCA='255'/>
+	<button name="SEARCH_BTN" x="777" y="129" w="54" h="22" >
+		<sprite l="0" t="956" r="54" b="978" texture="Present_Gift"/> 
+		<sprite l="0" t="979" r="54" b="1001" texture="Present_Gift"/> 
+		<sprite l="0" t="1002" r="54" b="1024" texture="Present_Gift"/> 
+	</button>
+    
+	<button name="SEARCH_DELETE_BTN" x="833" y="129" w="45" h="22" >
+		<sprite l="55" t="956" r="100" b="978" texture="Present_Gift"/> 
+		<sprite l="55" t="979" r="100" b="1001" texture="Present_Gift"/> 
+		<sprite l="55" t="1002" r="100" b="1024" texture="Present_Gift"/> 
+	</button>
+			
+</UIDEFINE>

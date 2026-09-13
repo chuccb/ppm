@@ -1,0 +1,70 @@
+<TUTORIALDEFINE>
+
+	<image name="Tutorial_Mode_01" filename="tu_t_1.DDS" />
+	<image name="Tutorial_Mode_03" filename="tu_t_3.DDS" />
+	<image name="Tutorial_Mode_Back" filename="TUTO_BACK.DDS" />
+	<image name="Tutorial_Mode_Mission" filename="tuto_mission.dds"/>
+	<image name="Tutorial_Mode_Clear" filename="tutorial_clear.dds"/>
+	
+	
+
+	<msprite name="TUTO_BACK_IMAGE" sx='0' sy='0' ex='0' ey='0' l='0' t='0' r='1024' b='768' texture="Tutorial_Mode_Back"/>
+	<msprite name="TUTO_START_IMAGE_BUKIYA" sx="0" sy="0" ex="0" ey="0" l="0" t="0" r="1024" b="768" texture="Tutorial_Mode_03"/>
+	
+
+	<msprite name="CHAPTER_START_IMG_1" sx="162" sy="213" ex="162" ey="213" l="0" t="768" r="313" b="834" texture="Tutorial_Mode_03"/>
+	<msprite name="CHAPTER_START_IMG_2" sx="162" sy="213" ex="162" ey="213" l="314" t="768" r="643" b="834" texture="Tutorial_Mode_03"/>
+	<msprite name="CHAPTER_START_IMG_3" sx="162" sy="213" ex="162" ey="213" l="644" t="768" r="932" b="834" texture="Tutorial_Mode_03"/>
+	<msprite name="CHAPTER_START_IMG_4" sx="162" sy="213" ex="162" ey="213" l="0" t="835" r="233" b="901" texture="Tutorial_Mode_03"/>
+	
+	<column name="CHAPTER_START_TEXT" x="165" y="298" w="540" h="236" fontsize="18" color="ffffffff" shadow="ff000000" format="VLEFT TOP"/>
+
+	<msprite name="TUTO_CLEAR_PRESENT" sx="284" sy="484" ex="284" ey="484" l="0" t="768" r="106" b="842" texture="Tutorial_Mode_Clear"/>
+	<msprite name="TUTO_CLEAR_IMAGE_SURURU" sx="0" sy="0" ex="0" ey="0" l="0" t="0" r="1024" b="768" texture="Tutorial_Mode_Clear"/>
+	<msprite name="TUTO_CLEAR_IMG" sx="162" sy="213" ex="162" ey="213" l="514" t="768" r="672" b="834" texture="Tutorial_Mode_Clear"/>
+	
+	<msprite name="TUTO_CLEAR_CHAPTER" sx="162" sy="213" ex="162" ey="213" l="673" t="835" r="831" b="901" texture="Tutorial_Mode_Clear"/>
+
+	<column name="CONTINUE_COUNT_10" x='478' y='312' w='33' h='33'/>
+	<column name="CONTINUE_COUNT_01" x='513' y='312' w='33' h='33'/>
+	<msprite name="TUTO_CONTINUE_POPUP" sx="377" sy="220" ex="377" ey="220" l="271" t="526" r="541" b="788" texture="Tutorial_Mode_Mission"/>
+
+
+	
+	<button name="CLEAR_NEXT" x="162" y="484" w="114" h="50">
+		<sprite l="583" t="768" r="697" b="818" texture="Tutorial_Mode_01"/>
+		<sprite l="583" t="819" r="697" b="869" texture="Tutorial_Mode_01"/>
+		<sprite l="583" t="870" r="697" b="920" texture="Tutorial_Mode_01"/>
+	</button>
+	
+
+	<button name="START_NEXT" x="162" y="484" w="114" h="50">
+		<sprite l="583" t="768" r="697" b="818" texture="Tutorial_Mode_01"/>
+		<sprite l="583" t="819" r="697" b="869" texture="Tutorial_Mode_01"/>
+		<sprite l="583" t="870" r="697" b="920" texture="Tutorial_Mode_01"/>
+	</button>
+
+	
+	<button name="TUTORIAL_END" x="162" y="484" w="114" h="50">
+ 		<sprite l="910" t="768" r="1024" b="818" texture="Tutorial_Mode_Clear"/>
+		<sprite l="910" t="819" r="1024" b="869" texture="Tutorial_Mode_Clear"/>
+		<sprite l="910" t="870" r="1024" b="920" texture="Tutorial_Mode_Clear"/>
+ 	</button>
+
+
+
+	<button name="CONTINUE_YES" x="514" y="421" w="104" h="42">
+		<sprite l="804" t="768" r="909" b="810" texture="Tutorial_Mode_01"/>
+		<sprite l="804" t="811" r="909" b="853" texture="Tutorial_Mode_01"/>
+		<sprite l="804" t="854" r="909" b="896" texture="Tutorial_Mode_01"/>
+	</button>
+
+	<button name="CONTINUE_NO" x="405" y="421" w="104" h="42">
+		<sprite l="698" t="768" r="803" b="810" texture="Tutorial_Mode_01"/>
+		<sprite l="698" t="811" r="803" b="853" texture="Tutorial_Mode_01"/>
+		<sprite l="698" t="854" r="803" b="896" texture="Tutorial_Mode_01"/>
+	</button>
+	
+
+	
+</TUTORIALDEFINE>

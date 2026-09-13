@@ -1,0 +1,124 @@
+﻿ <UIDEFINE>
+    	<image name="Package_Select_Shop03" filename="shop_03.dds"/>
+	<image name="Package_Select_Shop" filename="shop_01.dds"/>
+
+	
+  	<msprite name="BackGround_IMG" sx='326' sy='134' ex='326' ey='134' l='1' t='1' r='373' b='501' texture="Package_Select_Shop03"/>
+	
+	
+	<button name="TYPE_1" x="336" y="181" w="64" h="64">
+		<sprite l="2" t="667" r="66" b="731" texture="Package_Select_Shop03"/>
+		<sprite l="956" t="67" r="1020" b="131" texture="Package_Select_Shop"/>
+		<sprite l="2" t="535" r="66" b="599" texture="Package_Select_Shop03"/>
+	</button> 
+	
+	<button name="TYPE_2" x="408" y="181" w="64" h="64">
+		<sprite l="67" t="667" r="131" b="731" texture="Package_Select_Shop03"/>
+		<sprite l="956" t="67" r="1020" b="131" texture="Package_Select_Shop"/>
+		<sprite l="67" t="535" r="131" b="599" texture="Package_Select_Shop03"/>
+	</button> 
+	
+	<button name="TYPE_3" x="480" y="181" w="64" h="64">
+		<sprite l="132" t="667" r="196" b="731" texture="Package_Select_Shop03"/>
+		<sprite l="956" t="67" r="1020" b="131" texture="Package_Select_Shop"/>
+		<sprite l="132" t="535" r="196" b="599" texture="Package_Select_Shop03"/>
+	</button> 
+	
+	<button name="TYPE_4" x="552" y="181" w="64" h="64">
+		<sprite l="197" t="667" r="261" b="731" texture="Package_Select_Shop03"/>
+		<sprite l="956" t="67" r="1020" b="131" texture="Package_Select_Shop"/>
+		<sprite l="197" t="535" r="261" b="599" texture="Package_Select_Shop03"/>
+	</button> 
+	
+	<button name="TYPE_5" x="624" y="181" w="64" h="64">
+		<sprite l="262" t="667" r="326" b="731" texture="Package_Select_Shop03"/>
+		<sprite l="956" t="67" r="1020" b="131" texture="Package_Select_Shop"/>
+		<sprite l="262" t="535" r="326" b="599" texture="Package_Select_Shop03"/>
+	</button> 
+	
+	<button name="TYPE_6" x="336" y="277" w="64" h="64">
+		<sprite l="327" t="667" r="391" b="731" texture="Package_Select_Shop03"/>
+		<sprite l="956" t="67" r="1020" b="131" texture="Package_Select_Shop"/>
+		<sprite l="327" t="535" r="391" b="599" texture="Package_Select_Shop03"/>
+	</button> 
+	
+	<button name="TYPE_7" x="408" y="277" w="64" h="64">
+		<sprite l="392" t="667" r="456" b="731" texture="Package_Select_Shop03"/>
+		<sprite l="956" t="67" r="1020" b="131" texture="Package_Select_Shop"/>
+		<sprite l="392" t="535" r="456" b="599" texture="Package_Select_Shop03"/>
+	</button> 
+	
+	<button name="TYPE_8" x="480" y="277" w="64" h="64">
+		<sprite l="2" t="732" r="66" b="796" texture="Package_Select_Shop03"/>
+		<sprite l="956" t="67" r="1020" b="131" texture="Package_Select_Shop"/>
+		<sprite l="2" t="600" r="66" b="664" texture="Package_Select_Shop03"/>
+	</button> 
+	
+	<button name="TYPE_9" x="552" y="277" w="64" h="64">
+		<sprite l="67" t="732" r="131" b="796" texture="Package_Select_Shop03"/>
+		<sprite l="956" t="67" r="1020" b="131" texture="Package_Select_Shop"/>
+		<sprite l="67" t="600" r="131" b="664" texture="Package_Select_Shop03"/>
+	</button> 
+	
+	<button name="TYPE_10" x="624" y="277" w="64" h="64">
+		<sprite l="132" t="732" r="196" b="796" texture="Package_Select_Shop03"/>
+		<sprite l="956" t="67" r="1020" b="131" texture="Package_Select_Shop"/>
+		<sprite l="132" t="600" r="196" b="664" texture="Package_Select_Shop03"/>
+	</button> 
+	
+	<button name="TYPE_11" x="336" y="373" w="64" h="64">
+		<sprite l="197" t="732" r="261" b="796" texture="Package_Select_Shop03"/>
+		<sprite l="956" t="67" r="1020" b="131" texture="Package_Select_Shop"/>
+		<sprite l="197" t="600" r="261" b="664" texture="Package_Select_Shop03"/>
+	</button> 
+	
+	<button name="TYPE_12" x="408" y="373" w="64" h="64">
+		<sprite l="262" t="732" r="326" b="796" texture="Package_Select_Shop03"/>
+		<sprite l="956" t="67" r="1020" b="131" texture="Package_Select_Shop"/>
+		<sprite l="262" t="600" r="326" b="664" texture="Package_Select_Shop03"/>
+	</button> 
+
+	<button name="TYPE_13" x="480" y="373" w="64" h="64">
+		<sprite l="327" t="732" r="391" b="796" texture="Package_Select_Shop03"/>
+		<sprite l="956" t="67" r="1020" b="131" texture="Package_Select_Shop"/>
+		<sprite l="327" t="600" r="391" b="664" texture="Package_Select_Shop03"/>
+	</button> 
+
+	<button name="TYPE_14" x="552" y="373" w="64" h="64">
+		<sprite l="392" t="732" r="456" b="796" texture="Package_Select_Shop03"/>
+		<sprite l="956" t="67" r="1020" b="131" texture="Package_Select_Shop"/>
+		<sprite l="392" t="600" r="456" b="664" texture="Package_Select_Shop03"/>
+	</button> 
+
+	<button name="CANCEL" x="610" y="591" w="76" h="32">
+		<sprite l="0" t="0" r="0" b="0" texture="Package_Select_Shop03"/>
+		<sprite l="374" t="1" r="450" b="33" texture="Package_Select_Shop03"/>
+		<sprite l="374" t="34" r="450" b="66" texture="Package_Select_Shop03"/>
+	</button> 
+
+	<column name="TYPE_1" x="340" y="253" w="58" h="16" fontsize="12" color="ffffffff" shadow="ff000000" format="VCENTER CENTER"/>
+	<column name="TYPE_2" x="411" y="253" w="58" h="16" fontsize="12" color="ffffffff" shadow="ff000000" format="VCENTER CENTER"/>
+	<column name="TYPE_3" x="484" y="253" w="58" h="16" fontsize="12" color="ffffffff" shadow="ff000000" format="VCENTER CENTER"/>
+	<column name="TYPE_4" x="556" y="253" w="58" h="16" fontsize="12" color="ffffffff" shadow="ff000000" format="VCENTER CENTER"/>
+	<column name="TYPE_5" x="627" y="253" w="58" h="16" fontsize="12" color="ffffffff" shadow="ff000000" format="VCENTER CENTER"/>
+	<column name="TYPE_6" x="340" y="349" w="58" h="16" fontsize="12" color="ffffffff" shadow="ff000000" format="VCENTER CENTER"/>
+	<column name="TYPE_7" x="411" y="349" w="58" h="16" fontsize="12" color="ffffffff" shadow="ff000000" format="VCENTER CENTER"/>
+	<column name="TYPE_8" x="484" y="349" w="58" h="16" fontsize="12" color="ffffffff" shadow="ff000000" format="VCENTER CENTER"/>
+	<column name="TYPE_9" x="556" y="349" w="58" h="16" fontsize="12" color="ffffffff" shadow="ff000000" format="VCENTER CENTER"/>
+	<column name="TYPE_10" x="627" y="349" w="58" h="16" fontsize="12" color="ffffffff" shadow="ff000000" format="VCENTER CENTER"/>
+	<column name="TYPE_11" x="340" y="445" w="58" h="16" fontsize="12" color="ffffffff" shadow="ff000000" format="VCENTER CENTER"/>
+	<column name="TYPE_12" x="411" y="445" w="58" h="16" fontsize="12" color="ffffffff" shadow="ff000000" format="VCENTER CENTER"/>
+	<column name="TYPE_13" x="484" y="445" w="58" h="16" fontsize="12" color="ffffffff" shadow="ff000000" format="VCENTER CENTER"/>
+	<column name="TYPE_14" x="556" y="445" w="58" h="16" fontsize="12" color="ffffffff" shadow="ff000000" format="VCENTER CENTER"/>
+	<column name="ITEMNAME" x="344" y="473" w="336" h="18" fontsize="12" color="ffffffff" shadow="ff000000" format="VCENTER CENTER"/>
+	<column name="EXPLANATION" x="344" y="500" w="336" h="69" fontsize="12" color="ffffffff" shadow="ff000000" format="VLEFT TOP"/>
+	
+
+	
+	<rect name="INFOPRICE" l="340" t="252" r="397" b="268"/>
+	
+	<rect name="INFONAME" l="344" t="473" r="680" b="491"/>
+	
+	<rect name="INFOEXPLAIN" l="344" t="500" r="680" b="569"/>
+
+ </UIDEFINE>

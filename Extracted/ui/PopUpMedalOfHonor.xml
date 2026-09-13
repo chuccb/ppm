@@ -1,0 +1,17 @@
+<UIDEFINE>
+	<image name="MEDALOFHONOR_POPUP" filename="medalOFhonor_back.dds"/>
+
+	<msprite name="MEDAL_POPUP" sx='262' sy='247' ex='262' ey='247' l='752' t='1' r='976' b='115' texture="MEDALOFHONOR_POPUP"/>
+	<button name="MEDAL_POPUP_EXIT" x='272' y='334' w='46' h='21'>
+		<sprite l='752' t='116' r='798' b='137' texture="MEDALOFHONOR_POPUP"/>
+		<sprite l='799' t='116' r='845' b='137' texture="MEDALOFHONOR_POPUP"/>
+		<sprite l='846' t='116' r='892' b='137' texture="MEDALOFHONOR_POPUP"/>
+	</button>	
+
+	<column name="CLICK_IMAGE" x='269' y='254' w='50' h='50' />
+
+	<column name="QUESTDESC" x='327' y='255' w='147' h='18' font="12" widthoverdrawDOT="1" color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>
+	<column name="QUESTNAME" x='327' y='277' w='147' h='26' font="12" widthoverdrawDOT="1" color='FFFFFFFF'  shadow='FF000000' format='VCENTER CENTER'/>
+	<column name="QUESTDETAIL" x='327' y='307' w='147' h='47' font="12" widthoverdrawDOT="1" color='FFFFFFFF'  shadow='FF000000' format='VCENTER CENTER'/>
+
+</UIDEFINE>

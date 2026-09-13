@@ -1,0 +1,57 @@
+<UIDEFINE>
+	<image name="Recycle_IMG" filename="SHOP_02.dds"/>
+
+	<msprite name="RECYCLE_BACKGROUND_LAYER" sx='303' sy='209' ex='303' ey='209' l='0' t='476' r='421' b='835' texture="Recycle_IMG"/>
+
+  <button name="RECYCLE_BUTTON" x="549" y="535" w="84" h="28">
+		<sprite l="104" t="899" r="188" b="927" texture="UI_Button"/>
+		<sprite l="189" t="899" r="273" b="927" texture="UI_Button"/>
+		<sprite l="274" t="899" r="358" b="927" texture="UI_Button"/>
+	</button>
+
+	<button name="RECYCLE_CLOSE_BUTTON" x="635" y="535" w="84" h="28">
+		<sprite l="777" t="794" r="861" b="822" texture="UI_Button" />
+		<sprite l="777" t="823" r="861" b="851" texture="UI_Button" />
+		<sprite l="777" t="852" r="861" b="880" texture="UI_Button" />
+	</button>
+
+	<RecycleSlot name="ITEMSLOT">
+
+		<template>
+			<sprite name="HOLD_OUTLINE" l='875' t='141' r='939' b='205' texture="UI_Button"/>
+		</template>
+
+		<slot name="slot1" x='332'  y='265' w='64' h='64'/>
+		<slot name="slot2" x='400'  y='265' w='64' h='64'/>
+		<slot name="slot3" x='468'  y='265' w='64' h='64'/>
+		<slot name="slot4" x='536'  y='265' w='64' h='64'/>
+		<slot name="slot5" x='603'  y='265' w='64' h='64'/>
+
+		<slot name="slot6" x='332'  y='333' w='64' h='64'/>
+		<slot name="slot7" x='400'  y='333' w='64' h='64'/>
+		<slot name="slot8" x='468'  y='333' w='64' h='64'/>
+		<slot name="slot9" x='536'  y='333' w='64' h='64'/>
+		<slot name="slot10" x='603'  y='333' w='64' h='64'/>
+
+		<eventrect name="SCROLL_RECT" x="331" y="264" w="338" h="134"/>
+
+		<button name="UP" x="673" y="264" w="23" h="28">
+			<sprite l="258" t="461" r="281" b="489" texture="UI_Button"/>
+			<sprite l="282" t="461" r="305" b="489" texture="UI_Button"/>
+			<sprite l="306" t="461" r="329" b="489" texture="UI_Button"/>
+		</button>
+
+		<button name="DN" x="673" y="370" w="23" h="28">
+			<sprite l="258" t="490" r="281" b="518" texture="UI_Button"/>
+			<sprite l="282" t="490" r="305" b="518" texture="UI_Button"/>
+			<sprite l="306" t="490" r="329" b="518" texture="UI_Button"/>
+		</button>   
+
+	</RecycleSlot>
+
+	<column name="CP_CURCOUPON" x="552" y="439" w="144" h="19" fontsize="15" color="FFFFFFFF" format="VCENTER RIGHT"/>
+        <column name="CP_HAVECOUPON" x="552" y="468" w="144" h="19" fontsize="15" color="FFFFFFFF" format="VCENTER RIGHT"/>
+        <column name="CP_TOTCOUPON" x="552" y="497" w="144" h="19" fontsize="15" color="FFFFFFFF" format="VCENTER RIGHT"/>
+        <column name="ADD_CP" x="337" y="474" w="75" h="28" fontsize="18" color="FF1f9812F" shadow="FF000000" format="VCENTER RIGHT"/>
+
+</UIDEFINE>

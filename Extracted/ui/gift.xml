@@ -1,0 +1,58 @@
+<UIDEFINE>
+
+	<msprite sx='259' sy='147' ex='259' ey='147' l='0' t='0' r='508' b='475' texture="SHOP2"/>
+
+	
+	<msprite name="NETCAFE_BUY" sx='264' sy='152' ex='264' ey='152' l='422' t='730' r='920' b='764' texture="SHOP2"/>
+
+	<editbox name="GIFT_NICKNAME" l='389' t='205' r='715' b='224' linelimit='1' textlimit='50' TCR='255' TCG='255' TCB='255' TCA='255'/>
+
+	<editbox name="MESSAGE_EDIT" l='389' t='236' r='736' b='292' linelimit='6' textlimit='49' TCR='255' TCG='255' TCB='255' TCA='255'/>
+
+	<column name="ITEM_IMG" x='293' y='357' w='64' h='64' />
+
+	<column name="ITEM_NAME" x='383' y='355' w='166' h='19' color='FFFFFFFF' fontsize='13' format='VCENTER CENTER'/>
+
+	<hscroll name="PERIOD" l='578' t='355' r='718' b='374' >
+		<button name="LEFT" x='554' y='353' w='23' h='23'>
+			<sprite l='509' t='0' r='532' b='23' texture="SHOP2"/>
+			<sprite l='509' t='24' r='532' b='47' texture="SHOP2"/>
+			<sprite l='509' t='48' r='532' b='71' texture="SHOP2"/>
+		</button>
+		<button name="RIGHT" x='719' y='353' w='23' h='23'>
+			<sprite l='533' t='0' r='556' b='23' texture="SHOP2"/>
+			<sprite l='533' t='24' r='556' b='47' texture="SHOP2"/>
+			<sprite l='533' t='48' r='556' b='71' texture="SHOP2"/>
+		</button>
+	</hscroll>
+
+	<column name="ITEM_TYPE" x='383' y='404' w='166' h='19' color='FFFFFFFF' fontsize='15' format='VCENTER CENTER'/>
+
+	<column name="ITEM_PRICE" x='558' y='404' w='90' h='19' color='FFff6633' fontsize='15' format='VCENTER RIGHT'/>
+
+	<column name="ITEM_PRICE_CLASS" x='652' y='404' w='49' h='19' color='FFFFFFFF' fontsize='13' format='VCENTER LEFT'/>
+
+	<column name="TOTALJJOK" x='344' y='484' w='143' h='19' fontsize='15'  color='FFcccccc' format='VCENTER RIGHT'/>
+
+	<column name="EXPENSEJJOK" x='344' y='515' w='143' h='19' fontsize='15'  color='FFff6633' format='VCENTER RIGHT'/>
+
+	<column name="REMAINJJOK" x='344' y='546' w='143' h='19' fontsize='15'  color='FFFFFFFF' format='VCENTER RIGHT'/>
+
+	<column name="TOTALCASH" x='594' y='484' w='143' h='19' fontsize='15'   color='FFcccccc' format='VCENTER RIGHT'/>
+
+	<column name="EXPENSECASH" x='594' y='515' w='143' h='19' fontsize='15'   color='FFff6633' format='VCENTER RIGHT'/>
+
+	<column name="REMAINCASH" x='594' y='546' w='143' h='19' fontsize='15'   color='FFFFFFFF' format='VCENTER RIGHT'/>
+
+	<button name="OK" x='592' y='589' w="84" h="28">
+		<sprite l="777" t="881" r="861" b="909" texture="UI_Button" />
+		<sprite l="777" t="910" r="861" b="938" texture="UI_Button" />
+		<sprite l="777" t="939" r="861" b="967" texture="UI_Button" />
+	</button>
+
+	<button name="CANCEL" x='678' y='589' w="84" h="28">
+		<sprite l="85" t="347" r="169" b="375" texture="UI_Button" />
+		<sprite l="85" t="376" r="169" b="404" texture="UI_Button" />
+		<sprite l="85" t="405" r="169" b="433" texture="UI_Button" />
+	</button>
+</UIDEFINE>

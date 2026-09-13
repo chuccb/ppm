@@ -1,0 +1,235 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- edited with XMLSPY v2004 rel. 3 U (http://www.xmlspy.com) by Setsu -->
+<NewSkillAbilityTable>
+
+  <COMBILIMIT DATA="3"></COMBILIMIT>   						<!-- 기본조합한계치 -->
+  <SKILLPOINT ONE="15" TWO="9" THREE="12" FOUR="10" FIVE="11"></SKILLPOINT>	<!-- 능력치별레어도배율 -->
+  <Hair>
+    <COMBI data="8" />								<!-- 파츠보정값 -->
+    <STRENGTH data_1="1" data_2="2" data_3="3" />				<!-- 강화보정값 -->
+    <Lev_1 min="0" max="17" />							<!-- 레어도등급표_1 -->
+    <Lev_2 min="18" max="36" />							<!-- 레어도등급표_2 -->
+    <Lev_3 min="37" max="53" />							<!-- 레어도등급표_3 -->
+    <Lev_4 min="54" max="65" />							<!-- 레어도등급표_4 -->
+    <Lev_5 min="66" max="80" />							<!-- 레어도등급표_5 -->
+    <Lev_6 min="81" max="95" />							<!-- 레어도등급표_6 -->
+    <Lev_7 min="96" max="110" />						<!-- 레어도등급표_7 -->
+    <Lev_8 min="111" max="125" />						<!-- 레어도등급표_8 -->
+    <Lev_9 min="126" max="140" />						<!-- 레어도등급표_9 -->
+    <ValueRevision_1_5 data="4" />						<!-- 수치보정_헤어_신속 -->
+    <ValueRevision_1_6 data="5" />
+    <ValueRevision_1_7 data="6" />
+    <ValueRevision_1_8 data="7" />
+    <ValueRevision_1_9 data="8" />
+    <ValueRevision_2_5 data="2" />						<!-- 수치보정_헤어_민첩 -->
+    <ValueRevision_2_6 data="2" />
+    <ValueRevision_2_7 data="3" />
+    <ValueRevision_2_8 data="3" />
+    <ValueRevision_2_9 data="4" />
+    <ValueRevision_3_5 data="3" />						<!-- 수치보정_헤어_근성 -->
+    <ValueRevision_3_6 data="4" />
+    <ValueRevision_3_7 data="4" />
+    <ValueRevision_3_8 data="4" />
+    <ValueRevision_3_9 data="5" />
+    <ValueRevision_4_5 data="3" />						<!-- 수치보정_헤어_방어 -->
+    <ValueRevision_4_6 data="3" />
+    <ValueRevision_4_7 data="3" />
+    <ValueRevision_4_8 data="4" />
+    <ValueRevision_4_9 data="4" />
+    <ValueRevision_5_5 data="3" />						<!-- 수치보정_헤어_집중 -->
+    <ValueRevision_5_6 data="3" />
+    <ValueRevision_5_7 data="4" />
+    <ValueRevision_5_8 data="4" />
+    <ValueRevision_5_9 data="4" />
+  </Hair>
+  <Jacket>
+    <COMBI data="8" />
+    <STRENGTH data_1="2" data_2="3" data_3="4" />
+    <Lev_1 min="0" max="24" />
+    <Lev_2 min="25" max="40" />
+    <Lev_3 min="41" max="55" />
+    <Lev_4 min="56" max="70" />
+    <Lev_5 min="71" max="85" />
+    <Lev_6 min="86" max="100" />
+    <Lev_7 min="101" max="115" />
+    <Lev_8 min="116" max="130" />
+    <Lev_9 min="131" max="145" />
+    <ValueRevision_1_5 data="6" />						<!-- 수치보정_상의_신속 -->
+    <ValueRevision_1_6 data="7" />
+    <ValueRevision_1_7 data="8" />
+    <ValueRevision_1_8 data="9" />
+    <ValueRevision_1_9 data="10" />
+    <ValueRevision_2_5 data="3" />						<!-- 수치보정_상의_민첩 -->
+    <ValueRevision_2_6 data="4" />
+    <ValueRevision_2_7 data="4" />
+    <ValueRevision_2_8 data="4" />
+    <ValueRevision_2_9 data="5" />
+    <ValueRevision_3_5 data="4" />						<!-- 수치보정_상의_근성 -->
+    <ValueRevision_3_6 data="5" />
+    <ValueRevision_3_7 data="5" />
+    <ValueRevision_3_8 data="6" />
+    <ValueRevision_3_9 data="6" />
+    <ValueRevision_4_5 data="4" />						<!-- 수치보정_상의_방어 -->
+    <ValueRevision_4_6 data="4" />
+    <ValueRevision_4_7 data="5" />
+    <ValueRevision_4_8 data="5" />
+    <ValueRevision_4_9 data="6" />
+    <ValueRevision_5_5 data="4" />						<!-- 수치보정_상의_집중 -->
+    <ValueRevision_5_6 data="4" />
+    <ValueRevision_5_7 data="5" />
+    <ValueRevision_5_8 data="5" />
+    <ValueRevision_5_9 data="6" />
+  </Jacket>
+  <Pants>
+    <COMBI data="8" />
+    <STRENGTH data_1="1" data_2="2" data_3="3" />
+    <Lev_1 min="0" max="24" />
+    <Lev_2 min="25" max="40" />
+    <Lev_3 min="41" max="55" />
+    <Lev_4 min="56" max="70" />
+    <Lev_5 min="71" max="85" />
+    <Lev_6 min="86" max="100" />
+    <Lev_7 min="101" max="115" />
+    <Lev_8 min="116" max="130" />
+    <Lev_9 min="131" max="145" />
+    <ValueRevision_1_5 data="6" />						<!-- 수치보정_하의_신속 -->
+    <ValueRevision_1_6 data="7" />
+    <ValueRevision_1_7 data="8" />
+    <ValueRevision_1_8 data="9" />
+    <ValueRevision_1_9 data="10" />
+    <ValueRevision_2_5 data="3" />						<!-- 수치보정_하의_민첩 -->
+    <ValueRevision_2_6 data="4" />
+    <ValueRevision_2_7 data="4" />
+    <ValueRevision_2_8 data="4" />
+    <ValueRevision_2_9 data="5" />
+    <ValueRevision_3_5 data="4" />						<!-- 수치보정_하의_근성 -->
+    <ValueRevision_3_6 data="5" />
+    <ValueRevision_3_7 data="5" />
+    <ValueRevision_3_8 data="6" />
+    <ValueRevision_3_9 data="6" />
+    <ValueRevision_4_5 data="4" />						<!-- 수치보정_하의_방어 -->
+    <ValueRevision_4_6 data="4" />
+    <ValueRevision_4_7 data="5" />
+    <ValueRevision_4_8 data="5" />
+    <ValueRevision_4_9 data="6" />
+    <ValueRevision_5_5 data="4" />						<!-- 수치보정_하의_집중 -->
+    <ValueRevision_5_6 data="4" />
+    <ValueRevision_5_7 data="5" />
+    <ValueRevision_5_8 data="5" />
+    <ValueRevision_5_9 data="6" />
+  </Pants>
+  <Shoes>
+    <COMBI data="8" />
+    <STRENGTH data_1="2" data_2="3" data_3="4" />
+    <Lev_1 min="0" max="24" />
+    <Lev_2 min="25" max="40" />
+    <Lev_3 min="41" max="55" />
+    <Lev_4 min="56" max="70" />
+    <Lev_5 min="71" max="85" />
+    <Lev_6 min="86" max="100" />
+    <Lev_7 min="101" max="115" />
+    <Lev_8 min="116" max="130" />
+    <Lev_9 min="131" max="145" />
+    <ValueRevision_1_5 data="6" />						<!-- 수치보정_신발_신속 -->
+    <ValueRevision_1_6 data="7" />
+    <ValueRevision_1_7 data="8" />
+    <ValueRevision_1_8 data="9" />
+    <ValueRevision_1_9 data="10" />
+    <ValueRevision_2_5 data="3" />						<!-- 수치보정_신발_민첩 -->
+    <ValueRevision_2_6 data="4" />
+    <ValueRevision_2_7 data="4" />
+    <ValueRevision_2_8 data="4" />
+    <ValueRevision_2_9 data="5" />
+    <ValueRevision_3_5 data="4" />						<!-- 수치보정_신발_근성 -->
+    <ValueRevision_3_6 data="5" />
+    <ValueRevision_3_7 data="5" />
+    <ValueRevision_3_8 data="6" />
+    <ValueRevision_3_9 data="6" />
+    <ValueRevision_4_5 data="4" />						<!-- 수치보정_신발_방어 -->
+    <ValueRevision_4_6 data="4" />
+    <ValueRevision_4_7 data="5" />
+    <ValueRevision_4_8 data="5" />
+    <ValueRevision_4_9 data="6" />
+    <ValueRevision_5_5 data="4" />						<!-- 수치보정_신발_집중 -->
+    <ValueRevision_5_6 data="4" />
+    <ValueRevision_5_7 data="5" />
+    <ValueRevision_5_8 data="5" />
+    <ValueRevision_5_9 data="6" />
+  </Shoes>
+  <Set>
+    <COMBI data="23" />
+    <STRENGTH data_1="3" data_2="6" data_3="9" />
+    <Lev_1 min="0" max="65" />
+    <Lev_2 min="66" max="110" />
+    <Lev_3 min="111" max="155" />
+    <Lev_4 min="156" max="200" />
+    <Lev_5 min="201" max="245" />
+    <Lev_6 min="246" max="290" />
+    <Lev_7 min="291" max="335" />
+    <Lev_8 min="336" max="380" />
+    <Lev_9 min="381" max="430" />
+    <ValueRevision_1_5 data="4" />						<!-- 수치보정_세트_신속 -->
+    <ValueRevision_1_6 data="4" />
+    <ValueRevision_1_7 data="5" />
+    <ValueRevision_1_8 data="5" />
+    <ValueRevision_1_9 data="5" />
+    <ValueRevision_2_5 data="2" />						<!-- 수치보정_세트_민첩 -->
+    <ValueRevision_2_6 data="2" />
+    <ValueRevision_2_7 data="2" />
+    <ValueRevision_2_8 data="3" />
+    <ValueRevision_2_9 data="3" />
+    <ValueRevision_3_5 data="3" />						<!-- 수치보정_세트_근성 -->
+    <ValueRevision_3_6 data="4" />
+    <ValueRevision_3_7 data="4" />
+    <ValueRevision_3_8 data="4" />
+    <ValueRevision_3_9 data="5" />
+    <ValueRevision_4_5 data="3" />						<!-- 수치보정_세트_방어 -->
+    <ValueRevision_4_6 data="3" />
+    <ValueRevision_4_7 data="4" />
+    <ValueRevision_4_8 data="4" />
+    <ValueRevision_4_9 data="5" />
+    <ValueRevision_5_5 data="3" />						<!-- 수치보정_세트_집중 -->
+    <ValueRevision_5_6 data="3" />
+    <ValueRevision_5_7 data="4" />
+    <ValueRevision_5_8 data="4" />
+    <ValueRevision_5_9 data="5" />
+  </Set>
+  <Accessory>
+    <COMBI data="0" />
+    <STRENGTH data_1="0" data_2="0" data_3="0" />
+    <Lev_1 min="0" max="20" />
+    <Lev_2 min="21" max="30" />
+    <Lev_3 min="31" max="40" />
+    <Lev_4 min="41" max="50" />
+    <Lev_5 min="51" max="60" />
+    <Lev_6 min="61" max="70" />
+    <Lev_7 min="71" max="90" />
+    <Lev_8 min="81" max="90" />
+    <Lev_9 min="91" max="100" />
+    <ValueRevision_1_5 data="4" />						<!-- 수치보정_악세사리_신속 -->
+    <ValueRevision_1_6 data="5" />
+    <ValueRevision_1_7 data="6" />
+    <ValueRevision_1_8 data="7" />
+    <ValueRevision_1_9 data="8" />
+    <ValueRevision_2_5 data="2" />						<!-- 수치보정_악세사리_민첩 -->
+    <ValueRevision_2_6 data="2" />
+    <ValueRevision_2_7 data="3" />
+    <ValueRevision_2_8 data="3" />
+    <ValueRevision_2_9 data="4" />
+    <ValueRevision_3_5 data="3" />						<!-- 수치보정_악세사리_근성 -->
+    <ValueRevision_3_6 data="4" />
+    <ValueRevision_3_7 data="4" />
+    <ValueRevision_3_8 data="4" />
+    <ValueRevision_3_9 data="5" />
+    <ValueRevision_4_5 data="3" />						<!-- 수치보정_악세사리_방어 -->
+    <ValueRevision_4_6 data="3" />
+    <ValueRevision_4_7 data="3" />
+    <ValueRevision_4_8 data="4" />
+    <ValueRevision_4_9 data="4" />
+    <ValueRevision_5_5 data="3" />						<!-- 수치보정_악세사리_집중 -->
+    <ValueRevision_5_6 data="3" />
+    <ValueRevision_5_7 data="4" />
+    <ValueRevision_5_8 data="4" />
+    <ValueRevision_5_9 data="4" />
+  </Accessory>
+</NewSkillAbilityTable>

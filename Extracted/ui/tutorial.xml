@@ -1,0 +1,45 @@
+
+<UIDEFINE>
+
+	<image name="TUTO" filename="TUTO.dds"/>
+	<image name="Rank02" filename="Rank02.dds"/>
+
+<!--background_1-->
+<msprite sx='0' sy='0' ex='329' ey='121' l='0' t='0' r='417' b='552' texture="TUTO"/>
+
+
+	<select name="TUTORIAL_LIST" count='3' OffX='0' OffY='0'>
+		<rect l='358' t='320' r='717' b='397'/>
+		<rect l='358' t='397' r='717' b='474'/>
+		<rect l='358' t='474' r='717' b='551'/>
+
+	<column name="MENUNO" x='4' y='5' w='351' h='73'/>	
+		
+		<sprite l='418' t='221' r='776' b='303' texture="TUTO"/>
+		<sprite l='418' t='303' r='776' b='385' texture="TUTO"/>
+
+		<sprite l='418' t='0' r='769' b='73' texture="TUTO"/>
+		<sprite l='418' t='74' r='769' b='147' texture="TUTO"/>
+		<sprite l='418' t='148' r='769' b='221' texture="TUTO"/>
+	</select>
+
+        <button name="CLOSE" x='501' y='629' w='80' h='34'>
+		<sprite l='909' t='0' r='986' b='34' texture="TUTO"/>
+		<sprite l='909' t='35' r='986' b='69' texture="TUTO"/>
+		<sprite l='909' t='71' r='986' b='104' texture="TUTO"/>
+	</button>
+
+
+	<button name="UP" x='467' y='290' w='140' h='26'>
+		<sprite l='724' t='415' r='865' b='441' texture="Rank02"/>
+		<sprite l='724' t='469' r='865' b='495' texture="Rank02"/>
+		<sprite l='724' t='522' r='865' b='548' texture="Rank02"/>
+	</button>
+	
+	<button name="DN" x='467' y='558' w='140' h='26'>
+		<sprite l='724' t='442' r='865' b='468' texture="Rank02"/>
+		<sprite l='724' t='496' r='865' b='521' texture="Rank02"/>
+		<sprite l='724' t='549' r='865' b='575' texture="Rank02"/>
+	</button>
+
+</UIDEFINE>

@@ -1,0 +1,44 @@
+<TUTORIALDEFINE>
+	<PLASMA gunindex="1404" effectsize="18.0" spheresize="3.2" defaultdmg="10.0" bulletspped="60.0" commonproperty="0" textureFolderName="2frame"/>
+	<PLASMA gunindex="1405" effectsize="18.0" spheresize="3.2" defaultdmg="10.0" bulletspped="60.0" commonproperty="0" textureFolderName="2frame"/>
+	<PLASMA gunindex="1406" effectsize="18.0" spheresize="3.2" defaultdmg="10.0" bulletspped="60.0" commonproperty="0" textureFolderName="2frame"/>
+	<PLASMA gunindex="1407" effectsize="18.0" spheresize="3.2" defaultdmg="10.0" bulletspped="60.0" commonproperty="0" textureFolderName="2frame"/>
+	<PLASMA gunindex="1452" effectsize="0" spheresize="0" defaultdmg="0" bulletspped="60.0" commonproperty="0" textureFolderName="2frame"/>
+	<PLASMA gunindex="1453" effectsize="0" spheresize="0" defaultdmg="0" bulletspped="60.0" commonproperty="0" textureFolderName="2frame"/>
+	<PLASMA gunindex="1454" effectsize="0" spheresize="0" defaultdmg="0" bulletspped="60.0" commonproperty="0" textureFolderName="2frame"/>
+	<PLASMA gunindex="1455" effectsize="0" spheresize="0" defaultdmg="0" bulletspped="60.0" commonproperty="0" textureFolderName="2frame"/>
+	<PLASMA gunindex="1456" effectsize="0" spheresize="0" defaultdmg="0" bulletspped="60.0" commonproperty="0" textureFolderName="2frame"/>
+	<PLASMA gunindex="1457" effectsize="0" spheresize="0" defaultdmg="0" bulletspped="60.0" commonproperty="0" textureFolderName="2frame"/>
+	<PLASMA gunindex="1458" effectsize="0" spheresize="0" defaultdmg="0" bulletspped="60.0" commonproperty="0" textureFolderName="2frame"/>
+	<PLASMA gunindex="1459" effectsize="0" spheresize="0" defaultdmg="0" bulletspped="60.0" commonproperty="0" textureFolderName="2frame"/>
+	<PLASMA gunindex="1654" effectsize="0" spheresize="0" defaultdmg="0" bulletspped="60.0" commonproperty="0" textureFolderName="2frame"/>
+	<PLASMA gunindex="1655" effectsize="0" spheresize="0" defaultdmg="0" bulletspped="60.0" commonproperty="0" textureFolderName="2frame"/>
+	<PLASMA gunindex="1817" effectsize="45.0" spheresize="3.2" defaultdmg="10.0" bulletspped="15.0" commonproperty="0" textureFolderName="AI2_ani"/>
+	<PLASMA gunindex="1937" effectsize="30" spheresize="5" defaultdmg="15" bulletspped="40.0" commonproperty="8" textureFolderName="Comic"/>
+	<PLASMA gunindex="1938" effectsize="30" spheresize="5" defaultdmg="15" bulletspped="40.0" commonproperty="8" textureFolderName="Comic"/>
+	<PLASMA gunindex="1939" effectsize="30" spheresize="5" defaultdmg="15" bulletspped="40.0" commonproperty="8" textureFolderName="Comic"/>
+	<PLASMA gunindex="1940" effectsize="30" spheresize="5" defaultdmg="15" bulletspped="40.0" commonproperty="8" textureFolderName="Comic"/>
+	<PLASMA gunindex="1993" effectsize="30" spheresize="5" defaultdmg="15" bulletspped="40.0" commonproperty="8" textureFolderName="iceball"/>
+	<PLASMA gunindex="1994" effectsize="30" spheresize="5" defaultdmg="15" bulletspped="40.0" commonproperty="8" textureFolderName="iceball"/>
+	<PLASMA gunindex="1995" effectsize="30" spheresize="5" defaultdmg="15" bulletspped="40.0" commonproperty="8" textureFolderName="iceball"/>
+	<PLASMA gunindex="1996" effectsize="30" spheresize="5" defaultdmg="15" bulletspped="40.0" commonproperty="8" textureFolderName="iceball"/>
+	<PLASMA gunindex="2088" effectsize="8.0" spheresize="5" defaultdmg="10.0" bulletspped="60.0" commonproperty="0" textureFolderName="2frame"/>
+	<PLASMA gunindex="2089" effectsize="18.0" spheresize="3.2" defaultdmg="10.0" bulletspped="60.0" commonproperty="0" textureFolderName="2frame"/>
+	<PLASMA gunindex="2090" effectsize="18.0" spheresize="3.2" defaultdmg="10.0" bulletspped="60.0" commonproperty="0" textureFolderName="2frame"/>
+	<PLASMA gunindex="2253" effectsize="20.0" spheresize="3" defaultdmg="9.0" bulletspped="80.0" commonproperty="0" textureFolderName="cannon_soccer"/>
+	<PLASMA gunindex="2254" effectsize="20.0" spheresize="3" defaultdmg="9.0" bulletspped="80.0" commonproperty="0" textureFolderName="cannon_soccer"/>
+	<PLASMA gunindex="2255" effectsize="20.0" spheresize="3" defaultdmg="9.0" bulletspped="80.0" commonproperty="0" textureFolderName="cannon_soccer"/>
+	<PLASMA gunindex="2256" effectsize="20.0" spheresize="3" defaultdmg="9.0" bulletspped="80.0" commonproperty="0" textureFolderName="cannon_soccer"/>
+	<PLASMA gunindex="2365" bulletShotWaitTime="600" effectsize="0" spheresize="0" defaultdmg="0" bulletspped="60.0" commonproperty="0" textureFolderName="2frame"/>
+	<PLASMA gunindex="2366" bulletShotWaitTime="600" effectsize="0" spheresize="0" defaultdmg="0" bulletspped="60.0" commonproperty="0" textureFolderName="2frame"/>
+	<PLASMA gunindex="2367" bulletShotWaitTime="600" effectsize="0" spheresize="0" defaultdmg="0" bulletspped="60.0" commonproperty="0" textureFolderName="2frame"/>
+	<PLASMA gunindex="2368" bulletShotWaitTime="600" effectsize="0" spheresize="0" defaultdmg="0" bulletspped="60.0" commonproperty="0" textureFolderName="2frame"/>
+	<PLASMA gunindex="2568" effectsize="0" spheresize="0" defaultdmg="0" bulletspped="55.0" commonproperty="0" textureFolderName="2frame"/>
+	<PLASMA gunindex="2569" effectsize="0" spheresize="0" defaultdmg="0" bulletspped="55.0" commonproperty="0" textureFolderName="2frame"/>
+	<PLASMA gunindex="2570" effectsize="0" spheresize="0" defaultdmg="0" bulletspped="55.0" commonproperty="0" textureFolderName="2frame"/>
+	<PLASMA gunindex="2571" effectsize="0" spheresize="0" defaultdmg="0" bulletspped="55.0" commonproperty="0" textureFolderName="2frame"/>
+	<PLASMA gunindex="2696" effectsize="20.0" spheresize="3" defaultdmg="10.0" bulletspped="70.0" commonproperty="0" textureFolderName="AI2_ani"/>
+	<PLASMA gunindex="2697" effectsize="20.0" spheresize="3" defaultdmg="10.0" bulletspped="70.0" commonproperty="0" textureFolderName="AI2_ani"/>
+	<PLASMA gunindex="2698" effectsize="20.0" spheresize="3" defaultdmg="10.0" bulletspped="70.0" commonproperty="0" textureFolderName="AI2_ani"/>
+	<PLASMA gunindex="2699" effectsize="20.0" spheresize="3" defaultdmg="10.0" bulletspped="70.0" commonproperty="0" textureFolderName="AI2_ani"/>
+</TUTORIALDEFINE>

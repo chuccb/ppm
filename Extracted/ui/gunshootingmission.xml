@@ -1,0 +1,10 @@
+<UIDEFINE>
+	<bot_image name="gunshootingmission_btn" filename="gunshootingOKBtn.dds"/>
+
+  	
+	<button name="ENTER" x='277' y='577' w='99' h='44'>
+		<sprite l='1' t='1' r='100' b='45' texture="gunshootingmission_btn"/>
+		<sprite l='1' t='46' r='100' b='90' texture="gunshootingmission_btn"/>
+		<sprite l='1' t='91' r='100' b='135' texture="gunshootingmission_btn"/>
+	</button>
+</UIDEFINE>

@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CHANGE_AVATAR_TO_COOKI_PROPERTY>
+  <hayate bEnable="1">
+    <data_1 handTexture="hand1.tga" head="10000204" face="0" set="0" acc1="0" acc2="10760001" acc3="0" acc4="0"></data_1>
+  </hayate>
+  <tina bEnable="1">
+    <data_1 handTexture="hand2.tga" head="10000552" face="0" set="0" acc1="0" acc2="10760002" acc3="0" acc4="0"></data_1>
+  </tina>
+  <milly bEnable="1">
+    <data_1 handTexture="hand3.tga" head="10001780" face="0" set="0" acc1="0" acc2="10760003" acc3="0" acc4="0"></data_1>
+  </milly>
+  <Cyrus bEnable="1">
+    <data_1 handTexture="hand4.tga" head="10001251" face="0" set="0" acc1="0" acc2="10760004" acc3="0" acc4="0"></data_1>
+  </Cyrus>
+  <Doddon bEnable="1">
+    <data_1 handTexture="hand5.tga" head="10000066" face="0" set="0" acc1="0" acc2="10760005" acc3="0" acc4="0"></data_1>
+  </Doddon>
+  <Guy bEnable="1">
+    <data_1 handTexture="hand6.tga" head="10000211" face="0" set="0" acc1="0" acc2="10760006" acc3="0" acc4="0"></data_1>
+  </Guy>
+  <Tericia bEnable="1">
+    <data_1 handTexture="hand7.tga" head="10001784" face="0" set="0" acc1="0" acc2="10760007" acc3="0" acc4="0"></data_1>
+  </Tericia>
+  <alulu bEnable="1">
+    <data_1 handTexture="hand8.tga" head="10001785" face="0" set="0" acc1="0" acc2="10760008" acc3="0" acc4="0"></data_1>
+  </alulu>
+  <van bEnable="1">
+    <data_1 handTexture="hand9.tga" head="10001786" face="0" set="0" acc1="0" acc2="10760009" acc3="0" acc4="0"></data_1>
+  </van>
+  <hood bEnable="1">
+    <data_1 handTexture="hand10.tga" head="10001787" face="0" set="0" acc1="0" acc2="10760010" acc3="0" acc4="0"></data_1>
+  </hood>
+  <spygirl bEnable="1">
+    <data_1 handTexture="hand11.tga" head="10001788" face="0" set="0" acc1="0" acc2="10760011" acc3="0" acc4="0"></data_1>
+  </spygirl>
+  <robotgirl bEnable="1">
+    <data_1 handTexture="hand12.tga" head="10001789" face="0" set="0" acc1="0" acc2="10760012" acc3="0" acc4="0"></data_1>
+  </robotgirl>
+  <tsunderegirl bEnable="1">
+    <data_1 handTexture="hand13.tga" head="10001790" face="0" set="0" acc1="0" acc2="10760013" acc3="0" acc4="0"></data_1>  
+  </tsunderegirl>
+  <magicgirl bEnable="1">
+    <data_1 handTexture="hand14.tga" head="10000794" face="0" set="0" acc1="0" acc2="10760014" acc3="0" acc4="0"></data_1>  
+  </magicgirl>
+  <devilgirl bEnable="1">
+    <data_1 handTexture="hand15.tga" head="10001780" face="0" set="0" acc1="0" acc2="10760003" acc3="0" acc4="0"></data_1>
+  </devilgirl>
+</CHANGE_AVATAR_TO_COOKI_PROPERTY>

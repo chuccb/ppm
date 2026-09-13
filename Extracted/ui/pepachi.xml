@@ -1,0 +1,69 @@
+<UIDEFINE>
+
+	
+	<image name="PEPACHI" filename="pepachi.dds"/>
+	<image name="PEPACHI_Back" filename="tuto_back.dds"/>
+
+	<msprite sx='0' sy='0' ex='476' ey='91' l='0' t='0' r='516' b='593' texture="PEPACHI"/>
+
+	
+	<msprite name ="ARARI_ITEM_CASH" sx='0' sy='0' ex='516' ey='128' l='0' t='0' r='52' b='52' texture="PEPACHI"/>
+	<msprite name ="ARARI_ITEM_PG" sx='0' sy='0' ex='572' ey='128' l='0' t='0' r='52' b='52' texture="PEPACHI"/> 
+  
+	<msprite name ="ARARI_ICON" sx='0' sy='0' ex='492' ey='151' l='571' t='141' r='726' b='174' texture="PEPACHI"/> 
+
+	
+	<msprite name ="MOVIE_LAYER" sx='0' sy='0' ex='494' ey='199' l='0' t='0' r='480' b='360' texture="PEPACHI"/>
+
+	<msprite name ="REEL_LAYER" sx='0' sy='0' ex='637' ey='422' l='777' t='755' r='971' b='881' texture="PEPACHI"/> 
+	<msprite name ="REEL_COVER" sx='0' sy='0' ex='635' ey='420' l='777' t='886' r='975' b='1020' texture="PEPACHI"/>
+
+	<msprite name ="REEL_TOP_REPLAY"   sx='0' sy='0' ex='840' ey='250' l='848' t='651' r='960' b='680' texture="PEPACHI"/>
+	<msprite name ="REEL_TOP_PMARK_2"  sx='0' sy='0' ex='840' ey='250' l='848' t='681' r='960' b='710' texture="PEPACHI"/>
+	<msprite name ="REEL_TOP_PMARK_3"  sx='0' sy='0' ex='840' ey='250' l='848' t='711' r='960' b='740' texture="PEPACHI"/>
+
+	
+	<button name="START_PG" x='868' y='627' w='116' h='46'>
+		<sprite l='517' t='0' r='633' b='46' texture="PEPACHI"/>
+		<sprite l='517' t='47' r='633' b='93' texture="PEPACHI"/>
+		<sprite l='517' t='94' r='633' b='140' texture="PEPACHI"/>
+	</button>
+
+	<button name="START_CASH" x='748' y='627' w='116' h='46'>
+		<sprite l='634' t='0' r='750' b='46' texture="PEPACHI"/>
+		<sprite l='634' t='47' r='750' b='93' texture="PEPACHI"/>
+		<sprite l='634' t='94' r='750' b='140' texture="PEPACHI"/>
+	</button>
+
+	<button name="START_PG_10" x='628' y='627' w='116' h='46'>
+		<sprite l='751' t='0' r='867' b='46' texture="PEPACHI"/>
+		<sprite l='751' t='47' r='867' b='93' texture="PEPACHI"/>
+		<sprite l='751' t='94' r='867' b='140' texture="PEPACHI"/>
+	</button>
+
+	<button name="START_CASH_10" x='508' y='627' w='116' h='46'>
+		<sprite l='868' t='0' r='984' b='46' texture="PEPACHI"/>
+		<sprite l='868' t='47' r='984' b='93' texture="PEPACHI"/>
+		<sprite l='868' t='94' r='984' b='140' texture="PEPACHI"/>
+	</button>
+
+
+	<button name="STOP_0" x='642' y='567' w='53' h='23'>
+		<sprite l='517' t='141' r='570' b='164' texture="PEPACHI"/>
+		<sprite l='517' t='165' r='570' b='188' texture="PEPACHI"/>
+		<sprite l='517' t='189' r='570' b='212' texture="PEPACHI"/>
+	</button>
+
+	<button name="STOP_1" x='708' y='567' w='53' h='23'>
+		<sprite l='517' t='141' r='570' b='164' texture="PEPACHI"/>
+		<sprite l='517' t='165' r='570' b='188' texture="PEPACHI"/>
+		<sprite l='517' t='189' r='570' b='212' texture="PEPACHI"/>
+	</button>
+
+	<button name="STOP_2" x='774' y='567' w='53' h='23'>
+		<sprite l='517' t='141' r='570' b='164' texture="PEPACHI"/>
+		<sprite l='517' t='165' r='570' b='188' texture="PEPACHI"/>
+		<sprite l='517' t='189' r='570' b='212' texture="PEPACHI"/>
+	</button>
+  
+</UIDEFINE>

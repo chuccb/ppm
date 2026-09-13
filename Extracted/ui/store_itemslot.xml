@@ -1,0 +1,141 @@
+<UIDEFINE>
+	
+	<msprite name="STOREITEMSLOT_1" sx='92' sy='84' ex='92' ey='84' l='362' t='0' r='723' b='511' texture="MAIN_STORE_2"/>
+	
+	<rect name="INFOIMAGE" l="487" t="588" r="639" b="673"/> 
+	<rect name="INFONAME" l="483" t="554" r="746" b="577"/>  
+	<rect name="INFOEXPLAIN" l="757" t="558" r="978" b="669"/>
+	
+	<column name="ITEMABILITYCOMBINATIONNAME" x="108" y="498" w="142" h="22" fontsize="24" color="FFFFFFFF" shadow="FF000000" format="VCENTER LEFT"/>
+	<column name="ITEMABILITYCOMBINATIONLEV" x="109" y="544" w="40" h="17" fontsize="18" color="FF000000" format="VCENTER LEFT"/>
+	<column name="ITEMLEVNAME0" x="318" y="476" w="50" h="13" fontsize="12" color="FFFFFFFF"  format="VCENTER LEFT"/>
+	<column name="ITEMLEVNAME1" x="318" y="499" w="50" h="13" fontsize="12" color="FFFFFFFF"  format="VCENTER LEFT"/>
+	<column name="ITEMLEVNAME2" x="318" y="522" w="50" h="13" fontsize="12" color="FFFFFFFF"  format="VCENTER LEFT"/>
+	<column name="ITEMLEVNAME3" x="318" y="545" w="50" h="13" fontsize="12" color="FFFFFFFF"  format="VCENTER LEFT"/>
+	<column name="ITEMLEVNAME4" x="318" y="568" w="50" h="13" fontsize="12" color="FFFFFFFF"  format="VCENTER LEFT"/>
+
+  	<column name="PRECHARABIL0" x="589" y="558" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PRECHARABIL1" x="589" y="572" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PRECHARABIL2" x="589" y="586" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PRECHARABIL3" x="589" y="600" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PRECHARABIL4" x="589" y="614" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="ITEMABILITY0" x="632" y="558" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="ITEMABILITY1" x="632" y="572" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="ITEMABILITY2" x="632" y="586" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="ITEMABILITY3" x="632" y="600" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="ITEMABILITY4" x="632" y="614" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="AFTERCHARABIL0" x="675" y="558" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="AFTERCHARABIL1" x="675" y="572" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="AFTERCHARABIL2" x="675" y="586" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="AFTERCHARABIL3" x="675" y="600" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="AFTERCHARABIL4" x="675" y="614" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+
+	<SlotCardSYS name="CROSSHAIR">
+		<slot name="slot1" x="132" y="142" w="64" h="64">
+			<sprite l="579" t="518" r="643" b="582" texture="UI_Button"/> 
+			<sprite l="644" t="518" r="708" b="582" texture="UI_Button"/> 
+		</slot>
+	</SlotCardSYS>
+
+	<SlotCardSYS name="NAME">
+		<slot name="slot1" x="204" y="142" w="64" h="64">
+			<sprite l="579" t="518" r="643" b="582" texture="UI_Button"/> 
+			<sprite l="644" t="518" r="708" b="582" texture="UI_Button"/> 
+		</slot>
+	</SlotCardSYS>
+
+	<SlotCardSYS name="VOICE">
+ 	    	<slot name="slot1" x='274' y='186' w='64' h='64'>
+ 		    	<sprite l='872' t='131' r='936' b='194' texture="UI_Popup_1"/>
+			<sprite l='937' t='0' r='1001' b='64' texture="UI_Popup_1"/>
+		</slot>
+	</SlotCardSYS>
+
+ 	 <SlotCardSYS name="BOOSTOFEXP">
+		<slot name="slot1" x="132" y="263" w="64" h="64">
+			<sprite l="579" t="518" r="643" b="582" texture="UI_Button"/> 
+			<sprite l="644" t="518" r="708" b="582" texture="UI_Button"/> 
+		</slot>
+	</SlotCardSYS>
+
+	<SlotCardSYS name="BOOSTOFPG">
+		<slot name="slot1" x="204" y="263" w="64" h="64">
+			<sprite l="579" t="518" r="643" b="582" texture="UI_Button"/> 
+			<sprite l="644" t="518" r="708" b="582" texture="UI_Button"/> 
+		</slot>
+	</SlotCardSYS>
+
+	<SlotCardSYS name="EXTRAABILITY">
+		<slot name="slot1" x="132" y="384" w="64" h="64">
+			<sprite l="579" t="518" r="643" b="582" texture="UI_Button"/> 
+			<sprite l="644" t="518" r="708" b="582" texture="UI_Button"/> 
+		</slot>
+		<slot name="slot2" x="204" y="384" w="64" h="64">
+			<sprite l="579" t="518" r="643" b="582" texture="UI_Button"/> 
+			<sprite l="644" t="518" r="708" b="582" texture="UI_Button"/> 
+		</slot>
+   		<slot name="slot3" x="276" y="384" w="64" h="64">
+			<sprite l="579" t="518" r="643" b="582" texture="UI_Button"/> 
+			<sprite l="644" t="518" r="708" b="582" texture="UI_Button"/> 
+		</slot>
+	</SlotCardSYS>
+
+	<CardSYSitemslot name="ITEMSLOT">		
+		<template>
+
+			<button name="ENTERRECYCLEPOPUP" x="187" y="48" w="38" h="20">
+				<sprite l="704" t="348" r="750" b="371" texture="UI_Button"/> 
+				<sprite l="704" t="372" r="750" b="395" texture="UI_Button"/> 
+				<sprite l="704" t="396" r="750" b="419" texture="UI_Button"/> 
+			</button>    
+
+			<column name="NAME" x="78" y="7"/>
+			<sprite l="0" t="796" r="237" b="872"  texture="MAIN_STORE_1"/>
+			<sprite l="0" t="873" r="237" b="949"  texture="MAIN_STORE_1"/>
+
+			<sprite l="644" t="518" r="708" b="582" texture="UI_Button"/> 
+			<sprite l="384" t="518" r="448" b="582" texture="UI_Button"/>	
+			<sprite l="449" t="518" r="513" b="582" texture="UI_Button"/>	
+			
+			<sprite l="913" t="0" r="985" b="23" texture="MAIN_STORE_1"/>
+			<sprite l="913" t="24" r="985" b="47" texture="MAIN_STORE_1"/>
+			<sprite l="913" t="48" r="985" b="71" texture="MAIN_STORE_1"/>
+			<sprite l="913" t="72" r="985" b="95" texture="MAIN_STORE_1"/>
+			<sprite l="913" t="96" r="985" b="119" texture="MAIN_STORE_1"/>
+			<sprite l="913" t="120" r="985" b="143" texture="MAIN_STORE_1"/>
+			<sprite l="913" t="144" r="985" b="167" texture="MAIN_STORE_1"/>
+			<sprite l="913" t="168" r="985" b="191" texture="MAIN_STORE_1"/>
+			<sprite l="913" t="192" r="985" b="215" texture="MAIN_STORE_1"/>
+			<sprite l="913" t="216" r="985" b="239" texture="MAIN_STORE_1"/>
+			
+
+                        <sprite name="RECYCLE_OUTLINE" l="774" t="518" r="838" b="582" texture="UI_Button"/> 
+			<sprite name="ENTER_RECYCLE"  l="576" t="420" r="622" b="443" texture="UI_Button"/>	
+
+		</template>
+		
+		<eventrect name="SCROLL_RECT" x="483" y="158" w="474" h="384"/>
+		<slot name="slot1"  x="483" y="158" w="237" h="76"/>
+		<slot name="slot2"  x="721" y="158" w="237" h="76"/>
+		<slot name="slot3"  x="483" y="235" w="237" h="76"/>
+		<slot name="slot4"  x="721" y="235" w="237" h="76"/>
+		<slot name="slot5"  x="483" y="312" w="237" h="76"/>
+		<slot name="slot6"  x="721" y="312" w="237" h="76"/>
+		<slot name="slot7"  x="483" y="389" w="237" h="76"/>
+		<slot name="slot8"  x="721" y="389" w="237" h="76"/>
+		<slot name="slot9"  x="483" y="466" w="237" h="76"/>
+		<slot name="slot10" x="721" y="466" w="237" h="76"/>
+		<button name="UP" x="962" y="158" w="23" h="28">
+			<sprite l="258" t="461" r="281" b="489" texture="UI_Button"/>
+			<sprite l="282" t="461" r="305" b="489" texture="UI_Button"/>
+			<sprite l="306" t="461" r="329" b="489" texture="UI_Button"/>
+		</button>
+		<button name="DN" x="962" y="514" w="23" h="28">
+			<sprite l="258" t="490" r="281" b="518" texture="UI_Button"/>
+			<sprite l="282" t="490" r="305" b="518" texture="UI_Button"/>
+			<sprite l="306" t="490" r="329" b="518" texture="UI_Button"/>
+		</button> 
+  
+	</CardSYSitemslot>
+	
+</UIDEFINE>

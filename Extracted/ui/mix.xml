@@ -1,0 +1,46 @@
+﻿<UIDEFINE>
+
+	<bgmfile filename="bgm/bgm_character.mp3"/>
+	<image name="Mix_Back" filename="BACK2.dds"/>
+	<image name="Mix_Store01" filename="store_01.dds"/>
+	<image name="Mix_Store04" filename="store_04.dds"/>
+	<image name="Mix_Store05" filename="store_05.dds"/>
+
+  	<msprite name="BACKGROUND" sx='0' sy='0' ex='0' ey='0' l='0' t='0' r='1024' b='768' texture="Mix_Back"/>
+  	
+	
+	<msprite name="MIX_TITLE" sx="90" sy="0" ex="90" ey="0" l="521" t="0" r="886" b="25" texture="Mix_Store04" />
+	<msprite name="MIX_NETCAFE" sx="461" sy="0" ex="461" ey="0" l="0" t="973" r="546" b="998" texture="UI_Button" />
+
+	<column name="TITLE_SERVER"      x="560" y="7" w="61" h="11" fontsize="12" color="FFFFFFFF" format="VCENTER CENTER" />
+	<column name="TITLE_SERVER_TYPE" x="650" y="7" w="41" h="11" fontsize="12" color="FFFFFFFF" format="VCENTER CENTER" />
+
+	<button name="STORE" x="9" y="33" w="62" h="68">
+		<sprite l="0" t="0" r="62" b="68" texture="UI_Button" />
+		<sprite l="0" t="69" r="62" b="137" texture="UI_Button" />
+		<sprite l="0" t="138" r="62" b="206" texture="UI_Button" />
+	</button>
+
+	<button name="SHOP" x="9" y="104" w="62" h="68">
+		<sprite l="62" t="0" r="124" b="68" texture="UI_Button" />
+		<sprite l="62" t="69" r="124" b="137" texture="UI_Button" />
+		<sprite l="62" t="138" r="124" b="206" texture="UI_Button" />
+	</button>
+	
+	<button name="LOBBY" x="9" y="175" w="62" h="68">
+		<sprite l="560" t="0" r="622" b="68" texture="UI_Button" />
+		<sprite l="560" t="69" r="622" b="137" texture="UI_Button" />
+		<sprite l="560" t="138" r="622" b="206" texture="UI_Button" />
+	</button>
+
+
+	
+	<tab name="MIXTYPE" count='1'>
+		<page name="NEWSKILLCOMBI" x='94' y='42' default='true'>
+		      	<sprite l='0' t='0' r='0' b='0' texture="Mix_Store04" />
+		</page>
+	</tab>
+	
+	<column name="GIFT_ICON"  x="4" y="24" w="32" h="33" /> 
+
+</UIDEFINE>

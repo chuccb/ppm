@@ -1,0 +1,27 @@
+<UIDEFINE>
+
+	<image name="Voice_Main" filename="voice001.dds"/>
+
+  	<msprite name ="BACKGROUND_LAYER" sx='476' sy='91' ex='476' ey='91' l='0' t='0' r='516' b='593' texture="Voice_Main"/>
+	
+	<tab name="VOICE_CUSTOMIZE_TAB" count='5'>
+    		<page name="VOICE_CUSTOMIZE_FIGHT" x='476' y='91' default='true'>
+			<sprite l='517' t='211' r='580' b='241' texture="Voice_Main"/>
+    		</page>
+    		<page name="VOICE_CUSTOMIZE_EMOTION" x='540' y='91' >
+			<sprite l='581' t='211' r='644' b='241' texture="Voice_Main"/>
+    		</page>
+    		
+    		<page name="VOICE_CUSTOMIZE_COMMAND" x='604' y='91' >
+      			<sprite l='645' t='211' r='708' b='241' texture="Voice_Main"/>
+    		</page>
+    		
+    		<page name="VOICE_CUSTOMIZE_STRATEGY" x='668' y='91' >
+      			<sprite l='709' t='211' r='772' b='241' texture="Voice_Main"/>
+    		</page>
+    		
+		<page name="VOICE_CUSTOMIZE_STATEMENT" x='732' y='91' >
+      			<sprite l='773' t='211' r='836' b='241' texture="Voice_Main"/>
+    		</page>
+	</tab>  
+</UIDEFINE>

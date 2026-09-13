@@ -1,0 +1,271 @@
+<UIDEFINE>
+		<msprite name="ZXV_BACKGROUND_LAYER" sx='214' sy='145' ex='214' ey='145' l='0' t='0' r='617' b='497' texture="VOICE_03"/>
+  	<!-- ======================= -->
+
+	<tab name="VOICE_CUSTOMIZE_ZXV_TAB" count='9'>
+    		<page name="VOICE_CUSTOMIZE_ZXV_1" x='237' y='187' default='true'>
+			<sprite l='700'	t='0'  r='759'	b='29' texture="VOICE_03"/>
+			<msprite sx='299' sy='187' ex='299' ey='187' l='760'		t='30'		r='819'	b='59' texture="VOICE_03"/>
+			<msprite sx='361' sy='187' ex='361' ey='187' l='760'		t='60'		r='819'	b='89' texture="VOICE_03"/>
+			<msprite sx='423' sy='187' ex='423' ey='187' l='760'		t='90'		r='819'	b='119' texture="VOICE_03"/>
+			<msprite sx='485' sy='187' ex='485' ey='187' l='760'		t='120'	r='819'	b='149' texture="VOICE_03"/>
+			<msprite sx='547' sy='187' ex='547' ey='187' l='760'		t='150'	r='819'	b='179' texture="VOICE_03"/>
+			<msprite sx='609' sy='187' ex='609' ey='187' l='760'		t='180'	r='819'	b='209' texture="VOICE_03"/>
+			<msprite sx='671' sy='187' ex='671' ey='187' l='760'		t='210'	r='819'	b='239' texture="VOICE_03"/>
+			<msprite sx='733' sy='187' ex='733' ey='187' l='760'		t='240'	r='819'	b='269' texture="VOICE_03"/>
+		</page>
+
+		<page name="VOICE_CUSTOMIZE_ZXV_2" x='299' y='187' default='true'>
+			<sprite l='700'	t='30' 	r='759'	b='59' texture="VOICE_03"/>
+			<msprite sx='237' sy='187' ex='237' ey='187' l='760'		t='0'		r='819'	b='29' texture="VOICE_03"/>			
+			<msprite sx='361' sy='187' ex='361' ey='187' l='760'		t='60'		r='819'	b='89' texture="VOICE_03"/>
+			<msprite sx='423' sy='187' ex='423' ey='187' l='760'		t='90'		r='819'	b='119' texture="VOICE_03"/>
+			<msprite sx='485' sy='187' ex='485' ey='187' l='760'		t='120'	r='819'	b='149' texture="VOICE_03"/>
+			<msprite sx='547' sy='187' ex='547' ey='187' l='760'		t='150'	r='819'	b='179' texture="VOICE_03"/>
+			<msprite sx='609' sy='187' ex='609' ey='187' l='760'		t='180'	r='819'	b='209' texture="VOICE_03"/>
+			<msprite sx='671' sy='187' ex='671' ey='187' l='760'		t='210'	r='819'	b='239' texture="VOICE_03"/>
+			<msprite sx='733' sy='187' ex='733' ey='187' l='760'		t='240'	r='819'	b='269' texture="VOICE_03"/>
+		</page>
+
+		<page name="VOICE_CUSTOMIZE_ZXV_3" x='361' y='187' default='true'>
+			<sprite l='700'	t='60'	r='759'	b='89' texture="VOICE_03"/>
+			<msprite sx='237' sy='187' ex='237' ey='187' l='760'		t='0'		r='819'	b='29' texture="VOICE_03"/>
+			<msprite sx='299' sy='187' ex='299' ey='187' l='760'		t='30'		r='819'	b='59' texture="VOICE_03"/>			
+			<msprite sx='423' sy='187' ex='423' ey='187' l='760'		t='90'		r='819'	b='119' texture="VOICE_03"/>
+			<msprite sx='485' sy='187' ex='485' ey='187' l='760'		t='120'	r='819'	b='149' texture="VOICE_03"/>
+			<msprite sx='547' sy='187' ex='547' ey='187' l='760'		t='150'	r='819'	b='179' texture="VOICE_03"/>
+			<msprite sx='609' sy='187' ex='609' ey='187' l='760'		t='180'	r='819'	b='209' texture="VOICE_03"/>
+			<msprite sx='671' sy='187' ex='671' ey='187' l='760'		t='210'	r='819'	b='239' texture="VOICE_03"/>
+			<msprite sx='733' sy='187' ex='733' ey='187' l='760'		t='240'	r='819'	b='269' texture="VOICE_03"/>
+		</page>
+
+		<page name="VOICE_CUSTOMIZE_ZXV_4" x='423' y='187' default='true'>
+			<sprite l='700'	t='90'	r='759'	b='119' texture="VOICE_03"/>
+			<msprite sx='237' sy='187' ex='237' ey='187' l='760'		t='0'		r='819'	b='29' texture="VOICE_03"/>
+			<msprite sx='299' sy='187' ex='299' ey='187' l='760'		t='30'		r='819'	b='59' texture="VOICE_03"/>
+			<msprite sx='361' sy='187' ex='361' ey='187' l='760'		t='60'		r='819'	b='89' texture="VOICE_03"/>			
+			<msprite sx='485' sy='187' ex='485' ey='187' l='760'		t='120'	r='819'	b='149' texture="VOICE_03"/>
+			<msprite sx='547' sy='187' ex='547' ey='187' l='760'		t='150'	r='819'	b='179' texture="VOICE_03"/>
+			<msprite sx='609' sy='187' ex='609' ey='187' l='760'		t='180'	r='819'	b='209' texture="VOICE_03"/>
+			<msprite sx='671' sy='187' ex='671' ey='187' l='760'		t='210'	r='819'	b='239' texture="VOICE_03"/>
+			<msprite sx='733' sy='187' ex='733' ey='187' l='760'		t='240'	r='819'	b='269' texture="VOICE_03"/>
+		</page>
+
+		<page name="VOICE_CUSTOMIZE_ZXV_5" x='485' y='187' default='true'>
+			<sprite l='700'	t='120'	r='759'	b='149' texture="VOICE_03"/>	
+			<msprite sx='237' sy='187' ex='237' ey='187' l='760'		t='0'		r='819'	b='29' texture="VOICE_03"/>
+			<msprite sx='299' sy='187' ex='299' ey='187' l='760'		t='30'		r='819'	b='59' texture="VOICE_03"/>
+			<msprite sx='361' sy='187' ex='361' ey='187' l='760'		t='60'		r='819'	b='89' texture="VOICE_03"/>
+			<msprite sx='423' sy='187' ex='423' ey='187' l='760'		t='90'		r='819'	b='119' texture="VOICE_03"/>			
+			<msprite sx='547' sy='187' ex='547' ey='187' l='760'		t='150'	r='819'	b='179' texture="VOICE_03"/>
+			<msprite sx='609' sy='187' ex='609' ey='187' l='760'		t='180'	r='819'	b='209' texture="VOICE_03"/>
+			<msprite sx='671' sy='187' ex='671' ey='187' l='760'		t='210'	r='819'	b='239' texture="VOICE_03"/>
+			<msprite sx='733' sy='187' ex='733' ey='187' l='760'		t='240'	r='819'	b='269' texture="VOICE_03"/>
+		</page>
+
+		<page name="VOICE_CUSTOMIZE_ZXV_6" x='547' y='187' default='true'>
+			<sprite l='700'	t='150'	r='759'	b='179' texture="VOICE_03"/>			
+			<msprite sx='237' sy='187' ex='237' ey='187' l='760'		t='0'		r='819'	b='29' texture="VOICE_03"/>
+			<msprite sx='299' sy='187' ex='299' ey='187' l='760'		t='30'		r='819'	b='59' texture="VOICE_03"/>
+			<msprite sx='361' sy='187' ex='361' ey='187' l='760'		t='60'		r='819'	b='89' texture="VOICE_03"/>
+			<msprite sx='423' sy='187' ex='423' ey='187' l='760'		t='90'		r='819'	b='119' texture="VOICE_03"/>
+			<msprite sx='485' sy='187' ex='485' ey='187' l='760'		t='120'	r='819'	b='149' texture="VOICE_03"/>			
+			<msprite sx='609' sy='187' ex='609' ey='187' l='760'		t='180'	r='819'	b='209' texture="VOICE_03"/>
+			<msprite sx='671' sy='187' ex='671' ey='187' l='760'		t='210'	r='819'	b='239' texture="VOICE_03"/>
+			<msprite sx='733' sy='187' ex='733' ey='187' l='760'		t='240'	r='819'	b='269' texture="VOICE_03"/>
+		</page>
+
+		<page name="VOICE_CUSTOMIZE_ZXV_7" x='609' y='187' default='true'>
+			<sprite l='700'	t='180'	r='759'	b='209' texture="VOICE_03"/>			
+			<msprite sx='237' sy='187' ex='237' ey='187' l='760'		t='0'		r='819'	b='29' texture="VOICE_03"/>
+			<msprite sx='299' sy='187' ex='299' ey='187' l='760'		t='30'		r='819'	b='59' texture="VOICE_03"/>
+			<msprite sx='361' sy='187' ex='361' ey='187' l='760'		t='60'		r='819'	b='89' texture="VOICE_03"/>
+			<msprite sx='423' sy='187' ex='423' ey='187' l='760'		t='90'		r='819'	b='119' texture="VOICE_03"/>
+			<msprite sx='485' sy='187' ex='485' ey='187' l='760'		t='120'	r='819'	b='149' texture="VOICE_03"/>
+			<msprite sx='547' sy='187' ex='547' ey='187' l='760'		t='150'	r='819'	b='179' texture="VOICE_03"/>			
+			<msprite sx='671' sy='187' ex='671' ey='187' l='760'		t='210'	r='819'	b='239' texture="VOICE_03"/>
+			<msprite sx='733' sy='187' ex='733' ey='187' l='760'		t='240'	r='819'	b='269' texture="VOICE_03"/>
+		</page>
+
+		<page name="VOICE_CUSTOMIZE_ZXV_8" x='671' y='187' default='true'>
+			<sprite l='700'	t='210'	r='759'	b='239' texture="VOICE_03"/>	
+			<msprite sx='237' sy='187' ex='237' ey='187' l='760'		t='0'		r='819'	b='29' texture="VOICE_03"/>
+			<msprite sx='299' sy='187' ex='299' ey='187' l='760'		t='30'		r='819'	b='59' texture="VOICE_03"/>
+			<msprite sx='361' sy='187' ex='361' ey='187' l='760'		t='60'		r='819'	b='89' texture="VOICE_03"/>
+			<msprite sx='423' sy='187' ex='423' ey='187' l='760'		t='90'		r='819'	b='119' texture="VOICE_03"/>
+			<msprite sx='485' sy='187' ex='485' ey='187' l='760'		t='120'	r='819'	b='149' texture="VOICE_03"/>
+			<msprite sx='547' sy='187' ex='547' ey='187' l='760'		t='150'	r='819'	b='179' texture="VOICE_03"/>
+			<msprite sx='609' sy='187' ex='609' ey='187' l='760'		t='180'	r='819'	b='209' texture="VOICE_03"/>			
+			<msprite sx='733' sy='187' ex='733' ey='187' l='760'		t='240'	r='819'	b='269' texture="VOICE_03"/>
+		</page>
+
+		<page name="VOICE_CUSTOMIZE_ZXV_9" x='733' y='187' default='true'>
+			<sprite l='700'	t='240'	r='759'	b='269' texture="VOICE_03"/>	
+			<msprite sx='237' sy='187' ex='237' ey='187' l='760'		t='0'		r='819'	b='29' texture="VOICE_03"/>
+			<msprite sx='299' sy='187' ex='299' ey='187' l='760'		t='30'		r='819'	b='59' texture="VOICE_03"/>
+			<msprite sx='361' sy='187' ex='361' ey='187' l='760'		t='60'		r='819'	b='89' texture="VOICE_03"/>
+			<msprite sx='423' sy='187' ex='423' ey='187' l='760'		t='90'		r='819'	b='119' texture="VOICE_03"/>
+			<msprite sx='485' sy='187' ex='485' ey='187' l='760'		t='120'	r='819'	b='149' texture="VOICE_03"/>
+			<msprite sx='547' sy='187' ex='547' ey='187' l='760'		t='150'	r='819'	b='179' texture="VOICE_03"/>
+			<msprite sx='609' sy='187' ex='609' ey='187' l='760'		t='180'	r='819'	b='209' texture="VOICE_03"/>
+			<msprite sx='671' sy='187' ex='671' ey='187' l='760'		t='210'	r='819'	b='239' texture="VOICE_03"/>			
+		</page>
+	</tab>
+
+	<!-- 창닫기 버튼 -->
+	<button name="POPUP_ZXV_CLOSE_BUTTON" x='733' y='599' w='80' h='32'>
+		<sprite l='619' t='0' r='699' b='32' texture="VOICE_03"/>
+		<sprite l='619' t='33' r='699' b='65' texture="VOICE_03"/>
+		<sprite l='619' t='66' r='699' b='98' texture="VOICE_03"/>
+	</button>
+	<!-- ========================================================== -->
+  <!-- ========================================================== -->
+  <!-- 슬롯 왼쪽 버튼 -->
+  <button name="POPUP_ZXV_PREV_BUTTON" x='259' y='247' w='20' h='68'>
+    <sprite l='774' t='0' r='794' b='68' texture="VOICE_01"/>
+    <sprite l='817' t='0' r='837' b='68' texture="VOICE_01"/>
+    <sprite l='860' t='0' r='880' b='68' texture="VOICE_01"/>
+  </button>
+
+  <!-- 슬롯 오른쪽 버튼 -->
+  <button name="POPUP_ZXV_NEXT_BUTTON" x='765' y='247' w='20' h='68'>
+    <sprite l='795' t='0' r='815' b='68' texture="VOICE_01"/>
+    <sprite l='838' t='0' r='858' b='68' texture="VOICE_01"/>
+    <sprite l='881' t='0' r='901' b='68' texture="VOICE_01"/>
+  </button>
+
+  <!-- ========================================================== -->
+  <!-- ========================================================== -->
+  <!-- POPUP_ZXV소리 01 재생버튼 -->
+  <button name="POPUP_ZXV_PLAY_01" x='392' y='348' w='50' h='22'>
+    <sprite l='527' t='0' r='577' b='22' texture="VOICE_01"/>
+    <sprite l='527' t='23' r='577' b='45' texture="VOICE_01"/>
+    <sprite l='527' t='46' r='577' b='68' texture="VOICE_01"/>
+  </button>
+
+  <!-- POPUP_ZXV소리 02 재생버튼 -->
+  <button name="POPUP_ZXV_PLAY_02" x='670' y='348' w='50' h='22'>
+    <sprite l='527' t='0' r='577' b='22' texture="VOICE_01"/>
+    <sprite l='527' t='23' r='577' b='45' texture="VOICE_01"/>
+    <sprite l='527' t='46' r='577' b='68' texture="VOICE_01"/>
+  </button>
+
+  <!-- POPUP_ZXV소리 03 재생버튼 -->
+  <button name="POPUP_ZXV_PLAY_03" x='392' y='397' w='50' h='22'>
+    <sprite l='527' t='0' r='577' b='22' texture="VOICE_01"/>
+    <sprite l='527' t='23' r='577' b='45' texture="VOICE_01"/>
+    <sprite l='527' t='46' r='577' b='68' texture="VOICE_01"/>
+  </button>
+
+  <!-- POPUP_ZXV소리 04 재생버튼 -->
+  <button name="POPUP_ZXV_PLAY_04" x='670' y='397' w='50' h='22'>
+    <sprite l='527' t='0' r='577' b='22' texture="VOICE_01"/>
+    <sprite l='527' t='23' r='577' b='45' texture="VOICE_01"/>
+    <sprite l='527' t='46' r='577' b='68' texture="VOICE_01"/>
+  </button>
+
+  <!-- POPUP_ZXV소리 05 재생버튼 -->
+  <button name="POPUP_ZXV_PLAY_05" x='392' y='448' w='50' h='22'>
+    <sprite l='527' t='0' r='577' b='22' texture="VOICE_01"/>
+    <sprite l='527' t='23' r='577' b='45' texture="VOICE_01"/>
+    <sprite l='527' t='46' r='577' b='68' texture="VOICE_01"/>
+  </button>
+
+
+  <!-- POPUP_ZXV소리 06 재생버튼 -->
+  <button name="POPUP_ZXV_PLAY_06" x='670' y='448' w='50' h='22'>
+    <sprite l='527' t='0' r='577' b='22' texture="VOICE_01"/>
+    <sprite l='527' t='23' r='577' b='45' texture="VOICE_01"/>
+    <sprite l='527' t='46' r='577' b='68' texture="VOICE_01"/>
+  </button>
+
+  <!-- POPUP_ZXV소리 07 재생버튼 -->
+  <button name="POPUP_ZXV_PLAY_07" x='392' y='499' w='50' h='22'>
+    <sprite l='527' t='0' r='577' b='22' texture="VOICE_01"/>
+    <sprite l='527' t='23' r='577' b='45' texture="VOICE_01"/>
+    <sprite l='527' t='46' r='577' b='68' texture="VOICE_01"/>
+  </button>
+
+  <!-- POPUP_ZXV소리 08 재생버튼 -->
+  <button name="POPUP_ZXV_PLAY_08" x='670' y='499' w='50' h='22'>
+    <sprite l='527' t='0' r='577' b='22' texture="VOICE_01"/>
+    <sprite l='527' t='23' r='577' b='45' texture="VOICE_01"/>
+    <sprite l='527' t='46' r='577' b='68' texture="VOICE_01"/>
+  </button>
+
+  <!-- POPUP_ZXV소리 09 재생버튼 -->
+  <button name="POPUP_ZXV_PLAY_09" x='392' y='550' w='50' h='22'>
+    <sprite l='527' t='0' r='577' b='22' texture="VOICE_01"/>
+    <sprite l='527' t='23' r='577' b='45' texture="VOICE_01"/>
+    <sprite l='527' t='46' r='577' b='68' texture="VOICE_01"/>
+  </button>
+  <!-- ========================================================== -->
+  <!-- ========================================================== -->	
+	<!-- POPUP_ZXV소리 01 변경버튼 -->
+	<button name="POPUP_ZXV_CHANGE_01" x='454' y='348' w='50' h='22'>
+		<sprite l='527' t='69' r='577' b='91' texture="VOICE_01"/>
+		<sprite l='527' t='92' r='577' b='114' texture="VOICE_01"/>
+		<sprite l='527' t='115' r='577' b='137' texture="VOICE_01"/>
+	</button>
+
+	<!-- POPUP_ZXV소리 02 변경버튼 -->
+	<button name="POPUP_ZXV_CHANGE_02" x='732' y='348' w='50' h='22'>
+		<sprite l='527' t='69' r='577' b='91' texture="VOICE_01"/>
+		<sprite l='527' t='92' r='577' b='114' texture="VOICE_01"/>
+		<sprite l='527' t='115' r='577' b='137' texture="VOICE_01"/>
+	</button>
+
+
+	<!-- POPUP_ZXV소리 03 변경버튼 -->
+	<button name="POPUP_ZXV_CHANGE_03" x='454' y='397' w='50' h='22'>
+		<sprite l='527' t='69' r='577' b='91' texture="VOICE_01"/>
+		<sprite l='527' t='92' r='577' b='114' texture="VOICE_01"/>
+		<sprite l='527' t='115' r='577' b='137' texture="VOICE_01"/>
+	</button>
+
+	<!-- POPUP_ZXV소리 04 변경버튼 -->
+	<button name="POPUP_ZXV_CHANGE_04" x='732' y='397' w='50' h='22'>
+		<sprite l='527' t='69' r='577' b='91' texture="VOICE_01"/>
+		<sprite l='527' t='92' r='577' b='114' texture="VOICE_01"/>
+		<sprite l='527' t='115' r='577' b='137' texture="VOICE_01"/>
+	</button>
+
+	<!-- POPUP_ZXV소리 05 변경버튼 -->
+	<button name="POPUP_ZXV_CHANGE_05" x='454' y='448' w='50' h='22'>
+		<sprite l='527' t='69' r='577' b='91' texture="VOICE_01"/>
+		<sprite l='527' t='92' r='577' b='114' texture="VOICE_01"/>
+		<sprite l='527' t='115' r='577' b='137' texture="VOICE_01"/>
+	</button>
+
+	<!-- POPUP_ZXV소리 06 변경버튼 -->
+	<button name="POPUP_ZXV_CHANGE_06" x='732' y='448' w='50' h='22'>
+		<sprite l='527' t='69' r='577' b='91' texture="VOICE_01"/>
+		<sprite l='527' t='92' r='577' b='114' texture="VOICE_01"/>
+		<sprite l='527' t='115' r='577' b='137' texture="VOICE_01"/>
+	</button>
+
+	<!-- POPUP_ZXV소리 07 변경버튼 -->
+	<button name="POPUP_ZXV_CHANGE_07" x='454' y='499' w='50' h='22'>
+		<sprite l='527' t='69' r='577' b='91' texture="VOICE_01"/>
+		<sprite l='527' t='92' r='577' b='114' texture="VOICE_01"/>
+		<sprite l='527' t='115' r='577' b='137' texture="VOICE_01"/>
+	</button>
+
+	<!-- POPUP_ZXV소리 08 변경버튼 -->
+	<button name="POPUP_ZXV_CHANGE_08" x='732' y='499' w='50' h='22'>
+		<sprite l='527' t='69' r='577' b='91' texture="VOICE_01"/>
+		<sprite l='527' t='92' r='577' b='114' texture="VOICE_01"/>
+		<sprite l='527' t='115' r='577' b='137' texture="VOICE_01"/>
+	</button>
+
+	<!-- POPUP_ZXV소리 09 변경버튼 -->
+	<button name="POPUP_ZXV_CHANGE_09" x='454' y='550' w='50' h='22'>
+		<sprite l='527' t='69' r='577' b='91' texture="VOICE_01"/>
+		<sprite l='527' t='92' r='577' b='114' texture="VOICE_01"/>
+		<sprite l='527' t='115' r='577' b='137' texture="VOICE_01"/>
+	</button>
+
+	<msprite name = "TEXT_IMAGE_COMMAND" sx='229' sy='158' ex='229' ey='158' l='621' t='101' r='653' b='116' texture="VOICE_03"/>
+	<msprite name = "TEXT_IMAGE_STRATEGY" sx='229' sy='158' ex='229' ey='158' l='621' t='118' r='653' b='133' texture="VOICE_03"/>
+	<msprite name = "TEXT_IMAGE_STATEMENT" sx='229' sy='158' ex='229' ey='158' l='621' t='135' r='653' b='150' texture="VOICE_03"/>
+</UIDEFINE>

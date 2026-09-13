@@ -1,0 +1,210 @@
+<UIDEFINE>
+
+ 	
+
+	
+  	<msprite name="OPTIONQUICKJOIN_1" sx="202" sy="193" ex="202" ey="193" l="0" t="86" r="16" b="106" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONQUICKJOIN_2" tl="218" tt="193" tr="492" tb="213" l="18" t="86" r="32" b="106" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_3" sx="492" sy="193" ex="492" ey="193" l="34" t="86" r="50" b="106" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONQUICKJOIN_4" tl="202" tt="213" tr="218" tb="565" l="0" t="108" r="16" b="122" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONQUICKJOIN_5" tl="218" tt="213" tr="492" tb="565" l="18" t="108" r="32" b="122" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONQUICKJOIN_6" tl="492" tt="213" tr="508" tb="565" l="34" t="108" r="50" b="122" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_7" sx="202" sy="565" ex="202" ey="565" l="0" t="124" r="16" b="140" texture="UI_Popup_1"/>
+  	<ssprite name="OPTIONQUICKJOIN_8" tl="218" tt="565" tr="492" tb="581" l="18" t="124" r="32" b="140" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_9" sx="492" sy="565" ex="492" ey="565" l="34" t="124" r="50" b="140" texture="UI_Popup_1"/>
+
+
+  	<msprite name="OPTIONQUICKJOIN_10" sx='213' sy='197' ex='213' ey='197' l='484' t='138' r='547' b='150' texture="UI_Popup_1"/>
+
+  	
+
+  	<msprite name="OPTIONQUICKJOIN_11" sx='215' sy='226' ex='215' ey='226' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_12" sx='215' sy='250' ex='215' ey='250' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_13" sx='215' sy='276' ex='215' ey='276' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_14" sx='215' sy='302' ex='215' ey='302' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_15" sx='215' sy='328' ex='215' ey='328' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_16" sx='215' sy='354' ex='215' ey='354' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_17" sx='215' sy='382' ex='215' ey='382' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_18" sx='215' sy='406' ex='215' ey='406' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_27" sx='215' sy='434' ex='215' ey='434' l='153' t='35' r='165' b='47' texture="UI_Popup_1"/>
+
+  	
+
+  	<msprite name="OPTIONQUICKJOIN_19" sx='234' sy='215' ex='234' ey='225' l='58' t='591' r='145' b='604' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_20" sx='234' sy='250' ex='234' ey='250' l='58' t='604' r='145' b='617' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_21" sx='234' sy='275' ex='234' ey='275' l='58' t='617' r='145' b='630' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_22" sx='234' sy='302' ex='234' ey='302' l='58' t='630' r='145' b='643' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_23" sx='234' sy='328' ex='234' ey='328' l='58' t='643' r='145' b='656' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_24" sx='234' sy='354' ex='234' ey='352' l='58' t='656' r='145' b='670' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_25" sx='234' sy='382' ex='234' ey='382' l='354' t='948' r='404' b='959' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_26" sx='218' sy='408' ex='218' ey='408' l='365' t='961' r='405' b='970' texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_28" sx='234' sy='434' ex='234' ey='434' l='709' t='105' r='794' b='116' texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="OPTIONQUICKJOIN_27" sx="334" sy="222" ex="334" ey="222" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_28" sx="425" sy="222" ex="425" ey="222" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONQUICKJOIN_29" sx="334" sy="246" ex="334" ey="246" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_30" sx="425" sy="246" ex="425" ey="246" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONQUICKJOIN_31" sx="334" sy="272" ex="334" ey="272" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_32" sx="425" sy="272" ex="425" ey="272" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONQUICKJOIN_33" sx="334" sy="298" ex="334" ey="298" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_34" sx="425" sy="298" ex="425" ey="298" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONQUICKJOIN_35" sx="334" sy="324" ex="334" ey="324" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_36" sx="425" sy="324" ex="425" ey="324" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONQUICKJOIN_37" sx="334" sy="350" ex="334" ey="350" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_38" sx="425" sy="350" ex="425" ey="350" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONQUICKJOIN_39" sx="334" sy="378" ex="334" ey="378" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_40" sx="425" sy="378" ex="425" ey="378" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONQUICKJOIN_41" sx="334" sy="404" ex="334" ey="404" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_42" sx="425" sy="404" ex="425" ey="404" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONQUICKJOIN_60" sx="334" sy="430" ex="334" ey="430" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_61" sx="425" sy="430" ex="425" ey="430" l="58" t="118" r="78" b="138" texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="OPTIONQUICKJOIN_43" sx="368" sy="226" ex="368" ey="226" l="449" t="209" r="470" b="219" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_44" sx="461" sy="226" ex="461" ey="226" l="471" t="209" r="492" b="219" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONQUICKJOIN_45" sx="368" sy="250" ex="368" ey="250" l="449" t="209" r="470" b="219" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_46" sx="461" sy="250" ex="461" ey="250" l="471" t="209" r="492" b="219" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONQUICKJOIN_47" sx="368" sy="276" ex="368" ey="276" l="449" t="209" r="470" b="219" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_48" sx="461" sy="276" ex="461" ey="276" l="471" t="209" r="492" b="219" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONQUICKJOIN_49" sx="366" sy="304" ex="368" ey="304" l="449" t="209" r="470" b="219" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_50" sx="461" sy="304" ex="461" ey="304" l="471" t="209" r="492" b="219" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONQUICKJOIN_51" sx="368" sy="328" ex="368" ey="328" l="449" t="209" r="470" b="219" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_52" sx="461" sy="328" ex="461" ey="328" l="471" t="209" r="492" b="219" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONQUICKJOIN_53" sx="368" sy="354" ex="368" ey="354" l="449" t="209" r="470" b="219" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_54" sx="461" sy="354" ex="461" ey="354" l="471" t="209" r="492" b="219" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONQUICKJOIN_55" sx="368" sy="382" ex="368" ey="382" l="449" t="209" r="470" b="219" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_56" sx="461" sy="382" ex="461" ey="382" l="471" t="209" r="492" b="219" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONQUICKJOIN_57" sx="368" sy="408" ex="368" ey="408" l="449" t="209" r="470" b="219" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_58" sx="461" sy="408" ex="461" ey="408" l="471" t="209" r="492" b="219" texture="UI_Popup_1"/>
+
+  	<msprite name="OPTIONQUICKJOIN_62" sx="368" sy="434" ex="368" ey="434" l="449" t="209" r="470" b="219" texture="UI_Popup_1"/>
+  	<msprite name="OPTIONQUICKJOIN_63" sx="461" sy="434" ex="461" ey="434" l="471" t="209" r="492" b="219" texture="UI_Popup_1"/>
+
+  	
+
+	<checkbox name="LOCAL CHECK" x="214" y="475" w="12" h="12">
+  		<sprite l="109" t="814" r="121" b="826" texture="UI_Popup_1"/>
+    		<sprite l="109" t="827" r="121" b="839" texture="UI_Popup_1"/>
+  	</checkbox>
+	<msprite name="OPTIONQUICKJOIN_59" sx="228" sy="475" ex="228" ey="475" l="154" t="185" r="282" b="197" texture="UI_Popup_1"/>
+
+	
+	<checkbox name="MATCHING_GAME_CHECK" x="214" y="505" w="12" h="12">
+    		<sprite l="109" t="814" r="121" b="826" texture="UI_Popup_1"/>
+    		<sprite l="109" t="827" r="121" b="839" texture="UI_Popup_1"/>
+  	</checkbox>
+	<msprite name="OPTIONQUICKJOIN_64" sx="228" sy="505" ex="228" ey="505" l="0" t="933" r="82" b="945" texture="UI_Popup_1"/>
+
+ 	
+	<checkbox name="WAITROOM_WITH_CHECK" x="360" y="475" w="12" h="12">
+    		<sprite l="109" t="814" r="121" b="826" texture="UI_Popup_1"/>
+    		<sprite l="109" t="827" r="121" b="839" texture="UI_Popup_1"/>
+  	</checkbox>
+	<msprite name="OPTIONQUICKJOIN_65" sx="374" sy="475" ex="374" ey="475" l="0" t="946" r="113" b="958" texture="UI_Popup_1"/>
+
+	
+	<checkbox name="NOSKILL_WITH_CHECK" x="214" y="490" w="12" h="12">
+    		<sprite l="109" t="814" r="121" b="826" texture="UI_Popup_1"/>
+    		<sprite l="109" t="827" r="121" b="839" texture="UI_Popup_1"/>
+  	</checkbox>
+	<msprite name="OPTIONQUICKJOIN_66" sx="228" sy="490" ex="228" ey="490" l="0" t="959" r="113" b="971" texture="UI_Popup_1"/>
+
+	
+	<checkbox name="CRAZYMODE_WITH_CHECK" x="337" y="490" w="12" h="12">
+    		<sprite l="109" t="814" r="121" b="826" texture="UI_Popup_1"/>
+    		<sprite l="109" t="827" r="121" b="839" texture="UI_Popup_1"/>
+  	</checkbox>
+	<msprite name="OPTIONQUICKJOIN_67" sx="351" sy="490" ex="351" ey="490" l="0" t="972" r="135" b="984" texture="UI_Popup_1"/>
+
+
+	<radiobox name="SURVA_ON" x="334" y="222" w="20" h="20">
+		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+	</radiobox>
+
+	<radiobox name="SURVA_OFF" x="425" y="222" w="20" h="20">
+		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+	</radiobox>
+
+	<radiobox name="TEAMTATIC_ON" x="334" y="246" w="20" h="20">
+		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+	</radiobox>
+
+	<radiobox name="TEAMTATIC_OFF" x="425" y="246" w="20" h="20">
+		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+	</radiobox>
+
+	<radiobox name="TEAMBOOM_ON" x="334" y="272" w="20" h="20">
+		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+	</radiobox>
+
+	<radiobox name="TEAMBOOM_OFF" x="425" y="272" w="20" h="20">
+		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+	</radiobox>
+
+	<radiobox name="TEAMSURVA_ON" x="334" y="298" w="20" h="20">
+		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+	</radiobox>
+
+	<radiobox name="TEAMSURVA_0FF" x="425" y="298" w="20" h="20">
+		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+	</radiobox>
+
+	<radiobox name="STEAL_ON" x="334" y="324" w="20" h="20">
+		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+	</radiobox>
+
+	<radiobox name="STEAL_OFF" x="425" y="324" w="20" h="20">
+		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+	</radiobox>
+
+	<radiobox name="PULP_ON" x="334" y="350" w="20" h="20">
+		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+	</radiobox>
+
+	<radiobox name="PULP_OFF" x="425" y="350" w="20" h="20">
+		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+	</radiobox>
+
+	<radiobox name="OCCUPY_ON" x="334" y="378" w="20" h="20">
+		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+	</radiobox>
+
+	<radiobox name="OCCUPY_OFF" x="425" y="378" w="20" h="20">
+		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+	</radiobox>
+
+	<radiobox name="AI_ON" x="334" y="404" w="20" h="20">
+		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+	</radiobox>
+
+	<radiobox name="AI_OFF" x="425" y="404" w="20" h="20">
+		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+	</radiobox>
+
+	<radiobox name="EVENT_SOCCER_ON" x="334" y="430" w="20" h="20">
+		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+	</radiobox>
+
+	<radiobox name="EVENT_SOCCER_OFF" x="425" y="430" w="20" h="20">
+		<sprite l="79" t="118" r="99" b="138" texture="UI_Popup_1"/>
+	</radiobox>
+			
+
+	<msprite name="MATCHING_WARNING" sx="213" sy="529" ex="213" ey="529" l="570" t="348" r="854" b="389" texture="UI_Popup_1"/>								
+</UIDEFINE>

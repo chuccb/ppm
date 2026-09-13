@@ -1,0 +1,6 @@
+﻿<URLLIST>
+	<URL name="banner" index="1" url="http://dl.paperman.jp/paperman/lobby/banner.jpg" disable="0" />
+	<URL name="jpn_ranking" index="2" url="http://202.213.230.237:5351/content/mainContent.asp?key=%s" disable="0" />
+	<URL name="jpn_nhn_bill" index="3" url="http://paperman.hangame.co.jp/shop.nhn?m=point" disable="0" />
+	<URL name="jpn_bill" index="4" url="https://bill.paperman.jp/login.ashx?userid=%s&amp;token=%s" disable="0" />	
+</URLLIST>

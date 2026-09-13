@@ -1,0 +1,42 @@
+<UIDEFINE>
+	<image name="TUTO_MISSION" filename="TUTO_MISSION.dds" />
+	<msprite name="SELECTFRAME" sx='490' sy='311' ex='490' ey='311' l='201' t='512' r='400' b='737' texture="TUTO_MISSION" />
+	<msprite name="ATTACKLISTFRAME" sx='495' sy='316' ex='495' ey='316' l='6' t='738' r='195' b='953' texture="TUTO_MISSION" />
+   
+	<button name="ATTACK1" x='503' y='325' w='173' h='36' >
+		<sprite l='14' t='747' r='187' b='783' texture="TUTO_MISSION" />
+		<sprite l='622' t='449' r='795' b='485' texture="TUTO_MISSION" />
+		<sprite l='812' t='449' r='985' b='485' texture="TUTO_MISSION" />
+	</button>
+	<button name="ATTACK2" x='503' y='365' w='173' h='36' invalid='true' >
+		<sprite l='14' t='787' r='187' b='823' texture="TUTO_MISSION" />
+		<sprite l='622' t='489' r='795' b='525' texture="TUTO_MISSION" />
+		<sprite l='812' t='489' r='985' b='525' texture="TUTO_MISSION" />
+		<sprite l='432' t='489' r='605' b='525' texture="TUTO_MISSION" />
+	</button>
+	<button name="ATTACK3" x='503' y='405' w='173' h='36' invalid='true' >
+		<sprite l='14' t='827' r='187' b='863' texture="TUTO_MISSION" />
+		<sprite l='622' t='529' r='795' b='565' texture="TUTO_MISSION" />
+		<sprite l='812' t='529' r='985' b='565' texture="TUTO_MISSION" />
+		<sprite l='432' t='529' r='605' b='565' texture="TUTO_MISSION" />
+	</button>
+	<button name="ATTACK4" x='503' y='445' w='173' h='36' invalid='true' >
+		<sprite l='14' t='867' r='187' b='903' texture="TUTO_MISSION" />
+		<sprite l='622' t='569' r='795' b='605' texture="TUTO_MISSION" />
+		<sprite l='812' t='569' r='985' b='605' texture="TUTO_MISSION" />
+		<sprite l='432' t='569' r='605' b='605' texture="TUTO_MISSION" />
+	</button>
+	<button name="ATTACK5" x='503' y='485' w='173' h='36' invalid='true' >
+		<sprite l='14' t='907' r='187' b='943' texture="TUTO_MISSION" />
+		<sprite l='622' t='609' r='795' b='645' texture="TUTO_MISSION" />
+		<sprite l='812' t='609' r='985' b='645' texture="TUTO_MISSION" />
+		<sprite l='432' t='609' r='605' b='645' texture="TUTO_MISSION" />
+	</button>
+
+  <msprite name="ATTACK_COMPLETE_MARK_1" sx='510' sy='335' ex='510' ey='335' l='0' t='980' r='18' b='998' texture="TUTO_MISSION" />
+  <msprite name="ATTACK_COMPLETE_MARK_2" sx='510' sy='375' ex='510' ey='375' l='0' t='980' r='18' b='998' texture="TUTO_MISSION" />
+  <msprite name="ATTACK_COMPLETE_MARK_3" sx='510' sy='415' ex='510' ey='415' l='0' t='980' r='18' b='998' texture="TUTO_MISSION" />
+  <msprite name="ATTACK_COMPLETE_MARK_4" sx='510' sy='455' ex='510' ey='455' l='0' t='980' r='18' b='998' texture="TUTO_MISSION" />
+  <msprite name="ATTACK_COMPLETE_MARK_5" sx='510' sy='495' ex='510' ey='495' l='0' t='980' r='18' b='998' texture="TUTO_MISSION" />
+  
+</UIDEFINE>

@@ -1,0 +1,56 @@
+<UIDEFINE>
+	<image name="NETCAFE_POPUP" filename="netcafe_window.dds"/>
+
+	<msprite name="NETCAFE_POPUP_BACKGROUND" sx='0' sy='0' ex='0' ey='0' l='0' t='0' r='1024' b='768' texture="NETCAFE_POPUP"/>
+
+	<msprite name="CASH_DIGITAL_0" sx='0' sy='0' ex='0' ey='0' l='0' t='771' r='31' b='810' texture="NETCAFE_POPUP"/>
+	<msprite name="CASH_DIGITAL_1" sx='0' sy='0' ex='0' ey='0' l='32' t='771' r='62' b='810' texture="NETCAFE_POPUP"/>
+	<msprite name="CASH_DIGITAL_2" sx='0' sy='0' ex='0' ey='0' l='63' t='771' r='93' b='810' texture="NETCAFE_POPUP"/>
+	<msprite name="CASH_DIGITAL_3" sx='0' sy='0' ex='0' ey='0' l='94' t='771' r='124' b='810' texture="NETCAFE_POPUP"/>
+	<msprite name="CASH_DIGITAL_4" sx='0' sy='0' ex='0' ey='0' l='125' t='771' r='155' b='810' texture="NETCAFE_POPUP"/>
+	<msprite name="CASH_DIGITAL_5" sx='0' sy='0' ex='0' ey='0' l='156' t='771' r='186' b='810' texture="NETCAFE_POPUP"/>
+	<msprite name="CASH_DIGITAL_6" sx='0' sy='0' ex='0' ey='0' l='187' t='771' r='217' b='810' texture="NETCAFE_POPUP"/>
+	<msprite name="CASH_DIGITAL_7" sx='0' sy='0' ex='0' ey='0' l='218' t='771' r='248' b='810' texture="NETCAFE_POPUP"/>
+	<msprite name="CASH_DIGITAL_8" sx='0' sy='0' ex='0' ey='0' l='249' t='771' r='279' b='810' texture="NETCAFE_POPUP"/>
+	<msprite name="CASH_DIGITAL_9" sx='0' sy='0' ex='0' ey='0' l='280' t='771' r='310' b='810' texture="NETCAFE_POPUP"/>
+
+	<msprite name="PG_DIGITAL_0" sx='0' sy='0' ex='0' ey='0' l='0' t='816' r='31' b='855' texture="NETCAFE_POPUP"/>
+	<msprite name="PG_DIGITAL_1" sx='0' sy='0' ex='0' ey='0' l='32' t='816' r='62' b='855' texture="NETCAFE_POPUP"/>
+	<msprite name="PG_DIGITAL_2" sx='0' sy='0' ex='0' ey='0' l='63' t='816' r='93' b='855' texture="NETCAFE_POPUP"/>
+	<msprite name="PG_DIGITAL_3" sx='0' sy='0' ex='0' ey='0' l='94' t='816' r='124' b='855' texture="NETCAFE_POPUP"/>
+	<msprite name="PG_DIGITAL_4" sx='0' sy='0' ex='0' ey='0' l='125' t='816' r='155' b='855' texture="NETCAFE_POPUP"/>
+	<msprite name="PG_DIGITAL_5" sx='0' sy='0' ex='0' ey='0' l='156' t='816' r='186' b='855' texture="NETCAFE_POPUP"/>
+	<msprite name="PG_DIGITAL_6" sx='0' sy='0' ex='0' ey='0' l='187' t='816' r='217' b='855' texture="NETCAFE_POPUP"/>
+	<msprite name="PG_DIGITAL_7" sx='0' sy='0' ex='0' ey='0' l='218' t='816' r='248' b='855' texture="NETCAFE_POPUP"/>
+	<msprite name="PG_DIGITAL_8" sx='0' sy='0' ex='0' ey='0' l='249' t='816' r='279' b='855' texture="NETCAFE_POPUP"/>
+	<msprite name="PG_DIGITAL_9" sx='0' sy='0' ex='0' ey='0' l='280' t='816' r='310' b='855' texture="NETCAFE_POPUP"/>
+
+	<msprite name="IMG_0" sx='567' sy='359' ex='567' ey='359' l='313' t='806' r='347' b='840' texture="NETCAFE_POPUP"/>
+	<msprite name="IMG_1" sx='442' sy='343' ex='442' ey='343' l='313' t='841' r='347' b='875' texture="NETCAFE_POPUP"/>
+	<msprite name="IMG_2" sx='506' sy='425' ex='506' ey='425' l='348' t='806' r='381' b='840' texture="NETCAFE_POPUP"/>
+	<msprite name="IMG_3" sx='463' sy='470' ex='463' ey='470' l='348' t='841' r='381' b='875' texture="NETCAFE_POPUP"/>
+	<msprite name="IMG_4" sx='348' sy='383' ex='348' ey='383' l='383' t='771' r='417' b='805' texture="NETCAFE_POPUP"/>
+	<msprite name="IMG_5" sx='453' sy='300' ex='453' ey='300' l='383' t='806' r='416' b='840' texture="NETCAFE_POPUP"/>
+	<msprite name="IMG_6" sx='515' sy='482' ex='515' ey='482' l='383' t='841' r='416' b='875' texture="NETCAFE_POPUP"/>
+	<msprite name="IMG_7" sx='726' sy='313' ex='726' ey='313' l='418' t='771' r='452' b='805' texture="NETCAFE_POPUP"/>
+	<msprite name="IMG_8" sx='342' sy='306' ex='342' ey='306' l='418' t='771' r='452' b='805' texture="NETCAFE_POPUP"/>
+	<msprite name="IMG_9" sx='626' sy='231' ex='626' ey='231' l='418' t='771' r='452' b='805' texture="NETCAFE_POPUP"/>
+	<msprite name="IMG_10" sx='597' sy='436' ex='597' ey='436' l='418' t='771' r='452' b='805' texture="NETCAFE_POPUP"/>
+	<msprite name="IMG_11" sx='529' sy='196' ex='529' ey='196' l='418' t='771' r='452' b='805' texture="NETCAFE_POPUP"/>
+	<msprite name="IMG_12" sx='568' sy='430' ex='568' ey='430' l='418' t='771' r='452' b='805' texture="NETCAFE_POPUP"/>
+	<msprite name="IMG_13" sx='275' sy='273' ex='275' ey='273' l='418' t='771' r='452' b='805' texture="NETCAFE_POPUP"/>
+	<msprite name="IMG_14" sx='355' sy='209' ex='355' ey='209' l='418' t='771' r='452' b='805' texture="NETCAFE_POPUP"/>
+
+	<column name="PG_TEN_NUMBER" x='454' y='268' w='31' h='810' />
+	<column name="PG_ONE_NUMBER" x='479' y='268' w='31' h='810' />
+
+	<column name="CASH_TEN_NUMBER" x='484' y='313' w='31' h='810' />
+	<column name="CASH_ONE_NUMBER" x='509' y='313' w='31' h='810' />
+
+
+	<button name="CLOSE" x='953' y='64' w='34' h='34'>
+		<sprite l='313' t='771' r='347' b='805' texture="NETCAFE_POPUP"/>
+		<sprite l='348' t='771' r='382' b='805' texture="NETCAFE_POPUP"/>
+		<sprite l='313' t='771' r='347' b='805' texture="NETCAFE_POPUP"/>
+	</button>
+</UIDEFINE>

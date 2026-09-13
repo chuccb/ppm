@@ -1,0 +1,26 @@
+<UIDEFINE>
+
+	<bot_image name="Game_Center_Popup" filename="gs_popup.dds"/>
+  
+	<msprite name="GS_POPUP01" sx='206' sy='280' ex='206' ey='280' l='0' t='0' r='512' b='211' texture="Game_Center_Popup"/>
+	<msprite name="GS_POPUP02" sx='718' sy='280' ex='718' ey='280' l='0' t='212' r='103' b='423' texture="Game_Center_Popup"/>
+
+	<column name="NICKNAME"    	x='220'  y='295'  w='148'   h='20' fontsize="16" color="FFf3ea65" format='VCENTER CENTER'/>
+	<column name="CHAR_IMAGE"     x='221'  y='327'  w='150'   h='151' />
+	<column name="CLASS_IMAGE"    x='388'  y='352'  w='120'   h='38' format='VCENTER CENTER'/>
+	<column name="SCORE_IMAGE"    x='386'  y='440'  w='120'   h='22' format='VCENTER CENTER'/>
+
+	<column name="SPECIALCOUNT_0"         x='710'  y='327'  w='11'     h='20'   format='RIGHT'/>
+	<column name="SPECIALCOUNT_1"         x='710'  y='352'  w='11'     h='20'   format='RIGHT'/>
+	<column name="SPECIALCOUNT_2"         x='710'  y='377'  w='11'     h='20'   format='RIGHT'/>
+	<column name="SPECIALCOUNT_3"         x='710'  y='403'  w='11'     h='20'   format='RIGHT'/>
+	<column name="SPECIALCOUNT_4"         x='710'  y='429'  w='11'     h='20'   format='RIGHT'/>
+	<column name="SPECIALCOUNT_5"         x='710'  y='454'  w='11'     h='20'   format='RIGHT'/>
+
+	<button name="EXIT" x='746' y='288' w='60' h='25'>
+		<sprite l='389' t='212' r='449' b='237' texture="Game_Center_Popup"/>
+		<sprite l='389' t='238' r='449' b='263' texture="Game_Center_Popup"/>
+		<sprite l='389' t='264' r='449' b='289' texture="Game_Center_Popup"/>
+	</button>
+
+</UIDEFINE>

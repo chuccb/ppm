@@ -1,0 +1,79 @@
+<UIDEFINE>
+	<msprite name="GET_ITEM_BACK" sx='0' sy='0' ex='0' ey='0' l='0' t='0' r='1024' b='768' texture="PEPACHI_Back"/>
+	<msprite name="GET_ITEM_NOTICE" sx='397' sy='71' ex='397' ey='71' l='517' t='213' r='811' b='329' texture="PEPACHI"/>  
+
+	<button name="GET_ITEM_NOTICE_CLOSE" x="820" y="502" w="116" h="46">
+		<sprite l="864" t="207" r="980" b="253" texture="UI_Button" />
+		<sprite l="864" t="254" r="980" b="300" texture="UI_Button" />
+		<sprite l="864" t="301" r="980" b="347" texture="UI_Button" />
+	</button>
+
+
+	<msprite name="GET_ITEM_1"  sx="79" sy="208" ex="79" ey="208" l="812" t="164" r="949" b="330" texture="PEPACHI"/>  	
+	<msprite name="GET_ITEM_2"  sx="225" sy="208" ex="225" ey="208" l="812" t="164" r="949" b="330" texture="PEPACHI"/>  	
+	<msprite name="GET_ITEM_3"  sx="371" sy="208" ex="371" ey="208" l="812" t="164" r="949" b="330" texture="PEPACHI"/>  	
+	<msprite name="GET_ITEM_4"  sx="517" sy="208" ex="517" ey="208" l="812" t="164" r="949" b="330" texture="PEPACHI"/>  	
+	<msprite name="GET_ITEM_5"  sx="663" sy="208" ex="663" ey="208" l="812" t="164" r="949" b="330" texture="PEPACHI"/>  	
+	<msprite name="GET_ITEM_6"  sx="79"  sy="382" ex="79"  ey="382" l="812" t="164" r="949" b="330" texture="PEPACHI"/>  	
+	<msprite name="GET_ITEM_7"  sx="225" sy="382" ex="225" ey="382" l="812" t="164" r="949" b="330" texture="PEPACHI"/>  	
+	<msprite name="GET_ITEM_8"  sx="371" sy="382" ex="371" ey="382" l="812" t="164" r="949" b="330" texture="PEPACHI"/>  	
+	<msprite name="GET_ITEM_9"  sx="517" sy="382" ex="517" ey="382" l="812" t="164" r="949" b="330" texture="PEPACHI"/>  	
+	<msprite name="GET_ITEM_10" sx="663" sy="382" ex="663" ey="382" l="812" t="164" r="949" b="330" texture="PEPACHI"/>
+	<msprite name="GET_ITEM_11" sx="810" sy="281" ex="810" ey="281" l="812" t="164" r="949" b="330" texture="PEPACHI"/>  	  	
+
+	<column name="GET_ITEM_THUM_1" x="115" y="224" w="64" h="64" />
+  	<column name="GET_ITEM_THUM_2" x="261" y="224" w="64" h="64" />
+  	<column name="GET_ITEM_THUM_3" x="407" y="224" w="64" h="64" />
+  	<column name="GET_ITEM_THUM_4" x="553" y="224" w="64" h="64" />
+  	<column name="GET_ITEM_THUM_5" x="699" y="224" w="64" h="64" /> 	
+	
+	<column name="GET_ITEM_THUM_6" x="115" y="398" w="64" h="64" />
+  	<column name="GET_ITEM_THUM_7" x="261" y="398" w="64" h="64" />
+  	<column name="GET_ITEM_THUM_8" x="407" y="398" w="64" h="64" />
+  	<column name="GET_ITEM_THUM_9" x="553" y="398" w="64" h="64" />
+  	<column name="GET_ITEM_THUM_10" x="699" y="398" w="64" h="64" />
+	<column name="GET_ITEM_THUM_11" x="846" y="297" w="64" h="64" />
+
+
+	<column name="GET_ITEM_NAME_1" x="88" y="304"   w="119" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GET_ITEM_NAME_2" x="234" y="304"   w="119" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GET_ITEM_NAME_3" x="380" y="304"   w="119" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GET_ITEM_NAME_4" x="526" y="304"   w="119" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GET_ITEM_NAME_5" x="672" y="304"   w="119" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	
+	<column name="GET_ITEM_NAME_6" x="88" y="478"   w="119" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GET_ITEM_NAME_7" x="234" y="478"   w="119" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GET_ITEM_NAME_8" x="380" y="478"   w="119" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GET_ITEM_NAME_9" x="526" y="478"   w="119" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GET_ITEM_NAME_10" x="672" y="478"   w="119" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="GET_ITEM_NAME_11" x="819" y="377"   w="119" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+
+
+	<column name="GET_ITEM_KIND_1" x="88" y="343"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GET_ITEM_KIND_2" x="234" y="343"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GET_ITEM_KIND_3" x="380" y="343"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GET_ITEM_KIND_4" x="526" y="343"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GET_ITEM_KIND_5" x="672" y="343"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GET_ITEM_KIND_6" x="88" y="517"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GET_ITEM_KIND_7" x="234" y="517"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GET_ITEM_KIND_8" x="380" y="517"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GET_ITEM_KIND_9" x="526" y="517"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GET_ITEM_KIND_10" x="672" y="517"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="GET_ITEM_KIND_11" x="819" y="416"   w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+
+
+	<column name="GET_ITEM_COUNT_1" x="151" y="343" w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="GET_ITEM_COUNT_2" x="297" y="343" w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="GET_ITEM_COUNT_3" x="443" y="343" w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="GET_ITEM_COUNT_4" x="589" y="343" w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="GET_ITEM_COUNT_5" x="735" y="343" w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="GET_ITEM_COUNT_6" x="151" y="517" w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="GET_ITEM_COUNT_7" x="297" y="517" w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="GET_ITEM_COUNT_8" x="443" y="517" w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="GET_ITEM_COUNT_9" x="589" y="517" w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="GET_ITEM_COUNT_10" x="735" y="517" w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="GET_ITEM_COUNT_11" x="882" y="416" w="57" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+
+	<msprite name="GET_ITEM_BONUS" sx='894' sy='240' ex='894' ey='240' l='682' t='638' r='764' b='697' texture="PEPACHI"/>  
+	
+</UIDEFINE>

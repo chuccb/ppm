@@ -1,0 +1,128 @@
+<UIDEFINE>
+
+	<image name="EMBLEM_CH_EM" filename="change_emblem.dds" />
+	
+	<msprite sx='280' sy='200' ex='280' ey='200' l='0' t='0' r='128' b='34' texture="UI_Popup_1" />
+	<ssprite tl='408' tt='200' tr='760' tb='234' l='130' t='0' r='144' b='34' texture="UI_Popup_1" />
+	<msprite sx='760' sy='200' ex='760' ey='200' l='146' t='0' r='162' b='34' texture="UI_Popup_1" />
+	
+	<msprite sx='290' sy='209' ex='290' ey='209' l='495' t='40' r='649' b='56' texture="EMBLEM_CH_EM" />
+	
+	<msprite sx='280' sy='234' ex='280' ey='234' l='0' t='35' r='16' b='51' texture="UI_Popup_1" />
+	<ssprite tl='296' tt='234' tr='760' tb='250' l='18' t='35' r='32' b='51' texture="UI_Popup_1"/>
+	<msprite sx='760' sy='234' ex='760' ey='234' l='34' t='35' r='50' b='51' texture="UI_Popup_1" />
+
+	<ssprite tl='280' tt='240' tr='296' tb='515' l='0' t='53' r='16' b='67' texture="UI_Popup_1" />
+	<ssprite tl='296' tt='240' tr='760' tb='515' l='18' t='53' r='32' b='67' texture="UI_Popup_1"/>
+	<ssprite tl='760' tt='240' tr='776' tb='515' l='34' t='53' r='50' b='67' texture="UI_Popup_1"/>
+
+	<msprite sx='280' sy='515' ex='280' ey='515' l='0' t='69' r='16' b='85' texture="UI_Popup_1" />	
+	<ssprite tl='296' tt='515' tr='760' tb='531' l='18' t='69' r='32' b='85' texture="UI_Popup_1"/>
+	<msprite sx='760' sy='515' ex='760' ey='515' l='34' t='69' r='50' b='85' texture="UI_Popup_1" />
+
+	<msprite sx='280' sy='531' ex='280' ey='531' l='51' t='35' r='67' b='82' texture="UI_Popup_1" />	
+	<ssprite tl='296' tt='531' tr='760' tb='578' l='69' t='35' r='83' b='82' texture="UI_Popup_1"/>
+	<msprite sx='760' sy='531' ex='760' ey='531' l='85' t='35' r='101' b='82' texture="UI_Popup_1" />
+
+	<msprite sx='430' sy='260' ex='430' ey='260' l='0' t='0' r='320' b='250' texture="EMBLEM_CH_EM" />
+	
+	<select name="CHANGE_EMLIST" count='15' OffX='0' OffY='0' >
+		<rect l='449' t='336' r='481' b='368' />
+		<rect l='503' t='336' r='535' b='368' />
+		<rect l='557' t='336' r='589' b='368' />
+		<rect l='611' t='336' r='643' b='368' />
+		<rect l='665' t='336' r='697' b='368' />
+
+		<rect l='449' t='383' r='481' b='415' />
+		<rect l='503' t='383' r='535' b='415' />
+		<rect l='557' t='383' r='589' b='415' />
+		<rect l='611' t='383' r='643' b='415' />
+		<rect l='665' t='383' r='697' b='415' />
+
+		<rect l='449' t='430' r='481' b='462' />
+		<rect l='503' t='430' r='535' b='462' />
+		<rect l='557' t='430' r='589' b='462' />
+		<rect l='611' t='430' r='643' b='462' />
+		<rect l='665' t='430' r='697' b='462' />
+
+		<column name="EM_SOURCE" x='8' y='7' w='32' h='32' shadow="00000001" />
+
+		<sprite l='325' t='130' r='372' b='176' texture="EMBLEM_CH_EM"/>
+		<sprite l='325' t='177' r='372' b='223' texture="EMBLEM_CH_EM"/>
+
+    		<eventrect name="SCROLL_RECT" x="449" y="336" w="248" h="126"/>
+    
+		<button name='UP' x='717' y='335' w='19' h='32' >
+			<sprite l='325' t='115' r='335' b='130' texture="EMBLEM_CH_EM" />
+			<sprite l='345' t='115' r='355' b='130' texture="EMBLEM_CH_EM" />
+			<sprite l='365' t='115' r='375' b='130' texture="EMBLEM_CH_EM" />
+		</button>
+
+		<button name="DN" x="717" y="462" w="19" h="32">
+			<sprite l='335' t='115' r='345' b='130' texture="EMBLEM_CH_EM" />
+			<sprite l='355' t='115' r='365' b='130' texture="EMBLEM_CH_EM" />
+			<sprite l='375' t='115' r='385' b='130' texture="EMBLEM_CH_EM" />
+		</button>
+	</select>
+
+	<msprite sx='440' sy='266' ex='440' ey='266' l='410' t='1' r='494' b='26' texture="EMBLEM_CH_EM"/>
+	<msprite sx='532' sy='266' ex='532' ey='266' l='410' t='34' r='494' b='59' texture="EMBLEM_CH_EM"/>
+	<msprite sx='624' sy='266' ex='624' ey='266' l='410' t='67' r='494' b='92' texture="EMBLEM_CH_EM"/>
+
+	<tab name="MAIN_TAB" count='3' >
+		<page name="MAIN_TAB1" x='441' y='266' default='true' >
+			<sprite l='326' t='1' r='409' b='32' texture="EMBLEM_CH_EM" />
+		</page>
+		<page name="MAIN_TAB2" x='533' y='266' >
+			<sprite l='326' t='34' r='409' b='65' texture="EMBLEM_CH_EM" />
+		</page>
+		<page name="MAIN_TAB3" x='625' y='266' >
+			<sprite l='326' t='67' r='409' b='98' texture="EMBLEM_CH_EM" />
+		</page>
+	</tab>
+	
+	<msprite sx='456' sy='301' ex='456' ey='301' l='495' t='0' r='579' b='18' texture="EMBLEM_CH_EM"/>
+	<msprite sx='546' sy='301' ex='546' ey='301' l='580' t='0' r='664' b='18' texture="EMBLEM_CH_EM"/>
+	<msprite sx='636' sy='301' ex='636' ey='301' l='665' t='0' r='749' b='18' texture="EMBLEM_CH_EM"/>
+
+	<tab name="SUB_TAB" count='3' >
+		<page name="SUB_TAB1" x='456' y='300' default='true'>
+			<sprite l='495' t='18' r='579' b='39' texture="EMBLEM_CH_EM" />
+		</page>
+		<page name="SUB_TAB2" x='546' y='300' >
+			<sprite l='580' t='18' r='664' b='39' texture="EMBLEM_CH_EM" />
+		</page>
+		<page name="SUB_TAB3" x='636' y='300' >
+			<sprite l='665' t='18' r='749' b='39' texture="EMBLEM_CH_EM"/>
+		</page>
+	</tab>
+
+	<button name="OK" x="601" y="545" w="84" h="28">
+		<sprite l='825' t='390' r='909' b='418' texture="UI_Popup_1"/>
+		<sprite l='825' t='419' r='909' b='447' texture="UI_Popup_1"/>
+		<sprite l='825' t='448' r='909' b='476' texture="UI_Popup_1"/>
+	</button>
+
+	<button name="CANCEL" x="687" y="545" w="84" h="28">
+		<sprite l='740' t='390' r='824' b='418' texture="UI_Popup_1"/>
+		<sprite l='740' t='419' r='824' b='447' texture="UI_Popup_1"/>
+		<sprite l='740' t='448' r='824' b='476' texture="UI_Popup_1"/>
+	</button>
+
+	<button name="CLEAR" x="313" y="367" w="84" h="28">
+		<sprite l='655' t='390' r='739' b='418' texture="UI_Popup_1"/>
+		<sprite l='655' t='419' r='739' b='447' texture="UI_Popup_1"/>
+		<sprite l='655' t='448' r='739' b='476' texture="UI_Popup_1"/>
+	</button>
+
+	<msprite sx='300' sy='470' ex='300' ey='470' l='0' t='250' r='115' b='272' texture="EMBLEM_CH_EM" />
+	<msprite sx='315' sy='270' ex='315' ey='270' l='0' t='272' r='78' b='350' texture="EMBLEM_CH_EM" />
+
+	
+	<column name="NOTICE_TEXT" x='294' y='415' w='122' h='50' color='FF000000' fontsize='13' format='VCENTER CENTER' />
+
+	<column name="CASH_TEXT" x='301' y='472' w='73' h='19' fontsize='15'  color='FF99cc00' format='VCENTER RIGHT' />
+	
+	<column name="PREVIEW" x='323' y='277' />
+
+</UIDEFINE>

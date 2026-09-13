@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<AI_LEVEL>
+  <MODE index="95">
+    <WAVELEVEL wave_index="1">
+      <WAVE_LEVEL_EASY>
+        <waveabilityplayer number="1" subtraction_rate="55" bothp_rate="75" siege_dmg_rate="62" firstdelay_rate="10" shotdelay_rate="70" movespeed_rate="33" />
+        <waveabilityplayer number="2" subtraction_rate="50" bothp_rate="75" siege_dmg_rate="62" firstdelay_rate="10" shotdelay_rate="60" movespeed_rate="33" />
+        <waveabilityplayer number="3" subtraction_rate="45" bothp_rate="75" siege_dmg_rate="62" firstdelay_rate="10" shotdelay_rate="50" movespeed_rate="33" />
+        <waveabilityplayer number="4" subtraction_rate="35" bothp_rate="75" siege_dmg_rate="62" firstdelay_rate="10" shotdelay_rate="50" movespeed_rate="33" />
+        <waveabilityplayer number="5" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="6" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="7" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="8" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+      </WAVE_LEVEL_EASY>
+      <WAVE_LEVEL_NORMAL>
+        <waveabilityplayer number="1" subtraction_rate="45" bothp_rate="42" siege_dmg_rate="7" firstdelay_rate="3" shotdelay_rate="10" movespeed_rate="20" />
+        <waveabilityplayer number="2" subtraction_rate="35" bothp_rate="42" siege_dmg_rate="7" firstdelay_rate="3" shotdelay_rate="10" movespeed_rate="20" />
+        <waveabilityplayer number="3" subtraction_rate="29" bothp_rate="37" siege_dmg_rate="7" firstdelay_rate="3" shotdelay_rate="10" movespeed_rate="20" />
+        <waveabilityplayer number="4" subtraction_rate="18" bothp_rate="30" siege_dmg_rate="3" firstdelay_rate="3" shotdelay_rate="10" movespeed_rate="20" />
+        <waveabilityplayer number="5" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="6" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="7" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="8" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+      </WAVE_LEVEL_NORMAL>
+      <WAVE_LEVEL_HARD>
+        <waveabilityplayer number="1" subtraction_rate="25" bothp_rate="20" siege_dmg_rate="18" firstdelay_rate="0" shotdelay_rate="0" movespeed_rate="5" />
+        <waveabilityplayer number="2" subtraction_rate="18" bothp_rate="18" siege_dmg_rate="18" firstdelay_rate="0" shotdelay_rate="0" movespeed_rate="5" />
+        <waveabilityplayer number="3" subtraction_rate="15" bothp_rate="15" siege_dmg_rate="13" firstdelay_rate="0" shotdelay_rate="0" movespeed_rate="5" />
+        <waveabilityplayer number="4" subtraction_rate="10" bothp_rate="15" siege_dmg_rate="13" firstdelay_rate="0" shotdelay_rate="0" movespeed_rate="5" />
+        <waveabilityplayer number="5" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="6" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="7" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="8" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+      </WAVE_LEVEL_HARD>
+    </WAVELEVEL>
+    <WAVELEVEL wave_index="2">
+      <WAVE_LEVEL_EASY>
+        <waveabilityplayer number="1" subtraction_rate="55" bothp_rate="75" siege_dmg_rate="62" firstdelay_rate="10" shotdelay_rate="70" movespeed_rate="30" />
+        <waveabilityplayer number="2" subtraction_rate="50" bothp_rate="75" siege_dmg_rate="62" firstdelay_rate="10" shotdelay_rate="60" movespeed_rate="30" />
+        <waveabilityplayer number="3" subtraction_rate="45" bothp_rate="75" siege_dmg_rate="62" firstdelay_rate="10" shotdelay_rate="50" movespeed_rate="30" />
+        <waveabilityplayer number="4" subtraction_rate="35" bothp_rate="75" siege_dmg_rate="62" firstdelay_rate="10" shotdelay_rate="50" movespeed_rate="30" />
+        <waveabilityplayer number="5" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="6" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="7" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="8" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+      </WAVE_LEVEL_EASY>
+      <WAVE_LEVEL_NORMAL>
+        <waveabilityplayer number="1" subtraction_rate="45" bothp_rate="42" siege_dmg_rate="7" firstdelay_rate="5" shotdelay_rate="10" movespeed_rate="20" />
+        <waveabilityplayer number="2" subtraction_rate="35" bothp_rate="42" siege_dmg_rate="7" firstdelay_rate="5" shotdelay_rate="10" movespeed_rate="20" />
+        <waveabilityplayer number="3" subtraction_rate="29" bothp_rate="37" siege_dmg_rate="7" firstdelay_rate="5" shotdelay_rate="10" movespeed_rate="20" />
+        <waveabilityplayer number="4" subtraction_rate="18" bothp_rate="30" siege_dmg_rate="3" firstdelay_rate="5" shotdelay_rate="10" movespeed_rate="20" />
+        <waveabilityplayer number="5" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="6" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="7" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="8" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+      </WAVE_LEVEL_NORMAL>
+      <WAVE_LEVEL_HARD>
+        <waveabilityplayer number="1" subtraction_rate="35" bothp_rate="20" siege_dmg_rate="18" firstdelay_rate="0" shotdelay_rate="0" movespeed_rate="10" />
+        <waveabilityplayer number="2" subtraction_rate="25" bothp_rate="18" siege_dmg_rate="18" firstdelay_rate="0" shotdelay_rate="0" movespeed_rate="10" />
+        <waveabilityplayer number="3" subtraction_rate="20" bothp_rate="15" siege_dmg_rate="13" firstdelay_rate="0" shotdelay_rate="0" movespeed_rate="10" />
+        <waveabilityplayer number="4" subtraction_rate="15" bothp_rate="15" siege_dmg_rate="13" firstdelay_rate="0" shotdelay_rate="0" movespeed_rate="10" />
+        <waveabilityplayer number="5" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="6" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="7" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="8" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+      </WAVE_LEVEL_HARD>
+    </WAVELEVEL>
+    <WAVELEVEL wave_index="3">
+      <WAVE_LEVEL_EASY>
+        <waveabilityplayer number="1" subtraction_rate="45" bothp_rate="75" siege_dmg_rate="62" firstdelay_rate="10" shotdelay_rate="70" movespeed_rate="30" />
+        <waveabilityplayer number="2" subtraction_rate="37" bothp_rate="75" siege_dmg_rate="62" firstdelay_rate="10" shotdelay_rate="60" movespeed_rate="30" />
+        <waveabilityplayer number="3" subtraction_rate="25" bothp_rate="75" siege_dmg_rate="62" firstdelay_rate="10" shotdelay_rate="50" movespeed_rate="30" />
+        <waveabilityplayer number="4" subtraction_rate="20" bothp_rate="75" siege_dmg_rate="62" firstdelay_rate="10" shotdelay_rate="50" movespeed_rate="30" />
+        <waveabilityplayer number="5" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="6" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="7" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="8" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+      </WAVE_LEVEL_EASY>
+      <WAVE_LEVEL_NORMAL>
+        <waveabilityplayer number="1" subtraction_rate="37" bothp_rate="42" siege_dmg_rate="7" firstdelay_rate="5" shotdelay_rate="10" movespeed_rate="20" />
+        <waveabilityplayer number="2" subtraction_rate="25" bothp_rate="42" siege_dmg_rate="7" firstdelay_rate="5" shotdelay_rate="10" movespeed_rate="20" />
+        <waveabilityplayer number="3" subtraction_rate="20" bothp_rate="37" siege_dmg_rate="7" firstdelay_rate="5" shotdelay_rate="10" movespeed_rate="20" />
+        <waveabilityplayer number="4" subtraction_rate="15" bothp_rate="30" siege_dmg_rate="3" firstdelay_rate="5" shotdelay_rate="10" movespeed_rate="20" />
+        <waveabilityplayer number="5" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="6" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="7" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="8" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+      </WAVE_LEVEL_NORMAL>
+      <WAVE_LEVEL_HARD>
+        <waveabilityplayer number="1" subtraction_rate="25" bothp_rate="20" siege_dmg_rate="18" firstdelay_rate="0" shotdelay_rate="0" movespeed_rate="5" />
+        <waveabilityplayer number="2" subtraction_rate="20" bothp_rate="18" siege_dmg_rate="18" firstdelay_rate="0" shotdelay_rate="0" movespeed_rate="5" />
+        <waveabilityplayer number="3" subtraction_rate="15" bothp_rate="15" siege_dmg_rate="13" firstdelay_rate="0" shotdelay_rate="0" movespeed_rate="5" />
+        <waveabilityplayer number="4" subtraction_rate="10" bothp_rate="15" siege_dmg_rate="13" firstdelay_rate="0" shotdelay_rate="0" movespeed_rate="5" />
+        <waveabilityplayer number="5" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="6" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="7" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="8" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+      </WAVE_LEVEL_HARD>
+    </WAVELEVEL>
+    <WAVELEVEL wave_index="4">
+       <WAVE_LEVEL_EASY>
+        <waveabilityplayer number="1" subtraction_rate="50" bothp_rate="68" siege_dmg_rate="62" firstdelay_rate="0" shotdelay_rate="0" movespeed_rate="40" />
+        <waveabilityplayer number="2" subtraction_rate="45" bothp_rate="68" siege_dmg_rate="62" firstdelay_rate="0" shotdelay_rate="0" movespeed_rate="40" />
+        <waveabilityplayer number="3" subtraction_rate="35" bothp_rate="68" siege_dmg_rate="62" firstdelay_rate="0" shotdelay_rate="0" movespeed_rate="40" />
+        <waveabilityplayer number="4" subtraction_rate="28" bothp_rate="68" siege_dmg_rate="62" firstdelay_rate="0" shotdelay_rate="0" movespeed_rate="40" />
+        <waveabilityplayer number="5" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="6" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="7" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="8" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+      </WAVE_LEVEL_EASY>
+      <WAVE_LEVEL_NORMAL>
+        <waveabilityplayer number="1" subtraction_rate="38" bothp_rate="35" siege_dmg_rate="7" firstdelay_rate="0" shotdelay_rate="0" movespeed_rate="30" />
+        <waveabilityplayer number="2" subtraction_rate="30" bothp_rate="35" siege_dmg_rate="7" firstdelay_rate="0" shotdelay_rate="0" movespeed_rate="30" />
+        <waveabilityplayer number="3" subtraction_rate="26" bothp_rate="35" siege_dmg_rate="7" firstdelay_rate="0" shotdelay_rate="0" movespeed_rate="30" />
+        <waveabilityplayer number="4" subtraction_rate="18" bothp_rate="30" siege_dmg_rate="3" firstdelay_rate="0" shotdelay_rate="0" movespeed_rate="30" />
+        <waveabilityplayer number="5" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="6" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="7" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="8" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+      </WAVE_LEVEL_NORMAL>
+      <WAVE_LEVEL_HARD>
+        <waveabilityplayer number="1" subtraction_rate="35" bothp_rate="20" siege_dmg_rate="18" firstdelay_rate="0" shotdelay_rate="0" movespeed_rate="10" />
+        <waveabilityplayer number="2" subtraction_rate="20" bothp_rate="18" siege_dmg_rate="18" firstdelay_rate="0" shotdelay_rate="0" movespeed_rate="10" />
+        <waveabilityplayer number="3" subtraction_rate="15" bothp_rate="15" siege_dmg_rate="13" firstdelay_rate="0" shotdelay_rate="0" movespeed_rate="10" />
+        <waveabilityplayer number="4" subtraction_rate="10" bothp_rate="15" siege_dmg_rate="13" firstdelay_rate="0" shotdelay_rate="0" movespeed_rate="10" />
+        <waveabilityplayer number="5" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="6" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="7" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+        <waveabilityplayer number="8" subtraction_rate="0" bothp_rate="0" siege_dmg_rate="0" firstdelay_rate="1" shotdelay_rate="1" movespeed_rate="1" />
+      </WAVE_LEVEL_HARD>
+    </WAVELEVEL>
+  </MODE>
+</AI_LEVEL>

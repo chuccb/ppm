@@ -1,0 +1,74 @@
+<UIDEFINE>
+	<image name="Clan_Menu" filename="C_MENU.dds"/>
+
+	<menupop name="MASTERMENUOFNOSUBMASTER" count='9' OffX='0' OffY='0' l='0' t='6' r='94' b='141'>
+		<rect l='0' t='6' r='94' b='26'/>
+		<rect l='0' t='27' r='94' b='45'/>
+		<rect l='0' t='46' r='94' b='64'/>
+		<rect l='0' t='65' r='94' b='83'/>
+		<rect l='0' t='84' r='94' b='102'/>
+		<rect l='0' t='103' r='94' b='121'/>
+		<rect l='0' t='122' r='94' b='140'/>		
+		
+		<sprite l='520' t='0' r='616' b='167' texture="Clan_Menu"/>
+
+		<sprite l='712' t='7' r='807' b='25' texture="Clan_Menu"/>
+		<sprite l='712' t='26' r='807' b='44' texture="Clan_Menu"/>
+		<sprite l='712' t='45' r='807' b='63' texture="Clan_Menu"/>
+		<sprite l='712' t='64' r='807' b='82' texture="Clan_Menu"/>
+
+		<sprite l='712' t='103' r='807' b='120' texture="Clan_Menu"/>
+		<sprite l='712' t='140' r='807' b='158' texture="Clan_Menu"/>
+		<sprite l='712' t='121' r='807' b='139' texture="Clan_Menu"/>
+	</menupop>	
+
+	<menupop name="MASTERMENUOFEXISTSUBMASTER" count='9' OffX='0' OffY='0' l='0' t='6' r='94' b='141'>
+		<rect l='0' t='6' r='94' b='26'/>
+		<rect l='0' t='27' r='94' b='45'/>
+		<rect l='0' t='46' r='94' b='64'/>
+		<rect l='0' t='65' r='94' b='83'/>
+		<rect l='0' t='84' r='94' b='102'/>
+		<rect l='0' t='103' r='94' b='121'/>
+		<rect l='0' t='122' r='94' b='140'/>
+		
+		<sprite l='520' t='170' r='616' b='337' texture="Clan_Menu"/>
+
+		<sprite l='712' t='7' r='807' b='25' texture="Clan_Menu"/>
+		<sprite l='712' t='26' r='807' b='44' texture="Clan_Menu"/>
+		<sprite l='712' t='45' r='807' b='63' texture="Clan_Menu"/>
+		<sprite l='712' t='64' r='807' b='82' texture="Clan_Menu"/>
+
+		<sprite l='712' t='103' r='807' b='120' texture="Clan_Menu"/>
+		<sprite l='712' t='159' r='807' b='177' texture="Clan_Menu"/>
+		<sprite l='712' t='121' r='807' b='139' texture="Clan_Menu"/>
+	</menupop>	
+
+	<menupop name="NOMALMENU" count='5' OffX='0' OffY='0' l='0' t='6' r='94' b='102'>
+		<rect l='0' t='6' r='94' b='26'/>
+		<rect l='0' t='27' r='94' b='45'/>
+		<rect l='0' t='46' r='94' b='64'/>
+		<rect l='0' t='65' r='94' b='83'/>
+
+		<sprite l='616' t='0' r='712' b='110' texture="Clan_Menu"/>
+		<sprite l='712' t='7' r='807' b='25' texture="Clan_Menu"/>
+		<sprite l='712' t='26' r='807' b='44' texture="Clan_Menu"/>
+		<sprite l='712' t='45' r='807' b='63' texture="Clan_Menu"/>
+		<sprite l='712' t='64' r='807' b='82' texture="Clan_Menu"/>
+	</menupop>
+
+	<menupop name="GAMEROOMMENU" count='5' OffX='0' OffY='0' l='0' t='8' r='94' b='102'>
+		<rect l='0' t='8' r='94' b='26'/>
+		<rect l='0' t='27' r='94' b='45'/>
+		<rect l='0' t='46' r='94' b='64'/>
+		<rect l='0' t='65' r='94' b='83'/>
+		<rect l='0' t='84' r='94' b='102'/>
+   
+    		<sprite l='906' t='0' r='1001' b='110' texture="Clan_Menu"/>
+		<sprite l='810' t='99' r='905' b='117' texture="Clan_Menu"/>
+		<sprite l='810' t='118' r='905' b='136' texture="Clan_Menu"/>
+		<sprite l='810' t='137' r='905' b='155' texture="Clan_Menu"/>
+		<sprite l='810' t='156' r='905' b='174' texture="Clan_Menu"/>
+		<sprite l='810' t='80' r='905' b='98' texture="Clan_Menu"/>
+	</menupop>
+
+</UIDEFINE>

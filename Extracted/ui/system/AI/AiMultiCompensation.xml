@@ -1,0 +1,42 @@
+﻿<AI_COMPENSATION>
+  <MODE_PRESENT mode_index="102">
+    <MODE_LEVEL_EASY index="1">
+      <DATA    itemnumber="15301005" level="1" periodType="0"/>
+      <DATA    itemnumber="15301004" level="2" periodType="0"/>
+      <DATA    itemnumber="15200044" level="3" periodType="0"/>
+      <DATA    itemnumber="15200045" level="4" periodType="0"/>      
+    </MODE_LEVEL_EASY>
+    <MODE_LEVEL_NORMAL index="2">
+      <DATA    itemnumber="15301005" level="1" periodType="0"/>
+      <DATA    itemnumber="15301004" level="2" periodType="0"/>
+      <DATA    itemnumber="15200044" level="3" periodType="0"/>
+      <DATA    itemnumber="15200045" level="4" periodType="0"/>      
+    </MODE_LEVEL_NORMAL>
+    <MODE_LEVEL_HARD index="3">
+      <DATA    itemnumber="15301005" level="1" periodType="0"/>
+      <DATA    itemnumber="15301004" level="2" periodType="0"/>
+      <DATA    itemnumber="15200044" level="3" periodType="0"/>
+      <DATA    itemnumber="15200045" level="4" periodType="0"/>      
+    </MODE_LEVEL_HARD>
+  </MODE_PRESENT>  
+  <MODE_PRESENT mode_index="104">
+    <MODE_LEVEL_EASY index="1">
+      <DATA    itemnumber="15301005" level="1" periodType="0"/>
+      <DATA    itemnumber="15301004" level="2" periodType="0"/>
+      <DATA    itemnumber="15200044" level="3" periodType="0"/>
+      <DATA    itemnumber="15200045" level="4" periodType="0"/>      
+    </MODE_LEVEL_EASY>
+    <MODE_LEVEL_NORMAL index="2">
+      <DATA    itemnumber="15301005" level="1" periodType="0"/>
+      <DATA    itemnumber="15301004" level="2" periodType="0"/>
+      <DATA    itemnumber="15200044" level="3" periodType="0"/>
+      <DATA    itemnumber="15200045" level="4" periodType="0"/>      
+    </MODE_LEVEL_NORMAL>
+    <MODE_LEVEL_HARD index="3">
+      <DATA    itemnumber="15301005" level="1" periodType="0"/>
+      <DATA    itemnumber="15301004" level="2" periodType="0"/>
+      <DATA    itemnumber="15200044" level="3" periodType="0"/>
+      <DATA    itemnumber="15200045" level="4" periodType="0"/>      
+    </MODE_LEVEL_HARD>
+  </MODE_PRESENT> 
+</AI_COMPENSATION>

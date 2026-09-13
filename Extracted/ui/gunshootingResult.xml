@@ -1,0 +1,80 @@
+﻿<TUTORIALDEFINE>
+	<bot_image name="GunShooting_ui" filename="gs_ui.dds" />
+	<bot_image name="GunShooting_ui2" filename="gs_ui02.dds" />
+	<image name="GunShooting_Result" filename="Result.dds" />
+	<image name="GunShooting_Result_2" filename="ui_radar.dds"/>
+
+
+	<msprite name="MODE_COMPLETE1" sx="26" sy="136" ex="26" ey="136" l="0" t="40" r="381" b="379" texture="GunShooting_ui" />
+	<msprite name="MODE_COMPLETE2" sx="26" sy="136" ex="26" ey="136" l="0" t="1" r="381" b="340" texture="GunShooting_ui2" />
+	<msprite name="MODE_FAIL1" sx="26" sy="136" ex="26" ey="136" l="382" t="40" r="763" b="379" texture="GunShooting_ui" />
+	<msprite name="MODE_FAIL2" sx="26" sy="136" ex="26" ey="136" l="382" t="1" r="763" b="340" texture="GunShooting_ui2" />
+	<msprite name="GRAPH" sx="26" sy="475" ex="26" ey="477" l="382" t="540" r="763" b="697" texture="GunShooting_ui" />
+	<msprite name="BANNER_FAIL" sx="28" sy="330" ex="28" ey="330" l="539" t="845" r="916" b="991" texture="GunShooting_ui" />
+	<msprite name="BANNER_COMPLETE" sx="28" sy="330" ex="28" ey="330" l="539" t="698" r="916" b="844" texture="GunShooting_ui" />
+	<msprite name="SCORE_CLASS" sx="659" sy="201" ex="659" ey="201" l="0" t="758" r="338" b="832" texture="GunShooting_ui" />
+	<msprite name="RESULT_SHOT_BG" sx="659" sy="280" ex="659" ey="280" l="382" t="380" r="720" b="539" texture="GunShooting_ui" />
+	<msprite name="RESULT_SHOT" sx="671" sy="307" ex="671" ey="307" l="764" t="174" r="930" b="303" texture="GunShooting_ui" />
+	<msprite name="RESULT_MAX" sx="673" sy="282" ex="673" ey="282" l="340" t="803" r="515" b="828" texture="GunShooting_ui" />
+	<msprite name="GS_PG" sx="658" sy="448" ex="658" ey="448" l="686" t="859" r="1024" b="1004" texture="GunShooting_Result_2" />
+	<msprite name="GS_EXP" sx="658" sy="524" ex="658" ey="524" l="0" t="0" r="0" b="0" texture="GunShooting_Result_2" />
+	<msprite name="GS_BackGround" sx="0" sy="0" ex="0" ey="0" l='102' t='0' r='118' b='768' texture="GunShooting_Result" />
+
+	
+	<msprite name="BIG_RANK_8" sx="885" sy="232" ex="900" ey="232" l="645" t="3" r="728" b="39" texture="GunShooting_ui" />
+	<msprite name="BIG_RANK_7" sx="895" sy="232" ex="900" ey="232" l="729" t="3" r="786" b="39" texture="GunShooting_ui" />
+	<msprite name="BIG_RANK_6" sx="900" sy="232" ex="900" ey="232" l="787" t="3" r="817" b="39" texture="GunShooting_ui" />
+	<msprite name="BIG_RANK_5" sx="900" sy="232" ex="900" ey="232" l="818" t="3" r="852" b="39" texture="GunShooting_ui" />
+	<msprite name="BIG_RANK_4" sx="900" sy="232" ex="900" ey="232" l="853" t="3" r="885" b="39" texture="GunShooting_ui" />
+	<msprite name="BIG_RANK_3" sx="900" sy="232" ex="900" ey="232" l="886" t="3" r="918" b="39" texture="GunShooting_ui" />
+	<msprite name="BIG_RANK_2" sx="900" sy="232" ex="900" ey="232" l="919" t="3" r="951" b="39" texture="GunShooting_ui" />
+	<msprite name="BIG_RANK_1" sx="900" sy="232" ex="900" ey="232" l="952" t="3" r="982" b="39" texture="GunShooting_ui" />
+	<msprite name="BIG_RANK_0" sx="900" sy="232" ex="900" ey="232" l="983" t="3" r="1015" b="39" texture="GunShooting_ui" />
+
+	
+	<msprite name="SMALL_RANK_8" sx="650" sy="230" ex="650" ey="230" l="441" t="19" r="485" b="39" texture="GunShooting_ui" />
+	<msprite name="SMALL_RANK_7" sx="650" sy="230" ex="650" ey="230" l="486" t="19" r="517" b="39" texture="GunShooting_ui" />
+	<msprite name="SMALL_RANK_6" sx="650" sy="230" ex="650" ey="230" l="518" t="19" r="534" b="39" texture="GunShooting_ui" />
+	<msprite name="SMALL_RANK_5" sx="650" sy="230" ex="650" ey="230" l="535" t="19" r="553" b="39" texture="GunShooting_ui" />
+	<msprite name="SMALL_RANK_4" sx="650" sy="230" ex="650" ey="230" l="554" t="19" r="572" b="39" texture="GunShooting_ui" />
+	<msprite name="SMALL_RANK_3" sx="650" sy="230" ex="650" ey="230" l="573" t="19" r="590" b="39" texture="GunShooting_ui" />
+	<msprite name="SMALL_RANK_2" sx="650" sy="230" ex="650" ey="230" l="591" t="19" r="608" b="39" texture="GunShooting_ui" />
+	<msprite name="SMALL_RANK_1" sx="650" sy="230" ex="650" ey="230" l="609" t="19" r="626" b="39" texture="GunShooting_ui" />
+	<msprite name="SMALL_RANK_0" sx="650" sy="230" ex="650" ey="230" l="627" t="19" r="644" b="39" texture="GunShooting_ui" />
+
+	<button name="EXIT" x="880" y="683" w="101" h="42">
+		<sprite l="866" t="40" r="967" b="82" texture="GunShooting_ui" />
+		<sprite l="866" t="83" r="967" b="125" texture="GunShooting_ui" />
+		<sprite l="866" t="126" r="967" b="168" texture="GunShooting_ui" />
+	</button>
+
+	<sprite name="EASIER" l="131" t="993" r="346" b="1022" texture="GunShooting_ui" />
+	<msprite name="SHIELD_DES" sx="225" sy="343" ex="225" ey="343" l="765" t="667" r="900" b="682" texture="GunShooting_ui" />
+	<msprite name="TIME_OUT" sx="225" sy="343" ex="225" ey="343" l="765" t="684" r="900" b="696" texture="GunShooting_ui" />
+
+	<column name="GUNSHOOTING_MISSION_NAME" x="92" y="145" w="248" h="27" font="16" format="VCENTER CENTER" />
+	<column name="GUNSHOOTING_TOTAL_SCORE" x="703" y="240" w="0" h="0" />
+	<column name="GUNSHOOTING_RESULT_PG" x="690" y="481" w="19" h="26" />
+	<column name="GUNSHOOTING_MY_PG" x="866" y="491" w="230" h="16" format="RIGHT" />
+	<column name="GUNSHOOTING_RESULT_EXP" x="690" y="546" w="0" h="0" />
+	<column name="GUNSHOOTING_MY_EXP" x="800" y="558" w="0" h="0" />
+	<column name="GUNSHOOTING_KILLCOMBO" x="916" y="288" w="112" h="20" format="RIGHT" />
+	<column name="GUNSHOOTING_RAPID" x="916" y="313" w="112" h="20" format="RIGHT" />
+	<column name="GUNSHOOTING_HEADSHOT" x="916" y="338" w="112" h="20" format="RIGHT" />
+	<column name="GUNSHOOTING_HEARTSHOT" x="916" y="364" w="112" h="20" format="RIGHT" />
+	<column name="GUNSHOOTING_CRITICALSHOT" x="916" y="390" w="112" h="20" format="RIGHT" />
+	<column name="GUNSHOOTING_AIRCOMBO" x="916" y="415" w="112" h="20" format="RIGHT" />
+	
+	<column name="PERIOD_RESULT_START_MIN" x="232" y="369" w="135" h="12" format="RIGHT" />
+	<column name="PERIOD_RESULT_START_SEC" x="263" y="369" w="135" h="12" format="RIGHT" />
+	<column name="PERIOD_RESULT_END_MIN" x="305" y="369" w="135" h="12" format="RIGHT" />
+	<column name="PERIOD_RESULT_END_SEC" x="336" y="369" w="135" h="12" format="RIGHT" />
+	<column name="PERIOD_RATE_RESULT_NATURAL" x="320" y="421" w="135" h="12" format="RIGHT" />
+	<column name="PERIOD_RATE_RESULT_MINORITY" x="348" y="421" w="135" h="12" format="RIGHT" />
+	<column name="PERIOD_SCORE_RESULT" x="238" y="395" w="135" h="12" format="RIGHT" />
+	<column name="GUNSHOOTING_PLAYTIME_MIN" x="305" y="447" w="135" h="12" format="RIGHT" />
+	<column name="GUNSHOOTING_PLAYTIME_SEC" x="336" y="447" w="135" h="12" format="RIGHT" />
+	<column name="GUNSHOOTING_RESULT_EASY_MODE_IMAGE" x="109" y="532" w="215" h="31" format="CENTER" />
+	<column name="GUNSHOOTING_RESULT_EASY_MODE" x="99" y="62" w="832" h="36" fontsize="16" color="FF90f4f8" shadow="FF000000" format="VCENTER CENTER" />
+
+</TUTORIALDEFINE>

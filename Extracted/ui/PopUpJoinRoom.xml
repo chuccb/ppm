@@ -1,0 +1,74 @@
+<UIDEFINE>
+  
+  	<image name="Popup_Join_Room" filename="N_PJ.tga"/>
+
+  	<msprite name="BackGround_IMG" sx='227' sy='229' ex='227' ey='229' l='0' t='0' r='560' b='283' texture="Popup_Join_Room"/>
+
+	<rect name="JOIN_IMG_RECT" l="340" t="315" r="456" b="361"/>
+
+	<button name="BTN_A" x="237" y="475" w="84" h="28">
+		<sprite l="0" t="315" r="84" b="343" texture="Popup_Join_Room"/>
+		<sprite l="0" t="344" r="84" b="372" texture="Popup_Join_Room"/>
+		<sprite l="0" t="373" r="84" b="401" texture="Popup_Join_Room"/>
+	</button> 
+
+	<button name="BTN_B" x="693" y="475" w="84" h="28">
+		<sprite l="85" t="315" r="169" b="343" texture="Popup_Join_Room"/>
+		<sprite l="85" t="344" r="169" b="372" texture="Popup_Join_Room"/>
+		<sprite l="85" t="373" r="169" b="401" texture="Popup_Join_Room"/>
+	</button> 
+
+	
+	<button name="BTN_JOIN" x="422" y="476" w="84" h="28">
+		<sprite l="170" t="315" r="254" b="343" texture="Popup_Join_Room"/>
+		<sprite l="170" t="344" r="254" b="372" texture="Popup_Join_Room"/>
+		<sprite l="170" t="373" r="254" b="401" texture="Popup_Join_Room"/>
+	</button> 
+
+	<button name="BTN_CANCEL" x="508" y="476" w="84" h="28">
+		<sprite l="255" t="315" r="339" b="343" texture="Popup_Join_Room"/>
+		<sprite l="255" t="344" r="339" b="372" texture="Popup_Join_Room"/>
+		<sprite l="255" t="373" r="339" b="401" texture="Popup_Join_Room"/>
+	</button> 
+
+	<column name="PLAYER_1" x="237" y="268" w="175" h="19" fontsize="15" color="ffffffff" format="VCENTER CENTER"/>
+	<column name="PLAYER_2" x="602" y="268" w="175" h="19" fontsize="15" color="ffffffff" format="VCENTER CENTER"/>
+
+	<column name="PLAYER_3" x="237" y="294" w="175" h="19" fontsize="15" color="ffffffff" format="VCENTER CENTER"/>
+	<column name="PLAYER_4" x="602" y="294" w="175" h="19" fontsize="15" color="ffffffff" format="VCENTER CENTER"/>
+
+	<column name="PLAYER_5" x="237" y="320" w="175" h="19" fontsize="15" color="ffffffff" format="VCENTER CENTER"/>
+	<column name="PLAYER_6" x="602" y="320" w="175" h="19" fontsize="15" color="ffffffff" format="VCENTER CENTER"/>
+
+	<column name="PLAYER_7" x="237" y="346" w="175" h="19" fontsize="15" color="ffffffff" format="VCENTER CENTER"/>
+	<column name="PLAYER_8" x="602" y="346" w="175" h="19" fontsize="15" color="ffffffff" format="VCENTER CENTER"/>
+
+	<column name="PLAYER_9" x="237" y="372" w="175" h="19" fontsize="15" color="ffffffff" format="VCENTER CENTER"/>
+	<column name="PLAYER_10" x="602" y="372" w="175" h="19" fontsize="15" color="ffffffff" format="VCENTER CENTER"/>
+
+	<column name="PLAYER_11" x="237" y="398" w="175" h="19" fontsize="15" color="ffffffff" format="VCENTER CENTER"/>
+	<column name="PLAYER_12" x="602" y="398" w="175" h="19" fontsize="15" color="ffffffff" format="VCENTER CENTER"/>
+
+	<column name="PLAYER_13" x="237" y="424" w="175" h="19" fontsize="15" color="ffffffff" format="VCENTER CENTER"/>
+	<column name="PLAYER_14" x="602" y="424" w="175" h="19" fontsize="15" color="ffffffff" format="VCENTER CENTER"/>
+
+	<column name="PLAYER_15" x="237" y="450" w="175" h="19" fontsize="15" color="ffffffff" format="VCENTER CENTER"/>
+	<column name="PLAYER_16" x="602" y="450" w="175" h="19" fontsize="15" color="ffffffff" format="VCENTER CENTER"/>
+	
+	<column name="ROOM_MAP" x="421" y="327" w="170" h="19" fontsize="13" color="ffffffff" format="VCENTER CENTER"/>
+	<column name="ROOM_ROUND" x="421" y="367" w="170" h="19" fontsize="13" color="ffffffff" format="VCENTER CENTER"/>
+	<column name="ROOM_TIME" x="421" y="407" w="170" h="19" fontsize="13" color="ffffffff" format="VCENTER CENTER"/>
+	<column name="ROOM_ITEM" x="421" y="447" w="170" h="19" fontsize="13" color="ffffffff" format="VCENTER CENTER"/>
+
+
+	<column name="ROOM_NO" x="421" y="268" w="22" h="19" fontsize="15" color="ffffffff" format="VCENTER CENTER"/>
+	<column name="ROOM_NAME" x="450" y="270" w="149" h="38" fontsize="13" color="ffffffff" format="VTOP LEFT"/>
+
+
+</UIDEFINE>
+
+	
+	
+	
+	
+	

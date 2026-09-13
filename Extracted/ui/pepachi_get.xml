@@ -1,0 +1,16 @@
+<UIDEFINE>
+
+	<msprite name="GET_ITEM" sx="0" sy="0" ex="402" ey="332" l="0" t="0" r="64" b="64" texture="PEPACHI"/>
+	<msprite name="GET_ITEM_NOTICE" sx="0" sy="0" ex="350" ey="190" l="0" t="747" r="351" b="1024" texture="PEPACHI"/>
+
+	<button name="GET_ITEM_NOTICE_OK" x="612" y="434" w="84" h="28">
+		<sprite l="777" t="881" r="861" b="909" texture="UI_Button" />
+		<sprite l="777" t="910" r="861" b="938" texture="UI_Button" />
+		<sprite l="777" t="939" r="861" b="967" texture="UI_Button" />
+	</button>
+
+	<column name="GET_ITEM_NAME" x="476" y="332" w="178" h="21" fontsize="15" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="GET_ITEM_KIND" x="476" y="378" w="88" h="21" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="GET_ITEM_COUNT" x="566" y="378" w="88" h="21" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+
+</UIDEFINE>

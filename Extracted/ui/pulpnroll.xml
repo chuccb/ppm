@@ -1,0 +1,160 @@
+<UIDEFINE>
+	<image name="BackImage" filename="tuto_back.dds"/>
+	<image name="PULPnROLL" filename="pulpnroll.dds"/>
+	<image name="PnRCrazyUI" filename="pnr_crazy_ui.dds"/>
+	<image name="PnRReEnterUI_ATTACK" filename="pnr_crazy_reenter_red.dds"/>
+	<image name="PnRReEnterUI_ESCAPE" filename="pnr_crazy_reenter_yellow.dds"/>
+	<image name="PnR_Result" filename="Result.dds"/>
+
+	
+	<sprite name="CRAZY_ATTACK" x='365' y='591' w='347' h='119' texture="PULPnROLL"/>
+	
+	<sprite name="CRAZY_RUN" x='600' y='111' w='347' h='119' texture="PULPnROLL"/>
+
+	<sprite name="PULP_ICON_A" x='810' y='1' w='59' h='59' texture="PULPnROLL"/>
+	
+	<sprite name="PULP_ICON_B" x='870' y='1' w='59' h='59' texture="PULPnROLL"/>
+
+	<sprite name="PULP_OCCUPY" x='524' y='1' w='285' h='54' texture="PULPnROLL"/>
+	
+	<sprite name="PULP_STEAL_SUCC" x='524' y='55' w='285' h='56' texture="PULPnROLL"/>
+	
+	<sprite name="PULP_DEFENSE" x='252' y='111' w='347' h='119' texture="PULPnROLL"/>
+	
+	<sprite name="PULP_OFFENSE" x='266' y='231' w='347' h='119' texture="PULPnROLL"/>
+	
+	<sprite name="PULP_DESTROY" x='614' y='231' w='347' h='119' texture="PULPnROLL"/>
+	
+	<sprite name="PULP_LOST" x='625' y='471' w='347' h='119' texture="PULPnROLL"/>
+	
+	<sprite name="BR_STEAL_SUCC" x='277' y='471' w='347' h='119' texture="PULPnROLL"/>
+	
+	<sprite name="PULP_DEF_30SEC" x='266' y='351' w='347' h='119' texture="PULPnROLL"/>
+	
+	<sprite name="PULP_OFF_30SEC" x='614' y='351' w='347' h='119' texture="PULPnROLL"/>
+	
+	<sprite name="PULP_STATE_A_ICON" x='1' y='200' w='26' h='25' texture="PULPnROLL"/>
+	
+	<sprite name="PULP_STATE_B_ICON" x='28' y='200' w='26' h='25' texture="PULPnROLL"/>
+	
+	<sprite name="PULP_DESTROYING_STATE_MSG" x='444' y='1000' w='100' h='17' texture="PULPnROLL"/>
+	
+	<sprite name="PULP_DESTROYING_BG" x='2' y='1000' w='312' h='18' texture="PULPnROLL"/>
+
+	<sprite name="PULP_DESTROYING_SLICE" x='315' y='1000' w='6' h='16' texture="PULPnROLL"/>
+	
+	<sprite name="PULP_DESTROYING_IMAGE" x='0' y='320' w='93' h='70' texture="PULPnROLL"/> 
+
+	<sprite name="PULP_SPRING_A" x='0' y='0' w='35' h='37' texture="PULPnROLL"/> 
+	<sprite name="PULP_SPRING_B" x='36' y='0' w='35' h='37' texture="PULPnROLL"/> 
+	<sprite name="PULP_ORIGIN" x='0' y='37' w='30' h='30' texture="PULPnROLL"/>
+	<sprite name="PULP_ORIGIN_GRAY" x='35' y='37' w='30' h='30' texture="PULPnROLL"/> 
+	<sprite name="PULP_BIGMAP_A" x='0' y='70' w='37' h='37' texture="PULPnROLL"/> 
+	<sprite name="PULP_BIGMAP_B" x='38' y='70' w='37' h='37' texture="PULPnROLL"/> 
+
+	<sprite name="PULP_ORIGIN_INDEX_0" x='2' y='180' w='18' h='18' texture="PULPnROLL"/> 
+	<sprite name="PULP_ORIGIN_INDEX_1" x='2' y='161' w='18' h='18' texture="PULPnROLL"/> 
+	<sprite name="PULP_ORIGIN_INDEX_2" x='21' y='180' w='18' h='18' texture="PULPnROLL"/> 
+	<sprite name="PULP_ORIGIN_INDEX_3" x='21' y='161' w='18' h='18' texture="PULPnROLL"/> 
+	<sprite name="PULP_ORIGIN_INDEX_4" x='40' y='180' w='18' h='18' texture="PULPnROLL"/> 
+	<sprite name="PULP_ORIGIN_INDEX_5" x='40' y='161' w='18' h='18' texture="PULPnROLL"/> 
+
+	
+	<sprite name="MAGIC_GUAGE_A_STEP0" x='721' y='689' w='48' h='48' texture="PULPnROLL"/>
+	<sprite name="MAGIC_GUAGE_A_STEP1" x='966' y='591' w='48' h='48' texture="PULPnROLL"/>
+	<sprite name="MAGIC_GUAGE_A_STEP2" x='917' y='591' w='48' h='48' texture="PULPnROLL"/>
+	<sprite name="MAGIC_GUAGE_A_STEP3" x='868' y='591' w='48' h='48' texture="PULPnROLL"/>
+	<sprite name="MAGIC_GUAGE_A_STEP4" x='819' y='591' w='48' h='48' texture="PULPnROLL"/>
+	<sprite name="MAGIC_GUAGE_A_STEP5" x='770' y='591' w='48' h='48' texture="PULPnROLL"/>
+	<sprite name="MAGIC_GUAGE_A_STEP6" x='721' y='591' w='48' h='48' texture="PULPnROLL"/>
+	
+	<sprite name="MAGIC_GUAGE_B_STEP0" x='721' y='738' w='48' h='48' texture="PULPnROLL"/>
+	<sprite name="MAGIC_GUAGE_B_STEP1" x='966' y='640' w='48' h='48' texture="PULPnROLL"/>
+	<sprite name="MAGIC_GUAGE_B_STEP2" x='917' y='640' w='48' h='48' texture="PULPnROLL"/>
+	<sprite name="MAGIC_GUAGE_B_STEP3" x='868' y='640' w='48' h='48' texture="PULPnROLL"/>
+	<sprite name="MAGIC_GUAGE_B_STEP4" x='819' y='640' w='48' h='48' texture="PULPnROLL"/>
+	<sprite name="MAGIC_GUAGE_B_STEP5" x='770' y='640' w='48' h='48' texture="PULPnROLL"/>
+	<sprite name="MAGIC_GUAGE_B_STEP6" x='721' y='640' w='48' h='48' texture="PULPnROLL"/>
+
+	
+	<sprite name="PULPnROLL_ROUND_STATUS" x='251' y='1' w='272' h='54' texture="PULPnROLL"/>
+	
+	<sprite name="ROUND_STATUS_HIGHLIGHT" x='106' y='324' w='82' h='52' texture="PULPnROLL"/>
+	
+	<sprite name="SHOW_FULL_SIZE_MAP" x='1' y='120' w='57' h='39' texture="PULPnROLL"/>
+	
+	<sprite name="CRAZYMODE_TIMER_A" x='156' y='160' w='95' h='46' texture="PULPnROLL"/>
+	
+	<sprite name="CRAZYMODE_TIMER_B" x='60' y='160' w='95' h='46' texture="PULPnROLL"/>
+	
+	<sprite name="PULPnROLL_TIME_LIMIT_A" x='60' y='210' w='188' h='54' texture="PULPnROLL"/>
+
+	<sprite name="PULPnROLL_TIME_LIMIT_B" x='60' y='265' w='188' h='54' texture="PULPnROLL"/>
+
+	<sprite name="REENTER_CRAZYMODE" x='1' y='534' w='275' h='56' texture="PULPnROLL"/>
+	<sprite name="GUAGE_FULL_CRAZYMODE" x='1' y='597' w='363' h='69' texture="PULPnROLL"/>
+	
+	<sprite name="PULPnROLL_RESULT" x='783' y='196' w='33' h='11' texture="PnR_Result"/>
+	
+	<sprite name="SHOW_FULL_MAP_INFO" x='75' y='1' w='175' h='146' texture="PULPnROLL"/>
+	
+	<sprite name="BG_IMAGE" x='0' y='0' w='1024' h='768' texture="BackImage"/>
+	
+	<sprite name="CRAZY_WARN_BIG_UP" x='1' y='1' w='74' h='117' texture="PnRCrazyUI"/>
+	
+	<sprite name="CRAZY_WARN_BIG_DN" x='1' y='133' w='74' h='117' texture="PnRCrazyUI"/>
+	
+	<sprite name="ESCAPE_WARN_BIG_UP" x='76' y='1' w='74' h='117' texture="PnRCrazyUI"/>
+	
+	<sprite name="ESCAPE_WARN_BIG_DN" x='76' y='133' w='74' h='117' texture="PnRCrazyUI"/>
+	
+	<sprite name="CRAZY_WARN_SMALL_UP" x='1' y='119' w='74' h='6' texture="PnRCrazyUI"/>
+	
+	<sprite name="CRAZY_WARN_SMALL_DN" x='1' y='126' w='74' h='6' texture="PnRCrazyUI"/>
+	
+	<sprite name="ESCAPE_WARN_SMALL_UP" x='76' y='119' w='74' h='6' texture="PnRCrazyUI"/>
+	
+	<sprite name="ESCAPE_WARN_SMALL_DN" x='76' y='126' w='74' h='6' texture="PnRCrazyUI"/>
+	<sprite name="CRAZY_MAGIC_MSG" x='151' y='1' w='248' h='900' texture="PnRCrazyUI"/>
+	<sprite name="ESCAPE_MAGIC_MSG" x='400' y='1' w='248' h='900' texture="PnRCrazyUI"/>
+	<sprite name="CRAZY_CROSS_MSG" x='1' y='902' w='1022' h='60' texture="PnRCrazyUI"/>
+	<sprite name="ESCAPE_CROSS_MSG" x='1' y='963' w='1022' h='60' texture="PnRCrazyUI"/>	
+
+	<sprite name="DEFENSE_SUCCESS_ATTACK" x='1' y='837' w='369' h='62' texture="PULPnROLL"/>
+	<sprite name="DEFENSE_SUCCESS_ESCAPE" x='1' y='711' w='369' h='62' texture="PULPnROLL"/>
+
+	<sprite name="GUAGE_FULL_ATTACK" x='1' y='900' w='369' h='62' texture="PULPnROLL"/>
+	<sprite name="GUAGE_FULL_ESCAPE" x='1' y='774' w='369' h='62' texture="PULPnROLL"/>
+
+	<sprite name="REENTER_ATTACK_0" x='1' y='1' w='493' h='493' texture="PnRReEnterUI_ATTACK"/>
+	<sprite name="REENTER_ATTACK_1" x='495' y='1' w='493' h='493' texture="PnRReEnterUI_ATTACK"/>
+	<sprite name="REENTER_ATTACK_2" x='1' y='495' w='493' h='493' texture="PnRReEnterUI_ATTACK"/>
+	<sprite name="REENTER_ESCAPE_0" x='1' y='1' w='493' h='493' texture="PnRReEnterUI_ESCAPE"/>
+	<sprite name="REENTER_ESCAPE_1" x='495' y='1' w='493' h='493' texture="PnRReEnterUI_ESCAPE"/>
+	<sprite name="REENTER_ESCAPE_2" x='1' y='495' w='493' h='493' texture="PnRReEnterUI_ESCAPE"/>
+
+	<sprite name="BIGMAP_DIRECTION" x='70' y='394' w='60' h='108' texture="PULPnROLL"/>
+
+	
+	<sprite name="REWARD_SCORE_1_A" x='1' y='393' w='32' h='20' texture="PULPnROLL"/>
+	<sprite name="REWARD_SCORE_1_B" x='34' y='393' w='32' h='20' texture="PULPnROLL"/>
+	<sprite name="REWARD_SCORE_2_A" x='1' y='414' w='32' h='20' texture="PULPnROLL"/>
+	<sprite name="REWARD_SCORE_2_B" x='34' y='414' w='32' h='20' texture="PULPnROLL"/>
+	<sprite name="REWARD_SCORE_3_A" x='1' y='435' w='32' h='20' texture="PULPnROLL"/>
+	<sprite name="REWARD_SCORE_3_B" x='34' y='435' w='32' h='20' texture="PULPnROLL"/>
+	<sprite name="REWARD_SCORE_5_A" x='1' y='456' w='32' h='20' texture="PULPnROLL"/>
+	<sprite name="REWARD_SCORE_5_B" x='34' y='456' w='32' h='20' texture="PULPnROLL"/>
+	<sprite name="REWARD_SCORE_8_A" x='1' y='477' w='32' h='20' texture="PULPnROLL"/>
+	<sprite name="REWARD_SCORE_8_B" x='34' y='477' w='32' h='20' texture="PULPnROLL"/>
+
+	
+	<sprite name="OFFENSE_STATE" x='100' y='521' w='98' h='98' texture="PULPnROLL"/>
+	<sprite name="DEFENSE_STATE" x='1' y='521' w='98' h='98' texture="PULPnROLL"/>
+
+	<sprite name="OFFENST_TEXT" x='1' y='621' w='38' h='19' texture="PULPnROLL"/>
+	<sprite name="DEFFEXT_TEXT" x='40' y='621' w='38' h='19' texture="PULPnROLL"/>
+  
+	
+	<sprite name="DONOTEXIT" x='371' y='788' w='406' h='198' texture="PULPnROLL"/>
+
+</UIDEFINE>

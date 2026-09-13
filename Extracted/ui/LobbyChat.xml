@@ -1,0 +1,10 @@
+<TUTORIALDEFINE>
+
+	<list name="LOBBYCHAT" l='0' t='0' r='0' b='0'>
+		<button name="UP" x='0' y='0' w='0' h='0'>
+		</button>
+		<button name="DN" x='0' y='0' w='0' h='0'>
+		</button>
+	</list>
+
+</TUTORIALDEFINE>

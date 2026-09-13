@@ -1,0 +1,49 @@
+<UIDEFINE>
+	<image name="New_Skill_Shop_02" filename="shop_02.dds"/>
+
+	<msprite name="GET_ITEM_NOTICE" sx="0" sy="0"   ex="352" ey="158" l="557" t="0" r="878" b="241" texture="New_Skill_Shop_02"/>
+	<msprite name="COMPOSE_SUCCESS" sx='0' sy='0' ex='357' ey='163' l='879' t='0' r='982' b='112' texture="New_Skill_Shop_02"/>
+  	<msprite name="COMPOSE_FAIL"    sx='0' sy='0' ex='357' ey='163' l='879' t='113' r='982' b='224' texture="New_Skill_Shop_02"/>
+
+	<button name="GET_ITEM_NOTICE_OK" x="584" y="365" w="84" h="28">
+    		<sprite l="777" t="881" r="861" b="909" texture="UI_Button" />
+		<sprite l="777" t="910" r="861" b="938" texture="UI_Button" />
+		<sprite l="777" t="939" r="861" b="967" texture="UI_Button" />
+	</button>
+
+	<msprite name="GET_ITEM" sx="0" sy="0" ex="483" ey="179" l="0" t="0" r="64" b="64" texture="New_Skill_Shop_02"/>
+
+  	<column name="GET_ITEM_NAME" x="478" y="277" w="173" h="19" fontsize="15" color="FFFFFFFF" format="VCENTER CENTER"/>  
+	<column name="GET_ITEM_ABILITY_1" x="479" y="320" w="31" h="26" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GET_ITEM_ABILITY_2" x="514" y="320" w="31" h="26" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GET_ITEM_ABILITY_3" x="549" y="320" w="31" h="26" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GET_ITEM_ABILITY_4" x="584" y="320" w="31" h="26" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+  	<column name="GET_ITEM_ABILITY_5" x="619" y="320" w="31" h="26" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+
+	<msprite name="ICON_SPEED" sx='200' sy='215' ex='200' ey='230' l='1' t='614' r='20' b='635' texture="UI_Popup_1"/>
+	<msprite name="ICON_AGILE" sx='200' sy='215' ex='200' ey='230' l='1' t='636' r='20' b='657' texture="UI_Popup_1"/>
+	<msprite name="ICON_SPIRIT" sx='200' sy='215' ex='200' ey='230' l='1' t='592' r='20' b='613' texture="UI_Popup_1"/>
+	<msprite name="ICON_DEFENCE" sx='200' sy='215' ex='200' ey='230' l='1' t='658' r='20' b='679' texture="UI_Popup_1"/>
+	<msprite name="ICON_CONCENTRATION" sx='200' sy='215' ex='200' ey='230' l='1' t='680' r='20' b='701' texture="UI_Popup_1"/>
+	<msprite name="ICON_PLUS" sx='200' sy='220' ex='215' ey='230' l='1' t='702' r='20' b='723' texture="UI_Popup_1"/>
+
+  	<msprite name="RARE1" sx='200' sy='215' ex='200' ey='230' l='25' t='592' r='56' b='603' texture="UI_Popup_1"/>
+  	<msprite name="RARE2" sx='200' sy='215' ex='200' ey='230' l='25' t='604' r='56' b='615' texture="UI_Popup_1"/>
+  	<msprite name="RARE3" sx='200' sy='215' ex='200' ey='230' l='25' t='616' r='56' b='627' texture="UI_Popup_1"/>
+  	<msprite name="RARE4" sx='200' sy='215' ex='200' ey='230' l='25' t='628' r='56' b='639' texture="UI_Popup_1"/>
+  	<msprite name="RARE5" sx='200' sy='215' ex='200' ey='230' l='25' t='640' r='56' b='651' texture="UI_Popup_1"/>
+  	<msprite name="RARE6" sx='200' sy='215' ex='200' ey='230' l='25' t='652' r='56' b='663' texture="UI_Popup_1"/>
+  	<msprite name="RARE7" sx='200' sy='215' ex='200' ey='230' l='25' t='664' r='56' b='675' texture="UI_Popup_1"/>
+  	<msprite name="RARE8" sx='200' sy='215' ex='200' ey='230' l='25' t='676' r='56' b='687' texture="UI_Popup_1"/>
+  	<msprite name="RARE9" sx='200' sy='215' ex='200' ey='230' l='25' t='688' r='56' b='699' texture="UI_Popup_1"/>  
+
+	
+	<msprite name="GAGE_BACK_APLHA" sx='470' sy='168' ex='470' ey='168' l='509' t='296' r='690' b='473' texture="New_Skill_Shop_02"/>
+  	<msprite name="GAGE_BACK" sx='374' sy='310' ex='374' ey='310' l='509' t='242' r='786' b='270' texture="New_Skill_Shop_02"/>
+	<msprite name="GAGE_FRONT" sx='376' sy='312' ex='376' ey='312' l='509' t='271' r='782' b='295' texture="New_Skill_Shop_02"/>  
+	<msprite name="COMPOSING_TEXT" sx='465' sy='204' ex='465' ey='204' l='691' t='296' r='785' b='320' texture="New_Skill_Shop_02"/>  
+	<msprite name="COMPOSE_SUCCESS_IMG" sx='357' sy='164' ex='357' ey='164' l='879' t='0' r='982' b='112' texture="New_Skill_Shop_02"/>
+	<msprite name="COMPOSE_FAIL_IMG"  sx='357' sy='164' ex='357' ey='164' l='879' t='113' r='982' b='224' texture="New_Skill_Shop_02"/>
+	<column name="GAGE_PROGRESS_COUNT" x="462" y="247" w="100" h="46" fontsize="26" color="FFFFFFFF" shadow="FF000000" format="VTOP CENTER"/>
+  
+</UIDEFINE>

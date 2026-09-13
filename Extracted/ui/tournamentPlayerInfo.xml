@@ -1,0 +1,114 @@
+<UIDEFINE>
+
+	<image name="Tournament_PlayerInfo" filename="l_tournament_mr.dds"/>
+
+	<msprite name="BACK_1" sx="98" sy="131" ex="98" ey="131" l="0" t="985" r="558" b="1021" fscalex="0.0f" fscaley="0.0f" texture="Tournament_PlayerInfo"/>
+	<msprite name="BACK_2" sx="98" sy="168" ex="98" ey="168" l="0" t="985" r="558" b="1021" fscalex="0.0f" fscaley="0.0f" texture="Tournament_PlayerInfo"/>
+	<msprite name="BACK_3" sx="98" sy="205" ex="98" ey="205" l="0" t="985" r="558" b="1021" fscalex="0.0f" fscaley="0.0f" texture="Tournament_PlayerInfo"/>
+	<msprite name="BACK_4" sx="98" sy="242" ex="98" ey="242" l="0" t="985" r="558" b="1021" fscalex="0.0f" fscaley="0.0f" texture="Tournament_PlayerInfo"/>
+	<msprite name="BACK_5" sx="98" sy="279" ex="98" ey="279" l="0" t="985" r="558" b="1021" fscalex="0.0f" fscaley="0.0f" texture="Tournament_PlayerInfo"/>
+	<msprite name="BACK_6" sx="98" sy="316" ex="98" ey="316" l="0" t="985" r="558" b="1021" fscalex="0.0f" fscaley="0.0f" texture="Tournament_PlayerInfo"/>
+	<msprite name="BACK_7" sx="98" sy="353" ex="98" ey="353" l="0" t="985" r="558" b="1021" fscalex="0.0f" fscaley="0.0f" texture="Tournament_PlayerInfo"/>
+	<msprite name="BACK_8" sx="98" sy="390" ex="98" ey="390" l="0" t="985" r="558" b="1021" fscalex="0.0f" fscaley="0.0f" texture="Tournament_PlayerInfo"/>
+
+	<column name="PINFO_EMBLEM_1"  x="100" y="133" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="PINFO_EMBLEM_2"  x="622" y="133" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="PINFO_EMBLEM_3"  x="100" y="170" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="PINFO_EMBLEM_4"  x="622" y="170" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="PINFO_EMBLEM_5"  x="100" y="207" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="PINFO_EMBLEM_6"  x="622" y="207" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="PINFO_EMBLEM_7"  x="100" y="244" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="PINFO_EMBLEM_8"  x="622" y="244" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="PINFO_EMBLEM_9"  x="100" y="281" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="PINFO_EMBLEM_10" x="622" y="281" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="PINFO_EMBLEM_11" x="100" y="318" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="PINFO_EMBLEM_12" x="622" y="318" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="PINFO_EMBLEM_13" x="100" y="355" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="PINFO_EMBLEM_14" x="622" y="355" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="PINFO_EMBLEM_15" x="100" y="392" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	<column name="PINFO_EMBLEM_16" x="622" y="392" w="32" h="32" color="FFFFFFFF" shadow="FF444444"/>
+	
+	<column name="PINFO_FAIL_EMBLEM_1" x="0" y="0" w="32" h="32" />
+	<column name="PINFO_FAIL_EMBLEM_2" x="0" y="0" w="32" h="32" />
+	<column name="PINFO_FAIL_EMBLEM_3" x="0" y="0" w="32" h="32" />
+	<column name="PINFO_FAIL_EMBLEM_4" x="0" y="0" w="32" h="32" />
+	<column name="PINFO_FAIL_EMBLEM_5" x="0" y="0" w="32" h="32" />
+	<column name="PINFO_FAIL_EMBLEM_6" x="0" y="0" w="32" h="32" />
+	<column name="PINFO_FAIL_EMBLEM_7" x="0" y="0" w="32" h="32" />
+	<column name="PINFO_FAIL_EMBLEM_8" x="0" y="0" w="32" h="32" />
+	<column name="PINFO_FAIL_EMBLEM_9" x="0" y="0" w="32" h="32" />
+	<column name="PINFO_FAIL_EMBLEM_10" x="0" y="0" w="32" h="32" />
+	<column name="PINFO_FAIL_EMBLEM_11" x="0" y="0" w="32" h="32" />
+	<column name="PINFO_FAIL_EMBLEM_12" x="0" y="0" w="32" h="32" />
+	<column name="PINFO_FAIL_EMBLEM_13" x="0" y="0" w="32" h="32" />
+	<column name="PINFO_FAIL_EMBLEM_14" x="0" y="0" w="32" h="32" />
+	<column name="PINFO_FAIL_EMBLEM_15" x="0" y="0" w="32" h="32" />
+	<column name="PINFO_FAIL_EMBLEM_16" x="0" y="0" w="32" h="32" />
+	
+	
+	<column name="PINFO_NAME_1"  x="140" y="142" w="150" h="14" fontsize="14" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PINFO_NAME_2"  x="464" y="142" w="150" h="14" fontsize="12" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PINFO_NAME_3"  x="140" y="179" w="150" h="14" fontsize="14" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PINFO_NAME_4"  x="464" y="179" w="150" h="14" fontsize="14" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PINFO_NAME_5"  x="140" y="216" w="150" h="14" fontsize="14" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PINFO_NAME_6"  x="464" y="216" w="150" h="14" fontsize="14" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PINFO_NAME_7"  x="140" y="253" w="150" h="14" fontsize="14" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PINFO_NAME_8"  x="464" y="253" w="150" h="14" fontsize="14" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PINFO_NAME_9"  x="140" y="290" w="150" h="14" fontsize="14" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PINFO_NAME_10" x="464" y="290" w="150" h="14" fontsize="14" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PINFO_NAME_11" x="140" y="327" w="150" h="14" fontsize="14" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PINFO_NAME_12" x="464" y="327" w="150" h="14" fontsize="14" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PINFO_NAME_13" x="140" y="364" w="150" h="14" fontsize="14" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PINFO_NAME_14" x="464" y="364" w="150" h="14" fontsize="14" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PINFO_NAME_15" x="140" y="401" w="150" h="14" fontsize="14" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PINFO_NAME_16" x="464" y="401" w="150" h="14" fontsize="14" color="FFFFFFFF" format="VCENTER CENTER"/>
+	
+	<select name="MATCHGROUP" count="5" OffX="0" OffY="0">
+		<rect l="93" t="96" r="157" b="119"/>
+		<rect l="158" t="96" r="222" b="119"/>
+		<rect l="223" t="96" r="287" b="119"/>
+		<rect l="288" t="96" r="352" b="119"/>
+		<rect l="353" t="96" r="417" b="119"/>
+		<column name="STATUS_1" x="0" y="0" w="64" h="23"/>
+		<column name="STATUS_2" x="0" y="0" w="64" h="23"/>
+		<column name="STATUS_3" x="0" y="0" w="64" h="23"/>
+		<column name="STATUS_4" x="0" y="0" w="64" h="23"/>
+		<column name="STATUS_5" x="0" y="0" w="64" h="23"/>
+	</select>
+	 
+	<sprite name="VS_ON_32" l="169" t="903" r="233" b="926" texture="Tournament_PlayerInfo"/>
+	<sprite name="VS_ON_16" l="234" t="903" r="298" b="926" texture="Tournament_PlayerInfo"/>
+	<sprite name="VS_ON_8"  l="299" t="903" r="363" b="926" texture="Tournament_PlayerInfo"/>
+	<sprite name="VS_ON_4"  l="364" t="903" r="428" b="926" texture="Tournament_PlayerInfo"/>
+	<sprite name="VS_ON_2"  l="429" t="903" r="493" b="926" texture="Tournament_PlayerInfo"/>
+	
+	<sprite name="VS_OFF_32" l="169" t="879" r="233" b="902" texture="Tournament_PlayerInfo"/>
+	<sprite name="VS_OFF_16" l="234" t="879" r="298" b="902" texture="Tournament_PlayerInfo"/>
+	<sprite name="VS_OFF_8"  l="299" t="879" r="363" b="902" texture="Tournament_PlayerInfo"/>
+	<sprite name="VS_OFF_4"  l="364" t="879" r="428" b="902" texture="Tournament_PlayerInfo"/>
+	<sprite name="VS_OFF_2"  l="429" t="879" r="493" b="902" texture="Tournament_PlayerInfo"/>
+
+	<sprite name="VS_NONE" l="559" t="985" r="623" b="1008" texture="Tournament_PlayerInfo"/>
+
+	<sprite name="VS_CURRENT_32" l="169" t="855" r="233" b="878" texture="Tournament_PlayerInfo"/>
+	<sprite name="VS_CURRENT_16" l="234" t="855" r="298" b="878" texture="Tournament_PlayerInfo"/>
+	<sprite name="VS_CURRENT_8"  l="299" t="855" r="363" b="878" texture="Tournament_PlayerInfo"/>
+	<sprite name="VS_CURRENT_4"  l="364" t="855" r="428" b="878" texture="Tournament_PlayerInfo"/>
+	<sprite name="VS_CURRENT_2"  l="429" t="855" r="493" b="878" texture="Tournament_PlayerInfo"/>	
+		
+	<sprite name="PINFO_DIE_EMBLEM" l="634" t="855" r="666" b="887" texture="Tournament_PlayerInfo"/>
+	<sprite name="PINFO_WIN_IMAGE"  l="91" t="947" r="150" b="962" texture="Tournament_PlayerInfo"/>
+	<sprite name="PINFO_LOSE_IMAGE" l="91" t="963" r="150" b="978" texture="Tournament_PlayerInfo"/>
+	
+	<button name="UP" x="659" y="132" w="23" h="38">
+		<sprite l="372" t="147" r="389" b="164" texture="UI_Button" />
+		<sprite l="372" t="165" r="389" b="182" texture="UI_Button" />
+		<sprite l="372" t="183" r="389" b="200" texture="UI_Button" />
+	</button>
+
+	<button name="DN" x="659" y="397" w="23" h="38">
+		<sprite l="417" t="147" r="434" b="164" texture="UI_Button" />
+		<sprite l="417" t="165" r="434" b="182" texture="UI_Button" />
+		<sprite l="417" t="183" r="434" b="200" texture="UI_Button" />
+	</button>
+</UIDEFINE>

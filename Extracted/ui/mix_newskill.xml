@@ -1,0 +1,145 @@
+<UIDEFINE>
+	<image name="Mix_NewSkill_Store04" filename="store_04.dds"/>
+	<image name="Mix_NewSkill_Store01" filename="store_01.dds"/>
+
+	<column name="NICKNAME" x='450' y='515' w='140' h='16' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>
+	<column name="MESSAGE" x='480' y='540' w='477' h='85' color='FFFFFFFF' shadow='FF000000' format='WORDBREAK'/>
+
+	<rect name="OPTION_01" l='736' t='562' r='955' b='575'/>
+	<rect name="OPTION_02" l='736' t='580' r='955' b='593'/>
+	<rect name="OPTION_03" l='736' t='599' r='955' b='612'/>
+	
+	<!--LEFT PANEL-->
+	<msprite sx='90' sy='33' ex='90' ey='33' l='0' t='0' r='365' b='722' texture="Mix_NewSkill_Store04"/>
+	
+ 	<column name="AVATAR" x="101" y="93" w="238" h="362"/>
+
+	<column name="CASH" x='162' y='634' w='102' h='20' fontsize="13" color="FFFFFFFF" format='VCENTER RIGHT'/>
+	<column name="PG" x='330' y='634' w='102' h='20' fontsize="13" color="FFFFFFFF"  format='VCENTER RIGHT'/>
+  	<column name="COUPON" x='162' y='658' w='102' h='20' fontsize="13" color="FFFFFFFF"  format='VCENTER RIGHT'/>
+	<column name="COIN" x='330' y='658' w='102' h='20' fontsize="13" color="FFFFFFFF"  format='VCENTER RIGHT'/>
+
+ 	<column name="GRAPH" x='172' y='577' w='48' h='0'/> 
+
+	<column name="ITEMMAINLV" x="517" y="587" cx="171" cy="30" format="VTOP LEFT" fontsize="18" shadow="FF000000"/>
+
+	<column name="PRECHARABIL0" x="588" y="558" cx="30" cy="13" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="PRECHARABIL1" x="588" y="572" cx="30" cy="13" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="PRECHARABIL2" x="588" y="586" cx="30" cy="13" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="PRECHARABIL3" x="588" y="600" cx="30" cy="13" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="PRECHARABIL4" x="588" y="614" cx="30" cy="13" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="ITEMABILITY0" x="631" y="558" cx="30" cy="13" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="ITEMABILITY1" x="631" y="572" cx="30" cy="13" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="ITEMABILITY2" x="631" y="586" cx="30" cy="13" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="ITEMABILITY3" x="631" y="600" cx="30" cy="13" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="ITEMABILITY4" x="631" y="614" cx="30" cy="13" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="AFTERCHARABIL0" x="674" y="558" cx="30" cy="13" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="AFTERCHARABIL1" x="674" y="572" cx="30" cy="13" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="AFTERCHARABIL2" x="674" y="586" cx="30" cy="13" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="AFTERCHARABIL3" x="674" y="600" cx="30" cy="13" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+	<column name="AFTERCHARABIL4" x="674" y="614" cx="30" cy="13" fontsize="10" color="FFFFFFFF" shadow="FF000000" format="VCENTER CENTER"/>
+
+	<button name="FRONT" x="274" y="422" w="28" h="28">
+		<sprite l="0" t="521" r="28" b="549" texture="UI_Button" />
+		<sprite l="0" t="550" r="28" b="578" texture="UI_Button" />
+		<sprite l="0" t="579" r="28" b="607" texture="UI_Button" />
+	</button>
+	<button name="BACK" x="305" y="422" w="28" h="28">
+		<sprite l="29" t="521" r="57" b="549" texture="UI_Button" />
+		<sprite l="29" t="550" r="57" b="578" texture="UI_Button" />
+		<sprite l="29" t="579" r="57" b="607" texture="UI_Button" />
+	</button>
+
+	<charslot name="CHARSLOT">
+		<template>
+			<sprite l="709" t="518" r="773" b="582" texture="UI_Button"/> 
+			<sprite l="579" t="518" r="643" b="582" texture="UI_Button"/>
+		</template>
+		<slot name="char1" x="350" y="117" w="64" h="64"/>
+		<slot name="char2" x="350" y="184" w="64" h="64"/>
+		<slot name="char3" x="350" y="251" w="64" h="64"/>
+		<slot name="char4" x="350" y="318" w="64" h="64"/>
+		<slot name="char5" x="350" y="385 " w="64" h="64"/>
+    		<eventrect name="SCROLL_RECT" x="349" y="116" w="66" h="334"/>
+		<button name="UP" x="419" y="116" w="23" h="28">
+			<sprite l="258" t="461" r="281" b="489" texture="UI_Button"/>
+			<sprite l="282" t="461" r="305" b="489" texture="UI_Button"/>
+			<sprite l="306" t="461" r="329" b="489" texture="UI_Button"/>
+		</button>
+		<button name="DN" x="419" y="422" w="23" h="28">
+			<sprite l="258" t="490" r="281" b="518" texture="UI_Button"/>
+			<sprite l="282" t="490" r="305" b="518" texture="UI_Button"/>
+			<sprite l="306" t="490" r="329" b="518" texture="UI_Button"/>
+		</button>
+	</charslot>
+
+	<giftitemslot name="ITEMSLOT">
+		<template>
+
+			<button name="MYINVENTORY" x='127' y='48' w='50' h='21'>
+				<sprite l='891' t='320' r='941' b='340' texture="UI_Button"/>	
+				<sprite l='891' t='342' r='941' b='362' texture="UI_Button"/>	
+				<sprite l='891' t='363' r='941' b='383' texture="UI_Button"/>	
+			</button>
+
+			<button name="DELETE" x='180' y='48' w='50' h='21'>
+				<sprite l='942' t='320' r='991' b='340' texture="UI_Button"/>	
+				<sprite l='942' t='342' r='991' b='362' texture="UI_Button"/>	
+				<sprite l='942' t='363' r='991' b='383' texture="UI_Button"/>	
+			</button>
+
+			<column name="NAME" x="78" y="7"/>
+			<sprite l="296" t="766" r="531" b="840"  texture="UI_Button"/> <!--MOUSE OVER-->
+			<sprite l="296" t="841" r="531" b="915"  texture="UI_Button"/> <!--MOUSE CLICK-->
+
+			<sprite l="644" t="518" r="708" b="582" texture="UI_Button"/> 
+			<sprite l="384" t="518" r="448" b="582" texture="UI_Button"/>	
+			<sprite l="449" t="518" r="513" b="582" texture="UI_Button"/>	
+		</template>
+
+		<slot name="slot1" x='466'  y='175'  w='235' h='74'/>
+		<slot name="slot2" x='703'  y='175'  w='235' h='74'/>
+		<slot name="slot3" x='466'  y='252'  w='235' h='74'/>
+		<slot name="slot4" x='703'  y='252'  w='235' h='74'/>
+		<slot name="slot5" x='466'  y='329'  w='235' h='74'/>
+		<slot name="slot6" x='703'  y='329'  w='235' h='74'/>
+		<slot name="slot7" x='466'  y='406'  w='235' h='74'/>
+		<slot name="slot8" x='703'  y='406'  w='235' h='74'/>
+		<slot name="slot1"  x="483" y="158" w="237" h="76"/>
+		<slot name="slot2"  x="721" y="158" w="237" h="76"/>
+		<slot name="slot3"  x="483" y="235" w="237" h="76"/>
+		<slot name="slot4"  x="721" y="235" w="237" h="76"/>
+		<slot name="slot5"  x="483" y="312" w="237" h="76"/>
+		<slot name="slot6"  x="721" y="312" w="237" h="76"/>
+		<slot name="slot7"  x="483" y="389" w="237" h="76"/>
+		<slot name="slot8"  x="721" y="389" w="237" h="76"/>
+		<slot name="slot9"  x="483" y="466" w="237" h="76"/>
+		<slot name="slot10" x="721" y="466" w="237" h="76"/>
+    		
+
+		<eventrect name="SCROLL_RECT" x="483" y="158" w="474" h="384"/>
+		<button name="UP" x="962" y="158" w="23" h="28">
+			<sprite l="258" t="461" r="281" b="489" texture="UI_Button"/>
+			<sprite l="282" t="461" r="305" b="489" texture="UI_Button"/>
+			<sprite l="306" t="461" r="329" b="489" texture="UI_Button"/>
+		</button>
+		<button name="DN" x="962" y="514" w="23" h="28">
+			<sprite l="258" t="490" r="281" b="518" texture="UI_Button"/>
+			<sprite l="282" t="490" r="305" b="518" texture="UI_Button"/>
+			<sprite l="306" t="490" r="329" b="518" texture="UI_Button"/>
+		</button>   
+	</giftitemslot>
+
+	<button name="PRESENT_BOX" x='466' y='90' w='80' h='33'>
+		<sprite l='894' t='386' r='974' b='419' texture="UI_Button"/>
+		<sprite l='894' t='420' r='974' b='453' texture="UI_Button"/>
+		<sprite l='894' t='454' r='974' b='487' texture="UI_Button"/>
+	</button>
+
+	<button name="PAPER_CODE" x='560' y='90' w='80' h='33'>
+		<sprite l='894' t='488' r='974' b='521' texture="UI_Button"/>
+		<sprite l='894' t='522' r='974' b='555' texture="UI_Button"/>
+		<sprite l='894' t='556' r='974' b='589' texture="UI_Button"/>
+	</button>
+			
+</UIDEFINE>

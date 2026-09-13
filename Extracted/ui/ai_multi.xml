@@ -1,0 +1,239 @@
+<UIDEFINE>
+	<bot_image name="AI_MULTI_GUNSHOOTING" filename="gunshooting.dds"/>
+	<bot_image name="AI_MULTI_2" filename="ai2.dds"/>
+	<bot_image name="AI_MULTI_GS_POPUP" filename="gs_popup02.dds"/>
+	<bot_image name="AI_MULTI_GS_02" filename="gs_ui02.dds" />	
+	<image name="AI_MULTI_HELP" filename="help.dds" />
+	<image name="AI_MULTI_CRH" filename="crosshair.dds" />
+					
+	<sprite name="BOSS_ALERT" x='0' y='804' w='1' h='8' texture="AI_MULTI_HELP"/>
+
+	<sprite name="BOSS_CLEAR_GRAPH" x='138' y='1011' w='1' h='8' texture="AI_MULTI_2"/>
+
+	<sprite name="CHOICE_TURN" x="221" y="503" w="301" h="26" texture="AI_MULTI_2"/>
+
+	<sprite name="CONTINUE_TIME_GRAPH" x='0' y='1020' w='1' h='4' texture="AI_MULTI_2"/> 
+
+	<sprite name = "NOT_CANCEL" x='224' y='368' w='32' h='4' texture="AI_MULTI_2"/>	
+
+	<sprite name = "CANCEL" x='224' y='374' w='32' h='4' texture="AI_MULTI_2"/>
+
+	<sprite name="AI_ITEM_PANNEL" x='0' y='341' w='215' h='154' texture="AI_MULTI_GS_02"/>
+
+	<sprite name="AI_ITEM_GRAPH" x='215' y='341' w='60' h='3' texture="AI_MULTI_GS_02"/>
+
+	<sprite name="TOP_PANNEL" x='0' y='959' w='986' h='65' texture="AI_MULTI_GS_POPUP"/>
+
+	<column name="TEAM_SCORE" x='429' y='25' w='15' h='16'/>
+
+	<column name="MY_SCORE" x='583' y='25' w='15' h='16'/>
+
+	<column name="AI_TIME_HOUR_0" x='476' y='26' w='16' h='20'/>
+
+	<column name="AI_TIME_HOUR_1" x='491' y='26' w='16' h='20'/>
+
+	<column name="AI_TIME_MIN_0" x='514' y='26' w='16' h='20'/>
+
+	<column name="AI_TIME_MIN_1" x='529' y='26' w='16' h='20'/>
+
+	<sprite name="MIDDLE_PANNEL" x='0' y='573' w='29' h='265' texture="AI_MULTI_GS_POPUP"/>
+	 
+	<sprite name="GAGE_PANNEL" x='501' y='281' w='144' h='174' texture="AI_MULTI_GS_POPUP"/>
+	
+	<sprite name="GAGE_GRAPH" x='645' y='281' w='25' h='89' texture="AI_MULTI_GS_POPUP"/>
+
+	<sprite name="AI_MULTI_BODY" x='504' y='604' w='105' h='88' texture="AI_MULTI_GS_POPUP"/>
+
+	<sprite name="AI_MULTI_MAIN" x='604' y='817' w='19' h='88' texture="AI_MULTI_GS_POPUP"/>					
+
+	<sprite name="AI_MULTI_SUB"  x='624' y='817' w='19' h='88' texture="AI_MULTI_GS_POPUP"/> 						
+
+	<sprite name="AI_MULTI_CLOSE" x='604' y='728' w='19' h='88' texture="AI_MULTI_GS_POPUP"/> 						
+
+	<sprite name="AI_MULTI_THROW" x='624' y='728' w='19' h='88' texture="AI_MULTI_GS_POPUP"/> 
+
+	<column name="AI_WEAPON_THUM" x='30' y='322' w='64' h='64'/>
+	
+	<sprite name="SHIELD_GAGE" x='706' y='747' w='211' h='211' texture="AI_MULTI_GS_POPUP"/>	
+
+	<sprite name="STAGE_GAGE" x='162' y='866' w='135' h='135' texture="AI_MULTI_CRH"/>
+
+	<sprite name="BOTTOM_PANNEL" x='0' y='838' w='537' h='120' texture="AI_MULTI_GS_POPUP"/>
+
+	<sprite name="FEVER_PANNEL" x='665' y='670' w='40' h='288' texture="AI_MULTI_GS_POPUP"/>
+	
+	<sprite name="FEVER_GRAPH" x='644' y='729' w='14' h='230' texture="AI_MULTI_GS_POPUP"/>
+	
+	<sprite name="PRESS_F_TEXT" x='579' y='907' w='64' h='51' texture="AI_MULTI_GS_POPUP"/>
+
+	<sprites name="FireMode_AI" w='77' h='18'>
+		<element x='35' y='597' texture="AI_MULTI_GS_POPUP"/>
+		<element x='35' y='616' texture="AI_MULTI_GS_POPUP"/>
+		<element x='113' y='597' texture="AI_MULTI_GS_POPUP"/>
+		<element x='113' y='616' texture="AI_MULTI_GS_POPUP"/>
+	</sprites>
+
+	<sprite name="ICON_GRAY_QUICK" x='179' y='21' w='42' h='42' texture="AI_MULTI_GUNSHOOTING"/>
+
+	<sprite name="ICON_QUICK_LV1" x='224' y='23' w='38' h='38' texture="AI_MULTI_GUNSHOOTING"/>
+
+	<sprite name="ICON_QUICK_LV2" x='267' y='23' w='38' h='38' texture="AI_MULTI_GUNSHOOTING"/>
+
+	<sprite name="ICON_QUICK_LV3" x='310' y='23' w='38' h='38' texture="AI_MULTI_GUNSHOOTING"/>
+
+	<sprite name="ICON_GRAY_WEAK" x='179' y='63' w='42' h='42' texture="AI_MULTI_GUNSHOOTING"/>
+
+	<sprite name="ICON_WEAK_LV1" x='224' y='65' w='38' h='38' texture="AI_MULTI_GUNSHOOTING"/>
+
+	<sprite name="ICON_WEAK_LV2" x='267' y='65' w='38' h='38' texture="AI_MULTI_GUNSHOOTING"/>
+
+	<sprite name="ICON_WEAK_LV3" x='310' y='65' w='38' h='38' texture="AI_MULTI_GUNSHOOTING"/>
+
+	<sprite name="ICON_GRAY_COMBO" x='179' y='147' w='42' h='42' texture="AI_MULTI_GUNSHOOTING"/>
+
+	<sprite name="ICON_COMBO_LV1" x='224' y='149' w='38' h='38' texture="AI_MULTI_GUNSHOOTING"/>
+
+	<sprite name="ICON_COMBO_LV2" x='267' y='149' w='38' h='38' texture="AI_MULTI_GUNSHOOTING"/>
+
+	<sprite name="ICON_COMBO_LV3" x='310' y='149' w='38' h='38' texture="AI_MULTI_GUNSHOOTING"/>
+
+	<sprite name="ICON_COMBO_LV4" x='135' y='91' w='38' h='38' texture="AI_MULTI_GUNSHOOTING"/>
+
+	<sprite name="ICON_COMBO_LV5" x='135' y='133' w='38' h='38' texture="AI_MULTI_GUNSHOOTING"/>
+
+	<sprite name="ICON_COMBO_LV6" x='135' y='175' w='38' h='38' texture="AI_MULTI_GUNSHOOTING"/>
+
+	<sprite name="ICON_COMBO_LV7" x='181' y='192' w='38' h='38' texture="AI_MULTI_GUNSHOOTING"/>
+
+	<sprite name="ICON_COMBO_LV8" x='224' y='192' w='38' h='38' texture="AI_MULTI_GUNSHOOTING"/>
+
+	<sprite name="ICON_COMBO_LV9" x='267' y='192' w='38' h='38' texture="AI_MULTI_GUNSHOOTING"/>
+
+	<sprite name="ICON_COMBO_LV10" x='310' y='192' w='38' h='38' texture="AI_MULTI_GUNSHOOTING"/>
+
+	<sprite name="STAGE_0" x='35' y='635' w='46' h='27' texture="AI_MULTI_GS_POPUP"/> 	
+
+	<sprite name="STAGE_1" x='82' y='635' w='46' h='27' texture="AI_MULTI_GS_POPUP"/> 
+
+	<sprite name="STAGE_2" x='129' y='635' w='46' h='27' texture="AI_MULTI_GS_POPUP"/> 
+
+	<sprite name="STAGE_3" x='176' y='635' w='46' h='27' texture="AI_MULTI_GS_POPUP"/>
+	
+	<sprite name="WEAPON_INFIN" x='337' y='256' w='45' h='23' texture="AI_MULTI_GUNSHOOTING"/>
+
+	<sprite name="COMBO" x='292' y='397' w='130' h='29' texture="AI_MULTI_GUNSHOOTING"/>
+	
+	<sprite name="COMBO_BLUE" x='1' y='591' w='246' h='246' texture="AI_MULTI_GUNSHOOTING"/>
+	
+	<sprite name="COMBO_WHITE" x='248' y='591' w='283' h='220' texture="AI_MULTI_GUNSHOOTING"/>
+
+	<sprite name="RATIO_COMMA" x='347' y='231' w='16' h='22' texture="AI_MULTI_GUNSHOOTING"/>
+	
+	<sprite name="RATIO_MULTI" x='330' y='231' w='16' h='22' texture="AI_MULTI_GUNSHOOTING"/>
+	
+	<sprite name="FEVER_EFFECT" x='717' y='363' w='103' h='102' texture="AI_MULTI_GUNSHOOTING"/>
+
+	<sprite name="GS_SHOT_TYPE1" x='0' y='541' w='180' h='24' texture="AI_MULTI_GUNSHOOTING"/>
+
+	<sprite name="GS_SHOT_TYPE2" x='0' y='493' w='180' h='24' texture="AI_MULTI_GUNSHOOTING"/>
+
+	<sprite name="GS_SHOT_TYPE3" x='0' y='565' w='180' h='24' texture="AI_MULTI_GUNSHOOTING"/>
+
+	<sprite name="GS_SHOT_TYPE4" x='0' y='517' w='180' h='24' texture="AI_MULTI_GUNSHOOTING"/>
+	
+	<sprite name="AI_CAHT" x='36' y='663' w='467' h='174' texture="AI_MULTI_GS_POPUP"/>
+	
+	<font name="COMBO_Font" w='26' h='30' texture="AI_MULTI_GUNSHOOTING" >
+		<digit0 x='292' y='427' />
+		<digit1 x='319' y='427' />
+		<digit2 x='346' y='427' />
+		<digit3 x='373' y='427' />
+		<digit4 x='292' y='458' />
+		<digit5 x='319' y='458' />
+		<digit6 x='346' y='458' />
+		<digit7 x='292' y='489' />
+		<digit8 x='319' y='489' />
+		<digit9 x='346' y='489' />
+	</font>
+
+	<font name="AI_TIME_FONT" w='16' h='20' texture="AI_MULTI_GS_POPUP">
+		<digit0 x='30' y='573' />
+		<digit1 x='47' y='573' />
+		<digit2 x='64' y='573' />
+		<digit3 x='81' y='573' />
+		<digit4 x='98'  y='573' />
+		<digit5 x='115' y='573' />
+		<digit6 x='132' y='573' />
+		<digit7 x='149' y='573' />
+		<digit8 x='166'  y='573' />
+		<digit9 x='183' y='573' />
+	</font>
+
+	<font name="BotScoreFont" w='18' h='18' texture="AI_MULTI_GUNSHOOTING" >
+		<digit0 x='76' y='251' />
+		<digit1 x='95' y='251' />
+		<digit2 x='114' y='251' />
+		<digit3 x='133' y='251' />
+		<digit4 x='152' y='251' />
+		<digit5 x='76' y='270' />
+		<digit6 x='95' y='270' />
+		<digit7 x='114' y='270' />
+		<digit8 x='133' y='270' />
+		<digit9 x='152' y='270' />
+		<comma x='19' y='270' />
+	</font>
+	
+	<font name="TEAMSCORE_FONT" w='15' h='16' texture="AI_MULTI_GS_POPUP">
+		<digit0 x='200' y='574' />
+		<digit1 x='216' y='574' />
+		<digit2 x='232' y='574' />
+		<digit3 x='248' y='574' />
+		<digit4 x='264' y='574' />
+		<digit5 x='280' y='574' />
+		<digit6 x='296' y='574' />
+		<digit7 x='312' y='574' />
+		<digit8 x='328' y='574' />
+		<digit9 x='344' y='574' />
+	</font>
+
+	<font name="MYSCORE_Font" w='15' h='16' texture="AI_MULTI_GS_POPUP">
+		<digit0 x='360' y='574' />
+		<digit1 x='376' y='574' />
+		<digit2 x='392' y='574' />
+		<digit3 x='408' y='574' />
+		<digit4 x='424' y='574' />
+		<digit5 x='440' y='574' />
+		<digit6 x='456' y='574' />
+		<digit7 x='472' y='574' />
+		<digit8 x='488' y='574' />
+		<digit9 x='504' y='574' />
+	</font>
+
+	<font name="DEDUCTION_COIN_Font" w='19' h='26' texture="AI_MULTI_GS_POPUP">
+		<digit0 x='500' y='118' />
+		<digit1 x='520' y='118' />
+		<digit2 x='540' y='118' />
+		<digit3 x='560' y='118' />
+		<digit4 x='580' y='118' />
+		<digit5 x='600' y='118' />
+		<digit6 x='620' y='118' />
+		<digit7 x='640' y='118' />
+		<digit8 x='660' y='118' />
+		<digit9 x='680' y='118' />
+	</font>	
+
+	<sprite name="AI_BONUS_USEFEVER" x='525' y='495' w='64' h='24' texture="AI_MULTI_2"/>
+
+	<sprites name="AI_BONUS" w='64' h='24'>
+		<element x='395' y='413' texture="AI_MULTI_2"/>
+		<element x='460' y='413' texture="AI_MULTI_2"/>
+		<element x='525' y='413' texture="AI_MULTI_2"/>
+		<element x='395' y='440' texture="AI_MULTI_2"/>
+		<element x='460' y='440' texture="AI_MULTI_2"/>
+		<element x='525' y='440' texture="AI_MULTI_2"/>
+		<element x='395' y='467' texture="AI_MULTI_2"/>
+		<element x='460' y='467' texture="AI_MULTI_2"/>
+		<element x='525' y='467' texture="AI_MULTI_2"/>
+	</sprites>
+
+</UIDEFINE>

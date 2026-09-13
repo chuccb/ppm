@@ -1,0 +1,81 @@
+﻿<UIDEFINE>
+	<bgmfile filename="bgm/bgm_character.mp3"/>
+
+	<image name="Present_IMG" filename="gift_box.dds"/>
+
+  	<msprite name="PRESENT_BACKGROUND" sx='0' sy='0' ex='0' ey='0' l='0' t='0' r='1024' b='768' texture="UI_Back1"/>
+  	
+	
+	<msprite name="PRESENT_TITLE" sx="90" sy="0" ex="90" ey="0" l="101" t="999" r="466" b="1024" texture="Present_IMG"/>
+	<msprite name="PRESENT_NETCAFE" sx="461" sy="0" ex="461" ey="0" l="0" t="947" r="546" b="972" texture="UI_Button" />
+  	  	
+	<column name="TITLE_SERVER"      x="560" y="7" w="61" h="11" fontsize="12" color="FFFFFFFF" format="VCENTER CENTER" />
+	<column name="TITLE_SERVER_TYPE" x="650" y="7" w="41" h="11" fontsize="12" color="FFFFFFFF" format="VCENTER CENTER" />
+	
+	
+	<button name="CHARACTER" x="9" y="33" w="62" h="68">
+    		<sprite l="0" t="0" r="62" b="68" texture="UI_Button" />
+		<sprite l="0" t="69" r="62" b="137" texture="UI_Button" />
+		<sprite l="0" t="138" r="62" b="206" texture="UI_Button" />
+  	</button>
+  	
+	<button name="SHOP" x="9" y="104" w="62" h="68">
+		<sprite l="62" t="0" r="124" b="68" texture="UI_Button" />
+		<sprite l="62" t="69" r="124" b="137" texture="UI_Button" />
+		<sprite l="62" t="138" r="124" b="206" texture="UI_Button" />
+	</button>
+	
+	<button name="LOBBY" x="9" y="175" w="62" h="68" >
+		<sprite l="560" t="0" r="622" b="68" texture="UI_Button" />
+		<sprite l="560" t="69" r="622" b="137" texture="UI_Button" />
+		<sprite l="560" t="138" r="622" b="206" texture="UI_Button" />
+	</button>
+
+	<tab name="PRESENTTYPE" count='1'>
+		<page name="GIFT" x='0' y='0' default='true'>
+		      	<sprite l='0' t='0' r='0' b='0' texture="UI_Back1"/>
+		</page>
+		<page name="PAPERCODE" x='0' y='0'>
+		      	<sprite l='0' t='0' r='0' b='0' texture="UI_Back1"/>
+		</page>
+	</tab>
+
+	
+	<column name="ITEMABILITYCOMBINATIONNAME" x="195" y="472" w="169" h="25" fontsize="22" color="FF000000" shadow='FFCCCCCC'  format="VCENTER LEFT"/>
+	<column name="ITEMABILITYCOMBINATIONLEV"  x="369" y="472" w="72" h="25" fontsize="15" color="FF000000" shadow='FFCCCCCC'  format="VCENTER CENTER"/>
+
+	
+	<column name="ITEMLEVNUM_0" x="273" y="513" w="20" h="13" fontsize="12" color="FF330000"  format="VCENTER CENTER"/>
+	<column name="ITEMLEVNUM_1" x="273" y="528" w="20" h="13" fontsize="12" color="FF330000"  format="VCENTER CENTER"/>
+	<column name="ITEMLEVNUM_2" x="273" y="543" w="20" h="13" fontsize="12" color="FF330000"  format="VCENTER CENTER"/>
+	<column name="ITEMLEVNUM_3" x="273" y="558" w="20" h="13" fontsize="12" color="FF330000"  format="VCENTER CENTER"/>
+	<column name="ITEMLEVNUM_4" x="273" y="573" w="20" h="13" fontsize="12" color="FF330000"  format="VCENTER CENTER"/>
+
+
+	<column name="ITEMLEVNAME_0" x="371" y="514" w="66" h="13" fontsize="13" color="FF330000"  format="VCENTER CENTER"/>
+	<column name="ITEMLEVNAME_1" x="371" y="528" w="66" h="13" fontsize="13" color="FF330000"  format="VCENTER CENTER"/>
+	<column name="ITEMLEVNAME_2" x="371" y="543" w="66" h="13" fontsize="13" color="FF330000"  format="VCENTER CENTER"/>
+	<column name="ITEMLEVNAME_3" x="371" y="558" w="66" h="13" fontsize="13" color="FF330000"  format="VCENTER CENTER"/>
+	<column name="ITEMLEVNAME_4" x="371" y="573" w="66" h="13" fontsize="13" color="FF330000"  format="VCENTER CENTER"/>
+
+	<column name="SKILL_GRAPH_PLUS_0" x="295" y="513"  w="74" h="13"/>
+	<column name="SKILL_GRAPH_PLUS_1" x="295" y="528"  w="74" h="13"/>
+	<column name="SKILL_GRAPH_PLUS_2" x="295" y="543"  w="74" h="13"/>
+	<column name="SKILL_GRAPH_PLUS_3" x="295" y="558"  w="74" h="13"/>
+	<column name="SKILL_GRAPH_PLUS_4" x="295" y="573"  w="74" h="13"/>
+
+	<column name="SKILL_GRAPH_MINUS_0" x="243" y="513"  w="74" h="13"/> 
+	<column name="SKILL_GRAPH_MINUS_1" x="243" y="528"  w="74" h="13"/>
+	<column name="SKILL_GRAPH_MINUS_2" x="243" y="543"  w="74" h="13"/>
+	<column name="SKILL_GRAPH_MINUS_3" x="243" y="558"  w="74" h="13"/>
+	<column name="SKILL_GRAPH_MINUS_4" x="243" y="573"  w="74" h="13"/>
+
+	<sprite name="SKILL_GRAPH_0" l='0' t='860' r='74' b='873' texture="UI_Button"/>
+	<sprite name="SKILL_GRAPH_1" l='0' t='873' r='74' b='886' texture="UI_Button"/>
+	<sprite name="SKILL_GRAPH_2" l='0' t='886' r='74' b='899' texture="UI_Button"/>
+	<sprite name="SKILL_GRAPH_3" l='0' t='899' r='74' b='912' texture="UI_Button"/>
+	<sprite name="SKILL_GRAPH_4" l='0' t='912' r='74' b='925' texture="UI_Button"/>
+	<sprite name="SKILL_GRAPH_MINUS" l='0' t='925' r='74' b='938' texture="UI_Button"/>
+
+
+</UIDEFINE>

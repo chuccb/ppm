@@ -1,0 +1,30 @@
+<UIDEFINE>
+	<image name="TUTO_MISSION" filename="TUTO_MISSION.dds" />
+  	<image name="TUTO_MISSION_BACK" filename="TUTO_BACK.DDS" />
+
+  	<msprite name="TUTO_BACK" sx='0' sy='0' ex='0' ey='0' l='0' t='0' r='1024' b='768' texture="TUTO_MISSION_BACK"/>  
+	<msprite name="MISSIONMAIN" sx='301' sy='129' ex='301' ey='129' l='0' t='0' r='418' b='511' texture="TUTO_MISSION" />
+
+	<msprite name="KYOKASHYO"   sx='337' sy='314' ex='337' ey='314' l='424' t='872' r='577' b='945' texture="TUTO_MISSION" />
+	<msprite name="MOVEMISSION" sx='338' sy='388' ex='337' ey='388' l='419' t='1'   r='571' b='74'  texture="TUTO_MISSION" />
+	<msprite name="ATTACK_NOR"  sx='337' sy='462' ex='338' ey='462' l='581' t='349' r='733' b='422' texture="TUTO_MISSION" />
+	<msprite name="ATTACK_NONE" sx='337' sy='462' ex='338' ey='462' l='418' t='75'  r='571' b='148' texture="TUTO_MISSION" />
+
+	<tab name="MISSION" count ='3' >
+		<page name="INTRODUCTION" x='337' y='314' default='true' >
+			<sprite l='424' t='872' r='577' b='945' texture="TUTO_MISSION" />
+		</page>
+		<page name="MOVE" x='338' y='388' >
+			<sprite l='419' t='1' r='571' b='74' texture="TUTO_MISSION" />
+		</page>
+                <page name="ATTACK" x='337' y='462' >
+			<sprite l='581' t='349' r='733' b='422' texture="TUTO_MISSION" />
+		</page>
+	</tab>
+	<button name="CLOSE" x='472' y='595' w='77' h='34' >
+		<sprite l='721' t='226' r='798' b='260' texture="TUTO_MISSION" />
+		<sprite l='721' t='261' r='798' b='295' texture="TUTO_MISSION" />
+		<sprite l='721' t='296' r='798' b='330' texture="TUTO_MISSION" />
+	</button>
+  
+</UIDEFINE>

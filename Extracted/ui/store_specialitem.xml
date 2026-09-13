@@ -1,0 +1,109 @@
+<UIDEFINE>
+
+	<rect name="INFOIMAGE" l="487" t="588" r="639" b="673"/>
+	<rect name="INFONAME" l="483" t="554" r="746" b="577"/> 
+	<rect name="INFOEXPLAIN" l="757" t="558" r="978" b="669"/>
+	
+	<!--LEFT PANEL-->
+	<msprite name="STORESPECIALITEM_1" sx='90' sy='80' ex='90' ey='80' l='1' t='1' r='890' b='627' texture="MAIN_STORE_1"/>
+	<msprite name="STORESPECIALITEM_2" sx='442' sy='500' ex='464' ey='482' l='486' t='779' r='986' b='930' texture="MAIN_STORE_1"/>
+
+	<column name="AVATAR" x="101" y="105" w="238" h="320"/>
+	
+	<column name ="ITEMABILITYCOMBINATIONNAME" x ='310' y ='512' w ='77' h ='52' fontsize ='30' color='FFFFFFFF' shadow='FF000000' format='VCENTER RIGHT'/>
+	<column name ="ITEMABILITYCOMBINATIONLEV" x ='395' y ='539' w ='28' h ='16' fontsize ='12' color='FFFFFFFF' shadow='FF000000' format='VCENTER LEFT'/>
+
+	<column name ="ITEMLEVNAME0" x ='253' y ='562' w ='89' h ='19' fontsize ='10' color='FFFFFFFF' shadow='99000000' format='VCENTER CENTER'/>
+	<column name ="ITEMLEVNAME1" x ='345' y ='562' w ='89' h ='19' fontsize ='10' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>
+	<column name ="ITEMLEVNAME2" x ='253' y ='585' w ='89' h ='19' fontsize ='10' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>
+	<column name ="ITEMLEVNAME3" x ='345' y ='585' w ='89' h ='19' fontsize ='10' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>
+	<column name ="ITEMLEVNAME4" x ='253' y ='607' w ='89' h ='19' fontsize ='10' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>
+
+	<column name ="ITEMMAINTEXT" x='490' y ='560' cx ='146' cy ='30' fontsize ='15' color='FFFFFFFF' shadow='FF000000'/>
+	<column name ="ITEMMAINLV" x='517' y ='587' cx ='171' cy ='30' format='VTOP LEFT' fontsize ='15' color='FFFFFFFF' shadow='FF000000'/>
+
+	<column name="PRECHARABIL0" x="589" y="558" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PRECHARABIL1" x="589" y="572" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PRECHARABIL2" x="589" y="586" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PRECHARABIL3" x="589" y="600" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PRECHARABIL4" x="589" y="614" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="ITEMABILITY0" x="632" y="558" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="ITEMABILITY1" x="632" y="572" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="ITEMABILITY2" x="632" y="586" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="ITEMABILITY3" x="632" y="600" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="ITEMABILITY4" x="632" y="614" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="AFTERCHARABIL0" x="675" y="558" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="AFTERCHARABIL1" x="675" y="572" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="AFTERCHARABIL2" x="675" y="586" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="AFTERCHARABIL3" x="675" y="600" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="AFTERCHARABIL4" x="675" y="614" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+
+	<button name="FRONT" x='187' y='144' w='29' h='27'>
+		<sprite l='98' t='66' r='127' b='94' texture="MAIN_STORE_1"/>
+		<sprite l='955' t='132' r='985' b='159' texture="MAIN_STORE_1"/>
+		<sprite l='955' t='160' r='985' b='187' texture="MAIN_STORE_1"/>
+	</button>
+
+	<button name="BACK" x='220' y='144' w='29' h='27'>
+		<sprite l='130' t='66' r='160' b='94' texture="MAIN_STORE_1"/>
+		<sprite l='985' t='132' r='1015' b='159' texture="MAIN_STORE_1"/>
+		<sprite l='985' t='160' r='1015' b='187' texture="MAIN_STORE_1"/>
+	</button>
+
+	<charslot name="CHARSLOT">
+		<template>
+			<sprite l='956' t='67' r='1020' b='131' texture="MAIN_STORE_1"/>
+			<sprite l='956' t='2' r='1020' b='66' texture="MAIN_STORE_1"/>
+		
+		</template>
+		<slot name="char1" x='342' y='164' w='64' h='64'/>
+		<slot name="char2" x='342' y='231' w='64' h='64'/>
+		<slot name="char3" x='342' y='297' w='64' h='64'/>
+		<slot name="char4" x='342' y='363' w='64' h='64'/>
+		<slot name="char5" x='342' y='429' w='64' h='64'/>
+		<slot name="char6" x='342' y='498' w='64' h='64'/>
+
+		<button name="UP" x='414' y='166' w='20' h='34'>
+			<sprite l='51' t='83' r='71' b='117' texture="UI_Popup_1"/>
+			<sprite l='152' t='61' r='172' b='95' texture="UI_Popup_1"/>
+			<sprite l='152' t='96' r='172' b='130' texture="UI_Popup_1"/>
+		</button>
+		<button name="DN" x='414' y='523' w='20' h='34'>
+			<sprite l='72' t='83' r='92' b='117' texture="UI_Popup_1"/>
+			<sprite l='173' t='61' r='193' b='95' texture="UI_Popup_1"/>
+			<sprite l='173' t='96' r='193' b='130' texture="UI_Popup_1"/>
+		</button>
+	</charslot>
+	
+	<itemslot name="ITEMSLOT">
+		<template>
+			<column name="NAME" x='94' y='10'/>
+			<sprite l='2' t='873' r='237' b='947' texture="MAIN_STORE_1"/>
+			<sprite l='2' t='948' r='237' b='1023' texture="MAIN_STORE_1"/>
+
+			<sprite l='891' t='1' r='955' b='66' texture="MAIN_STORE_1"/>
+			<sprite l='891' t='67' r='955' b='131' texture="MAIN_STORE_1"/>
+			<sprite l='891' t='132' r='955' b='196' texture="MAIN_STORE_1"/>
+		</template>
+		<slot name="slot1" x='466'  y='175'  w='235' h='74'/>
+		<slot name="slot2" x='703'  y='175'  w='235' h='74'/>
+		<slot name="slot3" x='466'  y='252'  w='235' h='74'/>
+		<slot name="slot4" x='703'  y='252'  w='235' h='74'/>
+		<slot name="slot5" x='466'  y='329'  w='235' h='74'/>
+		<slot name="slot6" x='703'  y='329'  w='235' h='74'/>
+		<slot name="slot7" x='466'  y='406'  w='235' h='74'/>
+		<slot name="slot8" x='703'  y='406'  w='235' h='74'/>
+
+		<button name="UP" x='943' y='175' w='20' h='34'>
+			<sprite l='51' t='83' r='71' b='117' texture="UI_Popup_1"/>
+			<sprite l='152' t='61' r='172' b='95' texture="UI_Popup_1"/>
+			<sprite l='152' t='96' r='172' b='130' texture="UI_Popup_1"/>
+		</button>
+		<button name="DN" x='943' y='439' w='20' h='34'>
+			<sprite l='72' t='83' r='92' b='117' texture="UI_Popup_1"/>
+			<sprite l='173' t='61' r='193' b='95' texture="UI_Popup_1"/>
+			<sprite l='173' t='96' r='193' b='130' texture="UI_Popup_1"/>
+		</button>
+	</itemslot>
+
+</UIDEFINE>

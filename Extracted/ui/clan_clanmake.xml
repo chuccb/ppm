@@ -1,0 +1,29 @@
+<UIDEFINE>
+	<bgmfile filename="bgm/bgm_character.mp3"/>
+	<image name="Clan_Make" filename="C_GE.DDS"/>
+
+	<msprite name="CLANMAKE_1" sx='303' sy='261' ex='303' ey='261' l='0' t='0' r='415' b='243' texture="Clan_Make"/>
+
+	<editbox name="CLANNAMEEDIT" l='397' t='312' r='623' b='331' linelimit='1' textlimit='20' TCR='255' TCG='255' TCB='255' TCA='255'/>
+	<editbox name="CLANNOTICE" l='397' t='343' r='678' b='416' linelimit='6' textlimit='200' TCR='255' TCG='255' TCB='255' TCA='255'/>
+  
+	<button name="CLANNAMESEARCH" x='629' y='310' w='76' h='23'>
+		<sprite l='416' t='0' r='492' b='23' texture="Clan_Make"/>
+		<sprite l='416' t='24' r='492' b='47' texture="Clan_Make"/>
+		<sprite l='416' t='48' r='492' b='71' texture="Clan_Make"/>
+	</button>
+	
+	<button name="OK" x='623' y='437' w='84' h='28'>
+		<sprite l="777" t="881" r="861" b="909" texture="UI_Button" />
+		<sprite l="777" t="910" r="861" b="938" texture="UI_Button" />
+		<sprite l="777" t="939" r="861" b="967" texture="UI_Button" />
+	</button>
+
+	<button name="CANCEL" x='623' y='467' w='84' h='28'>
+		<sprite l="777" t="794" r="861" b="822" texture="UI_Button" />
+		<sprite l="777" t="823" r="861" b="851" texture="UI_Button" />
+		<sprite l="777" t="852" r="861" b="880" texture="UI_Button" />
+	</button>
+
+
+</UIDEFINE>

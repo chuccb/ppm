@@ -1,0 +1,8 @@
+<MAP>
+	<INDEX index="1" modeIndex="0" modeStartIndex="5" modeName="TeamDeath" />
+	<INDEX index="2" modeIndex="1" modeStartIndex="1" modeName="FreeForAll" />
+	<INDEX index="3" modeIndex="2" modeStartIndex="14" modeName="TeamHacking" />
+	<INDEX index="4" modeIndex="3" modeStartIndex="15" modeName="TeamSurvival" />
+	<INDEX index="5" modeIndex="4" modeStartIndex="23" modeName="TeamSteal" />
+	<INDEX index="6" modeIndex="8" modeStartIndex="51" modeName="PNR" />
+</MAP>

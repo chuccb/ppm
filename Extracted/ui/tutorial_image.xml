@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TUTORIALDEFINE>
+   <image name="TUT_CONTINUE" filename="tutorial_continue.dds"/>
+   <image name="TUT_FINISH" filename="tutorial_finish.dds"/>
+   <image name="TUT_COMPLETE" filename="tutorial_complete.dds"/>
+   <image name="TUT_MESSAGE" filename="tutorial_message.dds"/>
+   <image name="TUTO_BACK" filename="TUTO_BACK.DDS" />
+   <image name="TUTO_T_1" filename="tu_t_1.DDS" />
+   <image name="TUTO_T_2" filename="tu_t_2.DDS" />
+   <image name="TUTO_OPENNING" filename="tutorial_openning.dds"/>
+  
+   <msprite name="TUTO_BACK" sx='0' sy='0' ex='0' ey='0' l='0' t='0' r='1024' b='768' texture="TUTO_BACK"/>
+   <msprite name="FINISH_TOP" sx="0" sy="0" ex="0" ey="0" l="0" t="0" r="1024" b="138" texture="TUT_FINISH"/>
+   <msprite name="FINISH_BOTTOM" sx="0" sy="630" ex="0" ey="630" l="0" t="139" r="1025" b="277" texture="TUT_FINISH"/>
+  
+   <msprite name="FINISH_ATTACK_NAME" sx="41" sy="10" ex="41" ey="10" l="1" t="278" r="144" b="295" texture="TUT_FINISH"/>
+   <msprite name="FINISH_MOVE_NAME" sx="41" sy="10" ex="41" ey="10" l="1" t="296" r="144" b="313" texture="TUT_FINISH"/>
+   <msprite name="FINISH_MAIN_WEAPON" sx="41" sy="72" ex="41" ey="72" l="145" t="278" r="310" b="307" texture="TUT_FINISH"/>
+   <msprite name="FINISH_SUB_WEAPON" sx="41" sy="72" ex="41" ey="72" l="145" t="308" r="310" b="337" texture="TUT_FINISH"/>
+   <msprite name="FINISH_NEAR_WEAPON" sx="41" sy="72" ex="41" ey="72" l="145" t="338" r="310" b="367" texture="TUT_FINISH"/>
+   <msprite name="FINISH_BOMB_WEAPON" sx="41" sy="72" ex="41" ey="72" l="145" t="368" r="310" b="397" texture="TUT_FINISH"/>
+   <msprite name="FINISH_SNIPER_WEAPON" sx="41" sy="72" ex="41" ey="72" l="145" t="398" r="310" b="427" texture="TUT_FINISH"/>
+   <msprite name="FINISH_DEF_MOVE" sx="41" sy="72" ex="41" ey="72" l="311" t="368" r="476" b="397" texture="TUT_FINISH"/>
+   <msprite name="FINISH_ONLYWAY_MOVE" sx="41" sy="72" ex="41" ey="72" l="311" t="338" r="476" b="367" texture="TUT_FINISH"/>
+   <msprite name="FINISH_DUCK_MOVE" sx="41" sy="72" ex="41" ey="72" l="311" t="308" r="476" b="337" texture="TUT_FINISH"/>
+   <msprite name="FINISH_JUMP_MOVE" sx="41" sy="72" ex="41" ey="72" l="311" t="278" r="476" b="307" texture="TUT_FINISH"/>
+   <msprite name="FINISH_CLEAR" sx="191" sy="279" ex="191" ey="279" l="1" t="427" r="641" b="606" texture="TUT_FINISH"/>
+   <!--msprite name="FINISH_FAIL" sx="101" sy="340" ex="101" ey="340" l="1" t="608" r="824" b="718" texture="TUT_FINISH"/-->
+   <!--msprite name="COMPLETE_MESSAGE" sx="264" sy="175" ex="264" ey="175" l="1" t="1" r="433" b="382" texture="TUT_COMPLETE"/>
+   <msprite name="COMPLETE_ATTACK" sx="287" sy="184" ex="287" ey="184" l="236" t="383" r="423" b="400" texture="TUT_COMPLETE"/>
+   <msprite name="COMPLETE_MOVE" sx="287" sy="184" ex="287" ey="184" l="236" t="401" r="423" b="718" texture="TUT_COMPLETE"/-->
+   <msprite name="TUTO_OPENNING" sx="0" sy="0" ex="0" ey="0" l="0" t="0" r="1024" b="768" texture="TUTO_OPENNING"/>
+   <msprite name="COMPLETE_GIVE_ITEM_1" sx="274" sy="624" ex="274" ey="604" l="1" t="439" r="235" b="513" texture="TUT_COMPLETE"/>
+   <msprite name="COMPLETE_GIVE_ITEM_2" sx="274" sy="604" ex="274" ey="604" l="1" t="514" r="235" b="588" texture="TUT_COMPLETE"/>
+   <!--msprite name="COMPLETE_CHAR" sx="647" sy="85" ex="647" ey="85" l="434" t="1" r="751" b="531" texture="TUT_COMPLETE"/-->
+  
+  <button name="2_NEXT" x='360' y='625' w='77' h='34'>
+      <sprite l="1" t="383" r="78" b="417" texture="TUT_COMPLETE"/>
+      <sprite l="79" t="383" r="156" b="417" texture="TUT_COMPLETE"/>
+      <sprite l="157" t="383" r="234" b="417" texture="TUT_COMPLETE"/>
+   </button>
+   <button name="2_GET" x="405" y="653" w="77" h="34">
+      <sprite l="1" t="418" r="50" b="438" texture="TUT_COMPLETE"/>
+      <sprite l="51" t="418" r="100" b="438" texture="TUT_COMPLETE"/>
+      <sprite l="101" t="418" r="150" b="438" texture="TUT_COMPLETE"/>
+   </button>
+ 
+   <!--msprite name="MESSAGE_MSG" sx="227" sy="164" ex="227" ey="164" l="1" t="1" r="472" b="427" texture="TUT_MESSAGE"/>
+   <msprite name="MESSAGE_DEF_MOV" sx="437" sy="170" ex="437" ey="170" l="473" t="1" r="588" b="20" texture="TUT_MESSAGE"/>
+   <msprite name="MESSAGE_ONLYWAY_MOVE" sx="437" sy="170" ex="437" ey="170" l="473" t="21" r="588" b="40" texture="TUT_MESSAGE"/>
+   <msprite name="MESSAGE_DUCK_MOVE" sx="437" sy="170" ex="437" ey="170" l="473" t="41" r="588" b="60" texture="TUT_MESSAGE"/>
+   <msprite name="MESSAGE_JUMP_MOVE" sx="437" sy="170" ex="437" ey="170" l="473" t="61" r="588" b="80" texture="TUT_MESSAGE"/>
+   <msprite name="MESSAGE_MAIN_ATTACK" sx="437" sy="170" ex="437" ey="170" l="473" t="81" r="588" b="100" texture="TUT_MESSAGE"/>
+   <msprite name="MESSAGE_SUB_ATTACK" sx="437" sy="170" ex="437" ey="170" l="473" t="101" r="588" b="120" texture="TUT_MESSAGE"/>
+   <msprite name="MESSAGE_NEAR_ATTACK" sx="437" sy="170" ex="437" ey="170" l="473" t="121" r="588" b="140" texture="TUT_MESSAGE"/>
+   <msprite name="MESSAGE_BOMB_ATTACK" sx="437" sy="170" ex="437" ey="170" l="473" t="141" r="588" b="160" texture="TUT_MESSAGE"/>
+   <msprite name="MESSAGE_SNIPER_ATTACK" sx="437" sy="170" ex="437" ey="170" l="473" t="161" r="588" b="180" texture="TUT_MESSAGE"/-->
+   <!--msprite name="MESSAGE_CHAR_1" sx="4" sy="8" ex="4" ey="8" l="473" t="181" r="870" b="808" texture="TUT_MESSAGE"/-->
+   <!--msprite name="MESSAGE_CHAR_2" sx="7" sy="307" ex="7" ey="307" l="1" t="463" r="459" b="881" texture="TUT_MESSAGE"/-->
+    <msprite name="TUTO_T_1" sx="0" sy="0" ex="0" ey="0" l="0" t="0" r="1024" b="768" texture="TUTO_T_1"/>
+    <msprite name="TUTO_T_2" sx="0" sy="0" ex="0" ey="0" l="0" t="0" r="1024" b="768" texture="TUTO_T_2"/>
+   <button name="3_NEXT" x='360' y='625' w="77" h="34">
+      <sprite l="1" t="428" r="78" b="462" texture="TUT_MESSAGE"/>
+      <sprite l="79" t="428" r="156" b="462" texture="TUT_MESSAGE"/>
+      <sprite l="157" t="428" r="234" b="462" texture="TUT_MESSAGE"/>
+   </button>
+   <button name="3_NEXT_MISSION" x='360' y='625' w="77" h="34">
+      <sprite l="235" t="428" r="312" b="462" texture="TUT_MESSAGE"/>
+      <sprite l="313" t="428" r="390" b="462" texture="TUT_MESSAGE"/>
+      <sprite l="391" t="428" r="468" b="462" texture="TUT_MESSAGE"/>
+   </button>
+   <msprite name="CONTINUE_BACK" sx="315" sy="340" ex="315" ey="340" l="1" t="1" r="434" b="244" texture="TUT_CONTINUE"/>
+   <!--msprite name="CONTINUE_CHAR" sx="208" sy="223" ex="208" ey="223" l="434" t="1" r="614" b="273" texture="TUT_CONTINUE"/-->
+   <button name="CONTINUE_YES" x="556" y="459" w="77" h="34">
+      <sprite l="1" t="245" r="78" b="279" texture="TUT_CONTINUE"/>
+      <sprite l="1" t="280" r="78" b="314" texture="TUT_CONTINUE"/>
+      <sprite l="1" t="315" r="78" b="349" texture="TUT_CONTINUE"/>
+   </button>
+   <button name="CONTINUE_NO" x="637" y="459" w="77" h="34">
+      <sprite l="79" t="245" r="156" b="279" texture="TUT_CONTINUE"/>
+      <sprite l="79" t="280" r="156" b="314" texture="TUT_CONTINUE"/>
+      <sprite l="79" t="315" r="156" b="349" texture="TUT_CONTINUE"/>
+   </button>
+</TUTORIALDEFINE>

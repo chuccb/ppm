@@ -1,0 +1,144 @@
+<UIDEFINE>
+	<image name="Tutorial_Mode_Pulp" filename="pulpnroll.dds"/>
+	<image name="Tutorial_Mode_Occupy" filename="ocuppy_01.dds"/>
+	<image name="Tutorial_Mode_Mode" filename="tuto_mode.dds"/>
+	<image name="Tutorial_Mode_Mode2" filename="tuto_mode2.dds"/>
+	<image name="Tutorial_Mode_Tip" filename="tuto_tip.dds"/>
+
+	
+	<sprite name="TUTO_FAILED_POPUP" x="542" y="526"  w="270" h="262" texture="Tutorial_Mode_Mode"/>	
+
+	<sprite name="CHAPTER_1_TIP" x="271" y="526"  w="270" h="262" texture="Tutorial_Mode_Tip"/>
+	<sprite name="CHAPTER_2_TIP" x="542" y="0"  w="270" h="262" texture="Tutorial_Mode_Tip"/>
+	<sprite name="CHAPTER_3_TIP" x="542" y="263"  w="270" h="262" texture="Tutorial_Mode_Tip"/>
+	<sprite name="CHAPTER_4_TIP" x="542" y="526"  w="270" h="262" texture="Tutorial_Mode_Tip"/>
+	
+	
+	<sprite name="MISSION_SUCCESS" x="0" y="789"  w="272" h="55" texture="Tutorial_Mode_Tip"/>
+	
+
+	<sprite name="MISSION_TAG_1" x="0" y="789" w="270" h="58" texture="Tutorial_Mode_Mode"/>
+	<sprite name="MISSION_TAG_2" x="0" y="848" w="270" h="58" texture="Tutorial_Mode_Mode"/>
+	<sprite name="MISSION_TAG_3" x="271" y="789" w="270" h="58" texture="Tutorial_Mode_Mode"/>
+	<sprite name="MISSION_TAG_4" x="271" y="848" w="270" h="58" texture="Tutorial_Mode_Mode"/>
+	<sprite name="MISSION_TAG_5" x="542" y="789" w="270" h="58" texture="Tutorial_Mode_Mode"/>
+	<sprite name="MISSION_TAG_6" x="542" y="848" w="270" h="58" texture="Tutorial_Mode_Mode"/>
+
+	
+	
+	<sprite name="MISSION_1_1" x="0" y="0"  w="270" h="262" texture="Tutorial_Mode_Mode"/>
+	<sprite name="MISSION_1_2" x="0" y="263"  w="270" h="262" texture="Tutorial_Mode_Mode"/>
+	<sprite name="MISSION_1_CLEAR" x="0" y="526"  w="270" h="262" texture="Tutorial_Mode_Mode"/>
+
+	<sprite name="MISSION_2_1" x="271" y="0"  w="270" h="262" texture="Tutorial_Mode_Mode"/>
+	<sprite name="MISSION_2_CLEAR" x="271" y="263"  w="270" h="262" texture="Tutorial_Mode_Mode"/>
+
+	<sprite name="MISSION_3_1" x="271" y="526"  w="270" h="262" texture="Tutorial_Mode_Mode"/>
+	<sprite name="MISSION_3_2" x="542" y="0"  w="270" h="262" texture="Tutorial_Mode_Mode"/>
+	<sprite name="MISSION_3_CLEAR" x="542" y="263"  w="270" h="262" texture="Tutorial_Mode_Mode"/>
+
+	<sprite name="MISSION_4_1" x="0" y="0"  w="270" h="262" texture="Tutorial_Mode_Mode2"/>
+	<sprite name="MISSION_4_2" x="0" y="263"  w="270" h="262" texture="Tutorial_Mode_Mode2"/>
+	<sprite name="MISSION_4_CLEAR" x="0" y="526"  w="270" h="262" texture="Tutorial_Mode_Mode2"/>
+	
+	<sprite name="MISSION_5_1" x="271" y="0"  w="270" h="262" texture="Tutorial_Mode_Mode2"/>
+	<sprite name="MISSION_5_2" x="271" y="263"  w="270" h="262" texture="Tutorial_Mode_Mode2"/>
+	<sprite name="MISSION_5_CLEAR" x="271" y="526"  w="270" h="262" texture="Tutorial_Mode_Mode2"/>
+
+	<sprite name="MISSION_6_1" x="542" y="0"  w="270" h="262" texture="Tutorial_Mode_Mode2"/>
+	<sprite name="MISSION_6_2" x="542" y="263"  w="270" h="262" texture="Tutorial_Mode_Mode2"/>
+	<sprite name="MISSION_6_CLEAR" x="542" y="526"  w="270" h="262" texture="Tutorial_Mode_Mode2"/>
+
+
+
+
+	
+	<sprite name="PULPnROLL_ROUND_STATUS" x='251' y='1' w='272' h='54' texture="Tutorial_Mode_Pulp"/>
+
+	
+	<sprite name="ROUND_STATUS_HIGHLIGHT" x='106' y='324' w='82' h='52' texture="Tutorial_Mode_Pulp"/>
+
+	<sprite name="PULP_STATE_A_ICON" x='1' y='200' w='26' h='25' texture="Tutorial_Mode_Pulp"/>
+	<sprite name="PULP_STATE_B_ICON" x='28' y='200' w='26' h='25' texture="Tutorial_Mode_Pulp"/>
+
+	<sprite name="PULP_DESTROYING_IMAGE" x='0' y='320' w='93' h='70' texture="Tutorial_Mode_Pulp"/>
+
+	<sprite name="PULP_DESTROYING_BG" x='2' y='1000' w='312' h='18' texture="Tutorial_Mode_Pulp"/>
+
+	<sprite name="PULP_DESTROYING_SLICE" x='315' y='1000' w='6' h='16' texture="Tutorial_Mode_Pulp"/>
+
+	<sprite name="PULP_DESTROYING_IMAGE" x='0' y='320' w='93' h='70' texture="Tutorial_Mode_Pulp"/>
+	
+	<sprite name="PULPnROLL_TIME_LIMIT_A" x='60' y='210' w='188' h='54' texture="Tutorial_Mode_Pulp"/>
+	
+	<sprite name="PULPnROLL_TIME_LIMIT_B" x='60' y='265' w='188' h='54' texture="Tutorial_Mode_Pulp"/>
+
+	
+	<sprite name="PULP_OCCUPY" x='524' y='1' w='285' h='54' texture="Tutorial_Mode_Pulp"/> 
+
+	
+	<sprite name="PULP_DESTROY" x='614' y='231' w='347' h='119' texture="Tutorial_Mode_Pulp"/>
+
+	<sprite name="MAGIC_GUAGE_A_STEP0" x='721' y='689' w='48' h='48' texture="Tutorial_Mode_Pulp"/>
+	<sprite name="MAGIC_GUAGE_B_STEP0" x='721' y='738' w='48' h='48' texture="Tutorial_Mode_Pulp"/>
+
+
+	<sprite name="OFFENST_TEXT" x='1' y='621' w='38' h='19' texture="Tutorial_Mode_Pulp"/>
+	<sprite name="DEFFEXT_TEXT" x='40' y='621' w='38' h='19' texture="Tutorial_Mode_Pulp"/>
+
+
+
+
+	<sprite name="OCCUPY_STATE" x='1' y='1' w='408' h='47' texture="Tutorial_Mode_Occupy"/> 
+	<sprite name="A_STATE_DEFULT" x='1' y='154' w='55' h='58' texture="Tutorial_Mode_Occupy"/>
+	<sprite name="A_STATE_SELECT" x='1 ' y='95' w='55' h='58' texture="Tutorial_Mode_Occupy"/>
+	<sprite name="B_STATE_DEFULT" x='1' y='272' w='55' h='58' texture="Tutorial_Mode_Occupy"/>
+	<sprite name="B_STATE_SELECT" x='1 ' y='213' w='55' h='58' texture="Tutorial_Mode_Occupy"/>
+
+	<sprite name="FLAG_IMG_A" x='637' y='567' w='38' h='42' texture="Tutorial_Mode_Occupy"/>
+	<sprite name="SHIELD_IMG_A" x='677' y='567' w='38' h='42' texture="Tutorial_Mode_Occupy"/>
+	<sprite name="FLAG_IMG_B" x='637' y='610' w='38' h='42' texture="Tutorial_Mode_Occupy"/>
+	<sprite name="SHIELD_IMG_B" x='677' y='610' w='38' h='42' texture="Tutorial_Mode_Occupy"/>
+	<sprite name="1ROUND" x='3 ' y='50' w='52' h='14' texture="Tutorial_Mode_Occupy"/>
+
+	<sprite name="OCUPPY_GAUGE_BACK" x='1' y='344' w='403' h='43' texture="Tutorial_Mode_Occupy"/>
+
+	<sprite name="OCUPPY_GAUGE" x='57' y='432' w='347' h='43' texture="Tutorial_Mode_Occupy"/>
+
+	<sprite name="A_A_ICON" x='84' y='50' w='26' h='26' texture="Tutorial_Mode_Occupy"/>
+	<sprite name="A_B_ICON" x='111' y='50' w='26' h='26' texture="Tutorial_Mode_Occupy"/>
+	<sprite name="A_C_ICON" x='138' y='50' w='26' h='26' texture="Tutorial_Mode_Occupy"/>
+
+	<sprite name="B_A_ICON" x='84' y='77' w='26' h='26' texture="Tutorial_Mode_Occupy"/>
+	<sprite name="B_B_ICON" x='111' y='77' w='26' h='26' texture="Tutorial_Mode_Occupy"/>
+	<sprite name="B_C_ICON" x='138' y='77' w='26' h='26' texture="Tutorial_Mode_Occupy"/>
+
+
+	<sprite name="OCUPPY_IMAGE_A" x='445' y='567' w='95' h='96' texture="Tutorial_Mode_Occupy"/>
+
+	<sprite name="OCUPPY_IMAGE_B" x='541' y='567' w='95' h='96' texture="Tutorial_Mode_Occupy"/>
+
+	<sprite name="OCUPPY_IMAGE_AB" x='541' y='664' w='95' h='96' texture="Tutorial_Mode_Occupy"/>
+
+	<sprite name="OCUPPY_IMAGE" x='810' y='147' w='95' h='96' texture="Tutorial_Mode_Occupy"/>
+
+
+	<sprite name="A_OCUPPY_TEXT" x='608' y='370' w='202' h='20' texture="Tutorial_Mode_Occupy"/>
+
+	<sprite name="B_OCUPPY_TEXT" x='608' y='391' w='202' h='20' texture="Tutorial_Mode_Occupy"/>
+
+	<sprite name="AB_OCUPPY_TEXT" x='410' y='1' w='229' h='50' texture="Tutorial_Mode_Occupy"/>
+
+	<sprite name="C_OCUPPY_TEXT" x='608' y='412' w='202' h='20' texture="Tutorial_Mode_Occupy"/>
+
+	<sprite name="RESPAWN_IMAGE" x='810' y='244' w='95' h='96' texture="Tutorial_Mode_Occupy"/>
+	<sprite name="STATE_WINDOW" x='57' y='104' w='347' h='119' texture="Tutorial_Mode_Occupy"/> 
+
+	<sprite name="OCUPPY_SUCESS_TEXT" x='445' y='433' w='404' h='66' texture="Tutorial_Mode_Occupy"/>
+	<sprite name="CENTER_WINDOW" x='0' y='886' w='1024' h='138' texture="Tutorial_Mode_Occupy"/>	
+
+	<sprite name="NOTICE_WINDOW" x='57' y='224' w='347' h='119' texture="Tutorial_Mode_Occupy"/>
+	<sprite name="E_OCUPPY_TEXT" x='640' y='1' w='210' h='96' texture="Tutorial_Mode_Occupy"/>
+	<sprite name="OCUPPY_FLAG" x='851' y='1' w='95' h='96' texture="Tutorial_Mode_Occupy"/>
+
+</UIDEFINE>

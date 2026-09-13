@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TUTORIALDEFINE>
+
+  <AirBomb ReferenceWeapon="AIR_BOMB"/><!--0-->
+  <LPG ReferenceWeapon="HE_BOMB"/><!--1-->
+  <Barrel ReferenceWeapon="FIRE_BOMB"/><!--2-->
+  <StreetLamp ReferenceWeapon="FLASH_BOMB"/><!--3-->
+  <Smoke ReferenceWeapon="steam_bomb"/><!--4-->
+  <Heal ReferenceWeapon="Hill_BOMB"/><!--5-->
+  <water ReferenceWeapon="Liquid_Bomb"/><!--6-->
+</TUTORIALDEFINE>

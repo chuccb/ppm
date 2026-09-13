@@ -1,0 +1,237 @@
+<UIDEFINE>
+  
+  <image name="Observer_01" filename="Observer_01.dds"/>
+  
+	<sprite name="KillStatus" w='112' h='62' x='16' y='0' texture="Observer_01"/>
+	<sprite name="RoundStatus" w='112' h='62' x='129' y='0' texture="Observer_01"/>
+	<sprite name="TeamBlueMainPanel" w='234' h='76' x='0' y='63' texture="Observer_01"/>
+	<sprite name="TeamRedMainPanel" w='234' h='76' x='0' y='140' texture="Observer_01"/>
+	<sprite name="TeamBlueMemberPanel" w='168' h='46' x='242' y='0' texture="Observer_01"/>
+	<sprite name="TeamRedMemberPanel" w='168' h='46' x='242' y='47' texture="Observer_01"/>
+	<sprite name="DeadMemberPanel" w='168' h='46' x='242' y='94' texture="Observer_01"/>
+
+	<sprites name="HealthStatusOb" w='64' h='8'>
+		<element x='307' y='177' texture="Observer_01"/>
+		<element x='307' y='168' texture="Observer_01"/>
+		<element x='307' y='159' texture="Observer_01"/>
+		<element x='307' y='150' texture="Observer_01"/>
+		<element x='307' y='141' texture="Observer_01"/>
+		<element x='242' y='177' texture="Observer_01"/>
+		<element x='242' y='168' texture="Observer_01"/>
+		<element x='242' y='159' texture="Observer_01"/>
+		<element x='242' y='150' texture="Observer_01"/>
+		<element x='242' y='141' texture="Observer_01"/>
+	</sprites>
+
+	<sprites name="PaperFaceLive" w='32' h='32'>
+		<element x='1' y='223' texture="Observer_01"/>
+		<element x='1' y='256' texture="Observer_01"/>
+		<element x='1' y='289' texture="Observer_01"/>
+		<element x='1' y='322' texture="Observer_01"/>
+		<element x='1' y='355' texture="Observer_01"/>
+
+		<element x='67' y='223' texture="Observer_01"/>
+		<element x='67' y='256' texture="Observer_01"/>
+		<element x='67' y='289' texture="Observer_01"/>
+		<element x='67' y='322' texture="Observer_01"/>
+		<element x='67' y='355' texture="Observer_01"/>
+		<element x='86' y='391' texture="Observer_01"/>
+		<element x='1' y='492' texture="Observer_01"/>
+		<element x='1' y='591' texture="Observer_01"/> 
+		<element x='1' y='624' texture="Observer_01"/>
+		<element x='1' y='656' texture="Observer_01"/>
+	</sprites>
+
+	<sprites name="PaperFaceDead" w='32' h='32'> 
+		<element x='34' y='223' texture="Observer_01"/>
+		<element x='34' y='256' texture="Observer_01"/>
+		<element x='34' y='289' texture="Observer_01"/>
+		<element x='34' y='322' texture="Observer_01"/>
+		<element x='34' y='355' texture="Observer_01"/>
+
+		<element x='100' y='223' texture="Observer_01"/>
+		<element x='100' y='256' texture="Observer_01"/>
+		<element x='100' y='289' texture="Observer_01"/>
+		<element x='100' y='322' texture="Observer_01"/>
+		<element x='100' y='355' texture="Observer_01"/>
+		<element x='119' y='391' texture="Observer_01"/> 
+		<element x='34' y='492' texture="Observer_01"/>  
+		<element x='34' y='591' texture="Observer_01"/>  
+		<element x='34' y='624' texture="Observer_01"/>
+		<element x='34' y='656' texture="Observer_01"/>
+
+	</sprites>
+
+	
+	<sprite name="PULP_DEAD_FACE1" x='34' y='223' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_DEAD_FACE2" x='34' y='256' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_DEAD_FACE3" x='34' y='289' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_DEAD_FACE4" x='34' y='322' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_DEAD_FACE5" x='34' y='355' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_DEAD_FACE6" x='100' y='223' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_DEAD_FACE7" x='100' y='256' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_DEAD_FACE8" x='100' y='289' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_DEAD_FACE9" x='100' y='322' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_DEAD_FACE10" x='100' y='355' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_DEAD_FACE11" x='119' y='391' w='32' h='32' texture="Observer_01"/> 
+	<sprite name="PULP_DEAD_FACE12" x='34' y='492' w='32' h='32' texture="Observer_01"/>  
+  	<sprite name="PULP_DEAD_FACE13" x='34' y='591' w='32' h='32' texture="Observer_01"/>  
+	<sprite name="PULP_DEAD_FACE14" x='34' y='624' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_DEAD_FACE15" x='34' y='656' w='32' h='32' texture="Observer_01"/>
+
+	
+	<sprite name="PULP_MyTeam_Face1" x='265' y='223' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_MyTeam_Face2" x='265' y='256' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_MyTeam_Face3" x='265' y='289' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_MyTeam_Face4" x='265' y='322' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_MyTeam_Face5" x='265' y='355' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_MyTeam_Face6" x='331' y='223' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_MyTeam_Face7" x='331' y='256' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_MyTeam_Face8" x='331' y='289' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_MyTeam_Face9" x='331' y='322' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_MyTeam_Face10" x='331' y='355' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_MyTeam_Face11" x='218' y='391' w='32' h='32' texture="Observer_01"/> 
+	<sprite name="PULP_MyTeam_Face12" x='133' y='492' w='32' h='32' texture="Observer_01"/> 
+	<sprite name="PULP_MyTeam_Face13" x='133' y='591' w='32' h='32' texture="Observer_01"/> 
+	<sprite name="PULP_MyTeam_Face14" x='133' y='624' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_MyTeam_Face15" x='133' y='656' w='32' h='32' texture="Observer_01"/>
+
+	
+	<sprite name="PULP_MyTeam_Dead1" x='298' y='223' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_MyTeam_Dead2" x='298' y='256' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_MyTeam_Dead3" x='298' y='289' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_MyTeam_Dead4" x='298' y='322' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_MyTeam_Dead5" x='298' y='355' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_MyTeam_Dead6" x='364' y='223' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_MyTeam_Dead7" x='364' y='256' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_MyTeam_Dead8" x='364' y='289' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_MyTeam_Dead9" x='364' y='322' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_MyTeam_Dead10" x='364' y='355' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_MyTeam_Dead11" x='251' y='391' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_MyTeam_Dead12" x='166' y='492' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_MyTeam_Dead13" x='166' y='591' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_MyTeam_Dead14" x='166' y='624' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_MyTeam_Dead15" x='166' y='656' w='32' h='32' texture="Observer_01"/>
+
+
+	
+	<sprite name="PULP_Enemy_Face1" x='133' y='223' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_Enemy_Face2" x='133' y='256' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_Enemy_Face3" x='133' y='289' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_Enemy_Face4" x='133' y='322' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_Enemy_Face5" x='133' y='355' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_Enemy_Face6" x='199' y='223' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_Enemy_Face7" x='199' y='256' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_Enemy_Face8" x='199' y='289' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_Enemy_Face9" x='199' y='322' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_Enemy_Face10" x='199' y='355' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_Enemy_Face11" x='152' y='391' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_Enemy_Face12" x='67' y='492' w='32' h='32' texture="Observer_01"/> 
+	<sprite name="PULP_Enemy_Face13" x='67' y='591' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_Enemy_Face14" x='67' y='624' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_Enemy_Face15" x='67' y='656' w='32' h='32' texture="Observer_01"/>
+
+	
+	<sprite name="PULP_Enemy_Dead1" x='166' y='223' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_Enemy_Dead2" x='166' y='256' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_Enemy_Dead3" x='166' y='289' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_Enemy_Dead4" x='166' y='322' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_Enemy_Dead5" x='166' y='355' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_Enemy_Dead6" x='232' y='223' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_Enemy_Dead7" x='232' y='256' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_Enemy_Dead8" x='232' y='289' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_Enemy_Dead9" x='232' y='322' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_Enemy_Dead10" x='232' y='355' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_Enemy_Dead11" x='185' y='391' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_Enemy_Dead12" x='100' y='492' w='32' h='32' texture="Observer_01"/> 
+	<sprite name="PULP_Enemy_Dead13" x='100' y='591' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_Enemy_Dead14" x='100' y='624' w='32' h='32' texture="Observer_01"/>
+	<sprite name="PULP_Enemy_Dead15" x='100' y='656' w='32' h='32' texture="Observer_01"/>
+
+	
+	<sprite name="OBSERVER_Face1" x='397' y='223' w='30' h='32' texture="Observer_01"/>
+	<sprite name="OBSERVER_Face2" x='397' y='256' w='30' h='32' texture="Observer_01"/>
+	<sprite name="OBSERVER_Face3" x='397' y='289' w='30' h='32' texture="Observer_01"/>
+	<sprite name="OBSERVER_Face4" x='397' y='322' w='30' h='32' texture="Observer_01"/>
+	<sprite name="OBSERVER_Face5" x='397' y='355' w='30' h='32' texture="Observer_01"/>
+	<sprite name="OBSERVER_Face6" x='429' y='223' w='31' h='32' texture="Observer_01"/>
+	<sprite name="OBSERVER_Face7" x='429' y='256' w='31' h='32' texture="Observer_01"/>
+	<sprite name="OBSERVER_Face8" x='429' y='289' w='31' h='32' texture="Observer_01"/>
+	<sprite name="OBSERVER_Face9" x='429' y='322' w='31' h='32' texture="Observer_01"/>
+	<sprite name="OBSERVER_Face10" x='429' y='355' w='31' h='32' texture="Observer_01"/> 
+	<sprite name="OBSERVER_Face11" x='284' y='391' w='32' h='32' texture="Observer_01"/>
+	<sprite name="OBSERVER_Face12" x='199' y='492' w='32' h='32' texture="Observer_01"/> 
+	<sprite name="OBSERVER_Face13" x='199' y='591' w='32' h='32' texture="Observer_01"/>
+	<sprite name="OBSERVER_Face14" x='199' y='624' w='32' h='32' texture="Observer_01"/>
+	<sprite name="OBSERVER_Face15" x='199' y='656' w='32' h='32' texture="Observer_01"/>
+
+
+	<sprite name="BOT_Enemy_Face0" x='199' y='459' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Dead0" x='232' y='459' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Face3" x='199' y='426' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Dead3" x='232' y='426' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Face4" x='67' y='426' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Dead4" x='100' y='426' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Face5" x='133' y='426' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Dead5" x='166' y='426' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Face6" x='1' y='426' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Dead6" x='34' y='426' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Face7" x='1' y='459' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Dead7" x='34' y='459' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Face8" x='133' y='459' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Dead8" x='166' y='459' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Face9" x='67' y='459' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Dead9" x='100' y='459' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Face10" x='265' y='426' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Dead10" x='298' y='426' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Face11" x='265' y='426' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Dead11" x='298' y='426' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Face12" x='265' y='426' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Dead12" x='298' y='426' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Face13" x='265' y='426' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Dead13" x='298' y='426' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Face14" x='265' y='426' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Dead14" x='298' y='426' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Face15" x='265' y='426' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Dead15" x='298' y='426' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Face16" x='265' y='426' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Dead16" x='298' y='426' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Face17" x='397' y='459' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Dead18" x='430' y='459' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Face19" x='265' y='459' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Dead20" x='298' y='459' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Face21" x='331' y='459' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy_Dead22" x='364' y='459' w='32' h='32' texture="Observer_01"/>
+
+	<sprite name="BOT_Enemy2_Face0" x='67' y='558' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy2_Dead0" x='100' y='558' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy2_Face1" x='133' y='525' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy2_Dead1" x='166' y='525' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy2_Face2" x='1' y='525' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy2_Dead2" x='34' y='525' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy2_Face3" x='67' y='525' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy2_Dead3" x='100' y='525' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy2_Face4" x='199' y='558' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy2_Dead4" x='232' y='558' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy2_Face5" x='133' y='558' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy2_Dead5" x='166' y='558' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy2_Face6" x='1' y='558' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy2_Dead6" x='34' y='558' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy2_Face10" x='199' y='525' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy2_Dead10" x='232' y='525' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy2_Face11" x='199' y='525' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy2_Dead11" x='232' y='525' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy2_Face12" x='199' y='525' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy2_Dead12" x='232' y='525' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy2_Face13" x='199' y='525' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy2_Dead13" x='232' y='525' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy2_Face14" x='199' y='525' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy2_Dead14" x='232' y='525' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy2_Face15" x='199' y='525' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy2_Dead15" x='232' y='525' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy2_Face16" x='199' y='525' w='32' h='32' texture="Observer_01"/>
+	<sprite name="BOT_Enemy2_Dead16" x='232' y='525' w='32' h='32' texture="Observer_01"/>
+
+
+
+</UIDEFINE>

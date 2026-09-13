@@ -1,0 +1,153 @@
+<UIDEFINE>
+
+	
+	<msprite name="POPUPBUYDURABLE_81" sx='256' sy='192' ex='256' ey='192' l='0' t='0' r='128' b='34' texture="UI_Popup_1"/>
+	<ssprite name="POPUPBUYDURABLE_1" tl='384' tt='192' tr='752' tb='226' l='130' t='0' r='144' b='34' texture="UI_Popup_1"/>
+	<msprite name="POPUPBUYDURABLE_2" sx='752' sy='192' ex='752' ey='192' l='146' t='0' r='162' b='34' texture="UI_Popup_1"/>
+
+	<msprite name="POPUPBUYDURABLE_3" sx='266' sy='201' ex='266' ey='201' l='351' t='0' r='431' b='18' texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="POPUPBUYDURABLE_4" sx='256' sy='226' ex='256' ey='226' l='0' t='35' r='16' b='51' texture="UI_Popup_1"/>
+  	<ssprite name="POPUPBUYDURABLE_5" tl='272' tt='226' tr='752' tb='242' l='18' t='35' r='32' b='51' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_6" sx='752' sy='226' ex='752' ey='226' l='34' t='35' r='50' b='51' texture="UI_Popup_1"/>
+  	<ssprite name="POPUPBUYDURABLE_7" tl='256' tt='242' tr='272' tb='513' l='0' t='53' r='16' b='67' texture="UI_Popup_1"/>
+  	<ssprite name="POPUPBUYDURABLE_8" tl='272' tt='242' tr='752' tb='513' l='18' t='53' r='32' b='67' texture="UI_Popup_1"/>
+  	<ssprite name="POPUPBUYDURABLE_9" tl='752' tt='242' tr='768' tb='513' l='34' t='53' r='50' b='67' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_10" sx='256' sy='513' ex='256' ey='513' l='0' t='0' r='0' b='0' texture="UI_Popup_1"/>
+  	<ssprite name="POPUPBUYDURABLE_11" tl='272' tt='513' tr='752' tb='529' l='0' t='0' r='0' b='0' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_12" sx='752' sy='513' ex='752' ey='513' l='0' t='0' r='0' b='0' texture="UI_Popup_1"/>
+  
+
+	<msprite name="POPUPBUYDURABLE_13" sx='256' sy='482' ex='256' ey='482' l='51' t='35' r='67' b='82' texture="UI_Popup_1"/>
+	<ssprite name="POPUPBUYDURABLE_14" tl='272' tt='482' tr='752' tb='529' l='69' t='35' r='83' b='82' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_15" sx='752' sy='482' ex='752' ey='482' l='85' t='35' r='101' b='82' texture="UI_Popup_1"/>
+
+  
+  	<msprite name="POPUPBUYDURABLE_16" sx='266' sy='253' ex='266' ey='253' l='102' t='35' r='118' b='59' texture="UI_Popup_1"/>
+  	<ssprite name="POPUPBUYDURABLE_17" tl='282' tt='253' tr='398' tb='277' l='120' t='35' r='134' b='59' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_18" sx='398' sy='253' ex='398' ey='253' l='136' t='35' r='152' b='59' texture="UI_Popup_1"/>
+
+
+  
+  	<msprite name="POPUPBUYDURABLE_19" sx='416' sy='253' ex='416' ey='253' l='102' t='35' r='118' b='59' texture="UI_Popup_1"/>
+  	<ssprite name="POPUPBUYDURABLE_20" tl='432' tt='253' tr='491' tb='277' l='120' t='35' r='134' b='59' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_21" sx='491' sy='253' ex='491' ey='253' l='136' t='35' r='152' b='59' texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="POPUPBUYDURABLE_22" sx='542' sy='253' ex='542' ey='253' l='102' t='35' r='118' b='59' texture="UI_Popup_1"/>
+  	<ssprite name="POPUPBUYDURABLE_23" tl='558' tt='253' tr='585' tb='277' l='120' t='35' r='134' b='59' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_24" sx='585' sy='253' ex='585' ey='253' l='136' t='35' r='152' b='59' texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="POPUPBUYDURABLE_25" sx='636' sy='253' ex='636' ey='253' l='102' t='35' r='118' b='59' texture="UI_Popup_1"/>
+  	<ssprite name="POPUPBUYDURABLE_26" tl='652' tt='253' tr='711' tb='277' l='120' t='35' r='134' b='59' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_27" sx='711' sy='253' ex='711' ey='253' l='136' t='35' r='152' b='59' texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="POPUPBUYDURABLE_28" sx='272' sy='313' ex='272' ey='313' l='0' t='86' r='16' b='106' texture="UI_Popup_1"/>
+  	<ssprite name="POPUPBUYDURABLE_29" tl='288' tt='313' tr='492' tb='333' l='18' t='86' r='32' b='106' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_30" sx='492' sy='313' ex='492' ey='313' l='34' t='86' r='50' b='106' texture="UI_Popup_1"/>
+  	<ssprite name="POPUPBUYDURABLE_31" tl='272' tt='333' tr='288' tb='424' l='0' t='108' r='16' b='122' texture="UI_Popup_1"/>
+  	<ssprite name="POPUPBUYDURABLE_32" tl='288' tt='333' tr='493' tb='424' l='18' t='108' r='32' b='122' texture="UI_Popup_1"/>
+  	<ssprite name="POPUPBUYDURABLE_33" tl='493' tt='333' tr='508' tb='424' l='34' t='108' r='50' b='122' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_34" sx='272' sy='424' ex='272' ey='424' l='0' t='124' r='16' b='140' texture="UI_Popup_1"/>
+  	<ssprite name="POPUPBUYDURABLE_35" tl='288' tt='424' tr='492' tb='440' l='18' t='124' r='32' b='140' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_36" sx='492' sy='424' ex='492' ey='424' l='34' t='124' r='50' b='140' texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="POPUPBUYDURABLE_37" sx='516' sy='313' ex='516' ey='313' l='0' t='86' r='16' b='106' texture="UI_Popup_1"/>
+  	<ssprite name="POPUPBUYDURABLE_38" tl='532' tt='313' tr='736' tb='333' l='18' t='86' r='32' b='106' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_39" sx='736' sy='313' ex='736' ey='313' l='34' t='86' r='50' b='106' texture="UI_Popup_1"/>
+  	<ssprite name="POPUPBUYDURABLE_40" tl='516' tt='333' tr='532' tb='424' l='0' t='108' r='16' b='122' texture="UI_Popup_1"/>
+  	<ssprite name="POPUPBUYDURABLE_41" tl='532' tt='333' tr='736' tb='424' l='18' t='108' r='32' b='122' texture="UI_Popup_1"/>
+  	<ssprite name="POPUPBUYDURABLE_42" tl='736' tt='333' tr='752' tb='424' l='34' t='108' r='50' b='122' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_43" sx='516' sy='424' ex='516' ey='424' l='0' t='124' r='16' b='140' texture="UI_Popup_1"/>
+  	<ssprite name="POPUPBUYDURABLE_44" tl='532' tt='424' tr='736' tb='440' l='18' t='124' r='32' b='140' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_45" sx='736' sy='424' ex='736' ey='424' l='34' t='124' r='50' b='140' texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="POPUPBUYDURABLE_46" sx='368' sy='342' ex='368' ey='342' l='102' t='35' r='118' b='59' texture="UI_Popup_1"/>
+  	<ssprite name="POPUPBUYDURABLE_47" tl='384' tt='342' tr='479' tb='366' l='120' t='35' r='134' b='59' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_48" sx='479' sy='342' ex='479' ey='342' l='136' t='35' r='152' b='59' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_49" sx='368' sy='372' ex='368' ey='372' l='102' t='35' r='118' b='59' texture="UI_Popup_1"/>
+  	<ssprite name="POPUPBUYDURABLE_50" tl='384' tt='372' tr='479' tb='396' l='120' t='35' r='134' b='59' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_51" sx='479' sy='372' ex='479' ey='372' l='136' t='35' r='152' b='59' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_52" sx='368' sy='406' ex='368' ey='406' l='102' t='35' r='118' b='59' texture="UI_Popup_1"/>
+  	<ssprite name="POPUPBUYDURABLE_53" tl='384' tt='406' tr='479' tb='430' l='120' t='35' r='134' b='59' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_54" sx='479' sy='406' ex='479' ey='406' l='136' t='35' r='152' b='59' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_55" sx='612' sy='342' ex='612' ey='342' l='102' t='35' r='118' b='59' texture="UI_Popup_1"/>
+  	<ssprite name="POPUPBUYDURABLE_56" tl='628' tt='342' tr='723' tb='366' l='120' t='35' r='134' b='59' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_57" sx='723' sy='342' ex='723' ey='342' l='136' t='35' r='152' b='59' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_58" sx='612' sy='372' ex='612' ey='372' l='102' t='35' r='118' b='59' texture="UI_Popup_1"/>
+  	<ssprite name="POPUPBUYDURABLE_59" tl='628' tt='372' tr='723' tb='396' l='120' t='35' r='134' b='59' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_60" sx='723' sy='372' ex='723' ey='372' l='136' t='35' r='152' b='59' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_61" sx='612' sy='406' ex='612' ey='406' l='102' t='35' r='118' b='59' texture="UI_Popup_1"/>
+  	<ssprite name="POPUPBUYDURABLE_62" tl='628' tt='406' tr='723' tb='430' l='120' t='35' r='134' b='59' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_63" sx='723' sy='406' ex='723' ey='406' l='136' t='35' r='152' b='59' texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="POPUPBUYDURABLE_64" sx='22' sy='318' ex='282' ey='318' l='432' t='0' r='512' b='12' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_65" sx='526' sy='318' ex='526' ey='318' l='432' t='13' r='512' b='25' texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="POPUPBUYDURABLE_66" sx='320' sy='235' ex='320' ey='235' l='351' t='209' r='399' b='219' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_67" sx='438' sy='235' ex='433' ey='235' l='351' t='854' r='408' b='863' texture="UI_Popup_1"/>
+
+  	
+  	<msprite name="ONLYBUY" sx='551' sy='233' ex='551' ey='233' l='416' t='229' r='458' b='242' texture="UI_Popup_1"/>
+
+  	<msprite name="POPUPBUYDURABLE_68" sx='655' sy='235' ex= '655' ey='235' l='351' t='242' r='399' b='252' texture="UI_Popup_1"/>
+
+  	<msprite name="POPUPBUYDURABLE_69" sx='299' sy='348' ex='299' ey='348' l='351' t='253' r='399' b='263' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_70" sx='299' sy='378' ex='299' ey='378' l='351' t='264' r='399' b='274' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_71" sx='299' sy='412' ex='299' ey='412' l='351' t='275' r='399' b='285' texture="UI_Popup_1"/>
+
+  	<msprite name="POPUPBUYDURABLE_72" sx='540' sy='348' ex='541' ey='348' l='473' t='876' r='530' b='888' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_73" sx='540' sy='378' ex='541' ey='378' l='473' t='890' r='530' b='902' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_74" sx='540' sy='412' ex='541' ey='412' l='473' t='905' r='530' b='916' texture="UI_Popup_1"/>
+
+	<msprite name="POPUPBUYDURABLE_75" sx='473' sy='349' ex='473' ey='349' l='460' t='0' r='479' b='10' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_76" sx='473' sy='379' ex='473' ey='379' l='460' t='0' r='479' b='10' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_77" sx='473' sy='414' ex='473' ey='414' l='460' t='0' r='479' b='10' texture="UI_Popup_1"/>
+
+  	<msprite name="POPUPBUYDURABLE_78" sx='707' sy='349' ex='707' ey='349' l='474' t='14' r='510' b='23' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_79" sx='707' sy='379' ex='707' ey='379' l='474' t='14' r='510' b='23' texture="UI_Popup_1"/>
+  	<msprite name="POPUPBUYDURABLE_80" sx='707' sy='414' ex='707' ey='414' l='474' t='14' r='510' b='23' texture="UI_Popup_1"/>		
+	
+	<button name="OK" x='593' y='496' w="84" h="28">
+		<sprite l='910' t='390' r='994' b='418' texture="UI_Popup_1"/>
+		<sprite l='910' t='419' r='994' b='447' texture="UI_Popup_1"/>
+		<sprite l='910' t='448' r='994' b='476' texture="UI_Popup_1"/>
+	</button>
+	<button name="CANCEL" x='679' y='496' w="84" h="28">
+		<sprite l="85" t="347" r="169" b="375" texture="UI_Button" />
+		<sprite l="85" t="376" r="169" b="404" texture="UI_Button" />
+		<sprite l="85" t="405" r="169" b="433" texture="UI_Button" />
+	</button>
+	
+	<column name="JJOK_HAVE" x='381' y='345' w='90' h='18' color='FF696969' shadow='FFE5E1D4' format='VCENTER RIGHT'/>
+	<column name="JJOK_BUY" x='381' y='375' w='90' h='18' color='FF696969' shadow='FFE5E1D4' format='VCENTER RIGHT'/>
+	<column name="JJOK_REMAIN" x='381' y='409' w='90' h='18' color='FF696969' shadow='FFE5E1D4' format='VCENTER RIGHT'/>
+	
+	<column name="CASH_HAVE" x='617' y='345' w='90' h='18' color='FF696969' shadow='FFE5E1D4' format='VCENTER RIGHT'/>
+	<column name="CASH_BUY" x='617' y='375' w='90' h='18' color='FF696969' shadow='FFE5E1D4' format='VCENTER RIGHT'/>
+	<column name="CASH_REMAIN" x='617' y='409' w='90' h='18' color='FF696969' shadow='FFE5E1D4' format='VCENTER RIGHT'/>
+	<column name="NAME1" x='269' y='256' w='140' h='18' color='FF696969' shadow='FFE5E1D4' format='VCENTER CENTER'/>
+	<column name="KIND1" x='423' y='256' w='79' h='18' color='FF696969' shadow='FFE5E1D4' format='VCENTER CENTER'/>
+	<column name="COST1" x='638' y='256' w='80' h='18' color='FF696969' shadow='FFE5E1D4' format='VCENTER RIGHT'/>	
+	
+	<hscroll name="TIME1" l='542' t='256' r='601' b='273'>
+		<button name="LEFT" x='516' y='253' w='24' h='24'>
+			<sprite l='102' t='60' r='126' b='84' texture="UI_Popup_1"/>
+			<sprite l='102' t='85' r='126' b='109' texture="UI_Popup_1"/>
+			<sprite l='102' t='110' r='126' b='134' texture="UI_Popup_1"/>
+		</button>
+		<button name="RIGHT" x='604' y='253' w='24' h='24'>
+			<sprite l='127' t='60' r='151' b='84' texture="UI_Popup_1"/>
+			<sprite l='127' t='85' r='151' b='109' texture="UI_Popup_1"/>
+			<sprite l='127' t='110' r='151' b='134' texture="UI_Popup_1"/>
+		</button>
+	</hscroll>
+	
+</UIDEFINE>

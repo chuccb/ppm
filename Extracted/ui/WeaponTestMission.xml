@@ -1,0 +1,13 @@
+﻿<UIDEFINE>
+	<image name="weapontest_back" filename="weapontest_back.dds"/>
+
+
+    <msprite name="DEFULT_BACK" sx="0" sy="0" ex="0" ey="0" l="0" t="0" r="1024" b="768" texture="weapontest_back"/>
+
+ 
+	<button name="ENTER" x='277' y='577' w='100' h='44'>
+		<sprite l='1' t='769' r='100' b='813' texture="weapontest_back"/>
+		<sprite l='1' t='814' r='100' b='858' texture="weapontest_back"/>
+		<sprite l='1' t='859' r='100' b='903' texture="weapontest_back"/>
+	</button>
+</UIDEFINE>

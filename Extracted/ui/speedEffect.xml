@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TUTORIALDEFINE>
+  
+  <image name="SPEEDEFFECT_1" filename="speedEffect_001.dds"/>
+  <image name="SPEEDEFFECT_2" filename="speedEffect_002.dds"/>
+  <image name="SPEEDEFFECT_3" filename="speedEffect_003.dds"/>
+
+  <msprite name="seedEffect_1_1" sx='-28' sy='-27' ex='-28' ey='-27' l='0' t='0' r='320' b='240' fscalex='3.375f' fscaley='3.425f' texture="SPEEDEFFECT_1"/>
+  <msprite name="seedEffect_1_2" sx='-28' sy='-27' ex='-28' ey='-27' l='320' t='0' r='640' b='240' fscalex='3.375f' fscaley='3.425f' texture="SPEEDEFFECT_1"/>
+  <msprite name="seedEffect_1_3" sx='-28' sy='-27' ex='-28' ey='-27' l='640' t='0' r='960' b='240' fscalex='3.375f' fscaley='3.425f' texture="SPEEDEFFECT_1"/>
+  <msprite name="seedEffect_1_4" sx='-28' sy='-27' ex='-28' ey='-27' l='0' t='240' r='320' b='480' fscalex='3.375f' fscaley='3.425f' texture="SPEEDEFFECT_1"/>
+  <msprite name="seedEffect_1_5" sx='-28' sy='-27' ex='-28' ey='-27' l='320' t='240' r='640' b='480' fscalex='3.375f' fscaley='3.425f' texture="SPEEDEFFECT_1"/>
+  <msprite name="seedEffect_1_6" sx='-28' sy='-27' ex='-28' ey='-27' l='640' t='240' r='960' b='480' fscalex='3.375f' fscaley='3.425f' texture="SPEEDEFFECT_1"/>
+  <msprite name="seedEffect_1_7" sx='-28' sy='-27' ex='-28' ey='-27' l='0' t='480' r='320' b='720' fscalex='3.375f' fscaley='3.425f' texture="SPEEDEFFECT_1"/>
+  <msprite name="seedEffect_1_8" sx='-28' sy='-27' ex='-28' ey='-27' l='320' t='480' r='640' b='720' fscalex='3.375f' fscaley='3.425f' texture="SPEEDEFFECT_1"/>
+  <msprite name="seedEffect_1_9" sx='-28' sy='-27' ex='-28' ey='-27' l='642' t='480' r='960' b='720' fscalex='3.375f' fscaley='3.425f' texture="SPEEDEFFECT_1"/>
+  <msprite name="seedEffect_1_10" sx='-28' sy='-27' ex='-28' ey='-27' l='0' t='720' r='320' b='960' fscalex='3.375f' fscaley='3.425f' texture="SPEEDEFFECT_1"/>
+
+  <msprite name="seedEffect_2_1" sx='-28' sy='-27' ex='-28' ey='-27' l='0' t='0' r='320' b='240' fscalex='3.375f' fscaley='3.425f' texture="SPEEDEFFECT_2"/>
+  <msprite name="seedEffect_2_2" sx='-28' sy='-27' ex='-28' ey='-27' l='320' t='0' r='640' b='240' fscalex='3.375f' fscaley='3.425f' texture="SPEEDEFFECT_2"/>
+  <msprite name="seedEffect_2_3" sx='-28' sy='-27' ex='-28' ey='-27' l='640' t='0' r='960' b='240' fscalex='3.375f' fscaley='3.425f' texture="SPEEDEFFECT_2"/>
+  <msprite name="seedEffect_2_4" sx='-28' sy='-27' ex='-28' ey='-27' l='0' t='240' r='320' b='480' fscalex='3.375f' fscaley='3.425f' texture="SPEEDEFFECT_2"/>
+  <msprite name="seedEffect_2_5" sx='-28' sy='-27' ex='-28' ey='-27' l='320' t='240' r='640' b='480' fscalex='3.375f' fscaley='3.425f' texture="SPEEDEFFECT_2"/>
+  <msprite name="seedEffect_2_6" sx='-28' sy='-27' ex='-28' ey='-27' l='640' t='240' r='960' b='480' fscalex='3.375f' fscaley='3.425f' texture="SPEEDEFFECT_2"/>
+  <msprite name="seedEffect_2_7" sx='-28' sy='-27' ex='-28' ey='-27' l='0' t='480' r='320' b='720' fscalex='3.375f' fscaley='3.425f' texture="SPEEDEFFECT_2"/>
+  <msprite name="seedEffect_2_8" sx='-28' sy='-27' ex='-28' ey='-27' l='320' t='480' r='640' b='720' fscalex='3.375f' fscaley='3.425f' texture="SPEEDEFFECT_2"/>
+  <msprite name="seedEffect_2_9" sx='-28' sy='-27' ex='-28' ey='-27' l='642' t='480' r='960' b='720' fscalex='3.375f' fscaley='3.425f' texture="SPEEDEFFECT_2"/>
+  <msprite name="seedEffect_2_10" sx='-28' sy='-27' ex='-28' ey='-27' l='0' t='720' r='320' b='960' fscalex='3.375f' fscaley='3.425f' texture="SPEEDEFFECT_2"/>
+
+  <msprite name="seedEffect_3_1" sx='-28' sy='-27' ex='-28' ey='-27' l='0' t='0' r='320' b='240' fscalex='3.375f' fscaley='3.425f' texture="SPEEDEFFECT_3"/>
+  <msprite name="seedEffect_3_2" sx='-28' sy='-27' ex='-28' ey='-27' l='320' t='0' r='640' b='240' fscalex='3.375f' fscaley='3.425f' texture="SPEEDEFFECT_3"/>
+  <msprite name="seedEffect_3_3" sx='-28' sy='-27' ex='-28' ey='-27' l='640' t='0' r='960' b='240' fscalex='3.375f' fscaley='3.425f' texture="SPEEDEFFECT_3"/>
+  <msprite name="seedEffect_3_4" sx='-28' sy='-27' ex='-28' ey='-27' l='0' t='240' r='320' b='480' fscalex='3.375f' fscaley='3.425f' texture="SPEEDEFFECT_3"/>
+  <msprite name="seedEffect_3_5" sx='-28' sy='-27' ex='-28' ey='-27' l='320' t='240' r='640' b='480' fscalex='3.375f' fscaley='3.425f' texture="SPEEDEFFECT_3"/>
+  <msprite name="seedEffect_3_6" sx='-28' sy='-27' ex='-28' ey='-27' l='640' t='240' r='960' b='480' fscalex='3.375f' fscaley='3.425f' texture="SPEEDEFFECT_3"/>
+  <msprite name="seedEffect_3_7" sx='-28' sy='-27' ex='-28' ey='-27' l='0' t='480' r='320' b='720' fscalex='3.375f' fscaley='3.425f' texture="SPEEDEFFECT_3"/>
+  <msprite name="seedEffect_3_8" sx='-28' sy='-27' ex='-28' ey='-27' l='320' t='480' r='640' b='720' fscalex='3.375f' fscaley='3.425f' texture="SPEEDEFFECT_3"/>
+  <msprite name="seedEffect_3_9" sx='-28' sy='-27' ex='-28' ey='-27' l='642' t='480' r='960' b='720' fscalex='3.375f' fscaley='3.425f' texture="SPEEDEFFECT_3"/>
+  <msprite name="seedEffect_3_10" sx='-28' sy='-27' ex='-28' ey='-27' l='0' t='720' r='320' b='960' fscalex='3.375f' fscaley='3.425f' texture="SPEEDEFFECT_3"/>
+
+</TUTORIALDEFINE>

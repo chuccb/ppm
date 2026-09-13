@@ -1,0 +1,36 @@
+<UIDEFINE>
+	<bgmfile filename="bgm/bgm_character.mp3"/>
+	<image name="Clan_Emblem" filename="C_EM.dds"/>
+
+	<msprite name="CLANEMBLEM_1" sx="303" sy="261" ex="303" ey="261" l="0" t="0" r="415" b="203" texture="Clan_Emblem"/>
+	<column name="MAIN_EMBLEM" x="383" y="323"/>
+	<select name="EMBLEMLIST" count="10" OffX="0" OffY="0">
+		
+		<rect l="469" t="318" r="509" b="358"/>
+		<rect l="513" t="318" r="553" b="358"/>
+		<rect l="557" t="318" r="597" b="358"/>
+		<rect l="601" t="318" r="641" b="358"/>
+		<rect l="645" t="318" r="685" b="358"/>
+		
+		<rect l="469" t="362" r="509" b="402"/>
+		<rect l="513" t="362" r="553" b="402"/>
+		<rect l="557" t="362" r="597" b="402"/>
+		<rect l="601" t="362" r="641" b="402"/>
+		<rect l="645" t="362" r="685" b="402"/>
+		
+		<sprite l="415" t="0" r="455" b="40" texture="Clan_Emblem"/>
+		<sprite l="415" t="40" r="455" b="80" texture="Clan_Emblem"/>
+		<!--CLANMARK IMAGE-->
+		<column name="EMBLEM" x="4" y="4" w="32" h="32" shadow="00000001"/>
+	</select>
+	<button name="OK" x="543" y="431" w="77" h="34">
+		<sprite l="777" t="881" r="861" b="909" texture="UI_Button" />
+		<sprite l="777" t="910" r="861" b="938" texture="UI_Button" />
+		<sprite l="777" t="939" r="861" b="967" texture="UI_Button" />
+	</button>
+	<button name="CANCEL" x="629" y="431" w="77" h="34">
+		<sprite l="85" t="347" r="169" b="375" texture="UI_Button" />
+		<sprite l="85" t="376" r="169" b="404" texture="UI_Button" />
+		<sprite l="85" t="405" r="169" b="433" texture="UI_Button" />
+	</button>
+</UIDEFINE>

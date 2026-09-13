@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- edited with XMLSPY v2004 rel. 3 U (http://www.xmlspy.com) by S-->
+<tournamentlistTable>
+	<tournament_32 comment="tournament 32kang." index="0">
+		<state_32 pos_1="110 ,369" pos_2="178 ,369" pos_3="247 ,369" pos_4="315 ,369" pos_5="394 ,369" pos_6="462 ,369" pos_7="530 ,369" pos_8="598 ,369" size="32"/>
+		<state_16 pos_1="146 ,295" pos_2="282 ,295" pos_3="429 ,295" pos_4="565 ,295" size="32"/>
+		<state_8 pos_1="214 ,228" pos_2="497 ,228" size="32"/>
+		<state_4 pos_1="146 ,335" pos_2="282 ,335" pos_3="429 ,335" pos_4="565 ,335" size="32"/>
+		<state_2 pos_1="214 ,258" pos_2="497 ,258" size="32"/>
+		<state_1 pos_1="358 ,173" size="32"/>
+	</tournament_32>
+	<tournament_16 comment="tournament 16kang." index="1">
+		<state_16 pos_1="110 ,369" pos_2="178 ,369" pos_3="247 ,369" pos_4="315 ,369" pos_5="394 ,369" pos_6="462 ,369" pos_7="530 ,369" pos_8="598 ,369" size="32"/>
+		<state_8 pos_1="146 ,295" pos_2="282 ,295" pos_3="429 ,295" pos_4="565 ,295" size="32"/>
+		<state_4 pos_1="214 ,228" pos_2="497 ,228" size="32"/>
+		<state_2 pos_1="188 ,284" pos_2="488 ,284" size="64"/>
+		<state_1 pos_1="339 ,174" size="64"/>
+	</tournament_16>
+	<tournament_8 comment="tournament 8kang." index="2">
+		<state_8 pos_1="110 ,369" pos_2="178 ,369" pos_3="247 ,369" pos_4="315 ,369" pos_5="394 ,369" pos_6="462 ,369" pos_7="530 ,369" pos_8="598 ,369" size="32"/>
+		<state_4 pos_1="146 ,295" pos_2="282 ,295" pos_3="429 ,295" pos_4="565 ,295" size="32"/>
+		<state_2 pos_1="214 ,228" pos_2="497 ,228" size="32"/>
+		<state_1 pos_1="358 ,173" size="32"/>
+	</tournament_8>
+	<tournament_4 comment="tournament 4kang." index="3">
+		<state_4 pos_1="161 ,339" pos_2="290 ,339" pos_3="422 ,339" pos_4="551 ,339" size="32"/>
+		<state_2 pos_1="227 ,248" pos_2="487 ,248" size="32"/>
+		<state_1 pos_1="358 ,173" size="32"/>
+	</tournament_4>
+	<tournament_2 comment="tournament 2kang." index="4">
+		<state_2 pos_1="188 ,284" pos_2="488,284" size="64"/>
+		<state_1 pos_1="339 ,174" size="64"/>
+	</tournament_2>
+	<tournament_1 comment="tournament 1kang." index="5">
+		<state_1 pos_1="339 ,174" size="64"/>
+	</tournament_1>
+</tournamentlistTable>

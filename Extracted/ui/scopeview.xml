@@ -1,0 +1,8 @@
+<UIDEFINE>
+  <image name="SCOPEVIEW" filename="scopeview_000.dds"/>
+
+  
+  <sprite name="SCOPEVIEW_VIEW_001" x='0' y='0' w='17' h='17' texture="SCOPEVIEW"/>
+  <sprite name="SCOPEVIEW_VIEW_002" x='18' y='0' w='128' h='128' texture="SCOPEVIEW"/>  
+  
+</UIDEFINE>

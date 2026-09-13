@@ -1,0 +1,19 @@
+<TUTORIALDEFINE>
+	<NONE speed="1000" mouse="1000" armor="0" time="0" keyboard_reverse="0" mouse_reverse="0" jump="0" duplicate="0"/>
+	<ONE speed="600" mouse="450" armor="3" time="2200" keyboard_reverse="0" mouse_reverse="0" jump="0" duplicate="0"/>
+	<TWO speed="0" mouse="0" armor="0" time="650" keyboard_reverse="0" mouse_reverse="0" jump="0" duplicate="0"/>
+	<THREE speed="400" mouse="400" armor="0" time="3000" keyboard_reverse="0" mouse_reverse="0" jump="0" duplicate="0"/>
+	<FOUR speed="2500" mouse="300" armor="0" time="800" keyboard_reverse="0" mouse_reverse="0" jump="0" duplicate="0"/>
+	<FIVE speed="1000" mouse="850" armor="0" time="1700" keyboard_reverse="1700" mouse_reverse="1700" jump="0" duplicate="0"/>
+        <SIX speed="2500" mouse="300" armor="0" time="700" keyboard_reverse="0" mouse_reverse="0" jump="0" duplicate="0"/>
+        <SEVEN speed="600" mouse="400" armor="0" time="350" keyboard_reverse="0" mouse_reverse="0" jump="0" duplicate="0"/>
+	<EIGHT speed="0" mouse="0" armor="0" time="1000" keyboard_reverse="0" mouse_reverse="0" jump="1000" duplicate="0"/>
+	<NINE speed="700" mouse="1000" armor="0" time="5000" keyboard_reverse="0" mouse_reverse="0" jump="0" duplicate="0"/>
+	<TEN speed="2500" mouse="300" armor="0" time="480" keyboard_reverse="0" mouse_reverse="0" jump="0" duplicate="0"/>
+	<ELEVEN speed="1000" mouse="1000" armor="0" time="2500" keyboard_reverse="0" mouse_reverse="0" jump="0" GunFacilityLimit="1" duplicate="0"/>
+	<TWELVE speed="1000" mouse="1000" armor="0" time="2500" keyboard_reverse="0" mouse_reverse="0" jump="0" GunFacilityLimit="2" duplicate="0"/>
+	<THIRTEEN speed="800" mouse="1000" armor="0" time="3500" keyboard_reverse="0" mouse_reverse="0" jump="0"  duplicate="0"/>
+	<FOURTEEN speed="1600" mouse="800" armor="0" time="2200" keyboard_reverse="0" mouse_reverse="0" jump="0" duplicate="0"/>
+	<FIFTEEN speed="1000" mouse="1000" armor="0" time="3500" keyboard_reverse="0" mouse_reverse="0" jump="0" duplicate="0"/>
+	<SIXTEEN speed="900" mouse="1000" armor="0" time="2200" keyboard_reverse="0" mouse_reverse="0" jump="0" GunFacilityLimit="2" duplicate="0" senser="10000" senser_shadow="100000"/>
+</TUTORIALDEFINE>

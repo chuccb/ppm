@@ -1,0 +1,12 @@
+<UIFONT>
+	<!-- CHINA-->
+	<Font locale_name="CN" font_name="Microsoft YaHei" default_size='17' notice_size='21' small_size='15' large_size='33' font_path="Text_Font.TTF" clan_line='23' lobby_line='12' gameroom_line='9' ingame_line='8' gm_line='30' />
+	<!-- INDONESIA -->
+	<Font locale_name="IN" font_name="Century Gothic" default_size='12' notice_size='18' small_size='15' large_size='30' font_path="GOTHIC.TTF" clan_line='23' lobby_line='12' gameroom_line='9' ingame_line='8' gm_line='30' />
+	<!-- THAILAND -->
+	<Font locale_name="TH" font_name="Arial" default_size='14' notice_size='20' small_size='15' large_size='34' font_path="arial.ttf" clan_line='23' lobby_line='12' gameroom_line='9' ingame_line='8' gm_line='30' />
+	<!-- TAIWAN -->
+	<Font locale_name="TW" font_name="MingLiU" default_size='12' notice_size='18' small_size='15' large_size='30' font_path="mingliu.ttc" clan_line='23' lobby_line='12' gameroom_line='9' ingame_line='8' gm_line='30' />
+	<!-- JAPAN -->
+	<Font locale_name="JP" font_name="MS PGothic" default_size='12' notice_size='18' small_size='15'  large_size='30' font_path="msgothic.ttc" clan_line='23' lobby_line='12' gameroom_line='9' ingame_line='8' gm_line='30' />
+</UIFONT>

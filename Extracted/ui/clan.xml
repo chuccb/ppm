@@ -1,0 +1,293 @@
+﻿<UIDEFINE>
+	<bgmfile filename="bgm/bgm_character.mp3"/>
+	<image name="Clan_Main" filename="C_MAIN.dds"/>
+	<image name="Clan_Sub" filename="C_MENU.dds"/>
+
+	<msprite name="BACKGROUND" sx="0" sy="0" ex="0" ey="0" l="0" t="0" r="1024" b="768" texture="UI_Back1"/>
+	
+	
+	<column name="MAINTITLE" x="560" y="7" w="61" h="11" fontsize="12" color="FFFFFFFF" format="VCENTER CENTER" />
+	<msprite sx="90" sy="0" ex="90" ey="0" l="0" t="557" r="614" b="582" texture="Clan_Main"/>
+	<msprite name="CLAN_NETCAFE" sx="709" sy="0" ex="709" ey="0" l="629" t="999" r="936" b="1024" texture="UI_Button" />
+
+	<button name="STORE" x="9" y="33" w="62" h="68">
+		<sprite l="0" t="0" r="62" b="68" texture="UI_Button" />
+		<sprite l="0" t="69" r="62" b="137" texture="UI_Button" />
+		<sprite l="0" t="138" r="62" b="206" texture="UI_Button" />
+	</button>
+
+	<button name="SHOP" x="9" y="104" w="62" h="68">
+		<sprite l="62" t="0" r="124" b="68" texture="UI_Button" />
+		<sprite l="62" t="69" r="124" b="137" texture="UI_Button" />
+		<sprite l="62" t="138" r="124" b="206" texture="UI_Button" />
+	</button>
+
+	<button name="LOBBY" x="9" y="175" w="62" h="68">
+		<sprite l="560" t="0" r="622" b="68" texture="UI_Button" />
+		<sprite l="560" t="69" r="622" b="137" texture="UI_Button" />
+		<sprite l="560" t="138" r="622" b="206" texture="UI_Button" />
+	</button>
+
+  	<msprite name="CLAN_3" sx="90" sy="362" ex="90" ey="362" l="308" t="435" r="922" b="828" texture="Clan_Sub"/>
+ 
+	<tab name="CLANMAINTAB" count="2">
+		<page name="CLAN_MY_INFOMATION" x="94" y="42" default="true">
+
+			<sprite name="CLAN_4" l="0" t="583" r="83" b="625" texture="Clan_Main"/>
+      			<msprite name="CLAN_5" sx="90" sy="33" ex="90" ey="33" l="0" t="0" r="614" b="324" texture="Clan_Main"/> 
+			<msprite name="APPLICATION" sx="288" sy="150" ex="288" ey="150" l="303" t="696" r="371" b="718" texture="Clan_Main"/>
+ 
+			<button name="NEWClAN" x="460" y="301" w="115" h="46">
+				<sprite l="0" t="627" r="116" b="673" texture="Clan_Main"/>
+				<sprite l="0" t="674" r="116" b="720" texture="Clan_Main"/>
+				<sprite l="0" t="721" r="116" b="767" texture="Clan_Main"/>
+			</button>
+			<button name="SEARCHCLAN" x="579" y="301" w="115" h="46">
+				<sprite l="117" t="627" r="233" b="673" texture="Clan_Main"/>
+				<sprite l="117" t="674" r="233" b="720" texture="Clan_Main"/>
+				<sprite l="117" t="721" r="233" b="767" texture="Clan_Main"/>
+			</button>
+
+			<button name="CLAN_RANK_INFO" x="288" y="102" w="68" h="22">
+				<sprite l="234" t="627" r="302" b="649" texture="Clan_Main"/>
+				<sprite l="234" t="650" r="302" b="672" texture="Clan_Main"/>
+				<sprite l="234" t="673" r="302" b="695" texture="Clan_Main"/>
+			</button>
+
+			<button name="RETRACT" x="288" y="126" w="68" h="22">
+				<sprite l="303" t="627" r="371" b="649" texture="Clan_Main"/>
+				<sprite l="303" t="650" r="371" b="672" texture="Clan_Main"/>
+				<sprite l="303" t="673" r="371" b="695" texture="Clan_Main"/>
+			</button>
+
+
+			<!-- Clan info-->
+			<column name="CLANEMBLEM" x="219" y="104"  w='64' h='64' color="FFFFFFFF" shadow="FF333333"/>
+			<column name="CLANNAME"	  x="217" y="209"  w="228" h="18" fontsize='15' color="ffffffff" format="VCENTER CENTER"/>
+			<column name="CLANMASTER" x="217" y="253"  w="228" h="18" fontsize='15' color="ffffffff" format="VCENTER CENTER"/>
+			<column name="CLANMEMBERS" x="453" y="119"  w="228" h="18" fontsize='15' color="ffffffff" format="VCENTER CENTER"/>
+			<column name="CLANLEVEL"   x="453" y="164"  w="228" h="18" fontsize='15' color="ffffffff" format="VCENTER CENTER"/>
+			<column name="CLANEXP"	   x="453" y="209"  w="228" h="18" fontsize='15' color="ffffffff" format="VCENTER CENTER"/>
+			<column name="CLANSCORE"   x="453" y="253"  w="228" h="18" fontsize='15' color="ffffffff" format="VCENTER CENTER"/>
+		</page>
+
+		<page name="CLAN_ALL_INFOMATION" x="179" y="42" default="true">
+
+			<sprite name="CLAN_8" l="84" t="583" r="167" b="625" texture="Clan_Main"/>
+			<msprite sx="90" sy="33" ex="90" ey="33" l="0" t="0" r="614" b="324" texture="Clan_Main"/>
+			<msprite sx="92" sy="84" ex="92" ey="84" l="0" t="325" r="610" b="534" texture="Clan_Main"/>			
+			
+			<select name="MODES" count='5' OffX='15' OffY='12'>
+				<rect l='115' t='100' r='220' b='120'/>
+				<rect l='221' t='100' r='326' b='120'/>
+				<rect l='327' t='100' r='432' b='120'/>
+				<rect l='433' t='100' r='537' b='120'/>
+				<rect l='539' t='100' r='643' b='120'/>
+
+				<sprite l='0' t='535' r='104' b='555' texture="Clan_Main"/>
+				<sprite l='105' t='535' r='209' b='555' texture="Clan_Main"/>		
+
+				<column name="STATUS" x='250' y='0' w='40' h='24' />
+			</select> 
+
+				<button name="UP" x="646" y="127"  w="23" h="28">
+					<sprite l="258" t="461" r="281" b="489" texture="UI_Button"/>
+					<sprite l="282" t="461" r="305" b="489" texture="UI_Button"/>
+					<sprite l="306" t="461" r="329" b="489" texture="UI_Button"/>
+				</button>
+				<button name="DN" x="646" y="246"  w="23" h="28">
+					<sprite l="258" t="490" r="281" b="518" texture="UI_Button"/>
+					<sprite l="282" t="490" r="305" b="518" texture="UI_Button"/>
+					<sprite l="306" t="490" r="329" b="518" texture="UI_Button"/>
+				</button>
+
+			<button name="NEWClAN" x="460" y="301" w="115" h="46">
+				<sprite l="0" t="627" r="116" b="673" texture="Clan_Main"/>
+				<sprite l="0" t="674" r="116" b="720" texture="Clan_Main"/>
+				<sprite l="0" t="721" r="116" b="767" texture="Clan_Main"/>
+			</button>
+			<button name="SEARCHCLAN" x="579" y="301" w="115" h="46">
+				<sprite l="117" t="627" r="233" b="673" texture="Clan_Main"/>
+				<sprite l="117" t="674" r="233" b="720" texture="Clan_Main"/>
+				<sprite l="117" t="721" r="233" b="767" texture="Clan_Main"/>
+			</button>
+
+    			<sprite name="CLAN_RANK_S" 	l="210" t="534" r="234" b="556" texture="Clan_Main"/>     
+			<sprite name="CLAN_RANK_A" 	l="235" t="534" r="259" b="556" texture="Clan_Main"/>    
+			<sprite name="CLAN_RANK_B" 	l="260" t="534" r="284" b="556" texture="Clan_Main"/>    
+			<sprite name="CLAN_RANK_C"	l="285" t="534" r="309" b="556" texture="Clan_Main"/>     
+			<sprite name="CLAN_RANK_HYPHEN" l="310" t="534" r="334" b="556" texture="Clan_Main"/>    		
+
+			<column name="CLAN_RANK_MARK_1" x="119" y="130" w="24" h="22" color="FFFFFFFF" shadow="FF333333"/>
+			<column name="CLAN_RANK_MARK_2" x="385" y="130" w="24" h="22" color="FFFFFFFF" shadow="FF333333"/>
+			<column name="CLAN_RANK_MARK_3" x="119" y="160" w="24" h="22" color="FFFFFFFF" shadow="FF333333"/>
+			<column name="CLAN_RANK_MARK_4" x="385" y="160" w="24" h="22" color="FFFFFFFF" shadow="FF333333"/>
+			<column name="CLAN_RANK_MARK_5" x="119" y="190" w="24" h="22" color="FFFFFFFF" shadow="FF333333"/>
+			<column name="CLAN_RANK_MARK_6" x="385" y="190" w="24" h="22" color="FFFFFFFF" shadow="FF333333"/>
+			<column name="CLAN_RANK_MARK_7" x="119" y="220" w="24" h="22" color="FFFFFFFF" shadow="FF333333"/>
+			<column name="CLAN_RANK_MARK_8" x="385" y="220" w="24" h="22" color="FFFFFFFF" shadow="FF333333"/>
+			<column name="CLAN_RANK_MARK_9" x="119" y="250" w="24" h="22" color="FFFFFFFF" shadow="FF333333"/>
+			<column name="CLAN_RANK_MARK_10" x="385" y="250" w="24" h="22" color="FFFFFFFF" shadow="FF333333"/>
+
+
+			<column name="CLAN_EMBLEM_MARK_1" x="153" y="127" w="28" h="28" color="FFFFFFFF" shadow="FF333333"/>
+			<column name="CLAN_EMBLEM_MARK_2" x="419" y="127" w="28" h="28" color="FFFFFFFF" shadow="FF333333"/>
+			<column name="CLAN_EMBLEM_MARK_3" x="153" y="157" w="28" h="28" color="FFFFFFFF" shadow="FF333333"/>
+			<column name="CLAN_EMBLEM_MARK_4" x="419" y="157" w="28" h="28" color="FFFFFFFF" shadow="FF333333"/>
+			<column name="CLAN_EMBLEM_MARK_5" x="153" y="187" w="28" h="28" color="FFFFFFFF" shadow="FF333333"/>
+			<column name="CLAN_EMBLEM_MARK_6" x="419" y="187" w="28" h="28" color="FFFFFFFF" shadow="FF333333"/>
+			<column name="CLAN_EMBLEM_MARK_7" x="153" y="217" w="28" h="28" color="FFFFFFFF" shadow="FF333333"/>
+			<column name="CLAN_EMBLEM_MARK_8" x="419" y="217" w="28" h="28" color="FFFFFFFF" shadow="FF333333"/>
+			<column name="CLAN_EMBLEM_MARK_9" x="153" y="250" w="28" h="28" color="FFFFFFFF" shadow="FF333333"/>
+			<column name="CLAN_EMBLEM_MARK_10" x="419" y="250" w="28" h="28" color="FFFFFFFF" shadow="FF333333"/>
+
+			<column name="CLAN_NAME_1" x="183" y="132" w="194" h="18" color="ffffffff" fontsize='15' format="VCENTER CENTER"/>
+			<column name="CLAN_NAME_2" x="449" y="132" w="194" h="18" color="FFFFFFFF" fontsize='15' format="VCENTER CENTER"/>
+			<column name="CLAN_NAME_3" x="183" y="162" w="194" h="18" color="FFFFFFFF" fontsize='15' format="VCENTER CENTER"/>
+			<column name="CLAN_NAME_4" x="449" y="162" w="194" h="18" color="FFFFFFFF" fontsize='15' format="VCENTER CENTER"/>
+			<column name="CLAN_NAME_5" x="183" y="192" w="194" h="18" color="FFFFFFFF" fontsize='15' format="VCENTER CENTER"/>
+			<column name="CLAN_NAME_6" x="449" y="192" w="194" h="18" color="FFFFFFFF" fontsize='15' format="VCENTER CENTER"/>
+			<column name="CLAN_NAME_7" x="183" y="222" w="194" h="18" color="FFFFFFFF" fontsize='15' format="VCENTER CENTER"/>
+			<column name="CLAN_NAME_8" x="449" y="222" w="194" h="18" color="FFFFFFFF" fontsize='15' format="VCENTER CENTER"/>
+			<column name="CLAN_NAME_9" x="183" y="252" w="194" h="18" color="FFFFFFFF" fontsize='15' format="VCENTER CENTER"/>
+			<column name="CLAN_NAME_10" x="449" y="252" w="194" h="18" color="FFFFFFFF" fontsize='15' format="VCENTER CENTER"/>
+		</page>
+	</tab>
+
+	<tab name="CLANMENUTYPE" count="2">
+		<page name="CLANMEMBER" x="709" y="33" default="true">
+			<sprite l="168" t="583" r="251" b="613" texture="Clan_Main"/>
+			<msprite sx="709" sy="22" ex="709" ey="33" l="615" t="0" r="922" b="722" texture="Clan_Main"/>
+			<listcontrol name="CLANMEMBERLIST" count="24" OffX="0" OffY="0">
+				<rect l="718" t="119" r="1007" b="141"/>
+				<rect l="718" t="143" r="1007" b="165"/>
+				<rect l="718" t="167" r="1007" b="189"/>
+				<rect l="718" t="191" r="1007" b="203"/>
+				<rect l="718" t="215" r="1007" b="237"/>
+				<rect l="718" t="239" r="1007" b="261"/>
+				<rect l="718" t="263" r="1007" b="285"/>
+				<rect l="718" t="287" r="1007" b="309"/>
+
+				<rect l="718" t="311" r="1007" b="333"/>
+				<rect l="718" t="335" r="1007" b="357"/>
+				<rect l="718" t="359" r="1007" b="381"/>
+				<rect l="718" t="383" r="1007" b="405"/>
+				<rect l="718" t="407" r="1007" b="429"/>
+				<rect l="718" t="431" r="1007" b="453"/>
+				<rect l="718" t="455" r="1007" b="477"/>
+				<rect l="718" t="479" r="1007" b="501"/>
+				
+				<rect l="718" t="503" r="1007" b="525"/>
+				<rect l="718" t="527" r="1007" b="549"/>
+				<rect l="718" t="551" r="1007" b="573"/>
+				<rect l="718" t="575" r="1007" b="597"/>
+				<rect l="718" t="599" r="1007" b="621"/>
+				<rect l="718" t="623" r="1007" b="645"/>
+				<rect l="718" t="647" r="1007" b="669"/>
+				<rect l="718" t="671" r="1007" b="693"/>
+				
+				
+				
+				
+				<column name="CLANCLASS" x="4" y="2" w="56" h="18" fontsize="12" color="FFFFFFFF"  format="VCENTER CENTER"/>
+				<column name="NICKNAME" x="71" y="2" w="141" h="18" fontsize="15" color="FFFFFFFF" format="VCENTER CENTER"/>
+				<column name="USERSTATE" x="220" y="2"/>
+				
+				<sprite l="0" t="768" r="289" b="790" texture="Clan_Main"/> 
+				<sprite l="0" t="791" r="289" b="813" texture="Clan_Main"/> 
+				<sprite l="923" t="0" r="990" b="18" texture="Clan_Main"/> 
+				<sprite l="923" t="19" r="990" b="37" texture="Clan_Main"/> 
+				<sprite l="923" t="38" r="990" b="56" texture="Clan_Main"/> 
+        			
+				<eventrect name="SCROLL_RECT" x="718" y="119" w="589" h="574"/>
+
+				<button name="UP" x="988" y="98" w="17" h="17">
+					<sprite l="372" t="147" r="389" b="164" texture="UI_Button" />
+					<sprite l="372" t="165" r="389" b="182" texture="UI_Button" />
+					<sprite l="372" t="183" r="389" b="200" texture="UI_Button" />
+				</button>
+				<button name="DN" x="988" y="697" w="17" h="17">
+					<sprite l="417" t="147" r="434" b="164" texture="UI_Button" />
+					<sprite l="417" t="165" r="434" b="182" texture="UI_Button" />
+					<sprite l="417" t="183" r="434" b="200" texture="UI_Button" />
+				</button>
+			</listcontrol>
+		</page>
+		<page name="CLANMENU" x="793" y="33" default="true">
+			<sprite l="252" t="583" r="335" b="613" texture="Clan_Main"/>
+			<msprite sx="709" sy="33" ex="709" ey="33" l="0" t="0" r="307" b="722" texture="Clan_Sub"/>
+			<button name="CLANNOTICE" x="777" y="155" w="171" h="28">
+				<sprite l="308" t="0" r="479" b="28" texture="Clan_Sub"/>
+				<sprite l="308" t="29" r="479" b="57" texture="Clan_Sub"/>
+				<sprite l="308" t="58" r="479" b="86" texture="Clan_Sub"/>
+			</button>
+			<button name="EMBLEMCHANGE" x="777" y="191" w="171" h="28">
+				<sprite l="308" t="87" r="479" b="115" texture="Clan_Sub"/>
+				<sprite l="308" t="116" r="479" b="144" texture="Clan_Sub"/>
+				<sprite l="308" t="145" r="479" b="173" texture="Clan_Sub"/>
+			</button>
+			<button name="RESERVEMEMBER" x="777" y="227" w="171" h="28">
+				<sprite l="308" t="174" r="479" b="202" texture="Clan_Sub"/>
+				<sprite l="308" t="203" r="479" b="231" texture="Clan_Sub"/>
+				<sprite l="308" t="232" r="479" b="260" texture="Clan_Sub"/>
+			</button>
+			<button name="INTRODUCECHANGE" x="777" y="263" w="171" h="28">
+				<sprite l="308" t="261" r="479" b="289" texture="Clan_Sub"/>
+				<sprite l="308" t="290" r="479" b="318" texture="Clan_Sub"/>
+				<sprite l="308" t="319" r="479" b="347" texture="Clan_Sub"/>
+			</button>
+			<button name="CLANDISBAND" x="777" y="299" w="171" h="28">
+				<sprite l="308" t="348" r="479" b="376" texture="Clan_Sub"/>
+				<sprite l="308" t="377" r="479" b="405" texture="Clan_Sub"/>
+				<sprite l="308" t="406" r="479" b="434" texture="Clan_Sub"/>
+			</button>
+		</page>
+	</tab>
+	<button name="OUTCLAN" x="718" y="697" w="116" h="46">
+		<sprite l="372" t="627" r="488" b="673" texture="Clan_Main"/>
+		<sprite l="372" t="674" r="488" b="720" texture="Clan_Main"/>
+		<sprite l="372" t="721" r="488" b="767" texture="Clan_Main"/>
+	</button>
+
+	<column name="GIFT_ICON" x="4" y="24" w="32" h="33" /> 
+
+	<select name="CHATMODE" count='2' oneVone="1" OffX='0' OffY='0'>
+		<rect l='97' t='368' r='418' b='428'/>
+		<rect l='97' t='423' r='473' b='489'/>
+	 	<sprite l="937" t="409" r="979" b="459" texture="Clan_Main"/>
+	 	<sprite l="979" t="409" r="1021" b="459" texture="Clan_Main"/>
+	 	<sprite l="937" t="460" r="979" b="510" texture="Clan_Main"/>
+	 	<sprite l="979" t="460" r="1021" b="510" texture="Clan_Main"/>
+	</select>
+
+
+	<list name="CLANCHAT" l="158" t="400" r="656" b="708">
+    	<eventrect name="SCROLL_RECT" x="158" y="399" w="498" h="309"/>
+		<button name="UP" x="677" y="404" w="17" h="17">
+			<sprite l="372" t="147" r="389" b="164" texture="UI_Button" />
+			<sprite l="372" t="165" r="389" b="182" texture="UI_Button" />
+			<sprite l="372" t="183" r="389" b="200" texture="UI_Button" />
+		</button>
+		<button name="DN" x="677" y="693" w="17" h="17">
+			<sprite l="417" t="147" r="434" b="164" texture="UI_Button" />
+			<sprite l="417" t="165" r="434" b="182" texture="UI_Button" />
+			<sprite l="417" t="183" r="434" b="200" texture="UI_Button" />
+		</button>
+	</list>
+	
+	<checkbox name="CHAT_CLAN" x="158" y="375" w="13" h="13">
+		<sprite l="0" t="0" r="0" b="0" texture="UI_Button"/>
+		<sprite l="402" t="162" r="415" b="175" texture="UI_Button" />
+	</checkbox>
+
+	<checkbox name="CHAT_WHISPER" x="245" y="375" w="13" h="13">
+		<sprite l="0" t="0" r="0" b="0" texture="UI_Button"/>
+		<sprite l="402" t="162" r="415" b="175" texture="UI_Button" />
+	</checkbox>
+
+	<checkbox name="CHAT_SHOUT" x="305" y="375" w="13" h="13">
+		<sprite l="0" t="0" r="0" b="0" texture="UI_Button"/>
+		<sprite l="402" t="162" r="415" b="175" texture="UI_Button" />
+	</checkbox>
+	
+</UIDEFINE>

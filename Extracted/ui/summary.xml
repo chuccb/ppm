@@ -1,0 +1,360 @@
+﻿<TUTORIALDEFINE>
+	<image name="Summary_Result" filename="Result.dds"/>
+	<image name="Summary_Result_new" filename="ui_radar.dds"/>
+	<image name="Summary_Result_Occupy" filename="Result2.dds"/>
+  
+
+	<!-- team tab -->
+	<!-- tab team a -->
+
+	<msprite name="result_000" sx='15'  sy='142'  ex='15' ey='142'  l='243' t='607' r='599' b='844'  texture="Summary_Result"/>
+  	<msprite name="result_001" sx='15'  sy='379' ex='15'  ey='379' l='600' t='743'  r='956' b='967'  texture="Summary_Result"/>
+  	<msprite name="result_002" sx='15'  sy='603' ex='15'  ey='603' l='600' t='968'   r='956' b='993'  texture="Summary_Result"/>
+	<msprite name="Ateam_MARK_TAB" sx='23'  sy='150' ex='23'  ey='150' l='0' t='17' r='32' b='49' texture="Summary_Result"/>
+  	
+  
+
+  	<!-- tab team b -->
+
+  	<msprite name="result_003" sx='653'  sy='142'  ex='653' ey='142'  l='243' t='607' r='599' b='844'  texture="Summary_Result"/>
+  	<msprite name="result_004" sx='653'  sy='379' ex='653'  ey='379' l='600' t='743'  r='956' b='967'  texture="Summary_Result"/>
+  	<msprite name="result_005" sx='653'  sy='603' ex='653'  ey='603' l='600' t='968'   r='956' b='993'  texture="Summary_Result"/>
+	<msprite name="Bteam_MARK_TAB" sx='661' sy='150' ex='661' ey='150' l='33' t='17' r='65' b='49' texture="Summary_Result"/>
+  
+  	<msprite name="result_SHOT_A_STRIPE" sx='17'  sy='381' ex='17'  ey='381' l='670' t='751'   r='1024' b='777'  texture="Summary_Result_new"/> <!-- 간격 Y+28 -->
+  	<msprite name="result_SHOT_A_PANNEL" sx='371'  sy='264' ex='371'  ey='264' l='925' t='607'   r='1024' b='750'  texture="Summary_Result_new"/>
+ 
+  	<msprite name="result_SHOT_B_STRIPE" sx='653'  sy='379' ex='653'  ey='379' l='670' t='778' r='1024' b='804'  texture="Summary_Result_new"/>
+  	<msprite name="result_SHOT_B_PANNEL" sx='553'  sy='264' ex='553'  ey='264' l='825' t='607' r='924'  b='750'  texture="Summary_Result_new"/>
+ 
+
+  	<!-- solo tab L -->
+
+  	<msprite name="result_006" sx='15'  sy='89'  ex='15'  ey='89'  l='243' t='845' r='599' b='978'  texture="Summary_Result"/>
+  	<msprite name="result_007" sx='15'  sy='222' ex='15'  ey='222' l='600' t='743'  r='956' b='967'  texture="Summary_Result"/>
+  	<msprite name="result_008" sx='15'  sy='446' ex='15'  ey='334' l='600' t='743'  r='956' b='967'  texture="Summary_Result"/>
+  	<msprite name="result_009" sx='15'  sy='670' ex='15'  ey='670' l='600' t='968'   r='956' b='993'  texture="Summary_Result"/>
+
+  	<msprite name="result_SHOT_SOLO_STRIPE" sx='17'  sy='224' ex='17'  ey='224' l='672' t='805' r='1024' b='831'  texture="Summary_Result_new"/> <!-- 간격 Y+28 -->
+  
+
+	<!-- solo tab R -->
+
+  	<msprite name="result_0010" sx='755'  sy='89'  ex='755' ey='89'  l='770' t='0' r='1024' b='606'  texture="Summary_Result_new"/>
+
+
+	
+	<!-- NEW_OCCUPY  tab -->
+	<!-- tab team a -->
+
+	<msprite name="OCCUPY_result_000" sx='15'  sy='142'  ex='15' ey='142'  l='302' t='577' r='658' b='814'  texture="Summary_Result_Occupy"/>
+  	<msprite name="OCCUPY_result_001" sx='15'  sy='379' ex='15'  ey='379' l='600' t='743'  r='956' b='967'  texture="Summary_Result"/>
+  	<msprite name="OCCUPY_result_002" sx='15'  sy='603' ex='15'  ey='603' l='600' t='968'   r='956' b='993'  texture="Summary_Result"/>
+	<msprite name="OCCUPY_Ateam_MARK_TAB" sx='23'  sy='150' ex='23'  ey='150' l='0' t='17' r='32' b='49' texture="Summary_Result"/>
+  	
+  
+
+  	<!-- tab team b -->
+
+  	<msprite name="OCCUPY_result_003" sx='653'  sy='142'  ex='653' ey='142'  l='302' t='577' r='658' b='814'  texture="Summary_Result_Occupy"/>
+  	<msprite name="OCCUPY_result_004" sx='653'  sy='379' ex='653'  ey='379' l='600' t='743'  r='956' b='967'  texture="Summary_Result"/>
+  	<msprite name="OCCUPY_result_005" sx='653'  sy='603' ex='653'  ey='603' l='600' t='968'   r='956' b='993'  texture="Summary_Result"/>
+	<msprite name="OCCUPY_Bteam_MARK_TAB" sx='661' sy='150' ex='661' ey='150' l='33' t='17' r='65' b='49' texture="Summary_Result"/>
+  
+  	<msprite name="OCCUPY_result_SHOT_A_STRIPE" sx='17'  sy='381' ex='17'  ey='381' l='670' t='751'  r='1024' b='777'  texture="Summary_Result_Occupy"/> <!-- 간격 Y+28 -->
+  	<msprite name="OCCUPY_result_SHOT_A_PANNEL" sx='371'  sy='367' ex='371'  ey='367' l='825' t='710'   r='924' b='750'  texture="Summary_Result_Occupy"/>
+ 
+  	<msprite name="OCCUPY_result_SHOT_B_STRIPE" sx='653'  sy='379' ex='653'  ey='379' l='670' t='778'  r='1024' b='804'  texture="Summary_Result_Occupy"/>
+  	<msprite name="OCCUPY_result_SHOT_B_PANNEL" sx='554'  sy='367' ex='554'  ey='367' l='925' t='710'   r='1024'  b='750'  texture="Summary_Result_Occupy"/>
+ 
+  
+
+  	<!-- result -->
+  	<!-- result_team L -->
+
+  	<msprite name="result_011" sx='56' sy='89' ex='56' ey='89' l='600'  t='0' r='1024' b='357'  texture="Summary_Result"/>
+  	<msprite name="result_012" sx='56' sy='446' ex='56' ey='446' l='600'  t='358' r='1024' b='582'  texture="Summary_Result"/>
+  	<msprite name="result_013" sx='56' sy='670' ex='56' ey='670' l='600'  t='583' r='1024' b='608'  texture="Summary_Result"/>
+  
+  	<msprite name="result_STRIPE_TEAM" sx='58'  sy='448' ex='58'  ey='448' l='604' t='832' r='1024' b='858'  texture="Summary_Result_new"/><!-- 간격 Y+28 -->
+	
+
+ 	<!-- result_team R -->
+
+  	<msprite name="result_014" sx='486' sy='89' ex='486' ey='89' l='119'  t='0' r='599' b='606'  texture="Summary_Result"/>
+	<msprite name="result_CLAN_EXP_LV" sx='764' sy='536' ex='754' ey='536' l='60'  t='769' r='242' b='884'  texture="Summary_Result"/>
+	
+
+  	<!-- result_solo L -->
+
+  	<msprite name="result_015" sx='15' sy='89' ex='15' ey='89' l='600'  t='609' r='1024' b='742'  texture="Summary_Result"/>
+  	<msprite name="result_016" sx='15' sy='222' ex='15' ey='222' l='600'  t='358' r='1024' b='582'  texture="Summary_Result"/>
+  	<msprite name="result_017" sx='15' sy='446' ex='15' ey='446' l='600'  t='358' r='1024' b='582'  texture="Summary_Result"/>
+  	<msprite name="result_018" sx='15' sy='670' ex='15' ey='670' l='600'  t='583' r='1024' b='608'  texture="Summary_Result"/>
+	
+  	<msprite name="result_STRIPE_SOLO" sx='17'  sy='224' ex='17'  ey='224' l='604' t='832' r='1024' b='858'  texture="Summary_Result_new"/><!-- 간격 Y+28 -->
+  
+
+  	<!-- result_solo R -->
+
+  	<msprite name="result_019" sx='529' sy='89' ex='529' ey='89' l='119'  t='0' r='599' b='606'  texture="Summary_Result"/>
+ 
+
+
+	
+  	
+  	<!-- NEW_OCCUPY_result -->
+
+  	<msprite name="OCCUPY_result_011" sx='56' sy='89' ex='56' ey='89' l='600'  t='0' r='1024' b='162'  texture="Summary_Result"/>
+  	<msprite name="OCCUPY_result_012" sx='56' sy='251' ex='56' ey='251' l='344'  t='381' r='768' b='576'  texture="Summary_Result_Occupy"/>
+  	<msprite name="OCCUPY_result_013" sx='56' sy='446' ex='56' ey='446' l='600'  t='358' r='1024' b='582'  texture="Summary_Result"/>
+	<msprite name="OCCUPY_result_014" sx='56' sy='670' ex='56' ey='670' l='600'  t='583' r='1024' b='608'  texture="Summary_Result"/>
+  
+  	<msprite name="OCCUPY_result_STRIPE_TEAM" sx='58'  sy='448' ex='58'  ey='448' l='604' t='832' r='1024' b='858'  texture="Summary_Result_Occupy"/><!-- 간격 Y+28 -->
+	
+
+ 	<!-- result_team R -->
+
+  	<msprite name="OCCUPY_result_015" sx='486' sy='89' ex='486' ey='89' l='0'  t='834' r='480' b='1024'  texture="Summary_Result_Occupy"/>
+	<msprite name="OCCUPY_result_016" sx='486' sy='279' ex='486' ey='279' l='119'  t='190' r='599' b='606'  texture="Summary_Result"/>
+	<msprite name="OCCUPY_result_CLAN_EXP_LV" sx='764' sy='536' ex='754' ey='536' l='60'  t='769' r='242' b='884'  texture="Summary_Result"/>
+
+
+
+
+  	<!-- etc -->
+  
+  	<msprite name="Ateam_MARK" sx='64'  sy='98' ex='64'  ey='98' l='0' t='17' r='32' b='49' texture="Summary_Result"/> <!-- 팀전 결과창에서만 사용하도록 변경 -->
+  	<msprite name="Bteam_MARK" sx='64' sy='98' ex='64' ey='98' l='33' t='17' r='65' b='49' texture="Summary_Result"/> <!-- 팀전 결과창에서만 사용하도록 변경 -->
+ 
+  	<msprite name="BackGround_000" sx='0'  sy='0'  ex='0'  ey='0'  l='102' t='0' r='118' b='768' texture="Summary_Result"/> <!-- 64배 -->
+ 
+  	<msprite name="Fanal_TeamRound_1" sx='414' sy='155' ex='414' ey='155' l='1' t='327' r='40' b='357' texture="Summary_Result"/> 
+  	<msprite name="Fanal_TeamRound_2" sx='414' sy='198' ex='414' ey='198' l='1' t='327' r='40' b='357' texture="Summary_Result"/>
+  
+  	<msprite name="Fanal_Teamkill_1"  sx='414' sy='155' ex='414' ey='155' l='1' t='358' r='40' b='388' texture="Summary_Result"/>
+  	<msprite name="Fanal_Teamkill_2"  sx='414' sy='198' ex='414' ey='198' l='1' t='358' r='40' b='388' texture="Summary_Result"/>
+
+  	<msprite name="soccer_goals_1"  sx='414' sy='155' ex='414' ey='155' l='1' t='389' r='40' b='419' texture="Summary_Result"/>
+  	<msprite name="soccer_goals_2"  sx='414' sy='198' ex='414' ey='198' l='1' t='389' r='40' b='419' texture="Summary_Result"/>
+
+	<msprite name="PULPnROLL_RESULT_1" sx='414' sy='155' ex='414' ey='155' l='1' t='762' r='40' b='792' texture="Summary_Result"/>
+	<msprite name="PULPnROLL_RESULT_2" sx='414' sy='198' ex='414' ey='198' l='1' t='762' r='40' b='792' texture="Summary_Result"/>
+
+	<msprite name="StealResult_1" sx='414' sy='155' ex='414' ey='155' l='1' t='731' r='40' b='761' texture="Summary_Result"/>
+	<msprite name="StealResult_2" sx='414' sy='198' ex='414' ey='198' l='1' t='731' r='40' b='761' texture="Summary_Result"/>
+
+
+  	<msprite name="win"  sx='101' sy='98' ex='101' ey='98' l='120' t='607' r='242'  b='640' texture="Summary_Result"/>
+  	<msprite name="lose" sx='101' sy='98' ex='101' ey='98' l='120' t='641' r='242'  b='674' texture="Summary_Result"/>
+  	<msprite name="draw" sx='101' sy='98' ex='101' ey='98' l='120' t='675' r='242'  b='708' texture="Summary_Result"/>
+
+
+  	<!-- tab solo -->
+
+  	<column name="SOLO_RESULT_L_HIGHSCORE_PENDANT" x='66' y='111' w='87' h='87' />
+  	<column name="SOLO_RESULT_L_HIGHSCORE_EMBLEM"  x='188' y='152' w='64' h='64' />
+  	<column name="SOLO_RESULT_L_HIGHSCORE_CLASS"   x='207' y='152' w='16' h='16' />
+  	<column name="SOLO_RESULT_L_HIGHSCORE_TEXT_ID" x='231' y='155' w='107' h='13' format="VTOP CENTER"/>
+  	<column name="SOLO_RESULT_PING"       x='8' y='225' w='0' h='0' />
+  	<column name="SOLO_RESULT_L_HIGHSCORE_KILL"  x='239' y='175' w='60' h='13' fontsize='13' format="VTOP RIGHT"/>
+  	<column name="SOLO_RESULT_L_HIGHSCORE_DEATH" x='279' y='175' w='60' h='13' fontsize='13' format="VTOP LEFT"/>
+
+  	<column name="SOLO_RESULT_L_EMBLEM"  x='24' y='229' w='64' h='64' />
+  	<column name="SOLO_RESULT_L_CLASS"   x='43' y='229' w='16' h='16' /> 
+  	<column name="SOLO_RESULT_L_TEXT_ID"    x='65' y='232' w='102' h='15' format="VTOP CENTER"/>
+  	<column name="SOLO_RESULT_L_TEXT_KILL"  x='175' y='232' w='20' h='15' format="VTOP CENTER"/>
+  	<column name="SOLO_RESULT_L_TEXT_DEATH" x='196' y='232' w='20' h='15' format="VTOP CENTER"/>
+  	<column name="SOLO_RESULT_L_TEXT_DIFF"  x='217' y='232' w='20' h='15' format="VTOP CENTER"/>
+  	<column name="SOLO_RESULT_L_TEXT_ASSIST"  x='257' y='232' w='20' h='15' format="VTOP CENTER"/>
+
+  	<column name="SOLO_RESULT_R_PENDANT"  x='757' y='445' w='250' h='225' />
+  	<column name="SOLO_RESULT_R_MY_EMBLEM" x='778' y='154' w='16' h='16' />
+  	<column name="SOLO_RESULT_R_MY_CLASS" x='797' y='154' w='16' h='16' />
+  	<column name="SOLO_RESULT_R_TEXT_MY_ID" x='783' y='179' w='113' h='13' />
+  	<column name="SOLO_RESULT_R_MY_KILL"  x='786' y='225' w='19' h='26' /> 
+  	<column name="SOLO_RESULT_R_MY_DEATH" x='851' y='225' w='19' h='26' /> 
+  	<column name="SOLO_RESULT_R_HEADSHOT" x='935' y='303' w='0' h='0' />
+  	<column name="SOLO_RESULT_R_HEARTCNT" x='935' y='328' w='0' h='0' />
+  	<column name="SOLO_RESULT_R_CRITICAL" x='935' y='353' w='0' h='0' />
+  	<column name="SOLO_RESULT_R_AIRCOMBO" x='935' y='378' w='0' h='0' />
+  	<column name="SOLO_RESULT_R_ASSIST"   x='935' y='403' w='0' h='0' />
+
+
+	<!-- tab team A -->
+
+  	<column name="TEAM_A_CLAN_EMBLEM"   x='23' y='150' w='32' h='32' /> <!--클랜전에서 tab눌렀을때 클랜마크 표시 위치로만 사용함 -->
+  	<column name="TEAM_RESULT_A_HIGHSCORE_PENDANT" x='34'  y='210' w='143' h='143' />
+  	<column name="TEAM_RESULT_A_HIGHSCORE_EMBLEM"  x='188' y='209' w='16'  h='16' />
+  	<column name="TEAM_RESULT_A_HIGHSCORE_CLASS"   x='207' y='209' w='16'  h='16' />
+  	<column name="TEAM_RESULT_A_TEXT_HIGHSCORE_ID" x='193' y='233' w='120'  h='16' format="VTOP CENTER"/>
+  	<column name="TEAM_RESULT_A_HIGHSCORE_KILL"    x='172'  y='291' w='19'  h='26' />
+  	<column name="TEAM_RESULT_A_HIGHSCORE_DEATH"   x='237' y='291' w='19'  h='26' />
+	<column name="TEAM_RESULT_A_HIGHSCORE_OCCUPYPOINT"   x='204' y='291' w='19'  h='26' />
+  
+  	<column name="TEAM_RESULT_A_EMBLEM"   x='24' y='386' w='16' h='16' />
+  	<column name="TEAM_RESULT_A_CLASS"    x='43' y='386' w='16' h='16' />
+  	<column name="TEAM_RESULT_A_PING"      x='8' y='382' w='0' h='0' />
+  	<column name="TEAM_RESULT_A_HEADSHOT" x='405' y='276' w='11' h='16' />
+  	<column name="TEAM_RESULT_A_HEARTCNT" x='405' y='301' w='11' h='16' />
+  	<column name="TEAM_RESULT_A_CRITICAL" x='405' y='326' w='11' h='16' />
+  	<column name="TEAM_RESULT_A_AIRCOMBO" x='405' y='353' w='11' h='16' />
+  	<column name="TEAM_RESULT_A_ASSIST"   x='405' y='379' w='11' h='16' />
+
+  	<column name="TEAM_RESULT_A_TEXT_ID"    x='65'  y='389' w='88' h='15' format="VTOP CENTER"/>
+  	<column name="TEAM_RESULT_A_TEXT_KILL"  x='175' y='389' w='20' h='15' format="VTOP CENTER"/>
+  	<column name="TEAM_RESULT_A_TEXT_SLASH" x='193' y='389' w='0' h='0' format="VTOP CENTER"/>
+  	<column name="TEAM_RESULT_A_TEXT_DEATH" x='196' y='389' w='20' h='15' format="VTOP CENTER"/>
+  	<column name="TEAM_RESULT_A_TEXT_DIFF"  x='217' y='389' w='20' h='15' format="VTOP CENTER"/>
+  	<column name="TEAM_RESULT_A_TEXT_ASSIST"  x='255' y='389' w='20' h='15' format="VTOP CENTER"/>
+	<column name="TEAM_RESULT_A_TEXT_OCCUPYPOINT"  x='175' y='389' w='100' h='15' format="VTOP CENTER"/>
+ 
+
+	<!-- tab team B -->
+
+  	<column name="TEAM_B_CLAN_EMBLEM"   x='661' y='150' w='32' h='32' /> <!--클랜전에서 tab눌렀을때 클랜마크 표시 위치로만 사용함 -->
+  	<column name="TEAM_RESULT_B_HIGHSCORE_PENDANT" x='672'  y='210' w='143' h='143' />
+  	<column name="TEAM_RESULT_B_HIGHSCORE_EMBLEM"  x='826' y='209' w='16'  h='16' />
+  	<column name="TEAM_RESULT_B_HIGHSCORE_CLASS"   x='845' y='209' w='16'  h='16' />
+  	<column name="TEAM_RESULT_B_TEXT_HIGHSCORE_ID" x='831' y='233' w='120'  h='16' />
+  	<column name="TEAM_RESULT_B_HIGHSCORE_KILL"    x='809'  y='291' w='19'  h='26' /> <!-- -18 -->
+  	<column name="TEAM_RESULT_B_HIGHSCORE_DEATH"   x='875' y='291' w='19'  h='26' /> <!-- +18 -->
+	<column name="TEAM_RESULT_B_HIGHSCORE_OCCUPYPOINT"   x='842' y='291' w='19'  h='26' />
+  
+  	<column name="TEAM_RESULT_B_EMBLEM"   x='662' y='386' w='16' h='16' />
+  	<column name="TEAM_RESULT_B_CLASS"    x='681' y='386' w='16' h='16' />
+  	<column name="TEAM_RESULT_B_PING"     x='1012' y='382' w='0' h='0' />
+  	<column name="TEAM_RESULT_B_HEADSHOT" x='587' y='276' w='0' h='0' />
+  	<column name="TEAM_RESULT_B_HEARTCNT" x='587' y='307' w='0' h='0' />
+  	<column name="TEAM_RESULT_B_CRITICAL" x='587' y='326' w='0' h='0' />
+  	<column name="TEAM_RESULT_B_AIRCOMBO" x='587' y='353' w='0' h='0' />
+  	<column name="TEAM_RESULT_B_ASSIST"   x='587' y='379' w='0' h='0' />
+
+  	<column name="TEAM_RESULT_B_TEXT_ID"    x='703'  y='389' w='88' h='15' format="VTOP CENTER"/>
+  	<column name="TEAM_RESULT_B_TEXT_KILL"  x='815' y='389' w='20' h='15' format="VTOP CENTER"/>
+  	<column name="TEAM_RESULT_B_TEXT_SLASH" x='833' y='389' w='0' h='0' format="VTOP CENTER"/>
+  	<column name="TEAM_RESULT_B_TEXT_DEATH" x='836' y='389' w='20' h='15' format="VTOP CENTER"/>
+  	<column name="TEAM_RESULT_B_TEXT_DIFF"  x='857' y='389' w='20' h='15' format="VTOP CENTER"/>
+  	<column name="TEAM_RESULT_B_TEXT_ASSIST"  x='895' y='389' w='20' h='15' format="VTOP CENTER"/>
+	<column name="TEAM_RESULT_B_TEXT_OCCUPYPOINT"  x='813' y='389' w='100' h='15' format="VTOP CENTER"/>
+   
+
+ 	<!-- solo_gameend_L -->
+
+ 	<column name="SOLO_GAMEEND_HIGHSCORE_PENDANT"  x='38' y='111' w='87' h='87' />
+  	<column name="SOLO_GAMEEND_HIGHSCORE_EMBLEM"  x='144' y='144' w='16' h='16' />
+  	<column name="SOLO_GAMEEND_HIGHSCORE_CLASS"   x='163' y='144' w='16' h='16' />
+  	<column name="SOLO_GAMEEND_TEXT_HIGHSCORE_ID"    x='185' y='147' w='107' h='13' format="VTOP LEFT"/>
+  	<column name="SOLO_GAMEEND_TEXT_HIGHSCORE_KILL"  x='183' y='166' w='0' h='0' />
+  	<column name="SOLO_GAMEEND_TEXT_HIGHSCORE_DEATH" x='223' y='166' w='0' h='0' />
+
+  	<column name="SOLO_GAMEEND_TEXT_WINRESULT" x='356' y='143' w='108' h='11' fontsize='10' format="VTOP LEFT"/>
+  	<column name="SOLO_GAMEEND_TEXT_MAP"       x='356' y='156' w='108' h='11' fontsize='10' format="VTOP LEFT"/>
+  	<column name="SOLO_GAMEEND_TEXT_WINMODE"   x='356' y='169' w='108' h='11' fontsize='10' format="VTOP LEFT"/>
+  	<column name="SOLO_GAMEEND_TEXT_ITEMMODE"  x='356' y='182' w='108' h='11' fontsize='10' format="VTOP LEFT"/>
+
+  	<column name="SOLO_GAMEEND_EMBLEM"  x='24' y='229' w='64' h='64' />
+  	<column name="SOLO_GAMEEND_CLASS"   x='43' y='229' w='16' h='16' /> 
+  	<column name="SOLO_GAMEEND_TEXT_ID"    x='65' y='232' w='102' h='15' format="VTOP CENTER"/>
+  	<column name="SOLO_GAMEEND_TEXT_KILL"  x='175' y='232' w='20' h='15' format="VTOP CENTER"/>
+  	<column name="SOLO_GAMEEND_TEXT_DEATH" x='196' y='232' w='20' h='15' format="VTOP CENTER"/> 
+  	<column name="SOLO_GAMEEND_TEXT_DIFF"   x='217' y='232' w='20' h='15' format="VTOP CENTER"/>
+  	<column name="SOLO_GAMEEND_TEXT_ASSIST"  x='257' y='232' w='20' h='15' format="VTOP CENTER"/>
+  	<column name="SOLO_GAMEEND_TEXT_PG"    x='287' y='232' w='36'  h='15' format="VTOP CENTER"/>
+  	<column name="SOLO_GAMEEND_TEXT_EXP"   x='317' y='232' w='34'  h='15' format="VTOP CENTER"/>
+
+
+ 	<!-- solo_gameend_R -->
+
+	<column name="SOLO_END_RESULT_EMBLEM"  x='551' y='156' w='16' h='16' />
+  	<column name="SOLO_END_RESULT_CLASS"   x='570' y='156' w='16' h='16' />
+  	<column name="SOLO_END_RESULT_TEXT_ID" x='556'  y='180' w='107' h='13' />
+  	<column name="SOLO_END_RESULT_KILL"    x='546' y='225' w='19'  h='26' />
+  	<column name="SOLO_END_RESULT_DEATH"   x='611' y='225' w='19'  h='26' />
+  
+  	<column name="SOLO_END_RESULT_HEADSHOT" x='939' y='150' w='11' h='16' />
+  	<column name="SOLO_END_RESULT_HEARTCNT" x='939' y='175' w='11' h='16' />
+  	<column name="SOLO_END_RESULT_CRITICAL" x='939' y='200' w='11' h='16' />
+  	<column name="SOLO_END_RESULT_AIRCOMBO" x='939' y='225' w='11' h='16' />
+  	<column name="SOLO_END_RESULT_ASSIST"   x='939' y='250' w='11' h='16' />
+  	<column name="SOLO_END_RESULT_PENDANT"  x='545' y='301' w='248' h='350' />
+  
+  	<column name="SOLO_END_RESULT_TEMPEXP" x='887' y='323' w='19' h='26' />
+  	<column name="SOLO_END_RESULT_ALL_EXP"    x='811' y='385' w='164' h='16' />
+  	<column name="SOLO_END_RESULT_TEMPPG"    x='887' y='455' w='19' h='26' />
+  	<column name="SOLO_END_RESULT_ALL_PG"    x='877' y='493' w='11' h='16' />
+
+
+	<!--gameend_L -->
+
+	
+  	<column name="TEAM_GAMEEND_HIGHSCORE_PENDANT" x='84' y='268' w='152' h='152' />
+  	<column name="TEAM_GAMEEND_HIGHSCORE_EMBLEM"  x='267' y='272' w='16' h='16' />  <!--왜 엠블렘 위치 수정이 반영이 안되는가 -->
+  	<column name="TEAM_GAMEEND_HIGHSCORE_CLASS"   x='286' y='272' w='16' h='16' /> 	<!--얘도 왜 위치 수정이 반영이 안되는가 -->
+  	<column name="TEAM_GAMEEND_HIGHSCORE_KILL"  x='270' y='353' w='19' h='26' /> 
+  	<column name="TEAM_GAMEEND_HIGHSCORE_DEATH" x='337' y='353' w='19' h='26' /> 
+  	<column name="TEAM_GAMEEND_TEXT_HIGHSCORE_ID" x='272' y='295' w='130'  h='14' format="VTOP LEFT"/>
+  	<column name="TEAM_GAMEEND_TEXT_WINRESULT" x='149' y='157' w='107' h='13' format="VTOP LEFT"/>
+  	<column name="TEAM_GAMEEND_TEXT_MAP"       x='149' y='177' w='107' h='13' format="VTOP LEFT"/>
+  	<column name="TEAM_GAMEEND_TEXT_WINMODE"   x='149' y='197' w='107' h='13' format="VTOP LEFT"/>
+  	<column name="TEAM_GAMEEND_TEXT_ITEMMODE"  x='149' y='217' w='107' h='13' format="VTOP LEFT"/>
+	<column name="TEAM_GAMEEND_HIGHSCORE_OCCUPYPOINT" x='299' y='353' w='19' h='26' /> 
+ 
+  	<column name="TEAM_GAMEEND_EMBLEM"  x='65' y='453' w='0' h='0' />
+  	<column name="TEAM_GAMEEND_CLASS"   x='84' y='453' w='0' h='0' />
+  	<column name="TEAM_GAMEEND_TEXT_ID"    x='106'  y='456' w='102' h='15' format="VTOP CENTER"/>
+  	<column name="TEAM_GAMEEND_TEXT_KILL"  x='216' y='456' w='20' h='15' format="VTOP CENTER"/>
+  	<column name="TEAM_GAMEEND_TEXT_DEATH" x='237' y='456' w='20' h='15' format="VTOP CENTER"/>
+  	<column name="TEAM_GAMEEND_TEXT_SLASH" x='255' y='456' w='0' h='0' format="VTOP CENTER"/>
+  	<column name="TEAM_GAMEEND_TEXT_DIFF"  x='258' y='456' w='20' h='15' format="VTOP CENTER"/>
+  	<column name="TEAM_GAMEEND_TEXT_ASSIST" x='298' y='456' w='20' h='15' format="VTOP CENTER"/>
+  	<column name="TEAM_GAMEEND_TEXT_PG"    x='328' y='456' w='36' h='15' format="VTOP CENTER"/>
+  	<column name="TEAM_GAMEEND_TEXT_EXP"   x='358' y='456' w='34' h='15' format="VTOP CENTER"/>
+	<column name="TEAM_GAMEEND_TEXT_OCCUPYPOINT"   x='216' y='456' w='102' h='15' format="VTOP CENTER"/>
+
+
+	<!--gameend_R -->
+
+  	<column name="MY_RESULT_EMBLEM"  x='508' y='156' w='16' h='16' />
+  	<column name="MY_RESULT_CLASS"   x='527' y='156' w='16' h='16' />
+  	<column name="MY_RESULT_TEXT_ID"  x='513'  y='180' w='107' h='13' />
+  	<column name="MY_RESULT_KILL"    x='503' y='225' w='19'  h='26' />
+  	<column name="MY_RESULT_DEATH"   x='569' y='225' w='19'  h='26' />
+	<column name="MY_RESULT_OCCUPYPOINT"   x='535' y='225' w='19'  h='26' />
+  
+  	<column name="MY_RESULT_HEADSHOT" x='896' y='150' w='11' h='16' />
+  	<column name="MY_RESULT_HEARTCNT" x='896' y='175' w='11' h='16' />
+  	<column name="MY_RESULT_CRITICAL" x='896' y='200' w='11' h='16' />
+  	<column name="MY_RESULT_AIRCOMBO" x='896' y='225' w='11' h='16' />
+  	<column name="MY_RESULT_ASSIST"   x='896' y='250' w='11' h='16' />
+  	<column name="MY_RESULT_PENDANT"  x='504' y='301' w='248' h='350' />
+ 
+  	<column name="MYDATA_CLAN_TEMPEXP" x='844' y='323' w='19' h='26' />
+  	<column name="MYDATA_CLAN_ALLEXP"   x='768' y='385' w='164' h='16' />
+  	<column name="MYDATA_CLAN_TEMPPG"   x='844' y='455' w='19' h='26' />
+  	<column name="MYDATA_CLAN_ALL_PG"   x='834' y='493' w='107' h='13' />
+
+
+ 	<!--gameend_R_clan only -->
+
+  	<column name="MYDATA_CLAN_EMBLEM" x='769' y='556' w='16' h='16' />
+  	<column name="MYDATA_CLAN_NAME"   x='770' y='576' w='100' h='212' format="VTOP LEFT"/>
+  	<column name="MYDATA_CLAN_CLANEXP" x='844' y='559' w='19' h='26' />
+  	<column name="MYDATA_CLAN_LEVEL"   x='844' y='618' w='19' h='26' />
+
+
+ 	<!--gameend_R_clan only -->
+
+  	<column name="MYDATA_CLAN_EMBLEM" x='769' y='556' w='16' h='16' />
+  	<column name="MYDATA_CLAN_NAME"   x='770' y='576' w='100' h='212' format="VTOP LEFT"/>
+  	<column name="MYDATA_CLAN_CLANEXP" x='880' y='559' w='19' h='26' />
+  	<column name="MYDATA_CLAN_LEVEL"   x='880' y='618' w='19' h='26' />
+
+	<!--slot start -->
+	<column name="ICON_BASE_SOLO"     x='292' y='229' w='0' h='0' />
+	<column name="ICON_BASE_TEAM_A"   x='292' y='386' w='0' h='0' />
+	<column name="ICON_BASE_TEAM_B"   x='932' y='386' w='0' h='0' />
+	<column name="ICON_BASE_END_SOLO" x='360' y='229' w='0' h='0' />
+	<column name="ICON_BASE_END_TEAM" x='401' y='453' w='0' h='0' />
+ 
+</TUTORIALDEFINE>

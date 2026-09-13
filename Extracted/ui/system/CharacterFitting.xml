@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CHANGE_AVATAR_PROPERTY>
+  <hayate bEnable="0">
+    <data_1 handTexture="hand12.tga" head="0" face="0" set="10500568" acc1="0" acc2="0" acc3="0" acc4="0" SoundFolderName="Angry_Voice" PendantFolderName="Angry_Type1"></data_1>
+  </hayate>
+  <tina bEnable="0">
+    <data_1 handTexture="hand12.tga" head="0" face="0" set="0" acc1="0" acc2="0" acc3="0" acc4="0" SoundFolderName="Angry_Voice" PendantFolderName="Angry_Type2" />
+  </tina>
+  <milly bEnable="0">
+    <data_1 handTexture="hand12.tga" head="0" face="0" set="0" acc1="0" acc2="0" acc3="0" acc4="0" SoundFolderName="Angry_Voice" PendantFolderName="Angry_Type3" />
+  </milly>
+  <Cyrus bEnable="0">
+    <data_1 handTexture="hand12.tga" head="0" face="0" set="0" acc1="0" acc2="0" acc3="0" acc4="0" SoundFolderName="Angry_Voice" PendantFolderName="Angry_Type4" />
+  </Cyrus>
+  <Doddon bEnable="0">
+    <data_1 handTexture="hand12.tga" head="0" face="0" set="0" acc1="0" acc2="0" acc3="0" acc4="0" SoundFolderName="Angry_Voice" PendantFolderName="Angry_Type5" />
+  </Doddon>
+  <Guy bEnable="0">
+    <data_1 handTexture="hand12.tga" head="0" face="0" set="0" acc1="0" acc2="0" acc3="0" acc4="0" SoundFolderName="Angry_Voice" PendantFolderName="Angry_Type6" />
+  </Guy>
+  <Tericia bEnable="0">
+    <data_1 handTexture="hand12.tga" head="0" face="0" set="0" acc1="0" acc2="0" acc3="0" acc4="0" SoundFolderName="Angry_Voice" PendantFolderName="Angry_Type7" />
+  </Tericia>
+  <alulu bEnable="0">
+    <data_1 handTexture="hand12.tga" head="0" face="0" set="0" acc1="0" acc2="0" acc3="0" acc4="0" SoundFolderName="Angry_Voice" PendantFolderName="Angry_Type8" />
+  </alulu>
+  <van bEnable="0">
+    <data_1 handTexture="hand12.tga" head="0" face="0" set="0" acc1="0" acc2="0" acc3="0" acc4="0" SoundFolderName="Angry_Voice" PendantFolderName="Angry_Type9" />
+  </van>
+  <hood bEnable="0">
+    <data_1 handTexture="hand12.tga" head="0" face="0" set="0" acc1="0" acc2="0" acc3="0" acc4="0" SoundFolderName="Angry_Voice" PendantFolderName="Angry_Type10" />
+  </hood>
+  <spygirl bEnable="0">
+    <data_1 handTexture="hand12.tga" head="0" face="0" set="0" acc1="0" acc2="0" acc3="0" acc4="0" SoundFolderName="Angry_Voice" PendantFolderName="Angry_Type11" />
+  </spygirl>
+  <robotgirl bEnable="0">
+    <data_1 handTexture="hand12.tga" head="0" face="0" set="0" acc1="0" acc2="0" acc3="0" acc4="0" SoundFolderName="Angry_Voice" PendantFolderName="Angry_Type12" />
+  </robotgirl>
+  <tsunderegirl bEnable="1">
+    <data_1 handTexture="hand5.tga" head="10001601" face="0" set="10500740" acc1="0" acc2="0" acc3="0" acc4="0" SoundFolderName="Voice_angry" PendantFolderName="Angry_Type13" />
+  </tsunderegirl>
+</CHANGE_AVATAR_PROPERTY>

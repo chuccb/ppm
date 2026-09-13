@@ -1,0 +1,356 @@
+﻿<UIDEFINE>
+
+  	<image name="NEWSKILLINVENTORY_1" filename="store_NSkillInventory_1.dds"/>
+  	<image name="NEWSKILLINVENTORY_2" filename="store_NSkillInventory_2.dds"/>
+  	<image name="NEWSKILLINVENTORY_3" filename="store_NSkillInventory_3.dds"/>
+
+	<rect name="INFOIMAGE" l="487" t="588" r="639" b="673"/> 
+	<rect name="INFONAME" l="483" t="554" r="746" b="577"/>  
+	<rect name="INFOEXPLAIN" l="757" t="558" r="978" b="669"/>
+
+  	<column name="PRECHARABIL0" x="589" y="558" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PRECHARABIL1" x="589" y="572" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PRECHARABIL2" x="589" y="586" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PRECHARABIL3" x="589" y="600" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="PRECHARABIL4" x="589" y="614" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="ITEMABILITY0" x="632" y="558" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="ITEMABILITY1" x="632" y="572" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="ITEMABILITY2" x="632" y="586" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="ITEMABILITY3" x="632" y="600" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="ITEMABILITY4" x="632" y="614" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="AFTERCHARABIL0" x="675" y="558" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="AFTERCHARABIL1" x="675" y="572" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="AFTERCHARABIL2" x="675" y="586" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="AFTERCHARABIL3" x="675" y="600" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+	<column name="AFTERCHARABIL4" x="675" y="614" cx="30" cy="13" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER"/>
+
+	
+	
+  	<msprite name="STORENEWSKILLSYS_3" sx='99' sy='91' ex='99' ey='91' l='0' t='512' r='347' b='878' texture="MAIN_STORE_2"/>
+
+	<msprite name="SKILL_PRESET_BLIND_UP" sx='100' sy='92' ex='100' ey='92' l='348' t='512' r='578' b='875' texture="MAIN_STORE_2"/>
+	<msprite name="SKILL_PRESET_INFO" sx='107' sy='424' ex='107' ey='424' l='0' t='967' r='218' b='991' texture="MAIN_STORE_2"/>
+	<column name ="SKILL_PRESET_INFO_MSG" x='107' y='424' w='218' h='24' fontsize ='12' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>
+
+	<NEWSKILLSYS name="NEWSKILL_HEAD">
+		<slot name="slot1" x='101' y='93' w='230' h='96'>
+      			<sprite l='0' t='0' r='230' b='96' texture="NEWSKILLINVENTORY_1"/>
+			
+			<sprite l='0' t='194' r='230' b='290' texture="NEWSKILLINVENTORY_1"/>
+			<sprite l='0' t='291' r='230' b='387' texture="NEWSKILLINVENTORY_1"/>
+			<sprite l='0' t='388' r='230' b='484' texture="NEWSKILLINVENTORY_1"/>
+			<sprite l='0' t='485' r='230' b='581' texture="NEWSKILLINVENTORY_1"/>
+			<sprite l='0' t='582' r='230' b='678' texture="NEWSKILLINVENTORY_1"/>
+			<sprite l='0' t='679' r='230' b='775' texture="NEWSKILLINVENTORY_1"/>
+			<sprite l='0' t='776' r='230' b='872' texture="NEWSKILLINVENTORY_1"/>
+			<sprite l='0' t='873' r='230' b='969' texture="NEWSKILLINVENTORY_1"/>
+			
+			<sprite l='231' t='0'  r='461' b='96'  texture="NEWSKILLINVENTORY_1"/>
+			<sprite l='231' t='97' r='461' b='193' texture="NEWSKILLINVENTORY_1"/>
+			<sprite l='231' t='194' r='461' b='290' texture="NEWSKILLINVENTORY_1"/>
+			<sprite l='231' t='291' r='461' b='387' texture="NEWSKILLINVENTORY_1"/>
+			<sprite l='231' t='388' r='461' b='484' texture="NEWSKILLINVENTORY_1"/>
+			<sprite l='232' t='485' r='461' b='581' texture="NEWSKILLINVENTORY_1"/>
+			<sprite l='231' t='582' r='461' b='678' texture="NEWSKILLINVENTORY_1"/>
+			
+			<sprite l='0' t='97' r='230' b='193' texture="NEWSKILLINVENTORY_1"/>
+		</slot>
+	</NEWSKILLSYS>
+
+	<NEWSKILLSYS name="NEWSKILL_CLOTH_UP">
+		<slot name="slot1" x='101' y='168' w='230' h='175'>
+			<sprite l='0' t='0' r='230' b='175' texture="NEWSKILLINVENTORY_2"/>
+			<sprite l='0' t='352' r='230' b='527' texture="NEWSKILLINVENTORY_2"/>
+			<sprite l='0' t='528' r='230' b='703' texture="NEWSKILLINVENTORY_2"/>
+			<sprite l='0' t='704' r='230' b='879' texture="NEWSKILLINVENTORY_2"/>
+			<sprite l='231' t='0' r='461' b='175' texture="NEWSKILLINVENTORY_2"/>
+			<sprite l='231' t='176' r='461' b='351' texture="NEWSKILLINVENTORY_2"/>
+			<sprite l='231' t='352' r='461' b='527' texture="NEWSKILLINVENTORY_2"/>
+			<sprite l='231' t='528' r='461' b='703' texture="NEWSKILLINVENTORY_2"/>
+			<sprite l='231' t='704' r='461' b='879' texture="NEWSKILLINVENTORY_2"/>
+			<sprite l='462' t='0' r='692' b='175' texture="NEWSKILLINVENTORY_2"/>
+			<sprite l='462' t='176' r='692' b='351' texture="NEWSKILLINVENTORY_2"/>
+			<sprite l='462' t='352' r='692' b='527' texture="NEWSKILLINVENTORY_2"/>
+			<sprite l='462' t='528' r='692' b='703' texture="NEWSKILLINVENTORY_2"/>
+			<sprite l='462' t='704' r='692' b='879' texture="NEWSKILLINVENTORY_2"/>
+			<sprite l='693' t='0' r='923' b='175' texture="NEWSKILLINVENTORY_2"/>
+			<sprite l='693' t='176' r='923' b='351' texture="NEWSKILLINVENTORY_2"/>
+			<sprite l='0' t='176' r='230' b='351' texture="NEWSKILLINVENTORY_2"/>
+    		</slot>
+  	</NEWSKILLSYS>
+
+  	<NEWSKILLSYS name="NEWSKILL_CLOTH_DOWN">
+    		<slot name="slot1" x='101' y='271' w='230' h='184'>
+			<sprite l='693' t='352' r='923' b='536' texture="NEWSKILLINVENTORY_2"/>
+      		    	<sprite l='0' t='0' r='230' b='184' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='0' t='185' r='230' b='369' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='0' t='370' r='230' b='554' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='0' t='555' r='230' b='739' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='231' t='0' r='461' b='184' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='231' t='185' r='461' b='369' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='231' t='370' r='461' b='554' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='231' t='555' r='461' b='739' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='462' t='0' r='692' b='184' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='462' t='185' r='692' b='369' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='462' t='370' r='692' b='554' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='462' t='555' r='692' b='739' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='693' t='0' r='923' b='184' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='693' t='185' r='923' b='369' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='693' t='370' r='923' b='554' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='693' t='537' r='923' b='721' texture="NEWSKILLINVENTORY_2"/>
+    		</slot>
+  	</NEWSKILLSYS>
+
+  	<NEWSKILLSYS name="NEWSKILL_SHOES">
+		<slot name="slot1" x='116' y='319' w='198' h='136'>
+      		    	<sprite l='231' t='679' r='429' b='815' texture="NEWSKILLINVENTORY_1"/>
+      		    	<sprite l='0' t='880' r='198' b='1016' texture="NEWSKILLINVENTORY_2"/>
+      		    	<sprite l='199' t='880' r='397' b='1016' texture="NEWSKILLINVENTORY_2"/>
+      		    	<sprite l='398' t='880' r='596' b='1016' texture="NEWSKILLINVENTORY_2"/>
+      		    	<sprite l='597' t='880' r='795' b='1016' texture="NEWSKILLINVENTORY_2"/>
+      		    	<sprite l='796' t='880' r='994' b='1016' texture="NEWSKILLINVENTORY_2"/>
+			<sprite l='0' t='743' r='198' b='879' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='199' t='743' r='397' b='879' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='398' t='743' r='596' b='879' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='597' t='743' r='795' b='879' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='796' t='743' r='994' b='879' texture="NEWSKILLINVENTORY_3"/>
+			<sprite l='0' t='880' r='198' b='1016' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='199' t='880' r='397' b='1016' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='398' t='880' r='596' b='1016' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='597' t='880' r='795' b='1016' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='796' t='880' r='994' b='1016' texture="NEWSKILLINVENTORY_3"/>
+			<sprite l='231' t='816' r='429' b='952' texture="NEWSKILLINVENTORY_1"/>
+    		</slot>
+  	</NEWSKILLSYS>
+
+  	<NEWSKILLSYS name="NEWSKILL_CLOTHOFSET">
+    		<slot name="slot1" x='116' y='319' w='198' h='136'>
+      		    	<sprite l='231' t='816' r='429' b='952' texture="NEWSKILLINVENTORY_1"/>
+      		    	<sprite l='0' t='880' r='198' b='1016' texture="NEWSKILLINVENTORY_2"/>
+      		    	<sprite l='199' t='880' r='397' b='1016' texture="NEWSKILLINVENTORY_2"/>
+      		    	<sprite l='398' t='880' r='596' b='1016' texture="NEWSKILLINVENTORY_2"/>
+      		    	<sprite l='597' t='880' r='795' b='1016' texture="NEWSKILLINVENTORY_2"/>
+      		    	<sprite l='796' t='880' r='994' b='1016' texture="NEWSKILLINVENTORY_2"/>
+			<sprite l='0' t='743' r='198' b='879' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='199' t='743' r='397' b='879' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='398' t='743' r='596' b='879' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='597' t='743' r='795' b='879' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='796' t='743' r='994' b='879' texture="NEWSKILLINVENTORY_3"/>
+			<sprite l='0' t='880' r='198' b='1016' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='199' t='880' r='397' b='1016' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='398' t='880' r='596' b='1016' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='597' t='880' r='795' b='1016' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='796' t='880' r='994' b='1016' texture="NEWSKILLINVENTORY_3"/>
+      		    	<sprite l='231' t='679' r='429' b='815' texture="NEWSKILLINVENTORY_1"/>
+    		</slot>
+	</NEWSKILLSYS>
+
+	<NEWSKILLSYS name="NEWSKILL_ACCESSORY1">
+		<slot name="slot1" x='101' y='120' w='115' h='108'>
+      			<sprite l='462' t='0'   r='577' b='108' texture="NEWSKILLINVENTORY_1"/>
+			<sprite l='462' t='218' r='577' b='326' texture="NEWSKILLINVENTORY_1"/>
+			<sprite l='462' t='327' r='577' b='435' texture="NEWSKILLINVENTORY_1"/>
+			<sprite l='462' t='436' r='577' b='544' texture="NEWSKILLINVENTORY_1"/>
+			<sprite l='462' t='545' r='577' b='653' texture="NEWSKILLINVENTORY_1"/>
+			<sprite l='462' t='654' r='577' b='762' texture="NEWSKILLINVENTORY_1"/>
+			<sprite l='462' t='763' r='577' b='871' texture="NEWSKILLINVENTORY_1"/>
+			<sprite l='462' t='872' r='577' b='980' texture="NEWSKILLINVENTORY_1"/>
+			
+			<sprite l='578' t='0'   r='693' b='108' texture="NEWSKILLINVENTORY_1"/>
+      		    	<sprite l='578' t='109' r='693' b='217' texture="NEWSKILLINVENTORY_1"/>
+      		    	<sprite l='578' t='218' r='693' b='326' texture="NEWSKILLINVENTORY_1"/>
+      		    	<sprite l='578' t='327' r='693' b='435' texture="NEWSKILLINVENTORY_1"/>
+      		    	<sprite l='578' t='436' r='693' b='544' texture="NEWSKILLINVENTORY_1"/>
+      		    	<sprite l='578' t='545' r='693' b='653' texture="NEWSKILLINVENTORY_1"/>
+      		    	<sprite l='578' t='654' r='693' b='762' texture="NEWSKILLINVENTORY_1"/>
+      		    	<sprite l='578' t='763' r='693' b='871' texture="NEWSKILLINVENTORY_1"/>
+			<sprite l='462' t='109' r='577' b='217' texture="NEWSKILLINVENTORY_1"/>
+		</slot>
+    		<slot name="slot2" x='215' y='120' w='115' h='108'>
+      		    	<sprite l='694' t='0'   r='809' b='108' texture="NEWSKILLINVENTORY_1"/>
+			<sprite l='694' t='218' r='809' b='326' texture="NEWSKILLINVENTORY_1"/>
+			<sprite l='694' t='327' r='809' b='435' texture="NEWSKILLINVENTORY_1"/>
+			<sprite l='694' t='436' r='809' b='544' texture="NEWSKILLINVENTORY_1"/>
+			<sprite l='694' t='545' r='809' b='653' texture="NEWSKILLINVENTORY_1"/>
+			<sprite l='694' t='654' r='809' b='762' texture="NEWSKILLINVENTORY_1"/>
+			<sprite l='694' t='763' r='809' b='871' texture="NEWSKILLINVENTORY_1"/>
+			<sprite l='694' t='872' r='809' b='980' texture="NEWSKILLINVENTORY_1"/>
+			<sprite l='810' t='0'   r='925' b='108' texture="NEWSKILLINVENTORY_1"/>
+      		    	<sprite l='810' t='109' r='925' b='217' texture="NEWSKILLINVENTORY_1"/>
+      		    	<sprite l='810' t='218' r='925' b='326' texture="NEWSKILLINVENTORY_1"/>
+      		    	<sprite l='810' t='327' r='925' b='435' texture="NEWSKILLINVENTORY_1"/>
+      		    	<sprite l='810' t='436' r='925' b='544' texture="NEWSKILLINVENTORY_1"/>
+      		    	<sprite l='810' t='545' r='925' b='653' texture="NEWSKILLINVENTORY_1"/>
+      		    	<sprite l='810' t='654' r='925' b='762' texture="NEWSKILLINVENTORY_1"/>
+      		    	<sprite l='810' t='763' r='925' b='871' texture="NEWSKILLINVENTORY_1"/>
+      		    	<sprite l='694' t='109' r='809' b='217' texture="NEWSKILLINVENTORY_1"/>
+		</slot>	
+	</NEWSKILLSYS>
+
+	<NEWSKILLSYSSLOT name="NEWSKILLSLOT">
+		<template>			
+			<column name="NAME" x="78" y="7"/>
+			<sprite l="0" t="796" r="237" b="872"  texture="MAIN_STORE_1"/>
+			<sprite l="0" t="873" r="237" b="949"  texture="MAIN_STORE_1"/>
+			<sprite l="644" t="518" r="708" b="582" texture="UI_Button"/> 
+			<sprite l="384" t="518" r="448" b="582" texture="UI_Button"/>	
+			<sprite l="449" t="518" r="513" b="582" texture="UI_Button"/>	
+			
+			
+			<sprite l='1' t='614' r='20' b='635' texture="UI_Popup_1"/>
+			<sprite l='1' t='636' r='20' b='657' texture="UI_Popup_1"/>
+			<sprite l='1' t='592' r='20' b='613' texture="UI_Popup_1"/>
+			<sprite l='1' t='658' r='20' b='679' texture="UI_Popup_1"/>
+			<sprite l='1' t='680' r='20' b='701' texture="UI_Popup_1"/>
+			<sprite l='1' t='702' r='20' b='723' texture="UI_Popup_1"/>
+
+      		
+      			<sprite l='25' t='592' r='56' b='603' texture="UI_Popup_1"/>
+      			<sprite l='25' t='604' r='56' b='615' texture="UI_Popup_1"/>
+      			<sprite l='25' t='616' r='56' b='627' texture="UI_Popup_1"/>
+		      	<sprite l='25' t='628' r='56' b='639' texture="UI_Popup_1"/>
+      			<sprite l='25' t='640' r='56' b='651' texture="UI_Popup_1"/>
+      			<sprite l='25' t='652' r='56' b='663' texture="UI_Popup_1"/>
+      			<sprite l='25' t='664' r='56' b='675' texture="UI_Popup_1"/>
+      			<sprite l='25' t='676' r='56' b='687' texture="UI_Popup_1"/>
+      			<sprite l='25' t='688' r='56' b='699' texture="UI_Popup_1"/>
+
+			
+      			<sprite l='0' t='766' r='159' b='795' texture="MAIN_STORE_1"/>		
+      
+		</template>
+
+		<slot name="slot1"  x="483" y="158" w="237" h="76"/>
+		<slot name="slot2"  x="721" y="158" w="237" h="76"/>
+		<slot name="slot3"  x="483" y="235" w="237" h="76"/>
+		<slot name="slot4"  x="721" y="235" w="237" h="76"/>
+		<slot name="slot5"  x="483" y="312" w="237" h="76"/>
+		<slot name="slot6"  x="721" y="312" w="237" h="76"/>
+		<slot name="slot7"  x="483" y="389" w="237" h="76"/>
+		<slot name="slot8"  x="721" y="389" w="237" h="76"/>
+		<slot name="slot9"  x="483" y="466" w="237" h="76"/>
+		<slot name="slot10" x="721" y="466" w="237" h="76"/>
+
+    		<eventrect name="SCROLL_RECT" x="483" y="158" w="474" h="384"/>
+		<button name="UP" x="962" y="158" w="23" h="28">
+			<sprite l="258" t="461" r="281" b="489" texture="UI_Button"/>
+			<sprite l="282" t="461" r="305" b="489" texture="UI_Button"/>
+			<sprite l="306" t="461" r="329" b="489" texture="UI_Button"/>
+		</button>
+
+		<button name="DN" x="962" y="514" w="23" h="28">
+			<sprite l="258" t="490" r="281" b="518" texture="UI_Button"/>
+			<sprite l="282" t="490" r="305" b="518" texture="UI_Button"/>
+			<sprite l="306" t="490" r="329" b="518" texture="UI_Button"/>
+		</button>   
+
+	</NEWSKILLSYSSLOT>
+
+  	<msprite sx='476' sy='91' ex='476' ey='91' l='579' t='710' r='672' b='738' texture="MAIN_STORE_2"/>
+  
+	<tab name="NSKILL_SORTTYPE" count='6'>
+    		<page name="NSKILL_DEFAULT_SORT" x='476' y='91' default='true'>
+	      		<sprite l='0' t='879' r='63' b='909' texture="MAIN_STORE_2"/>
+			<msprite sx='476' sy='91' ex='476' ey='91' l='0' t='910' r='63' b='940' texture="MAIN_STORE_2"/>
+			<msprite sx='540' sy='91' ex='540' ey='91' l='64' t='910' r='127' b='940' texture="MAIN_STORE_2"/>
+			<msprite sx='604' sy='91' ex='604' ey='91' l='128' t='910' r='191' b='940' texture="MAIN_STORE_2"/>
+			<msprite sx='668' sy='91' ex='668' ey='91' l='192' t='910' r='255' b='940' texture="MAIN_STORE_2"/>
+			<msprite sx='732' sy='91' ex='732' ey='91' l='256' t='910' r='319' b='940' texture="MAIN_STORE_2"/>
+            		<msprite sx='796' sy='91' ex='796' ey='91' l='320' t='910' r='383' b='940' texture="MAIN_STORE_2"/>
+    		</page>
+    		<page name="NSKILL_SPEED_SORT" x='540' y='91'>
+			<sprite l='64' t='879' r='127' b='909' texture="MAIN_STORE_2"/>
+          		<msprite sx='476' sy='91' ex='476' ey='91' l='0' t='910' r='63' b='940' texture="MAIN_STORE_2"/>
+			<msprite sx='540' sy='91' ex='540' ey='91' l='64' t='910' r='127' b='940' texture="MAIN_STORE_2"/>
+			<msprite sx='604' sy='91' ex='604' ey='91' l='128' t='910' r='191' b='940' texture="MAIN_STORE_2"/>
+			<msprite sx='668' sy='91' ex='668' ey='91' l='192' t='910' r='255' b='940' texture="MAIN_STORE_2"/>
+			<msprite sx='732' sy='91' ex='732' ey='91' l='256' t='910' r='319' b='940' texture="MAIN_STORE_2"/>
+            		<msprite sx='796' sy='91' ex='796' ey='91' l='320' t='910' r='383' b='940' texture="MAIN_STORE_2"/>
+        	</page>
+		<page name="NSKILL_AGILE_SORT" x='604' y='91'>
+      		    	<sprite l='128' t='879' r='191' b='909' texture="MAIN_STORE_2"/>
+      		    	<msprite sx='476' sy='91' ex='476' ey='91' l='0' t='910' r='63' b='940' texture="MAIN_STORE_2"/>
+			<msprite sx='540' sy='91' ex='540' ey='91' l='64' t='910' r='127' b='940' texture="MAIN_STORE_2"/>
+			<msprite sx='604' sy='91' ex='604' ey='91' l='128' t='910' r='191' b='940' texture="MAIN_STORE_2"/>
+			<msprite sx='668' sy='91' ex='668' ey='91' l='192' t='910' r='255' b='940' texture="MAIN_STORE_2"/>
+			<msprite sx='732' sy='91' ex='732' ey='91' l='256' t='910' r='319' b='940' texture="MAIN_STORE_2"/>
+            		<msprite sx='796' sy='91' ex='796' ey='91' l='320' t='910' r='383' b='940' texture="MAIN_STORE_2"/>
+    		</page>
+		<page name="NSKILL_SPIRIT_SORT" x='668' y='91'>
+      		    	<sprite l='192' t='879' r='255' b='909' texture="MAIN_STORE_2"/>
+      		    	<msprite sx='476' sy='91' ex='476' ey='91' l='0' t='910' r='63' b='940' texture="MAIN_STORE_2"/>
+			<msprite sx='540' sy='91' ex='540' ey='91' l='64' t='910' r='127' b='940' texture="MAIN_STORE_2"/>
+			<msprite sx='604' sy='91' ex='604' ey='91' l='128' t='910' r='191' b='940' texture="MAIN_STORE_2"/>
+			<msprite sx='668' sy='91' ex='668' ey='91' l='192' t='910' r='255' b='940' texture="MAIN_STORE_2"/>
+			<msprite sx='732' sy='91' ex='732' ey='91' l='256' t='910' r='319' b='940' texture="MAIN_STORE_2"/>
+            		<msprite sx='796' sy='91' ex='796' ey='91' l='320' t='910' r='383' b='940' texture="MAIN_STORE_2"/>
+    		</page>
+		<page name="NSKILL_DEFENCE_SORT" x='732' y='91'>
+      		    	<sprite l='256' t='879' r='319' b='909' texture="MAIN_STORE_2"/>
+      		    	<msprite sx='476' sy='91' ex='476' ey='91' l='0' t='910' r='63' b='940' texture="MAIN_STORE_2"/>
+			<msprite sx='540' sy='91' ex='540' ey='91' l='64' t='910' r='127' b='940' texture="MAIN_STORE_2"/>
+			<msprite sx='604' sy='91' ex='604' ey='91' l='128' t='910' r='191' b='940' texture="MAIN_STORE_2"/>
+			<msprite sx='668' sy='91' ex='668' ey='91' l='192' t='910' r='255' b='940' texture="MAIN_STORE_2"/>
+			<msprite sx='732' sy='91' ex='732' ey='91' l='256' t='910' r='319' b='940' texture="MAIN_STORE_2"/>
+            		<msprite sx='796' sy='91' ex='796' ey='91' l='320' t='910' r='383' b='940' texture="MAIN_STORE_2"/>
+    		</page>
+		<page name="NSKILL_CONCENTRATION_SORT" x='796' y='91'>
+      		    	<sprite l='320' t='879' r='383' b='909' texture="MAIN_STORE_2"/>
+      		    	<msprite sx='476' sy='91' ex='476' ey='91' l='0' t='910' r='63' b='940' texture="MAIN_STORE_2"/>
+			<msprite sx='540' sy='91' ex='540' ey='91' l='64' t='910' r='127' b='940' texture="MAIN_STORE_2"/>
+			<msprite sx='604' sy='91' ex='604' ey='91' l='128' t='910' r='191' b='940' texture="MAIN_STORE_2"/>
+			<msprite sx='668' sy='91' ex='668' ey='91' l='192' t='910' r='255' b='940' texture="MAIN_STORE_2"/>
+			<msprite sx='732' sy='91' ex='732' ey='91' l='256' t='910' r='319' b='940' texture="MAIN_STORE_2"/>
+            		<msprite sx='796' sy='91' ex='796' ey='91' l='320' t='910' r='383' b='940' texture="MAIN_STORE_2"/>
+    		</page>    		
+  	</tab>
+
+	<SKILLFREESETITEMSLOT name="SKILLFREESETSLOT">
+		<template>						
+			<sprite l='580' t='512' r='673' b='578' texture="MAIN_STORE_2"/> 
+			<sprite l='580' t='579' r='673' b='645' texture="MAIN_STORE_2"/> 
+			<sprite l='580' t='647' r='669' b='709' texture="MAIN_STORE_2"/>
+
+			<sprite name="MARK_SPIRIT"        l='675' t='513' r='688' b='526' texture="MAIN_STORE_2"/> 
+			<sprite name="MARK_SPEED"         l='675' t='527' r='688' b='540' texture="MAIN_STORE_2"/> 
+			<sprite name="MARK_AGILE"         l='675' t='541' r='688' b='554' texture="MAIN_STORE_2"/> 
+  			<sprite name="MARK_DEFENCE"       l='675' t='555' r='688' b='568' texture="MAIN_STORE_2"/> 
+  			<sprite name="MARK_CONCENTRATION" l='675' t='569' r='688' b='582' texture="MAIN_STORE_2"/> 
+  			<sprite name="MARK_PLUS"          l='675' t='583' r='688' b='596' texture="MAIN_STORE_2"/> 
+
+			<button name="BUY" x='53' y='0' w='36' h='18'>
+				<sprite l='579' t='739' r='615' b='757' texture="MAIN_STORE_2"/> 
+				<sprite l='579' t='758' r='615' b='776' texture="MAIN_STORE_2"/> 
+				<sprite l='579' t='777' r='615' b='795' texture="MAIN_STORE_2"/> 
+			</button>
+
+			<button name="EXTENSION_BUY" x='53' y='0' w='36' h='18'>
+				<sprite l='616' t='739' r='652' b='757' texture="MAIN_STORE_2"/> 
+				<sprite l='616' t='758' r='652' b='776' texture="MAIN_STORE_2"/> 
+				<sprite l='616' t='777' r='652' b='795' texture="MAIN_STORE_2"/> 
+			</button>
+			
+		</template>
+		<slot name="SKILL_PRESET_SLOT_1" x="350" y="121" w="89" h="62"/>
+		<slot name="SKILL_PRESET_SLOT_2" x="350" y="188" w="89" h="62"/>
+		<slot name="SKILL_PRESET_SLOT_3" x="350" y="255" w="89" h="62"/>
+		<slot name="SKILL_PRESET_SLOT_4" x="350" y="322" w="89" h="62"/>
+		<slot name="SKILL_PRESET_SLOT_5" x="350" y="389" w="89" h="62"/>
+
+		<column name ="PRESET_SLOT_NAME_1"   x ='365' y ='145' w ='61' h ='21' fontsize ='18' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>
+		<column name ="PRESET_SLOT_LEV_1"    x ='375' y ='167' w ='34' h ='16' fontsize ='13' color='FFf7c35e' shadow='FF000000' format='VCENTER RIGHT'/>
+
+		<column name ="PRESET_SLOT_NAME_2"   x ='365' y ='212' w ='61' h ='21' fontsize ='18' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>
+  		<column name ="PRESET_SLOT_LEV_2"    x ='375' y ='234' w ='34' h ='16' fontsize ='13' color='FFf7c35e' shadow='FF000000' format='VCENTER RIGHT'/>
+
+  		<column name ="PRESET_SLOT_NAME_3"   x ='365' y ='279' w ='61' h ='21' fontsize ='18' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>
+  		<column name ="PRESET_SLOT_LEV_3"    x ='375' y ='301' w ='34' h ='16' fontsize ='13' color='FFf7c35e' shadow='FF000000' format='VCENTER RIGHT'/>
+
+  		<column name ="PRESET_SLOT_NAME_4"   x ='365' y ='346' w ='61' h ='21' fontsize ='18' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>
+  		<column name ="PRESET_SLOT_LEV_4"    x ='375' y ='368' w ='34' h ='16' fontsize ='13' color='FFf7c35e' shadow='FF000000' format='VCENTER RIGHT'/>
+
+  		<column name ="PRESET_SLOT_NAME_5"   x ='365' y ='413' w ='61' h ='21' fontsize ='18' color='FFFFFFFF' shadow='FF000000' format='VCENTER CENTER'/>
+  		<column name ="PRESET_SLOT_LEV_5"    x ='375' y ='435' w ='34' h ='16' fontsize ='13' color='FFf7c35e' shadow='FF000000' format='VCENTER RIGHT'/>
+	</SKILLFREESETITEMSLOT>	
+	
+</UIDEFINE>

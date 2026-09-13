@@ -1,0 +1,27 @@
+<UIDEFINE>
+  	<image name="GIFT_PACKAGE_STORE3" filename="present_code.DDS"/>
+
+  	<msprite name ="PACKAGE_BG" sx='0' sy='0' ex='288' ey='225' l='950' t='0' r='1015' b='65' texture="GIFT_PACKAGE_STORE3"/>
+
+  	<msprite name="Package_Popup" sx='0' sy='0' ex='270' ey='170' l='509' t='687' r='1015' b='1023' texture="GIFT_PACKAGE_STORE3"/>
+	<msprite name="Hukubuku_Popup" sx='0' sy='0' ex='270' ey='170' l='1' t='687' r='507' b='1023' texture="GIFT_PACKAGE_STORE3"/>
+
+	<button name="PACKAGE_PAGE_UP" x='747' y='302' w='23' h='28'>
+		<sprite l="258" t="461" r="281" b="489" texture="UI_Button"/>
+		<sprite l="282" t="461" r="305" b="489" texture="UI_Button"/>
+		<sprite l="306" t="461" r="329" b="489" texture="UI_Button"/>
+	</button>
+
+	<button name="PACKAGE_PAGE_DOWN" x='747' y='427' w='20' h='34'>
+		<sprite l="258" t="490" r="281" b="518" texture="UI_Button"/>
+		<sprite l="282" t="490" r="305" b="518" texture="UI_Button"/>
+		<sprite l="306" t="490" r="329" b="518" texture="UI_Button"/>
+	</button>   
+
+	<button name="PACKAGE_PAGE_GET" x="687" y="473" w='84' h='28'>
+		<sprite l="777" t="881" r="861" b="909" texture="UI_Button"/>
+		<sprite l="777" t="910" r="861" b="938" texture="UI_Button"/>
+		<sprite l="777" t="939" r="861" b="967" texture="UI_Button"/>
+	</button>
+	
+</UIDEFINE>

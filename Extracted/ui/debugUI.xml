@@ -1,0 +1,20 @@
+<UIDEFINE>
+
+	<all_loading_image name="packetvier_ui_back" filename="tuto_back.dds"/>
+
+	<msprite name="back" sx='0' sy='0' ex='0' ey='0' l='0' t='0' r='820' b='600' texture="packetvier_ui_back"/>
+
+	<list name="UICHAT" l='0' t='0' r='800' b='600'>
+		<button name="UP" x='800' y='20' w='20' h='34'>
+			<sprite l='51' t='83' r='71' b='117' texture="UI_Popup_1"/>
+			<sprite l='152' t='61' r='172' b='95' texture="UI_Popup_1"/>
+			<sprite l='152' t='96' r='172' b='130' texture="UI_Popup_1"/>
+		</button>
+		<button name="DN" x='800' y='540' w='20' h='34'>
+			<sprite l='72' t='83' r='92' b='117' texture="UI_Popup_1"/>
+			<sprite l='173' t='61' r='193' b='95' texture="UI_Popup_1"/>
+			<sprite l='173' t='96' r='193' b='130' texture="UI_Popup_1"/>
+		</button>
+	</list>
+
+</UIDEFINE>

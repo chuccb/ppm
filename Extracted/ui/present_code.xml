@@ -1,0 +1,14 @@
+<UIDEFINE>
+	<image name="Present_Code" filename="present_code.DDS" />
+ 	<image name="STORE_CODE_BACK" filename="store_codeback.jpg" />
+  
+	<msprite name="PRESENTCODE_1" sx='463' sy='82' ex='463' ey='82' l='0' t='0' r='542' b='612' texture="Present_Code"/> 
+	<msprite name="PRESENTCODE_3" sx='0' sy='0' ex='554' ey='594' l='0' t='0' r='0' b='0' texture="Present_Code" /> 
+  
+	<button name="OK" x="841" y="594" w="84" h="28">
+		 <sprite l="700" t="480" r="784" b="508" texture="Present_Code"/> 
+   		 <sprite l="700" t="509" r="784" b="537" texture="Present_Code"/> 
+   		 <sprite l="700" t="538" r="784" b="566" texture="Present_Code"/> 
+	</button>
+
+</UIDEFINE>
