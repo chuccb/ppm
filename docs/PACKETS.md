@@ -490,6 +490,20 @@ repeat: string from, u8, string title, u32 msg_id, string body(≤201), string, 
 **ACK 297** (sub_57AA50): `u8 result` — 0=成功, 之後 5×s32
 (cash/餘額顯示組); 1..11 = 錯誤碼 (11 種禮物失敗訊息)。
 
+### 3.15d 連線生命週期 103/141-144 (九輪讀畢)
+```
+103 GE_LOGOUT_REQ (sub_58D660): 無 payload — client 登出通知
+141 PM_CONNECT_REQ (sub_556530): 無 payload — 進房 TCP 握手
+142 PM_CONNECT_ACK (sub_5565D0): str host, s32 port, u8, f32 —
+    伺服器指示戰鬥連線目標 (client 隨即連 UDP)
+143 PM_UDPSTART_REQ (sub_555C60): str nick, s32 n100 (login 681 的
+    n100 原樣回送), s8 1, s32 dword_231800C (billing id)
+144 PM_UDPSTART_ACK (sub_555D50): u8 n108 (0=正常 1/2=模式切換
+    3=踢出), u8 flag65, s32 → 1D0D23C, str(64), s32, s32, s32, f32;
+    u8 flag66!=0 → {u8, u8, u8, u8, 8×s32} (延伸參數塊 →
+    sub_A1C800); n108 1/2/3 各自進不同狀態機
+```
+
 ### 3.15c 好友/訊息家族 419-441 (九輪讀畢)
 ```
 419 GL_MSG_ADD_REQ → 420 ACK (sub_559810): str to_nick, u8 x, u8 result
