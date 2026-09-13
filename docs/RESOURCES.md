@@ -235,6 +235,14 @@ hand*.tga 互證: 那是「試衣間手部貼圖」快取)
 - map/game*.dat (material/object/sfx/shader) = 地圖渲染資源索引
   (戰鬥模擬才需要, 私服可略)
 
+## 5f. 收尾細項 (廿一輪終)
+- convars 的 m_cDmg2MultiplyAvataAbility = 第二套角色參數 (2x 傷害
+  模式), 值與基本組相同 — 模式共用參數
+- RecommandItem Concept: 1=男性向 (531) / 2=女性向 (485) / 20=特殊
+  (14) — 頭行第二值 "20" 即最大 concept 編號
+- ItemAbilityNameTAble_JP: 能力顯示名 (速度系/機動系/鎮壓系...)
+- 全資料最終計數: **7 表 37,044 條**, 全部測試綠
+
 ## 6. 其他已知資源
 
 - `system/map_StartIndex.xml`, `SelectRandomMap.xml`: 地圖選擇
