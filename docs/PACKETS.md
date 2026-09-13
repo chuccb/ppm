@@ -407,6 +407,10 @@ repeat count:
   s32 v18 (旗標, 進 sub_468470 最後參數)
 (UI 於 36084 行: EE8D18 印在 "PG" label, ArgList=v20 印在 "CASH",
 EE8D1C 印在 "CP" — 標籤即鐵證)
+count==0 失敗路徑的 `u8 err` (→ sub_468470 a3, 十一輪逐 case):
+0=一般失敗(0xB7; a4==0 且 a5(item_id)≠0 時帶名字 0x348/0x349),
+1=餘額不足(0xCD), 4=格式訊息(0x39A), 5/7=期限/重複(0x63),
+8=背包滿(0x327), 9=其他 — 只有這 7 個值有訊息, 其他值靜默。
 ```
 GS_BUY_ONCEITEM_REQ (695): u8/s32 item_id, string opt, u8 kind, u8 period。
 period 合法值: 1/7/15/30/60/90 天 (kind 0,1,3,14)、0 = 永久型 (kind 2,4,9,15,10,11,16)。
