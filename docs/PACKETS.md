@@ -646,6 +646,23 @@ GM 權限: 這些 REQ 無等級檢查 — server 端必須以帳號 GM flag gate
 (客戶端 builder 存在不代表可用; 681 result 0xD6 的「GM IP 白名單」
 是唯一 client 端 gate)。
 
+### 3.15d2a ペパチ轉蛋機完整鏈 (廿七輪 — 場景層補完)
+```
+698 ENTER_PEPACHI_REQ: 無 payload (builder 由 UI 直組, 抽取器未見)
+699 ENTER_PEPACHI_ACK: u8, s32, s32 (五輪已錄, CLobbyShop 層)
+700 START_GAME_REQ (builder): u8 machine, s32 (投幣型式)
+701 START_GAME_ACK (sub_84A000→sub_84A490 — 轉蛋動畫控制器層!):
+    bool err, u8 err_code(2→訊息264, 3→...; 429 預設);
+    OK → s32×2 (jackpot/餘幣), u8, u8 count(≤11),
+    count×{s32 reel_a, s32 reel_b, s32 reel_c} — 11 組轉輪結果!
+    count>=11 → 大獎模式 (全轉輪顯示, 15.0 秒動畫)
+702 PEPACHI_LIST_REQ: 無; 703 ACK: s32, s32 n, n×f32 (機率表)
+```
+對應資源: Extracted/pepachi/*.swf (轉輪動畫 Flash!) —
+id 格式 機台_轉輪_變體.swf; 賠率由 server 的 703 機率表控制。
+handler 不在 dispatcher 也不在 CLobbyShop — 在**轉蛋動畫控制器**
+(0x84A000, 第四個封包處理層!)
+
 ### 3.15d2b 推播族 NOTIFY/NOTICE 補遺 (廿六輪終掃)
 ```
 587 CLAN_GAMEEND_RESULT: (s32×3+u16×2)×2 — 戰隊戰兩隊結算
@@ -1055,6 +1072,45 @@ dispatcher case 102 → `sub_58D6F0` 立即 `ctor(101)` 回送
    MASTER_TEST/UPITEM 等 GM 殘留, *_BASE 佔位 (100/560/580/680)
 → 私服無需理會死協定; 622 條活協定全部有佈局/序列記錄。
 ```
+
+## 3.98 CClientData 記憶體總圖 (廿七輪彙整 — 歷輪碎片權威版)
+byte 偏移 (this 為物件基址):
+```
++4     u8   slot_current (198 尾段寫)
++60    char nick[24]     (wire str)
++88    u8   char_type    (wire u8; 1..14 = ICT_* 角色)
++92    s32  [23] wire level (參考值)
++96    s32  [24] exp
++100   s32  [25] level ← client 由 exp 查表 sub_403360 重算
++104   s32  [26] cash
++108   s32  [27] 任務 cond1 計數
++112/116 s32 [28]/[29] 閒置
++136..144 s32 [34..36] 保留 (無讀取者)
++148   s32  [37] wins    (任務 cond5)
++152   s32  [38] losses  (cond6)
++156..168 s32 [39..42] kills/deaths/disc/hearts (cond3/4/7/10)
++172   s32  [43] headshots (cond8)
++176   s32  [44] combos  (cond9; wire 亂序: 43,45,46,44)
++180/184 s32 [45]/[46] double/triple (cond11/12)
++188..204 s32 [47..51] multi/ultra/z/k/dd (cond13..17)
++208   48B  [52..63] 遊玩秒(cond20)+模式場次[53..60]
++304..306 u8×3 閒置旗標
++313   u8   角色槽數
++314   20×26B 角色槽 {u8 slot, u8 type, 12×u16 外觀偏移}
+       (u16 = full_id - 類別基底; 基底表見 §3.15pre1)
++628   13×u16×20 = wire 讀入鏡像 (sub_524010 的 157+13i 區)
++840   5120×28B 背包 {flags,id,f1,f2,period,kind,dura×2}
++36117 s32  禮物數; +36119 1024×23B 禮物條目
++36095 區   9×s32 稱號槽 (sub_527550)
++144201 u8  武器編組數; +144204 4×44B 編組
+       {u8 no, u16 equipped, 3×u16 sub, 8×u32 parts}
++144420 28B 快速槽 7×s32 ヘアパズル (sub_527D00)
++144452 u8  n5 拼圖參數
+```
+封包處理層全圖 (五層): ① dispatcher sub_58B010 (306 case)
+② 場景 vtable sub_407360→CLobbyShop 等 ③ 登入層 0x43E651
+④ 轉蛋動畫控制器 0x84A000 (701) ⑤ 語音 vtable sub_885D00
+(792/794/796) + UDP 層 sub_595E80。
 
 ## 4. 對伺服器 DB 的直接推論
 
