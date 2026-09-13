@@ -56,6 +56,14 @@ public static class BattleRelayHandlers
 
     public static void Register(Registrar add)
     {
+        // Y_TCP_INF (165→166): TCP 備援戰鬥同步 (卅輪 — 第六處理層
+        // sub_749B90 subtype 1-9)。165 REQ 首欄無 slot — server 轉發時
+        // 以 166 = u8 slot + 原 payload 補上 (與 GG 模式1 同構)。
+        add(Opcode.Y_TCP_INF_REQ, MakeSlotRelay(Opcode.Y_TCP_INF_ACK));
+
+        // PM_TSPOSUPDATE (271→272): TS 模式位置更新 — 同上轉發
+        add(Opcode.PM_TSPOSUPDATE_REQ, MakeSlotRelay(Opcode.PM_TSPOSUPDATE_ACK));
+
         foreach (var (req, ack) in SlotPrefixed)
         {
             add(req, MakeSlotRelay(ack));
