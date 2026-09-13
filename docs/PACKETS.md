@@ -1038,6 +1038,24 @@ dispatcher case 102 → `sub_58D6F0` 立即 `ctor(101)` 回送
 
 ---
 
+## 3.99 廿六輪終極盤點 — 670 opcode 全分類收官
+```
+✔ dispatcher 直讀     300 條 (LAYOUTS.md 自動表)
+✔ REQ builder         261 條 (LAYOUTS_REQ.md 自動表)
+✔ 場景 vtable 層      699/703/707/807/809 (CLobbyShop), 719-723
+                      (IVotingNetwork), 788 (sub_407360)
+✔ 登入層 0x43E651     681/694/882
+✔ UDP 層 sub_595E80   2-34 私有編號 + 153-164 + 155/156 HOLE_INF
+✘ 真·死協定 ~80 條    無 builder 無 parser 無別層引用:
+   PM_MASTER/ID/LOGOUT/CH_SERVER (145-152 舊版中控殘留),
+   GR_STARTTIME/AUTOCHANGE/CRYSTAL 系 (棄用模式),
+   GV_VIEWER 組 560-570 (外部觀戰工具協定, client 不實作),
+   GS_STOREOK/NEWGIFT/HUKUBUKURO/PRESENTPACKAGE (棄用商店流程),
+   SECURITY_AHNLAB/NPGAMEGUARD (韓版安全模組, 日版不用),
+   MASTER_TEST/UPITEM 等 GM 殘留, *_BASE 佔位 (100/560/580/680)
+→ 私服無需理會死協定; 622 條活協定全部有佈局/序列記錄。
+```
+
 ## 4. 對伺服器 DB 的直接推論
 
 1. **背包上限 5120 格、每包分頁 100 條** (sub_524B70) → `inventory.slot 0..5119`。
