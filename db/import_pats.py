@@ -93,6 +93,9 @@ def import_quests(con: sqlite3.Connection) -> int:
                 int(parts[idx["QuestTermData"]] or 0),     # 目標值
                 int(parts[idx["ClearItem1"]] or 0) or None,
                 int(parts[idx["UserLevel"]] or 0),
+                int(parts[idx["CharacterType"]] or 0),     # 0=全角色, 1..14 限定
+                int(parts[idx["ClearItemOption1"]] or 0),  # 獎勵期限天數 (0=永久)
+                1 if parts[idx["Hidden"]].strip() == "1" else 0,
             )
         )
 
@@ -101,8 +104,9 @@ def import_quests(con: sqlite3.Connection) -> int:
     con.executemany(
         """
         INSERT OR REPLACE INTO quest_catalog
-            (quest_id, name, quest_type, is_daily, goal_type, goal, reward_item, req_level)
-        VALUES (?,?,?,?,?,?,?,?)
+            (quest_id, name, quest_type, is_daily, goal_type, goal, reward_item,
+             req_level, char_type, reward_period, hidden)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?)
         """,
         rows,
     )
@@ -265,7 +269,13 @@ def main() -> int:
             con.execute(f"ALTER TABLE item_catalog ADD COLUMN {col} INTEGER NOT NULL DEFAULT 0")
 
     qcols = [r[1] for r in con.execute("PRAGMA table_info(quest_catalog)")]
-    for col, decl in (("goal_type", "INTEGER NOT NULL DEFAULT 0"), ("req_level", "INTEGER NOT NULL DEFAULT 0")):
+    for col, decl in (
+        ("goal_type", "INTEGER NOT NULL DEFAULT 0"),
+        ("req_level", "INTEGER NOT NULL DEFAULT 0"),
+        ("char_type", "INTEGER NOT NULL DEFAULT 0"),
+        ("reward_period", "INTEGER NOT NULL DEFAULT 0"),
+        ("hidden", "INTEGER NOT NULL DEFAULT 0"),
+    ):
         if col not in qcols:
             con.execute(f"ALTER TABLE quest_catalog ADD COLUMN {col} {decl}")
 

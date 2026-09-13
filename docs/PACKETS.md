@@ -381,8 +381,10 @@ s32     start_index          (分頁, 每包最多 100 條, 背包上限 5120)
 repeat until sentinel:
   s32   inv_slot   (負值 = 結束)
   s32   item_id    (負值/非法 = 中止)
-  float f1         (耐久?)
-  float f2
+  float f1         (⭐ 廿一輪定案: 外觀技能 roll 值 — NewSkillLevTable
+  float f2          0..140 稀有度分級, Hair/Jacket/Pants/Shoes/Accessory/
+                    Set 六槽適用; 舊制 ItemAbility 為負值懲罰表。
+                    server 送 0 = 無技能 (合法); 進階可隨機 roll)
   s32   period     (剩餘天數)
   u8    extra      ⚠ 四輪修正: 200 有 extra (sub_570AB0 呼叫 sub_524B70(cd,pkt,1));
                    無-extra 版 (a3=0) 屬 290/294 MASTER_USERINFO 系
@@ -513,6 +515,20 @@ total 送錯會讓任務進度爆走 (再次強調: 必須 MAX 單調)。
 其他欄位: PeriodType 恆 1; QuestRepeat 215 條可重複; LimitDate 分鐘制
 (180/1200/1440); TermItem1-5 (305 條要求持有物品); UseWeapon (20 條
 限定武器)。
+
+### 3.12c 庫存條目記憶體結構 (sub_524F70, 28B) — 廿一輪
+`{u32 flags=0, s32 item_id, f32 f1, f32 f2, s32 period, u8 kind,
+u16 dura, u16 dura_max}` (7 dword × 最多 5,120 槽 @ this+210)。
+kind 0/1/14 與 12/13/17 (可覆寫類) 走覆寫路徑, 其他 kind 重複購買
+會新增槽位 — 對應 200/205 條目欄位一一吻合。
+
+### 3.12d Quest.pat 欄位補完 (廿一輪)
+- CharacterType: 0=全角色 (606 條), 1..14=限定角色任務 (各 19 條)
+- ChanelList: "4_5" 格式 = 頻道限定 (20 條)
+- Hidden: 119 條隱藏任務 (achievements)
+- ClearItemOption1 = **獎勵期限天數** (0=永久 612, 1/7/15/30 天)
+- ClearItemLimit 全 0 (未使用)
+→ quest_catalog 已補 char_type/reward_period/hidden 欄位
 
 ### 3.13 GQ_QUEST 任務家族 (八輪全家讀畢)
 13-byte 任務快照 = `{s32 quest_index, s32 progress, u8 state, s32 extra}`

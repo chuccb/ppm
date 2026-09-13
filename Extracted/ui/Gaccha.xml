@@ -1,0 +1,42 @@
+<UIDEFINE>
+	<image name="PEPAGACHA" filename="pepagacha.dds"/>
+
+	<msprite sx='0' sy='0' ex='476' ey='91' l='0' t='0' r='516' b='593' texture="PEPAGACHA"/>
+
+	<msprite name ="MOVIE_LAYER" sx='0' sy='0' ex='494' ey='199' l='0' t='0' r='480' b='360' texture="PEPAGACHA"/>
+
+	<column name="BANNER" x="489" y="104" w="256" h="77" />
+
+	<button name="SKIP" x='896' y='565' w='80' h='46'>
+		<sprite l='520' t='162' r='600' b='208' texture="PEPAGACHA"/>
+		<sprite l='601' t='162' r='681' b='208' texture="PEPAGACHA"/>
+		<sprite l='682' t='162' r='762' b='208' texture="PEPAGACHA"/>
+	</button>
+
+	<button name="START_CASH" x='748' y='627' w='116' h='46'>
+	    	<sprite l='634' t='0' r='750' b='46' texture="PEPAGACHA"/>
+	    	<sprite l='634' t='47' r='750' b='93' texture="PEPAGACHA"/>
+	    	<sprite l='634' t='94' r='750' b='140' texture="PEPAGACHA"/>
+	</button>
+
+<!--
+	<button name="START_PG" x='484' y='627' w='116' h='46'>
+	   	<sprite l='517' t='0' r='633' b='46' texture="PEPAGACHA"/>
+	    	<sprite l='517' t='47' r='633' b='93' texture="PEPAGACHA"/>
+	    	<sprite l='517' t='94' r='633' b='140' texture="PEPAGACHA"/>
+	</button> 
+
+	<button name="START_CP" x='724' y='627' w='116' h='46'>
+	  	<sprite l='751' t='0' r='867' b='46' texture="PEPAGACHA"/>
+	   	<sprite l='751' t='47' r='867' b='93' texture="PEPAGACHA"/>
+	    	<sprite l='751' t='94' r='867' b='140' texture="PEPAGACHA"/>
+	</button> -->
+
+	<button name="START_TEN_CASH" x='868' y='627' w='116' h='46'>
+	   	<sprite l='517' t='507' r='633' b='553' texture="PEPAGACHA"/>
+	    	<sprite l='517' t='554' r='633' b='600' texture="PEPAGACHA"/>
+	    	<sprite l='517' t='601' r='633' b='647' texture="PEPAGACHA"/>
+	</button> 
+
+
+</UIDEFINE>

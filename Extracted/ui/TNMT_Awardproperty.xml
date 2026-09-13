@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- edited with XMLSPY v2004 rel. 3 U (http://www.xmlspy.com) by S-->
+<tournamentAwardTable>
+	<award_1 comment="tournament one." index="3">
+		<emblem_1 pos_1="239 ,250" size="64"/>
+		<emblem_2 pos_1="304 ,197" pos_2="369 ,197" size="64"/>
+		<emblem_3 pos_1="272 ,197" pos_2="339 ,197" pos_3="404 ,197" size="64"/>
+		<emblem_4 pos_1="236 ,197" pos_2="304 ,197" pos_3="369 ,197" pos_4="435 ,197" size="64"/>
+		<present_1 pos_1="339 ,262" size="64"/>
+		<present_2 pos_1="304 ,262" pos_2="369 ,262" size="64"/>
+		<present_3 pos_1="272 ,262" pos_2="339 ,262" pos_3="404 ,262" size="64"/>
+		<present_4 pos_1="236 ,262" pos_2="304 ,262" pos_3="369 ,262" pos_4="435 ,262" size="64"/>
+	</award_1>
+	<award_2 comment="tournament two." index="2">
+		<emblem_1 pos_1="177 ,350" size="64"/>
+		<emblem_2 pos_1="139 ,350" pos_2="205 ,350" size="64"/>
+		<emblem_3 pos_1="111 ,350" pos_2="177 ,350" pos_3="243 ,350" size="64"/>
+		<emblem_4 pos_1="73 ,350" pos_2="139 ,350" pos_3="205 ,350" pos_4="271 ,350" size="64"/>
+		<present_1 pos_1="177 ,415" size="64"/>
+		<present_2 pos_1="139 ,415" pos_2="205 ,415" size="64"/>
+		<present_3 pos_1="111 ,415" pos_2="177 ,415" pos_3="243 ,415" size="64"/>
+		<present_4 pos_1="73 ,415" pos_2="139 ,415" pos_3="205 ,415" pos_4="271 ,415" size="64"/>
+	</award_2>
+	<award_3 comment="tournament three." index="1">
+		<emblem_1 pos_1="517 ,350" size="64"/>
+		<emblem_2 pos_1="479 ,350" pos_2="545 ,350" size="64"/>
+		<emblem_3 pos_1="451 ,350" pos_2="517 ,350" pos_3="583 ,350" pos_4="649 ,350" size="64"/>
+		<emblem_4 pos_1="413 ,350" pos_2="470 ,350" pos_3="545 ,350" pos_4="611 ,350" size="64"/>
+		<present_1 pos_1="517 ,415" size="64"/>
+		<present_2 pos_1="479 ,415" pos_2="545 ,415" size="64"/>
+		<present_3 pos_1="451 ,415" pos_2="517 ,415" pos_3="583 ,415" pos_4="649 ,415" size="64"/>
+		<present_4 pos_1="413 ,415" pos_2="470 ,415" pos_3="545 ,415" pos_4="611 ,415" size="64"/>
+	</award_3>
+	<!-- -->
+	<nomarl_award comment="normal tournament" index="4">
+		<emblem_1 pos_1="190 ,197" size="64"/>
+		<emblem_2 pos_1= "504 ,147" pos_2="504 ,147" size="32"/>
+		<emblem_3 pos_1="426 ,287" pos_2="580 ,287" pos_3="580 ,287" size="32"/>
+	</nomarl_award>
+	<abnomarl_award comment="abnormal tournament" index="5">
+		<emblem_1 pos_1="170 ,198" size="64"/>
+		<emblem_2 pos_1="368 ,154" pos_2="368 ,287" size="32"/>
+		<emblem_3 pos_1="498 ,163" pos_2="608 ,163" pos_3="498 ,281" pos_4="608 ,281" size="32"/>
+	</abnomarl_award>
+</tournamentAwardTable>

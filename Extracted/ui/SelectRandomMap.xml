@@ -1,0 +1,91 @@
+﻿<UIDEFINE>
+	<image name="LOBBY03_CUSTOM" filename="lobby_03.dds"/>
+	<image name="Game_Room_RANDOM_Back" filename="BACK5.dds"/>
+
+
+	<msprite name="GAMEROOM_Random_BACKGROUND" sx="0" sy="0" ex="0" ey="0" l="0" t="0" r="1024" b="768" texture="Game_Room_RANDOM_Back"/>
+	<msprite name="CUSTOM_ON_BG" sx="392" sy="63" ex="392" ey="63" l="316" t="143" r="549" b="643" texture="LOBBY03_CUSTOM"/> 
+	
+	<select name="CUSTOM_MAP_LIST" count="8" OffX="0" OffY="0">
+		<rect l="406" t="171" r="608" b="193" />
+    		<rect l="406" t="195" r="608" b="217" />
+		<rect l="406" t="219" r="608" b="241" />
+		<rect l="406" t="243" r="608" b="265" />
+		<rect l="406" t="267" r="608" b="289" />
+		<rect l="406" t="291" r="608" b="313" />
+		<rect l="406" t="315" r="608" b="337" />
+		<rect l="406" t="339" r="608" b="361" />
+
+		<sprite name="CUSTOM_MOUSE_OVER" l="316" t="644" r="518" b="666" texture="LOBBY03_CUSTOM" />
+		<sprite name="CUSTOM_MOUSE_CLICK" l="0" t="0" r="0" b="0" texture="LOBBY03_CUSTOM" />
+		<sprite name="CUSTOM_MAP_CHECK_STAR_OFF" l="145" t="875" r="166" b="897" texture="Game_Room" />
+		<sprite name="CUSTOM_MAP_CHECK_STAR" l="87" t="875" r="108" b="897" texture="Game_Room" />
+
+		<column name="CUSTOM_MAP_NAME" x="7" y="2" w="156" h="18" fontsize="14" color="FFFFFFFF" format="VCENTER LEFT" />
+   		<column name="CUSTOM_MAP_CHECK" x="174" y="0" w="21" h="22" />
+
+		<button name="CUSTOM_PAGE_LEFT" x="446" y="370" w="11" h="11">
+			<sprite l="109" t="875" r="121" b="886" texture="Game_Room"/>
+			<sprite l="121" t="875" r="132" b="886" texture="Game_Room"/>
+			<sprite l="133" t="875" r="144" b="886" texture="Game_Room"/>
+		</button>
+
+		<button name="CUSTOM_PAGE_RIGHT" x="558" y="370" w="11" h="11">
+			<sprite l="109" t="887" r="121" b="898" texture="Game_Room"/>
+			<sprite l="121" t="887" r="132" b="898" texture="Game_Room"/>
+			<sprite l="133" t="887" r="144" b="898" texture="Game_Room"/>
+		</button>
+
+		<eventrect name="SCROLL_RECT" x="406" y="171" w="202" h="190" />
+
+	</select>
+
+	<column name="CUSTOM_MAP_TOTAL_PAGE" x="515" y="367" w="40" h="18"/>
+
+	<column name="CUSTOM_MAP_NOW_PAGE" x="460" y="367" w="40" h="18"/>
+
+	<button name="CUSTOM_OK" x="400" y="532" w="70" h="28">
+		<sprite l="316" t="667" r="386" b="695" texture="LOBBY03_CUSTOM"/> 
+		<sprite l="316" t="696" r="386" b="724" texture="LOBBY03_CUSTOM"/> 
+		<sprite l="316" t="725" r="386" b="753" texture="LOBBY03_CUSTOM"/>
+	</button>
+
+	<button name="CUSTOM_DEFAULT" x="472" y="532" w="70" h="28">
+		<sprite l="387" t="667" r="457" b="695" texture="LOBBY03_CUSTOM"/>
+		<sprite l="387" t="696" r="457" b="724" texture="LOBBY03_CUSTOM"/> 
+		<sprite l="387" t="725" r="457" b="753" texture="LOBBY03_CUSTOM"/> 
+	</button>
+
+	<button name="CUSTOM_CANCEL" x="544" y="532" w="70" h="28">
+		<sprite l="458" t="667" r="528" b="695" texture="LOBBY03_CUSTOM"/> 
+		<sprite l="458" t="696" r="528" b="724" texture="LOBBY03_CUSTOM"/> 
+		<sprite l="458" t="725" r="528" b="753" texture="LOBBY03_CUSTOM"/> 
+	</button>
+
+	<hscroll name="CUSTOM_SCROLL_MODE" l="433" t="142" r="582" b="165">
+		<button name="CUSTOM_MODE_LEFT" x="408" y="142" w="29" h="27">
+			<sprite l="203" t="791" r="226" b="814" texture="Game_Room"/>
+			<sprite l="203" t="815" r="226" b="838" texture="Game_Room"/>
+			<sprite l="203" t="839" r="226" b="862" texture="Game_Room"/>
+		</button>
+		<button name="CUSTOM_MODE_RIGHT" x="584" y="142" w="29" h="27">
+			<sprite l="227" t="791" r="250" b="814" texture="Game_Room"/>
+			<sprite l="227" t="815" r="250" b="838" texture="Game_Room"/>
+			<sprite l="227" t="839" r="250" b="862" texture="Game_Room"/>
+		</button>
+	</hscroll>
+
+<!-- 
+	if add New mode "TOTAL_MAP" x plus and new add column "MAP_NUM_".
+-->
+	<column name="TOTAL_MAP" x="8" y="0" w="0" h="0"/>
+
+	<column name="MAP_NUM_0" x="1" y="0" w="0" h="0"/>
+	<column name="MAP_NUM_1" x="2" y="0" w="0" h="0"/>
+	<column name="MAP_NUM_2" x="4" y="0" w="0" h="0"/>
+	<column name="MAP_NUM_3" x="8" y="0" w="0" h="0"/>
+	<column name="MAP_NUM_4" x="16" y="0" w="0" h="0"/>
+	<column name="MAP_NUM_5" x="512" y="0" w="0" h="0"/>
+	<column name="MAP_NUM_6" x="4096" y="0" w="0" h="0"/>
+	<column name="MAP_NUM_7" x="16384" y="0" w="0" h="0"/>
+</UIDEFINE>

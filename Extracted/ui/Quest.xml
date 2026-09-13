@@ -1,0 +1,293 @@
+﻿<UIDEFINE>		
+
+	<bgmfile filename="bgm/bgm_LOBBY.mp3" />
+	
+	
+	<image name="Quest_IMG" filename="Quest.dds" />
+
+	<msprite name="BACKGROUND" sx="0" sy="0" ex="0" ey="0" l="0" t="0" r="1024" b="768" texture="UI_Back1" />
+	<msprite name="QUEST_TITLE" sx="90" sy="0" ex="90" ey="0" l="347" t="890" r="712" b="915" texture="Quest_IMG" />
+	<msprite name="QUEST_NETCAFE" sx="461" sy="0" ex="461" ey="0" l="347" t="864" r="893" b="889" texture="Quest_IMG" />
+
+	<column name="TITLE_SERVER"      x="459" y="6" w="85" h="13" fontsize="12" color="FFFFFFFF" format="VCENTER RIGHT" />
+	<column name="TITLE_SERVER_TYPE" x="646" y="6" w="46" h="13" fontsize="12" color="FFFFFFFF" format="VCENTER CENTER" />
+
+	<msprite name="QUEST_PANNEL_L" sx="90" sy="33" ex="90" ey="33" l="0" t="0" r="365" b="722" texture="Quest_IMG" /> 
+	<msprite name="QUEST_PANNEL_R" sx="4619" sy="33" ex="461" ey="33" l="366" t="0" r="912" b="722" texture="Quest_IMG" />
+
+	
+	<button name="CHARACTER" x="9" y="33" w="62" h="68">
+		<sprite l="0" t="0" r="62" b="68" texture="UI_Button" />
+		<sprite l="0" t="69" r="62" b="137" texture="UI_Button" />
+		<sprite l="0" t="138" r="62" b="206" texture="UI_Button" />
+	</button>
+	<button name="LOBBY" x="9" y="104" w="62" h="68">
+		<sprite l="560" t="0" r="622" b="68" texture="UI_Button" />
+		<sprite l="560" t="69" r="622" b="137" texture="UI_Button" />
+		<sprite l="560" t="138" r="622" b="206" texture="UI_Button" />
+	</button>
+	<button name="SHOP" x="9" y="175" w="62" h="68">
+		<sprite l="62" t="0" r="124" b="68" texture="UI_Button" />
+		<sprite l="62" t="69" r="124" b="137" texture="UI_Button" />
+		<sprite l="62" t="138" r="124" b="206" texture="UI_Button" />
+	</button>
+
+	<tab name="QUESTDETAILINFO" count="3">
+		<page name="QUESTCHALLENGE" x="94" y="42" default="true">
+			<sprite name="DEFAULTTABIMG1_1" l="0" t="723" r="83" b="765" texture="Quest_IMG" />
+			<msprite name="PROPERTYIMGTITLE_1" sx="125" sy="114" ex="125" ey="114" l="773" t="723" r="870" b="739" texture="Quest_IMG" />
+			<msprite name="PROPERTYIMGTITLE_2" sx="125" sy="346" ex="125" ey="346" l="773" t="740" r="870" b="756" texture="Quest_IMG" />
+			<Questslot name="QUESTSLOTLIST">
+				<template>
+					<sprite name="DEFULT_BAR_TODAYMISSION" l="0" t="766" r="293" b="822" texture="Quest_IMG" />
+					<sprite name="BAR_MOUSEOVER" l="0" t="879" r="293" b="935" texture="Quest_IMG" />
+					<sprite name="BAR_SELECT" l="0" t="936" r="293" b="992" texture="Quest_IMG" />
+					<sprite name="NEW_MARK" l="131" t="993" r="152" b="1012" texture="Quest_IMG" />
+					<sprite name="EVENT_MARK" l="153" t="993" r="174" b="1012" texture="Quest_IMG" />
+
+					<sprite name="BLACK_STAR" l="175" t="993" r="191" b="1008" texture="Quest_IMG" />
+					<sprite name="YELLOW_STAR" l="192" t="993" r="208" b="1008" texture="Quest_IMG" />
+
+					<sprite name="GAGE_BACK" l="698" t="723" r="773" b="740" texture="Quest_IMG" />
+					<sprite name="GAGE_WORKING" l="698" t="741" r="773" b="758" texture="Quest_IMG" />
+					<sprite name="GAGE_SUCCESS" l="698" t="759" r="773" b="776" texture="Quest_IMG" />
+					<sprite name="GAGE_FAIL" l="698" t="777" r="773" b="794" texture="Quest_IMG" />
+					<sprite name="DEFAULT_BAR_QUEST" l="0" t="822" r="293" b="878" texture="Quest_IMG" />
+					
+					<column name="QUEST_TITLE" x="65" y="10" w="134" h="14" fontsize="14" color="FFFFFFFF" format="VCENTER LEFT" />
+					<column name="QUEST_TIME"  x="66" y="32" w="134" h="18" fontsize="13" color="FFffda81" format="VCENTER LEFT" />
+					<column name="QUEST_THUM"  x="4" y="4" w="48" h="48" />
+					<column name="QUEST_STAR"  x="227" y="8" w="16" h="15" /> <!-- x+17 -->
+					<column name="QUEST_PERCENT"  x="216" y="37" w="72" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER" />
+				</template>
+			
+				<slot name="slot_1" x="125" y="140" w="293" h="56" />
+				<slot name="slot_2" x="125" y="198" w="293" h="56" />
+				<slot name="slot_3" x="125" y="256" w="293" h="56" />
+				<slot name="slot_4" x="125" y="372" w="293" h="56" />
+				<slot name="slot_5" x="125" y="430" w="293" h="56" />
+				<slot name="slot_6" x="125" y="488" w="293" h="56" />
+			
+			</Questslot>
+		</page>
+
+		<page name="QUEST" x="179" y="42" default="true">
+			<sprite name="DEFAULTTABIMG1_2" l="84" t="723" r="167" b="765" texture="Quest_IMG" />
+			<msprite name="QUEST_TITLE_1" sx="112" sy="105" ex="112" ey="105" l="773" t="757" r="870" b="773" texture="Quest_IMG" />
+			<msprite name="PAGE_BACK" sx="274" sy="655" ex="274" ey="655" l="0" t="993" r="130" b="1015" texture="Quest_IMG" />
+			<column name="PAGE_COUNT" x="318" y="659" w="46" h="14" fontsize="15" color="FF66cccc" format="VCENTER CENTER" />
+			<column name="QUESTPAGE" x="318" y="659" w="46" h="14" shadow="FF000000" format="VCENTER LEFT" />
+						
+				<Questslot name="QUESTSLOTLIST">
+				<template>
+					<sprite name="DEFAULT_BAR_QUEST" l="0" t="822" r="293" b="878" texture="Quest_IMG" />
+					<sprite name="BAR_MOUSEOVER" l="0" t="879" r="293" b="935" texture="Quest_IMG" />
+					<sprite name="BAR_SELECT" l="0" t="936" r="293" b="992" texture="Quest_IMG" />					
+					<sprite name="NEW_MARK" l="131" t="993" r="152" b="1012" texture="Quest_IMG" />
+					<sprite name="EVENT_MARK" l="153" t="993" r="174" b="1012" texture="Quest_IMG" />
+
+					<sprite name="BLACK_STAR" l="175" t="993" r="191" b="1008" texture="Quest_IMG" />
+					<sprite name="YELLOW_STAR" l="192" t="993" r="208" b="1008" texture="Quest_IMG" />
+
+					<column name="QUEST_TITLE" x="65" y="10" w="134" h="14" fontsize="14" color="FFFFFFFF" format="VCENTER LEFT" />
+					<column name="QUEST_TIME"  x="66" y="32" w="134" h="18" fontsize="13" color="FFffda81" format="VCENTER LEFT" />
+					<column name="QUEST_THUM"  x="4" y="4" w="48" h="48" />
+					<column name="QUEST_STAR"  x="227" y="8" w="16" h="15" /> <!-- x+17 -->
+					<column name="QUEST_PERCENT"  x="216" y="35" w="72" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER" />
+				</template>
+			
+				<slot name="slot_1" x="112" y="131" w="293" h="56" />
+				<slot name="slot_2" x="112" y="189" w="293" h="56" />
+				<slot name="slot_3" x="112" y="247" w="293" h="56" />
+				<slot name="slot_4" x="112" y="305" w="293" h="56" />
+				<slot name="slot_5" x="112" y="363" w="293" h="56" />
+				<slot name="slot_6" x="112" y="421" w="293" h="56" />
+				<slot name="slot_7" x="112" y="479" w="293" h="56" />
+				<slot name="slot_8" x="112" y="537" w="293" h="56" />
+				<slot name="slot_9" x="112" y="595" w="293" h="56" />
+							
+				<button name="NAME" x="112" y="655" w="52" h="22">
+					<sprite l="294" t="766" r="346" b="788" texture="Quest_IMG" />
+					<sprite l="294" t="788" r="346" b="810" texture="Quest_IMG" />
+					<sprite l="294" t="810" r="346" b="832" texture="Quest_IMG" />
+				</button>
+
+				<button name="TYPE" x="167" y="655" w="52" h="22">
+					<sprite l="294" t="832" r="346" b="854" texture="Quest_IMG" />
+					<sprite l="294" t="854" r="346" b="876" texture="Quest_IMG" />
+					<sprite l="294" t="876" r="346" b="898" texture="Quest_IMG" />
+				</button>
+
+				<button name="SORTRANK" x="220" y="655" w="52" h="22">
+					<sprite l="294" t="898" r="346" b="920" texture="Quest_IMG" />
+					<sprite l="294" t="920" r="346" b="942" texture="Quest_IMG" />
+					<sprite l="294" t="942" r="346" b="964" texture="Quest_IMG" />
+				</button>
+
+				<button name="LEFT" x="277" y="661" w="11" h="11">
+					<sprite l="300" t="723" r="311" b="734" texture="Quest_IMG" />
+					<sprite l="312" t="723" r="323" b="734" texture="Quest_IMG" />
+					<sprite l="324" t="723" r="335" b="734" texture="Quest_IMG" />
+				</button>
+
+				<button name="RIGHT" x="390" y="661" w="11" h="11">
+					<sprite l="300" t="735" r="311" b="746" texture="Quest_IMG" />
+					<sprite l="312" t="735" r="323" b="746" texture="Quest_IMG" />
+					<sprite l="324" t="735" r="335" b="746" texture="Quest_IMG" />
+				</button>
+
+				<button name="UP" x="411" y="131" w="23" h="28">
+					<sprite l="258" t="461" r="281" b="489" texture="UI_Button"/>
+					<sprite l="282" t="461" r="305" b="489" texture="UI_Button"/>
+					<sprite l="306" t="461" r="329" b="489" texture="UI_Button"/>
+				</button>
+				
+				<button name="DN" x="411" y="623" w="23" h="28">
+					<sprite l="258" t="490" r="281" b="518" texture="UI_Button"/>
+					<sprite l="282" t="490" r="305" b="518" texture="UI_Button"/>
+					<sprite l="306" t="490" r="329" b="518" texture="UI_Button"/>
+				</button>   
+
+				<eventrect name="SCROLL_RECT" x="112" y="131" w="293" h="520" />
+			</Questslot>
+		</page>
+
+		<page name="QUESTCLEARLIST" x="264" y="42" default="true">
+			<sprite name="DEFAULTTABIMG1_3" l="168" t="723" r="251" b="765" texture="Quest_IMG" />
+			<msprite name="QUEST_TITLE_1" sx="112" sy="105" ex="112" ey="105" l="773" t="774" r="870" b="790" texture="Quest_IMG" />
+			<msprite name="PAGE_BACK" sx="274" sy="655" ex="274" ey="655" l="0" t="993" r="130" b="1015" texture="Quest_IMG" />
+			<column name="PAGE_COUNT" x="318" y="659" w="46" h="14" fontsize="15" color="FF66cccc" format="VCENTER CENTER" />
+			<column name="QUESTPAGE" x="318" y="659" w="46" h="14" shadow="FF000000" format="VCENTER LEFT" />
+				
+			<Questslot name="QUESTSLOTLIST">
+				<template>
+					<sprite name="DEFAULT_BAR_QUEST" l="0" t="822" r="293" b="878" texture="Quest_IMG" />
+					<sprite name="BAR_MOUSEOVER" l="0" t="879" r="293" b="935" texture="Quest_IMG" />
+					<sprite name="BAR_SELECT" l="0" t="936" r="293" b="992" texture="Quest_IMG" />			
+					<sprite name="NEW_MARK" l="131" t="993" r="152" b="1012" texture="Quest_IMG" /> 
+					<sprite name="EVENT_MARK" l="153" t="993" r="174" b="1012" texture="Quest_IMG" />
+
+					<sprite name="BLACK_STAR" l="175" t="993" r="191" b="1008" texture="Quest_IMG" />
+					<sprite name="YELLOW_STAR" l="192" t="993" r="208" b="1008" texture="Quest_IMG" />
+
+					<column name="QUEST_TITLE" x="65" y="10" w="134" h="14" fontsize="14" color="FFFFFFFF" format="VCENTER LEFT" />
+					<column name="QUEST_TIME"  x="66" y="32" w="134" h="18" fontsize="13" color="FFffda81" format="VCENTER LEFT" />
+					<column name="QUEST_THUM"  x="4" y="4" w="48" h="48" />
+					<column name="QUEST_STAR"  x="227" y="8" w="16" h="15" /> <!-- x+17 -->
+					<column name="QUEST_PERCENT"  x="216" y="35" w="72" h="15" fontsize="13" color="FFFFFFFF" format="VCENTER CENTER" />
+				</template>
+			
+				<slot name="slot_1" x="112" y="131" w="293" h="56" />
+				<slot name="slot_2" x="112" y="189" w="293" h="56" />
+				<slot name="slot_3" x="112" y="247" w="293" h="56" />
+				<slot name="slot_4" x="112" y="305" w="293" h="56" />
+				<slot name="slot_5" x="112" y="363" w="293" h="56" />
+				<slot name="slot_6" x="112" y="421" w="293" h="56" />
+				<slot name="slot_7" x="112" y="479" w="293" h="56" />
+				<slot name="slot_8" x="112" y="537" w="293" h="56" />
+				<slot name="slot_9" x="112" y="595" w="293" h="56" />
+							
+				<button name="NAME" x="112" y="655" w="52" h="22">
+					<sprite l="294" t="766" r="346" b="788" texture="Quest_IMG" />
+					<sprite l="294" t="788" r="346" b="810" texture="Quest_IMG" />
+					<sprite l="294" t="810" r="346" b="832" texture="Quest_IMG" />
+				</button>
+
+				<button name="TYPE" x="167" y="655" w="52" h="22">
+					<sprite l="294" t="832" r="346" b="854" texture="Quest_IMG" />
+					<sprite l="294" t="854" r="346" b="876" texture="Quest_IMG" />
+					<sprite l="294" t="876" r="346" b="898" texture="Quest_IMG" />
+				</button>
+
+				<button name="SORTRANK" x="220" y="655" w="52" h="22">
+					<sprite l="294" t="898" r="346" b="920" texture="Quest_IMG" />
+					<sprite l="294" t="920" r="346" b="942" texture="Quest_IMG" />
+					<sprite l="294" t="942" r="346" b="964" texture="Quest_IMG" />
+				</button>
+
+				<button name="LEFT" x="277" y="661" w="11" h="11">
+					<sprite l="300" t="723" r="311" b="734" texture="Quest_IMG" />
+					<sprite l="312" t="723" r="323" b="734" texture="Quest_IMG" />
+					<sprite l="324" t="723" r="335" b="734" texture="Quest_IMG" />
+				</button>
+
+				<button name="RIGHT" x="390" y="661" w="11" h="11">
+					<sprite l="300" t="735" r="311" b="746" texture="Quest_IMG" />
+					<sprite l="312" t="735" r="323" b="746" texture="Quest_IMG" />
+					<sprite l="324" t="735" r="335" b="746" texture="Quest_IMG" />
+				</button>
+
+				<button name="UP" x="411" y="131" w="23" h="28">
+					<sprite l="258" t="461" r="281" b="489" texture="UI_Button"/>
+					<sprite l="282" t="461" r="305" b="489" texture="UI_Button"/>
+					<sprite l="306" t="461" r="329" b="489" texture="UI_Button"/>
+				</button>
+				
+				<button name="DN" x="411" y="623" w="23" h="28">
+					<sprite l="258" t="490" r="281" b="518" texture="UI_Button"/>
+					<sprite l="282" t="490" r="305" b="518" texture="UI_Button"/>
+					<sprite l="306" t="490" r="329" b="518" texture="UI_Button"/>
+				</button>   
+
+				<eventrect name="SCROLL_RECT" x="112" y="131" w="293" h="520" />
+			</Questslot>
+		</page>
+				
+	</tab>		
+
+	
+	<column name="QUEST_LARGE_THUM" x="557" y="160" w="82" h="82" /> <!-- 75% -->
+
+
+	<column name="QUESTNAME" x="508" y="369" w="177" h="41" Fontsize="18" Color="FFFFFFFF" shadow="FF336666" format="VCENTER CENTER" />
+
+	
+	<column name="QUESTCLEAR_1" x="729" y="152" w="236" h="13" Fontsize="12" shadow="FF000000" format="VCENTER	LEFT" />
+	<column name="QUESTCLEAR_2" x="729" y="168" w="236" h="13" Fontsize="12" shadow="FF000000" format="VCENTER	LEFT" />
+	<column name="QUESTCLEAR_3" x="729" y="184" w="236" h="13" Fontsize="12" shadow="FF000000" format="VCENTER	LEFT" />
+	<column name="QUESTCLEAR_4" x="729" y="200" w="236" h="13" Fontsize="12" shadow="FF000000" format="VCENTER	LEFT" />
+	<column name="QUESTCLEAR_5" x="729" y="216" w="236" h="13" Fontsize="12" shadow="FF000000" format="VCENTER	LEFT" />
+
+	
+	<column name="QUESTDESC_1" x="729" y="318" w="236" h="13" Fontsize="12" Color="FFFFFFFF" shadow="FF000000" format="VCENTER	LEFT" />
+	<column name="QUESTDESC_2" x="729" y="334" w="236" h="13" Fontsize="12" Color="FFFFFFFF" shadow="FF000000" format="VCENTER	LEFT" />
+	<column name="QUESTDESC_3" x="729" y="350" w="236" h="13" Fontsize="12" Color="FFFFFFFF" shadow="FF000000" format="VCENTER	LEFT" />
+	<column name="QUESTDESC_4" x="729" y="366" w="236" h="13" Fontsize="12" Color="FFFFFFFF" shadow="FF000000" format="VCENTER	LEFT" />
+	<column name="QUESTDESC_5" x="729" y="382" w="236" h="13" Fontsize="12" Color="FFFFFFFF" shadow="FF000000" format="VCENTER	LEFT" />
+	<column name="QUESTDESC_6" x="729" y="398" w="236" h="13" Fontsize="12" Color="FFFFFFFF" shadow="FF000000" format="VCENTER	LEFT" />
+
+	
+	<column name="QUESTPERIOD" x="508" y="428" w="177" h="23" Fontsize="14" Color="FF66cccc" shadow="FF000000" format="VCENTER	CENTER" />
+
+	
+	<column name="INIT_NOTICE"  x="745" y="152" w="203" h="13" Color="FFcc9966" format="VCENTER LEFT" />
+
+	
+	<column name="STAR_column" x="522" y="271" w="47" h="42" /> <!-- x51 -->
+	<sprite name="STAR" l="252" t="723" r="299" b="765" texture="Quest_IMG" />
+
+	
+	<column name="ITEM_THUM" x="723" y="493" w="48" h="48" shadow="FF000000" />
+	<column name="ITEM_NAME" x="818" y="500" w="177" h="41" Fontsize="16" Color="FFffcc33"  format="VCENTER LEFT" />
+	<column name="ITEM_TIME" x="818" y="523" w="177" h="41" Fontsize="16" Color="FFFFFFFF"  format="VCENTER LEFT" />
+		
+		
+	<button name="ACCEPT" x="538" y="485" w="116" h="46">
+		<sprite l="347" t="723" r="463" b="769" texture="Quest_IMG" />
+		<sprite l="347" t="770" r="463" b="816" texture="Quest_IMG" />
+		<sprite l="347" t="817" r="463" b="863" texture="Quest_IMG" />
+	</button>
+
+	<button name="CANCEL" x="538" y="485" w="116" h="46">
+		<sprite l="464" t="723" r="580" b="769" texture="Quest_IMG" />
+		<sprite l="464" t="770" r="580" b="816" texture="Quest_IMG" />
+		<sprite l="464" t="817" r="580" b="863" texture="Quest_IMG" />
+	</button>
+		
+	<button name="CONFIRM" x="538" y="485" w="116" h="46">
+		<sprite l="581" t="723" r="697" b="769" texture="Quest_IMG" />
+		<sprite l="581" t="770" r="697" b="816" texture="Quest_IMG" />
+		<sprite l="581" t="817" r="697" b="863" texture="Quest_IMG" />
+	</button>
+		
+</UIDEFINE>	
