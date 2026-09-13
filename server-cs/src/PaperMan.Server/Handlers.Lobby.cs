@@ -21,6 +21,86 @@ public static class LobbyHandlers
         add(Opcode.GM_CHECKNICK_REQ, CheckNick);
         add(Opcode.GM_CREATENICK_REQ, CreateNick);
         add(Opcode.GL_CHATTING_REQ, Chat);
+        add(Opcode.GL_LOBBYIN_REQ, SceneEnter);
+        add(Opcode.GL_SHOPIN_REQ, SceneEnter);
+        add(Opcode.GL_INVENIN_REQ, SceneEnter);
+        add(Opcode.GL_CLIENTINFO_REQ, ClientInfo);
+    }
+
+    // 250 GL_LOBBYIN / 252 GL_SHOPIN / 254 GL_INVENIN — 場景切換通知
+    // (廿五輪: dispatcher 無 251/253 case → client 不解析回包;
+    //  255 GL_INVENIN_ACK 存在但僅刷新 UI 座標 — 靜默吸收最穩)
+    private static ValueTask SceneEnter(Session s, Packet p, ServerContext ctx)
+    {
+        // client 狀態機自行推進 (sub_537710); server 只需記錄場景
+        return ValueTask.CompletedTask;
+    }
+
+    // 246 GL_CLIENTINFO_REQ: str nick → 247 ACK (sub_573EB0):
+    //   u8 ok(==1) + sub_523BF0 基本資料塊 + sub_524360 單角色外觀
+    //   (十一輪: 與 198 首段同構 — 重用 BuildMyInfoAck 的統計佈局)
+    private static async ValueTask ClientInfo(Session s, Packet p, ServerContext ctx)
+    {
+        var nick = p.ReadStr();
+        var info = ctx.Db.GetMyInfoByNick(nick);
+
+        if (info is null)
+        {
+            await s.SendAsync(new Packet(Opcode.GL_CLIENTINFO_ACK).WriteU8(0));
+            return;
+        }
+
+        var chars = ctx.Db.GetCharacters(info.UserId);
+        var ack = BuildClientInfoAck(info, chars);
+        await s.SendAsync(ack);
+    }
+
+    /// <summary>247 = sub_523BF0 統計塊 + sub_524360 單角色外觀。</summary>
+    private static Packet BuildClientInfoAck(Db.MyInfo info, List<Db.CharSlot> chars)
+    {
+        var st = info.Stats;
+        var ack = new Packet(Opcode.GL_CLIENTINFO_ACK)
+            .WriteU8(1)
+            // sub_523BF0 — 與 198 首段完全同構 (佈局見 BuildMyInfoAck)
+            .WriteStr(info.Nickname)
+            .WriteU8(info.CurrentChar)
+            .WriteS32(info.Level)
+            .WriteS32((int)info.Exp)
+            .WriteS32(0)
+            .WriteS32((int)st.PlayCount)
+            .WriteS32((int)st.RoundCount)
+            .WriteS32((int)st.Criticals)
+            .WriteS32((int)st.Wins)
+            .WriteS32((int)st.Losses)
+            .WriteS32((int)st.Kills)
+            .WriteS32((int)st.Deaths)
+            .WriteS32((int)st.Disconnects)
+            .WriteS32((int)st.Hearts)
+            .WriteS32((int)st.Headshots)
+            .WriteS32((int)st.DoubleKill)
+            .WriteS32((int)st.TripleKill)
+            .WriteS32((int)st.Combos)
+            .WriteS32((int)st.MultiKill)
+            .WriteS32((int)st.UltraKill)
+            .WriteS32((int)st.ZKill)
+            .WriteS32((int)st.KKill)
+            .WriteS32((int)st.DdKill)
+            .WriteU8(0).WriteU8(0).WriteU8(0)
+            .WriteS32(info.Cash)
+            .WriteS32(0).WriteS32(0)
+            .WriteRaw(stackalloc byte[48])
+            .WriteU8(info.CurrentChar);
+
+        // sub_524360: u8 slot + u8 char_type + 12×u16 外觀
+        var slot = chars.FirstOrDefault(c => c.SlotNo == info.CurrentChar) ?? chars.FirstOrDefault();
+        ack.WriteU8(slot?.SlotNo ?? 0)
+           .WriteU8(slot?.CharType ?? 1);
+        for (int i = 0; i < 12; i++)
+        {
+            ack.WriteU16(slot?.Equip.ElementAtOrDefault(i) ?? (ushort)0);
+        }
+
+        return ack;
     }
 
     // REQ(119) builder @0x56E2xx: str message (ANSI)

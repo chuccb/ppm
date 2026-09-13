@@ -182,6 +182,51 @@ public sealed class Db : IDisposable
         }
     }
 
+    /// <summary>247 GL_CLIENTINFO 用: 以暱稱查他人資料 (廿五輪)。</summary>
+    public MyInfo? GetMyInfoByNick(string nickname)
+    {
+        lock (_gate)
+        {
+            using var who = Cmd(
+                "SELECT user_id FROM users WHERE nickname=@n", ("@n", nickname));
+            var uid = who.ExecuteScalar();
+
+            return uid is null ? null : GetMyInfoUnlocked((long)uid);
+        }
+    }
+
+    private MyInfo? GetMyInfoUnlocked(long userId)
+    {
+        using var cmd = Cmd("""
+            SELECT user_id, nickname, level, exp, game_point, cash, current_char,
+                   wins, losses, kills, deaths, headshots, combos, hearts,
+                   double_kill, triple_kill, criticals, multi_kill, ultra_kill,
+                   z_kill, k_kill, dd_kill, play_count, round_count, disconnects, play_time_s
+            FROM v_myinfo WHERE user_id=@u
+            """, ("@u", userId));
+        using var r = cmd.ExecuteReader();
+
+        if (!r.Read())
+        {
+            return null;
+        }
+
+        return new(
+            r.GetInt64(0), r.GetString(1), r.GetInt32(2), r.GetInt64(3),
+            r.GetInt64(4), r.GetInt32(5), (byte)r.GetInt32(6),
+            new Stats(
+                Wins: r.GetInt64(7), Losses: r.GetInt64(8),
+                Kills: r.GetInt64(9), Deaths: r.GetInt64(10),
+                Headshots: r.GetInt64(11), Combos: r.GetInt64(12),
+                Hearts: r.GetInt64(13), DoubleKill: r.GetInt64(14),
+                TripleKill: r.GetInt64(15), Criticals: r.GetInt64(16),
+                MultiKill: r.GetInt64(17), UltraKill: r.GetInt64(18),
+                ZKill: r.GetInt64(19), KKill: r.GetInt64(20),
+                DdKill: r.GetInt64(21), PlayCount: r.GetInt64(22),
+                RoundCount: r.GetInt64(23), Disconnects: r.GetInt64(24),
+                PlayTimeS: r.GetInt64(25)));
+    }
+
     public sealed record CharSlot(byte SlotNo, byte CharType, ushort[] Equip);
 
     public List<CharSlot> GetCharacters(long userId)
