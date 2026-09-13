@@ -588,6 +588,37 @@ kind 0/1/14 與 12/13/17 (可覆寫類) 走覆寫路徑, 其他 kind 重複購�
 私服要點: 快照結構 = 114 (ENTERROOM sub_type==2) 的擴充版; 兩者成員
 條目欄位順序一致 (交叉驗證), 269 多了戰鬥中狀態 (alive/dead/觀戰目標)。
 
+### 3.15c3 倉庫五連 856-863 (廿二輪 — n11==19 倉庫場景)
+```
+856 GL_MYWAREHOUSEINFO_ACK: (n11==19 才處理) 倉庫基本資訊
+858 GL_MYWAREHOUSEITEMLIST_ACK (sub_4FACE0): u8 err, u8;
+    err!=0 → ≤5 錯誤碼 (0x49C 訊息);
+    err==0 → s32 count, s32 total, count×{s32 slot(<0 停),
+    s32 item_id(需過 sub_535020), f32 f1, f32 f2, s32 period,
+    u8 kind, u16 dura(複製為 dura_max)} — 與背包 28B 條目同構!
+860/862 PUSH/POP_TO_WAREHOUSE_ACK: 存入/取出確認
+863 GL_CHANGED_WAREHOUSEINFO_ACK (sub_4FB180): raw 0x46=70B
+    倉庫狀態塊
+```
+
+### 3.15c4 訊息/喊話/物品推播 (廿二輪)
+```
+782 GL_RECEIVE_NEW_MSG (sub_5643C0): 新信推播 → 信箱圖示
+784 GL_NEW_MSG_COUNT_ACK (sub_564480): 未讀數
+837 GL_SHOUTCHAT_ACK (sub_583C20): u8 type(0/1), s32 uid,
+    s32 custom_tex, str nick, s32 len, raw[len] message —
+    喊話 (シャウトチャット item 15300008 觸發, 全頻廣播)
+691 GL_ITEM_MODIFY_NOTIFIER (sub_55C880): s32 count, f32; count×
+    {u32 flags; flags&1 → s32×2; flags&0x10 → s32...} — 物品變動
+    差分推播 (期限到期/耐久歸零時 server 主動通知)
+686 GL_TUTORIALINDEX_ACK (sub_55C790): 教學進度
+⭐ 693 GL_TCPCONNSUCC (sub_57CAE0) = **直接呼叫 sub_555C60 = 143
+    PM_UDPSTART_REQ builder**! 戰鬥伺服器握手鏈完整版:
+    client 連上戰鬥 TCP → server 發 693 → client 送 143 (帶 nick +
+    n100 + ext_count 回送) → server 回 144 — 與大廳 694→682→681
+    完全平行的第二握手!
+```
+
 ### 3.15d 連線生命週期 103/141-144 (九輪讀畢)
 ```
 103 GE_LOGOUT_REQ (sub_58D660): 無 payload — client 登出通知
