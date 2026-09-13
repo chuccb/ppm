@@ -539,7 +539,7 @@ total 送錯會讓任務進度爆走 (再次強調: 必須 MAX 單調)。
   `s32, s32, s32 custom_tex, str(64)` + 4×武器組 {s16 equipped,
   kk!=3 → s16×2... , equipped→8×s32 parts} + `u8` + [8×s32] + ...
 - 7 (fall-through 主體): **完整房間+全成員快照**:
-  房間頭: `s32 room_uid, s32 game_time(0x1770), u8 map, u8 count(jj_1),
+  房間頭: `s32 room_uid, s32 elapsed_ms (同 130 的時間基準), u8 map, u8 count(jj_1),
   u8 room_no, u8 rule, u16 win, u8 max, u8, u16, u8 flags(bit0/1 拆),
   u8 has_pass, u16, u8, u8, u8 obs` + `u8×4 (n2_10 等模式旗標)`
   然後 count× 成員條目:
@@ -558,7 +558,10 @@ total 送錯會讓任務進度爆走 (再次強調: 必須 MAX 單調)。
 142 PM_CONNECT_ACK (sub_5565D0): str host, s32 port, u8, f32 —
     伺服器指示戰鬥連線目標 (client 隨即連 UDP)
 143 PM_UDPSTART_REQ (sub_555C60): str nick, s32 n100 (login 681 的
-    n100 原樣回送), s8 1, s32 dword_231800C (billing id)
+    n100 原樣回送), s8 1, s32 ext_count (⚠ 十三輪定案:
+    dword_231800C = dword_2318008[1] = 681 ext 塊的 count, 由
+    sub_A1C870 第4參數寫入 — 即 681 的兩個值都會被 143 回送,
+    可作雙重 session 驗證)
 144 PM_UDPSTART_ACK (sub_555D50): u8 n108 (0=正常 1/2=模式切換
     3=踢出), u8 flag65, s32 → 1D0D23C, str(64), s32, s32, s32, f32;
     u8 flag66!=0 → {u8, u8, u8, u8, 8×s32} (延伸參數塊 →
@@ -592,7 +595,9 @@ total 送錯會讓任務進度爆走 (再次強調: 必須 MAX 單調)。
     以 slot 對照房間成員陣列翻 ready 狀態
 129 GR_START_REQ  (sub_5627C0): u8 n125 (倒數秒/模式參數)
 130 GR_START_ACK  (sub_562870): u8 result; ==1 →
-    u8, s32 game_time(0x1770=6000), u8 slot, u8, u8, u16, u8, u8 host,
+    u8, s32 elapsed_ms (⚠ 十三輪更正: 是「已進行毫秒數」—
+    sub_537670 存 timeGetTime()-x 當時間基準, 供中途加入同步;
+    開新局送 0), u8 slot, u8, u8, u16, u8, u8 host,
     u16, u8 flags(bit0/bit1 拆開), u8, u8, u8, u8, u8 →
     寫入房間物件 (+128/+4/+105/+129/+144/+110/+109/+185...),
     然後 16×s32 (per-slot 值 → dword_F6DD1C[60195*i])
