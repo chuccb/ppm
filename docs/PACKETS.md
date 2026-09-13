@@ -567,6 +567,28 @@ kind 0/1/14 與 12/13/17 (可覆寫類) 走覆寫路徑, 其他 kind 重複購�
 **ACK 297** (sub_57AA50): `u8 result` — 0=成功, 之後 5×s32
 (cash/餘額顯示組); 1..11 = 錯誤碼 (11 種禮物失敗訊息)。
 
+### 3.15d2 剩餘家族速覽 (廿二輪終掃)
+```
+984 GL_MATCHINGROOM_MAKE_ACK  (sub_5865A0): u8 result — 配對房建立
+985 GL_ENTERMATCHINGROOM_ACK  (sub_586610): u8 result; OK → s32 uid,
+    u8 slot, str nick + [s32 …] 成員迴圈 — 配對進房 (與 114 同構)
+989 GL_MATCHINGROOM_CANCLE_ACK: 取消配對
+757 GL_CLAN_TNMT_RECEIPT_ACK  (sub_57E030): u8 result — 錦標賽報名
+763 TNMT_CURRENT_STATE_NOTICE (sub_57E5A0): f32 time, u8 state,
+    u8 round, u8; state==2 → s32 tnmt_id (比對自己 clan) — 狀態推播
+772 TNMT_ALL_INFO_ACK (sub_57E550): 錦標賽總覽
+473 GL_GAMECENTER_REC_ACK (sub_584910): u16, s32, u8 n1 ×
+    raw(0x38=56B 紀錄塊), u8 — 射擊館排行榜 (56B/條)
+482 GAMECENTER_COIN_CHANGED (sub_585F50): 遊戲幣變動推播
+705 GL_LEVEL_KILL_LIMIT_ACK (sub_55C9B0): s32 level_limit,
+    f32 → BEFEE8, s32 kill_limit — 房間等級/擊殺限制參數
+816 GL_ADDICTION_PREVENT_ALARM (sub_582500): u8, u8, f32 —
+    防沉迷警告 (遊玩時數提醒)
+```
+至此 dispatcher 306 case 中: 大廳/商店/房間/戰隊/任務/好友/倉庫/
+配對/錦標賽/GameCenter 全部家族皆有佈局記錄; 未逐條展開者僅餘
+GG 戰鬥事件中繼 (server 原樣轉發即可) 與 MASTER_* GM 工具組。
+
 ### 3.15e GL_JOINPLAY_ACK (269) — sub_574B20, 1524 行巨型函數 (十輪讀畢)
 中途加入/觀戰的「全房間快照」。頂層: `u8 n7` switch:
 - 0: 失敗, 通知 UI (sub_406F20(0))
