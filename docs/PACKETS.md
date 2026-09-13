@@ -1014,15 +1014,29 @@ festival: 681 的 3 頻道組 ↔ 195 的 group 序號互證; 頻道類型 n2==3
                        隊打散 (發送前置 sub_435520: 房主檢查 + mode rule
                        vtable+28 非零 + sub_437060 取目前地圖後送出)
 895 GR_TEAMSHUFFLE_ACK  (sub_585E70→sub_435680): u8 status,
-                       u16 (client 讀後丟棄), u8 count,
-                       count×(u8 slot, u32 uid) — status 1=逐槽重排
+                       u16 (client 讀後丟棄, 卌三輪定型: case 1 裡
+                       sub_592A00 讀入 v35[6] 後無任何引用 — 純保留欄
+                       送 0), u8 count,
+                       count×(u8 slot, u32 uid; ⚠ 卌三輪以原語表定型
+                       sub_592940=u8 讀 slot、sub_592A40=u32 讀 uid) —
+                       status 1=逐槽重排
                        (dword_F3312C 比對 uid, dword_F6DCF4 寫新 slot,
                        sub_4360B0 更新 USERSLOTS; 若 uid=自己則
                        sub_537610 記我的新 slot); 2=shuffle 忙碌
-                       (*(this+344)=1+sub_436E70); 3..16=錯誤碼播
-                       訊息 0x4B5/0x87/0x4B6/0x178/0x4B7/0x2CE/0x111/0xD9
+                       (*(this+344)=1+sub_436E70); 錯誤碼語意
+                       (msgtableres.lang 解碼, 卌三輪):
+                       3/4/9/11→0x4B5「チームシャッフルに失敗しました」
+                       5/10→0x87「全員がレディー状態になってから
+                       スタート可能です」6→0x4B6「3人以上必要」
+                       7→0x178「権限がないためこのメニューは利用
+                       できません」8/15/16→0x4B7「支援しないモード
+                       です」12→0x2CE「移動する事が出来ません」
+                       13→0x111「２つのチームに分かれてください」
+                       14→0xD9「定員オーバーです」
 366 GR_LOCALROOM_REQ   (sub_585FD0): u8, 僅 n2_0!=3 送 — 區域限定房
-                       (名稱表未註冊, 由 GAMEROOM_LOCALROOM UI 字串補名;
+                       (n2_0==3 為錦標賽場景 dword_EA0F30, 一般房為
+                       dword_EA10D0 — 366/969 只存在於一般房;
+                       名稱表未註冊, 由 GAMEROOM_LOCALROOM UI 字串補名;
                        server 現已實作同 990/991 之例)
 367 GR_LOCALROOM_ACK   (sub_586090→sub_437B50): u8 — 勾選
                        GAMEROOM_LOCALROOM
@@ -1159,9 +1173,10 @@ u8+slot 系列)
     以 slot 對照房間成員陣列翻 ready 狀態
 129 GR_START_REQ  (sub_5627C0): u8 n125 (倒數秒/模式參數)
 130 GR_START_ACK  (sub_562870): u8 result; ==1 →
-    u8, s32 elapsed_ms (⚠ 十三輪更正: 是「已進行毫秒數」—
-    sub_537670 存 timeGetTime()-x 當時間基準, 供中途加入同步;
-    開新局送 0), u8 room_no(sub_407E80 定址房物件),
+    u8 mode+14 (足球隊旗 sub_74F4D0, 969/970; ⚠ 卌三輪確認是
+    這個欄位不是 mode), s32 elapsed_ms (⚠ 十三輪更正: 是
+    「已進行毫秒數」— sub_537670 存 timeGetTime()-x 當時間基準,
+    供中途加入同步; 開新局送 0), u8 room_no(sub_407E80 定址房物件),
     u8 cur_players(+105), u8 max_players(+129 冗餘, client 以 +110
     popcount 重算), u16 max_slot_mask(+110), u8 map(+130),
     u8 mode(→sub_53FBB0), u16 (+144), u8 flags(bit0→mode+4/bit1 拆開),
