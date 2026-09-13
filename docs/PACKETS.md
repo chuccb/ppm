@@ -261,6 +261,30 @@ ping 顯示; **158 UDP_TCP_DEAD_ACK** (sub_596910) = 無 payload 的
 私服結論: 這層只做 P2P 打洞與測速, 中繼伺服器只需回聲/轉發,
 不需理解 16B blob 內容 (原樣轉發即可)。
 
+**UDP P2P 完整協定圖 (卅輪 — 收發兩端配對)**:
+```
+op  送端(builder)              收端(handler)         語意
+2                              sub_593A60            session 建立
+4                              sub_593AB0: u8 n+     地址表廣播
+                               n×{u8 uid,16B addr}
+5   u8 uid, s32 tick           sub_593E60            打洞探測 →
+6   u8 uid, s32 tick           sub_5940E0            探測回應
+9   u8×3, s32          →10     sub_594460            中繼協商
+13  u8 uid, s32        →13/14  sub_594A10/594CA0     中繼保活
+15  u8×2                       sub_593DF0            短探測
+17  (空)/str                   —                     keepalive
+19  u8,u8,s8,u8,s32,str →20    sub_5968C0            P2P 訊息
+21  u8×3, s32×3         →22    sub_5964E0: u8,u8 n,  RTT 量測
+                               n×{u8 uid,f32 rtt}
+32  u8,u8,u8,s32,u8,s8, →33/34 sub_594EC0/594F20:    ⭐移動同步!
+    u16 x,y,z                  u8×5, u16 x,y,z       (兩型收端)
+28  —                          u8×3                  狀態通知
+154/158                        ping表/斷線 (七輪)
+```
+奇數=送 偶數=收 的 P2P 對稱設計; 32→33/34 = 位置封包 (u16 量化座標,
+與 GG_DROPWEAPON 的 s16×3 同一座標系)。中繼伺服器只需在打洞失敗時
+原樣轉發 — 無需解 16B addr blob。
+
 **戰隊隧道協定 (五輪發現)**: `GC_CLAN_PROTOCOL_REQ(583)/_ACK(584)` 是
 **容器封包** — payload 第一個欄位是 `s32 sub_opcode`, 之後才是子協定
 內容。ACK 端 `sub_54D040` (case 584) 依 sub_opcode 分發:
