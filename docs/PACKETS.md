@@ -403,7 +403,12 @@ kind 12/13/17 = 顏色/貼圖變體]}`
 ### 3.7 GM_CHECKNICK (210/211) / GM_CREATENICK (212/213)
 REQ (builder @0x572D30 / sub_572DC0): **只有 `str nick`** (⚠ 四輪修正:
 u8+str 是 216/262 的格式 sub_56B180/56B230, 先前誤植)。
-ACK (sub_572D80/572E70): `u8 result`。
+ACK (sub_572D80/572E70): `u8 result` — **result 語意十輪逐分支定案**:
+- 211 (sub_41BBB0): `1` = 可用 (訊息 0xE0), `2` = 已被使用
+  (格式訊息 0xDF), `0` = 一般錯誤 (彈窗 0x70/17); 三者皆 state:=2
+- 213 (sub_41BD40): ⚠ **`1` = 成功** (拷貝 6 個統計欄位到全域,
+  state:=5 進大廳), `0` = 失敗 (彈窗, state:=4), 其他值被忽略
+  (client 卡在原畫面) — 成功碼是 1 不是 0!
 ### 3.8 GL_USERLIST_ACK (106) — sub_56A250 (四輪修正):
 ```
 u16    count

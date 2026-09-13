@@ -106,13 +106,13 @@ public sealed class Db : IDisposable
     }
 
     // ------------------------------------------------------------- nickname
-    /// <summary>GM_CHECKNICK(210): 0=可用 1=重複。</summary>
-    public byte CheckNick(string nick)
+    /// <summary>暱稱是否已被使用 (GM_CHECKNICK 210 用; result 碼由 handler 對映)。</summary>
+    public bool IsNickTaken(string nick)
     {
         lock (_gate)
         {
             using var cmd = Cmd("SELECT 1 FROM users WHERE nickname=@n", ("@n", nick));
-            return cmd.ExecuteScalar() is null ? (byte)0 : (byte)1;
+            return cmd.ExecuteScalar() is not null;
         }
     }
 

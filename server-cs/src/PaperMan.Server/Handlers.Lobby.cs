@@ -166,25 +166,38 @@ public static class LobbyHandlers
     }
 
     // 210 REQ builder @0x572D30: 只有 str nick (u8+str 是 216/262 的格式)
-    // → 211 ACK sub_572D80: u8 result
+    // → 211 ACK sub_572D80 → sub_41BBB0 (十輪逐分支讀出):
+    //   1 = 可用 (訊息 0xE0), 2 = 已被使用 (格式訊息 0xDF 帶名字),
+    //   0 = 一般錯誤 (彈窗 0x70/17) — 三種都停在暱稱畫面 (state:=2)
     private static async ValueTask CheckNick(Session s, Packet p, ServerContext ctx)
     {
         var nick = p.ReadStr();
-        byte result = IsValidNick(nick) ? ctx.Db.CheckNick(nick) : (byte)2;
+
+        byte result = (IsValidNick(nick), ctx.Db.IsNickTaken(nick)) switch
+        {
+            (false, _) => 0,                                // 非法 → 一般錯誤
+            (_, true) => 2,                                 // 重複 → 0xDF 訊息
+            _ => 1,                                         // 可用 → 0xE0 訊息
+        };
+
         await s.SendAsync(new Packet(Opcode.GM_CHECKNICK_ACK).WriteU8(result));
     }
 
-    // 212 REQ builder sub_572DC0: 只有 str nick → 213 ACK sub_572E70: u8 result
+    // 212 REQ builder sub_572DC0: 只有 str nick
+    // → 213 ACK sub_572E70 → sub_41BD40 (十輪重大更正):
+    //   ⚠ 1 = 成功 (拷貝統計欄位, state:=5 進大廳), 0 = 失敗 (state:=4)
+    //   — 舊實作成功回 0 會讓 client 卡在失敗畫面!
     private static async ValueTask CreateNick(Session s, Packet p, ServerContext ctx)
     {
         var nick = p.ReadStr();
-        byte result = 1;
+        byte result = 0;
+
         if (s.Authenticated && IsValidNick(nick))
         {
             long uid = ctx.Db.CreateNick(s.AccountId, nick);
             if (uid != 0)
             {
-                (s.UserId, s.Nickname, result) = (uid, nick, (byte)0);
+                (s.UserId, s.Nickname, result) = (uid, nick, (byte)1);
             }
         }
 
