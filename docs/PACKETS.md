@@ -264,6 +264,12 @@ REQ 端 24 個 builder 全部 `ctor(583)` + `WriteS32(sub_op)`:
 `s32 count + raw(4*count)` 的成員 id 陣列)。伺服器實作戰隊功能時
 必須解析/產生這層內嵌結構。
 
+**廿四輪自動定案 — 全 24 個 REQ builder 寫入序列**
+(sub 編號後的欄位; s=str, i=s32, R=raw):
+182:(無) 184:str 185:i,i,i,i 186:str 187:i 188:i,i 189:i
+191:i,str 192:i 193:i 195:i,str 196:i,[R] 197:i,[R] 200:i 202:(無)
+203:str 205:str×3 208:(無) 209:(無) 210:str 211:i 212:i
+
 **八輪逐一佈局 (REQ 段 = sub 之後的欄位; ACK 段 = 584 內容):**
 ```
 sub  REQ (client→server)          ACK (server→client, sub_54D040 分發)
