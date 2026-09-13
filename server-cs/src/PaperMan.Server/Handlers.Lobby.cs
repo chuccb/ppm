@@ -25,6 +25,15 @@ public static class LobbyHandlers
         add(Opcode.GL_SHOPIN_REQ, SceneEnter);
         add(Opcode.GL_INVENIN_REQ, SceneEnter);
         add(Opcode.GL_CLIENTINFO_REQ, ClientInfo);
+        add(Opcode.GL_MYINFO_OPEN, MyInfoOpen);
+    }
+
+    // 270 GL_MYINFO_OPEN (sub_556680): s8 — 個資公開開關 (單向通知,
+    // 無 ACK; 卅六輪) — 記錄即可
+    private static ValueTask MyInfoOpen(Session session, Packet packet, ServerContext context)
+    {
+        _ = packet.Remaining >= 1 ? packet.ReadS8() : (sbyte)0;
+        return ValueTask.CompletedTask;
     }
 
     // 250 GL_LOBBYIN / 252 GL_SHOPIN / 254 GL_INVENIN — 場景切換通知

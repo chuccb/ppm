@@ -34,6 +34,19 @@ public static class FriendHandlers
         add(Opcode.GL_MSG_ADD_REQ, MsgSend);
         add(Opcode.GL_MSG_RECVLIST_REQ, MsgList);
         add(Opcode.GL_MSG_DEL_REQ, MsgDelete);
+        add(Opcode.GL_NEW_MSG_COUNT_REQ, NewMessageCount);
+    }
+
+    // 783 (空) → 784 (sub_564480): s32 未讀數 → dword_F0C104 →
+    // UI vtbl+72(count!=0) 信箱紅點 (卅六輪)
+    private static async ValueTask NewMessageCount(Session session, Packet packet, ServerContext context)
+    {
+        int unread = session.UserId != 0
+            ? context.Db.CountUnreadMessages(session.UserId)
+            : 0;
+
+        await session.SendAsync(new Packet(Opcode.GL_NEW_MSG_COUNT_ACK)
+            .WriteS32(unread));
     }
 
     // REQ(419): s32, str to, str title, str body, str, u16 date, u8

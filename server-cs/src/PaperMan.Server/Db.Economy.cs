@@ -322,6 +322,18 @@ public sealed partial class Db
         }
     }
 
+    /// <summary>未讀信數 (783→784 信箱紅點)。</summary>
+    public int CountUnreadMessages(long userId)
+    {
+        lock (_gate)
+        {
+            using var cmd = Cmd(
+                "SELECT COUNT(*) FROM messages WHERE to_user_id=@u AND is_read=0",
+                ("@u", userId));
+            return Convert.ToInt32(cmd.ExecuteScalar() ?? 0);
+        }
+    }
+
     /// <summary>刪信 (421)。</summary>
     public bool DeleteMessage(long userId, long msgId)
     {

@@ -34,6 +34,7 @@ public sealed class Router
         RoomHandlers.Register(Add);
         BattleRelayHandlers.Register(Add);
         ChannelHandlers.Register(Add);
+        VoiceHandlers.Register(Add);
         return new(table);
     }
 

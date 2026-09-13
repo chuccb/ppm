@@ -445,13 +445,13 @@ repeat until sentinel:
                    無-extra 版 (a3=0) 屬 290/294 MASTER_USERINFO 系
   u16   durability (寫入 *2 個 word: current=max)
 ```
-相鄰 opcode (五輪讀畢, GameNetwork 物件 0x2313148):
-- **201 GL_MYPARTSUP_ACK** (sub_95A3B0): `s32 count` +
-  count×`{f32, f32, u8, f32, f32}` (each → 20B part-up 條目, sub_95A4A0
-  插入排序容器; 完成後 sub_538470 通知)
-- **202 GL_EXPIRE_PARTSUP_ACK** (sub_95AE40): 同 201 佈局
-  `s32 count` + count×`{f32 a, f32 b, u8, f32, f32}` — 但只取 (b,a) 呼叫
-  sub_95A800 移除對應條目
+相鄰 opcode (卅六輪型別定案 — 六輪的 f32 標註更正為 s32 鍵):
+- **201 GL_MYPARTSUP_ACK** (sub_95A3B0): `s32 count` + count×20B
+  `{s32 gun_item, s32 part_item, u8 kind, s32 val, s32 period}`
+  — 武器改裝裝配表; (gun,part) 雙鍵 (比較子 sub_95A0C0) 與
+  weapon_parts_catalog 結構互證
+- **202 GL_EXPIRE_PARTSUP_ACK** (sub_95AE40): 同構; 逐條
+  (part,gun) 進 sub_95A800 移除 = 改裝件到期拆除
 額外驗證: start<=0 → 背包游標歸 0; start>=5020 → 夾到 5020; item_id 需通過
 sub_535020 目錄檢查, 失敗即 sub_528960(6,...) 錯誤處理並中止本包。
 
@@ -607,6 +607,46 @@ kind 0/1/14 與 12/13/17 (可覆寫類) 走覆寫路徑, 其他 kind 重複購�
 - ClearItemOption1 = **獎勵期限天數** (0=永久 612, 1/7/15/30 天)
 - ClearItemLimit 全 0 (未使用)
 → quest_catalog 已補 char_type/reward_period/hidden 欄位
+
+### 3.12e 九族精讀總表 (卅六輪 — 指定深挖)
+```
+【197→198 MyInfo】REQ 空 (sub_5704B0); 198 見 §3.2。
+  另: 270 GL_MYINFO_OPEN (sub_556680): s8 — 個資公開開關 (單向)
+【199→200 MyItem】REQ 空! (sub_570A00; client 顯示 0x66「載入中」;
+  server 恆從 0 送 — 廿六輪結論三驗) ; 200 見 §3.3
+【201 GL_MYPARTSUP_ACK】(sub_95A3B0): s32 count × 20B 條目
+  {s32 gun_item, s32 part_item, u8 kind, s32 val, s32 period}
+  — ⭐卅六輪語意定案: PARTSUP = 武器改裝(Parts-Up)裝配表!
+  等鍵比較子 sub_95A0C0 = ([0],[4]) 雙鍵 = (gun,part) —
+  與 weapon_parts_catalog 10,648 條 (gun,part) 結構互證!
+【202 GL_EXPIRE_PARTSUP_ACK】(sub_95AE40): 同構; 逐條以
+  (part,gun) 呼叫 sub_95A800 紅黑樹移除 = 改裝件到期拆除
+【250→251 LobbyIn】REQ 空 ×2 builder (sub_574080 帶 state:=2 /
+  sub_584FE0 純送); 251 死協定 (無 case) — server 不回 ✓
+【254→255 InvenIn】REQ u8 = 倉庫頁籤 (呼叫端 v212=倉庫物件+4);
+  builder 帶 state:=7 (倉庫場景)。255 (sub_574270):
+  u8 mode(0/1) + mode==1:{s32 uid, u8 slot, u8} /
+  mode==0:{u8, u8 slot, s32 uid} (讀序相反!) — slot 經 sub_67D870
+  映射大廳走位; uid==自己(EE8CB4) 再讀 u8 n5(<5) + raw 160B
+  = 5×32B 倉庫頁狀態塊
+【783→784 NewMsgCount】REQ 空 (sub_5643E0); 784 (sub_564480):
+  s32 count → dword_F0C104 → UI vtbl+72(count!=0) 信箱紅點
+【791→792 VoiceItemSlot】REQ 空 (CVCustomizeManager::
+  SendPacketMyVoiceCustomize; debug 字串洩類名!); this+289 防重入;
+  792 ACK 經第五層 sub_885D00→vtbl+16 解析 (佈局=795 變體A 鏡像)
+【793→794 VoiceItemSlotAll】REQ 空 (SendPacketMyVoiceCustomizeAll);
+  794 = 795 變體B 鏡像: 20×{s32 char_idx, s16 base_voice, s16 x2,
+  3×9×{s16 voice_item, u8 flag}} — 3 類 (command/tactics/infomation)
+  ×9 句 = voice_customize_contents.xml 的 command_1..9/tactics_1..9/
+  infomation_1..9 完全互證 (Extracted 實測)!
+【795→796 ChangeVoiceSlot】REQ 兩變體:
+  A (sub_885F10, 單角色差分): u8 char, u8 base_changed,
+    [s16 voice,s16], 3×{u8 n, ≤9×{u8 slot(1..9), s16 item, u8 flag}}
+  B (sub_886330, 全量): 同 794 結構
+  796 ACK (sub_885E40, 卅六輪全文): u8 err, u8; err≠0 → 訊息 0x3FB
+  + 續讀 792 單角色塊 (server 回滾用); this+290 pending 佇列自動重送
+  — 防重入設計: 791 進行中 (this+289) 的變更先入佇列
+```
 
 ### 3.13 GQ_QUEST 任務家族 (八輪全家讀畢)
 13-byte 任務快照 = `{s32 quest_index, s32 progress, u8 state, s32 extra}`
