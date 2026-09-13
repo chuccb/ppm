@@ -226,6 +226,15 @@ miRun) 等 31 項彈道參數的修正 — weaponparts↔partsability 第九次�
 (CharacterFitting 引用 hand12.tga — 與 data.pat 快取表的 15 個
 hand*.tga 互證: 那是「試衣間手部貼圖」快取)
 
+## 5e. 版本考古 (廿一輪)
+- 根 datarevision.txt = 811034967 (patch 版本號)
+- map/maplist.dat = **舊版明文** (head f32 v1.02, 67 圖, 832B/條,
+  無 +824/+828 版本條件欄) vs ui/cfg/maplist.pat = 新版加密
+  (123 圖, 836B/條) — 載入器的 [+824 版本條件] 即此演進痕跡;
+  **.pat 為權威來源**
+- map/game*.dat (material/object/sfx/shader) = 地圖渲染資源索引
+  (戰鬥模擬才需要, 私服可略)
+
 ## 6. 其他已知資源
 
 - `system/map_StartIndex.xml`, `SelectRandomMap.xml`: 地圖選擇
