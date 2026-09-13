@@ -118,7 +118,8 @@ def import_maps(con: sqlite3.Connection) -> int:
     for _ in range(count):
         if off + 836 > len(data):
             break
-        map_id, flags = struct.unpack_from("<ii", data, off)
+        # 十五輪三驗: +0 = 模式 bitmask (大量重複), +4 = 唯一 map_id
+        flags, map_id = struct.unpack_from("<ii", data, off)
         # 十五輪實測: +8 = 檔名 (maps\\*.pmm), +136 = 顯示名 (日文)
         fname = data[off + 8 : off + 136].decode("utf-16-le", errors="replace").split("\x00")[0]
         disp = data[off + 136 : off + 264].decode("utf-16-le", errors="replace").split("\x00")[0]

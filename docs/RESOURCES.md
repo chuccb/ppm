@@ -19,10 +19,9 @@
 | Map.dat / map\game*.dat | | 地圖幾何/材質 | ○ (僅戰鬥模擬需要) |
 | ui/*.xml (CLAN.xml, SHOP.xml...) | | UI 佈局 | ○ (純客戶端) |
 
-**➡ 如果你手上有 PaperMan 客戶端資料夾, 最想要的是:
-`Data\pmClient.dat`(或已解出的 `cfg\ItemData.pat` + `cfg\Quest.pat` +
-`cfg\maplist.pat`)。給我這幾個檔就能把 item_catalog / quest_catalog
-從「種子示意」升級成完整真實目錄。**
+**✅ 已取得 (十五輪): 使用者提供 Extracted/ — itemdata.pat (21,164 條)、
+Quest.pat (844 條)、maplist.pat (123 張圖) 已解密並灌入 DB
+(db/import_pats.py)。此為日版 ペーパーマン 資料。**
 
 ## 2. cfg\ItemData.pat 條目格式 (載入器 @131262, 1808B/條)
 
@@ -52,7 +51,14 @@
 
 ## 2b. cfg\Quest.pat 格式 (載入器 @602219 — 十四輪)
 
-**解密後是 CRLF 分行的文字檔** (每行一個欄位, atol 解析):
+**解密後是 CSV (Shift-JIS 編碼, CRLF 行)** — 十五輪實測: 首行=總數,
+第 2 行 = 47 欄標頭 (Index, QuestRepeat, QuestLevel, QuestName,
+TermItem1-5, UseWeapon..., GameMode, MapNumber, PeriodType,
+QuestTerm(=條件類型 sub_9252D0 cond!), QuestTermData(=目標值),
+ClearItem1-3(獎勵), StartDate, EndDate, Hidden)。
+「個人サバイバル Kill10」= QuestTerm 3 (cond3=kills)×10 —
+與十二輪任務條件對照表互為第四證鏈。
+(以下為載入器讀取順序的原始分析, 供參考):
 ```
 行1: quest 總數
 行2: (略過)
@@ -90,21 +96,20 @@
   (加密端 sub_711720 = 先 XOR 再 ROR — 互逆已對照)
 - cfg\*.pat 全部走這條路徑 (sub_717E50 組路徑 → pmFile 讀取)
 
-## 4b. cfg\maplist.pat 格式 (載入器 @363285 — 十四輪)
+## 4b. cfg\maplist.pat 格式 (十五輪以真實檔案實測修正!)
 
-二進位 (pmFile 解密後): `[s32 count][s32 → this+2832]` + count×836B:
+二進位 (pmFile 解密後): `[4B 版本/f32][s32 count=123]` + count×836B:
 ```
-+0    s32  map_id
-+4    s32  (模式旗標)
-+8    128B 名稱 (顯示名)
-+136  128B 檔名
++0    s32  模式 bitmask   (⚠ 實測: 大量重複 → 是模式不是 id)
++4    s32  map_id         (唯一鍵, 0..122 連續)
++8    128B 檔名 UTF-16    (maps\\*.pmm — ⚠ 與載入器推測對調)
++136  128B 顯示名 UTF-16  (日文: 古城/スタジアム/池袋...)
 +264  128B 縮圖
-+392  128B 說明1
-+520  128B 說明2
-+648.. 混合區 (8B 步進讀 ×3 組 + ...)
-+816  s32, +820 s32, [+824 s32, +828 s32 (版本條件)], +832 s32
++392/+520  128B×2 說明
++816  f32 ×2 (1.0f)  [+824.. 版本條件]
 ```
-→ 111 GL_MAKEROOM_REQ 的 map id 驗證即對照這張表。
+→ 111 GL_MAKEROOM_REQ 的 map id 驗證即對照這張表 (123 張圖已入
+map_catalog)。
 
 ## 5. .pat 文字/二進位雙軌 (convars)
 
