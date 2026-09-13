@@ -47,7 +47,7 @@ public sealed class PacketCodec(byte[]? aesKey = null, ushort compressThreshold 
         set => field = value == 0 ? NeverCompress : value;   // C# 14 field keyword
     } = compressThreshold == 0 ? NeverCompress : compressThreshold;
 
-    /// <summary>AES-128 金鑰 (原版 .data 0xB69E88)。null = 明文模式 (自測/代理)。</summary>
+    /// <summary>AES-128 金鑰 (原生金鑰見 PaperAes.DefaultKey)。null = 明文模式 (自測/代理)。</summary>
     public bool Encrypted => _aes is not null;
 
     private readonly PaperAes? _aes = aesKey switch

@@ -1,8 +1,9 @@
 // =============================================================================
 // PaperMan 私服入口 — C# 14 / .NET 10
-// 用法: dotnet run --project src/PaperMan.Server -- [db路徑] [port] [aeskey hex32]
-//   AES 金鑰須自原版 PaperMan.exe 的 .data VA 0xB69E88 抽 16 bytes
-//   (IDA .c 導出不含資料段)。未提供 → 明文模式 (自測/代理除錯用)。
+// 用法: dotnet run --project src/PaperMan.Server -- [db路徑] [port] [aes]
+//   aes 參數: 省略 = 客戶端原生金鑰 (EUC-KR「트렁크점령전머지」,
+//   已自反編譯 sub_403430 完整還原並過測試向量);
+//   "off"/"plain" = 明文模式 (自測/代理除錯); 或 32 位 hex 自訂金鑰。
 // =============================================================================
 using System.Net;
 using System.Net.Sockets;

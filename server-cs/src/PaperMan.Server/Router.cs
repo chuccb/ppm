@@ -28,6 +28,7 @@ public sealed class Router
         LobbyHandlers.Register(Add);
         ShopHandlers.Register(Add);
         StatHandlers.Register(Add);
+        ClanHandlers.Register(Add);
         return new(table);
     }
 

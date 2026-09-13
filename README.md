@@ -39,7 +39,8 @@ python3 server/packet.py         # Packet 編解碼自測
 - ⚠️ popcount checksum + XOR「seal」層 (`sub_5923D0/sub_592420`) 為
   **死碼** (無呼叫者), 二次深挖後已自管線剔除 — 詳見 `docs/PACKETS.md` §1.4
 - 壓縮門檻由 `GL_ACCOUNTCONNSUCC(694)` 的 u16 協商, 預設 0x2580(9600)=永不壓縮
-- AES-128 金鑰在 exe `.data` VA `0xB69E88` (IDA .c 不含資料段, 需另行 dump)
+- AES-128 金鑰**已還原**: EUC-KR 字串「트렁크점령전머지」=
+  `C6AEB7B7C5A9C1A1B7C9C0FCB8D3C1F6` (`sub_403430` 字串字面量, 過測試向量)
 - 字串: NUL 結尾 ANSI (CP949), 無長度前綴 (`sub_5926F0` = `lstrlenA`+1);
   寬字串: 雙 NUL 結尾 UTF-16LE (`sub_592770`)
 

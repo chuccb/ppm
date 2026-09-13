@@ -25,6 +25,10 @@ import struct
 MAX_PAYLOAD = 9592          # sub_591DA0: buffer 9600, header 8
 HEADER_SIZE = 8
 
+# AES-128 金鑰 (sub_403430 的 EUC-KR 字串「트렁크점령전머지」; 過測試向量:
+#   ECB(key, 000102..0F) = D7F8930CFE8758AD7BF2FEF759EBB845 )
+AES_KEY = bytes.fromhex("C6AEB7B7C5A9C1A1B7C9C0FCB8D3C1F6")
+
 FLAG_COMPRESSED = 0x01      # this+19252 bit0 (sub_592D30)
 FLAG_ENCRYPTED = 0x04       # this+19252 bit2 (sub_592FB0)
 

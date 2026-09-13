@@ -38,12 +38,14 @@ dotnet build                                   # 需要 nuget 還原兩個套件
                                                #   Microsoft.Data.Sqlite
                                                #   System.Text.Encoding.CodePages
 dotnet run --project src/PaperMan.SelfTest     # 先跑自測 (codec round-trip)
-dotnet run --project src/PaperMan.Server -- ../db/paperman.db 40200 <AES金鑰hex32>
+dotnet run --project src/PaperMan.Server -- ../db/paperman.db 40200
 ```
 
-- **AES 金鑰**: IDA 匯出的 `.c` 不含資料段, 必須自原版 `PaperMan.exe`
-  的 `.data` VA `0xB69E88` 抽出 16 bytes (例如 IDA 中 `unk_B69E88` 按 Shift+E)。
-  不給金鑰 = 明文模式, 僅供自測/代理除錯, 真客戶端無法連。
+- **AES 金鑰已內建**: 客戶端硬編碼金鑰 = EUC-KR 字串「트렁크점령전머지」
+  (`C6AEB7B7 C5A9C1A1 B7C9C0FC B8D3C1F6`), 自反編譯 `sub_403430`
+  (Hex-Rays 9.4 重導出直接展開字串來源) 完整還原, 並以獨立 AES 實作
+  + FIPS-197 測試向量三重驗證。預設啟用 (`PaperAes.DefaultKey`);
+  第三個參數給 `off`/`plain` = 明文模式, 或 32 位 hex = 自訂金鑰。
 - **壓縮門檻**: 預設送 `0x2580` (=9600) 給 `GL_ACCOUNTCONNSUCC(694)` → 客戶端
   永不壓縮, 與原版預設一致, 可簡化除錯。
 - LZ 演算法已用 Python 逐行移植做過 310 組 round-trip 驗證 (含 fuzz)。

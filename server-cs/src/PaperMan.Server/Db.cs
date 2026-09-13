@@ -356,6 +356,47 @@ public sealed class Db : IDisposable
         }
     }
 
+    // ------------------------------------------------------------- clans
+    /// <summary>
+    /// 建戰隊 (583 隧道 sub=182)。回 clan_id; 名稱重複或已入隊 → 0。
+    /// </summary>
+    public long CreateClan(long leaderUserId, string name)
+    {
+        if (name is not { Length: > 0 and <= 16 }) return 0;
+        lock (_gate)
+        {
+            using var tx = _conn.BeginTransaction();
+            try
+            {
+                using var ins = Cmd(
+                    "INSERT INTO clans(name, leader_id) VALUES(@n, @u) RETURNING clan_id",
+                    ("@n", name), ("@u", leaderUserId));
+                ins.Transaction = tx;
+                long clanId = Convert.ToInt64(ins.ExecuteScalar()!);
+
+                using var mem = Cmd(
+                    "INSERT INTO clan_members(clan_id, user_id, rank) VALUES(@c, @u, 2)",
+                    ("@c", clanId), ("@u", leaderUserId));
+                mem.Transaction = tx;
+                mem.ExecuteNonQuery();
+
+                using var upd = Cmd(
+                    "UPDATE users SET clan_id=@c WHERE user_id=@u",
+                    ("@c", clanId), ("@u", leaderUserId));
+                upd.Transaction = tx;
+                upd.ExecuteNonQuery();
+
+                tx.Commit();
+                return clanId;
+            }
+            catch (SqliteException)   // UNIQUE(name) / UNIQUE(user_id) 落敗
+            {
+                tx.Rollback();
+                return 0;
+            }
+        }
+    }
+
     public void LogPacket(ushort opcode, bool rx, int bytes)
     {
         lock (_gate)
