@@ -614,6 +614,31 @@ kind 0/1/14 與 12/13/17 (可覆寫類) 走覆寫路徑, 其他 kind 重複購�
 同構鏈總結: 114⇔257⇔765⇔985 (進房四變體), 130⇔986 (開戰),
 959⇔961⇔963 (掉落) — client 重用解析器的鐵證。
 
+### 3.15d4 MASTER GM 工具組全表 (廿五輪 — 最後一族掃畢)
+```
+275/276 MEMO (wstr 私訊) / 277/278 MEMOALL (wstr 全服公告)
+279 USERCUT (u8+str 踢人) / 281 USERCUT2 (s32 uid) / 283 ROOMCUT (u8 房)
+285/286 MSET (u8 GM模式) / 287/288 PRINTUSER (線上清單)
+289/290 USERINFO (str nick → str×2+u8×4 + sub_523A50 全量)
+293/294 USERINFODB (str → u8+str DB 查詢)
+394/395 ROOMINFO (u8 → u8×2+str×2)
+402-405 EVENTPAGE/EXP (f32 經驗/點數倍率! → 841-846 SETALL 版本
+  + s32 影響人數回報, 846 VIEWALL = str+s32+f32×2 per 伺服器)
+406/407 ENABLE/DISABLE_LOGIN (開關登入) / 416 KILLALL (全服踢出)
+412/414 DISGMS/DISLOG (str+s32 停用服務) / 800 XTRAP_RELOAD (反作弊重載)
+822/823 CHAT_BAN (u8+u8+str → u8) / 830 FORCE_BAN (u8+str+s32 天數)
+824-826 USERLIST (u8 type+s32 page → 大廳版 s32×2+str×2 /
+  房間版 s32×3+str×2)
+883/884 FIND_USER (s32 uid → bool+s32+str×2+s32+u8×4 所在位置)
+885 PLAY_WITH (s32 — GM 跳到玩家房間)
+773/804/892 RELOAD (錦標賽/隱藏商品/戰隊排名 熱重載)
+812-815 特殊能力槽/炸彈作弊檢測開關 (s8 → bool)
+831 RESET_PACKET_DELAY (s32 — 流控參數!)
+```
+GM 權限: 這些 REQ 無等級檢查 — server 端必須以帳號 GM flag gate
+(客戶端 builder 存在不代表可用; 681 result 0xD6 的「GM IP 白名單」
+是唯一 client 端 gate)。
+
 ### 3.15d3 GG 戰鬥中繼全 58 對 — 轉發模式分類 (廿五輪自動配對)
 Server 的 GG 處理 = **驗證 + 廣播**, 三種模式:
 1. **slot 前綴轉發** (最常見): ACK = `u8 actor_slot` + REQ 原欄位
