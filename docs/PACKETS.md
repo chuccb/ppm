@@ -439,9 +439,12 @@ u16    count
 若 count != 0:      ← count==0 時後面什麼都沒有
   u8   flags        (bit0: 開啟清單 UI; bit0|bit2: 關閉)
   u8   n
-  repeat n: s32 user_id, string nick, s32 status
-            if user_id>0 { s32 custom_tex_id, string tex_name }
+  repeat n: s32 user_id, string nick, s32 exp
+            if user_id>0 { s32 custom_tex_id, string tex_name(64) }
 ```
+⚠ 第三個 s32 是 **exp 不是 status** (十二輪定案): sub_588560 對它呼叫
+sub_403360(exp→level 查表) 後把 level 顯示在清單。custom_tex_id 進
+CCustomTexture 快取請求 (個人頭像貼圖)。
 ### 3.9 GL_GAMEROOMINFO_ACK (108) — sub_568CE0 (五輪完整讀畢):
 ```
 u8   mode (3 = 錦標賽樹狀圖, 委派 sub_580A80; 其他 = 房間清單)
