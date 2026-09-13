@@ -116,7 +116,10 @@ CREATE TABLE IF NOT EXISTS characters (
     user_id      INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     slot_no      INTEGER NOT NULL CHECK (slot_no BETWEEN 0 AND 19),
     char_type    INTEGER NOT NULL DEFAULT 0,     -- u8 角色種類 (GS_BUYCHAR 310)
-    -- 12 個裝備欄位 (u16 item ref, 0=空) — sub_524010 讀 12 個 u16
+    -- 12 個外觀欄位 (u16 = 類別內偏移, 0=空) — sub_524010 讀 12 個 u16
+    -- 十八輪真值: [0]=角色(19.9M) [1]=髮型 [2]=臉 [3]=上衣 [4]=下裝
+    -- [5]=鞋 [6]=外套 [7]=眼部 [8]=髮飾 [9]=臉飾 [10]=頭飾 [11]=特殊
+    -- (欄名沿用舊稱, 對應順序如上; 武器另走武器編組表)
     eq_primary   INTEGER NOT NULL DEFAULT 0,
     eq_secondary INTEGER NOT NULL DEFAULT 0,
     eq_melee     INTEGER NOT NULL DEFAULT 0,
