@@ -21,9 +21,12 @@ connect ──► server 發 694 (門檻 0x2580) ──► client 送 682 (帳�
 129 開戰→130廣播(17欄+16×s32) → 各員 183 載入完→184 → 187→188 開打
 
 【頻道伺服器 TCP :40201 (握手=693 GL_TCPCONNSUCC; 681 清單指向此 port)】
-connect → server 發 693 GL_TCPCONNSUCC → client 送 143 (nick +
-  n100/ext_count 雙 token 回送) → 144 PM_UDPSTART_ACK
-  (n108 狀態機: 0=OK 3=踢出 — token 不符可踢)
+connect → server 發 693 → client 送 143 (nick + n100/ext_count
+  雙 token 回送) → 144 (n108: 0=OK 3=踢出 — token 不符即踢)
+  → **client 自動續送 141** (144 handler 尾端 ctor(141) — 卅二輪)
+  → 142 回 UDP 打洞目標 (host/port 直填 sockaddr, sub_596E60)
+  → client 開始 UDP session (預留 :40202)
+port 佈局: 40200 登入(694) / 40201 頻道(693) / 40202 UDP(未來 relay)
 【戰鬥 (P2P + relay)】
 UDP 打洞 (私有編號 2-34, sub_595E80; 32→33/34 移動同步);
 UDP 失敗 → TCP 備援 165/166 (第六層戰場引擎 subtype 1-9)

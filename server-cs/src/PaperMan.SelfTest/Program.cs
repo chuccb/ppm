@@ -88,25 +88,25 @@ var key = RandomNumberGenerator.GetBytes(16);
 foreach (var (label, codec) in codecs)
 {
     var ping = new Packet(Opcode.GT_PING_REQ);
-    var d0 = codec.Decode(codec.Encode(ping));
-    Check($"{label}: empty payload", d0.Opcode == Opcode.GT_PING_REQ && d0.Length == 0);
+    var decodedEmpty = codec.Decode(codec.Encode(ping));
+    Check($"{label}: empty payload", decodedEmpty.Opcode == Opcode.GT_PING_REQ && decodedEmpty.Length == 0);
 
     var small = new Packet(Opcode.GL_MYINFO_REQ).WriteS32(42).WriteStr("nick");
-    var d1 = codec.Decode(codec.Encode(small));
-    Check($"{label}: small payload", d1.ReadS32() == 42 && d1.ReadStr() == "nick");
+    var decodedSmall = codec.Decode(codec.Encode(small));
+    Check($"{label}: small payload", decodedSmall.ReadS32() == 42 && decodedSmall.ReadStr() == "nick");
 
     var big = new Packet(Opcode.GL_MYITEM_ACK);
     for (int i = 0; i < 500; i++)
     {
         big.WriteS32(i % 3).WriteU16(7);
     }
-    var f2 = codec.Encode(big);
-    var d2 = codec.Decode(f2);
-    bool okBig = d2.Length == big.Length;
+    var bigFrame = codec.Encode(big);
+    var decodedBig = codec.Decode(bigFrame);
+    bool okBig = decodedBig.Length == big.Length;
     for (int i = 0; okBig && i < 500; i++)
-        okBig = d2.ReadS32() == i % 3 && d2.ReadU16() == 7;
+        okBig = decodedBig.ReadS32() == i % 3 && decodedBig.ReadU16() == 7;
     Check($"{label}: big payload roundtrip", okBig);
-    Check($"{label}: FrameLength", PacketCodec.FrameLength(f2) == f2.Length);
+    Check($"{label}: FrameLength", PacketCodec.FrameLength(bigFrame) == bigFrame.Length);
 }
 
 // ---- 4. header 語意 ---------------------------------------------------------
@@ -121,17 +121,17 @@ foreach (var (label, codec) in codecs)
     Check("w3 = 原始大小 4", w3 == 4);
 
     // 壓縮管線: w3 = 原始大小, w2 = 加密前(=壓縮後)大小
-    var (_, czip) = codecs[2];                               // aes+compress, 門檻 64
+    var (_, compressingCodec) = codecs[2];                               // aes+compress, 門檻 64
     var big = new Packet(Opcode.GL_MYITEM_ACK);
     for (int i = 0; i < 300; i++)
     {
         big.WriteS32(1);
     }
-    var zf = czip.Encode(big);
-    ushort zw2 = BinaryPrimitives.ReadUInt16LittleEndian(zf.AsSpan(4));
-    ushort zw3 = BinaryPrimitives.ReadUInt16LittleEndian(zf.AsSpan(6));
-    Check("compressed: w3 = 原始 1200", zw3 == 1200);
-    Check("compressed: w2 < w3 (壓縮後)", zw2 < zw3);
+    var compressedFrame = compressingCodec.Encode(big);
+    ushort compressedWord2 = BinaryPrimitives.ReadUInt16LittleEndian(compressedFrame.AsSpan(4));
+    ushort compressedWord3 = BinaryPrimitives.ReadUInt16LittleEndian(compressedFrame.AsSpan(6));
+    Check("compressed: w3 = 原始 1200", compressedWord3 == 1200);
+    Check("compressed: w2 < w3 (壓縮後)", compressedWord2 < compressedWord3);
 
     // 壞包必須擲例外或亂碼 (原版 drop-all)
     frame[8] ^= 0xFF;

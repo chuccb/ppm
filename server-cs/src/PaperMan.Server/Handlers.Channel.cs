@@ -67,13 +67,18 @@ public static class ChannelHandlers
         await session.SendAsync(ack);
     }
 
-    // 141 → 142 PM_CONNECT_ACK (sub_5565D0): str host, s32 port, u8, f32
-    //   — 指示 client 戰鬥連線目標 (單機 = 自己)
+    // 141 → 142 PM_CONNECT_ACK (sub_5565D0, 卅二輪定案):
+    //   str host, s32 port, u8, f32 — host/port 經 sub_596E60 直填
+    //   UDP sockaddr = UDP 打洞伺服器目標。
+    //   時序: 144 (n108=0) 成功後 client 自動續送 141 (handler 尾端
+    //   ctor(141)) — 本方法是頻道進入鏈的最後一步。
     private static async ValueTask PmConnect(Session session, Packet packet, ServerContext context)
     {
+        // 142 的 host/port 是 UDP 打洞伺服器目標 (sub_596E60 直填 sockaddr)。
+        // 單機模式預留 UDP port = ChannelPort + 1 (UDP relay 為未來擴充)。
         await session.SendAsync(new Packet(Opcode.PM_CONNECT_ACK)
             .WriteStr(context.Config.PublicHost)
-            .WriteS32(context.Config.Port)
+            .WriteS32(context.Config.ChannelPort + 1)
             .WriteU8(0)
             .WriteF32(0f));
     }

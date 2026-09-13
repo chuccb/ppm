@@ -101,7 +101,7 @@ async Task RunSessionAsync(TcpClient client, long sessionId, ServerRole role, Ca
 
         await foreach (var packet in session.ReceiveAsync(cancellationToken))
         {
-            db.LogPacket(packet.OpcodeRaw, rx: true, packet.Length);
+            db.LogPacket(packet.OpcodeRaw, isReceive: true, packet.Length);
             try
             {
                 if (!await router.DispatchAsync(session, packet, ctx))

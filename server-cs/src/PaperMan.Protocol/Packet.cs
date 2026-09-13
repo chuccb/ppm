@@ -106,81 +106,81 @@ public sealed class Packet(Opcode opcode)
     }
 
     // ------------------------------------------------------------------ write
-    private Span<byte> Grow(int n)
+    private Span<byte> Grow(int byteCount)
     {
         // sub_592580: write cursor + n 不得超過 buffer 終點
-        if (Length + n > MaxPayload)
+        if (Length + byteCount > MaxPayload)
         {
             throw new InvalidOperationException($"payload would exceed {MaxPayload}");
         }
 
-        if (Length + n > _buf.Length)
+        if (Length + byteCount > _buf.Length)
         {
-            Array.Resize(ref _buf, Math.Max(_buf.Length * 2, Length + n));
+            Array.Resize(ref _buf, Math.Max(_buf.Length * 2, Length + byteCount));
         }
 
-        var span = _buf.AsSpan(Length, n);
-        Length += n;
+        var span = _buf.AsSpan(Length, byteCount);
+        Length += byteCount;
         return span;
     }
 
     /// <summary>sub_592920: 單一 byte。</summary>
-    public Packet WriteU8(byte v)
+    public Packet WriteU8(byte value)
     {
-        Grow(1)[0] = v;
+        Grow(1)[0] = value;
         return this;
     }
 
     /// <summary>sub_5928E0: 帶號 byte。</summary>
-    public Packet WriteS8(sbyte v)
+    public Packet WriteS8(sbyte value)
     {
-        Grow(1)[0] = unchecked((byte)v);
+        Grow(1)[0] = unchecked((byte)value);
         return this;
     }
 
     /// <summary>sub_592900 讀端對應: 0/1 旗標。</summary>
-    public Packet WriteBool(bool v) =>
-        WriteU8(v ? (byte)1 : (byte)0);
+    public Packet WriteBool(bool value) =>
+        WriteU8(value ? (byte)1 : (byte)0);
 
     /// <summary>sub_5929A0: u16 little-endian。</summary>
-    public Packet WriteU16(ushort v)
+    public Packet WriteU16(ushort value)
     {
-        BinaryPrimitives.WriteUInt16LittleEndian(Grow(2), v);
+        BinaryPrimitives.WriteUInt16LittleEndian(Grow(2), value);
         return this;
     }
 
     /// <summary>sub_5929E0: s16 little-endian。</summary>
-    public Packet WriteS16(short v)
+    public Packet WriteS16(short value)
     {
-        BinaryPrimitives.WriteInt16LittleEndian(Grow(2), v);
+        BinaryPrimitives.WriteInt16LittleEndian(Grow(2), value);
         return this;
     }
 
     /// <summary>sub_592A60: u32 little-endian。</summary>
-    public Packet WriteU32(uint v)
+    public Packet WriteU32(uint value)
     {
-        BinaryPrimitives.WriteUInt32LittleEndian(Grow(4), v);
+        BinaryPrimitives.WriteUInt32LittleEndian(Grow(4), value);
         return this;
     }
 
     /// <summary>sub_592A20: s32 little-endian。</summary>
-    public Packet WriteS32(int v)
+    public Packet WriteS32(int value)
     {
-        BinaryPrimitives.WriteInt32LittleEndian(Grow(4), v);
+        BinaryPrimitives.WriteInt32LittleEndian(Grow(4), value);
         return this;
     }
 
     /// <summary>sub_592AE0: u64 little-endian。</summary>
-    public Packet WriteU64(ulong v)
+    public Packet WriteU64(ulong value)
     {
-        BinaryPrimitives.WriteUInt64LittleEndian(Grow(8), v);
+        BinaryPrimitives.WriteUInt64LittleEndian(Grow(8), value);
         return this;
     }
 
     /// <summary>sub_592B20: IEEE-754 單精度。</summary>
-    public Packet WriteF32(float v)
+    public Packet WriteF32(float value)
     {
-        BinaryPrimitives.WriteSingleLittleEndian(Grow(4), v);
+        BinaryPrimitives.WriteSingleLittleEndian(Grow(4), value);
         return this;
     }
 
@@ -220,16 +220,16 @@ public sealed class Packet(Opcode opcode)
         WriteU16(inner.OpcodeRaw).WriteU32((uint)inner.Length).WriteRaw(inner.Payload);
 
     // ------------------------------------------------------------------- read
-    private ReadOnlySpan<byte> Take(int n)
+    private ReadOnlySpan<byte> Take(int byteCount)
     {
         // sub_592500: cursor+n 同時對 w0 與 buffer 終點做上限檢查
-        if (ReadPos + n > Length)
+        if (ReadPos + byteCount > Length)
         {
-            throw new EndOfStreamException($"read {n} at {ReadPos}/{Length} (op={Opcode})");
+            throw new EndOfStreamException($"read {byteCount} at {ReadPos}/{Length} (op={Opcode})");
         }
 
-        var span = _buf.AsSpan(ReadPos, n);
-        ReadPos += n;
+        var span = _buf.AsSpan(ReadPos, byteCount);
+        ReadPos += byteCount;
         return span;
     }
 

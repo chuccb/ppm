@@ -63,9 +63,9 @@ public sealed class PacketCodec(byte[]? aesKey = null, ushort compressThreshold 
 
     // ------------------------------------------------------------------- send
     /// <summary>組出完整 wire frame: [w0 size][w1 opcode][w2][w3] + payload。</summary>
-    public byte[] Encode(Packet p)
+    public byte[] Encode(Packet packet)
     {
-        ReadOnlySpan<byte> payload = p.Payload;
+        ReadOnlySpan<byte> payload = packet.Payload;
         ushort w2 = 0;
         ushort w3 = (ushort)payload.Length;                    // sub_591F90 (首次送出)
 
@@ -98,7 +98,7 @@ public sealed class PacketCodec(byte[]? aesKey = null, ushort compressThreshold 
         var frame = new byte[Packet.HeaderSize + payload.Length];
         var h = frame.AsSpan();
         BinaryPrimitives.WriteUInt16LittleEndian(h, (ushort)payload.Length);
-        BinaryPrimitives.WriteUInt16LittleEndian(h[2..], p.OpcodeRaw);
+        BinaryPrimitives.WriteUInt16LittleEndian(h[2..], packet.OpcodeRaw);
         BinaryPrimitives.WriteUInt16LittleEndian(h[4..], w2);
         BinaryPrimitives.WriteUInt16LittleEndian(h[6..], w3);
         payload.CopyTo(h[Packet.HeaderSize..]);

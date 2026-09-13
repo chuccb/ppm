@@ -829,8 +829,13 @@ GG 戰鬥事件中繼 (server 原樣轉發即可) 與 MASTER_* GM 工具組。
 ```
 103 GE_LOGOUT_REQ (sub_58D660): 無 payload — client 登出通知
 141 PM_CONNECT_REQ (sub_556530): 無 payload — 進房 TCP 握手
-142 PM_CONNECT_ACK (sub_5565D0): str host, s32 port, u8, f32 —
-    伺服器指示戰鬥連線目標 (client 隨即連 UDP)
+142 PM_CONNECT_ACK (sub_5565D0, 卅二輪深挖): str host, s32 port,
+    u8, f32→word_1D0D1F8 (更新率?) — host/port 經 sub_596E60 直填
+    **UDP sockaddr** (inet_addr+htons) = UDP 打洞伺服器目標!
+    完整頻道進入鏈 (卅二輪定案):
+    connect → 693 → 143 (token) → 144 (n108=0) →
+    **client 續送 141** (144 handler 尾端 ctor(141)) →
+    142 (UDP host/port) → client 開始 UDP session (打洞 2→4→5/6)
 143 PM_UDPSTART_REQ (sub_555C60): str nick, s32 n100 (login 681 的
     n100 原樣回送), s8 1, s32 ext_count (⚠ 十三輪定案:
     dword_231800C = dword_2318008[1] = 681 ext 塊的 count, 由

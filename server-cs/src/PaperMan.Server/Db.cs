@@ -330,12 +330,12 @@ public sealed class Db : IDisposable
         }
     }
 
-    private BuyResult BuyItemInTx(SqliteTransaction tx, long userId, int itemId, byte periodDays, bool useCash)
+    private BuyResult BuyItemInTx(SqliteTransaction transaction, long userId, int itemId, byte periodDays, bool useCash)
     {
         SqliteCommand TxCmd(string sql, params ReadOnlySpan<(string, object?)> args)
         {
             var c = Cmd(sql, args);
-            c.Transaction = tx;
+            c.Transaction = transaction;
             return c;
         }
 
@@ -781,7 +781,7 @@ public sealed class Db : IDisposable
         }
     }
 
-    public void LogPacket(ushort opcode, bool rx, int bytes)
+    public void LogPacket(ushort opcode, bool isReceive, int bytes)
     {
         lock (_gate)
         {
@@ -791,8 +791,8 @@ public sealed class Db : IDisposable
                 ON CONFLICT(day,opcode) DO UPDATE SET
                   rx_count=rx_count+@rc, tx_count=tx_count+@tc,
                   rx_bytes=rx_bytes+@rb, tx_bytes=tx_bytes+@tb
-                """, ("@o", opcode), ("@rc", rx ? 1 : 0), ("@tc", rx ? 0 : 1),
-                     ("@rb", rx ? bytes : 0), ("@tb", rx ? 0 : bytes));
+                """, ("@o", opcode), ("@rc", isReceive ? 1 : 0), ("@tc", isReceive ? 0 : 1),
+                     ("@rb", isReceive ? bytes : 0), ("@tb", isReceive ? 0 : bytes));
             try
             {
                 cmd.ExecuteNonQuery();
