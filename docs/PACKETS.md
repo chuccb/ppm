@@ -614,6 +614,27 @@ kind 0/1/14 與 12/13/17 (可覆寫類) 走覆寫路徑, 其他 kind 重複購�
 同構鏈總結: 114⇔257⇔765⇔985 (進房四變體), 130⇔986 (開戰),
 959⇔961⇔963 (掉落) — client 重用解析器的鐵證。
 
+### 3.15d3 GG 戰鬥中繼全 58 對 — 轉發模式分類 (廿五輪自動配對)
+Server 的 GG 處理 = **驗證 + 廣播**, 三種模式:
+1. **slot 前綴轉發** (最常見): ACK = `u8 actor_slot` + REQ 原欄位
+   [+附加]。實證: 316 駭入 (REQ u8 → ACK u8+u8), 318 駭入成功
+   (REQ u8+6×f32 → ACK 同+u8), 326/328/330 拆彈, 737/739/741 破壞,
+   730 奪紙漿, 820 檢舉, 902/906 佔領
+2. **復活五連同構**: 342 SOLO / 360 TSUR / 455 EXERCISE / 746 PNR /
+   909 OCC / 971 SOCCER — REQ 全是 `s32 (respawn token)`,
+   ACK 全是 `u8 slot, u8, s16 x, s16 y, s16 z` (座標指派) —
+   六個模式共用一個復活協定!
+3. **聊天四連**: 344/346/348/350 (live/team/dead/teamdead) REQ 全 =
+   `s32 tex, u8 slot, str msg`; ACK 端無讀取 (client 以自身緩衝顯示)
+   → server 依模式過濾聽眾後原樣轉發
+其他: 443/445/447 奪寶三連 (ACK u8+u8+u16×3 分數組); 964/967 足球
+(得球/進球 = u8×2); 749 GIMMICK (s32×2+u8); 752 地圖重載;
+962 掉落武器 (REQ 6 欄 → ACK 13 欄 = server 附 drop_id+item 詳情);
+474-483 射擊館 (476 END 帶 raw24+raw44 成績塊, 478 CHECK raw36 防作弊);
+716 快速槽 4×s16; 437 房間廣播 (u8+s32+rawN 自由載荷)。
+334/336/338 SEEDKEY/UNIQUEKEY/DETECTCRACK = 反作弊挑戰 (REQ/ACK 皆
+無 builder/parser — 由安全模組直接組包, 私服可忽略)。
+
 ### 3.15d2 剩餘家族速覽 (廿二輪終掃)
 ```
 984 GL_MATCHINGROOM_MAKE_ACK  (sub_5865A0): u8 result — 配對房建立
