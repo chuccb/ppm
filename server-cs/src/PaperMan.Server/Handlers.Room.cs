@@ -35,6 +35,114 @@ public static class RoomHandlers
         add(Opcode.GR_READY_REQ, Ready);
         add(Opcode.GR_CHANGESLOT_REQ, ChangeSlot);
         add(Opcode.GL_ENTERROOMPASS_REQ, EnterRoomPass);
+        add(Opcode.GR_START_REQ, StartGame);
+        add(Opcode.GR_ENDLOADING_REQ, EndLoading);
+        add(Opcode.GG_STARTGAME_REQ, BeginBattle);
+        add(Opcode.GR_END_REQ, EndGame);
+    }
+
+    // 129 REQ: u8 n125 → 130 ACK (sub_562870 讀序, 廿九輪逐變數):
+    //   u8 result(1=開戰), s8, s32 elapsed_ms(新局=0), u8 slot, u8, u8,
+    //   u16, u8, u8 host_slot, u16, u8 flags, s8×3, u8, s8, 16×s32
+    private static async ValueTask StartGame(Session s, Packet p, ServerContext ctx)
+    {
+        _ = p.ReadU8();                                     // n125 (倒數參數)
+
+        if (s.RoomNo is not { } roomNo || ctx.Rooms.Find(roomNo) is not { } room)
+        {
+            return;
+        }
+
+        var masterSlot = room.MasterSlot;
+        var ack = new Packet(Opcode.GR_START_ACK)
+            .WriteU8(1)                                     // result: 開戰
+            .WriteS8(0)
+            .WriteS32(0)                                    // elapsed_ms (新局)
+            .WriteU8(masterSlot)                            // slot
+            .WriteU8(room.MapId)                            // +105
+            .WriteU8(room.Rule)                             // +129
+            .WriteU16(room.WinCount)
+            .WriteU8(room.MaxPlayers)
+            .WriteU8(masterSlot)                            // host
+            .WriteU16(0)                                    // +144
+            .WriteU8(0)                                     // flags (bit0/1)
+            .WriteS8(0).WriteS8(0).WriteS8(0)
+            .WriteU8(0)
+            .WriteS8(0);
+        for (int i = 0; i < 16; i++)
+        {
+            ack.WriteS32(0);                                // per-slot 值
+        }
+
+        room.ResetLoading();
+        await RoomManager.BroadcastAsync(room, ack);
+    }
+
+    // 183 REQ 空 → 184 ACK (sub_563B00): u8 n2(1), u8 slot, u8 slot2, u8
+    //   — 每位成員載入完成後廣播; 全員到齊由 client 觸發 187
+    private static async ValueTask EndLoading(Session s, Packet p, ServerContext ctx)
+    {
+        if (s.RoomNo is not { } roomNo || ctx.Rooms.Find(roomNo) is not { } room)
+        {
+            return;
+        }
+
+        var slot = room.Members.FirstOrDefault(kv => ReferenceEquals(kv.Value, s)).Key;
+        room.MarkLoaded(slot);
+
+        await RoomManager.BroadcastAsync(room, new Packet(Opcode.GR_ENDLOADING_ACK)
+            .WriteU8(1)
+            .WriteU8(slot)
+            .WriteU8(slot)
+            .WriteU8(0));
+    }
+
+    // 187 REQ 空 → 188 ACK (sub_563D60): u8 n2==1, u8 count, count×u8 slot
+    //   — 開打廣播 (帶已載入成員名單)
+    private static async ValueTask BeginBattle(Session s, Packet p, ServerContext ctx)
+    {
+        if (s.RoomNo is not { } roomNo || ctx.Rooms.Find(roomNo) is not { } room)
+        {
+            return;
+        }
+
+        var loaded = room.LoadedSlots;
+        var ack = new Packet(Opcode.GG_STARTGAME_ACK)
+            .WriteU8(1)
+            .WriteU8((byte)loaded.Count);
+        foreach (var slot in loaded)
+        {
+            ack.WriteU8(slot);
+        }
+
+        await RoomManager.BroadcastAsync(room, ack);
+    }
+
+    // 133 REQ 空 → 134 ACK (sub_562EA0, 與 130 鏡像): 回房重置
+    private static async ValueTask EndGame(Session s, Packet p, ServerContext ctx)
+    {
+        if (s.RoomNo is not { } roomNo || ctx.Rooms.Find(roomNo) is not { } room)
+        {
+            return;
+        }
+
+        var slot = room.Members.FirstOrDefault(kv => ReferenceEquals(kv.Value, s)).Key;
+        var ack = new Packet(Opcode.GR_END_ACK)
+            .WriteU8(1)
+            .WriteU8(0)                                     // count
+            .WriteU8(slot)
+            .WriteU8(room.MapId)
+            .WriteU8(room.Rule)
+            .WriteU16(room.WinCount)
+            .WriteU8(room.MaxPlayers)
+            .WriteU8(room.MasterSlot)
+            .WriteU16(0)
+            .WriteU8(0)
+            .WriteU16(0)
+            .WriteS8(0).WriteS8(0).WriteS8(0).WriteS8(0)
+            .WriteU8(0)
+            .WriteU8(0);
+        await RoomManager.BroadcastAsync(room, ack);
     }
 
     // 127 REQ 空 → 128 ACK (sub_5626D0): u8 ready_flag, u8 slot —

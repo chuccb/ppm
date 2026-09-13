@@ -37,6 +37,37 @@ public sealed class Room
     public byte MasterSlot { get; set; }
 
     private readonly HashSet<byte> _ready = [];
+    private readonly HashSet<byte> _loaded = [];
+
+    /// <summary>183 GR_ENDLOADING: 標記已載入。</summary>
+    public void MarkLoaded(byte slot)
+    {
+        lock (_loaded)
+        {
+            _loaded.Add(slot);
+        }
+    }
+
+    /// <summary>已載入 slot 快照 (188 開打名單)。</summary>
+    public List<byte> LoadedSlots
+    {
+        get
+        {
+            lock (_loaded)
+            {
+                return [.. _loaded.Order()];
+            }
+        }
+    }
+
+    /// <summary>129 開戰時重置載入狀態。</summary>
+    public void ResetLoading()
+    {
+        lock (_loaded)
+        {
+            _loaded.Clear();
+        }
+    }
 
     /// <summary>128 GR_READY: 翻轉 slot 的 ready 狀態, 回新值。</summary>
     public bool ToggleReady(byte slot)

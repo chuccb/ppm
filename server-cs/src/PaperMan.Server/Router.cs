@@ -32,6 +32,7 @@ public sealed class Router
         QuestHandlers.Register(Add);
         FriendHandlers.Register(Add);
         RoomHandlers.Register(Add);
+        BattleRelayHandlers.Register(Add);
         return new(table);
     }
 
