@@ -231,6 +231,48 @@ REQ 端 24 個 builder 全部 `ctor(583)` + `WriteS32(sub_op)`:
 `s32 count + raw(4*count)` 的成員 id 陣列)。伺服器實作戰隊功能時
 必須解析/產生這層內嵌結構。
 
+**八輪逐一佈局 (REQ 段 = sub 之後的欄位; ACK 段 = 584 內容):**
+```
+sub  REQ (client→server)          ACK (server→client, sub_54D040 分發)
+182  (無)   邀請入隊確認           s32 clan_id → 顯示歡迎訊息 (sub_54E890)
+184  str clan_name  申請入隊       s32 clan_id, str nick (sub_54E490)
+185  s32 x, s32 uid, s32 11, s32 0 s32 clan_id, s32 reason (sub_54E670)
+186  str nick       踢除           s32 uid, str nick (sub_54E2E0)
+187  s32 clan_id    戰隊資訊       (查表更新)
+188  s32 clan_id, s32 page 成員頁  —
+189  s32 clan_id    公告           s32 clan_id, str notice ×2 (sub_54F9B0,
+                                   兩個 str 都 strncmp 0x18 比對)
+191  s32 n3, str nick  邀請        —
+192  s32 answer     邀請答覆       s32, str ×4, s32 ×5 (sub_54E0F0
+                                   完整戰隊摘要塊)
+193  s32 flag       解散           (this 語境處理 sub_54E020)
+195  s32 id, str    標誌查詢       —
+196  s32 count, raw(4n)  成員id    —
+197  s32 count, raw(4n)  成員id2   —
+200  s32 clan_id    成員清單       s32 count, count×{s32 rank(0..4),
+                                   s32 uid, s32 level, str nick,
+                                   str, s32 status} (sub_54EE70)
+202  (無)           次數查詢       s32, s32 (sub_54F0F0)
+203  str message    戰隊聊天       (sub_54F2D0; 需 rank>1 才可送)
+205  str×3          戰隊訊息       str from, str title, str body
+                                   (sub_54F3D0)
+208  (無)           捐獻           — (sub 208 只有 REQ)
+209  (無)           基金           — (同上)
+210  str            設定變更       s32 uid, str (sub_54E770)
+211  s32 uid        升職           s32 clan_id, str nick → rank:=5
+                                   (sub_54FBA0, 過場訊息 0x3E9)
+212  s32 uid        降職           同 211 鏡像 (sub_54FD50)
+198  —              戰爭邀請       s32, s32, str ×2, s32 (sub_54F450)
+199  —              戰爭答覆       (sub_54F5A0)
+201  —              排名           s32, [s32] (sub_54F0F0 同構)
+381..383  —         戰隊戰績       s32 ×2 (sub_54FF00/54FFC0, 帶 sub 參數)
+```
+**獨立對: 585 GC_CLAN_CREATE_REQ / 586 _ACK (不走隧道!)**:
+REQ (sub_5505F0) = `str name, str slogan, str intro, u8 emblem`;
+ACK (sub_54CB90) = `s8 result` — 0=成功 (再讀 `s32 → EE8D18` 扣費後 GP,
+sub_54DD70), 1..7 = 錯誤碼 (重名/GP 不足/等級不夠...)。
+建立成功後 client 自行送 583/187 拉戰隊資訊。
+
 ---
 
 ## 3. 關鍵 payload 結構 (伺服器必須產生/解析)

@@ -444,9 +444,10 @@ public sealed class Db : IDisposable
 
     // ------------------------------------------------------------- clans
     /// <summary>
-    /// 建戰隊 (583 隧道 sub=182)。回 clan_id; 名稱重複或已入隊 → 0。
+    /// 建戰隊 — 走獨立對 GC_CLAN_CREATE_REQ(585)/_ACK(586), 非隧道
+    /// (八輪更正)。回 clan_id; 名稱重複或已入隊 → 0。
     /// </summary>
-    public long CreateClan(long leaderUserId, string name)
+    public long CreateClan(long leaderUserId, string name, byte emblem = 0)
     {
         if (name is not { Length: > 0 and <= 16 })
         {
@@ -459,8 +460,8 @@ public sealed class Db : IDisposable
             try
             {
                 using var ins = Cmd(
-                    "INSERT INTO clans(name, leader_id) VALUES(@n, @u) RETURNING clan_id",
-                    ("@n", name), ("@u", leaderUserId));
+                    "INSERT INTO clans(name, leader_id, emblem_id) VALUES(@n, @u, @e) RETURNING clan_id",
+                    ("@n", name), ("@u", leaderUserId), ("@e", (int)emblem));
                 ins.Transaction = tx;
                 long clanId = Convert.ToInt64(ins.ExecuteScalar()!);
 
