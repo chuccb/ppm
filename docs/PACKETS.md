@@ -455,6 +455,12 @@ repeat until sentinel:
 額外驗證: start<=0 → 背包游標歸 0; start>=5020 → 夾到 5020; item_id 需通過
 sub_535020 目錄檢查, 失敗即 sub_528960(6,...) 錯誤處理並中止本包。
 
+**205 入帳鏈 (卅五輪)**: per-item ok 塊 → sub_534450(item, dura)
+同步兩處: itemdata 目錄執行期欄 +1200/+1202 (dura cur/max) +
+背包快取 28B 條目 word[18]/[20]; 再 sub_524F70 (廿一輪 28B 寫入,
+kind 12/13/17 覆寫) — client 端帳目完全由 205 驅動, server 是
+唯一事實源 ✓ (與 200 分頁快取一致)。
+
 ### 3.4 GS_BUYITEM_ACK (205) — handler sub_571910 (四輪修正: 完整結構)
 ```
 u8      count
