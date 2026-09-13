@@ -65,30 +65,52 @@ offset 8   ...  payload (小端, 緊湊, 無對齊)
 
 **送出 (sub_555090 → sub_593280):**
 ```
-1. 若 word3==0: word3 := word0 (原始 payload 大小)     (sub_591F90)
+1. 若 send_count(+19256)==0: word3 := word0 (原始大小)  (sub_591F90 = w3 setter)
+   ⚠ 只在「第一次送出」設定 — 同物件重送不會重設 w3
 2. 若 n0x2580>0 且 word0 ≥ n0x2580 → LZ 壓縮:
      sub_592CE0 → sub_592D30 → sub_591600
-     word2 := 壓縮前大小, word0 := 壓縮後大小, flag|=1
-     (壓不小就放棄, 不設 flag)
+     word3 := 壓縮前大小 (再次經 sub_591F90 — 值同原始大小),
+     word0 := 壓縮後大小 (sub_591F20), flag|=1
+     (n16==0 或壓不小就放棄, 不設 flag)
+     ⚠ 第二輪筆誤更正: 壓縮層寫的是 word3, 不是 word2
 3. 一律 AES 加密: sub_592F60 → sub_592FB0
-     n16 = 16-byte 對齊上取 (空 payload 也補一個 block)
+     n16 = 16-byte 對齊上取 (空 payload 也補一個 block); n16 ≥ 0x2578 → 失敗
      sub_4042A0(key_schedule, buf, n16, n2_4)   n2_4=1 CBC-加密 / 2 CBC-XOR先 / 其他 ECB
-     word2 := 加密前 word0, word0 := n16, flag|=4
-4. WSASend(this+24, word0 + 8)
+     word2 := 加密前 word0 (**(WORD**)(this+16)), word0 := n16, flag|=4
+     ⚠ word2 由且僅由 AES 層寫入
+4. WSASend(this+24, word0 + 8); 加密失敗 → 客戶端 ExitProcess(0)!
+5. send_count++ (sub_593260, InterlockedIncrement)
 ```
 
 **接收 (sub_555280 / sub_554E00 event loop):**
 ```
-1. 累積 stream 到 9600-byte buffer, 依 word0+8 切 frame (sub_591FB0)
-2. 合法性: sub_591D50 (total≥8 且 total ≥ word0+8)
+1. WSARecv 追加到 9600B 累積 buffer (a1+16, 已用量 a1[2404])
+2. while (剩餘>0): sub_591FB0 把整段剩餘 bytes 灌進新 Packet
+   frame_len = word0 + 8
+   合法性 sub_591D50: 灌入量 ≥ 8 且 ≥ word0 (半包 → break 等下次 recv)
 3. AES 解密: sub_5930C0 → sub_593110 → sub_404470(key, buf, n16, n2_4)
-     驗證: word0 必須 16 對齊且 == align16(word2), 否則丟包
-     word0 := word2 (還原大小), flag|=8
-4. 若 word3 > word0 且 word3 ≥ n0x2580 → LZ 解壓:
-     sub_592E50 判斷 → sub_592E00 → sub_592E90 → sub_591900
-     驗證: 解壓後大小必須 == word3, 否則丟包
-5. dispatch 到 handler (vtable+4 虛呼叫)
+     驗證: word0 ≥ 16, word0 == align16(word2), word0 16 對齊, word0 < 0x2578
+     word0 := word2 (還原大小), word3 不動, flag|=8; 失敗 → break (整緩衝殘留丟棄)
+4. 若 word3 ≥ n0x2580 且 word0 < word3 (sub_592E50) → LZ 解壓:
+     sub_592E00 → sub_592E90 → sub_591900
+     驗證: 解壓後大小 == word3 且 < 0x2580; 失敗 → a1[2404]=0 (清空整緩衝)
+5. dispatch sub_58B010(opcode switch); 之後 memmove 剩餘 bytes 到 buffer 頭
 ```
+
+**dispatcher 覆蓋範圍 (sub_58B010, 365 個 case)**: 除了註冊表的名字外,
+還處理 **27 個未註冊 opcode** (203, 367, 417, 488, 489, 852, 880, 914, 931,
+933, 946, 947, 949, 954, 958, 970, 976, 991, 995, 997, 999, 1001, 1003,
+1005, 1007, 1009, 1010) — 協定實際延伸到 1010; 203 = 武器編組同步 ACK
+(sub_571D50 → sub_524660 反序列化), 995..1010 = 較新的 room/match 家族。
+未知 opcode → default: return (靜默忽略)。
+
+**Packet 物件其他機制 (伺服器不需要, 記錄供參考):**
+- `this+9625` 第二個 9600B buffer + `this+19228` 長度 = 原始 payload 備份;
+  sub_592C60 可從備份還原 (重送/重加密用)。
+- `sub_5927F0/sub_592850` 內嵌 packet: u16 opcode + **u32** size + payload。
+- 拷貝建構 (sub_592030/592110/592600) 會校正讀寫游標的相對位移。
+- UDP 路徑 (sub_595A60, CUDPManager) 也走同一 AES 解密 (sub_5930C0),
+  但長度來自 recvfrom 而非累積 buffer。
 
 **AES 細節 (sub_403430 = key schedule 初始化):**
 - 全域常數: `n16_0=16` (block), `n10=10` (rounds) → **AES-128**

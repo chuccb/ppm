@@ -10,16 +10,20 @@ server-cs/
 └── src/
     ├── PaperMan.Protocol/          # 純協定層 (無 IO 依賴)
     │   ├── Opcode.cs               # 670 opcodes ← sub_9D2050 註冊表
-    │   ├── Packet.cs               # 讀寫原語 ← sub_592xxx 家族 (CP949 字串)
+    │   ├── Packet.cs               # 讀寫原語 ← sub_592xxx 家族 (CP949/wstr/blob/內嵌)
     │   ├── PaperLz.cs              # LZSS ← sub_591600 / sub_591900
     │   ├── PaperAes.cs             # AES-128-ECB ← sub_403430/4042A0/404470
     │   └── PacketCodec.cs          # 送收管線 ← sub_593280 / sub_5930C0
     ├── PaperMan.Server/            # TCP 伺服器
-    │   ├── Session.cs              # 9600B 緩衝框架, 錯包全丟 (原版行為)
-    │   ├── Db.cs                   # Microsoft.Data.Sqlite 存取層
-    │   ├── Handlers.cs             # login/lobby/shop/nick handlers
-    │   ├── StatHandlers.cs         # GP_CH*C 戰績家族 (19 計數器)
-    │   └── Program.cs
+    │   ├── Program.cs              # 入口 (top-level, 每連線一 task)
+    │   ├── ServerContext.cs        # 組態 record + LoginCode enum
+    │   ├── Session.cs              # 9600B 緩衝框架, 錯包全丟 (sub_555280 行為)
+    │   ├── Router.cs               # FrozenDictionary 路由 (≈ sub_58B010 switch)
+    │   ├── Db.cs                   # Microsoft.Data.Sqlite 存取層 (record 模型)
+    │   ├── Handlers.Auth.cs        # 682→681+694, ping
+    │   ├── Handlers.Lobby.cs       # 105/107/197/199/210/212
+    │   ├── Handlers.Shop.cs        # 356/204/695
+    │   └── Handlers.Stats.cs       # GP_CH*C 戰績家族 (18 REQ + 882 推播)
     └── PaperMan.SelfTest/          # 不需客戶端的 codec 自測
 ```
 
@@ -46,12 +50,26 @@ dotnet run --project src/PaperMan.Server -- ../db/paperman.db 40200 <AES金鑰he
 
 ## 協定要點 (詳見 ../docs/PACKETS.md)
 
-- Header 8B: `[u16 size][u16 opcode][u16 w2][u16 w3]`, frame = size+8。
-- 送出: w3=原始大小 → (視門檻) LZ 壓縮 (w2=壓前大小) → **一律** AES-128-ECB
-  (補齊 16, w2=加密前大小)。
-- 接收: AES 解密 (驗 16 對齊 + w0==align16(w2)) → (條件) LZ 解壓 (結果須==w3)。
+- Header 8B: `[u16 w0=size][u16 w1=opcode][u16 w2][u16 w3]`, frame = w0+8。
+- 送出 (`sub_593280`): 首次送出時 w3:=原始大小 → (w0≥門檻時) LZ 壓縮
+  (**w3 不變**, w0:=壓縮後) → **一律** AES-128-ECB (補齊 16, **w2:=加密前大小**,
+  w0:=對齊後)。⚠ w2 由且僅由 AES 層寫入; 加密失敗原版客戶端 ExitProcess。
+- 接收 (`sub_555280`): AES 解密 (驗 w0≥16、16 對齊、==align16(w2)、<0x2578)
+  → 若 w3≥門檻且 w0<w3 → LZ 解壓 (結果須==w3 且 <0x2580); 失敗丟整緩衝。
+- dispatcher `sub_58B010` 有 365 個 case, 含 **27 個未註冊 opcode**
+  (203, 995..1010 等) — 協定實際延伸到 1010; 未知 opcode 靜默忽略。
 - popcount+XOR「seal」層 (`sub_5923D0/592420`) 為**死碼**, 無呼叫者, 不實作。
-- 字串 = NUL 結尾 CP949 (無長度前綴); 寬字串 = 雙 NUL 結尾 UTF-16LE。
+- 字串 = NUL 結尾 CP949 (無長度前綴, `lstrlenA+1`); 寬字串 = 雙 NUL UTF-16LE;
+  blob = u16 len 前綴 (`sub_592BA0`); 內嵌 packet = u16 op + u32 size + payload。
+
+## C# 14 / .NET 10 特性使用
+
+- `field` keyword (CompressThreshold 正規化 setter)
+- primary constructors (Packet / Session / PacketCodec)
+- collection expressions `[...]`、list pattern (`is [1,2,3]`)
+- `System.Threading.Lock`、`FrozenDictionary` 路由表
+- span-first API (`ReadOnlySpan<byte>` 貫穿 protocol 層, `stackalloc` 零配置)
+- `IAsyncEnumerable` recv 迴圈 + `await foreach`
 
 ## 為何 SQLite 仍是 2026 年的正確選擇
 

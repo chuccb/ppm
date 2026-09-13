@@ -1,12 +1,28 @@
 // =============================================================================
 // PaperMan wire packet — 逐函數對應 PaperMan.exe.c 反編譯:
-//   header 佈局      <- sub_591DA0 (init) / sub_591F00 (word0) / sub_591EE0 (word1)
-//                       sub_5923B0 (word2) / sub_591F70 (word3)
-//   write 原語       <- sub_592580 家族 (sub_592920 u8, sub_5929A0 u16, sub_592A20 s32,
-//                       sub_592AE0 u64, sub_592B20 f32, sub_5926F0 str, sub_592770 wstr)
-//   read 原語        <- sub_592500 家族 (sub_592940 u8, sub_592A00 u16, sub_592A40 s32,
-//                       sub_592B00 u64, sub_592AC0 f32, sub_592730 str, sub_5927B0 wstr)
-//   內嵌 packet      <- sub_5927F0 / sub_852850
+//
+//   物件佈局 (size 19260, vftable @0xAEE4F8):
+//     +0   vftable          +4   dispatch-done flag (u8)
+//     +8   →w0 (this+24)    +12  →w1 (+26)   +16  →w2 (+28)   +20  →w3 (+30)
+//     +24  8B header         +32  payload buffer (9592B 可用, 總 9600)
+//     +9625 第二 9600B buffer (原始 payload 備份, sub_592C60 還原用)
+//     +19228 備份長度        +19232 →payload 起點
+//     +19236 read cursor     +19240 write cursor    +19244 →buffer 終點 (+9624)
+//     +19248 total (w0+8)    +19252 stage flags (1=LZ, 2=解LZ, 4=AES, 8=解AES)
+//     +19256 送出計數 (InterlockedIncrement, 守衛 w3 只設一次)
+//
+//   讀寫原語 (讀失敗回 0 不擲例外; 這裡改為擲例外 = server 端嚴格模式):
+//     核心   sub_592580 (write raw) / sub_592500 (read raw, 雙重邊界檢查)
+//     u8     sub_592920/592960 w, sub_592940/592980 r    s8  sub_5928E0/592900
+//     u16    sub_5929A0 w, sub_592A00 r                  s16 sub_5929E0/5929C0
+//     s32    sub_592A20 w, sub_592A40 r                  u32 sub_592A60/592A80
+//     u64    sub_592AE0/592B00, 592B60/592B80 (兩對)     f32 sub_592B20/592B40, 592AC0
+//     16B    sub_592C20 w, sub_592C40 r (GUID/hash 塊)
+//     str    sub_5926F0 w (lstrlenA+1, 含 NUL), sub_592730 r
+//     wstr   sub_592770 w (lstrlenW*2+2), sub_5927B0 r
+//     內嵌   sub_5927F0 w / sub_592850 r: u16 opcode + u32 size + payload
+//     len前綴 blob sub_592BA0 w / sub_592BE0 r: u16 len + bytes
+//
 // C# 14 / .NET 10。
 // =============================================================================
 using System.Buffers.Binary;
@@ -14,14 +30,13 @@ using System.Text;
 
 namespace PaperMan.Protocol;
 
-public sealed class Packet
+public sealed class Packet(Opcode opcode)
 {
     /// <summary>payload 上限: buffer 9600 - header 8 (sub_591DA0)。</summary>
     public const int MaxPayload = 9592;
     public const int HeaderSize = 8;
 
-    // CP949 (韓服 ANSI 編碼, lstrlenA 語意)。
-    // 注意: 不能用 static ctor + 欄位初始器 — 欄位初始器先於 static ctor 本體執行。
+    /// <summary>CP949 (韓服 ANSI, lstrlenA 語意)。初始化時註冊 CodePages provider。</summary>
     public static readonly Encoding Ansi = CreateAnsi();
 
     private static Encoding CreateAnsi()
@@ -33,7 +48,7 @@ public sealed class Packet
     private byte[] _buf = new byte[256];
 
     /// <summary>header word1 — dispatcher 以此 switch (sub_58B010)。</summary>
-    public ushort OpcodeRaw { get; set; }
+    public ushort OpcodeRaw { get; set; } = (ushort)opcode;
 
     public Opcode Opcode
     {
@@ -41,29 +56,53 @@ public sealed class Packet
         set => OpcodeRaw = (ushort)value;
     }
 
-    /// <summary>header word2 — 壓縮前大小 (LZ) / 加密前大小 (AES)。</summary>
-    public ushort Word2 { get; set; }
+    /// <summary>header word2 — 僅 AES 層寫入 (加密前大小)。</summary>
+    public ushort Word2 { get; init; }
 
-    /// <summary>header word3 — 原始 payload 大小 (sub_591F90 首次寫入)。</summary>
-    public ushort Word3 { get; set; }
+    /// <summary>header word3 — 原始 payload 大小 (sub_591F90, 首次送出時寫入)。</summary>
+    public ushort Word3 { get; init; }
 
     /// <summary>目前 payload 長度 (header word0)。</summary>
     public int Length { get; private set; }
 
-    /// <summary>read cursor (this+19236)。</summary>
+    /// <summary>read cursor (this+19236 相對 +19232)。</summary>
     public int ReadPos { get; private set; }
 
-    public Packet() { }
-
-    public Packet(Opcode opcode) => Opcode = opcode;   // Packet::ctor_0 (0x591B40)
+    public int Remaining => Length - ReadPos;
 
     public ReadOnlySpan<byte> Payload => _buf.AsSpan(0, Length);
 
-    public int Remaining => Length - ReadPos;
+    /// <summary>codec 解出明文後建構 (對應 sub_591FB0 灌包)。</summary>
+    internal static Packet FromWire(ushort opcode, ushort w2, ushort w3, ReadOnlySpan<byte> payload)
+    {
+        var p = new Packet((Opcode)opcode) { Word2 = w2, Word3 = w3 };
+        p.SetPayload(payload);
+        return p;
+    }
+
+    /// <summary>從原始 payload 建立可讀 Packet (測試/工具用)。</summary>
+    public static Packet FromPayload(Opcode opcode, ReadOnlySpan<byte> payload)
+    {
+        var p = new Packet(opcode);
+        p.SetPayload(payload);
+        return p;
+    }
+
+    private void SetPayload(ReadOnlySpan<byte> data)
+    {
+        if (data.Length > MaxPayload)
+            throw new ArgumentException($"payload {data.Length} exceeds {MaxPayload}");
+        if (data.Length > _buf.Length)
+            _buf = new byte[data.Length];
+        data.CopyTo(_buf);
+        Length = data.Length;
+        ReadPos = 0;
+    }
 
     // ------------------------------------------------------------------ write
     private Span<byte> Grow(int n)
     {
+        // sub_592580: write cursor + n 不得超過 buffer 終點
         if (Length + n > MaxPayload)
             throw new InvalidOperationException($"payload would exceed {MaxPayload}");
         if (Length + n > _buf.Length)
@@ -73,35 +112,34 @@ public sealed class Packet
         return span;
     }
 
-    public Packet WriteU8(byte v) { Grow(1)[0] = v; return this; }                     // sub_592920
-    public Packet WriteS8(sbyte v) { Grow(1)[0] = unchecked((byte)v); return this; }   // sub_5928E0
-    public Packet WriteBool(bool v) => WriteU8(v ? (byte)1 : (byte)0);
+    public Packet WriteU8(byte v)     { Grow(1)[0] = v; return this; }                                       // sub_592920
+    public Packet WriteS8(sbyte v)    { Grow(1)[0] = unchecked((byte)v); return this; }                      // sub_5928E0
+    public Packet WriteBool(bool v)   => WriteU8(v ? (byte)1 : (byte)0);
+    public Packet WriteU16(ushort v)  { BinaryPrimitives.WriteUInt16LittleEndian(Grow(2), v); return this; } // sub_5929A0
+    public Packet WriteS16(short v)   { BinaryPrimitives.WriteInt16LittleEndian(Grow(2), v);  return this; } // sub_5929E0
+    public Packet WriteU32(uint v)    { BinaryPrimitives.WriteUInt32LittleEndian(Grow(4), v); return this; } // sub_592A60
+    public Packet WriteS32(int v)     { BinaryPrimitives.WriteInt32LittleEndian(Grow(4), v);  return this; } // sub_592A20
+    public Packet WriteU64(ulong v)   { BinaryPrimitives.WriteUInt64LittleEndian(Grow(8), v); return this; } // sub_592AE0
+    public Packet WriteF32(float v)   { BinaryPrimitives.WriteSingleLittleEndian(Grow(4), v); return this; } // sub_592B20
 
-    public Packet WriteU16(ushort v) { BinaryPrimitives.WriteUInt16LittleEndian(Grow(2), v); return this; }  // sub_5929A0
-    public Packet WriteS16(short v)  { BinaryPrimitives.WriteInt16LittleEndian(Grow(2), v);  return this; }  // sub_5929E0
-    public Packet WriteU32(uint v)   { BinaryPrimitives.WriteUInt32LittleEndian(Grow(4), v); return this; }  // sub_592A60
-    public Packet WriteS32(int v)    { BinaryPrimitives.WriteInt32LittleEndian(Grow(4), v);  return this; }  // sub_592A20
-    public Packet WriteU64(ulong v)  { BinaryPrimitives.WriteUInt64LittleEndian(Grow(8), v); return this; }  // sub_592AE0
-    public Packet WriteF32(float v)  { BinaryPrimitives.WriteSingleLittleEndian(Grow(4), v); return this; }  // sub_592B20
-
-    /// <summary>sub_5926F0: ANSI 字串 + NUL, 無長度前綴。</summary>
+    /// <summary>sub_5926F0: NUL 結尾 ANSI (CP949) 字串, 無長度前綴。</summary>
     public Packet WriteStr(string s)
     {
-        var bytes = Ansi.GetBytes(s);
-        var span = Grow(bytes.Length + 1);
-        bytes.CopyTo(span);
-        span[^1] = 0;
+        int n = Ansi.GetByteCount(s);
+        var span = Grow(n + 1);
+        Ansi.GetBytes(s, span);
+        span[n] = 0;
         return this;
     }
 
-    /// <summary>sub_592770: UTF-16LE 字串 + 雙 NUL。</summary>
+    /// <summary>sub_592770: 雙 NUL 結尾 UTF-16LE 字串。</summary>
     public Packet WriteWStr(string s)
     {
-        var bytes = Encoding.Unicode.GetBytes(s);
-        var span = Grow(bytes.Length + 2);
-        bytes.CopyTo(span);
-        span[^2] = 0;
-        span[^1] = 0;
+        int n = Encoding.Unicode.GetByteCount(s);
+        var span = Grow(n + 2);
+        Encoding.Unicode.GetBytes(s, span);
+        span[n] = 0;
+        span[n + 1] = 0;
         return this;
     }
 
@@ -111,6 +149,10 @@ public sealed class Packet
         return this;
     }
 
+    /// <summary>sub_592BA0: u16 長度前綴 + raw bytes。</summary>
+    public Packet WriteBlob(ReadOnlySpan<byte> data) =>
+        WriteU16((ushort)data.Length).WriteRaw(data);
+
     /// <summary>sub_5927F0: 內嵌 packet = u16 opcode + u32 size + payload。</summary>
     public Packet WritePacket(Packet inner) =>
         WriteU16(inner.OpcodeRaw).WriteU32((uint)inner.Length).WriteRaw(inner.Payload);
@@ -118,6 +160,7 @@ public sealed class Packet
     // ------------------------------------------------------------------- read
     private ReadOnlySpan<byte> Take(int n)
     {
+        // sub_592500: cursor+n 同時對 w0 與 buffer 終點做上限檢查
         if (ReadPos + n > Length)
             throw new EndOfStreamException($"read {n} at {ReadPos}/{Length} (op={Opcode})");
         var span = _buf.AsSpan(ReadPos, n);
@@ -125,21 +168,22 @@ public sealed class Packet
         return span;
     }
 
-    public byte ReadU8() => Take(1)[0];                                                            // sub_592940
-    public sbyte ReadS8() => unchecked((sbyte)Take(1)[0]);                                         // sub_592900
-    public bool ReadBool() => Take(1)[0] != 0;
-    public ushort ReadU16() => BinaryPrimitives.ReadUInt16LittleEndian(Take(2));                   // sub_592A00
-    public short ReadS16() => BinaryPrimitives.ReadInt16LittleEndian(Take(2));                     // sub_5929C0
-    public uint ReadU32() => BinaryPrimitives.ReadUInt32LittleEndian(Take(4));                     // sub_592A80
-    public int ReadS32() => BinaryPrimitives.ReadInt32LittleEndian(Take(4));                       // sub_592A40
-    public ulong ReadU64() => BinaryPrimitives.ReadUInt64LittleEndian(Take(8));                    // sub_592B00
-    public float ReadF32() => BinaryPrimitives.ReadSingleLittleEndian(Take(4));                    // sub_592AC0
+    public byte ReadU8()     => Take(1)[0];                                                  // sub_592940
+    public sbyte ReadS8()    => unchecked((sbyte)Take(1)[0]);                                // sub_592900
+    public bool ReadBool()   => Take(1)[0] != 0;
+    public ushort ReadU16()  => BinaryPrimitives.ReadUInt16LittleEndian(Take(2));            // sub_592A00
+    public short ReadS16()   => BinaryPrimitives.ReadInt16LittleEndian(Take(2));             // sub_5929C0
+    public uint ReadU32()    => BinaryPrimitives.ReadUInt32LittleEndian(Take(4));            // sub_592A80
+    public int ReadS32()     => BinaryPrimitives.ReadInt32LittleEndian(Take(4));             // sub_592A40
+    public ulong ReadU64()   => BinaryPrimitives.ReadUInt64LittleEndian(Take(8));            // sub_592B00
+    public float ReadF32()   => BinaryPrimitives.ReadSingleLittleEndian(Take(4));            // sub_592AC0
 
-    /// <summary>sub_592730: 讀到 NUL (lstrlenA 語意)。可設 maxBytes 對應客戶端定長 buffer。</summary>
+    /// <summary>sub_592730: 讀到 NUL。maxBytes 對應客戶端定長 buffer。</summary>
     public string ReadStr(int maxBytes = MaxPayload)
     {
-        int end = Array.IndexOf(_buf, (byte)0, ReadPos, Math.Min(Length - ReadPos, maxBytes));
-        if (end < 0) throw new EndOfStreamException("unterminated string");
+        int end = Array.IndexOf(_buf, (byte)0, ReadPos, Math.Min(Remaining, maxBytes));
+        if (end < 0)
+            throw new EndOfStreamException($"unterminated string (op={Opcode})");
         var s = Ansi.GetString(_buf, ReadPos, end - ReadPos);
         ReadPos = end + 1;
         return s;
@@ -151,29 +195,21 @@ public sealed class Packet
         int i = ReadPos;
         while (i + 1 < Length && (_buf[i] != 0 || _buf[i + 1] != 0)) i += 2;
         var s = Encoding.Unicode.GetString(_buf, ReadPos, i - ReadPos);
-        ReadPos = i + 2;
+        ReadPos = Math.Min(i + 2, Length);
         return s;
     }
 
     public ReadOnlySpan<byte> ReadRaw(int n) => Take(n);
 
-    // ------------------------------------------------------------------- misc
-    /// <summary>從原始 payload 建立可讀 Packet (測試/工具用)。</summary>
-    public static Packet FromPayload(Opcode opcode, ReadOnlySpan<byte> payload)
-    {
-        var p = new Packet(opcode);
-        p.SetPayload(payload);
-        return p;
-    }
+    /// <summary>sub_592BE0: u16 長度前綴 + raw bytes。</summary>
+    public byte[] ReadBlob() => Take(ReadU16()).ToArray();
 
-    /// <summary>codec 解出明文後回填 (內部用)。</summary>
-    internal void SetPayload(ReadOnlySpan<byte> data)
+    /// <summary>sub_592850: 內嵌 packet。</summary>
+    public Packet ReadPacket()
     {
-        if (data.Length > MaxPayload) throw new ArgumentException("payload too large");
-        if (data.Length > _buf.Length) _buf = new byte[data.Length];
-        data.CopyTo(_buf);
-        Length = data.Length;
-        ReadPos = 0;
+        ushort op = ReadU16();
+        int size = (int)ReadU32();
+        return FromPayload((Opcode)op, Take(size));
     }
 
     public override string ToString() => $"<Packet {Opcode}({OpcodeRaw}) len={Length} rpos={ReadPos}>";
