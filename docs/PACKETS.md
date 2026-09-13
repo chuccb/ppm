@@ -1092,7 +1092,7 @@ u8+slot 系列)
     sub_537670 存 timeGetTime()-x 當時間基準, 供中途加入同步;
     開新局送 0), u8 room_no(sub_407E80 定址房物件),
     u8 cur_players(+105), u8 max_players(+129 冗餘, client 以 +110
-    popcount 重算), u16 max_slot_mask(+110), u8 flag(+130),
+    popcount 重算), u16 max_slot_mask(+110), u8 map(+130),
     u8 mode(→sub_53FBB0), u16 (+144), u8 flags(bit0→mode+4/bit1 拆開),
     u8 mode+12, u8 +109, u8 mode+13, u8 +185, u8 +128 →
     寫入房間物件, 然後 16×s32 (per-slot 值 → dword_F6DD1C[60195*i])
@@ -1100,7 +1100,7 @@ u8+slot 系列)
     u8 slot, [mode==2: s32, str, s32, str (兩組隊伍名)], [mode==3: ...]
 133 GR_END_REQ    (sub_562E00): 無 payload
 134 GR_END_ACK    (sub_562EA0): u8 result; ==1 →
-    u8(+130), u8(讀後丟棄), u8 room_no(sub_407E80 定址),
+    u8 map(+130), u8(讀後丟棄), u8 room_no(sub_407E80 定址),
     u8 max_players(+129 冗餘), u16 max_slot_mask(+110, 回房恢復),
     u8 mode(→sub_53FBB0), u8(+136), u16(+144), u8 flags,
     u8(+146), u16(+148), u8(+150), u8 mode+12, u8 +109, u8 mode+13 →
