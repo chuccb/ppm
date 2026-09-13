@@ -162,9 +162,10 @@ public static class LobbyHandlers
     //     state<0 → str title), 之後 12 欄:
     //     u8 cur_players(+105), bool has_pass(+106), u8 max_players(+129 冗餘,
     //     client 以 +110 popcount 重算), u16 max_slot_mask(+110),
-    //     u8 game_mode(→sub_53FBB0), bool room_type_A(+108), u8 mode_param_a(+12),
-    //     bool room_type_B(+109), bool double_damage(+128), u8 map(+130),
-    //     u8 mode_param_b(+4), bool no_skill_bg(+185) }
+    //     u8 game_mode(→sub_53FBB0), bool room_type_A(+108), bool mode+12
+    //     (是否隊伍房 sub_438990?1:0), bool room_type_B(+109),
+    //     bool double_damage(+128), u8 map(+130), u8 mode_param_b(+4 道具),
+    //     bool no_skill_bg(+185) }
     private static async ValueTask RoomList(Session session, Packet packet, ServerContext context)
     {
         var rooms = context.Rooms.All.Take(50).ToList();
@@ -184,7 +185,7 @@ public static class LobbyHandlers
                .WriteU16(room.MaxSlotMask)                  // +110 上限槽位點陣 (popcount = 最大人數)
                .WriteU8(room.Rule)                          // game_mode → sub_53FBB0 (0..15)
                .WriteBool(false)                            // +108 room_type bit A (server 側未定)
-               .WriteU8(0)                                  // mode+12 rule param (server 側語意未定)
+               .WriteBool(IsTeamMode(room.Rule))            // mode+12 是否隊伍房 (sub_56A7B0: sub_438990?1:0)
                .WriteBool(false)                            // +109 room_type bit B (server 側未定)
                .WriteBool(room.DoubleDamage)                // +128 double_damage (990/991)
                .WriteU8(room.MapId)                         // +130 map (sub_540280/540260; 122 亦寫此欄)
@@ -194,6 +195,9 @@ public static class LobbyHandlers
 
         await session.SendAsync(ack);
     }
+
+    /// <summary>sub_438990 的 server 側對照: 兩隊制模式 (0/2/3/4/8/10/11/12/13)。</summary>
+    private static bool IsTeamMode(byte mode) => mode is 0 or 2 or 3 or 4 or 8 or 10 or 11 or 12 or 13;
 
     // ACK(198): 完整 CClientData 序列化 (docs/PACKETS.md §3.2)
     private static async ValueTask MyInfo(Session session, Packet packet, ServerContext context)

@@ -546,8 +546,9 @@ u8   mode (3 = 錦標賽樹狀圖, 委派 sub_580A80; 其他 = 房間清單)
 u8   count
 repeat count:
   u8    room_no (需 <0xD2=210), s8 state
-  state>=0: title 由 client 查字串表 state+309 (地圖預設房名);
-            state<0: string title (自訂房名) — 之後皆為下列 12 欄:
+  state>=0: title 由 client 查字串表 state+309 (msgtableres 0x135+state
+            = 預設房名片語, 如「私達はペラペラだ！」「日々の努力が実力に
+            なる」…); state<0: string title (自訂房名) — 之後皆為下列 12 欄:
     u8   cur_players   (+105; sub_44E970, 「cur/max」第一數)
     bool has_pass      (+106)
     u8   max_players   (+129; 冗餘 — client 以 +110 popcount 重算覆寫)
@@ -1061,9 +1062,22 @@ festival: 681 的 3 頻道組 ↔ 195 的 group 序號互證; 頻道類型 n2==3
 190 GR_CHANGEMASTER_ACK(sub_56FBF0): u8 new_master_slot
                        (n0x10 比對自己 → 房主 UI 切換)
 191 GR_CALLUSER_REQ    (sub_56FD60): str nick — 呼叫指定玩家
-192 GR_CALLUSER_ACK    (sub_56FE10): n2==2 時 u8 slot + str nick
-                       — 呼叫玩家
-194 GC_CHANNEL_ACK     (sub_56FE90): u8 — 頻道確認
+192 GR_CALLUSER_ACK    (sub_56FE10): 無 header; 依本機房狀態
+                       sub_5376F0(byte_EE8968)=+24 是否==2 決定讀不讀
+                       body — ==2 (在房內) 才讀 u8 caller_slot +
+                       str caller_nick → sub_406DB0(dword_BEFEF0)
+                       (→sub_449E80→sub_4FE8D0) 彈呼叫視窗; 否則只回
+                       狀態碼無 body。server: 雙方同房才送 (192 無錯誤碼)
+193 GC_CHANNEL_REQ     (sub_550790): u32 n2 — 戰隊頻道資料請求
+                       (0=戰隊資訊, 1=成員分頁, 2=重置; 只由戰隊場景
+                       發出: sub_422F30 刷新 / /l 指令)
+194 GC_CHANNEL_ACK     兩場景兩解讀 (同 opcode 不同 dispatcher):
+                       • 一般場景 sub_56FE90: 5×u8 存 byte_BEFF76[0..4]
+                         頻道資訊 → sub_522440 刷新 lobby channel UI
+                         (sub_48BF00 顯示 %03d/%03d 頻道人數/200)
+                       • 戰隊頻道 dispatcher sub_54D040 case 194→
+                         sub_54EE10: u32 n2 (0→sub_54EA60 戰隊資訊+
+                         成員, 1→sub_54ECE0 成員分頁, 2→sub_54EDE0 重置)
 ```
 
 **房物件 (CLobbyGameRoom) 欄位總圖 — 四十一輪逐欄定案** (wire 序經
@@ -1083,13 +1097,16 @@ sub_568CE0/sub_53F830/sub_53F920/sub_53F9F0 三 ctor 交叉驗證):
 +186  team_balance (僅錦標賽 ctor sub_53F9F0 寫; 一般房 364/365
       只切 GAMEROOM_TEAMBALANCE UI)
 +33   mode LobbyUI 物件 (sub_53FBB0 建, modeIndex 0..15)
-+132  mode rule 物件 (16B, 有 vtable — 卌二輪逐欄定案):
-        +4  = item bit0 (sub_74F450; 175/176)
++132  mode rule 物件 (16B, 有 vtable — 卌二輪逐欄定案, 卌五輪補語意):
+        +4  = item bit0 (sub_74F450; 175/176; 112 建房預設 =1 開)
         +8  = item bit1 (sub_74F430; 175/176)
-        +12 = rule param (u8, wire 直寫; 112 本地初始化以 sub_438990
-              「是否隊伍房」寫 1/0 — server 側語意仍待原服確認)
+        +12 = 是否隊伍房 (u8 1/0 — sub_56A7B0 建房時以 sub_438990
+              定案: mode∈{0,2,3,4,8,10,11,12,13}→1, 其餘→0; 卌五輪
+              逐行確認, 非「待原服確認」)
         +13 = 隊打散開關 (u8; 368/369)
-        +14 = 足球旗標 (u8; sub_74F4D0 寫/sub_74F4B0 讀; 969/970)
+        +14 = 足球旗標 (u8; sub_74F4D0 寫/sub_74F4B0 讀, 969/970;
+              讀取受 sub_67F410()=「是否 mode==12 足球」gate,
+              UI 字串 SOCCER_CHECK_TEXT 佐證)
 ```
 
 **112 GL_MAKEROOM_ACK 補完 (卌二輪 — sub_56A7B0 重讀, 先前 6 欄漏了尾 9 欄):**
@@ -1179,9 +1196,12 @@ u8+slot 系列)
     供中途加入同步; 開新局送 0), u8 room_no(sub_407E80 定址房物件),
     u8 cur_players(+105), u8 max_players(+129 冗餘, client 以 +110
     popcount 重算), u16 max_slot_mask(+110), u8 map(+130),
-    u8 mode(→sub_53FBB0), u16 (+144), u8 flags(bit0→mode+4/bit1 拆開),
-    u8 mode+12, u8 +109, u8 mode+13, u8 +185, u8 +128 →
-    寫入房間物件, 然後 16×s32 (per-slot 值 → dword_F6DD1C[60195*i])
+    u8 mode(→sub_53FBB0), u16 (+144 勝場目標), u8 flags
+    (bit0→mode+4 item / bit1→mode+8),
+    u8 mode+12 (是否隊伍房 1/0 — 卌五輪 sub_56A7B0 定案), u8 +109,
+    u8 mode+13 (隊打散), u8 +185 (noskillbg), u8 +128 (double damage) →
+    寫入房間物件, 然後 16×s32 (per-slot 值 → dword_F6DD1C[60195*i],
+    165 開戰 REQ 以 sub_592AA0 原樣回送)
 131 GR_FORCEOUT_REQ / 132 _ACK (sub_56ECC0): u8 ok; ok →
     u8 slot, [mode==2: s32, str, s32, str (兩組隊伍名)], [mode==3: ...]
 133 GR_END_REQ    (sub_562E00): 無 payload

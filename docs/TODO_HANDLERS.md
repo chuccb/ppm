@@ -26,14 +26,30 @@
 > msgtableres.lang 解碼完成 (CP932/LF/+3 偏移, 1346 條) — 895 錯誤碼
 > 文字已補 §3.15b2, 全表 851 個 sub_408080 引用可查 RESOURCES.md §8。
 >
-> 下一輪可做: 190 GR_CHANGEMASTER_ACK 新房主廣播、191/192 CALLUSER、
-> 194 GC_CHANNEL_ACK; 130/134 的 +146/+150 原服語意 (client 存而不讀);
+> 卌四輪 (190/191/192/194 反編譯解碼): lobby channel dispatcher 即
+> sub_54D040 (case 193/194 → sub_54E020/sub_54EE10); 194 兩場景兩解讀
+> (一般場景 sub_56FE90 5×u8; 戰隊頻道 sub_54EE10 u32 n2)。
+>
+> 卌五輪 (落地 191/192/193/194 + mode+12 定案):
+> ① 190 新房主廣播 (Rooms.RemoveMemberAsync) + 123/124 離房改用共用
+>   RemoveMemberAsync (房主離房一併廣播新房主, 否則新房主不戴皇冠);
+> ② 191 GR_CALLUSER_REQ (str nick) → 192 (u8 slot + str nick) 落地,
+>   新增 SessionRegistry (nick→Session 反查, TryRemove(key,value) 防
+>   同名誤刪); 192 依接收者房狀態==2 才帶 body (sub_56FE10);
+> ③ 193 GC_CHANNEL_REQ (u32 n2) → 194 回 u32 2 (重置; 私服無戰隊);
+> ④ mode+12 定案 =「是否隊伍房」(sub_56A7B0 建房時 sub_438990?1:0),
+>   已取代 130/134/114/108 四處原本送 0 的寫法; +146/+150 確認 client
+>   存而不讀 (全 exe 無讀者) 送 0 安全。
+>
+> 下一輪可做: GM/MASTER 群 (275-299/394-416/822-831/883-885, 需權限
+> 分級); warehouse 群 (855-861); matching room 群 (983/986/988);
+> AI 模式群 (918-944); 130/134 的 +146/+150 原服語意 (client 存而不讀,
+> 送 0 已安全)。
 
 | op | 名稱 | REQ 寫入序列 |
 |---|---|---|
 | 103 | GE_LOGOUT_REQ | `(空)` |
 | 131 | GR_FORCEOUT_REQ | `u8` |
-| 191 | GR_CALLUSER_REQ | `str` |
 | 214 | GM_CREATECHAR_REQ | `u8 s16 s16 s16` |
 | 218 | GI_CHANGEDATA_REQ | `u8` |
 | 220 | GI_CHANGEWP_REQ | `u8` |

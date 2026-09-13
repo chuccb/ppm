@@ -20,6 +20,9 @@ public sealed record ServerContext(Db Db, ServerConfig Config)
 {
     /// <summary>全服房間表 (廿八輪)。</summary>
     public RoomManager Rooms { get; } = new();
+
+    /// <summary>線上 session 對照表 (nick → Session; 191 呼出/跨房操作)。</summary>
+    public SessionRegistry Sessions { get; } = new();
 }
 
 public sealed record ServerConfig

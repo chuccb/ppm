@@ -64,6 +64,7 @@ public static class RoomHandlers
         add(Opcode.GR_MAPCHANGE_REQ, MapChange);
         add(Opcode.GR_READY_REQ, Ready);
         add(Opcode.GR_CHANGESLOT_REQ, ChangeSlot);
+        add(Opcode.GR_CALLUSER_REQ, CallUser);
         add(Opcode.GL_ENTERROOMPASS_REQ, EnterRoomPass);
         add(Opcode.GR_START_REQ, StartGame);
         add(Opcode.GR_ENDLOADING_REQ, EndLoading);
@@ -119,7 +120,7 @@ public static class RoomHandlers
             .WriteU8(room.Rule)                             // mode → sub_53FBB0
             .WriteU16(room.WinCount)                        // +144 勝場目標 (171/172)
             .WriteU8(room.ItemMode)                         // flags bit0→mode+4, bit1→mode+8 (175/176)
-            .WriteU8(0)                                     // mode+12 rule param (client 僅鏡像, server 側語意未定)
+            .WriteBool(IsTeamMode(room.Rule))               // mode+12 是否隊伍房 (sub_56A7B0: sub_438990?1:0)
             .WriteU8(0)                                     // +109 room_type_B (client 僅鏡像)
             .WriteBool(room.TeamShuffle)                    // mode+13 隊打散開關 (368/369)
             .WriteBool(room.NoSkillBg)                      // +185 noskillbg (712/713)
@@ -198,10 +199,10 @@ public static class RoomHandlers
             .WriteU8(room.TimeLimit)                        // +136 時間 (173/174)
             .WriteU16(room.WinCount)                        // +144 勝場目標 (171/172)
             .WriteU8(room.ItemMode)                         // flags bit0→mode+4, bit1→mode+8
-            .WriteU8(0)                                     // +146 (server 側語意未定, client 僅鏡像)
+            .WriteU8(0)                                     // +146 (mode param, client 存而不讀)
             .WriteU16(room.KillCount)                       // +148 擊殺目標 (340/341)
-            .WriteU8(0)                                     // +150 (server 側語意未定, client 僅鏡像)
-            .WriteU8(0)                                     // mode+12 rule param (client 僅鏡像)
+            .WriteU8(0)                                     // +150 (mode param, client 存而不讀)
+            .WriteBool(IsTeamMode(room.Rule))               // mode+12 是否隊伍房 (sub_56A7B0: sub_438990?1:0)
             .WriteU8(0)                                     // +109 room_type_B (client 僅鏡像)
             .WriteBool(room.TeamShuffle);                   // mode+13 隊打散開關 (368/369)
         await RoomManager.BroadcastAsync(room, ack);
@@ -285,6 +286,37 @@ public static class RoomHandlers
 
         await session.SendAsync(new Packet(Opcode.GL_ENTERROOMPASS_ACK)
             .WriteU8(ok ? (byte)1 : (byte)0));
+    }
+
+    // 191 REQ (sub_56FD60): str nick — 呼叫指定玩家 (房內點名)。
+    // → 192 ACK (sub_56FE10): 僅當接收者房狀態==2 (在房內) 才讀 body,
+    //   u8 caller_slot + str caller_nick → sub_406DB0 彈「呼叫」視窗;
+    //   否則連 body 都不讀 (sub_5376F0(byte_EE8968)=+24 非 2 即返回)。
+    //   server 側: 雙方需同房才送 body (離線/異房一律靜默 — 192 無錯誤碼)。
+    private static async ValueTask CallUser(Session session, Packet packet, ServerContext context)
+    {
+        var targetNick = packet.ReadStr();
+        if (targetNick.Length == 0)
+        {
+            return;
+        }
+
+        var target = context.Sessions.Find(targetNick);
+        if (target is null || ReferenceEquals(target, session))
+        {
+            return;
+        }
+
+        // 雙方需同房 (sub_56FE10 依接收者房狀態==2 才讀 body)
+        if (!TryGetRoom(session, context, out _, out var callerSlot)
+            || target.RoomNo != session.RoomNo)
+        {
+            return;
+        }
+
+        await target.SendAsync(new Packet(Opcode.GR_CALLUSER_ACK)
+            .WriteU8(callerSlot)                            // 呼叫者 slot
+            .WriteStr(session.Nickname));                   // 呼叫者暱稱
     }
 
     // 125 REQ (sub_56E860 wstr 版; sub_56E6C0 str 版為死碼 — 無呼叫者):
@@ -843,7 +875,7 @@ public static class RoomHandlers
            .WriteU8(0)                                     // v193 → +146 (server 側語意未定, client 僅鏡像)
            .WriteU16(room.KillCount)                       // v191[3] → +148 擊殺目標
            .WriteU8(0)                                     // v169 → +150 (server 側語意未定, client 僅鏡像)
-           .WriteU8(0)                                     // v173 → mode+12 rule param (client 僅鏡像)
+           .WriteBool(IsTeamMode(room.Rule))               // v173 → mode+12 是否隊伍房 (sub_56A7B0: sub_438990?1:0)
            .WriteU8(0)                                     // v185 → +109 room_type_B (client 僅鏡像)
            .WriteBool(room.TeamShuffle)                    // v141[0] → mode+13 隊打散開關 (368/369)
            .WriteBool(room.NoSkillBg)                      // v177 → +185 no_skill_bg
@@ -851,7 +883,9 @@ public static class RoomHandlers
            .WriteBool(room.Soccer);                        // v142 → mode+14 (sub_74F4D0; 969/970)
     }
 
-    // 123 GR_LEAVE_REQ → 124 ACK (u8 result + u8 slot 廣播)
+    // 123 GR_LEAVE_REQ → 124 ACK (u8 result; ≠0 → u8 slot 離房廣播)。
+    // 與斷線清理共用 RemoveMemberAsync — 房主離房時一併廣播 190 新房主
+    // (否則新房主不會戴皇冠, UI 卡在無房主狀態)。
     private static async ValueTask LeaveRoom(Session session, Packet packet, ServerContext context)
     {
         if (session.RoomNo is not { } roomNo || context.Rooms.Find(roomNo) is not { } room)
@@ -860,22 +894,7 @@ public static class RoomHandlers
             return;
         }
 
-        var slot = room.Members.FirstOrDefault(kv => ReferenceEquals(kv.Value, session)).Key;
-        room.Members.TryRemove(slot, out _);
-        session.RoomNo = null;
-
-        if (room.Members.IsEmpty)
-        {
-            context.Rooms.Remove(roomNo);                       // 空房回收
-        }
-        else
-        {
-            var notice = new Packet(Opcode.GR_LEAVE_ACK)
-                .WriteU8(1)
-                .WriteU8(slot);
-            await RoomManager.BroadcastAsync(room, notice);
-        }
-
+        await context.Rooms.RemoveMemberAsync(room, session);
         await session.SendAsync(new Packet(Opcode.GR_LEAVE_ACK).WriteU8(0));
     }
 }

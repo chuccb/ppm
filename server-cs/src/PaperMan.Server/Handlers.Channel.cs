@@ -49,6 +49,7 @@ public static class ChannelHandlers
     {
         add(Opcode.PM_UDPSTART_REQ, UdpStart);
         add(Opcode.GC_ENTERCHANNEL_REQ, EnterChannel);
+        add(Opcode.GC_CHANNEL_REQ, ChannelQuery);
         add(Opcode.PM_CONNECT_REQ, PmConnect);
     }
 
@@ -116,5 +117,19 @@ public static class ChannelHandlers
             .WriteS32(context.Config.ChannelPort + 1)
             .WriteU8(0)
             .WriteF32(0f));
+    }
+
+    // 193 GC_CHANNEL_REQ (sub_550790): u32 n2 — 戰隊頻道資料請求
+    //   (0=戰隊資訊, 1=成員分頁, 2=重置; 由戰隊頻道 dispatcher
+    //   sub_54D040 case 193/194 → sub_54E020/sub_54EE10 分派)。
+    // → 194 GC_CHANNEL_ACK: u32 n2 + 對應子塊; 私服無戰隊系統,
+    //   一律回 n2==2 (sub_54EDE0 重置: 清空戰隊頻道 UI + 標記已收到)。
+    //   ⚠ 194 在「一般場景」由 sub_56FE90 解成 5×u8 (byte_BEFF76 頻道人數),
+    //   但在戰隊頻道場景由 sub_54EE10 解成 u32 n2 — 193 只會從戰隊場景
+    //   發出 (sub_422F30 / /l 指令), 故回 u32 2 為正確格式。
+    private static async ValueTask ChannelQuery(Session session, Packet packet, ServerContext context)
+    {
+        _ = packet.Remaining >= 4 ? packet.ReadU32() : 0u;      // n2 (戰隊分頁)
+        await session.SendAsync(new Packet(Opcode.GC_CHANNEL_ACK).WriteU32(2));
     }
 }

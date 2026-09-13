@@ -113,6 +113,13 @@ async Task RunSessionAsync(TcpClient client, long sessionId, ServerRole role, Ca
             {
                 Console.WriteLine($"[s{sessionId}] handler {packet.Opcode} error: {ex.Message}");
             }
+
+            // 登入綁定暱稱後註冊進線上對照表 (191 GR_CALLUSER 反查目標連線)。
+            // 冪等覆寫, 每包呼叫成本 O(1); 綁定前 (nick 空) 自動略過。
+            if (session.Authenticated && session.Nickname.Length > 0)
+            {
+                ctx.Sessions.Register(session);
+            }
         }
     }
     catch (OperationCanceledException)
@@ -126,6 +133,7 @@ async Task RunSessionAsync(TcpClient client, long sessionId, ServerRole role, Ca
     finally
     {
         pingCts.Cancel();
+        ctx.Sessions.Unregister(session);
 
         // 斷線清理: 還在房內 → 與主動離房相同流程
         // (124 離房廣播 + 190 房主遷移 + 空房回收) — 防殭屍成員
