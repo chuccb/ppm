@@ -28,9 +28,12 @@ public static class LobbyHandlers
     private static async ValueTask UserList(Session s, Packet p, ServerContext ctx) =>
         await s.SendAsync(new Packet(Opcode.GL_USERLIST_ACK).WriteU16(0));
 
-    // ACK(108) sub_568CE0: u8 mode (3=委派 sub_580A80), 其他: u8 count, repeat{
-    //   u8 room_no, s8 state; state>=0 → 定長塊 (u8,s8,u8,u16,u8,s8,s8[100],s8,s8,u8,u8,u8)
-    //                        state<0  → str title + 同組欄位 }
+    // ACK(108) sub_568CE0 (五輪完整讀畢):
+    //   u8 mode (3=錦標賽樹 sub_580A80); 其他: u8 count, repeat{
+    //     u8 room_no(<210), s8 state;
+    //     state>=0 → u8 map, bool, u8 rule, u16 win, u8 max, bool pass, u8[1]
+    //     state<0  → str title + 同欄位;
+    //     共同尾段 bool,bool,u8,u8,u8; mode==2 加 2×{s32,u32 crc,str,u8} }
     private static async ValueTask RoomList(Session s, Packet p, ServerContext ctx) =>
         await s.SendAsync(new Packet(Opcode.GL_GAMEROOMINFO_ACK)
             .WriteU8(0).WriteU8(0));
@@ -89,23 +92,28 @@ public static class LobbyHandlers
             if (g != 3) ack.WriteU16(0).WriteU16(0).WriteU16(0);
         }
 
-        // --- sub_527550/527D00 技能欄 + 快速槽 (各 7×s32) ---
-        for (int block = 0; block < 2; block++)
-        {
-            ack.WriteU8(7);
-            for (int i = 0; i < 7; i++) ack.WriteS32(0);
-        }
+        // --- sub_527550 (sub_522480): 9×s32 裝備/技能 id, 無前導 count!
+        //     每個非零 id 都要過 sub_535020 目錄驗證, 否則 client 錯誤 10
+        for (int i = 0; i < 9; i++) ack.WriteS32(0);
 
+        // --- sub_527D00: u8 n5 (+144452) + raw 28B = 7×s32 (sub_527AF0),
+        //     非零 id 同樣過目錄驗證, 失敗 → client 錯誤 9
+        ack.WriteU8(5);                                            // n5 預設值 5
+        for (int i = 0; i < 7; i++) ack.WriteS32(0);
+
+        // --- sub_570550 尾段 (u16 → i_23, s32 → sub_5392A0 GP,
+        //     u8 count + count×u8 教學旗標 → sub_5A9B30, 最多 20) ---
         return ack
-            .WriteU16(0)                                           // clan/channel id
+            .WriteU16(0)                                           // i_23 (clan/channel)
             .WriteS32((int)info.Gp)                                // game_point
-            .WriteU8(0);                                           // tutorial_count
+            .WriteU8(0);                                           // tutorial flag count
     }
 
     // ACK(200) sub_570AB0 → sub_524B70(cd, pkt, extra=1):
     //   bool ok; ok 時: s32 start, repeat{s32 slot(<0 結束), s32 item, f32, f32,
-    //   s32 period, u8 extra(僅 200 帶; 202 走 sub_523A50 → extra=0), u16 dura}
-    //   ⚠ 交叉驗證修正: 200 有 u8 extra, 202 反而沒有 (先前記反了)
+    //   s32 period, u8 extra(200 專屬), u16 dura}
+    //   (a3=0 的無-extra 版本屬 290/294 MASTER_USERINFO 系 sub_523A50 —
+    //    GM 查他人資料, 與一般玩家路徑無關; 五輪驗證定案)
     private static async ValueTask MyItems(Session s, Packet p, ServerContext ctx)
     {
         int start = p.Remaining >= 4 ? p.ReadS32() : 0;

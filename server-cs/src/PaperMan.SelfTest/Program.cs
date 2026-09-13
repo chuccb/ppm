@@ -126,5 +126,28 @@ foreach (var (label, codec) in codecs)
 
 foreach (var (_, codec) in codecs) codec.Dispose();
 
+// ---- 5. 客戶端原生 AES 金鑰測試向量 -----------------------------------------
+// 金鑰 = sub_403430 的 EUC-KR 字串「트렁크점령전머지」;
+// 期望值以獨立純 Python AES (過 FIPS-197 C.1) 生成, 三重交叉驗證。
+{
+    using var aes = new PaperAes(PaperAes.DefaultKey);
+
+    byte[] block1 = [.. Enumerable.Range(0, 16).Select(i => (byte)i)];
+    aes.EncryptEcb(block1);
+    Check("native key: ECB(000102..0F)",
+        Convert.ToHexString(block1) == "D7F8930CFE8758AD7BF2FEF759EBB845");
+
+    byte[] block2 = "PaperMan-Packet!"u8.ToArray();
+    aes.EncryptEcb(block2);
+    Check("native key: ECB('PaperMan-Packet!')",
+        Convert.ToHexString(block2) == "8B8ABD9B2B743448188ED7E554BD4AA2");
+
+    aes.DecryptEcb(block2);
+    Check("native key: decrypt roundtrip", block2.AsSpan().SequenceEqual("PaperMan-Packet!"u8));
+
+    Check("native key bytes = EUC-KR 트렁크점령전머지",
+        Convert.ToHexString(PaperAes.DefaultKey) == "C6AEB7B7C5A9C1A1B7C9C0FCB8D3C1F6");
+}
+
 Console.WriteLine($"\n{pass} passed, {fail} failed");
 return fail == 0 ? 0 : 1;

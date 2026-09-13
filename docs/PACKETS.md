@@ -112,15 +112,26 @@ offset 8   ...  payload (小端, 緊湊, 無對齊)
 - UDP 路徑 (sub_595A60, CUDPManager) 也走同一 AES 解密 (sub_5930C0),
   但長度來自 recvfrom 而非累積 buffer。
 
-**AES 細節 (sub_403430 = key schedule 初始化):**
+**AES 細節 (sub_403430 = key schedule 初始化) — 金鑰已完整還原:**
 - 全域常數: `n16_0=16` (block), `n10=10` (rounds) → **AES-128**
-- 金鑰: `unk_B69E88` 起 16 bytes **硬編碼在 .data 段** (Rijndael key
-  expansion + T-table `dword_B69208/B69608/B69A08/B68E08`, SBox `byte_B66C08`)
+- **金鑰 = EUC-KR 字串字面量「트렁크점령전머지」(後車廂佔領戰merge)**
+  ```
+  C6 AE B7 B7 C5 A9 C1 A1 B7 C9 C0 FC B8 D3 C1 F6
+  ```
+  (新版 Hex-Rays 9.4 導出直接展開了 sub_403430 的字串來源; 舊導出只見
+  `unk_B69E88` 位址。) 大端組字 w[0..3] 後做標準 RotWord/SubWord/rcon
+  展開 — 已逐位對照 FIPS-197 驗證為標準 AES-128 key expansion。
+- 三重驗證測試向量 (獨立純 Python AES, 先過 FIPS-197 C.1 自檢):
+  - `ECB(key, 000102030405060708090A0B0C0D0E0F) = D7F8930CFE8758AD7BF2FEF759EBB845`
+  - `ECB(key, "PaperMan-Packet!") = 8B8ABD9B2B743448188ED7E554BD4AA2`
+- 加密輪金鑰存 `dword_23199F8`, 解密輪金鑰 (逆序 + InvMixColumns 預處理)
+  存 `dword_2319D18`; T-table `dword_B68E08/B69208/B69608/B69A08`,
+  S-box `byte_B66C08`, rcon `unk_B69E08`
 - `sub_403DE0`/`sub_403650` = 單 block 加密, `sub_404040` = 單 block 解密
-- 模式由全域 `n2_4` 決定: 1/2 = 兩種 CBC 變體 (IV=0, XOR 前/後), 其他 = ECB
-- **注意**: 封包路徑上 `n2_4` 未見初始化 (BSS 預設 0) → 實際運行為 **ECB 模式**;
-  出現在別處的 `n2_4=1/2` 賦值屬於 UI 狀態機變數重名, 與加密無關
-- 金鑰 16 bytes 需從 exe .data 段 0xB69E88 抽出 (`.c` 導出檔沒帶資料段內容)
+- 模式 (sub_4042A0 的 n2): 1 = CBC 加密, 2 = CBC 解密, 其他 = **ECB**
+- 封包路徑 `sub_592FB0`/`sub_593110` 傳全域 `n2_4` (未初始化, BSS=0) → **ECB**;
+  別處的 `n2_4=1/2` 賦值屬 UI 狀態機重名 (五輪重驗: 127 處引用全部檢查,
+  無一在網路路徑上)
 
 **壓縮門檻協商**: 全域 `n0x2580` 初始 0x2580(9600, 即「從不壓縮」)。
 `GL_ACCOUNTCONNSUCC(694)` ACK 攜帶一個 u16, 若 <0x2580 則更新門檻
@@ -188,6 +199,21 @@ _REQ = client→server, _ACK = server→client, _NOTIFY/_NOTICE = server 推播�
 主 dispatcher (client 端 lobby): `sub_58B010` — `switch(sub_591EE0(pkt))`
 處理所有 ACK。遊戲內 UDP/戰鬥 packet 走 GameNetwork (0x2313148 物件)。
 
+**多層分發 (五輪發現)**: `sub_58B010` 進 switch 前先呼叫兩個前置轉發器,
+所以有些 opcode **不在主 switch 的 306 個 case 裡**也會被處理:
+1. `sub_407360(dword_BEFEF0, pkt)` — 自己攔 **788 GL_RACKINGWEB_TOKEN_ACK**
+   (u8 ok + str token≤16), 然後經 vtable+52 轉發給目前 UI 場景物件。
+   已確認的場景級處理器:
+   - `CLobbyShop::sub_46AD00`: **699** (u8, s32, s32), **703** (s32, s32 n,
+     n×f32), **707** (str→this+521173), **709** (u8 n10; n10≠1 → s32, s32,
+     s32), **807** (u8, s16, s16 n22; 迴圈 {s32, s16, u8, u8 len, raw len}
+     ×3 組), **809** (s32)
+   - `IVotingNetwork::sub_9BF430`: **719/720/722/723** (投票系統)
+2. `CGameRule::sub_67CF90(n9_0, pkt)` — 遊戲規則層攔截。
+房間/戰鬥期間另有 `sub_54D040` (CLobbyGameRoom 狀態機) 以自己的
+switch 處理 182/184/185/186/189/192/193/194/198... 的**場景轉換**副作用
+(不重複解 payload, 只驅動 UI 狀態)。
+
 ---
 
 ## 3. 關鍵 payload 結構 (伺服器必須產生/解析)
@@ -235,13 +261,19 @@ bool    success
     u16   equipped_flag
     if group_no != 3: u16 x3 (sub-slot)
     if equipped_flag: s32 x8 (parts item ids)
-  --- sub_527550 / sub_527D00: 技能欄 + 快速槽 ---
-  u8 + s32 x7 (skill item ids, sub_527AF0 讀 0x1C bytes)
-  u16     clan/channel id
-  s32     game_point (GP)
-  --- 其餘: 20 bytes 教學進度 ---
-  u8      tutorial_count; u8 x count (≤20)
+  --- sub_527550 (sub_522480): 9×s32 — 無前導 count! (五輪修正)
+      每個非零 id 需過 sub_535020 目錄驗證, 失敗 → client 錯誤 10
+  --- sub_527D00: u8 n5 (+144452) + raw 28B = 7×s32 (sub_527AF0);
+      非零 id 同樣驗證, 失敗 → client 錯誤 9
+  --- sub_570550 尾段 (五輪補完, 先前部分遺漏):
+  u16     → i_23 (clan/channel id)
+  s32     game_point (GP, sub_5392A0)
+  u8      tutorial_count (≤20); repeat count: u8 flag → sub_5A9B30
 ```
+⚠ 198 的解析器是 sub_570550 (dispatcher case 198 直查確認)。嵌入完整
+CClientData 的 sub_523A50 (523BF0+524010+524660+524B70(a3=0)) 其實屬於
+**290 MASTER_USERINFO_ACK (sub_579830)** 與 **294 MASTER_USERINFODB_ACK
+(sub_57A540)** — GM 查詢他人資料, 與 198 無關 (四輪誤記, 五輪更正)。
 
 ### 3.3 GL_MYITEM_ACK (200) — handler sub_570AB0 → sub_524B70 (分頁背包)
 ```
@@ -293,17 +325,27 @@ u16    count
   repeat n: s32 user_id, string nick, s32 status
             if user_id>0 { s32 custom_tex_id, string tex_name }
 ```
-### 3.9 GL_GAMEROOMINFO_ACK (108) — sub_568CE0:
+### 3.9 GL_GAMEROOMINFO_ACK (108) — sub_568CE0 (五輪完整讀畢):
 ```
-u8   mode (3 = 委派 sub_580A80)
+u8   mode (3 = 錦標賽樹狀圖, 委派 sub_580A80; 其他 = 房間清單)
 u8   count
 repeat count:
-  u8    room_no (≥0xD2=210 上限), s8 state
-  string title (state<0 時只送 100-byte 定長塊)
-  u8 map, bool, u8 rule, u16 win_count, u8 max_player, bool has_pass,
-  bool item_mode, bool balance, u8 time_limit, u8 skill_off, u8 observer
-  若 mode==2: {s32,u32 custom_tex,string,u8} x2 (隊伍圖示)
+  u8    room_no (需 <0xD2=210), s8 state
+  state>=0: u8 map, bool b1, u8 rule, u16 win_count, u8 max_player,
+            bool has_pass, u8[1] title_first (title 由 client 表查
+            room_no+309), 之後同下
+  state<0 : string title, 之後 u8 map, bool b1, u8 rule, u16 win_count,
+            u8 max_player, bool has_pass, bool title0
+  共同尾段: bool b2, bool b3, u8 flag1, u8 flag2, u8 flag3
+  (寫入 room+109=b2, room+128=b3)
+  若 mode==2: 兩組 {s32 team_id, u32 custom_tex_crc, str(75/87) tex_name,
+              u8 x} (隊伍自訂圖示, CCustomTexture 註冊)
 ```
+sub_580A80 (mode==3 錦標賽): u8 n4, u8 i1, u8 flags142;
+repeat i = n4-1 downto i1 {u8, u8 round_type, u8, s32, s32, u8 pair_count;
+repeat pair_count {s32 room, u8, u8, bool, u8, u16} + [u8 只在
+round_type==4] + 2×{s32 uid (+s32)} }; 之後 u8 has_my (≠0 → u8 room,
+u8), f32 → 存 [494]。
 ### 3.10 GL_FRIEND_LIST_ACK (434) — sub_55AFC0:
 ```
 u16 x, string self, u8 count; repeat: string nick, s32 status
