@@ -30,6 +30,7 @@ public sealed class Router
         StatHandlers.Register(Add);
         ClanHandlers.Register(Add);
         QuestHandlers.Register(Add);
+        FriendHandlers.Register(Add);
         return new(table);
     }
 

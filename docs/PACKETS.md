@@ -474,6 +474,48 @@ repeat: string from, u8, string title, u32 msg_id, string body(≤201), string, 
 **ACK 297** (sub_57AA50): `u8 result` — 0=成功, 之後 5×s32
 (cash/餘額顯示組); 1..11 = 錯誤碼 (11 種禮物失敗訊息)。
 
+### 3.15c 好友/訊息家族 419-441 (九輪讀畢)
+```
+419 GL_MSG_ADD_REQ → 420 ACK (sub_559810): str to_nick, u8 x, u8 result
+    (0=成功 1=對方拒收 2=信箱滿; 讀序 str→u8→u8)
+421 GL_MSG_DEL_REQ → 422 ACK (sub_55A310): u8 ok, str msg_key
+423 GL_MSG_READ_REQ → 424 ACK (sub_55A4F0): u8 ok, str msg_key (與 422 同構)
+429 GL_FRIEND_ADD_REQ (builder): str nick
+430 GL_FRIEND_ADD_ACK (sub_55AA90): u8 result (0=成功 1..4 錯誤碼:
+    重複/不存在/滿/對方拒), str nick
+431 GL_FRIEND_DEL_REQ: str nick → 432 ACK (sub_55AE10):
+    u8 result (0/1/2), str nick
+433 GL_FRIEND_LIST_REQ: 無 payload
+435 GL_FRIEND_INFO_REQ: str nick → 436 ACK (sub_55B2C0):
+    u8 count, count×{str nick, u8 online(1=線上), [online: str where,
+    u8 channel] } → sub_5382D0(nick, online, where, ch+1)
+439 GL_FRIEND_CHAT_REQ: s32 uid(dword_F2A684), str to_nick,
+    str from_nick, str message (ANSI ×3)
+441 GL_FRIEND_WHERE_REQ: (查所在頻道)
+```
+
+### 3.15b 房間戰鬥流程 GR 家族 (九輪讀畢)
+```
+127 GR_READY_REQ  (sub_562640): 無 payload
+128 GR_READY_ACK  (sub_5626D0): u8 ready_flag, u8 slot(<16) —
+    以 slot 對照房間成員陣列翻 ready 狀態
+129 GR_START_REQ  (sub_5627C0): u8 n125 (倒數秒/模式參數)
+130 GR_START_ACK  (sub_562870): u8 result; ==1 →
+    u8, s32 game_time(0x1770=6000), u8 slot, u8, u8, u16, u8, u8 host,
+    u16, u8 flags(bit0/bit1 拆開), u8, u8, u8, u8, u8 →
+    寫入房間物件 (+128/+4/+105/+129/+144/+110/+109/+185...),
+    然後 16×s32 (per-slot 值 → dword_F6DD1C[60195*i])
+131 GR_FORCEOUT_REQ / 132 _ACK (sub_56ECC0): u8 ok; ok →
+    u8 slot, [mode==2: s32, str, s32, str (兩組隊伍名)], [mode==3: ...]
+133 GR_END_REQ    (sub_562E00): 無 payload
+134 GR_END_ACK    (sub_562EA0): u8 result; ==1 →
+    u8, u8 count, u8 slot, u8, u16, u8 host, u8, u16, u8 flags,
+    u8, u16, u8, u8, u8 → 回房重置 (與 130 鏡像的房間物件更新)
+135 GR_CHANGESLOT_REQ (sub_56EE90): u8 n254, u8 slot(<16)
+136 GR_CHANGESLOT_ACK (sub_56EF40): u8 ok; ok → (n11 10/11 特判)
+    u8 from, u8 to, s32, s32, u8 count, count×條目
+```
+
 ### 3.15a 大廳聊天/名單 (八輪讀畢)
 - **119 GL_CHATTING_REQ**: `str message` (ANSI)
 - **120 GL_CHATTING_ACK** (sub_56E300): `s32 custom_tex, str nick,
