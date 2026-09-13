@@ -398,9 +398,14 @@ repeat: string from, u8, string title, u32 msg_id, string body(≤201), string, 
 u8 result (0=OK, 7=特殊錯誤); result!=0: s32 quest_index_type
 result==0: 13-byte 快照 {s32 quest_id, s32, u8, s32}
 ```
-### 3.14 GS_GIVEGIFT_ACK (297) — sub_57AA50 (七輪修正; sub_579830 屬 290):
-`u8 result` — 0=成功, 之後 5×s32 (cash/餘額顯示組); 1..11 = 錯誤碼
-(對應 11 種禮物失敗訊息)。
+### 3.14 GS_GIVEGIFT (296/297) — 七輪修正 (sub_579830 屬 290):
+**REQ 296** 兩變體 (builder @0x57A6xx):
+- 簡短版: `s32, u8, u8`
+- 完整版: `str to_nick, u8 has_msg(0 → 只寫 0), [str message], s32 item_id,
+  u8 kind, u8 period, [u16 -(idx+1) 只在 kind 12/13/17]` — 與 204 同樣的
+  顏色/貼圖變體尾欄
+**ACK 297** (sub_57AA50): `u8 result` — 0=成功, 之後 5×s32
+(cash/餘額顯示組); 1..11 = 錯誤碼 (11 種禮物失敗訊息)。
 
 ### 3.15 房間系統 (七輪讀畢)
 - **111 GL_MAKEROOM_REQ** (builder @0x569xxx): `u8 map(a1<0 時 0xFF), u8 pass_flag,

@@ -405,6 +405,46 @@ public sealed class Db : IDisposable
         }
     }
 
+    // ------------------------------------------------------------- gifts
+    /// <summary>
+    /// 送禮 (296)。回 297 的 result 碼: 0=成功, 2=收件人不存在,
+    /// 3=物品不在目錄, 1=其他失敗。
+    /// </summary>
+    public byte GiveGift(long fromUserId, string toNick, int itemId, byte periodDays, string? message)
+    {
+        lock (_gate)
+        {
+            using var who = Cmd(
+                "SELECT user_id FROM users WHERE nickname=@n",
+                ("@n", toNick));
+            var toId = who.ExecuteScalar();
+
+            if (toId is null)
+            {
+                return 2;                                   // 收件人不存在
+            }
+
+            try
+            {
+                using var ins = Cmd("""
+                    INSERT INTO gifts(from_user_id, to_user_id, item_id, period_days, message)
+                    VALUES(@f, @t, @i, @p, @m)
+                    """,
+                    ("@f", fromUserId),
+                    ("@t", (long)toId),
+                    ("@i", itemId),
+                    ("@p", (int)periodDays),
+                    ("@m", message));
+                ins.ExecuteNonQuery();
+                return 0;
+            }
+            catch (SqliteException)
+            {
+                return 3;                                   // FK 落敗: 物品不在目錄
+            }
+        }
+    }
+
     // ------------------------------------------------------------- clans
     /// <summary>
     /// 建戰隊 (583 隧道 sub=182)。回 clan_id; 名稱重複或已入隊 → 0。

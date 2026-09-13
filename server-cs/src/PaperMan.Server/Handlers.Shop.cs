@@ -17,6 +17,7 @@ public static class ShopHandlers
         add(Opcode.GS_CASH_REQ, Cash);
         add(Opcode.GS_BUYITEM_REQ, BuyItems);
         add(Opcode.GS_BUY_ONCEITEM_REQ, BuyOnceItem);
+        add(Opcode.GS_GIVEGIFT_REQ, GiveGift);
     }
 
     private static async ValueTask Cash(Session s, Packet p, ServerContext ctx)
@@ -74,12 +75,54 @@ public static class ShopHandlers
             ? ctx.Db.BuyItem(s.UserId, itemId, period, useCash)
             : Db.BuyResult.Fail(itemId);
 
+    // REQ(296) 完整版 builder @0x57A6xx (七輪讀畢):
+    //   str to_nick, u8 has_msg, [str message], s32 item_id, u8 kind,
+    //   u8 period, [u16 變體 只在 kind 12/13/17]
+    // ACK(297) sub_57AA50: u8 result (0=成功 → 另 5×s32; 1..11 = 錯誤碼)
+    private static async ValueTask GiveGift(Session s, Packet p, ServerContext ctx)
+    {
+        var toNick = p.ReadStr();
+        var message = p.ReadBool() ? p.ReadStr() : null;
+        int itemId = p.ReadS32();
+        byte kind = p.ReadU8();
+        byte period = p.Remaining > 0 ? p.ReadU8() : (byte)0;
+
+        if (kind is 12 or 13 or 17 && p.Remaining >= 2)
+        {
+            _ = p.ReadU16();                                // 顏色/貼圖變體 (負編碼)
+        }
+
+        byte result = s.UserId != 0
+            ? ctx.Db.GiveGift(s.UserId, toNick, itemId, period, message)
+            : (byte)1;
+
+        var ack = new Packet(Opcode.GS_GIVEGIFT_ACK).WriteU8(result);
+        if (result == 0)
+        {
+            int cash = ctx.Db.GetCash(s.UserId);
+            ack.WriteS32(cash)                              // 扣款後餘額顯示組
+               .WriteS32(0)
+               .WriteS32(0)
+               .WriteS32(0)
+               .WriteS32(0);
+        }
+
+        await s.SendAsync(ack);
+    }
+
     private static void WriteResult(Packet ack, Db.BuyResult r)
     {
         ack.WriteBool(r.Ok);
+
         if (r.Ok)
-            ack.WriteS32(r.ItemId).WriteF32(r.F1).WriteF32(r.F2)
-               .WriteS32(r.Period).WriteU8(r.Kind).WriteU16(r.Dura);
+        {
+            ack.WriteS32(r.ItemId)
+               .WriteF32(r.F1)
+               .WriteF32(r.F2)
+               .WriteS32(r.Period)
+               .WriteU8(r.Kind)
+               .WriteU16(r.Dura);
+        }
     }
 
     /// <summary>205 尾端 7×s32 (client 無條件讀取, 順序見 sub_571910 v22/v16/v26/v20/v15/v27/v18)。</summary>
