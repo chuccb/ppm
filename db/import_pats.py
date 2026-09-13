@@ -144,6 +144,113 @@ def import_maps(con: sqlite3.Connection) -> int:
     return len(rows)
 
 
+
+
+def import_weapon_parts(con: sqlite3.Connection) -> int:
+    """weaponparts.pat (CSV/cp932): Gun Item No + 4 組×10 改裝件 id。"""
+    text = (DEC / "weaponparts.pat.dec").read_bytes().decode("cp932", errors="replace")
+    lines = text.split("\r\n")
+
+    con.execute(
+        """
+        CREATE TABLE IF NOT EXISTS weapon_parts_catalog (
+            gun_item_id  INTEGER NOT NULL,
+            grp          INTEGER NOT NULL CHECK (grp BETWEEN 0 AND 3),
+            slot         INTEGER NOT NULL CHECK (slot BETWEEN 0 AND 9),
+            part_item_id INTEGER NOT NULL,
+            PRIMARY KEY (gun_item_id, grp, slot)
+        ) STRICT, WITHOUT ROWID
+        """
+    )
+    con.execute("DELETE FROM weapon_parts_catalog")
+
+    rows = []
+    for line in lines[2:]:
+        parts = line.split(",")
+        if not parts or not parts[0].strip().isdigit():
+            continue
+        gun = int(parts[0])
+        for grp in range(4):
+            for slot in range(10):
+                col = 1 + grp * 10 + slot
+                if col < len(parts) and parts[col].strip().isdigit() and int(parts[col]) > 0:
+                    rows.append((gun, grp, slot, int(parts[col])))
+
+    con.executemany("INSERT OR REPLACE INTO weapon_parts_catalog VALUES (?,?,?,?)", rows)
+    return len(rows)
+
+
+def import_parts_ability(con: sqlite3.Connection) -> int:
+    """partsability.pat (CSV/cp932): 413 條武器彈道/傷害參數。"""
+    text = (DEC / "partsability.pat.dec").read_bytes().decode("cp932", errors="replace")
+    lines = text.split("\r\n")
+    hdr = [h.strip().replace(" ", "_").lower() for h in lines[1].split(",")]
+    idx = {h: i for i, h in enumerate(hdr)}
+
+    con.execute(
+        """
+        CREATE TABLE IF NOT EXISTS parts_ability_catalog (
+            item_id INTEGER PRIMARY KEY, recoil REAL, effective_range REAL,
+            limit_range REAL, effective_damage REAL, limit_damage REAL,
+            shot_delay REAL, move_speed REAL, shots_per_fire INTEGER
+        ) STRICT
+        """
+    )
+    con.execute("DELETE FROM parts_ability_catalog")
+
+    rows = []
+    for line in lines[2:]:
+        p = line.split(",")
+        if not p or not p[0].strip().isdigit():
+            continue
+
+        def g(name: str, cast=float):
+            try:
+                return cast(p[idx[name]])
+            except (ValueError, IndexError):
+                return 0
+
+        rows.append(
+            (int(p[0]), g("recoil"), g("effective_range"), g("limit_range"),
+             g("effective_damage"), g("limit_damage"), g("shot_delay"),
+             g("move_speed"), g("shots_per_fire", int))
+        )
+
+    con.executemany("INSERT OR REPLACE INTO parts_ability_catalog VALUES (?,?,?,?,?,?,?,?,?)", rows)
+    return len(rows)
+
+
+def import_recommend_sets(con: sqlite3.Connection) -> int:
+    """RecommandItem.pat (CSV/cp932): 推薦套裝 → 809 GS_GET_RECOMMENDSET_INFO 資料源。"""
+    text = (DEC / "RecommandItem.pat.dec").read_bytes().decode("cp932", errors="replace")
+    lines = text.split("\r\n")
+
+    con.execute(
+        """
+        CREATE TABLE IF NOT EXISTS recommend_set_catalog (
+            set_id INTEGER NOT NULL, char_type INTEGER NOT NULL,
+            concept INTEGER NOT NULL, slot INTEGER NOT NULL, item_id INTEGER NOT NULL,
+            PRIMARY KEY (set_id, slot)
+        ) STRICT, WITHOUT ROWID
+        """
+    )
+    con.execute("DELETE FROM recommend_set_catalog")
+
+    rows = []
+    for line in lines[3:]:
+        p = line.split(",")
+        if len(p) < 12 or not p[0].strip().isdigit():
+            continue
+        sid, ct, cc = int(p[0]), int(p[1] or 0), int(p[2] or 0)
+        for s in range(9):
+            v = p[3 + s].strip()
+            if v.isdigit() and int(v) > 0:
+                rows.append((sid, ct, cc, s, int(v)))
+
+    con.executemany("INSERT OR REPLACE INTO recommend_set_catalog VALUES (?,?,?,?,?)", rows)
+    return len(rows)
+
+
 def main() -> int:
     con = sqlite3.connect(DB)
     con.execute("PRAGMA foreign_keys=OFF")
@@ -162,11 +269,17 @@ def main() -> int:
     n_items = import_items(con)
     n_quests = import_quests(con)
     n_maps = import_maps(con)
+    n_parts = import_weapon_parts(con)
+    n_abil = import_parts_ability(con)
+    n_rec = import_recommend_sets(con)
     con.commit()
 
     print(f"item_catalog : {n_items} 條 (真實日版目錄)")
     print(f"quest_catalog: {n_quests} 條")
     print(f"map_catalog  : {n_maps} 條")
+    print(f"weapon_parts : {n_parts} 條")
+    print(f"parts_ability: {n_abil} 條")
+    print(f"recommend_set: {n_rec} 條")
 
     for row in con.execute(
         "SELECT kind, COUNT(*) FROM item_catalog GROUP BY kind ORDER BY 2 DESC LIMIT 8"
