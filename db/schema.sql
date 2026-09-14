@@ -124,6 +124,9 @@ CREATE TABLE IF NOT EXISTS characters (
     -- 十八輪真值: [0]=角色(19.9M) [1]=髮型 [2]=臉 [3]=上衣 [4]=下裝
     -- [5]=鞋 [6]=外套 [7]=眼部 [8]=髮飾 [9]=臉飾 [10]=頭飾 [11]=特殊
     -- (欄名沿用舊稱, 對應順序如上; 武器另走武器編組表)
+    -- Canonical playable type t (1..15) requires body offset t here:
+    -- ItemData 19,900,000+t has +532=t and native 198 treats 0 as unavailable.
+    -- Keep DEFAULT 0 for optional/legacy rows; Db repairs only valid type+t zero rows.
     eq_primary   INTEGER NOT NULL DEFAULT 0,
     eq_secondary INTEGER NOT NULL DEFAULT 0,
     eq_melee     INTEGER NOT NULL DEFAULT 0,

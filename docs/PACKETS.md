@@ -567,7 +567,7 @@ bool    success                 0 時直接顯示 resource 0x70 / code 17
   s32   user_id (v19)
   --- sub_523BF0: 基本資料 ---
   string  nickname            (this+60,  0x30 bytes 區)
-  u8      char_type           (this+88)
+  u8      selected_char_index (this+88; CHARSLOT list index, not char_type)
   s32     level/exp 相關 x3   (this+92,96,108)
   s32     win/loss/kill/death/disconnect x5 (this+136..152)
   s32     headshot/combo/heart/dkill x4     (this+156..168)
@@ -610,6 +610,45 @@ bool    success                 0 時直接顯示 resource 0x70 / code 17
 CClientData 的 sub_523A50 (523BF0+524010+524660+524B70(a3=0)) 其實屬於
 **290 MASTER_USERINFO_ACK (sub_579830)** 與 **294 MASTER_USERINFODB_ACK
 (sub_57A540)** — GM 查詢他人資料, 與 198 無關 (四輪誤記, 五輪更正)。
+
+#### 3.2a 198 的 code 63 / 可用角色不變量（本輪驗證）
+
+**Fact / HIGH**
+
+- `sub_570550` 在完整讀取 198 後，以目前角色的 `word_EE8DE8[13*i]`
+  （`sub_524010` 角色記錄的第一個 `u16`）判斷可用性。它是 0 時掃描
+  已解析記錄；若仍找不到非 0 值，便取得 resource `0xCC` 並顯示 code 63。
+- `sub_523BF0` 在 nickname 後讀 `CClientData+88`，並在 48-byte blob 後
+  讀 `+4`；`sub_526CA0` / `sub_884160` 將 `+88` 用作 `CHARSLOT` 選取值，
+  並由 `sub_884160` 原樣寫入 outbound opcode 312。Server 必須在 **兩個**
+  198/247 基本資料欄位寫目前的 character-list slot/index，不能在 `+88`
+  寫角色 type。真正的 `char_type` 是後續每筆 `sub_524010` 記錄的首 byte。
+- 對精確的 `origin/main:Extracted/ui/cfg/itemdata.pat` 解密後，變長 ItemData
+  stream 的 header 是 `(version=1,count=21164)`，可無殘餘地解析全部 21,164
+  records。`19,900,001..19,900,015` 連續 15 筆角色本體在 record `+532` 的
+  byte 恰為 `1..15`。`sub_533FB0` 直接回傳同一 `+532` byte；`sub_526730`
+  將角色第一個 equipment offset 重建為此 body item 後使用該 lookup。
+
+**Inference / HIGH**
+
+- 因此 Server 建立 canonical type `t`（`1..15`）時必須持久化
+  `eq_primary=t`，使 wire 的第一個 `u16` 重建 `19,900,000+t`。type 1 starter
+  的值嚴格為 `1`（Hayate body `19,900,001`）；其餘 11 個外觀 offset 可為 0。
+- 成功驗證登入時，type `1..15` 且 `eq_primary=0` 的既有 character row 可安全
+  修成 `eq_primary=char_type`。此修復還須令 current slot/index 指向有 body 的
+  已序列化記錄；任何非零歷史 body/cosmetic 值不在這個修復範圍內。
+
+**Assumption / bounded**
+
+- `characters.slot_no` 目前由 Server 以連續 list position 配置。Client 的 198
+  character records 本身沒有 slot id，因此 wire 選取值必須始終是序列化順序的
+  index；若未來允許稀疏 slot storage，selection persistence 必須先明確做
+  slot-id ↔ sorted-wire-index conversion，不能猜測兩者仍相等。
+
+`PaperMan.SelfTest` 的 198 reader test 會完整消費 basic/stat、四個 weapon
+records、skill/quick/tail，並斷言 selected index `0`、char count `1`、type `1`、
+第一個 body `u16=1` 和其餘十一個 `u16=0`；另含 fresh identity、legacy
+bodyless-row repair、nonzero body preservation、GM/purchase type validation coverage。
 
 ### 3.3 GL_MYITEM_ACK (200) — handler sub_570AB0 → sub_524B70 (分頁背包)
 ```
@@ -2082,11 +2121,10 @@ dispatcher case 102 → `sub_58D6F0` 立即 `ctor(101)` 回送
 ## 3.98 CClientData 記憶體總圖 (廿七輪彙整 — 歷輪碎片權威版)
 byte 偏移 (this 為物件基址):
 ```
-+4     u8   slot_current (198 尾段寫)
++4     u8   current_char_list_index (198/247 的 basic blob 尾段讀入)
 +60    char nick[24]     (wire str)
-+88    u8   char_type    (wire u8; 1..15 = ICT_* 角色 — 1=maru/hayate…
-                         15=devilgirl/lucy, 對應 item_id 19900001..15;
-                         語音 char_idx = char_type−1)
++88    u8   selected_char_list_index (wire u8; `CHARSLOT` UI 讀寫，
+                         sub_884160 將此值原樣送 opcode 312；不是 char_type)
 +92    s32  [23] wire level (參考值)
 +96    s32  [24] exp
 +100   s32  [25] level ← client 由 exp 查表 sub_403360 重算

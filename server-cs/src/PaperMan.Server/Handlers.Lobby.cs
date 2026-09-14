@@ -139,13 +139,14 @@ public static class LobbyHandlers
     private static Packet BuildClientInfoAck(Db.MyInfo info, List<Db.CharSlot> chars)
     {
         var st = info.Stats;
-        // wire 第 2 欄是 char_type (+88), 不是 slot (與 198 首段同構)。
-        byte currentCharType = chars.FirstOrDefault(c => c.SlotNo == info.CurrentChar)?.CharType ?? (byte)0;
+        // 247 uses the same sub_523BF0 block as 198: CClientData+88 is the
+        // selected CHARSLOT list index, not a character type.
+        byte selectedCharacterSlot = info.CurrentChar;
         var ack = new Packet(Opcode.GL_CLIENTINFO_ACK)
             .WriteU8(1)
             // sub_523BF0 — 與 198 首段完全同構 (佈局見 BuildMyInfoAck)
             .WriteStr(info.Nickname)
-            .WriteU8(currentCharType)
+            .WriteU8(selectedCharacterSlot)
             .WriteS32(info.Level)
             .WriteS32((int)info.Exp)
             .WriteS32(0)
@@ -290,13 +291,14 @@ public static class LobbyHandlers
             context.Db.GetGiftCount(info.UserId)));
     }
 
-    private static Packet BuildMyInfoAck(
+    internal static Packet BuildMyInfoAck(
         Db.MyInfo info, List<Db.CharSlot> chars, List<Db.WeaponGroup> weaponGroups, Db.Slots slots,
         ushort giftCount)
     {
         var st = info.Stats;
-        // wire 第 2 欄是 char_type (+88; §3.98 總圖), 不是 slot — 查當前角色槽的型別。
-        byte currentCharType = chars.FirstOrDefault(c => c.SlotNo == info.CurrentChar)?.CharType ?? (byte)1;
+        // sub_526CA0/sub_884160 use CClientData+88 as the CHARSLOT list index
+        // and sub_884160 sends that same u8 in 312. It is not char_type.
+        byte selectedCharacterSlot = info.CurrentChar;
 
         // 統計欄位佈局 — 十二輪以任務條件檢查器 sub_9252D0 逐欄破解:
         //   cond5→dword[37]=wins, cond6→[38]=losses, cond3→[39]=kills,
@@ -314,7 +316,7 @@ public static class LobbyHandlers
             .WriteS32((int)info.UserId)
             // --- sub_523BF0 基本資料 ---
             .WriteStr(info.Nickname)
-            .WriteU8(currentCharType)                              // char_type (+88, 1..14 ICT_*)
+            .WriteU8(selectedCharacterSlot)                        // selected character-list slot (+88)
             .WriteS32(info.Level)                                  // [23]
             .WriteS32((int)info.Exp)                               // [24] (level 由 client 查表重算)
             .WriteS32(0)                                           // [27] 任務 cond1 計數
@@ -368,9 +370,13 @@ public static class LobbyHandlers
         // --- sub_524010 角色槽 (≤20, 每個 u8 type + 12×u16 裝備) ---
         if (chars.Count == 0)
         {
-            ack.WriteU8(1);                                        // 保底 1 個現役角色槽
-            ack.WriteU8(1);                                        // char_type=1 (Hayate)
-            for (int i = 0; i < 12; i++)
+            // Defensive formatter fallback only. Successful Login persists the
+            // same canonical starter; never use an all-zero body because the
+            // native 198 availability gate emits resource 0xCC / code 63.
+            ack.WriteU8(1);                                        // one character record
+            ack.WriteU8(1);                                        // canonical type 1 (Hayate)
+            ack.WriteU16(1);                                       // 19,900,001 body offset
+            for (int i = 1; i < 12; i++)
             {
                 ack.WriteU16(0);
             }

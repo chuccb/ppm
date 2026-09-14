@@ -153,7 +153,12 @@ public static class ShopHandlers
         int charType = packet.Remaining >= 4 ? packet.ReadS32() : 0;
         var existing = context.Db.GetCharacters(session.UserId);
         byte slotNo = (byte)existing.Count;
-        bool ok = session.UserId != 0 && slotNo < 20 && context.Db.BuyCharacter(session.UserId, slotNo, (byte)charType);
+        // Validate the signed wire value before narrowing it to u8. Otherwise
+        // 257/256/etc. could wrap into a legitimate canonical character type.
+        bool ok = session.UserId != 0
+            && slotNo < 20
+            && Db.IsCanonicalCharacterType(charType)
+            && context.Db.BuyCharacter(session.UserId, slotNo, (byte)charType);
 
         var ack = new Packet(Opcode.GS_BUYCHAR_ACK).WriteU8(ok ? (byte)1 : (byte)0);
         if (ok)

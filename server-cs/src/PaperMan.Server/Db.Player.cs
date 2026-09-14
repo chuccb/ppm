@@ -128,13 +128,23 @@ public sealed partial class Db
 
     public bool CreateChar(long userId, byte slotNo, byte charType)
     {
+        if (slotNo >= 20 || !IsCanonicalCharacterType(charType))
+        {
+            return false;
+        }
+
         lock (_gate)
         {
             try
             {
-                using var cmd = Cmd(
-                    "INSERT INTO characters(user_id,slot_no,char_type) VALUES(@u,@s,@c)",
-                    ("@u", userId), ("@s", slotNo), ("@c", charType));
+                using var cmd = Cmd("""
+                    INSERT INTO characters(user_id,slot_no,char_type,eq_primary)
+                    VALUES(@u,@s,@c,@body)
+                    """,
+                    ("@u", userId),
+                    ("@s", slotNo),
+                    ("@c", charType),
+                    ("@body", (int)CanonicalBodyOffset(charType)));
                 return cmd.ExecuteNonQuery() == 1;
             }
             catch (SqliteException)
@@ -249,6 +259,11 @@ public sealed partial class Db
     /// <summary>購買新角色槽 (GS_BUYCHAR 310/311)。</summary>
     public bool BuyCharacter(long userId, byte slotNo, byte charType, int priceGp = 0)
     {
+        if (slotNo >= 20 || !IsCanonicalCharacterType(charType) || priceGp < 0)
+        {
+            return false;
+        }
+
         lock (_gate)
         {
             using var tx = _conn.BeginTransaction();
@@ -268,10 +283,16 @@ public sealed partial class Db
                 }
 
                 using var ins = Cmd("""
-                    INSERT INTO characters(user_id, slot_no, char_type)
-                    VALUES(@u, @s, @c)
-                    ON CONFLICT(user_id, slot_no) DO UPDATE SET char_type=@c
-                    """, ("@u", userId), ("@s", (int)slotNo), ("@c", (int)charType));
+                    INSERT INTO characters(user_id, slot_no, char_type, eq_primary)
+                    VALUES(@u, @s, @c, @body)
+                    ON CONFLICT(user_id, slot_no) DO UPDATE SET
+                        char_type=excluded.char_type,
+                        eq_primary=excluded.eq_primary
+                    """,
+                    ("@u", userId),
+                    ("@s", (int)slotNo),
+                    ("@c", (int)charType),
+                    ("@body", (int)CanonicalBodyOffset(charType)));
                 ins.Transaction = tx;
                 ins.ExecuteNonQuery();
 

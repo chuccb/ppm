@@ -182,6 +182,26 @@ public sealed partial class Db : IDisposable
     private const int MaximumAcceptedPasswordIterations = 1_000_000;
     private const int SqliteConstraintErrorCode = 19; // SQLITE_CONSTRAINT primary result code
 
+    // ItemData's 19,900,001..19,900,015 body records carry their matching
+    // character type at +532. The native 198 availability check requires the
+    // first character equipment word to be nonzero, so a created canonical
+    // character needs its matching body offset rather than the SQL default 0.
+    private const byte FirstCanonicalCharacterType = 1;
+    private const byte LastCanonicalCharacterType = 15;
+
+    internal static bool IsCanonicalCharacterType(int charType) =>
+        charType is >= FirstCanonicalCharacterType and <= LastCanonicalCharacterType;
+
+    private static ushort CanonicalBodyOffset(byte charType)
+    {
+        if (!IsCanonicalCharacterType(charType))
+        {
+            throw new ArgumentOutOfRangeException(nameof(charType));
+        }
+
+        return charType;
+    }
+
     public sealed record LoginResult(
         LoginCode Result, long AccountId = 0, long UserId = 0, string Nickname = "",
         int Cash = 0, long GamePoint = 0, int Level = 1, long Exp = 0);
@@ -297,7 +317,9 @@ public sealed partial class Db : IDisposable
     {
         if (account.UserId > 0 && account.Nickname.Length > 0)
         {
-            return new PlayerIdentity(account.UserId, account.Nickname);
+            return EnsurePlayableCharacterStateUnlocked(account.UserId)
+                ? new PlayerIdentity(account.UserId, account.Nickname)
+                : null;
         }
 
         string generatedNickname = CreateGeneratedNickname(account.AccountId);
@@ -321,6 +343,119 @@ public sealed partial class Db : IDisposable
 
         userId = CreateNickUnlocked(account.AccountId, generatedNickname);
         return userId > 0 ? new PlayerIdentity(userId, generatedNickname) : null;
+    }
+
+    /// <summary>
+    /// Repairs only the bodyless rows that contradict the native availability
+    /// invariant. Existing nonzero body/cosmetic data remains untouched: the
+    /// client evidence proves the zero-to-canonical repair, not a rewrite of
+    /// historical custom loadouts.
+    /// </summary>
+    private bool EnsurePlayableCharacterStateUnlocked(long userId)
+    {
+        using var transaction = _conn.BeginTransaction();
+
+        using (var repairBodies = Cmd("""
+            UPDATE characters
+            SET eq_primary = char_type
+            WHERE user_id = @userId
+              AND char_type BETWEEN @firstType AND @lastType
+              AND eq_primary = 0
+            """,
+            ("@userId", userId),
+            ("@firstType", (int)FirstCanonicalCharacterType),
+            ("@lastType", (int)LastCanonicalCharacterType)))
+        {
+            repairBodies.Transaction = transaction;
+            repairBodies.ExecuteNonQuery();
+        }
+
+        int currentCharacterIndex;
+        using (var currentCharacter = Cmd(
+            "SELECT current_char FROM users WHERE user_id=@userId", ("@userId", userId)))
+        {
+            currentCharacter.Transaction = transaction;
+            object? value = currentCharacter.ExecuteScalar();
+            if (value is null)
+            {
+                transaction.Rollback();
+                return false;
+            }
+
+            currentCharacterIndex = Convert.ToInt32(value);
+        }
+
+        var occupiedSlots = new bool[20];
+        var playablePositions = new List<bool>();
+        using (var characters = Cmd("""
+            SELECT slot_no, char_type, eq_primary
+            FROM characters
+            WHERE user_id=@userId
+            ORDER BY slot_no
+            """, ("@userId", userId)))
+        {
+            characters.Transaction = transaction;
+            using var reader = characters.ExecuteReader();
+            while (reader.Read())
+            {
+                int slotNo = reader.GetInt32(0);
+                int charType = reader.GetInt32(1);
+                int bodyOffset = reader.GetInt32(2);
+                occupiedSlots[slotNo] = true;
+                playablePositions.Add(
+                    IsCanonicalCharacterType(charType) && IsCanonicalCharacterType(bodyOffset));
+            }
+        }
+
+        int firstPlayablePosition = playablePositions.FindIndex(playable => playable);
+        if (firstPlayablePosition < 0)
+        {
+            int emptySlot = Array.FindIndex(occupiedSlots, occupied => !occupied);
+            if (emptySlot < 0)
+            {
+                transaction.Rollback();
+                return false;
+            }
+
+            using var addStarter = Cmd("""
+                INSERT INTO characters(user_id, slot_no, char_type, eq_primary)
+                VALUES(@userId, @slotNo, @charType, @bodyOffset)
+                """,
+                ("@userId", userId),
+                ("@slotNo", emptySlot),
+                ("@charType", (int)FirstCanonicalCharacterType),
+                ("@bodyOffset", (int)CanonicalBodyOffset(FirstCanonicalCharacterType)));
+            addStarter.Transaction = transaction;
+            addStarter.ExecuteNonQuery();
+
+            // 198 omits physical slot numbers. It selects the sorted character
+            // record by position, so account for any preserved legacy rows.
+            firstPlayablePosition = occupiedSlots.Take(emptySlot).Count(occupied => occupied);
+            playablePositions.Add(true);
+        }
+
+        bool currentCharacterIsPlayable = currentCharacterIndex >= 0
+            && currentCharacterIndex < playablePositions.Count
+            && playablePositions[currentCharacterIndex];
+        if (!currentCharacterIsPlayable)
+        {
+            using var selectPlayableCharacter = Cmd("""
+                UPDATE users
+                SET current_char=@characterIndex, updated_at=unixepoch()
+                WHERE user_id=@userId
+                """,
+                ("@characterIndex", firstPlayablePosition),
+                ("@userId", userId));
+            selectPlayableCharacter.Transaction = transaction;
+            if (selectPlayableCharacter.ExecuteNonQuery() != 1)
+            {
+                transaction.Rollback();
+                return false;
+            }
+        }
+
+        transaction.Commit();
+        return true;
     }
 
     private static bool IsNativeNicknameLength(string nickname) =>
@@ -571,8 +706,10 @@ public sealed partial class Db : IDisposable
             // groups. The explicit character remains server policy, so it
             // belongs in this transaction rather than a post-commit repair.
             using var characterCommand = Cmd(
-                "INSERT INTO characters(user_id,slot_no,char_type) VALUES(@userId,0,1)",
-                ("@userId", userId));
+                "INSERT INTO characters(user_id,slot_no,char_type,eq_primary) VALUES(@userId,0,@charType,@bodyOffset)",
+                ("@userId", userId),
+                ("@charType", (int)FirstCanonicalCharacterType),
+                ("@bodyOffset", (int)CanonicalBodyOffset(FirstCanonicalCharacterType)));
             characterCommand.Transaction = transaction;
             characterCommand.ExecuteNonQuery();
 

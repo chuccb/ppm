@@ -225,7 +225,8 @@ miRun) 等 31 項彈道參數的修正 — weaponparts↔partsability 第九次�
 19,900,001..19,900,015 = 15 位角色: ハヤテ/ティナ/ミリィ/サイラス/
 ドッドン/ガイ/テリシア/アルル/ヴァン/フッド/リカ/レム/エリス/
 ルコット/ルーシー。推薦套裝 char_type 1..14 與角色段序號一一對應
-(198 wire 的 u8 char_type 即此編號) — 第六次互證。
+(198 `sub_524010` character record 的 u8 char_type 即此編號；basic block 的
+`+88` u8 是另一個 CHARSLOT list index) — 第六次互證。
 
 ## 5d. system XML 資料表 (二十輪全掃)
 

@@ -80,6 +80,105 @@ int GetAvailableIpv4UdpPort()
     return endpoint.Port;
 }
 
+bool IsNative198StarterAcknowledgement(Packet acknowledgement)
+{
+    var reader = Packet.FromPayload(acknowledgement.Opcode, acknowledgement.Payload);
+    if (acknowledgement.Opcode != Opcode.GL_MYINFO_ACK
+        || !reader.ReadBool()
+        || reader.ReadS32() != 7
+        || reader.ReadStr() != "Starter")
+    {
+        return false;
+    }
+
+    // sub_523BF0: +88 is a CHARSLOT list position, followed by the complete
+    // stat/basic block and the separately read +4 current list position.
+    if (reader.ReadU8() != 0)
+    {
+        return false;
+    }
+
+    for (int i = 0; i < 3 + 5 + 4 + 4 + 5; i++)
+    {
+        if (reader.ReadS32() != 0)
+        {
+            return false;
+        }
+    }
+
+    if (reader.ReadU8() != 0 || reader.ReadU8() != 0 || reader.ReadU8() != 0
+        || reader.ReadS32() != 0 || reader.ReadS32() != 0 || reader.ReadS32() != 0)
+    {
+        return false;
+    }
+
+    for (int i = 0; i < 48; i++)
+    {
+        if (reader.ReadU8() != 0)
+        {
+            return false;
+        }
+    }
+
+    if (reader.ReadU8() != 0 || reader.ReadU8() != 1 || reader.ReadU8() != 1)
+    {
+        return false;
+    }
+
+    for (int i = 0; i < 12; i++)
+    {
+        if (reader.ReadU16() != (i == 0 ? 1 : 0))
+        {
+            return false;
+        }
+    }
+
+    if (reader.ReadU8() != 4)
+    {
+        return false;
+    }
+
+    for (byte group = 0; group < 4; group++)
+    {
+        if (reader.ReadU8() != group || reader.ReadU16() != 0)
+        {
+            return false;
+        }
+
+        if (group != 3
+            && (reader.ReadU16() != 0 || reader.ReadU16() != 0 || reader.ReadU16() != 0))
+        {
+            return false;
+        }
+    }
+
+    for (int i = 0; i < 9; i++)
+    {
+        if (reader.ReadS32() != 0)
+        {
+            return false;
+        }
+    }
+
+    if (reader.ReadU8() != 5)
+    {
+        return false;
+    }
+
+    for (int i = 0; i < 7; i++)
+    {
+        if (reader.ReadS32() != 0)
+        {
+            return false;
+        }
+    }
+
+    return reader.ReadU16() == 0
+        && reader.ReadS32() == 0
+        && reader.ReadU8() == 0
+        && reader.Remaining == 0;
+}
+
 // ---- 1. Packet 原語 ---------------------------------------------------------
 {
     var inner = new Packet(Opcode.GT_PING_ACK).WriteS32(7);
@@ -110,6 +209,32 @@ int GetAvailableIpv4UdpPort()
 
     var rawStrPkt = Packet.FromPayload(Opcode.GL_LOGIN_REQ, "UserNoNul"u8);
     Check("non-nul terminated ReadStr returns text safely", rawStrPkt.ReadStr() == "UserNoNul");
+}
+
+// ---- 1a. 198 starter character availability contract ----------------------
+{
+    var starterStats = new Db.Stats(
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0);
+    var starterInfo = new Db.MyInfo(7, "Starter", 1, 0, 0, 0, 0, starterStats);
+    Packet myInfo = LobbyHandlers.BuildMyInfoAck(
+        starterInfo,
+        [new Db.CharSlot(0, 1, [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])],
+        [],
+        new Db.Slots(new int[9], new int[7]),
+        giftCount: 0);
+
+    Check("198 native-order starter has selected slot zero and canonical body one",
+        IsNative198StarterAcknowledgement(myInfo));
+
+    Packet defensiveFallback = LobbyHandlers.BuildMyInfoAck(
+        starterInfo,
+        [],
+        [],
+        new Db.Slots(new int[9], new int[7]),
+        giftCount: 0);
+    Check("198 no-row formatter fallback remains natively playable",
+        IsNative198StarterAcknowledgement(defensiveFallback));
 }
 
 // ---- 1b. Login / channel bootstrap wire contract ---------------------------
@@ -468,6 +593,7 @@ int GetAvailableIpv4UdpPort()
     string temporaryDirectory = Path.Combine(Path.GetTempPath(), $"paperman-selftest-{Guid.NewGuid():N}");
     string temporaryDatabasePath = Path.Combine(temporaryDirectory, "data", "paperman.db");
     string legacyDatabasePath = Path.Combine(temporaryDirectory, "legacy", "paperman.db");
+    long bootstrapUserId = 0;
     try
     {
         using (var firstOpen = new Db(temporaryDatabasePath))
@@ -500,6 +626,10 @@ int GetAvailableIpv4UdpPort()
             Db.MyInfo? provisionedIdentity = newAccount.UserId > 0
                 ? secondOpen.GetMyInfo(newAccount.UserId)
                 : null;
+            List<Db.CharSlot> freshCharacters = newAccount.UserId > 0
+                ? secondOpen.GetCharacters(newAccount.UserId)
+                : [];
+            bootstrapUserId = newAccount.UserId;
             Db.LoginResult acceptedPassword = secondOpen.Login(
                 accountName: "BootstrapAccount",
                 passwordOrToken: "fresh-password",
@@ -563,8 +693,9 @@ int GetAvailableIpv4UdpPort()
                 !secondOpen.Initialization.CreatedDatabaseFile
                 && secondOpen.Initialization.ProtocolPacketDefinitionCount == 676
                 && newAccount is { Result: LoginCode.Ok, AccountId: > 0, UserId: > 0, Nickname: "BootstrapAccount" }
-                && provisionedIdentity is { UserId: > 0, Nickname: "BootstrapAccount" }
-                && secondOpen.GetCharacters(newAccount.UserId) is [{ SlotNo: 0, CharType: 1 }]
+                && provisionedIdentity is { UserId: > 0, Nickname: "BootstrapAccount", CurrentChar: 0 }
+                && freshCharacters is [{ SlotNo: 0, CharType: 1 }]
+                && freshCharacters[0].Equip.SequenceEqual([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
                 && duplicateUserId == 0
                 && acceptedPassword is { Result: LoginCode.Ok, UserId: > 0, Nickname: "BootstrapAccount" }
                 && rejectedPassword.Result == LoginCode.BadCredentials);
@@ -574,6 +705,21 @@ int GetAvailableIpv4UdpPort()
                 && channelWasNotEnteredAfterHandoff
                 && selectionWasProcessed
                 && channelSession.ChannelEntryCompleted);
+        }
+
+        // Concrete legacy fixture: a canonical type-1 record lost only its
+        // primary body. Keep a nonzero type-2 body beside it to prove repair
+        // does not rewrite historical nonzero equipment.
+        using (var connection = OpenExistingSqlite(temporaryDatabasePath))
+        using (var command = connection.CreateCommand())
+        {
+            command.CommandText = """
+                UPDATE characters SET eq_primary=0 WHERE user_id=@userId AND slot_no=0;
+                INSERT INTO characters(user_id,slot_no,char_type,eq_primary)
+                VALUES(@userId,1,2,7);
+                """;
+            command.Parameters.AddWithValue("@userId", bootstrapUserId);
+            command.ExecuteNonQuery();
         }
 
         string legacySalt = "legacy-salt";
@@ -594,6 +740,36 @@ int GetAvailableIpv4UdpPort()
 
         using (var thirdOpen = new Db(temporaryDatabasePath))
         {
+            Db.LoginResult repairedLogin = thirdOpen.Login(
+                accountName: "BootstrapAccount",
+                passwordOrToken: "fresh-password",
+                clientDataRevision: 2,
+                fingerprintSource: LoginFingerprintSource.Unavailable,
+                clientFingerprint: new byte[24],
+                remoteIp: "127.0.0.1");
+            List<Db.CharSlot> repairedCharacters = thirdOpen.GetCharacters(bootstrapUserId);
+            bool createsCanonicalBodies = thirdOpen.CreateChar(bootstrapUserId, 2, 2)
+                && thirdOpen.BuyCharacter(bootstrapUserId, 3, 3)
+                && !thirdOpen.CreateChar(bootstrapUserId, 4, 0)
+                && !thirdOpen.BuyCharacter(bootstrapUserId, 4, 16);
+            List<Db.CharSlot> createdCharacters = thirdOpen.GetCharacters(bootstrapUserId);
+
+            Check("verified login repairs only zero canonical bodies and keeps selection playable",
+                repairedLogin is { Result: LoginCode.Ok, UserId: > 0 }
+                && repairedCharacters.Count == 2
+                && repairedCharacters[0] is { SlotNo: 0, CharType: 1 }
+                && repairedCharacters[0].Equip[0] == 1
+                && repairedCharacters[1] is { SlotNo: 1, CharType: 2 }
+                && repairedCharacters[1].Equip[0] == 7
+                && thirdOpen.GetMyInfo(bootstrapUserId) is { CurrentChar: 0 });
+            Check("GM and purchase character creation persist canonical bodies and reject invalid types",
+                createsCanonicalBodies
+                && createdCharacters.Count == 4
+                && createdCharacters[2] is { SlotNo: 2, CharType: 2 }
+                && createdCharacters[2].Equip[0] == 2
+                && createdCharacters[3] is { SlotNo: 3, CharType: 3 }
+                && createdCharacters[3].Equip[0] == 3);
+
             Db.LoginResult legacyLogin = thirdOpen.Login(
                 accountName: "LegacyAccount",
                 passwordOrToken: legacyPassword,
@@ -601,9 +777,13 @@ int GetAvailableIpv4UdpPort()
                 fingerprintSource: LoginFingerprintSource.Unavailable,
                 clientFingerprint: new byte[24],
                 remoteIp: "127.0.0.1");
+            List<Db.CharSlot> legacyCharacters = legacyLogin.UserId > 0
+                ? thirdOpen.GetCharacters(legacyLogin.UserId)
+                : [];
             Check("legacy orphan account receives a player identity and PBKDF2 upgrade",
                 legacyLogin is { Result: LoginCode.Ok, AccountId: > 0, UserId: > 0, Nickname: "LegacyAccount" }
-                && thirdOpen.GetCharacters(legacyLogin.UserId) is [{ SlotNo: 0, CharType: 1 }]);
+                && legacyCharacters is [{ SlotNo: 0, CharType: 1 }]
+                && legacyCharacters[0].Equip[0] == 1);
         }
 
         using (var connection = OpenExistingSqlite(temporaryDatabasePath))
