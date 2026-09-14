@@ -6,10 +6,13 @@
 //   4) header 欄位語意 (w0/w2/w3) — w2 僅 AES 層寫, w3 = 原始大小
 //   5) 681/682/693/694 and 141/142/143/144/195/196 bootstrap wire contracts
 //   6) 681→143 source-IP / one-use admission rules
+//   7) zero-argument SQLite bootstrap, account upgrades, and legacy migration
 // 用法: dotnet run --project src/PaperMan.SelfTest
 // =============================================================================
 using System.Buffers.Binary;
 using System.Security.Cryptography;
+using System.Text;
+using Microsoft.Data.Sqlite;
 using PaperMan.Protocol;
 using PaperMan.Server;
 
@@ -27,6 +30,19 @@ void Check(string name, bool ok)
         fail++;
         Console.WriteLine($"FAIL  {name}");
     }
+}
+
+SqliteConnection OpenExistingSqlite(string databasePath)
+{
+    var connection = new SqliteConnection(new SqliteConnectionStringBuilder
+    {
+        DataSource = databasePath,
+        Mode = SqliteOpenMode.ReadWrite,
+        ForeignKeys = true,
+        Pooling = false,
+    }.ConnectionString);
+    connection.Open();
+    return connection;
 }
 
 // ---- 1. Packet 原語 ---------------------------------------------------------
@@ -406,6 +422,205 @@ void Check(string name, bool ok)
         "203.0.113.12",
         now.AddSeconds(1),
         out _));
+}
+
+// ---- 1d. Zero-command SQLite bootstrap and login migration -----------------
+{
+    string temporaryDirectory = Path.Combine(Path.GetTempPath(), $"paperman-selftest-{Guid.NewGuid():N}");
+    string temporaryDatabasePath = Path.Combine(temporaryDirectory, "data", "paperman.db");
+    string legacyDatabasePath = Path.Combine(temporaryDirectory, "legacy", "paperman.db");
+    try
+    {
+        using (var firstOpen = new Db(temporaryDatabasePath))
+        {
+            Check("SQLite first open creates database and complete protocol catalog",
+                firstOpen.Initialization.CreatedDatabaseFile
+                && File.Exists(temporaryDatabasePath)
+                && firstOpen.Initialization.ProtocolPacketDefinitionCount == 676);
+        }
+
+        // The bootstrap owns defaults only, not an operator's later decision.
+        using (var connection = OpenExistingSqlite(temporaryDatabasePath))
+        using (var command = connection.CreateCommand())
+        {
+            command.CommandText = "INSERT OR REPLACE INTO server_config(key,value) VALUES('event_exp_rate','275')";
+            command.ExecuteNonQuery();
+        }
+
+        using (var secondOpen = new Db(temporaryDatabasePath))
+        {
+            var fingerprint = new byte[24];
+            Db.LoginResult newAccount = secondOpen.Login(
+                accountName: "BootstrapAccount",
+                passwordOrToken: "fresh-password",
+                clientDataRevision: 0x1020_3040,
+                fingerprintSource: LoginFingerprintSource.Unavailable,
+                clientFingerprint: fingerprint,
+                remoteIp: "127.0.0.1");
+            Db.LoginResult acceptedPassword = secondOpen.Login(
+                accountName: "BootstrapAccount",
+                passwordOrToken: "fresh-password",
+                clientDataRevision: 0,
+                fingerprintSource: LoginFingerprintSource.Unavailable,
+                clientFingerprint: fingerprint,
+                remoteIp: "127.0.0.1");
+            Db.LoginResult rejectedPassword = secondOpen.Login(
+                accountName: "BootstrapAccount",
+                passwordOrToken: "incorrect-password",
+                clientDataRevision: 0,
+                fingerprintSource: LoginFingerprintSource.Unavailable,
+                clientFingerprint: fingerprint,
+                remoteIp: "127.0.0.1");
+            secondOpen.LogPacket((ushort)Opcode.GT_PING_REQ, isReceive: true, bytes: 12);
+            secondOpen.LogPacket(ushort.MaxValue, isReceive: true, bytes: 12);
+
+            Check("SQLite second open preserves database and operator configuration",
+                !secondOpen.Initialization.CreatedDatabaseFile
+                && secondOpen.Initialization.ProtocolPacketDefinitionCount == 676
+                && newAccount is { Result: LoginCode.Ok, AccountId: > 0, UserId: 0 }
+                && acceptedPassword.Result == LoginCode.Ok
+                && rejectedPassword.Result == LoginCode.BadCredentials);
+        }
+
+        string legacySalt = "legacy-salt";
+        string legacyPassword = "legacy-password";
+        string legacyHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(legacySalt + legacyPassword)));
+        using (var connection = OpenExistingSqlite(temporaryDatabasePath))
+        using (var command = connection.CreateCommand())
+        {
+            command.CommandText = """
+                INSERT INTO accounts(login_name,pass_hash,pass_salt)
+                VALUES(@loginName,@passwordHash,@passwordSalt)
+                """;
+            command.Parameters.AddWithValue("@loginName", "LegacyAccount");
+            command.Parameters.AddWithValue("@passwordHash", legacyHash);
+            command.Parameters.AddWithValue("@passwordSalt", legacySalt);
+            command.ExecuteNonQuery();
+        }
+
+        using (var thirdOpen = new Db(temporaryDatabasePath))
+        {
+            Db.LoginResult legacyLogin = thirdOpen.Login(
+                accountName: "LegacyAccount",
+                passwordOrToken: legacyPassword,
+                clientDataRevision: 1,
+                fingerprintSource: LoginFingerprintSource.Unavailable,
+                clientFingerprint: new byte[24],
+                remoteIp: "127.0.0.1");
+            Check("legacy SHA256 credential authenticates once for PBKDF2 upgrade",
+                legacyLogin is { Result: LoginCode.Ok, AccountId: > 0 });
+        }
+
+        using (var connection = OpenExistingSqlite(temporaryDatabasePath))
+        using (var command = connection.CreateCommand())
+        {
+            command.CommandText = """
+                SELECT
+                    (SELECT value FROM server_config WHERE key='event_exp_rate'),
+                    (SELECT pass_hash FROM accounts WHERE login_name='BootstrapAccount'),
+                    (SELECT pass_salt FROM accounts WHERE login_name='BootstrapAccount'),
+                    (SELECT pass_hash FROM accounts WHERE login_name='LegacyAccount'),
+                    (SELECT COUNT(*) FROM packet_stats WHERE opcode = 101),
+                    (SELECT COUNT(*) FROM packet_stats WHERE opcode = 65535)
+                """;
+            using var reader = command.ExecuteReader();
+            reader.Read();
+            string currentRate = reader.GetString(0);
+            string freshHash = reader.GetString(1);
+            string freshSalt = reader.GetString(2);
+            string upgradedLegacyHash = reader.GetString(3);
+            long knownPacketStats = reader.GetInt64(4);
+            long unknownPacketStats = reader.GetInt64(5);
+            Check("bootstrap retains config, PBKDF2 format, and unknown-opcode guard",
+                currentRate == "275"
+                && freshHash.StartsWith("PBKDF2-SHA256$210000$", StringComparison.Ordinal)
+                && Convert.FromBase64String(freshSalt).Length == 16
+                && upgradedLegacyHash.StartsWith("PBKDF2-SHA256$210000$", StringComparison.Ordinal)
+                && knownPacketStats == 1
+                && unknownPacketStats == 0);
+        }
+
+        // Reproduce only the old 682 column names; Db must preserve the value
+        // while giving the present code its source-verified names and raw24 guard.
+        Directory.CreateDirectory(Path.GetDirectoryName(legacyDatabasePath)!);
+        using (var connection = new SqliteConnection($"Data Source={legacyDatabasePath};Mode=ReadWriteCreate;Pooling=False"))
+        {
+            connection.Open();
+            using var command = connection.CreateCommand();
+            command.CommandText = """
+                CREATE TABLE accounts (
+                    account_id INTEGER PRIMARY KEY,
+                    login_name TEXT NOT NULL UNIQUE COLLATE NOCASE,
+                    pass_hash TEXT NOT NULL,
+                    pass_salt TEXT NOT NULL,
+                    hw_key INTEGER,
+                    security_state INTEGER NOT NULL DEFAULT 0,
+                    cash INTEGER NOT NULL DEFAULT 0,
+                    is_gm INTEGER NOT NULL DEFAULT 0,
+                    is_banned INTEGER NOT NULL DEFAULT 0,
+                    ban_reason TEXT,
+                    ban_until INTEGER,
+                    chat_ban_until INTEGER,
+                    created_at INTEGER,
+                    updated_at INTEGER,
+                    last_login_at INTEGER,
+                    last_login_ip TEXT
+                );
+                INSERT INTO accounts(login_name,pass_hash,pass_salt,hw_key,security_state)
+                VALUES('OldMetadata','h','s',123,2);
+                """;
+            command.ExecuteNonQuery();
+        }
+
+        using (var migratedOpen = new Db(legacyDatabasePath))
+        {
+            Check("legacy database opens through automatic 682 metadata migration",
+                !migratedOpen.Initialization.CreatedDatabaseFile);
+        }
+
+        using (var connection = OpenExistingSqlite(legacyDatabasePath))
+        using (var command = connection.CreateCommand())
+        {
+            command.CommandText = """
+                SELECT
+                    (SELECT client_data_revision FROM accounts WHERE login_name='OldMetadata'),
+                    (SELECT fingerprint_source FROM accounts WHERE login_name='OldMetadata'),
+                    EXISTS(SELECT 1 FROM pragma_table_info('accounts') WHERE name='client_fingerprint')
+                """;
+            using var reader = command.ExecuteReader();
+            reader.Read();
+            long revision = reader.GetInt64(0);
+            long source = reader.GetInt64(1);
+            bool hasFingerprint = reader.GetInt64(2) != 0;
+
+            bool rejectedWrongFingerprintLength;
+            try
+            {
+                using var insert = connection.CreateCommand();
+                insert.CommandText = "INSERT INTO accounts(login_name,pass_hash,pass_salt,client_fingerprint) VALUES('BadFingerprint','h','s',@fingerprint)";
+                insert.Parameters.AddWithValue("@fingerprint", new byte[23]);
+                insert.ExecuteNonQuery();
+                rejectedWrongFingerprintLength = false;
+            }
+            catch (SqliteException)
+            {
+                rejectedWrongFingerprintLength = true;
+            }
+
+            Check("legacy metadata values and migrated raw24 invariant are preserved",
+                revision == 123
+                && source == 2
+                && hasFingerprint
+                && rejectedWrongFingerprintLength);
+        }
+    }
+    finally
+    {
+        if (Directory.Exists(temporaryDirectory))
+        {
+            Directory.Delete(temporaryDirectory, recursive: true);
+        }
+    }
 }
 
 // ---- 2. PaperLz -------------------------------------------------------------

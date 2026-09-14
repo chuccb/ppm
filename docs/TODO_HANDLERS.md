@@ -197,6 +197,25 @@
 >    902/903/905/907/962/963（含 963 的 1B/59B 分支）wire round-trip。詳
 >    PACKETS.md §3.15d3a。
 >
+> 五十七輪（零參數 SQLite bootstrap / account migration）:
+> ① `PaperMan.Server` 將 `db/schema.sql` 與 `db/packets.tsv` 編入 assembly；`Db`
+>    第一次開啟時建立 parent directory、SQLite 檔案、idempotent schema、676 筆
+>    protocol catalog 與只補不存在 key 的 17 項 `server_config` 預設值。這不是
+>    runtime shell-out Python，故 publish 輸出也能自行初始化。
+> ② 不再讀取 database / port / cipher command-line arguments：開發時可靠地定位 repo
+>    `db/paperman.db`，publish 時用 executable 旁 `data/paperman.db`；只有 operator
+>    明確設定 `PAPERMAN_DATABASE_PATH` 才改位置。啟動 banner 顯示解析後路徑與
+>    bootstrap 結果，便於排查錯開資料庫。
+> ③ 帳密新 row 使用 PBKDF2-SHA256（210,000 iterations、per-account random salt）；
+>    遺留 `SHA256(salt + password)` 僅在驗證成功後升級。682 的 raw24 fingerprint
+>    legacy columns 會安全 migration，並在 migration 後以 trigger 保留長度不變量。
+>    `CreateNick` 改為 user、trigger bootstrap、starter character 同一 transaction，
+>    不留下半建好的 identity；unknown opcode 統計以 SQL existence guard 忽略而不破壞
+>    router 的 native-like 靜默行為。
+> ④ SelfTest 新增 temporary-path first/second-open 自動建庫測試；`smoke_test.py`
+>    新增 682 raw24 schema constraint test。仍須在有 .NET 10 SDK 的環境做完整 build
+>    與 SelfTest 實跑（本輪文件不得把未跑結果稱作通過）。
+>
 > 下一輪可做:
 > 1. 取得一組已知正常及一組拒絕的 681→143→144→195→196 實包，定位
 >    `String[24]` 的 writer（仍不能猜為 account/nickname）、681 extension 的兩個

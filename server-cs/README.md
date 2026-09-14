@@ -1,7 +1,8 @@
 # PaperMan 私服 — C# 14 / .NET 10
 
 以 `PaperMan.exe.c` (IDA/Hex-Rays 反編譯) 逐函數重建的伺服端。
-資料層為 **SQLite** (`db/paperman.db`, schema 見 `db/schema.sql`)。
+資料層為 **SQLite**。首次啟動由 server 自動建立 schema、opcode catalog 與預設
+運維設定；開發模式預設檔是 repository 的 `db/paperman.db`。
 
 ```
 server-cs/
@@ -9,7 +10,7 @@ server-cs/
 ├── tools/gen_opcodes.py            # db/packets.tsv → Opcode.cs (勿手改 Opcode.cs)
 └── src/
     ├── PaperMan.Protocol/          # 純協定層 (無 IO 依賴)
-    │   ├── Opcode.cs               # 670 opcodes ← sub_9D2050 註冊表
+    │   ├── Opcode.cs               # 676 opcodes ← sub_9D2050 註冊表
     │   ├── Packet.cs               # 讀寫原語 ← sub_592xxx 家族 (CP949/wstr/blob/內嵌)
     │   ├── LoginWire.cs            # 682/681/693/694 嚴格 wire contract
     │   ├── ChannelBootstrapWire.cs # 142/144/196 + packed calendar contract
@@ -22,14 +23,16 @@ server-cs/
     │   ├── ChannelAdmissionRegistry.cs # 681→143 IP-bound one-use handoff
     │   ├── Session.cs              # 9600B 緩衝框架, 錯包全丟 (sub_555280 行為)
     │   ├── Router.cs               # FrozenDictionary 路由 (≈ sub_58B010 switch)
-    │   ├── Db.cs                   # Microsoft.Data.Sqlite 存取層 (record 模型)
+    │   ├── Db.cs                   # SQLite 存取 + migration + transaction models
+    │   ├── DatabaseBootstrapper.cs # embedded schema.sql/packets.tsv first-run seed
+    │   ├── ServerDataPaths.cs      # zero-argument DB path resolver
     │   ├── Handlers.Auth.cs        # 682→681, ping (694 is Program greeting)
     │   ├── Handlers.Channel.cs     # 143→144→195→196; 141→142 endpoint confirm
     │   ├── Handlers.Lobby.cs       # 105/107/197/199/210/212
     │   ├── Handlers.Shop.cs        # 356/204/695
     │   ├── Handlers.Stats.cs       # GP_CH*C 戰績家族 (18 REQ + 882 推播)
     │   └── Handlers.BattleObjects.cs # OCC 902–907 權威狀態 + 962 安全拒絕
-    └── PaperMan.SelfTest/          # 不需客戶端的 codec 自測
+    └── PaperMan.SelfTest/          # codec / wire / SQLite bootstrap 自測
 ```
 
 ## 建置與執行
@@ -38,20 +41,32 @@ server-cs/
 .NET 10 SDK 的機器上:
 
 ```bash
-cd server-cs
-dotnet build                                   # 只需還原 1 個套件: Microsoft.Data.Sqlite 10.0.12
-                                               #   (CP949 編碼已內建於 .NET 10 shared framework,
-                                               #    無需 System.Text.Encoding.CodePages — 加了反而 NU1510)
-dotnet run --project src/PaperMan.SelfTest     # 先跑自測 (codec + login/channel wire layouts)
-dotnet run --project src/PaperMan.Server -- ../db/paperman.db 40200
+# 在 repository root 執行；沒有 DB 建置命令、路徑或 port 參數。
+dotnet run --project server-cs/src/PaperMan.Server
+# 第一次執行：自動建立 db/paperman.db、所有 schema、676 筆 packet catalog、
+#              預設 server_config。
 # 40200 = 登入伺服器 (握手 694); 40201 = 頻道伺服器 (握手 693, 自動 +1)
+
+# 可選：在有 .NET 10 SDK 的機器先驗證。
+dotnet build server-cs/PaperMan.slnx
+dotnet run --project server-cs/src/PaperMan.SelfTest
 ```
 
 - **AES 金鑰已內建**: 客戶端硬編碼金鑰 = EUC-KR 字串「트렁크점령전머지」
   (`C6AEB7B7 C5A9C1A1 B7C9C0FC B8D3C1F6`), 自反編譯 `sub_403430`
   (Hex-Rays 9.4 重導出直接展開字串來源) 完整還原, 並以獨立 AES 實作
   + FIPS-197 測試向量三重驗證。預設啟用 (`PaperAes.DefaultKey`);
-  第三個參數給 `off`/`plain` = 明文模式, 或 32 位 hex = 自訂金鑰。
+  server 預設啟用；目前 zero-configuration launch 不讀 command-line 覆寫。
+- **零參數、可攜 DB bootstrap**：`schema.sql` 與 `packets.tsv` 是 assembly 的
+  embedded resources。`Db` 會建立父目錄、以 WAL/foreign keys 開啟 SQLite、套用
+  idempotent schema、seed 676 筆 opcode 與未存在的運維預設值；既有玩家與管理者
+  設定不會被覆寫。開發時預設使用 repository `db/paperman.db`；publish 後使用
+  executable 旁的 `data/paperman.db`。只有需要自訂持久化位置時才設定環境變數
+  `PAPERMAN_DATABASE_PATH`，不需要 command-line argument。
+- **帳密與 migration guard**：新帳號使用 PBKDF2-SHA256（210,000 iterations、
+  per-account random 16-byte salt、32-byte derived hash）；有效的舊
+  `SHA256(salt + password)` 登入後立即升級。舊 DB 的 682 欄位會 rename/migrate，
+  並用 trigger 補強 SQLite 無法以 `ALTER TABLE` 補上的 raw24 fingerprint 長度限制。
 - **壓縮門檻**: 預設送 `0x2580` (=9600) 給 `GL_ACCOUNTCONNSUCC(694)` → 客戶端
   永不壓縮，與原版預設一致。native 只有收到 **< `0x2580`** 才覆寫門檻；
   因此 `ServerConfig` / `PacketCodec` 都拒絕大於 `0x2580` 的值，避免 client

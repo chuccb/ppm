@@ -1,6 +1,7 @@
 // =============================================================================
 // 伺服器組態與共享狀態。
 // =============================================================================
+using System.Net;
 using PaperMan.Protocol;
 
 namespace PaperMan.Server;
@@ -163,6 +164,11 @@ public sealed record ServerConfig
     /// <summary>Fails before listeners are opened when a value would overflow a native fixed buffer or wire field.</summary>
     public ServerConfig Validate()
     {
+        if (!IPAddress.TryParse(ListenHost, out _))
+        {
+            throw new ArgumentException("Listen host must be a numeric IPv4 or IPv6 address.", nameof(ListenHost));
+        }
+
         // Need login, channel, and (by default) UDP ports without overflow.
         if (Port is < 1 or > 65533)
         {
@@ -273,16 +279,6 @@ public sealed record ServerConfig
                 LoginBilling));
     }
 
-    public static ServerConfig FromArgs(string[] args) => new()
-    {
-        Port = args.Length > 1 && int.TryParse(args[1], out int p) ? p : 40200,
-        AesKey = (args.Length > 2) switch
-        {
-            true when args[2] is "off" or "plain" => null,
-            true => Convert.FromHexString(args[2]),
-            false => PaperAes.DefaultKey.ToArray(),
-        },
-    };
 }
 
 /// <summary>

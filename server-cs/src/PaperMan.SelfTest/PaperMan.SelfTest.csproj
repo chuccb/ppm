@@ -11,6 +11,8 @@
   <ItemGroup>
     <ProjectReference Include="../PaperMan.Protocol/PaperMan.Protocol.csproj" />
     <ProjectReference Include="../PaperMan.Server/PaperMan.Server.csproj" />
+    <!-- Direct reference lets self-test inspect persisted bootstrap invariants. -->
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.12" />
   </ItemGroup>
 
 </Project>

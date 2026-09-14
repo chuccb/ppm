@@ -12,19 +12,23 @@
 | `docs/LAYOUTS.md` / `docs/LAYOUTS_REQ.md` | 各封包 dispatcher 讀取序 / REQ builder 寫入序 (欄位級對照) |
 | `docs/ARCHITECTURE.md` | 全景架構: 生命週期、資料層、加密、互證鏈 |
 | `docs/TODO_HANDLERS.md` | 尚未實作的 server handler 清單與下一輪建議 |
-| `db/packets.tsv` | 從 `sub_9D2050` 抽出的 **670 個 opcode ↔ 名稱** 對照表 (100–994) |
-| `db/schema.sql` | SQLite schema (STRICT tables, 30 表 + 3 視圖 + 4 觸發器), 每個欄位註明來源封包/函數 |
-| `db/build_db.py` | 建 DB + 匯入 opcode 註冊表 + 預設運維設定 + 自檢 |
+| `db/packets.tsv` | 從 `sub_9D2050` 抽出的 **676 筆 opcode ↔ 名稱** 對照表 (100–994) |
+| `db/schema.sql` | SQLite schema (33 個 STRICT tables、3 views、4 triggers；C# migration 另補 legacy guards), 每個欄位註明來源封包/函數 |
+| `db/build_db.py` | **可選**離線重建／檢查工具；C# server 首次啟動會自行建庫，不必先跑它 |
 | `db/smoke_test.py` | 模擬 登入→建角→購物→背包分頁→開房→結算→好友/訊息/任務/公會 全流程的 DB 讀寫測試 |
-| `db/paperman.db` | 已建好的資料庫 |
+| `db/paperman.db` | 開發模式的預設 SQLite 資料庫（不存在時由 C# server 自動建立） |
 | `server/packet.py` | wire 協議 Packet 參考實作 (Python, 逐函數對應反編譯), 含自測 |
 | `server-cs/` | **C# 14 / .NET 10 伺服器** (協定層 + TCP 伺服器 + SQLite 存取層 + 自測), 見 `server-cs/README.md` |
 
 ## 快速開始
 
 ```bash
-python3 db/build_db.py --fresh   # 重建 DB
-python3 db/smoke_test.py         # 跑全流程測試
+# 只要 .NET 10 SDK；不需要 DB 建置命令或任何啟動參數。
+dotnet run --project server-cs/src/PaperMan.Server
+
+# 下列是可選的離線工具：
+python3 db/build_db.py --fresh   # 明確重建 DB
+python3 db/smoke_test.py         # 跑 DB 全流程測試
 python3 server/packet.py         # Packet 編解碼自測
 python3 db/import_pats.py        # 資源目錄灌 DB (需先以 server/pmfile.py 解密 cfg/*.pat)
 ```
@@ -71,7 +75,7 @@ python3 db/import_pats.py        # 資源目錄灌 DB (需先以 server/pmfile.p
 | 期限白名單 1/7/15/30/60/90 天 | `sub_570B00` | `inventory.period_days CHECK` |
 | 訊息內文 ≤200 字 | `sub_55A630` (buf 201) | `messages.body CHECK` |
 
-`protocol_packets` 表載入了全部 670 個 opcode, 伺服器可直接拿來做
+`protocol_packets` 表載入了全部 676 筆 opcode, 伺服器可直接拿來做
 route table / 日誌 / `packet_stats` 監控。
 
 ## 客戶端資源地圖 (`Extracted/`, 詳見 `docs/RESOURCES.md`)
@@ -118,18 +122,19 @@ route table / 日誌 / `packet_stats` 監控。
 
 依上述逆向成果重建的可運行伺服端 (net10.0, `LangVersion 14`):
 
-- `PaperMan.Protocol` — 純協定層: `Opcode.cs` (670 opcodes, 由
+- `PaperMan.Protocol` — 純協定層: `Opcode.cs` (676 opcodes, 由
   `tools/gen_opcodes.py` 從 `db/packets.tsv` 產生)、`Packet.cs` (讀寫原語)、
   `LoginWire.cs` (682/681/693/694) 與 `ChannelBootstrapWire.cs`
   (142/144/196 + packed calendar) 的具名 wire contract、`PaperLz.cs` /
   `PaperAes.cs` / `PacketCodec.cs` (真實 LZ+AES 管線)。
 - `PaperMan.Server` — TCP 伺服器: 9600B 框架 (`Session.cs`)、SQLite 存取層
-  (`Db.cs`, 交易式購物/登入/暱稱/背包分頁)、login/channel 雙 listener、
+  (`Db.cs` + embedded `DatabaseBootstrapper.cs`: 自動建庫、schema migration、opcode/
+  運維預設資料 seed；交易式購物/登入/暱稱/背包分頁)、login/channel 雙 listener、
   `ChannelAdmissionRegistry` 的 681→143 單次交接，以及封包 handlers
   (681/694、143/144、195/196、大廳、商店、送禮 296/297、戰隊隧道
   583/584、GP_CH*C 戰績 18 REQ/ACK 對 + 882 推播、房間
   111–194/340–367/712–728、語音 791–796、倉庫 855–863)。AES 原生金鑰已內建。
-- `PaperMan.SelfTest` — 不需遊戲客戶端的 codec + login/channel wire layout 自測。
+- `PaperMan.SelfTest` — 不需遊戲客戶端的 codec、login/channel wire layout、SQLite first-run bootstrap、credential upgrade/migration 自測。
 - LZ 演算法另以 Python 逐行移植跑過 310 組 round-trip/fuzz 驗證。
 
 本沙箱無法安裝 .NET SDK (所有鏡像被網路封鎖), 原始碼未經編譯 —
@@ -139,5 +144,7 @@ route table / 日誌 / `packet_stats` 監控。
 
 單行程私服 + WAL 模式 = 每秒數萬寫入輕鬆達標且無網路 round-trip;
 `STRICT` 表 + `CHECK` 約束把逆向得到的值域直接壓進 schema;
-一檔即全部狀態、零運維; `Microsoft.Data.Sqlite` 是 .NET 10 第一方支援。
+一檔即全部狀態、零運維。server 將 schema.sql 與 packets.tsv 編入 assembly，首次
+啟動自動建立父目錄、schema、opcode catalog 與非破壞性的預設運維設定；
+`Microsoft.Data.Sqlite` 是 .NET 10 第一方支援。
 詳細論證見 `server-cs/README.md` 末節。

@@ -18,4 +18,12 @@
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.12" />
   </ItemGroup>
 
+  <!-- Keep first-run initialization self-contained in both dotnet run and
+       published deployments. The server never needs Python or a separately
+       prepared SQLite file merely to start. -->
+  <ItemGroup>
+    <EmbeddedResource Include="../../../db/schema.sql" Link="Database/schema.sql" />
+    <EmbeddedResource Include="../../../db/packets.tsv" Link="Database/packets.tsv" />
+  </ItemGroup>
+
 </Project>

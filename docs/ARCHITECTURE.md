@@ -64,7 +64,7 @@ GG 中繼三模式: slot前綴轉發 / 復活六模式同構 / 聊天過濾
 
 item 21,164 (id=基底+偏移編碼) / quest 844 (cond 雙機制) /
 map 123 (模式bitmask) / weapon_parts 10,648 (8組) /
-parts_ability 413 (31欄彈道) / recommend 3,180 / protocol 670
+parts_ability 413 (31欄彈道) / recommend 3,180 / protocol 676
 
 ## 4. 加密四件套 (全部互逆驗證)
 

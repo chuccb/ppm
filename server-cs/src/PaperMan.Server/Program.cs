@@ -1,26 +1,26 @@
 // =============================================================================
 // PaperMan 私服入口 — C# 14 / .NET 10
-// 用法: dotnet run --project src/PaperMan.Server -- [db路徑] [port] [aes]
-//   aes 參數: 省略 = 客戶端原生金鑰 (EUC-KR「트렁크점령전머지」,
-//   已自反編譯 sub_403430 完整還原並過測試向量);
-//   "off"/"plain" = 明文模式 (自測/代理除錯); 或 32 位 hex 自訂金鑰。
+// Zero-configuration launch:
+//   dotnet run --project server-cs/src/PaperMan.Server
+//
+// No command-line argument or prebuilt SQLite file is required. ServerDataPaths
+// chooses the repository db/paperman.db during development (or data/paperman.db
+// beside a published executable), while Db creates/migrates/seeds it on open.
 // =============================================================================
 using System.Net;
 using System.Net.Sockets;
 using PaperMan.Protocol;
 using PaperMan.Server;
 
-var dbPath = args.Length > 0 ? args[0] : Path.Combine("..", "..", "db", "paperman.db");
-var config = ServerConfig.FromArgs(args).Validate();
-
-using var db = new Db(dbPath);
+var config = new ServerConfig().Validate();
+using var db = new Db(ServerDataPaths.GetDatabasePath());
 var ctx = new ServerContext(db, config);
 var router = Router.Build();
 
 Console.WriteLine(
     $"""
      [paperman] handlers : {router.Count}
-     [paperman] database : {dbPath}
+     [paperman] database : {db.DatabasePath} ({(db.Initialization.CreatedDatabaseFile ? "created" : "ready")}; {db.Initialization.ProtocolPacketDefinitionCount} protocol definitions)
      [paperman] aes      : {(config.AesKey is null ? "OFF (明文模式)" : "ON")}
      [paperman] compress : threshold 0x{config.EffectiveCompressionThreshold:X4}{(config.EffectiveCompressionThreshold >= PacketCodec.NeverCompress ? " (停用)" : "")}
      """);

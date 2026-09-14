@@ -3,24 +3,74 @@
 // 單一寫入者模型 (WAL): 寫入以 Lock 序列化, schema 的 STRICT/CHECK 約束
 // 直接承載逆向得到的值域 (slot 0..5119, period 白名單, 角色槽 0..19...)。
 // =============================================================================
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.Data.Sqlite;
 using PaperMan.Protocol;
 
 namespace PaperMan.Server;
+
+/// <summary>Result of idempotent database initialization at process startup.</summary>
+public readonly record struct DatabaseInitialization(
+    bool CreatedDatabaseFile,
+    int ProtocolPacketDefinitionCount);
 
 public sealed partial class Db : IDisposable
 {
     private readonly SqliteConnection _conn;
     private readonly Lock _gate = new();       // .NET 9+ System.Threading.Lock
 
-    public Db(string path)
+    /// <summary>Absolute on-disk SQLite path used by this server process.</summary>
+    public string DatabasePath { get; }
+
+    /// <summary>Details recorded while opening and initializing this database.</summary>
+    public DatabaseInitialization Initialization { get; }
+
+    /// <summary>
+    /// Opens a SQLite database, creating its parent directory, schema, protocol
+    /// catalog, and default operational settings when they do not yet exist.
+    /// This is intentionally the sole first-run database path; no Python setup
+    /// command or hand-created empty file is required.
+    /// </summary>
+    public Db(string databasePath)
     {
-        _conn = new SqliteConnection($"Data Source={path};Pooling=false");
-        _conn.Open();
-        using var cmd = _conn.CreateCommand();
-        cmd.CommandText = "PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON; PRAGMA synchronous=NORMAL;";
-        cmd.ExecuteNonQuery();
-        MigrateLegacyLoginMetadataColumns();
+        ArgumentException.ThrowIfNullOrWhiteSpace(databasePath);
+
+        DatabasePath = Path.GetFullPath(databasePath);
+        string parentDirectory = Path.GetDirectoryName(DatabasePath)
+            ?? throw new InvalidOperationException("The database path must have a parent directory.");
+        Directory.CreateDirectory(parentDirectory);
+
+        bool databaseFileWasCreated = !File.Exists(DatabasePath);
+        var connectionString = new SqliteConnectionStringBuilder
+        {
+            DataSource = DatabasePath,
+            Mode = SqliteOpenMode.ReadWriteCreate,
+            Pooling = false,
+            ForeignKeys = true,
+        };
+        _conn = new SqliteConnection(connectionString.ConnectionString);
+        try
+        {
+            _conn.Open();
+            ConfigureConnection();
+            int protocolPacketDefinitionCount = DatabaseBootstrapper.EnsureCurrent(_conn);
+            MigrateLegacyLoginMetadataColumns();
+            EnsureCurrentAccountGuards();
+            Initialization = new DatabaseInitialization(databaseFileWasCreated, protocolPacketDefinitionCount);
+        }
+        catch
+        {
+            _conn.Dispose();
+            throw;
+        }
+    }
+
+    private void ConfigureConnection()
+    {
+        using var command = _conn.CreateCommand();
+        command.CommandText = "PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON; PRAGMA synchronous=NORMAL;";
+        command.ExecuteNonQuery();
     }
 
     /// <summary>
@@ -60,11 +110,52 @@ public sealed partial class Db : IDisposable
             migrate.ExecuteNonQuery();
         }
 
-        if (!hasClientFingerprint && (hasClientDataRevision || hasLegacyHardwareKey))
+        if (!hasClientFingerprint)
         {
             using var migrate = Cmd("ALTER TABLE accounts ADD COLUMN client_fingerprint BLOB");
             migrate.ExecuteNonQuery();
         }
+    }
+
+    /// <summary>
+    /// Old SQLite databases cannot acquire a new column CHECK through
+    /// <c>ALTER TABLE ADD COLUMN</c>. These idempotent triggers provide the
+    /// same 24-byte invariant for migrated databases as the fresh schema's
+    /// <c>accounts.client_fingerprint</c> CHECK constraint.
+    /// </summary>
+    private void EnsureCurrentAccountGuards()
+    {
+        using var command = Cmd("""
+            DROP TRIGGER IF EXISTS trg_accounts_touch;
+
+            CREATE TRIGGER trg_accounts_touch
+            AFTER UPDATE OF pass_hash, pass_salt, client_data_revision,
+                            fingerprint_source, client_fingerprint, cash,
+                            is_banned, chat_ban_until ON accounts
+            FOR EACH ROW
+            BEGIN
+                UPDATE accounts SET updated_at = unixepoch() WHERE account_id = NEW.account_id;
+            END;
+
+            CREATE TRIGGER IF NOT EXISTS trg_accounts_fingerprint_insert
+            BEFORE INSERT ON accounts
+            FOR EACH ROW
+            WHEN NEW.client_fingerprint IS NOT NULL
+                 AND length(NEW.client_fingerprint) != 24
+            BEGIN
+                SELECT RAISE(ABORT, 'client_fingerprint must be exactly 24 bytes');
+            END;
+
+            CREATE TRIGGER IF NOT EXISTS trg_accounts_fingerprint_update
+            BEFORE UPDATE OF client_fingerprint ON accounts
+            FOR EACH ROW
+            WHEN NEW.client_fingerprint IS NOT NULL
+                 AND length(NEW.client_fingerprint) != 24
+            BEGIN
+                SELECT RAISE(ABORT, 'client_fingerprint must be exactly 24 bytes');
+            END;
+            """);
+        command.ExecuteNonQuery();
     }
 
     public void Dispose() => _conn.Dispose();
@@ -79,19 +170,35 @@ public sealed partial class Db : IDisposable
     }
 
     // ------------------------------------------------------------- accounts
+    private const string PasswordHashAlgorithm = "PBKDF2-SHA256";
+    private const int PasswordHashIterations = 210_000;
+    private const int PasswordSaltByteCount = 16;
+    private const int PasswordHashByteCount = 32;
+    private const int MinimumAcceptedPasswordIterations = 100_000;
+    private const int MaximumAcceptedPasswordIterations = 1_000_000;
+
     public sealed record LoginResult(
         LoginCode Result, long AccountId = 0, long UserId = 0, string Nickname = "",
         int Cash = 0, long GamePoint = 0, int Level = 1, long Exp = 0);
 
-    /// <summary>GL_LOGIN_REQ(682) 驗證; 密碼 = SHA256(salt + token)。</summary>
+    /// <summary>
+    /// Authenticates GL_LOGIN_REQ(682), records its verified metadata, and
+    /// provisions an otherwise unknown private-server account on its first
+    /// valid login. New credentials use PBKDF2-SHA256; valid legacy SHA-256
+    /// rows are upgraded transparently after successful authentication.
+    /// </summary>
     public LoginResult Login(
-        string account,
-        string tokenOrPass,
+        string accountName,
+        string passwordOrToken,
         uint clientDataRevision,
         LoginFingerprintSource fingerprintSource,
-        byte[] clientFingerprint)
+        byte[] clientFingerprint,
+        string remoteIp)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(accountName);
+        ArgumentNullException.ThrowIfNull(passwordOrToken);
         ArgumentNullException.ThrowIfNull(clientFingerprint);
+        ArgumentException.ThrowIfNullOrWhiteSpace(remoteIp);
         if (clientFingerprint.Length != 24)
         {
             throw new ArgumentException("682 fingerprint must contain exactly 24 bytes.", nameof(clientFingerprint));
@@ -99,84 +206,220 @@ public sealed partial class Db : IDisposable
 
         lock (_gate)
         {
-            using var cmd = Cmd("""
-                SELECT a.account_id, a.pass_hash, a.pass_salt, a.is_banned, a.cash,
-                       u.user_id, u.nickname, u.game_point, u.level, u.exp
-                FROM accounts a LEFT JOIN users u ON u.account_id = a.account_id
-                WHERE a.login_name = @n
-                """, ("@n", account));
-            using var r = cmd.ExecuteReader();
-
-            if (!r.Read())
+            var account = FindAccountForLogin(accountName);
+            if (account is null)
             {
-                r.Close();
-                if (!string.IsNullOrWhiteSpace(account))
-                {
-                    CreateAccount(account, tokenOrPass);
-                    return Login(account, tokenOrPass, clientDataRevision, fingerprintSource, clientFingerprint);
-                }
-                return new(LoginCode.BadCredentials);
+                long accountId = CreateAccountForFirstLogin(
+                    accountName,
+                    passwordOrToken,
+                    clientDataRevision,
+                    fingerprintSource,
+                    clientFingerprint,
+                    remoteIp);
+                return accountId > 0
+                    ? new LoginResult(LoginCode.Ok, AccountId: accountId)
+                    : new LoginResult(LoginCode.BadCredentials);
             }
 
-            if (r.GetInt64(3) != 0)
+            if (account.IsBanned)
             {
-                return new(LoginCode.Banned);
+                return new LoginResult(LoginCode.Banned);
             }
 
-            if (!VerifyPassword(r.GetString(2), tokenOrPass, r.GetString(1)))
+            PasswordVerification verification = VerifyPassword(
+                account.PasswordSalt,
+                passwordOrToken,
+                account.PasswordHash);
+            if (!verification.IsValid)
             {
-                return new(LoginCode.BadCredentials);
+                return new LoginResult(LoginCode.BadCredentials);
             }
 
             var result = new LoginResult(
                 LoginCode.Ok,
-                AccountId: r.GetInt64(0),
-                UserId: r.IsDBNull(5) ? 0 : r.GetInt64(5),
-                Nickname: r.IsDBNull(6) ? "" : r.GetString(6),
-                Cash: r.GetInt32(4),
-                GamePoint: r.IsDBNull(7) ? 0 : r.GetInt64(7),
-                Level: r.IsDBNull(8) ? 1 : r.GetInt32(8),
-                Exp: r.IsDBNull(9) ? 0 : r.GetInt64(9));
-            r.Close();
-
-            using var upd = Cmd(
-                """
-                UPDATE accounts
-                SET client_data_revision=@r,
-                    fingerprint_source=@s,
-                    client_fingerprint=@f,
-                    last_login_at=unixepoch()
-                WHERE account_id=@a
-                """,
-                ("@r", (long)clientDataRevision),
-                ("@s", (byte)fingerprintSource),
-                ("@f", clientFingerprint),
-                ("@a", result.AccountId));
-            upd.ExecuteNonQuery();
+                AccountId: account.AccountId,
+                UserId: account.UserId,
+                Nickname: account.Nickname,
+                Cash: account.Cash,
+                GamePoint: account.GamePoint,
+                Level: account.Level,
+                Exp: account.Exp);
+            UpdateSuccessfulLoginMetadata(
+                result.AccountId,
+                clientDataRevision,
+                fingerprintSource,
+                clientFingerprint,
+                remoteIp,
+                upgradeCredentials: verification.RequiresUpgrade ? CreatePasswordCredentials(passwordOrToken) : null);
             return result;
         }
     }
 
-    private static bool VerifyPassword(string salt, string password, string expectedHash)
+    private AccountForLogin? FindAccountForLogin(string accountName)
     {
-        var hash = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(
-            System.Text.Encoding.UTF8.GetBytes(salt + password)));
-        return hash.Equals(expectedHash, StringComparison.OrdinalIgnoreCase);
+        using var command = Cmd("""
+            SELECT a.account_id, a.pass_hash, a.pass_salt, a.is_banned, a.cash,
+                   u.user_id, u.nickname, u.game_point, u.level, u.exp
+            FROM accounts a LEFT JOIN users u ON u.account_id = a.account_id
+            WHERE a.login_name = @accountName
+            """, ("@accountName", accountName));
+        using var reader = command.ExecuteReader();
+        if (!reader.Read())
+        {
+            return null;
+        }
+
+        return new AccountForLogin(
+            AccountId: reader.GetInt64(0),
+            PasswordHash: reader.GetString(1),
+            PasswordSalt: reader.GetString(2),
+            IsBanned: reader.GetInt64(3) != 0,
+            Cash: reader.GetInt32(4),
+            UserId: reader.IsDBNull(5) ? 0 : reader.GetInt64(5),
+            Nickname: reader.IsDBNull(6) ? string.Empty : reader.GetString(6),
+            GamePoint: reader.IsDBNull(7) ? 0 : reader.GetInt64(7),
+            Level: reader.IsDBNull(8) ? 1 : reader.GetInt32(8),
+            Exp: reader.IsDBNull(9) ? 0 : reader.GetInt64(9));
     }
 
-    public void CreateAccount(string name, string pass)
+    private long CreateAccountForFirstLogin(
+        string accountName,
+        string passwordOrToken,
+        uint clientDataRevision,
+        LoginFingerprintSource fingerprintSource,
+        byte[] clientFingerprint,
+        string remoteIp)
     {
-        lock (_gate)
+        PasswordCredentials credentials = CreatePasswordCredentials(passwordOrToken);
+        using var command = Cmd("""
+            INSERT INTO accounts(
+                login_name, pass_hash, pass_salt, client_data_revision,
+                fingerprint_source, client_fingerprint, last_login_at, last_login_ip)
+            VALUES (
+                @accountName, @passwordHash, @passwordSalt, @dataRevision,
+                @fingerprintSource, @fingerprint, unixepoch(), @remoteIp)
+            ON CONFLICT(login_name) DO NOTHING
+            RETURNING account_id
+            """,
+            ("@accountName", accountName),
+            ("@passwordHash", credentials.Hash),
+            ("@passwordSalt", credentials.Salt),
+            ("@dataRevision", (long)clientDataRevision),
+            ("@fingerprintSource", (int)fingerprintSource),
+            ("@fingerprint", clientFingerprint),
+            ("@remoteIp", remoteIp));
+        return command.ExecuteScalar() is long accountId ? accountId : 0;
+    }
+
+    private void UpdateSuccessfulLoginMetadata(
+        long accountId,
+        uint clientDataRevision,
+        LoginFingerprintSource fingerprintSource,
+        byte[] clientFingerprint,
+        string remoteIp,
+        PasswordCredentials? upgradeCredentials)
+    {
+        using var command = Cmd("""
+            UPDATE accounts
+            SET client_data_revision = @dataRevision,
+                fingerprint_source = @fingerprintSource,
+                client_fingerprint = @fingerprint,
+                last_login_at = unixepoch(),
+                last_login_ip = @remoteIp,
+                pass_hash = COALESCE(@passwordHash, pass_hash),
+                pass_salt = COALESCE(@passwordSalt, pass_salt)
+            WHERE account_id = @accountId
+            """,
+            ("@dataRevision", (long)clientDataRevision),
+            ("@fingerprintSource", (int)fingerprintSource),
+            ("@fingerprint", clientFingerprint),
+            ("@remoteIp", remoteIp),
+            ("@passwordHash", upgradeCredentials?.Hash),
+            ("@passwordSalt", upgradeCredentials?.Salt),
+            ("@accountId", accountId));
+        command.ExecuteNonQuery();
+    }
+
+    private static PasswordCredentials CreatePasswordCredentials(string passwordOrToken)
+    {
+        byte[] salt = RandomNumberGenerator.GetBytes(PasswordSaltByteCount);
+        byte[] hash = Rfc2898DeriveBytes.Pbkdf2(
+            Encoding.UTF8.GetBytes(passwordOrToken),
+            salt,
+            PasswordHashIterations,
+            HashAlgorithmName.SHA256,
+            PasswordHashByteCount);
+        return new PasswordCredentials(
+            Convert.ToBase64String(salt),
+            $"{PasswordHashAlgorithm}${PasswordHashIterations}${Convert.ToBase64String(hash)}");
+    }
+
+    private static PasswordVerification VerifyPassword(
+        string storedSalt,
+        string passwordOrToken,
+        string storedHash)
+    {
+        string[] hashParts = storedHash.Split('$');
+        if (hashParts is [PasswordHashAlgorithm, var iterationsText, var encodedHash]
+            && int.TryParse(iterationsText, out int iterations)
+            && iterations is >= MinimumAcceptedPasswordIterations and <= MaximumAcceptedPasswordIterations)
         {
-            var salt = Guid.NewGuid().ToString("N")[..16];
-            var hash = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(
-                System.Text.Encoding.UTF8.GetBytes(salt + pass)));
-            using var cmd = Cmd(
-                "INSERT OR IGNORE INTO accounts(login_name,pass_hash,pass_salt) VALUES(@n,@h,@s)",
-                ("@n", name), ("@h", hash), ("@s", salt));
-            cmd.ExecuteNonQuery();
+            try
+            {
+                byte[] salt = Convert.FromBase64String(storedSalt);
+                byte[] expectedHash = Convert.FromBase64String(encodedHash);
+                if (salt.Length < PasswordSaltByteCount || expectedHash.Length != PasswordHashByteCount)
+                {
+                    return new PasswordVerification(false, false);
+                }
+
+                byte[] actualHash = Rfc2898DeriveBytes.Pbkdf2(
+                    Encoding.UTF8.GetBytes(passwordOrToken),
+                    salt,
+                    iterations,
+                    HashAlgorithmName.SHA256,
+                    expectedHash.Length);
+                bool isValid = CryptographicOperations.FixedTimeEquals(actualHash, expectedHash);
+                return new PasswordVerification(isValid, isValid && iterations < PasswordHashIterations);
+            }
+            catch (FormatException)
+            {
+                return new PasswordVerification(false, false);
+            }
+        }
+
+        // The original private-server schema stored SHA256(salt + password) as
+        // hexadecimal. Keep it readable only long enough to upgrade a valid
+        // legacy row; all new account inserts use PBKDF2 above.
+        try
+        {
+            byte[] expectedHash = Convert.FromHexString(storedHash);
+            byte[] actualHash = SHA256.HashData(Encoding.UTF8.GetBytes(storedSalt + passwordOrToken));
+            return new PasswordVerification(
+                CryptographicOperations.FixedTimeEquals(actualHash, expectedHash),
+                RequiresUpgrade: true);
+        }
+        catch (FormatException)
+        {
+            return new PasswordVerification(false, false);
         }
     }
+
+    private sealed record AccountForLogin(
+        long AccountId,
+        string PasswordHash,
+        string PasswordSalt,
+        bool IsBanned,
+        int Cash,
+        long UserId,
+        string Nickname,
+        long GamePoint,
+        int Level,
+        long Exp);
+
+    private readonly record struct PasswordCredentials(string Salt, string Hash);
+
+    private readonly record struct PasswordVerification(bool IsValid, bool RequiresUpgrade);
 
     // ------------------------------------------------------------- nickname
     /// <summary>暱稱是否已被使用 (GM_CHECKNICK 210 用; result 碼由 handler 對映)。</summary>
@@ -189,53 +432,73 @@ public sealed partial class Db : IDisposable
         }
     }
 
-    /// <summary>GM_CREATENICK(212): 建 user; 回傳 user_id, 0=失敗。</summary>
-    public long CreateNick(long accountId, string nick)
+    /// <summary>
+    /// Creates the first player identity for GM_CREATENICK(212). The user row,
+    /// trigger-created stats/groups, and starter character commit together so a
+    /// failed starter setup never leaves a half-created account identity.
+    /// </summary>
+    public long CreateNick(long accountId, string nickname)
     {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(accountId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(nickname);
+
         lock (_gate)
         {
+            using var transaction = _conn.BeginTransaction();
             try
             {
-                using var cmd = Cmd(
-                    "INSERT INTO users(account_id,nickname) VALUES(@a,@n) RETURNING user_id",
-                    ("@a", accountId), ("@n", nick));
-                long userId = (long)cmd.ExecuteScalar()!;
+                using var userCommand = Cmd(
+                    "INSERT INTO users(account_id,nickname) VALUES(@accountId,@nickname) RETURNING user_id",
+                    ("@accountId", accountId), ("@nickname", nickname));
+                userCommand.Transaction = transaction;
+                long userId = (long)userCommand.ExecuteScalar()!;
 
-                using var stCmd = Cmd("INSERT OR IGNORE INTO user_stats(user_id) VALUES(@u)", ("@u", userId));
-                stCmd.ExecuteNonQuery();
+                // trg_users_bootstrap provides user_stats and all four weapon
+                // groups. The explicit character remains server policy, so it
+                // belongs in this transaction rather than a post-commit repair.
+                using var characterCommand = Cmd(
+                    "INSERT INTO characters(user_id,slot_no,char_type) VALUES(@userId,0,1)",
+                    ("@userId", userId));
+                characterCommand.Transaction = transaction;
+                characterCommand.ExecuteNonQuery();
 
-                using var charCmd = Cmd("INSERT OR IGNORE INTO characters(user_id,slot_no,char_type) VALUES(@u,0,1)", ("@u", userId));
-                charCmd.ExecuteNonQuery();
-
+                transaction.Commit();
                 return userId;
             }
             catch (SqliteException)
             {
-                return 0;                                   // UNIQUE(nickname) 落敗
+                return 0;                                   // duplicate nickname / invalid account / constraint failure
             }
         }
     }
 
+    /// <summary>
+    /// Records traffic for a registered opcode. Unknown opcodes remain visible
+    /// in the router log but do not violate packet_stats' reference-data foreign
+    /// key or hide an unrelated SQLite failure.
+    /// </summary>
     public void LogPacket(ushort opcode, bool isReceive, int bytes)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(bytes);
+
         lock (_gate)
         {
-            using var cmd = Cmd("""
-                INSERT INTO packet_stats(day,opcode,rx_count,tx_count,rx_bytes,tx_bytes)
-                VALUES(date('now'),@o,@rc,@tc,@rb,@tb)
-                ON CONFLICT(day,opcode) DO UPDATE SET
-                  rx_count=rx_count+@rc, tx_count=tx_count+@tc,
-                  rx_bytes=rx_bytes+@rb, tx_bytes=tx_bytes+@tb
-                """, ("@o", opcode), ("@rc", isReceive ? 1 : 0), ("@tc", isReceive ? 0 : 1),
-                     ("@rb", isReceive ? bytes : 0), ("@tb", isReceive ? 0 : bytes));
-            try
-            {
-                cmd.ExecuteNonQuery();
-            }
-            catch (SqliteException)
-            {
-                // opcode 不在 protocol_packets — 統計表 FK 落敗, 可忽略
-            }
+            using var command = Cmd("""
+                INSERT INTO packet_stats(day, opcode, rx_count, tx_count, rx_bytes, tx_bytes)
+                SELECT date('now'), @opcode, @receiveCount, @transmitCount, @receiveBytes, @transmitBytes
+                WHERE EXISTS (SELECT 1 FROM protocol_packets WHERE opcode = @opcode)
+                ON CONFLICT(day, opcode) DO UPDATE SET
+                    rx_count = rx_count + @receiveCount,
+                    tx_count = tx_count + @transmitCount,
+                    rx_bytes = rx_bytes + @receiveBytes,
+                    tx_bytes = tx_bytes + @transmitBytes
+                """,
+                ("@opcode", (int)opcode),
+                ("@receiveCount", isReceive ? 1 : 0),
+                ("@transmitCount", isReceive ? 0 : 1),
+                ("@receiveBytes", isReceive ? bytes : 0),
+                ("@transmitBytes", isReceive ? 0 : bytes));
+            command.ExecuteNonQuery();
         }
     }
 }

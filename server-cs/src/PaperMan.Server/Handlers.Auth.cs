@@ -47,7 +47,8 @@ public static class AuthHandlers
             request.PasswordOrToken,
             dataRevision,
             request.FingerprintSource,
-            request.Fingerprint);
+            request.Fingerprint,
+            session.RemoteIp);
         Console.WriteLine(
             $"[s{session.Id}] Db.Login: result={login.Result}, userId={login.UserId}, " +
             $"hasNickname={!string.IsNullOrEmpty(login.Nickname)}");

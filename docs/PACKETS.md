@@ -1948,7 +1948,7 @@ dispatcher case 102 → `sub_58D6F0` 立即 `ctor(101)` 回送
 
 ---
 
-## 3.99 廿六輪終極盤點 — 670 opcode 全分類收官
+## 3.99 廿六輪終極盤點 — 676-entry catalog 全分類收官
 ```
 ✔ dispatcher 直讀     300 條 (LAYOUTS.md 自動表)
 ✔ REQ builder         261 條 (LAYOUTS_REQ.md 自動表)

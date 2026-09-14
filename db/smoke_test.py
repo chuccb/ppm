@@ -34,6 +34,15 @@ c.execute("INSERT INTO accounts(login_name,pass_hash,pass_salt) VALUES ('bob','h
 c.execute("INSERT INTO users(account_id,nickname) VALUES (?, 'PaperBob')", (c.lastrowid,))
 uid2 = c.lastrowid
 
+# 682 raw24 fingerprint: fresh databases enforce its exact native size in SQL,
+# rather than relying on only the C# packet reader to preserve this invariant.
+c.execute("UPDATE accounts SET client_fingerprint=? WHERE account_id=?", (bytes(24), aid))
+try:
+    c.execute("UPDATE accounts SET client_fingerprint=? WHERE account_id=?", (bytes(23), aid))
+    raise AssertionError('682 fingerprint 23 bytes should violate its CHECK constraint')
+except sqlite3.IntegrityError:
+    pass
+
 # --- 2. 角色槽 (GM_CREATECHAR 214, ≤20) ---
 step('characters (slot 0..19 bound)')
 c.execute('INSERT INTO characters(user_id,slot_no,char_type) VALUES (?,0,1)', (uid,))

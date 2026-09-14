@@ -38,7 +38,8 @@ CREATE TABLE IF NOT EXISTS protocol_packets (
 CREATE TABLE IF NOT EXISTS accounts (
     account_id     INTEGER PRIMARY KEY,
     login_name     TEXT    NOT NULL UNIQUE COLLATE NOCASE,
-    -- 永不存明文: scrypt/argon2id 由服務層產生
+    -- 永不存明文：C# server 寫入 PBKDF2-SHA256（salt/iterations/hash）；
+    -- 第一次成功登入時可安全升級舊版 SHA256(salt+password) row。
     pass_hash      TEXT    NOT NULL,
     pass_salt      TEXT    NOT NULL,
     client_data_revision INTEGER,           -- 682 u64 高 dword XOR 還原；來源為 datarevision.txt，非硬體 ID
@@ -552,7 +553,8 @@ BEGIN
 END;
 
 CREATE TRIGGER IF NOT EXISTS trg_accounts_touch
-AFTER UPDATE OF pass_hash, cash, is_banned, chat_ban_until ON accounts FOR EACH ROW
+AFTER UPDATE OF pass_hash, pass_salt, client_data_revision, fingerprint_source,
+                client_fingerprint, cash, is_banned, chat_ban_until ON accounts FOR EACH ROW
 BEGIN
     UPDATE accounts SET updated_at = unixepoch() WHERE account_id = NEW.account_id;
 END;
