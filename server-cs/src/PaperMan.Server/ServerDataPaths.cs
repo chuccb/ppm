@@ -24,12 +24,19 @@ public static class ServerDataPaths
             return Path.GetFullPath(configuredPath);
         }
 
-        string? repositoryRoot = FindRepositoryRoot(Directory.GetCurrentDirectory())
-            ?? FindRepositoryRoot(AppContext.BaseDirectory);
-        string dataDirectory = repositoryRoot is not null
-            ? Path.Combine(repositoryRoot, "db")
-            : Path.Combine(AppContext.BaseDirectory, "data");
-        return Path.Combine(dataDirectory, DatabaseFileName);
+        string? repositoryRoot = FindRepositoryRoot(Directory.GetCurrentDirectory());
+        if (repositoryRoot is not null)
+        {
+            return Path.Combine(repositoryRoot, "db", DatabaseFileName);
+        }
+
+        repositoryRoot = FindRepositoryRoot(AppContext.BaseDirectory);
+        if (repositoryRoot is not null)
+        {
+            return Path.Combine(repositoryRoot, "db", DatabaseFileName);
+        }
+
+        return Path.Combine(AppContext.BaseDirectory, "data", DatabaseFileName);
     }
 
     private static string? FindRepositoryRoot(string startingPath)

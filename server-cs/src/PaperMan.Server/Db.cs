@@ -80,24 +80,28 @@ public sealed partial class Db : IDisposable
     /// </summary>
     private void MigrateLegacyLoginMetadataColumns()
     {
-        using var columns = Cmd("PRAGMA table_info(accounts)");
-        using var reader = columns.ExecuteReader();
         bool hasLegacyHardwareKey = false;
         bool hasClientDataRevision = false;
         bool hasLegacySecurityState = false;
         bool hasFingerprintSource = false;
         bool hasClientFingerprint = false;
-        while (reader.Read())
+
+        // Complete the schema read before issuing ALTER TABLE on this same
+        // connection; the scoped using makes that ordering visible.
+        using (var columnQuery = Cmd("PRAGMA table_info(accounts)"))
+        using (var reader = columnQuery.ExecuteReader())
         {
-            string name = reader.GetString(1);
-            hasLegacyHardwareKey |= name.Equals("hw_key", StringComparison.OrdinalIgnoreCase);
-            hasClientDataRevision |= name.Equals("client_data_revision", StringComparison.OrdinalIgnoreCase);
-            hasLegacySecurityState |= name.Equals("security_state", StringComparison.OrdinalIgnoreCase);
-            hasFingerprintSource |= name.Equals("fingerprint_source", StringComparison.OrdinalIgnoreCase);
-            hasClientFingerprint |= name.Equals("client_fingerprint", StringComparison.OrdinalIgnoreCase);
+            while (reader.Read())
+            {
+                string columnName = reader.GetString(1);
+                hasLegacyHardwareKey |= columnName.Equals("hw_key", StringComparison.OrdinalIgnoreCase);
+                hasClientDataRevision |= columnName.Equals("client_data_revision", StringComparison.OrdinalIgnoreCase);
+                hasLegacySecurityState |= columnName.Equals("security_state", StringComparison.OrdinalIgnoreCase);
+                hasFingerprintSource |= columnName.Equals("fingerprint_source", StringComparison.OrdinalIgnoreCase);
+                hasClientFingerprint |= columnName.Equals("client_fingerprint", StringComparison.OrdinalIgnoreCase);
+            }
         }
 
-        reader.Close();
         if (hasLegacyHardwareKey && !hasClientDataRevision)
         {
             using var migrate = Cmd("ALTER TABLE accounts RENAME COLUMN hw_key TO client_data_revision");
@@ -176,6 +180,7 @@ public sealed partial class Db : IDisposable
     private const int PasswordHashByteCount = 32;
     private const int MinimumAcceptedPasswordIterations = 100_000;
     private const int MaximumAcceptedPasswordIterations = 1_000_000;
+    private const int SqliteConstraintErrorCode = 19; // SQLITE_CONSTRAINT primary result code
 
     public sealed record LoginResult(
         LoginCode Result, long AccountId = 0, long UserId = 0, string Nickname = "",
@@ -216,9 +221,14 @@ public sealed partial class Db : IDisposable
                     fingerprintSource,
                     clientFingerprint,
                     remoteIp);
-                return accountId > 0
-                    ? new LoginResult(LoginCode.Ok, AccountId: accountId)
-                    : new LoginResult(LoginCode.BadCredentials);
+                if (accountId == 0)
+                {
+                    // Another process inserted this login name after our lookup.
+                    // Do not retry recursively while holding the database lock.
+                    return new LoginResult(LoginCode.BadCredentials);
+                }
+
+                return new LoginResult(LoginCode.Ok, AccountId: accountId);
             }
 
             if (account.IsBanned)
@@ -360,14 +370,22 @@ public sealed partial class Db : IDisposable
         string storedHash)
     {
         string[] hashParts = storedHash.Split('$');
-        if (hashParts is [PasswordHashAlgorithm, var iterationsText, var encodedHash]
-            && int.TryParse(iterationsText, out int iterations)
-            && iterations is >= MinimumAcceptedPasswordIterations and <= MaximumAcceptedPasswordIterations)
+        int iterations = 0;
+        bool isPbkdf2Hash = hashParts.Length == 3
+            && hashParts[0] == PasswordHashAlgorithm
+            && int.TryParse(hashParts[1], out iterations);
+        if (isPbkdf2Hash)
         {
+            if (iterations < MinimumAcceptedPasswordIterations
+                || iterations > MaximumAcceptedPasswordIterations)
+            {
+                return new PasswordVerification(false, false);
+            }
+
             try
             {
                 byte[] salt = Convert.FromBase64String(storedSalt);
-                byte[] expectedHash = Convert.FromBase64String(encodedHash);
+                byte[] expectedHash = Convert.FromBase64String(hashParts[2]);
                 if (salt.Length < PasswordSaltByteCount || expectedHash.Length != PasswordHashByteCount)
                 {
                     return new PasswordVerification(false, false);
@@ -378,9 +396,10 @@ public sealed partial class Db : IDisposable
                     salt,
                     iterations,
                     HashAlgorithmName.SHA256,
-                    expectedHash.Length);
+                    PasswordHashByteCount);
                 bool isValid = CryptographicOperations.FixedTimeEquals(actualHash, expectedHash);
-                return new PasswordVerification(isValid, isValid && iterations < PasswordHashIterations);
+                bool needsRehash = isValid && iterations < PasswordHashIterations;
+                return new PasswordVerification(isValid, needsRehash);
             }
             catch (FormatException)
             {
@@ -465,9 +484,12 @@ public sealed partial class Db : IDisposable
                 transaction.Commit();
                 return userId;
             }
-            catch (SqliteException)
+            catch (SqliteException exception) when (exception.SqliteErrorCode == SqliteConstraintErrorCode)
             {
-                return 0;                                   // duplicate nickname / invalid account / constraint failure
+                // This is the normal domain failure path: duplicate nickname,
+                // already-created identity, or an invalid account reference.
+                // Other SQLite failures must reach the session error log.
+                return 0;
             }
         }
     }
@@ -481,23 +503,29 @@ public sealed partial class Db : IDisposable
     {
         ArgumentOutOfRangeException.ThrowIfNegative(bytes);
 
+        int receivedPacketCount = isReceive ? 1 : 0;
+        int transmittedPacketCount = isReceive ? 0 : 1;
+        int receivedByteCount = isReceive ? bytes : 0;
+        int transmittedByteCount = isReceive ? 0 : bytes;
+
         lock (_gate)
         {
             using var command = Cmd("""
                 INSERT INTO packet_stats(day, opcode, rx_count, tx_count, rx_bytes, tx_bytes)
-                SELECT date('now'), @opcode, @receiveCount, @transmitCount, @receiveBytes, @transmitBytes
+                SELECT date('now'), @opcode, @receivedPacketCount, @transmittedPacketCount,
+                       @receivedByteCount, @transmittedByteCount
                 WHERE EXISTS (SELECT 1 FROM protocol_packets WHERE opcode = @opcode)
                 ON CONFLICT(day, opcode) DO UPDATE SET
-                    rx_count = rx_count + @receiveCount,
-                    tx_count = tx_count + @transmitCount,
-                    rx_bytes = rx_bytes + @receiveBytes,
-                    tx_bytes = tx_bytes + @transmitBytes
+                    rx_count = rx_count + @receivedPacketCount,
+                    tx_count = tx_count + @transmittedPacketCount,
+                    rx_bytes = rx_bytes + @receivedByteCount,
+                    tx_bytes = tx_bytes + @transmittedByteCount
                 """,
                 ("@opcode", (int)opcode),
-                ("@receiveCount", isReceive ? 1 : 0),
-                ("@transmitCount", isReceive ? 0 : 1),
-                ("@receiveBytes", isReceive ? bytes : 0),
-                ("@transmitBytes", isReceive ? 0 : bytes));
+                ("@receivedPacketCount", receivedPacketCount),
+                ("@transmittedPacketCount", transmittedPacketCount),
+                ("@receivedByteCount", receivedByteCount),
+                ("@transmittedByteCount", transmittedByteCount));
             command.ExecuteNonQuery();
         }
     }

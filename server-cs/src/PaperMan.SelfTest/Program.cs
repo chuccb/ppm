@@ -457,6 +457,8 @@ SqliteConnection OpenExistingSqlite(string databasePath)
                 fingerprintSource: LoginFingerprintSource.Unavailable,
                 clientFingerprint: fingerprint,
                 remoteIp: "127.0.0.1");
+            long createdUserId = secondOpen.CreateNick(newAccount.AccountId, "BootstrapNickname");
+            long duplicateUserId = secondOpen.CreateNick(newAccount.AccountId, "BootstrapNickname");
             Db.LoginResult acceptedPassword = secondOpen.Login(
                 accountName: "BootstrapAccount",
                 passwordOrToken: "fresh-password",
@@ -478,7 +480,9 @@ SqliteConnection OpenExistingSqlite(string databasePath)
                 !secondOpen.Initialization.CreatedDatabaseFile
                 && secondOpen.Initialization.ProtocolPacketDefinitionCount == 676
                 && newAccount is { Result: LoginCode.Ok, AccountId: > 0, UserId: 0 }
-                && acceptedPassword.Result == LoginCode.Ok
+                && createdUserId > 0
+                && duplicateUserId == 0
+                && acceptedPassword is { Result: LoginCode.Ok, UserId: > 0, Nickname: "BootstrapNickname" }
                 && rejectedPassword.Result == LoginCode.BadCredentials);
         }
 

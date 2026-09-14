@@ -183,14 +183,23 @@ internal static class DatabaseBootstrapper
         return reader.ReadToEnd();
     }
 
-    private static string GetPacketDirection(string packetName) => packetName.EndsWith("_REQ", StringComparison.Ordinal)
-        ? "C2S"
-        : packetName.EndsWith("_ACK", StringComparison.Ordinal)
+    private static string GetPacketDirection(string packetName)
+    {
+        if (packetName.EndsWith("_REQ", StringComparison.Ordinal))
+        {
+            return "C2S";
+        }
+
+        if (packetName.EndsWith("_ACK", StringComparison.Ordinal)
             || packetName.EndsWith("_NOTIFY", StringComparison.Ordinal)
             || packetName.EndsWith("_NOTICE", StringComparison.Ordinal)
-            || packetName.EndsWith("_INF", StringComparison.Ordinal)
-                ? "S2C"
-                : "BOTH";
+            || packetName.EndsWith("_INF", StringComparison.Ordinal))
+        {
+            return "S2C";
+        }
+
+        return "BOTH";
+    }
 
     private static string GetSubsystem(string packetName)
     {
