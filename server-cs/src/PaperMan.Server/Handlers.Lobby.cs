@@ -564,8 +564,8 @@ public static class LobbyHandlers
         var ack = new Packet(Opcode.GL_CHANGECHANNEL_ACK)
             .WriteU8(1)                                     // status 1 = 成功
             .WriteU8(ch)                                    // channel_id
-            .WriteStr("127.0.0.1")                          // host ip
-            .WriteS32(10000)                                // host port
+            .WriteStr(context.Config.PublicHost)            // host ip
+            .WriteS32(context.Config.ChannelPort + 1)       // UDP port
             .WriteU8(0);                                    // extra
 
         await session.SendAsync(ack);

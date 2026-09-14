@@ -272,6 +272,31 @@ foreach (var (_, codec) in codecs)
 
 // ---- 8. 系統 / 角色 / 商城 / 任務 / 投票新封包 wire 格式 round-trip ---------
 {
+    // 143/144 PM_UDPSTART (status 1 = OK)
+    var p144 = new Packet(Opcode.PM_UDPSTART_ACK)
+        .WriteU8(1)
+        .WriteU8(0)
+        .WriteS32(42)
+        .WriteStr("Channel 1")
+        .WriteS32(0).WriteS32(0).WriteS32(0)
+        .WriteF32(0f)
+        .WriteS32(0)
+        .WriteU8(0);
+    Check("144 PM_UDPSTART_ACK status == 1", p144.ReadU8() == 1 && p144.ReadU8() == 0 && p144.ReadS32() == 42 && p144.ReadStr() == "Channel 1");
+
+    // 195/196 GC_ENTERCHANNEL (result 1 = OK)
+    var p196 = new Packet(Opcode.GC_ENTERCHANNEL_ACK)
+        .WriteU8(1)
+        .WriteS32(1)
+        .WriteU8(0)
+        .WriteStr("127.0.0.1")
+        .WriteS32(40202)
+        .WriteU8(0)
+        .WriteU8(0)
+        .WriteS32(0)
+        .WriteU8(5);
+    Check("196 GC_ENTERCHANNEL_ACK result == 1", p196.ReadU8() == 1 && p196.ReadS32() == 1 && p196.ReadU8() == 0 && p196.ReadStr() == "127.0.0.1" && p196.ReadS32() == 40202);
+
     // 685/686 Tutorial
     var p686 = new Packet(Opcode.GL_TUTORIALINDEX_ACK).WriteS32(5);
     Check("686 Tutorial ACK size == 4", p686.Length == 4 && p686.ReadS32() == 5);

@@ -182,7 +182,7 @@ public static class MasterHandlers
             {
                 ack.WriteU8(slot)
                    .WriteStr(member.Nickname)
-                   .WriteStr("127.0.0.1");
+                   .WriteStr(member.RemoteIp);
             }
         }
 

@@ -15,6 +15,7 @@ public sealed class Session(TcpClient client, PacketCodec codec, long id) : IDis
 {
     public long Id { get; } = id;
     public string Remote { get; } = client.Client.RemoteEndPoint?.ToString() ?? "?";
+    public string RemoteIp => (client.Client.RemoteEndPoint as System.Net.IPEndPoint)?.Address.ToString() ?? "127.0.0.1";
 
     // 登入後綁定
     public long AccountId { get; set; }
