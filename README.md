@@ -84,7 +84,7 @@ route table / 日誌 / `packet_stats` 監控。
 | `ui/lang/msgtableres.lang` | **全 client 唯一訊息表** (CP932, entry i=第 i+3 行) — ACK error code、預設房名(309..325)、895/112 status 的權威文字來源 |
 | `ui/roommake.xml` / `gameroom.xml` | 建房/房內 UI 控制項 → 房設定簇 (121/122、167–178、340/341、364/365、712/713、990/991) 語意 |
 | `ui/system/map_StartIndex.xml` | mode → 預設 map_id (0→106、1→104、2→14、3→107、4→23、8→51、9→89、12→98; ⚠ soccer 預設 98 實為 TeamSurvival 圖, 真正 soccer 圖是 99/100) |
-| `ui/system/voice_customize_contents.xml` / `voice_customize_path.xml` | **語音自訂 791–796 資料源**: 15 角色 × 92 情境 × 27 句 (command/tactics/infomation × 9) + 語音檔路徑 `sound\soundsNN\<角色>` |
+| `ui/system/voice_customize_contents.xml` / `voice_customize_path.xml` | **語音自訂 791–796 資料源**: 15 角色 × 92 情境 (缺 87) × 27 句 (command/tactics/infomation × 9) + 語音檔路徑 `sound\soundsNN\<codename>` |
 | `ui/slanderfilter/filterword.txt` + `exceptionword.txt` | 聊天/暱稱過濾詞 (GM/GS 變體 + 髒話) |
 | `ui/system/Total_Package_Index.xml` / `SpecialWeaponType.xml` / `map_BGMSoundNames.xml` | 套裝索引 / 特殊武器型態 / 地圖 BGM |
 | `ui/{bot,game,lobby,loadscreen}/` + `ui/sounds/` | DDS/TGA 圖集與音效 — 檔名可佐證各模式 UI (見下) |
