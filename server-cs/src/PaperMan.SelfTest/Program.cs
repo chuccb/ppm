@@ -115,7 +115,7 @@ int GetAvailableIpv4UdpPort()
 // ---- 1b. Login / channel bootstrap wire contract ---------------------------
 {
     const uint revision = 0x1234ABCD;
-    ulong obfuscatedDataRevision = ((ulong)(revision ^ 0xB1A9D7C7u) << 32) | 0x0000000Eu;
+    ulong obfuscatedDataRevision = ((ulong)(revision ^ 0xB1A9D7C7u) << 32) | 0xF1E1AB0Eu;
     var loginRequestPacket = new Packet(Opcode.GL_LOGIN_REQ)
         .WriteStr("Alpha9@")
         .WriteStr("not-logged")
@@ -129,6 +129,10 @@ int GetAvailableIpv4UdpPort()
         && loginRequest.Fingerprint.Length == 24);
     Check("682 data revision decode", LoginWire.TryDecodeDataRevision(loginRequest.ObfuscatedDataRevision, out uint decodedDataRevision)
         && decodedDataRevision == revision);
+    Check("682 captured client revision decode", LoginWire.TryDecodeDataRevision(
+        0x81FEBE90F1E1AB0EUL,
+        out uint capturedDataRevision)
+        && capturedDataRevision == 0x30576957u);
     Check("682 revision low-word guard", !LoginWire.TryDecodeDataRevision(obfuscatedDataRevision ^ 1, out _));
 
     var groups = new LoginChannelEntry?[]

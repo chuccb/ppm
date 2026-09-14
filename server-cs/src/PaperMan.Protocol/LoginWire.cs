@@ -64,17 +64,24 @@ public static class LoginWire
         return new LoginRequest(accountName, passwordOrToken, obfuscatedDataRevision, fingerprintSource, fingerprint);
     }
 
+    // sub_43DF00 writes this as the first dword passed to sub_592AE0. Although
+    // the decompiler displays that helper's first value as a char, sub_592AE0
+    // copies eight contiguous bytes from its stack address. A native 682 frame
+    // confirms this complete dword, not merely its low byte (0x0E).
+    private const uint DataRevisionGuard = 0xF1E1AB0Eu;
+    private const uint DataRevisionMask = 0xB1A9D7C7u;
+
     /// <summary>
-    /// Decodes the u64 emitted by sub_43DF00. The low dword is fixed to
-    /// <c>0x0000000E</c>; the high dword is the value loaded from
+    /// Decodes the u64 emitted by sub_43DF00. The low dword is the fixed
+    /// <c>0xF1E1AB0E</c> guard; the high dword is the value loaded from
     /// <c>datarevision.txt</c>, XORed with <c>0xB1A9D7C7</c>. It is a client
     /// content revision guard, not a hardware identifier; the hardware-related
     /// client material is the separate raw 24-byte fingerprint.
     /// </summary>
     public static bool TryDecodeDataRevision(ulong obfuscatedDataRevision, out uint dataRevision)
     {
-        dataRevision = (uint)(obfuscatedDataRevision >> 32) ^ 0xB1A9D7C7u;
-        return (uint)obfuscatedDataRevision == 0x0000000Eu;
+        dataRevision = (uint)(obfuscatedDataRevision >> 32) ^ DataRevisionMask;
+        return (uint)obfuscatedDataRevision == DataRevisionGuard;
     }
 
     /// <summary>

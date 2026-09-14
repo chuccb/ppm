@@ -104,7 +104,7 @@ dotnet run --project server-cs/src/PaperMan.SelfTest
   無 endpoint tail 的拒絕 196。
 - **682 的真實欄位**：`str account, str password_or_token, u64 packed_data_revision,
   u8 fingerprint_source, raw[24] fingerprint`。u64 的高 32 bits 是
-  `datarevision.txt ^ 0xB1A9D7C7`，低 32 bits 必為 `0x0000000E`；它不是硬體
+  `datarevision.txt ^ 0xB1A9D7C7`，低 32 bits 必為 `0xF1E1AB0E`；它不是硬體
   key。`fingerprint_source` 是 2=storage serial、1=fallback adapter MAC、0=none。
   伺服器嚴格要求 NUL、完整 raw24、無 trailing data，保存 source/raw24/revision，
   且不記錄密碼或 fingerprint bytes。

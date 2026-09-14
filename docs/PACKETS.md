@@ -220,9 +220,9 @@ wire contract in `PaperMan.Protocol/LoginWire.cs`, including a self-test that
 mimics the native read order. `GL_LOGIN_REQ(682)` is structurally exact:
 `str account, str password_or_token, u64 packed_data_revision, u8 fingerprint_source,
 raw[24]`; no optional/trailing bytes are accepted. The client builder emits a
-low fixed dword of `0x0000000E` and high dword
-`dataRevision ^ 0xB1A9D7C7`; it is decoded only when that guard matches. The
-revision comes from `datarevision.txt`; raw[24] is the separate
+low fixed dword of `0xF1E1AB0E` and high dword
+`dataRevision ^ 0xB1A9D7C7`; it is decoded only when that complete guard
+matches. The revision comes from `datarevision.txt`; raw[24] is the separate
 security/device fingerprint material.
 
 The native client makes a **new** channel TCP connection after 681. Its 143
@@ -537,13 +537,17 @@ byte[24] fingerprint          source=2: hard-drive serial bytes，超過 23 byte
                               GetAdaptersInfo 第一個 adapter MAC，餘位為零；
                               source=0: 全零
 ```
-**2026-09 native primitive re-check.** `sub_43CBA0`/`sub_43CCF0` loads
+**2026-09-15 native primitive re-check.** `sub_43CBA0`/`sub_43CCF0` loads
 `datarevision.txt` into `this+396`; `sub_43DF00` writes
-`sub_592AE0(pkt, (revision<<32 | 0xAA)^0xA4,
-revision^0xB1A9D7C7)`. Since `sub_592AE0` copies exactly eight contiguous
-little-endian bytes from its two stack words, **lo32(wire)=0x0000000E** and
-**hi32(wire)=revision^0xB1A9D7C7**. The server restores
-`revision=hi32^0xB1A9D7C7` and validates the low-word guard.
+`0xF1E1AB0E` into the first dword and `revision^0xB1A9D7C7` into the
+second before calling `sub_592AE0`. Although the decompiler types the helper's
+first argument as `char`, `sub_592AE0` copies eight contiguous bytes from that
+stack address. A native 682 frame independently confirms the complete layout:
+**lo32(wire)=0xF1E1AB0E** and **hi32(wire)=revision^0xB1A9D7C7**. For the
+bundled `datarevision.txt` value `811034967` (`0x30576957`), the exact wire
+value is `0x81FEBE90F1E1AB0E` (little-endian bytes
+`0E AB E1 F1 90 BE FE 81`). The server restores
+`revision=hi32^0xB1A9D7C7` and validates the complete low-dword guard.
 
 Fingerprint source comes directly from the builder: `sub_9A8790` first tries
 its storage-identification list and copies at most 23 bytes into the zeroed
