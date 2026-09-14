@@ -273,10 +273,10 @@ public static class JoinHandlers
                 ack.WriteS32(skill);
             }
 
-            ack.WriteU8(5);
-            foreach (var quick in data.Slots.Quick)
+            ack.WriteU8(5); // unresolved n5: retain existing raw convention
+            foreach (var puzzleItemId in data.Slots.NewSkillPuzzleIds)
             {
-                ack.WriteS32(quick);
+                ack.WriteS32(puzzleItemId);
             }
 
             RoomHandlers.WriteVoiceBlock(ack, data.Voice);       // sub_885D00 語音塊 (85B)
@@ -369,10 +369,10 @@ public static class JoinHandlers
                     ack.WriteS32(skill);
                 }
 
-                ack.WriteU8(5);
-                foreach (var quick in data.Slots.Quick)
+                ack.WriteU8(5); // unresolved n5: retain existing raw convention
+                foreach (var puzzleItemId in data.Slots.NewSkillPuzzleIds)
                 {
-                    ack.WriteS32(quick);
+                    ack.WriteS32(puzzleItemId);
                 }
 
                 RoomHandlers.WriteVoiceBlock(ack, data.Voice);   // sub_885D00 語音塊 (85B)

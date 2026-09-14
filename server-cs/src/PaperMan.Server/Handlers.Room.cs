@@ -903,7 +903,7 @@ public static class RoomHandlers
     //   2=完整房間狀態 (給進房者, 房物件欄位 + count×成員條目)。
     //   成員條目 = s32 uid, u8 slot, str nick, s32 exp(level 由 client 查表),
     //   u8 char_type, + 負載 (sub_524360 char, custom_tex/crc/tex,
-    //   武器組×4, extra_flag, sub_527550 技能, sub_527D00 快速槽,
+    //   武器組×4, extra_flag, sub_527550 9 UI-item, sub_527D00 selected NewSkill puzzles,
     //   sub_885D00 語音自訂 85B 塊);
     //   sub_type==2 的條目另含 crown/status/observer 三枚 u8。
     private static async ValueTask EnterRoom(Session session, Packet packet, ServerContext context)
@@ -996,7 +996,7 @@ public static class RoomHandlers
     /// (custom_tex/crc/tex, server 不追蹤 → 0/空) + 武器組×4 (固定四組,
     /// 組號即順位 — 異於 198 sub_524660 的 count+kind 版) +
     /// extra_flag(0 → 無 8×s32 尾塊) + sub_527550 技能 9×s32 +
-    /// sub_527D00 快速槽 u8+7×s32 + sub_885D00 語音自訂 85B 塊
+    /// sub_527D00 raw n5 + 已選 NewSkill profile 7×s32 puzzle IDs + sub_885D00 語音自訂 85B 塊
     /// (s16 base1, s16 base2, 27×{s16 item, u8 flag})。首欄為「角色槽」(CurrentChar) 而非房槽。
     /// </summary>
     internal static void WriteMemberLoadout(
@@ -1039,10 +1039,10 @@ public static class RoomHandlers
             ack.WriteS32(skill);
         }
 
-        ack.WriteU8(5);                                     // n5 預設 5
-        foreach (var quick in slots.Quick)                  // sub_527D00: 7×s32
+        ack.WriteU8(5);                                     // unresolved n5: retain existing raw convention
+        foreach (var puzzleItemId in slots.NewSkillPuzzleIds) // sub_527D00: selected profile 7×s32
         {
-            ack.WriteS32(quick);
+            ack.WriteS32(puzzleItemId);
         }
 
         WriteVoiceBlock(ack, voice);                        // sub_885D00 語音塊 (85B, 逐函數定案)

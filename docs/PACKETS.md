@@ -596,10 +596,12 @@ bool    success                 0 時直接顯示 resource 0x70 / code 17
       9 個槽位依序為: [0] Crosshair (準心), [1] NAME (名牌), [2] MASTER (大師稱號),
       [3] ABILITY (主能力), [4] BOOST_EXP (經驗加成), [5] BOOST_PG (PG加成),
       [6] EXTRA_ABILITY (額外能力1), [7] EXTRA_ABILITY (額外能力2), [8] VOICE (語音自訂)!
-  --- sub_527D00: u8 n5 (+144452) + raw 28B = 7×s32 (sub_527AF0);
-      非零 id 同樣驗證, 失敗 → client 錯誤 9
+  --- sub_527D00: raw u8 n5 (+144452) + 已選 NewSkill profile 的 raw 28B
+      = 7×s32 (sub_527AF0); 非零 id 同樣驗證, 失敗 → client 錯誤 9。
       ⭐ 驗證段 11,010,001..11,070,000 = **ヘアパズル段** (1,273 條,
-      kind 13) → 7 個「髮型拼圖槽」; n5 = 已解鎖拼圖數?
+      kind 13) → 七個 NewSkill puzzle ordinals；這是 255 五-profile snapshot
+      中 selected record 的鏡像，**不是快速槽**。n5 的原服語意仍 **UNRESOLVED**
+      （現有 server 保留既有 raw value 5 convention）。
   --- sub_570550 尾段 (五輪補完, 先前部分遺漏):
   u16     → i_23 (禮物盒 pending 數; F0C100 — 299 寫入禮物盒,
             301 收下/刪除時遞減 sub_57AFE0; 大廳禮物通知徽章)
@@ -646,7 +648,7 @@ CClientData 的 sub_523A50 (523BF0+524010+524660+524B70(a3=0)) 其實屬於
   slot-id ↔ sorted-wire-index conversion，不能猜測兩者仍相等。
 
 `PaperMan.SelfTest` 的 198 reader test 會完整消費 basic/stat、四個 weapon
-records、skill/quick/tail，並斷言 selected index `0`、char count `1`、type `1`、
+records、9 UI-item / selected-NewSkill-puzzle / tail，並斷言 selected index `0`、char count `1`、type `1`、
 第一個 body `u16=1` 和其餘十一個 `u16=0`；另含 fresh identity、legacy
 bodyless-row repair、nonzero body preservation、GM/purchase type validation coverage。
 
@@ -870,12 +872,21 @@ kind 0/1/14 與 12/13/17 (可覆寫類) 走覆寫路徑, 其他 kind 重複購�
   (part,gun) 呼叫 sub_95A800 紅黑樹移除 = 改裝件到期拆除
 【250→251 LobbyIn】REQ 空 ×2 builder (sub_574080 帶 state:=2 /
   sub_584FE0 純送); 251 死協定 (無 case) — server 不回 ✓
-【254→255 InvenIn】REQ u8 = 倉庫頁籤 (呼叫端 v212=倉庫物件+4);
-  builder 帶 state:=7 (倉庫場景)。255 (sub_574270):
-  u8 mode(0/1) + mode==1:{s32 uid, u8 slot, u8} /
-  mode==0:{u8, u8 slot, s32 uid} (讀序相反!) — slot 經 sub_67D870
-  映射大廳走位; uid==自己(EE8CB4) 再讀 u8 n5(<5) + raw 160B
-  = 5×32B 倉庫頁狀態塊
+【254→255 InvenIn】REQ 精確為一個 `u8 requestContextRaw` (sub_5741C0;
+  呼叫端從目前 UI/entity 物件 `+4` 取得，**語意 UNRESOLVED**，不得再稱倉庫頁籤)，
+  builder 帶 state:=7。255 (sub_574270) 的 **Fact / HIGH** wire branches:
+  `u8 mode(0/1), s32 uid, u8 contextRaw, u8 unknownHeaderRaw`; 僅 mode==0
+  另讀 `{u8,u8,s32}` 並以其中 slot 作 `sub_67D870` remote-user lookup。
+  若前述 uid==本機 `EE8CB4`，再嚴格讀 `u8 selectedProfile(<5)` + 160 raw bytes
+  (=5×32B)。`sub_4BDD80→sub_4AAB80` 將其載入 **五個 NewSkill profile**，絕非
+  倉庫頁狀態：每 record 是 `7×s32 puzzle IDs + s32 packed-minute expiry`。
+  profile 0 的尾字被 UI 強制忽略；1..4 的尾字經 `sub_48B9A0→sub_5309C0` 解析為
+  YYYY(2000+top byte)/month/day/hour/minute，剩餘整分鐘不正時不可用。**Fact / HIGH:**
+  native local-time conversion uses `_mktime64`, so bit-field values such as
+  month 0/31, day 0/63, hour 63, minute 127 are normalized rather than a separate
+  malformed-date wire error; raw zero is simply an already-expired profile 1..4.
+  **Inference / MEDIUM:** 466 沒有角色索引且 snapshot 以 uid 定址，故 profiles
+  應為 user/account-level，而非 198/247 的 character 12-slot 外觀。
 【783→784 NewMsgCount】REQ 空 (sub_5643E0); 784 (sub_564480):
   s32 count → dword_F0C104 → UI vtbl+72(count!=0) 信箱紅點
 【791→792 VoiceItemSlot】REQ 空 (sub_885590; 無 debug 字串 — 類名
@@ -1238,7 +1249,7 @@ festival: 681 的 3 頻道組 ↔ 195 的 group 序號互證; 頻道類型 n2==3
   (角色外觀) + `s32, s32, s32 custom_tex, str(64)` + 4×武器組
   {s16 equipped, kk!=3 → s16×2... , equipped→8×s32 parts} +
   `u8 extra_flag` + (extra_flag≠0 時 8×s32) + sub_527550 技能 (9×s32) +
-  sub_527D00 快速槽 (u8+7×s32) + **sub_885D00 語音自訂 85B 尾塊**
+  sub_527D00 已選 NewSkill puzzles (raw n5+7×s32) + **sub_885D00 語音自訂 85B 尾塊**
   (`s16 base1, s16 base2, 27×{s16 item, u8 flag}`) — 對應 268 REQ flag==0 (PLAY)
 - 7 (fall-through 主體): **觀戰加入 (完整房間+全成員快照)** — 對應
   268 REQ flag==1 (OBSERVE):
@@ -1253,7 +1264,7 @@ festival: 681 的 3 頻道組 ↔ 195 的 group 序號互證; 頻道類型 n2==3
   `s32×2, s32 tex_crc, str(64) tex_name`, 4×武器組 (kk!=3 帶 sub-slot, equipped→8×s32 parts),
   `u8 extra_flag` (+8×s32 若≠0), [模式特定: rule 12 足球 u8 / rule 13 占領 s32],
   `u8 active_weapon_flag` (+武器件組 若≠0), sub_527550 技能 (9×s32),
-  sub_527D00 快速槽 (u8+7×s32), **sub_885D00 語音自訂 85B 尾塊**
+  sub_527D00 已選 NewSkill puzzles (raw n5+7×s32), **sub_885D00 語音自訂 85B 尾塊**
   (`s16 base1, s16 base2, 27×{s16 item, u8 flag}`), 5×u8 局內旗標。
   尾部: 7×u8 局狀態 + s32(n0x3E8) + u8 + {u8, s32, s16×2, u8} + 16×s32 比分/戰績。
 私服要點: 快照結構 = 114 (ENTERROOM sub_type==2) 的戰時擴充版; 兩者成員
@@ -1749,8 +1760,8 @@ u8+slot 系列)
 | 221 | `GI_CHANGEWP_ACK` | `sub_5735F0` | S2C | `u8 count(4), 4×weapon_group` |
 | 312 | `GI_CHANGESLOT_REQ` | `sub_523FB0` | C2S | `u8 slot_no` |
 | 313 | `GI_CHANGESLOT_ACK` | `sub_573320` | S2C | `u8 slot_no` |
-| 466 | `GI_CHANGE_SKILLITEMSLOT_REQ` | `sub_5273C0` | C2S | `u8 char_slot, u8 slot_idx, s32 item_id` |
-| 467 | `GI_CHANGE_SKILLITEMSLOT_ACK` | `sub_573A70` | S2C | `u8 err(0), u8 char_slot, u8 count(1), u8 slot_idx, raw32 skill` |
+| 466 | `GI_CHANGE_SKILLITEMSLOT_REQ` | `sub_5738A0` | C2S | `u8 target_profile, u8 previous_update_raw, [u8 previous_profile, 7×s32 puzzle]`; raw 0→2B, nonzero→31B |
+| 467 | `GI_CHANGE_SKILLITEMSLOT_ACK` | `sub_573A70` | S2C | `u8 resultRaw, u8 unknownHeaderRaw, u8 count, count×{u8 profile, raw32}` |
 | 912 | `GL_WEAPONPARTS_EQUIP_CHANGE_REQ`| `sub_9591F0` | C2S | `u8 op_type, s32 weapon_id, s32 part_id, [s32 old_part]` |
 | 913 | `GL_WEAPONPARTS_EQUIP_CHANGE_ACK`| `sub_95B180` | S2C | `u8 err(0), u8 op_type, s32 weapon_id, s32 part_id, [s32 old_part]` |
 | 310 | `GS_BUYCHAR_REQ` | `sub_529680` | C2S | `s32 char_type, 5×s32 items` |
@@ -2129,7 +2140,7 @@ dispatcher case 102 → `sub_58D6F0` 立即 `ctor(101)` 回送
   s32 custom_tex, s32 tex_crc, str tex_name, 武器組×4 (固定四組:
   u16 equipped, [3×u16 sub 若組≠3], [8×s32 parts 若 equipped≠0]),
   u8 extra_flag([8×s32] 若≠0), 9×s32 技能 (sub_527550),
-  u8 n5 + 7×s32 快速槽 (sub_527D00), sub_885D00 語音塊 (85B:
+  raw u8 n5 + selected NewSkill profile 7×s32 puzzle IDs (sub_527D00), sub_885D00 語音塊 (85B:
   s16 base1, s16 base2, 27×{s16 item, u8 flag})`;
   ==3: 同 ==1 的單人更新 (以 slot 定址)
 - **110 GL_ROOMINFOCHANGE_ACK** (sub_569240): `bool ok, u8 sub_type` +
@@ -2146,6 +2157,42 @@ dispatcher case 102 → `sub_58D6F0` 立即 `ctor(101)` 回送
   差異偵測 sub_525680)
 - **221 GI_CHANGEWP_ACK** (sub_5735F0): `u8 result` + 特殊模式 10 時
   的 slot 更新通知
+- **466 GI_CHANGE_SKILLITEMSLOT_REQ** (sub_5738A0) — **Fact / HIGH:**
+  exact body is either 2 bytes `{u8 targetProfile, u8 previousProfileUpdateRaw=0}`
+  or 31 bytes `{u8 targetProfile, u8 previousProfileUpdateRaw!=0,
+  u8 previousProfile, 7×s32 previousProfilePuzzleIds}`. The raw byte is a branch
+  condition, not a Boolean constrained to 0/1; an emulator must retain/accept
+  every nonzero value with the 31-byte form. `sub_4AADE0` copies
+  the currently active 32-byte profile to the profile being left, copies the
+  target profile into `CClientData+144420`, and calls this sender. Both profile
+  indices are bounded `0..4`; neither is a character slot or a 9-slot ordinal.
+- **467 GI_CHANGE_SKILLITEMSLOT_ACK** (sub_573A70) — **Fact / HIGH:**
+  `{u8 resultRaw, u8 unknownHeaderRaw, u8 recordCount,
+  recordCount×{u8 profileIndex, raw32}}`. For each record, the client reads all
+  32 bytes but writes only its final `s32` to that profile's expiry metadata.
+  It does not branch on the first two bytes in this receiver. **UNRESOLVED:**
+  original-server meanings/error values of those two header bytes and the
+  authoritative operation that grants/extends profile 1..4 expiry. Server code
+  therefore returns an actual persisted record on accepted writes; it must not
+  emit the former fake all-zero raw32 success response.
+- **NewSkill validity boundary — Fact / HIGH:** `sub_527AF0` accepts only zero
+  or a catalog entry in `11010001..11070000`; `sub_4AC8F0` partitions the seven
+  ordinals as hair `11010001..11020000`, jacket `11020001..11030000`, pants
+  `11030001..11040000`, shoes `11040001..11050000`, set `11050001..11060000`,
+  accessory1/2 `11060001..11070000`. The resource text at message 900 says the
+  same nonzero accessory puzzle cannot occupy both accessory positions.
+- **Server validation policy — Inference / MEDIUM (not an original-server
+  control-flow fact):** 466 accepts a profile only when its conditional previous
+  record belongs to the active profile, all nonzero IDs fit the native ordinal
+  family, distinct submitted IDs are owned and unexpired, and a target profile
+  1..4 has a positive native packed-minute remainder. Invalid requests cause no
+  state mutation and no invented 467 success. The direct localization evidence
+  proves the duplicate-accessory *rule text*, not the exact native branch.
+- **Persistence migration — implementation / HIGH:** fresh-user bootstrap creates
+  selected profile 0 plus five zero raw32 records. For a pre-profile database,
+  the first profile read atomically creates the five records and imports legacy
+  `skill_slots(slot_kind=1,idx=0..6)` into profile 0 only if profile 0 was absent;
+  later reads and 466 never overwrite expiry or re-import that legacy source.
 
 ---
 
@@ -2200,8 +2247,8 @@ byte 偏移 (this 為物件基址):
 +36095 區   9×s32 稱號槽 (sub_527550)
 +144201 u8  武器編組數; +144204 4×44B 編組
        {u8 no, u16 equipped, 3×u16 sub, 8×u32 parts}
-+144420 28B 快速槽 7×s32 ヘアパズル (sub_527D00)
-+144452 u8  n5 拼圖參數
++144420 28B 已選 NewSkill profile 的 7×s32 ヘアパズル (sub_527D00)
++144452 u8  raw n5（語意 UNRESOLVED）
 ```
 封包處理層全圖 (五層): ① dispatcher sub_58B010 (306 case)
 ② 場景 vtable sub_407360→CLobbyShop 等 ③ 登入層 0x43E651
@@ -2214,7 +2261,7 @@ byte 偏移 (this 為物件基址):
 2. **角色槽最多 20** (sub_524010 迴圈上限 20) → `characters.slot_no 0..19`，
    每角色 12 個裝備 u16 欄位。
 3. **武器編組固定 4 組** (sub_524660 上限 4)，每組 1 個 flag + 3 個副欄 + 8 個 parts。
-4. **技能/快速槽 7 格** (sub_527AF0 讀 0x1C=7*4)。
+4. **9-slot UI-item block** (sub_522480) 與 **NewSkill 5×7 profile**（selected record 由 sub_527AF0 讀 0x1C=7*4）分離儲存；466 操作後者。
 5. **戰績 19 個計數器** (GP_CH*C 家族)。
 6. **道具屬性**: item_id(s32), 兩個 float(耐久/強化), period(天), kind(u8), durability(u16)。
 7. **房間**: no(≤210), title, map, rule, win_count, time_limit, max_player(≤10 slots),

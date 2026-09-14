@@ -143,7 +143,7 @@
 | 461 | GS_USE_PAPERCODEGIFT_REQ | 1處 | `str` |
 | 463 | GS_ENTERPAPERCODEGIFT_NOTIFY | 1處 | `(空)` |
 | 464 | GS_USE_PAPERCODEGIFT_IGNORE_DUPLICATED_ITEM_REQ | 1處 | `u8 str` |
-| 466 | GI_CHANGE_SKILLITEMSLOT_REQ | 1處 | `u8 u8 u8` |
+| 466 | GI_CHANGE_SKILLITEMSLOT_REQ | 1處 | `u8 target_profile, u8 previous_update_raw, [u8 previous_profile, 7×s32]` (raw==0 → 2B; raw!=0 → 31B; sub_5738A0) |
 | 472 | GL_GAMECENTER_REC_REQ | 1處 | `s16` |
 | 474 | GG_GAMECENTER_GAME_START_REQ | 1處 | `s16 u8` |
 | 476 | GG_GAMECENTER_GAME_END_REQ | 1處 | `s16 raw24 raw44` |

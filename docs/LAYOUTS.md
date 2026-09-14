@@ -90,7 +90,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 243 | GP_CHDKILLC_ACK | sub_556B30 | `(無直接讀取/轉發)` |
 | 245 | GP_CHTKILLC_ACK | sub_556C50 | `(無直接讀取/轉發)` |
 | 247 | GL_CLIENTINFO_ACK | sub_573EB0 | `u8` |
-| 255 | GL_INVENIN_ACK | sub_574270 | `u8 s32 u8 u8 u8 u8 s32 u8` |
+| 255 | GL_INVENIN_ACK | sub_574270 | `u8 mode, s32 uid, u8 contextRaw, u8 unknown; self uid→u8 selected(<5), 5×raw32 NewSkill profile` |
 | 257 | GL_ENTERROOMOB_ACK | sub_56D420 | `u8 u8 u8 u8 u8 u8 u16 u8 u8 u16 u8 s8/bool u16 s8/bool u8 str s8/bool s8/bool s32` |
 | 261 | GL_JOIN_ACK | sub_56DA70 | `u8` |
 | 263 | GL_JOINPASS_ACK | sub_56B2E0 | `s8/bool` |
@@ -172,7 +172,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 458 | GI_CHANGEITEMSLOT_ACK | sub_573860 | `(無直接讀取/轉發)` |
 | 462 | GS_USE_PAPERCODEGIFT_ACK | sub_57CC90 | `(無直接讀取/轉發)` |
 | 465 | GS_USE_PAPERCODEGIFT_IGNORE_DUPLICATED_ITEM_ACK | sub_57CDD0 | `u8` |
-| 467 | GI_CHANGE_SKILLITEMSLOT_ACK | sub_573A70 | `u8 u8 u8 u8` |
+| 467 | GI_CHANGE_SKILLITEMSLOT_ACK | sub_573A70 | `u8 resultRaw, u8 unknown, u8 count, count×{u8 profile, raw32}` |
 | 469 | GS_BUY_HUKUBUKURO_ACK | sub_57CE30 | `u8 s32 s32 s32 s32 s32 s32` |
 | 471 | GS_GET_HUKUBUKURO_ACK | sub_57D210 | `u8 s32 s32 u8` |
 | 473 | GL_GAMECENTER_REC_ACK | sub_584910 | `u16 s32 u8 u8 u8 u8 u16 s32 u8 u8 u16 u16` |

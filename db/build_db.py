@@ -78,8 +78,9 @@ def main() -> int:
         'inventory_page_size': '100',
         'max_characters': '20',          # sub_524010
         'weapon_groups': '4',            # sub_524660
-        'skill_slots': '9',              # sub_527550 → sub_522480 (9×s32)
-        'quick_slots': '7',              # sub_527D00 → sub_527AF0 (u8 + 7×s32 = 0x1C)
+        'skill_slots': '9',              # sub_527550 → sub_522480 (9×s32 UI items)
+        'new_skill_profile_count': '5',
+        'new_skill_puzzle_slots': '7',   # selected profile → sub_527D00 (u8 + 7×s32)
         'schema_version': '1',
     }
     con.executemany(

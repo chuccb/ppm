@@ -279,7 +279,8 @@ head is `1096` (full ID `10001096`), not the previously misread `584`.
 | Character body item (`199xxxxx`) | It selects a character identity/body and indexes the five template maps. It is the first normal appearance word, not a weapon or a recommendation set. | **Fact / HIGH** |
 | 198/247 character record | `sub_524010`/`sub_524360` carry `u8 char_type` then 12 u16 normal appearance offsets: body, head, face, top, bottom, shoes, outer/set, eye, hair accessory, face accessory, head accessory, special. | **Fact / HIGH** |
 | Canonical starter prefix | It is only the first six normal record words from the table above. The native maps do not name or populate the last six slots, so server bootstrap leaves those unrelated optional slots unchanged/empty. | **Fact / HIGH** for scope; **Inference / MEDIUM** for server persistence policy. |
-| Weapons, skill/quick items, and other props | Weapon groups (`sub_524660`) and skill/quick blocks are separate 198 state, not arguments or results of the five body maps. No native/resource dataflow in this corpus establishes a per-character starter weapon, consumable, or last-six-slot item. | **Fact / HIGH** for separation; **UNRESOLVED** for any historical per-character starter-item policy. |
+| Weapons, 9 UI-item slots, and other props | Weapon groups (`sub_524660`), the nine `sub_527550` UI-item ordinals, and the selected NewSkill puzzle record are separate 198 state, not arguments or results of the five body maps. No native/resource dataflow in this corpus establishes a per-character starter weapon, consumable, or last-six-slot item. | **Fact / HIGH** for separation; **UNRESOLVED** for any historical per-character starter-item policy. |
+| NewSkill five profiles | `GL_INVENIN_ACK` 255 carries five records of seven `1101…1107` puzzle IDs plus a packed-minute expiry; `sub_4AAB80` loads the selected one to `CClientData+144420`. Its `NEWSKILL_HEAD/CLOTH_UP/CLOTH_DOWN/SHOES/CLOTHOFSET/ACCESSORY1/ACCESSORY2` controls are puzzle preview controls, not 198/247 normal appearance or a shop recommendation. | **Fact / HIGH** for wire/UI separation. **Inference / MEDIUM:** user/account scope, because 255 is self-uid keyed and 466 has no character identity. |
 | Fitting XML | `Extracted/ui/system/CharacterFitting.xml` is a `CHANGE_AVATAR_PROPERTY` fitting/preview source. Its hand textures and values are not a persistent starter vector. | **Fact / HIGH** |
 | Cooki transformation | `CharacterToCooki.xml` is `CHANGE_AVATAR_TO_COOKI_PROPERTY`; `CCharToCookiProperty::sub_993E40` snapshots normal appearance and `sub_9942D0` restores it. It is temporary override state. | **Fact / HIGH** |
 | RecommandItem / Total_Package XML | These are shop recommendation/package presentation data. They have no observed write to the persistent 12-slot character record and are not used as starter-default evidence. | **Fact / HIGH** for their UI/resource role; **UNRESOLVED** for any unobserved original-server pricing/business policy. |
@@ -310,6 +311,10 @@ reader-level layout.
 3. Do **not** add a weapon, consumable, recommendation-set, Cooki, fitting, or
    last-six-slot "starter" value until a native field/state write path supports
    it; the current evidence only establishes the six-word normal prefix.
+4. NewSkill profile 1..4 expiry is server-authoritative in 255/467, but the
+   original grant/renew packet has not yet been traced. Do not manufacture a
+   shop/default unlock; retain the packed-minute raw word and leave the source
+   operation **UNRESOLVED**.
 
 ## 5d. system XML 資料表 (二十輪全掃)
 

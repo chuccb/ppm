@@ -166,19 +166,44 @@ CREATE TABLE IF NOT EXISTS weapon_groups (
 ) STRICT, WITHOUT ROWID;
 
 -- ----------------------------------------------------------------------------
--- 6. 技能 / 快速槽 (卅六輪逐函數直查):
---    sub_527550 → sub_522480: 9×s32 技能槽 (無前導 count)
---    sub_527D00 → sub_527AF0: u8 n5 + 7×s32 (0x1C = 28B) 快速槽
---    (GI_CHANGE_SKILLITEMSLOT 466 / GL_COMBISKILLITEM 724)
+-- 6. 198/room UI-item 與 legacy migration source:
+--    sub_527550 → sub_522480: 9×s32 UI-item slots (無前導 count)
+--    slot_kind=1 remains only as an old-server seven-ID import source. The
+--    actual sub_527D00 selected NewSkill profile is in 6a, not a quick slot.
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS skill_slots (
     user_id   INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-    slot_kind INTEGER NOT NULL CHECK (slot_kind IN (0,1)),  -- 0=skill(sub_527550, 9 槽) 1=quick(sub_527D00, 7 槽)
+    slot_kind INTEGER NOT NULL CHECK (slot_kind IN (0,1)),  -- 0=sub_527550 UI-item (9); 1=legacy seven-ID import
     idx       INTEGER NOT NULL,
     item_id   INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (user_id, slot_kind, idx),
     CHECK ((slot_kind = 0 AND idx BETWEEN 0 AND 8) OR        -- sub_522480 讀 9×s32
-           (slot_kind = 1 AND idx BETWEEN 0 AND 6))          -- sub_527AF0 讀 7×s32 (0x1C)
+           (slot_kind = 1 AND idx BETWEEN 0 AND 6))          -- legacy profile-0 migration source; no longer 466 storage
+) STRICT, WITHOUT ROWID;
+
+-- ----------------------------------------------------------------------------
+-- 6a. NewSkill 五個 profile — GL_INVENIN_ACK 255 (sub_574270) 的 5×32B。
+-- 每筆 = 七個 puzzle full-id + server-owned packed-minute expiration word。
+-- profile 0 永遠可用；profile 1..4 的末字透過 sub_48B9A0/sub_5309C0 控制期限。
+-- 466 僅回送「離開的 profile」的前 28B，絕不可從 C2S 覆寫 expires 欄位。
+-- ----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS new_skill_profile_state (
+    user_id          INTEGER PRIMARY KEY REFERENCES users(user_id) ON DELETE CASCADE,
+    selected_profile INTEGER NOT NULL DEFAULT 0 CHECK (selected_profile BETWEEN 0 AND 4)
+) STRICT, WITHOUT ROWID;
+
+CREATE TABLE IF NOT EXISTS new_skill_profiles (
+    user_id                   INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    profile_index             INTEGER NOT NULL CHECK (profile_index BETWEEN 0 AND 4),
+    puzzle0                   INTEGER NOT NULL DEFAULT 0,
+    puzzle1                   INTEGER NOT NULL DEFAULT 0,
+    puzzle2                   INTEGER NOT NULL DEFAULT 0,
+    puzzle3                   INTEGER NOT NULL DEFAULT 0,
+    puzzle4                   INTEGER NOT NULL DEFAULT 0,
+    puzzle5                   INTEGER NOT NULL DEFAULT 0,
+    puzzle6                   INTEGER NOT NULL DEFAULT 0,
+    expires_at_packed_minute  INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (user_id, profile_index)
 ) STRICT, WITHOUT ROWID;
 
 -- ----------------------------------------------------------------------------
@@ -570,6 +595,9 @@ BEGIN
     INSERT INTO user_stats(user_id) VALUES (NEW.user_id);
     INSERT INTO weapon_groups(user_id, group_no) VALUES
         (NEW.user_id,0),(NEW.user_id,1),(NEW.user_id,2),(NEW.user_id,3);
+    INSERT INTO new_skill_profile_state(user_id, selected_profile) VALUES (NEW.user_id,0);
+    INSERT INTO new_skill_profiles(user_id, profile_index) VALUES
+        (NEW.user_id,0),(NEW.user_id,1),(NEW.user_id,2),(NEW.user_id,3),(NEW.user_id,4);
 END;
 
 -- 對戰結束時把 per-match 數據累加進 user_stats (對應 GP_CH*C ACK 推播來源)

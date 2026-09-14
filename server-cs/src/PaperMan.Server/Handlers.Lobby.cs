@@ -23,7 +23,7 @@ public static class LobbyHandlers
         add(Opcode.GL_CHATTING_REQ, Chat);
         add(Opcode.GL_LOBBYIN_REQ, SceneEnter);
         add(Opcode.GL_SHOPIN_REQ, SceneEnter);
-        add(Opcode.GL_INVENIN_REQ, SceneEnter);
+        add(Opcode.GL_INVENIN_REQ, InventoryEnter);
         add(Opcode.GL_CLIENTINFO_REQ, ClientInfo);
         add(Opcode.GL_MYINFO_OPEN, MyInfoOpen);
         add(Opcode.GL_SHOUTCHAT_REQ, Shout);
@@ -107,13 +107,40 @@ public static class LobbyHandlers
     /// <summary>837 的 timer — CHAT_SHOUT 動作表 cooldown (非0=可再喊)。</summary>
     private const int ShoutCooldown = 1;
 
-    // 250 GL_LOBBYIN / 252 GL_SHOPIN / 254 GL_INVENIN — 場景切換通知
-    // (廿五輪: dispatcher 無 251/253 case → client 不解析回包;
-    //  255 GL_INVENIN_ACK 存在但僅刷新 UI 座標 — 靜默吸收最穩)
+    // 250 GL_LOBBYIN / 252 GL_SHOPIN — client state transition notices.
+    // Their nominal ACK opcodes have no direct dispatcher consumer.
     private static ValueTask SceneEnter(Session session, Packet packet, ServerContext context)
     {
         // client 狀態機自行推進 (sub_537710); server 只需記錄場景
         return ValueTask.CompletedTask;
+    }
+
+    // 254 → 255 (sub_5741C0 / sub_574270). This is not an empty scene ACK:
+    // the local-user branch consumes a selected index and five 32-byte
+    // NewSkill profile records after the mode-1 header.
+    private static async ValueTask InventoryEnter(Session session, Packet packet, ServerContext context)
+    {
+        byte requestContextRaw = packet.ReadU8();
+        if (packet.Remaining != 0)
+        {
+            throw new InvalidDataException("GL_INVENIN_REQ must contain exactly one context byte.");
+        }
+
+        if (session.UserId == 0)
+        {
+            throw new InvalidDataException("GL_INVENIN_REQ requires an authenticated player identity.");
+        }
+
+        Db.NewSkillProfileSnapshot snapshot = context.Db.GetNewSkillProfileSnapshot(session.UserId);
+        NewSkillProfileRecord[] profiles = snapshot.Profiles
+            .Select(profile => new NewSkillProfileRecord(profile.PuzzleItemIds, profile.ExpiresAtPackedMinute))
+            .ToArray();
+        Packet acknowledgement = NewSkillProfileWire.CreateInventoryEnterAcknowledgement(
+            checked((int)session.UserId),
+            requestContextRaw,
+            snapshot.SelectedProfile,
+            profiles);
+        await session.SendAsync(acknowledgement);
     }
 
     // 246 GL_CLIENTINFO_REQ: str nick → 247 ACK (sub_573EB0):
@@ -432,9 +459,10 @@ public static class LobbyHandlers
             ack.WriteS32(item);
         }
 
-        // --- sub_527D00: u8 n5(預設 5) + 7×s32 快速槽 (0x1C) ---
-        ack.WriteU8(5);                                            // n5 預設值 5
-        foreach (var item in slots.Quick)
+        // --- sub_527D00: raw u8 n5 + selected NewSkill profile's 7×s32
+        //     puzzle IDs (0x1C); n5's original semantic is unresolved. ---
+        ack.WriteU8(5);                                            // existing native-compatible raw convention
+        foreach (var item in slots.NewSkillPuzzleIds)
         {
             ack.WriteS32(item);
         }
@@ -652,27 +680,44 @@ public static class LobbyHandlers
         await session.SendAsync(ack);
     }
 
-    // 466 GI_CHANGE_SKILLITEMSLOT_REQ (sub_5273C0: u8 char_slot, u8 slot_idx, s32 item_id)
-    // → 467 ACK (sub_573A70): u8 err(0=成功), u8 char_slot, u8 count, count×(u8 slot, raw32)
+    // 466 → 467 (sub_5738A0 / sub_573A70): target profile, a conditional
+    // previous-profile seven-id save, then an authoritative raw32 profile
+    // metadata record. This is unrelated to the 9×s32 sub_527550 item block.
     private static async ValueTask ChangeSkillSlot(Session session, Packet packet, ServerContext context)
     {
-        byte charSlot = packet.Remaining >= 1 ? packet.ReadU8() : (byte)0;
-        byte slotIdx = packet.Remaining >= 1 ? packet.ReadU8() : (byte)0;
-        int itemId = packet.Remaining >= 4 ? packet.ReadS32() : 0;
-
-        if (session.UserId != 0)
+        NewSkillProfileChange request = NewSkillProfileWire.ReadChangeRequest(packet);
+        if (session.UserId == 0)
         {
-            context.Db.UpdateSkillSlot(session.UserId, slotKind: 0, slotIdx, itemId);
+            throw new InvalidDataException("GI_CHANGE_SKILLITEMSLOT_REQ requires an authenticated player identity.");
         }
 
-        var ack = new Packet(Opcode.GI_CHANGE_SKILLITEMSLOT_ACK)
-            .WriteU8(0)                                     // err 0 = 成功
-            .WriteU8(charSlot)
-            .WriteU8(1)                                     // count = 1
-            .WriteU8(slotIdx)
-            .WriteRaw(new byte[32]);                        // 32B skill struct
+        Db.NewSkillProfile? selectedRecord = context.Db.ChangeNewSkillProfile(
+            session.UserId,
+            request.TargetProfile,
+            request.HasPreviousProfileUpdate,
+            request.PreviousProfile,
+            request.PreviousProfilePuzzleItemIds);
+        if (selectedRecord is null)
+        {
+            // The client parser reveals no server rejection-code mapping for
+            // 467. Do not forge a nominal success or replace the server-owned
+            // raw32 record with zeros; reject without state mutation instead.
+            throw new InvalidDataException("GI_CHANGE_SKILLITEMSLOT_REQ failed NewSkill ownership, profile, or expiry validation.");
+        }
 
-        await session.SendAsync(ack);
+        var profile = new NewSkillProfileRecord(
+            selectedRecord.PuzzleItemIds,
+            selectedRecord.ExpiresAtPackedMinute);
+        // sub_573A70 unconditionally reads and discards these two raw header
+        // bytes. The original success/error meanings are still unobserved;
+        // retain the server's established zero convention, but never call it
+        // a semantic success flag.
+        Packet acknowledgement = NewSkillProfileWire.CreateChangeAcknowledgement(
+            resultRaw: 0,
+            unknownHeaderRaw: 0,
+            profileIndex: request.TargetProfile,
+            profile: profile);
+        await session.SendAsync(acknowledgement);
     }
 
     // 912 GL_WEAPONPARTS_EQUIP_CHANGE_REQ (sub_9591F0): u8 op_type, s32 weapon_id, s32 part_id, [s32 old_part]

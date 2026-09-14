@@ -38,7 +38,8 @@ internal static class DatabaseBootstrapper
         new("max_characters", "20"),
         new("weapon_groups", "4"),
         new("skill_slots", "9"),
-        new("quick_slots", "7"),
+        new("new_skill_profile_count", "5"),
+        new("new_skill_puzzle_slots", "7"),
         new("schema_version", "1"),
     ];
 

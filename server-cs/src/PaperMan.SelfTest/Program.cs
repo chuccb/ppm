@@ -253,7 +253,112 @@ bool IsNative311FailureAcknowledgement(Packet acknowledgement)
     Check("non-nul terminated ReadStr returns text safely", rawStrPkt.ReadStr() == "UserNoNul");
 }
 
-// ---- 1a. 198 starter character availability contract ----------------------
+// ---- 1a. NewSkill profile wire contract -----------------------------------
+{
+    var updateRequest = new Packet(Opcode.GI_CHANGE_SKILLITEMSLOT_REQ)
+        .WriteU8(3)
+        .WriteU8(0xA5) // sub_5738A0 branches on any nonzero raw byte
+        .WriteU8(1)
+        .WriteS32(11010001)
+        .WriteS32(11020001)
+        .WriteS32(11030001)
+        .WriteS32(11040001)
+        .WriteS32(11050001)
+        .WriteS32(11060001)
+        .WriteS32(11060002);
+    NewSkillProfileChange parsedUpdate = NewSkillProfileWire.ReadChangeRequest(
+        Packet.FromPayload(updateRequest.Opcode, updateRequest.Payload));
+    Check("466 has target, conditional previous index, and exactly seven s32 ids",
+        updateRequest.Length == NewSkillProfileWire.ChangeWithUpdateByteCount
+        && parsedUpdate is
+        {
+            TargetProfile: 3,
+            PreviousProfileUpdateRaw: 0xA5,
+            HasPreviousProfileUpdate: true,
+            PreviousProfile: 1,
+            PreviousProfilePuzzleItemIds: [11010001, 11020001, 11030001, 11040001, 11050001, 11060001, 11060002],
+        });
+
+    bool rejectsMalformedNewSkillChange;
+    try
+    {
+        _ = NewSkillProfileWire.ReadChangeRequest(
+            new Packet(Opcode.GI_CHANGE_SKILLITEMSLOT_REQ).WriteU8(0).WriteU8(0).WriteU8(0));
+        rejectsMalformedNewSkillChange = false;
+    }
+    catch (InvalidDataException)
+    {
+        rejectsMalformedNewSkillChange = true;
+    }
+    Check("466 rejects a trailing block when its raw update byte is zero", rejectsMalformedNewSkillChange);
+
+    bool rejectsMissingNonzeroUpdateBlock;
+    try
+    {
+        _ = NewSkillProfileWire.ReadChangeRequest(
+            new Packet(Opcode.GI_CHANGE_SKILLITEMSLOT_REQ).WriteU8(0).WriteU8(0x7F));
+        rejectsMissingNonzeroUpdateBlock = false;
+    }
+    catch (InvalidDataException)
+    {
+        rejectsMissingNonzeroUpdateBlock = true;
+    }
+    Check("466 requires the complete 31-byte variant for every nonzero raw update byte",
+        rejectsMissingNonzeroUpdateBlock);
+
+    NewSkillProfileRecord[] profiles = Enumerable.Range(0, NewSkillProfileWire.ProfileCount)
+        .Select(profile => new NewSkillProfileRecord(
+            Enumerable.Range(0, NewSkillProfileWire.PuzzleSlotCount)
+                .Select(slot => profile * 100 + slot)
+                .ToArray(),
+            0x65000000 + profile))
+        .ToArray();
+    Packet inventoryEnter = NewSkillProfileWire.CreateInventoryEnterAcknowledgement(
+        userId: 7,
+        requestContextRaw: 0xD2,
+        selectedProfile: 2,
+        profiles: profiles);
+    var snapshotReader = Packet.FromPayload(inventoryEnter.Opcode, inventoryEnter.Payload);
+    bool snapshotLayout = inventoryEnter.Length == 168
+        && snapshotReader.ReadU8() == NewSkillProfileWire.SelfSnapshotMode
+        && snapshotReader.ReadS32() == 7
+        && snapshotReader.ReadU8() == 0xD2
+        && snapshotReader.ReadU8() == 0
+        && snapshotReader.ReadU8() == 2;
+    for (int profile = 0; snapshotLayout && profile < profiles.Length; profile++)
+    {
+        for (int slot = 0; slot < NewSkillProfileWire.PuzzleSlotCount; slot++)
+        {
+            snapshotLayout &= snapshotReader.ReadS32() == profiles[profile].PuzzleItemIds[slot];
+        }
+
+        snapshotLayout &= snapshotReader.ReadS32() == profiles[profile].ExpiresAtPackedMinute;
+    }
+    Check("255 mode-1 self snapshot contains selected index plus five raw32 profiles",
+        snapshotLayout && snapshotReader.Remaining == 0);
+
+    Packet changeAcknowledgement = NewSkillProfileWire.CreateChangeAcknowledgement(
+        resultRaw: 0,
+        unknownHeaderRaw: 9,
+        profileIndex: 2,
+        profile: profiles[2]);
+    var changeReader = Packet.FromPayload(changeAcknowledgement.Opcode, changeAcknowledgement.Payload);
+    bool changeLayout = changeAcknowledgement.Length == 36
+        && changeReader.ReadU8() == 0
+        && changeReader.ReadU8() == 9
+        && changeReader.ReadU8() == 1
+        && changeReader.ReadU8() == 2;
+    for (int slot = 0; changeLayout && slot < NewSkillProfileWire.PuzzleSlotCount; slot++)
+    {
+        changeLayout &= changeReader.ReadS32() == profiles[2].PuzzleItemIds[slot];
+    }
+    Check("467 carries a real stored raw32 record instead of a zero placeholder",
+        changeLayout
+        && changeReader.ReadS32() == profiles[2].ExpiresAtPackedMinute
+        && changeReader.Remaining == 0);
+}
+
+// ---- 1b. 198 starter character availability contract ----------------------
 {
     var starterStats = new Db.Stats(
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -747,6 +852,50 @@ bool IsNative311FailureAcknowledgement(Packet acknowledgement)
             Packet truncatedCharacterPurchaseAcknowledgement = await ReadServerPacketAsync(clientPeer.GetStream(), channelCodec);
             List<Db.CharSlot> charactersAfterPurchase = secondOpen.GetCharacters(newAccount.UserId);
 
+            bool inventoryEnterWasProcessed = await router.DispatchAsync(
+                channelSession,
+                new Packet(Opcode.GL_INVENIN_REQ).WriteU8(0xD2),
+                channelContext);
+            Packet inventoryEnterAcknowledgement = await ReadServerPacketAsync(clientPeer.GetStream(), channelCodec);
+            var inventoryEnterReader = Packet.FromPayload(
+                inventoryEnterAcknowledgement.Opcode,
+                inventoryEnterAcknowledgement.Payload);
+            bool inventoryEnterLayout = inventoryEnterAcknowledgement.Opcode == Opcode.GL_INVENIN_ACK
+                && inventoryEnterReader.ReadU8() == NewSkillProfileWire.SelfSnapshotMode
+                && inventoryEnterReader.ReadS32() == newAccount.UserId
+                && inventoryEnterReader.ReadU8() == 0xD2
+                && inventoryEnterReader.ReadU8() == 0
+                && inventoryEnterReader.ReadU8() == 0;
+            for (int profile = 0; inventoryEnterLayout && profile < NewSkillProfileWire.ProfileCount; profile++)
+            {
+                for (int slot = 0; slot < NewSkillProfileWire.PuzzleSlotCount; slot++)
+                {
+                    inventoryEnterLayout &= inventoryEnterReader.ReadS32() == 0;
+                }
+
+                inventoryEnterLayout &= inventoryEnterReader.ReadS32() == 0;
+            }
+
+            bool newSkillChangeWasProcessed = await router.DispatchAsync(
+                channelSession,
+                new Packet(Opcode.GI_CHANGE_SKILLITEMSLOT_REQ).WriteU8(0).WriteU8(0),
+                channelContext);
+            Packet newSkillChangeAcknowledgement = await ReadServerPacketAsync(clientPeer.GetStream(), channelCodec);
+            var newSkillChangeReader = Packet.FromPayload(
+                newSkillChangeAcknowledgement.Opcode,
+                newSkillChangeAcknowledgement.Payload);
+            bool newSkillChangeLayout = newSkillChangeAcknowledgement.Opcode == Opcode.GI_CHANGE_SKILLITEMSLOT_ACK
+                && newSkillChangeReader.ReadU8() == 0
+                && newSkillChangeReader.ReadU8() == 0
+                && newSkillChangeReader.ReadU8() == 1
+                && newSkillChangeReader.ReadU8() == 0;
+            for (int slot = 0; newSkillChangeLayout && slot < NewSkillProfileWire.PuzzleSlotCount; slot++)
+            {
+                newSkillChangeLayout &= newSkillChangeReader.ReadS32() == 0;
+            }
+            newSkillChangeLayout &= newSkillChangeReader.ReadS32() == 0
+                && newSkillChangeReader.Remaining == 0;
+
             Check("SQLite first login provisions a playable identity",
                 !secondOpen.Initialization.CreatedDatabaseFile
                 && secondOpen.Initialization.ProtocolPacketDefinitionCount == 676
@@ -774,6 +923,13 @@ bool IsNative311FailureAcknowledgement(Packet acknowledgement)
                 truncatedCharacterPurchaseWasProcessed
                 && IsNative311FailureAcknowledgement(truncatedCharacterPurchaseAcknowledgement)
                 && charactersAfterPurchase.Count == 2);
+            Check("254 → 255 returns five authoritative NewSkill profile records",
+                inventoryEnterWasProcessed
+                && inventoryEnterLayout
+                && inventoryEnterReader.Remaining == 0);
+            Check("466 → 467 returns the persisted raw32 profile, never a truncated placeholder",
+                newSkillChangeWasProcessed
+                && newSkillChangeLayout);
         }
 
         // Concrete legacy fixtures: a canonical type-1 record lost its body;
@@ -862,6 +1018,115 @@ bool IsNative311FailureAcknowledgement(Packet acknowledgement)
                 && everyCanonicalStarterPersists
                 && createdCharacters[2] is { SlotNo: 2, CharType: 2 }
                 && createdCharacters[3] is { SlotNo: 3, CharType: 3 });
+
+            Db.NewSkillProfileSnapshot initialProfiles = thirdOpen.GetNewSkillProfileSnapshot(bootstrapUserId);
+            long lazyProfileUserId;
+            using (var connection = OpenExistingSqlite(temporaryDatabasePath))
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = """
+                    INSERT INTO accounts(login_name,pass_hash,pass_salt) VALUES('LazyProfileAccount','h','s');
+                    INSERT INTO users(account_id,nickname) VALUES(last_insert_rowid(),'LazyProfileUser');
+                    DELETE FROM new_skill_profiles WHERE user_id=(SELECT user_id FROM users WHERE nickname='LazyProfileUser');
+                    DELETE FROM new_skill_profile_state WHERE user_id=(SELECT user_id FROM users WHERE nickname='LazyProfileUser');
+                    INSERT INTO skill_slots(user_id,slot_kind,idx,item_id)
+                    VALUES((SELECT user_id FROM users WHERE nickname='LazyProfileUser'),1,0,11010001),
+                          ((SELECT user_id FROM users WHERE nickname='LazyProfileUser'),1,5,11060002);
+                    """;
+                command.ExecuteNonQuery();
+                command.CommandText = "SELECT user_id FROM users WHERE nickname='LazyProfileUser'";
+                lazyProfileUserId = Convert.ToInt64(command.ExecuteScalar());
+            }
+            Db.NewSkillProfileSnapshot lazyMigratedProfiles = thirdOpen.GetNewSkillProfileSnapshot(lazyProfileUserId);
+            Db.NewSkillProfileSnapshot lazyProfilesReloaded = thirdOpen.GetNewSkillProfileSnapshot(lazyProfileUserId);
+            Check("missing NewSkill rows lazily import legacy profile zero exactly once",
+                lazyMigratedProfiles.SelectedProfile == 0
+                && lazyMigratedProfiles.Profiles[0].PuzzleItemIds.SequenceEqual([11010001, 0, 0, 0, 0, 11060002, 0])
+                && lazyMigratedProfiles.Profiles.Skip(1).All(profile =>
+                    profile.PuzzleItemIds.SequenceEqual(new int[NewSkillProfileWire.PuzzleSlotCount]))
+                && lazyProfilesReloaded.Profiles[0].PuzzleItemIds.SequenceEqual(
+                    lazyMigratedProfiles.Profiles[0].PuzzleItemIds));
+
+            DateTime profileExpiry = DateTime.Now.AddDays(7);
+            int packedProfileExpiry = ((profileExpiry.Year - 2000) << 24)
+                | (profileExpiry.Month << 19)
+                | (profileExpiry.Day << 13)
+                | (profileExpiry.Hour << 7)
+                | profileExpiry.Minute;
+            using (var connection = OpenExistingSqlite(temporaryDatabasePath))
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = """
+                    INSERT INTO item_catalog(item_id,name,kind) VALUES(11010001,'profile test hair',2);
+                    INSERT INTO inventory(user_id,slot,item_id,period_days) VALUES(@userId,5119,11010001,0);
+                    UPDATE new_skill_profiles
+                    SET expires_at_packed_minute=@expiry
+                    WHERE user_id=@userId AND profile_index=1;
+                    """;
+                command.Parameters.AddWithValue("@userId", bootstrapUserId);
+                command.Parameters.AddWithValue("@expiry", packedProfileExpiry);
+                command.ExecuteNonQuery();
+            }
+
+            Db.NewSkillProfile? selectedProfileOne = thirdOpen.ChangeNewSkillProfile(
+                bootstrapUserId,
+                targetProfile: 1,
+                hasPreviousProfileUpdate: true,
+                previousProfile: 0,
+                previousProfilePuzzleItemIds: new int[NewSkillProfileWire.PuzzleSlotCount]);
+            Db.NewSkillProfile? selectedProfileZero = thirdOpen.ChangeNewSkillProfile(
+                bootstrapUserId,
+                targetProfile: 0,
+                hasPreviousProfileUpdate: true,
+                previousProfile: 1,
+                previousProfilePuzzleItemIds: [11010001, 0, 0, 0, 0, 0, 0]);
+            Db.NewSkillProfileSnapshot persistedProfiles = thirdOpen.GetNewSkillProfileSnapshot(bootstrapUserId);
+            Db.NewSkillProfile? wrongFamilyWasRejected = thirdOpen.ChangeNewSkillProfile(
+                bootstrapUserId,
+                targetProfile: 0,
+                hasPreviousProfileUpdate: true,
+                previousProfile: 0,
+                previousProfilePuzzleItemIds: [11020001, 0, 0, 0, 0, 0, 0]);
+            Check("NewSkill 255 storage creates five profiles and 466 persists only validated previous ids",
+                initialProfiles is { SelectedProfile: 0, Profiles.Length: NewSkillProfileWire.ProfileCount }
+                && initialProfiles.Profiles.All(profile => profile.PuzzleItemIds.SequenceEqual(new int[NewSkillProfileWire.PuzzleSlotCount]))
+                && selectedProfileOne is { ExpiresAtPackedMinute: var expiry } && expiry == packedProfileExpiry
+                && selectedProfileZero is not null
+                && persistedProfiles.SelectedProfile == 0
+                && persistedProfiles.Profiles[1].PuzzleItemIds.SequenceEqual([11010001, 0, 0, 0, 0, 0, 0])
+                && persistedProfiles.Profiles[1].ExpiresAtPackedMinute == packedProfileExpiry
+                && wrongFamilyWasRejected is null);
+
+            DateTime expiredProfileTime = DateTime.Now.AddMinutes(-2);
+            int packedExpiredProfileTime = ((expiredProfileTime.Year - 2000) << 24)
+                | (expiredProfileTime.Month << 19)
+                | (expiredProfileTime.Day << 13)
+                | (expiredProfileTime.Hour << 7)
+                | expiredProfileTime.Minute;
+            using (var connection = OpenExistingSqlite(temporaryDatabasePath))
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = """
+                    UPDATE new_skill_profiles SET expires_at_packed_minute=@expired WHERE user_id=@userId AND profile_index=2;
+                    UPDATE new_skill_profiles SET expires_at_packed_minute=0 WHERE user_id=@userId AND profile_index=3;
+                    UPDATE new_skill_profiles SET expires_at_packed_minute=@allBitsSet WHERE user_id=@userId AND profile_index=4;
+                    """;
+                command.Parameters.AddWithValue("@userId", bootstrapUserId);
+                command.Parameters.AddWithValue("@expired", packedExpiredProfileTime);
+                command.Parameters.AddWithValue("@allBitsSet", -1);
+                command.ExecuteNonQuery();
+            }
+
+            Db.NewSkillProfile? pastExpiryWasRejected = thirdOpen.ChangeNewSkillProfile(
+                bootstrapUserId, 2, true, 0, new int[NewSkillProfileWire.PuzzleSlotCount]);
+            Db.NewSkillProfile? zeroExpiryWasRejected = thirdOpen.ChangeNewSkillProfile(
+                bootstrapUserId, 3, true, 0, new int[NewSkillProfileWire.PuzzleSlotCount]);
+            Db.NewSkillProfile? allBitsSetExpiryWasAccepted = thirdOpen.ChangeNewSkillProfile(
+                bootstrapUserId, 4, true, 0, new int[NewSkillProfileWire.PuzzleSlotCount]);
+            Check("NewSkill packed-minute expiry rejects past/zero and normalizes full-width raw fields",
+                pastExpiryWasRejected is null
+                && zeroExpiryWasRejected is null
+                && allBitsSetExpiryWasAccepted is { ExpiresAtPackedMinute: -1 });
 
             Db.LoginResult legacyLogin = thirdOpen.Login(
                 accountName: "LegacyAccount",

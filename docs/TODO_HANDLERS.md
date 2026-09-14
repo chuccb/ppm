@@ -136,7 +136,7 @@
 >    - 214/215: 角色初創 (u8 char_type, 3×s16 equip);
 >    - 218/219 & 312/313: 角色槽切換 (u8 slot_no → users.current_char);
 >    - 220/221: 武器組全量裝備更新 (4×weapon_groups);
->    - 466/467: 技能槽更換 (skill_slots 更新);
+>    - 466/467: NewSkill 五 profile 切換／上一 profile 七 puzzle IDs 持久化；255 snapshot 與 raw packed-minute expiry 見 `PACKETS.md`（不寫入 9-slot `skill_slots`）;
 >    - 912/913: 武器零件裝備/更換 (op_type 1/2, weapon_id, part_id);
 >    - 310/311: 購買新角色 (characters 插入, users.game_point 扣款)。
 > ③ **商城/背包/信件/任務 (453/454, 802/803, 423/424, 876/877, 878/879)**:

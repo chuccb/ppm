@@ -30,6 +30,19 @@ uid = c.lastrowid
 assert c.execute('SELECT COUNT(*) FROM user_stats WHERE user_id=?', (uid,)).fetchone()[0] == 1
 assert c.execute('SELECT COUNT(*) FROM weapon_groups WHERE user_id=?', (uid,)).fetchone()[0] == 4
 
+# GL_INVENIN_ACK(255) provides five account-level NewSkill raw32 records.
+# The first profile is always usable; profiles 1..4 retain a server-owned
+# packed-minute expiration word that 466 cannot overwrite.
+assert c.execute('SELECT selected_profile FROM new_skill_profile_state WHERE user_id=?', (uid,)).fetchone() == (0,)
+assert c.execute('SELECT COUNT(*) FROM new_skill_profiles WHERE user_id=?', (uid,)).fetchone()[0] == 5
+c.execute('UPDATE new_skill_profiles SET puzzle0=11010001, expires_at_packed_minute=0 WHERE user_id=? AND profile_index=0', (uid,))
+assert c.execute('SELECT puzzle0, expires_at_packed_minute FROM new_skill_profiles WHERE user_id=? AND profile_index=0', (uid,)).fetchone() == (11010001, 0)
+try:
+    c.execute('INSERT INTO new_skill_profiles(user_id,profile_index) VALUES (?,5)', (uid,))
+    raise AssertionError('NewSkill profile 5 should violate its 0..4 CHECK')
+except sqlite3.IntegrityError:
+    pass
+
 c.execute("INSERT INTO accounts(login_name,pass_hash,pass_salt) VALUES ('bob','h','s')")
 c.execute("INSERT INTO users(account_id,nickname) VALUES (?, 'PaperBob')", (c.lastrowid,))
 uid2 = c.lastrowid
