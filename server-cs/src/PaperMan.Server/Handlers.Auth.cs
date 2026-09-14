@@ -87,7 +87,7 @@ public static class AuthHandlers
            .WriteS16(1)                                    //   server_id
            .WriteStr(cfg.ServerName)
            .WriteStr(cfg.PublicHost)                       //   host (16B 定長區)
-           .WriteS16((short)cfg.Port)
+           .WriteS16((short)cfg.ChannelPort)               //   server_port (⚠ 填頻道 port! 供 sub_58AD90 連線)
            .WriteU8(0)                                     //   flag
            .WriteS16(0);                                   //   group
 

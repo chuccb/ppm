@@ -180,8 +180,8 @@ s32  result           1=成功, 2=帳密錯(0x42), 其他≠0=一般失敗(0x23D
   repeat server_count:                 ← 伺服器清單
     s16  server_id
     str  name  (ANSI)
-    str  host? (v124, 16B buffer)
-    s16  port?
+    str  host  (v124, 16B buffer)
+    s16  port  (⚠ 填頻道伺服器 port! sub_58AD90 以 offset 118 的 port 連線)
     u8   flag
     s16  group
     repeat 3:                          ← 每台 3 個頻道分組
