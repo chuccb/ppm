@@ -11,16 +11,20 @@ using PaperMan.Protocol;
 
 namespace PaperMan.Server;
 
-public sealed class Session(TcpClient client, PacketCodec codec, long id) : IDisposable
+public sealed class Session(TcpClient client, PacketCodec codec, long id, ServerRole role) : IDisposable
 {
     public long Id { get; } = id;
+    public ServerRole Role { get; } = role;
     public string Remote { get; } = client.Client.RemoteEndPoint?.ToString() ?? "?";
-    public string RemoteIp => (client.Client.RemoteEndPoint as System.Net.IPEndPoint)?.Address.ToString() ?? "127.0.0.1";
+    public string RemoteIp => (client.Client.RemoteEndPoint as System.Net.IPEndPoint)?.Address.ToString() ?? "<unknown>";
 
-    // 登入後綁定
-    public long AccountId { get; set; }
-    public long UserId { get; set; }
-    public string Nickname { get; set; } = "";
+    // 登入後綁定。LoginName 是資料庫帳號；Nickname 是後續房間/好友協定
+    // 使用的玩家名稱。143 的 native String[24] 寫入者尚未證實，故不可把
+    // 它推定為任一欄位或作為 admission lookup key。
+    public long AccountId { get; internal set; }
+    public long UserId { get; internal set; }
+    public string LoginName { get; internal set; } = "";
+    public string Nickname { get; internal set; } = "";
 
     /// <summary>最後一次收到 101 GT_PING_REQ (client pong) 的時間。</summary>
     public DateTimeOffset LastPongAt { get; set; } = DateTimeOffset.UtcNow;
@@ -32,6 +36,16 @@ public sealed class Session(TcpClient client, PacketCodec codec, long id) : IDis
     public byte? SlotNo { get; set; }
 
     public bool Authenticated => AccountId != 0;
+
+    /// <summary>Applies one verified login or login-to-channel handoff atomically.</summary>
+    internal void BindAuthentication(long accountId, long userId, string loginName, string nickname)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(accountId);
+        AccountId = accountId;
+        UserId = userId;
+        LoginName = loginName;
+        Nickname = nickname;
+    }
 
     private readonly NetworkStream _stream = client.GetStream();
     private readonly byte[] _rxBuf = new byte[9600];          // 客戶端同款緩衝

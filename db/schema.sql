@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS protocol_packets (
 ) STRICT, WITHOUT ROWID;
 
 -- ----------------------------------------------------------------------------
--- 1. 帳號 (GL_LOGIN_REQ 682: account + token + hwkey + 安全狀態)
+-- 1. 帳號 (GL_LOGIN_REQ 682: account + token + data revision + 安全狀態)
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS accounts (
     account_id     INTEGER PRIMARY KEY,
@@ -41,8 +41,11 @@ CREATE TABLE IF NOT EXISTS accounts (
     -- 永不存明文: scrypt/argon2id 由服務層產生
     pass_hash      TEXT    NOT NULL,
     pass_salt      TEXT    NOT NULL,
-    hw_key         INTEGER,                 -- GL_LOGIN_REQ 的 u64 機器指紋 (XOR 還原後)
-    security_state INTEGER NOT NULL DEFAULT 0 CHECK (security_state IN (0,1,2)),
+    client_data_revision INTEGER,           -- 682 u64 高 dword XOR 還原；來源為 datarevision.txt，非硬體 ID
+    fingerprint_source INTEGER NOT NULL DEFAULT 0 CHECK (fingerprint_source IN (0,1,2)),
+                                               -- 0=無來源, 1=first adapter MAC, 2=storage serial
+    client_fingerprint BLOB CHECK (client_fingerprint IS NULL OR length(client_fingerprint) = 24),
+                                               -- 682 raw24；serial 成功時最多 23 bytes + NUL，否則 MAC 前 6 bytes + 零尾端
     cash           INTEGER NOT NULL DEFAULT 0 CHECK (cash >= 0),        -- GS_CASH_ACK(357)
     is_gm          INTEGER NOT NULL DEFAULT 0 CHECK (is_gm IN (0,1)),   -- MASTER_* 權限
     is_banned      INTEGER NOT NULL DEFAULT 0 CHECK (is_banned IN (0,1)),

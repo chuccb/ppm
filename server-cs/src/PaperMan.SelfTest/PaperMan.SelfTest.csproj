@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../PaperMan.Protocol/PaperMan.Protocol.csproj" />
+    <ProjectReference Include="../PaperMan.Server/PaperMan.Server.csproj" />
   </ItemGroup>
 
 </Project>

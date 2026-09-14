@@ -11,7 +11,7 @@ using PaperMan.Protocol;
 using PaperMan.Server;
 
 var dbPath = args.Length > 0 ? args[0] : Path.Combine("..", "..", "db", "paperman.db");
-var config = ServerConfig.FromArgs(args);
+var config = ServerConfig.FromArgs(args).Validate();
 
 using var db = new Db(dbPath);
 var ctx = new ServerContext(db, config);
@@ -22,7 +22,7 @@ Console.WriteLine(
      [paperman] handlers : {router.Count}
      [paperman] database : {dbPath}
      [paperman] aes      : {(config.AesKey is null ? "OFF (明文模式)" : "ON")}
-     [paperman] compress : threshold 0x{config.CompressThreshold:X4}{(config.CompressThreshold >= PacketCodec.NeverCompress ? " (停用)" : "")}
+     [paperman] compress : threshold 0x{config.EffectiveCompressionThreshold:X4}{(config.EffectiveCompressionThreshold >= PacketCodec.NeverCompress ? " (停用)" : "")}
      """);
 
 // 雙 listener 架構 (卅一輪定案): client 登入後會「另開連線」到 681
@@ -75,8 +75,8 @@ return;
 async Task RunSessionAsync(TcpClient client, long sessionId, ServerRole role, CancellationToken cancellationToken)
 {
     // codec 為 per-session (壓縮門檻是 per-connection 協商值)
-    using var codec = new PacketCodec(config.AesKey, config.CompressThreshold);
-    using var session = new Session(client, codec, sessionId);
+    using var codec = new PacketCodec(config.AesKey, config.EffectiveCompressionThreshold);
+    using var session = new Session(client, codec, sessionId, role);
     Console.WriteLine($"[s{sessionId}] connect {session.Remote} ({role})");
 
     // 心跳: 伺服器主動發 102, client 以 101 回應 (sub_58D6F0; 方向十輪定案)
@@ -93,9 +93,8 @@ async Task RunSessionAsync(TcpClient client, long sessionId, ServerRole role, Ca
         // 兩者都只在連線建立時發一次, 之後不可重發 (會觸發 client 重跑握手)。
         var greeting = role switch
         {
-            ServerRole.Channel => new Packet(Opcode.GL_TCPCONNSUCC),
-            _ => new Packet(Opcode.GL_ACCOUNTCONNSUCC)
-                    .WriteU16(config.CompressThreshold),
+            ServerRole.Channel => LoginWire.CreateTcpConnectionSuccess(),
+            _ => LoginWire.CreateAccountConnectionSuccess(config.EffectiveCompressionThreshold),
         };
         Console.WriteLine($"[s{sessionId}] sending greeting handshake ({greeting.Opcode}) to {session.Remote}...");
         await session.SendAsync(greeting, cancellationToken);

@@ -11,16 +11,19 @@ server-cs/
     ├── PaperMan.Protocol/          # 純協定層 (無 IO 依賴)
     │   ├── Opcode.cs               # 670 opcodes ← sub_9D2050 註冊表
     │   ├── Packet.cs               # 讀寫原語 ← sub_592xxx 家族 (CP949/wstr/blob/內嵌)
+    │   ├── LoginWire.cs            # 682/681/693/694 嚴格 wire contract
     │   ├── PaperLz.cs              # LZSS ← sub_591600 / sub_591900
     │   ├── PaperAes.cs             # AES-128-ECB ← sub_403430/4042A0/404470
     │   └── PacketCodec.cs          # 送收管線 ← sub_593280 / sub_5930C0
     ├── PaperMan.Server/            # TCP 伺服器
     │   ├── Program.cs              # 入口 (top-level, 每連線一 task)
-    │   ├── ServerContext.cs        # 組態 record + LoginCode enum
+    │   ├── ServerContext.cs        # listener/681/bootstrap 組態 + LoginCode
+    │   ├── ChannelAdmissionRegistry.cs # 681→143 IP-bound one-use handoff
     │   ├── Session.cs              # 9600B 緩衝框架, 錯包全丟 (sub_555280 行為)
     │   ├── Router.cs               # FrozenDictionary 路由 (≈ sub_58B010 switch)
     │   ├── Db.cs                   # Microsoft.Data.Sqlite 存取層 (record 模型)
-    │   ├── Handlers.Auth.cs        # 682→681+694, ping
+    │   ├── Handlers.Auth.cs        # 682→681, ping (694 is Program greeting)
+    │   ├── Handlers.Channel.cs     # 143→144→195→196; 141→142 endpoint confirm
     │   ├── Handlers.Lobby.cs       # 105/107/197/199/210/212
     │   ├── Handlers.Shop.cs        # 356/204/695
     │   ├── Handlers.Stats.cs       # GP_CH*C 戰績家族 (18 REQ + 882 推播)
@@ -57,6 +60,33 @@ dotnet run --project src/PaperMan.Server -- ../db/paperman.db 40200
   1-byte rejection，絕不偽造成功 ACK。完整證據與後續工作見
   `../docs/PACKETS.md` §3.15d3a。
 
+## 已實作的登入／頻道 bootstrap
+
+- **兩個角色、兩條 TCP connection**：登入 listener 連線時只發一次
+  `694 GL_ACCOUNTCONNSUCC(u16 compression threshold)`；681 清單所列的頻道
+  listener 則只發一次空 payload `693 GL_TCPCONNSUCC`。`Router` 會拒絕在
+  channel listener 收 682、在 login listener 使用其他 lobby opcode，且在
+  channel 143 claim 成功前僅允許 ping/143。
+- **682 的真實欄位**：`str account, str password_or_token, u64 packed_data_revision,
+  u8 fingerprint_source, raw[24] fingerprint`。u64 的高 32 bits 是
+  `datarevision.txt ^ 0xB1A9D7C7`，低 32 bits 必為 `0x0000000E`；它不是硬體
+  key。`fingerprint_source` 是 2=storage serial、1=fallback adapter MAC、0=none。
+  伺服器嚴格要求 NUL、完整 raw24、無 trailing data，保存 source/raw24/revision，
+  且不記錄密碼或 fingerprint bytes。
+- **681 成功 tail**：一個 account/net-café extension（0 或 1 組）、固定三個
+  channel groups、s16 port bit pattern、type-3 extension byte 和最後的 billing
+  s32×2 都由 `LoginWire` 具名建模與驗證。`ServerConfig` 會在開 listener 前
+  檢查 CP949 fixed-buffer 長度與不支援的 type-3/144 optional block。
+- **143 無法當 credential**：native `String[24]` 的大小可證，但此匯出尚未找到
+  寫入者，不能猜它是 account 或 nickname。故 server 不以它當 lookup key；而是
+  對同 source IP、billing UI mode、extension count 的「唯一」近期 681 admission
+  做一次性 claim。相同 NAT 下有兩個無法區分的 live login 時會安全拒絕 143，直到
+  有實包或 writer trace 可建立正確 identity mapping。這是 native handoff 格式本身
+  的限制，而非可用零值或別名修補的項目。
+- 舊 DB 的 `accounts.hw_key` / `security_state` 在首次開啟時自動 rename 成
+  `client_data_revision` / `fingerprint_source`，並補入 `client_fingerprint`；
+  既有資料會保留，但欄名改為真實 wire 語意。
+
 ## 協定要點 (詳見 ../docs/PACKETS.md)
 
 - Header 8B: `[u16 w0=size][u16 w1=opcode][u16 w2][u16 w3]`, frame = w0+8。
@@ -73,9 +103,9 @@ dotnet run --project src/PaperMan.Server -- ../db/paperman.db 40200
 
 ## C# 14 / .NET 10 特性使用
 
-- `field` keyword (CompressThreshold 正規化 setter)
+- immutable `record` 組態 + `init` properties（bootstrap metadata 具名化）
 - primary constructors (Packet / Session / PacketCodec)
-- collection expressions `[...]`、list pattern (`is [1,2,3]`)
+- collection expressions `[...]`、relational/property patterns
 - `System.Threading.Lock`、`FrozenDictionary` 路由表
 - span-first API (`ReadOnlySpan<byte>` 貫穿 protocol 層, `stackalloc` 零配置)
 - `IAsyncEnumerable` recv 迴圈 + `await foreach`

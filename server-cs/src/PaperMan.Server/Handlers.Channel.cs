@@ -1,22 +1,11 @@
 // =============================================================================
-// 頻道伺服器 handlers (卅三輪全鏈定案 — 兩層處理逐行證據):
+// Channel-listener bootstrap handlers.
 //
-//   connect → server 發 693 GL_TCPCONNSUCC
-//   → client (sub_57CAE0) 送 143 PM_UDPSTART_REQ:
-//       str nick, s32 n100 (681 回送), s8 1, s32 ext_count (681 回送)
-//   → server 回 144 PM_UDPSTART_ACK (雙層處理):
-//       dispatcher 層 sub_555D50 存資料/錯誤彈窗;
-//       CLobbyChannel::sub_4179D0 case 144 → 自動送 195
-//   → client 送 195 GC_ENTERCHANNEL_REQ (sub_56FF40):
-//       u8 group (681 清單 3 組之序), u8 channel, u8 replay_flag
-//   → server 回 196 GC_ENTERCHANNEL_ACK (CLobbyChannel case 196):
-//       u8 result (1=成功; 0=頻道滿 0xDA, 2=維護 0x148), s32 channel_id,
-//       u8; 成功→ str udp_host, s32 udp_port (⭐sub_596E60 直填
-//       sockaddr = UDP 打洞目標!), u8, u8 channel_type (3=AI 頻道→
-//       續讀 sub_875680 關卡大塊), f32 flags, u8 n5
-//   → client 開 UDP session → UDP op18 → 141 → 142 (位址再確認)
-//
-//   n100/ext_count 雙 token 防跳登入直連 (144 n108=3 踢出)。
+// Native path:
+//   channel TCP connect → 693 → 143 → 144 → 195 → 196 → UDP bootstrap.
+// 143's identity and the two values echoed from 681 are bound to a recent,
+// single-use login admission; a new TCP connection must not become an arbitrary
+// account merely by sending the public default 100 / 0 values.
 // =============================================================================
 using PaperMan.Protocol;
 
@@ -24,27 +13,27 @@ namespace PaperMan.Server;
 
 public static class ChannelHandlers
 {
-    // 144 的 n108: 1=成功(mode1), 2=成功(mode2), 3=踢出 code 52, 4=code 53, 5=code 54; 0=失敗 code 38 彈窗
+    // sub_555D50 consumes the full 144 header before acting on n108.
     private enum UdpStartStatus : byte
     {
-        Fail = 0,               // 0 = sub_9A7DE0: code 38 彈窗
-        Ok = 1,                 // 1 = 成功 (mode 1: n2_10=2, byte_1D0D237=0, n3_4=3)
-        OkAlt = 2,              // 2 = 成功 (mode 2: n2_10=2, byte_1D0D237=1, n3_4=0)
-        Kicked = 3,             // 3 = 踢出 (code 52)
-        DuplicateLogin = 4,     // 4 = code 53
-        Rejected = 5,           // 5 = code 54
+        Failed = 0,
+        Ok = 1,
+        OkAlternateMode = 2,
+        Kicked = 3,
+        DuplicateLogin = 4,
+        Rejected = 5,
     }
 
-    /// <summary>196 的 result 碼 — 卅四輪全表 (sub_4177B0 十碼)。</summary>
+    // CLobbyChannel::sub_4179D0 always reads this three-field prefix of 196.
     private enum EnterChannelResult : byte
     {
-        Full = 0,               // 0xDA 頻道滿
-        Ok = 1,                 // 頻道號回顯 → client 切大廳場景
-        Maintenance = 2,        // 0x148 維護中
-        VersionMismatch = 3,    // 0x328
-        GenericError = 4,       // 4/5/7/9 → 0x1A5
-        Error6 = 6,             // 0x3A6
-        Error8 = 8,             // 0x3A7
+        Full = 0,
+        Ok = 1,
+        Maintenance = 2,
+        VersionMismatch = 3,
+        GenericError = 4,
+        Error6 = 6,
+        Error8 = 8,
     }
 
     public static void Register(Registrar add)
@@ -55,83 +44,186 @@ public static class ChannelHandlers
         add(Opcode.PM_CONNECT_REQ, PmConnect);
     }
 
-    // 143 → 144: 頻道進入第一步 (驗 n100 token; 成功後 client 自動送 195)
+    /// <summary>143 → 144. Claims the one recent successful 681 for this account.</summary>
     private static async ValueTask UdpStart(Session session, Packet packet, ServerContext context)
     {
-        // 143 全 4 欄 (sub_555C60 builder): str, s32, s8, s32
-        var nickname = packet.ReadStr();
-        int echoedN100 = packet.Remaining >= 4 ? packet.ReadS32() : 0;
-        sbyte constantOne = packet.Remaining >= 1 ? packet.ReadS8() : (sbyte)0;
-        int echoedExtCount = packet.Remaining >= 4 ? packet.ReadS32() : 0;
-
-        // 681 送的 n100=100 / ext_count=0 / 常數 1 — 三重回送驗證
-        var status = echoedN100 == 100 && constantOne == 1 && echoedExtCount == 0
-            ? UdpStartStatus.Ok
-            : UdpStartStatus.Kicked;
-
-        if (session.Nickname.Length == 0 && nickname.Length > 0)
+        if (session.Authenticated)
         {
-            session.Nickname = nickname;                    // 頻道連線補綁定
+            // 143 is a one-time bootstrap claim. In particular, do not let an
+            // already authenticated channel socket consume another same-IP
+            // admission and replace its account identity.
+            await session.SendAsync(CreateUdpStartAcknowledgement(
+                session,
+                context.Config,
+                UdpStartStatus.Kicked));
+            return;
         }
 
-        var ack = new Packet(Opcode.PM_UDPSTART_ACK)
-            .WriteU8((byte)status)
-            .WriteU8(0)                                     // flag65
-            .WriteS32((int)session.Id)                      // → dword_1D0D23C
-            .WriteStr(context.Config.ServerName)            // 頻道名 (str 64)
-            .WriteS32(0)
-            .WriteS32(0)
-            .WriteS32(0)
-            .WriteF32(0f)
-            .WriteS32(0)
-            .WriteU8(0);                                    // flag66=0 → 無延伸塊
+        UdpStartStatus status;
+        try
+        {
+            string identity = packet.ReadNulTerminatedAnsiString(LoginWire.MaxChannelIdentityBytes);
+            int billingUiMode = packet.ReadS32();
+            sbyte requiredOne = packet.ReadS8();
+            int featureExtensionCount = packet.ReadS32();
+            if (packet.Remaining != 0)
+            {
+                throw new InvalidDataException("PM_UDPSTART_REQ has trailing data.");
+            }
 
-        await session.SendAsync(ack);
+            bool claimed = requiredOne == 1
+                && context.ChannelAdmissions.TryClaim(
+                    billingUiMode,
+                    featureExtensionCount,
+                    session.RemoteIp,
+                    DateTimeOffset.UtcNow,
+                    out var admission);
+            if (claimed)
+            {
+                session.BindAuthentication(
+                    admission.AccountId,
+                    admission.UserId,
+                    admission.LoginName,
+                    admission.Nickname);
+                status = UdpStartStatus.Ok;
+                Console.WriteLine($"[s{session.Id}] accepted channel handoff for account '{ToLogSafe(identity)}'");
+            }
+            else
+            {
+                status = UdpStartStatus.Kicked;
+                Console.WriteLine($"[s{session.Id}] rejected channel handoff for identity '{ToLogSafe(identity)}'");
+            }
+        }
+        catch (Exception exception) when (exception is ArgumentException or EndOfStreamException or InvalidDataException)
+        {
+            status = UdpStartStatus.Kicked;
+            Console.WriteLine($"[s{session.Id}] malformed PM_UDPSTART_REQ: {exception.Message}");
+        }
+
+        await session.SendAsync(CreateUdpStartAcknowledgement(session, context.Config, status));
     }
 
-    // 195 → 196: 頻道選擇確認 + 下發 UDP 打洞目標 (CLobbyChannel::sub_4179D0 case 196)
+    /// <summary>195 → 196. Only the sole 681-advertised group/channel is accepted by this single-channel host.</summary>
     private static async ValueTask EnterChannel(Session session, Packet packet, ServerContext context)
     {
-        byte group = packet.ReadU8();
-        byte channel = packet.Remaining > 0 ? packet.ReadU8() : (byte)0;
-        _ = packet.Remaining > 0 ? packet.ReadU8() : (byte)0;   // replay flag
+        EnterChannelResult result = EnterChannelResult.GenericError;
+        byte selectedChannel = 0;
+        try
+        {
+            byte selectedGroup = packet.ReadU8();
+            selectedChannel = packet.ReadU8();
+            _ = packet.ReadU8(); // replay feature flag: parsed for framing; this host has no replay service.
+            if (packet.Remaining != 0)
+            {
+                throw new InvalidDataException("GC_ENTERCHANNEL_REQ has trailing data.");
+            }
 
-        var ack = new Packet(Opcode.GC_ENTERCHANNEL_ACK)
-            .WriteU8((byte)EnterChannelResult.Ok)           // v16 = 1 (Ok)
-            .WriteS32(group << 8 | channel)                 // v15 = channel_id → *(sub_417D00() + 1)
-            .WriteU8(channel)                               // v17 → *sub_417D00() = v17
-            // --- result==1 成功塊 ---
-            .WriteStr(context.Config.PublicHost)            // ⭐ UDP 打洞位址
-            .WriteS32(context.Config.ChannelPort + 1)       //    (預留 :40202)
-            .WriteU8(0)                                     // → unk_1D0CFE4
-            .WriteU8(0)                                     // n2: channel_type (0=一般; 3=AI 需大塊)
-            .WriteS32(0)                                    // v11: flags (bit0 → byte_1D0D21B)
-            .WriteU8(5);                                    // n5 → sub_417D00()[8] (client 預設 5)
+            if (session.Authenticated
+                && selectedGroup == context.Config.ChannelGroupIndex
+                && selectedChannel == context.Config.ChannelIndex)
+            {
+                result = EnterChannelResult.Ok;
+            }
+        }
+        catch (EndOfStreamException)
+        {
+            // Return a well-framed non-success 196 rather than accidentally
+            // interpreting missing bytes as channel zero.
+        }
+        catch (InvalidDataException)
+        {
+            // As above.
+        }
 
-        await session.SendAsync(ack);
+        await session.SendAsync(CreateEnterChannelAcknowledgement(result, selectedChannel, context.Config));
     }
 
-    // 141 → 142 (sub_5565D0): UDP 位址再確認 — 由 UDP op18 觸發的重連路徑
+    /// <summary>141 → 142, issued after UDP op18 asks for its endpoint confirmation.</summary>
     private static async ValueTask PmConnect(Session session, Packet packet, ServerContext context)
     {
+        if (!session.Authenticated || packet.Remaining != 0)
+        {
+            return;
+        }
+
+        var metadata = context.Config.PmConnectMetadata;
         await session.SendAsync(new Packet(Opcode.PM_CONNECT_ACK)
-            .WriteStr(context.Config.PublicHost)
-            .WriteS32(context.Config.ChannelPort + 1)
-            .WriteU8(0)
-            .WriteS32(0));
+            .WriteStr(context.Config.UdpHost)
+            .WriteS32(context.Config.UdpPort)
+            .WriteU8(metadata.OpaqueFlag)
+            .WriteU32(metadata.OpaqueConfiguration));
     }
 
-    // 193 GC_CHANNEL_REQ (sub_550790): u32 n2 — 戰隊頻道資料請求
-    //   (0=戰隊資訊, 1=成員分頁, 2=重置; 由戰隊頻道 dispatcher
-    //   sub_54D040 case 193/194 → sub_54E020/sub_54EE10 分派)。
-    // → 194 GC_CHANNEL_ACK: u32 n2 + 對應子塊; 私服無戰隊系統,
-    //   一律回 n2==2 (sub_54EDE0 重置: 清空戰隊頻道 UI + 標記已收到)。
-    //   ⚠ 194 在「一般場景」由 sub_56FE90 解成 5×u8 (byte_BEFF76 頻道人數),
-    //   但在戰隊頻道場景由 sub_54EE10 解成 u32 n2 — 193 只會從戰隊場景
-    //   發出 (sub_422F30 / /l 指令), 故回 u32 2 為正確格式。
+    // 193 GC_CHANNEL_REQ exists only in the clan-channel scene. Normal-scene
+    // 194 has a different reader, so this remains the clan reset response.
     private static async ValueTask ChannelQuery(Session session, Packet packet, ServerContext context)
     {
-        _ = packet.Remaining >= 4 ? packet.ReadU32() : 0u;      // n2 (戰隊分頁)
+        _ = packet.ReadU32();
+        if (packet.Remaining != 0)
+        {
+            return;
+        }
+
         await session.SendAsync(new Packet(Opcode.GC_CHANNEL_ACK).WriteU32(2));
     }
+
+    private static Packet CreateUdpStartAcknowledgement(Session session, ServerConfig config, UdpStartStatus status)
+    {
+        if (session.Id is < int.MinValue or > int.MaxValue)
+        {
+            throw new InvalidOperationException("144 connection id exceeds the native signed 32-bit field.");
+        }
+
+        int sessionId = (int)session.Id;
+
+        // sub_555D50 unconditionally reads all fields below. For this normal
+        // route it uses n108 to trigger 195; named metadata keeps the remaining
+        // proven-but-not-yet-semantic fields configurable without inventing a
+        // relationship to account, server, or UDP endpoint state.
+        var metadata = config.UdpStartMetadata;
+        return new Packet(Opcode.PM_UDPSTART_ACK)
+            .WriteU8((byte)status)
+            .WriteU8(metadata.SecondaryStatus)
+            .WriteS32(sessionId)
+            .WriteStr(config.ChannelName)
+            .WriteS32(metadata.FirstOpaqueValue)
+            .WriteS32(metadata.SecondOpaqueValue)
+            .WriteS32(metadata.ThirdOpaqueValue)
+            .WriteF32(metadata.FourthOpaqueValue)
+            .WriteU32(metadata.FifthOpaqueValue) // sub_592AC0, not s32
+            .WriteU8(metadata.OptionalBlockFlag);
+    }
+
+    private static Packet CreateEnterChannelAcknowledgement(
+        EnterChannelResult result,
+        byte selectedChannel,
+        ServerConfig config)
+    {
+        var acknowledgement = new Packet(Opcode.GC_ENTERCHANNEL_ACK)
+            .WriteU8((byte)result)
+            .WriteS32(config.ChannelId)
+            .WriteU8(selectedChannel);
+
+        if (result is not EnterChannelResult.Ok)
+        {
+            return acknowledgement;
+        }
+
+        var metadata = config.EnterChannelMetadata;
+        return acknowledgement
+            .WriteStr(config.UdpHost)
+            .WriteS32(config.UdpPort)
+            .WriteU8(metadata.OpaqueEndpointFlag)
+            .WriteU8(config.ChannelType)
+            .WriteU32(metadata.ClientFlags) // sub_592AC0; bit 0 controls a native flag
+            .WriteU8(metadata.ClientDefaultValue);
+    }
+
+    private static string ToLogSafe(string value) => string.Create(value.Length, value, static (destination, source) =>
+    {
+        for (int index = 0; index < source.Length; index++)
+        {
+            destination[index] = char.IsControl(source[index]) ? '.' : source[index];
+        }
+    });
 }

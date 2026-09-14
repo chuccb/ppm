@@ -4,11 +4,14 @@
 //   2) PaperLz 壓縮/解壓 round-trip (高重複、隨機、RLE、文字)
 //   3) PacketCodec 明文/AES/壓縮 管線 round-trip
 //   4) header 欄位語意 (w0/w2/w3) — w2 僅 AES 層寫, w3 = 原始大小
+//   5) 681/682/693/694 bootstrap wire contract (native reader order)
+//   6) 681→143 source-IP / one-use admission rules
 // 用法: dotnet run --project src/PaperMan.SelfTest
 // =============================================================================
 using System.Buffers.Binary;
 using System.Security.Cryptography;
 using PaperMan.Protocol;
+using PaperMan.Server;
 
 int pass = 0, fail = 0;
 
@@ -56,6 +59,152 @@ void Check(string name, bool ok)
 
     var rawStrPkt = Packet.FromPayload(Opcode.GL_LOGIN_REQ, "UserNoNul"u8);
     Check("non-nul terminated ReadStr returns text safely", rawStrPkt.ReadStr() == "UserNoNul");
+}
+
+// ---- 1b. Login / channel bootstrap wire contract ---------------------------
+{
+    const uint revision = 0x1234ABCD;
+    ulong obfuscatedDataRevision = ((ulong)(revision ^ 0xB1A9D7C7u) << 32) | 0x0000000Eu;
+    var loginRequestPacket = new Packet(Opcode.GL_LOGIN_REQ)
+        .WriteStr("Alpha9@")
+        .WriteStr("not-logged")
+        .WriteU64(obfuscatedDataRevision)
+        .WriteU8(2)
+        .WriteRaw(new byte[24]);
+    var loginRequest = LoginWire.ReadRequest(Packet.FromPayload(loginRequestPacket.Opcode, loginRequestPacket.Payload));
+    Check("682 exact request fields", loginRequest.AccountName == "Alpha9@"
+        && loginRequest.PasswordOrToken == "not-logged"
+        && loginRequest.FingerprintSource == LoginFingerprintSource.StorageSerial
+        && loginRequest.Fingerprint.Length == 24);
+    Check("682 data revision decode", LoginWire.TryDecodeDataRevision(loginRequest.ObfuscatedDataRevision, out uint decodedDataRevision)
+        && decodedDataRevision == revision);
+    Check("682 revision low-word guard", !LoginWire.TryDecodeDataRevision(obfuscatedDataRevision ^ 1, out _));
+
+    var groups = new LoginChannelEntry?[]
+    {
+        new LoginChannelEntry(0, "Normal", 40201, 0),
+        null,
+        new LoginChannelEntry(3, "AI", 40202, 9, TypeThreeExtension: 0x7E),
+    };
+    var loginAck = LoginWire.CreateAcknowledgement(new LoginAcknowledgement(
+        ResultCode: 1,
+        Success: new LoginAcknowledgementSuccess(
+            UserId: 77,
+            BillingUiMode: 101,
+            FeatureExtension: new LoginFeatureExtension(0x11111111, -7, FeatureFlag: 0xA5),
+            Servers:
+            [
+                new LoginServerEntry(-2, "Private", "127.0.0.1", 40201, 4, -3, groups),
+            ],
+            Billing: new LoginBillingMetadata(unchecked((int)0x89ABCDEF), 0x10203040))));
+
+    // This reader intentionally follows CLobbyLogin::sub_43E500, including
+    // its exactly-three groups and one-record-only group interpretation.
+    var nativeReader = Packet.FromPayload(loginAck.Opcode, loginAck.Payload);
+    bool native681Layout = nativeReader.ReadS32() == 1
+        && nativeReader.ReadS32() == 77
+        && nativeReader.ReadS32() == 101
+        && nativeReader.ReadS32() == 1
+        && nativeReader.ReadS32() == 0x11111111
+        && nativeReader.ReadS32() == -7
+        && nativeReader.ReadU8() == 0xA5
+        && nativeReader.ReadS16() == 1
+        && nativeReader.ReadS16() == -2
+        && nativeReader.ReadNulTerminatedAnsiString(49) == "Private"
+        && nativeReader.ReadNulTerminatedAnsiString(15) == "127.0.0.1"
+        && nativeReader.ReadS16() == unchecked((short)40201)
+        && nativeReader.ReadU8() == 4
+        && nativeReader.ReadS16() == -3;
+
+    // Group 0: one normal channel. Group 1: empty. Group 2: one type-3
+    // channel, whose extra trailing byte is mandatory.
+    native681Layout &= nativeReader.ReadS16() == 1
+        && nativeReader.ReadU8() == 0
+        && nativeReader.ReadNulTerminatedAnsiString(49) == "Normal"
+        && nativeReader.ReadS16() == unchecked((short)40201)
+        && nativeReader.ReadU8() == 0
+        && nativeReader.ReadS16() == 0
+        && nativeReader.ReadS16() == 1
+        && nativeReader.ReadU8() == 3
+        && nativeReader.ReadNulTerminatedAnsiString(49) == "AI"
+        && nativeReader.ReadS16() == unchecked((short)40202)
+        && nativeReader.ReadU8() == 9
+        && nativeReader.ReadU8() == 0x7E
+        && nativeReader.ReadS32() == unchecked((int)0x89ABCDEF)
+        && nativeReader.ReadS32() == 0x10203040
+        && nativeReader.Remaining == 0;
+    Check("681 success exact native reader order", native681Layout);
+
+    var failureAck = LoginWire.CreateAcknowledgement(new LoginAcknowledgement((int)2));
+    var failureReader = Packet.FromPayload(failureAck.Opcode, failureAck.Payload);
+    Check("681 failure is result word only", failureAck.Length == 4
+        && failureReader.ReadS32() == 2
+        && failureReader.Remaining == 0);
+
+    var accountGreeting = LoginWire.CreateAccountConnectionSuccess(0x2580);
+    var accountGreetingReader = Packet.FromPayload(accountGreeting.Opcode, accountGreeting.Payload);
+    Check("694 is one u16 threshold", accountGreeting.Opcode == Opcode.GL_ACCOUNTCONNSUCC
+        && accountGreetingReader.ReadU16() == 0x2580
+        && accountGreetingReader.Remaining == 0);
+    Check("693 is empty", LoginWire.CreateTcpConnectionSuccess().Opcode == Opcode.GL_TCPCONNSUCC
+        && LoginWire.CreateTcpConnectionSuccess().Length == 0);
+
+    bool rejectedUnterminatedRequest = false;
+    try
+    {
+        LoginWire.ReadRequest(Packet.FromPayload(Opcode.GL_LOGIN_REQ, "unterminated"u8));
+    }
+    catch (Exception exception) when (exception is InvalidDataException or EndOfStreamException)
+    {
+        rejectedUnterminatedRequest = true;
+    }
+    Check("682 rejects malformed NUL field", rejectedUnterminatedRequest);
+}
+
+// ---- 1c. Login-to-channel admission contract -------------------------------
+{
+    var admissions = new ChannelAdmissionRegistry();
+    var now = new DateTimeOffset(2026, 9, 15, 12, 0, 0, TimeSpan.FromHours(8));
+    admissions.Issue(
+        accountId: 10,
+        userId: 20,
+        loginName: "Alpha9",
+        nickname: "",
+        billingUiMode: 100,
+        featureExtensionCount: 0,
+        remoteIp: "203.0.113.9",
+        lifetime: TimeSpan.FromMinutes(2),
+        now: now);
+
+    Check("143 admission rejects wrong source", !admissions.TryClaim(
+        billingUiMode: 100,
+        featureExtensionCount: 0,
+        remoteIp: "203.0.113.10",
+        now: now,
+        out _));
+    Check("143 admission claims exact native echo once", admissions.TryClaim(
+        billingUiMode: 100,
+        featureExtensionCount: 0,
+        remoteIp: "203.0.113.9",
+        now: now,
+        out var claimedAdmission)
+        && claimedAdmission.AccountId == 10
+        && !admissions.TryClaim(100, 0, "203.0.113.9", now, out _));
+
+    // The String[24] writer is not known, so two otherwise indistinguishable
+    // login handoffs behind one NAT must fail closed instead of guessing an
+    // account/nickname identity alias.
+    admissions.Issue(11, 21, "Bravo", "B", 100, 0, "203.0.113.11", TimeSpan.FromMinutes(2), now);
+    admissions.Issue(12, 22, "Charlie", "C", 100, 0, "203.0.113.11", TimeSpan.FromMinutes(2), now);
+    Check("143 admission rejects ambiguous NAT claims", !admissions.TryClaim(100, 0, "203.0.113.11", now, out _));
+
+    admissions.Issue(13, 23, "Delta", "D", 101, 1, "203.0.113.12", TimeSpan.FromSeconds(1), now);
+    Check("143 admission expires before claim", !admissions.TryClaim(
+        101,
+        1,
+        "203.0.113.12",
+        now.AddSeconds(1),
+        out _));
 }
 
 // ---- 2. PaperLz -------------------------------------------------------------

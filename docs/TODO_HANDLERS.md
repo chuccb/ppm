@@ -198,11 +198,19 @@
 >    PACKETS.md §3.15d3a。
 >
 > 下一輪可做:
-> 1. 取得 Pulp’n Roll 733/734 initial-state 和 959/961 ground-weapon 實包，建立
+> 1. 取得一組已知正常的 681→143→144→195→196 實包，特別比對 `String[24]`
+>    具體是 account 或 nickname、681 ext 的兩個 s32、末尾 billing s32×2，以及
+>    144 的 `v72/v68/v70/v75/v69`。目前 server 對已證實但未命名的 144 metadata
+>    僅送安全 neutral 值，type-3 AI channel 也因此刻意拒絕設定。
+> 2. 實作/驗證 UDP relay 後才允許設定真正的 `UdpHost`/`UdpPort`；目前 196/142
+>    僅正確下發 endpoint，尚未提供 UDP socket service。也應以實包驗證 684
+>    `GL_LOGIN_DUPLICATE` 的方向與 payload（現有 C export 沒有可歸屬的 builder/
+>    reader，不能猜測發送）。
+> 3. 取得 Pulp’n Roll 733/734 initial-state 和 959/961 ground-weapon 實包，建立
 >    可重現的 per-room object seed，才實作 730–742 Pulp 與 962 成功交換。
-> 2. 精讀並實作戰隊錦標賽進階流程 (756–776)：先對每項 builder/dispatcher/
+> 4. 精讀並實作戰隊錦標賽進階流程 (756–776)：先對每項 builder/dispatcher/
 >    parser 做欄位對照，再決定使用既有 `clan_tournaments`/entries schema 的範圍。
-> 3. 以 OCC 實包驗證 `CaptureParticipantCount` 是否可由位置聚合增加到 2，以及
+> 5. 以 OCC 實包驗證 `CaptureParticipantCount` 是否可由位置聚合增加到 2，以及
 >    908 的可發送條件；目前只有單一已驗證 start actor，不能硬編成 team/slot。
 
 | op | 名稱 | REQ 寫入序列 |

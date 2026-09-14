@@ -4,8 +4,9 @@
 > 已與 5 個歷輪手工佈局抽查比對全部吻合 (106/118/120/122/142)。
 >
 > 型別對照: u8=sub_592940, s8/bool=592900, s8=592980, u16=592A00,
-> s16=5929C0, s32=592A40/592AA0, u32=592A80, f32/s32=592AC0 (4B),
-> f32=592B40, u64=592B00, str=592730 (NUL ANSI), wstr=5927B0 (UTF-16),
+> s16=5929C0, s32=592A40/592AA0, u32=592A80, raw4=592AC0 (caller determines
+> semantics; 142/144/196 use u32), f32=592B40, u64=592B00,
+> str=592730 (NUL ANSI), wstr=5927B0 (UTF-16),
 > raw16=592C40。
 >
 > ⚠ 此表為「讀取序列」非精確佈局: 條件分支/迴圈會使實際 wire 依
@@ -32,8 +33,8 @@
 | 134 | GR_END_ACK | sub_562EA0 | `u8 u8 u8 u8 u8 u16 u8 u8 u16 u8 s8/bool u16 s8/bool s8/bool s8/bool s8/bool u8 u8` |
 | 136 | GR_CHANGESLOT_ACK | sub_56EF40 | `u8 u8 u8 f32/s32 s32 u8 u8 s32` |
 | 140 | GG_EXITGAME_ACK | sub_563430 | `u8 u8` |
-| 142 | PM_CONNECT_ACK | sub_5565D0 | `str s32 u8 f32/s32` |
-| 144 | PM_UDPSTART_ACK | sub_555D50 | `u8 u8 s32 str s32 s32 s32 f32 f32/s32 u8 u8 u8 u8 u8 s32` |
+| 142 | PM_CONNECT_ACK | sub_5565D0 | `str s32 u8 u32` |
+| 144 | PM_UDPSTART_ACK | sub_555D50 | `u8 u8 s32 str s32 s32 s32 f32 u32 u8 [u8 u8 u8 u8 s32×8]` |
 | 160 | TCP_UDP_DEAD_ACK | sub_58D790 | `(無直接讀取/轉發)` |
 | 166 | Y_TCP_INF_ACK | sub_58D820 | `(無直接讀取/轉發)` |
 | 168 | GR_CHANGEUSER_ACK | sub_56F410 | `u16` |
@@ -46,7 +47,7 @@
 | 190 | GR_CHANGEMASTER_ACK | sub_56FBF0 | `u8` |
 | 192 | GR_CALLUSER_ACK | sub_56FE10 | `u8 str` |
 | 194 | GC_CHANNEL_ACK | sub_56FE90 | `u8` |
-| 196 | GC_ENTERCHANNEL_ACK | sub_4179D0 | `u8 s32 u8 [str s32 u8 u8 s32 u8]` |
+| 196 | GC_ENTERCHANNEL_ACK | sub_4179D0 | `u8 s32 u8 [str s32 u8 u8 u32 u8]` |
 | 198 | GL_MYINFO_ACK | sub_570550 | `s8/bool s32 u16 s32 u8 u8` |
 | 200 | GL_MYITEM_ACK | sub_570AB0 | `s8/bool` |
 | 201 | GL_MYPARTSUP_ACK | sub_95A3B0 | `s32 f32/s32 f32/s32 s8/bool f32/s32 f32/s32` |

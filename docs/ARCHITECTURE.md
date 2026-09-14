@@ -7,9 +7,10 @@
 
 ```
 【登入伺服器 TCP :40200 (握手=694 GL_ACCOUNTCONNSUCC)】
-connect ──► server 發 694 (門檻 0x2580) ──► client 送 682 (帳密+MAC指紋)
-        ──► server 回 681 (result=1 + 伺服器清單 + ext 等級gate + Tricod)
-        ──► client 進帳號大廳 (state 2)
+connect ──► server 發一次 694 (門檻 0x2580) ──► client 送 682 (帳密+硬體指紋)
+        ──► server 回 681 (result=1 + 伺服器清單 + account/net-café feature ext + Tricod)
+        ──► client 以 681 清單的 host:port 建立獨立頻道 TCP（帳號 TCP 的
+            關閉時機未由此段 parser 單獨證實）
 選頻道: 195 → 196; 進大廳: 250 (無回包) → client 自拉:
   197→198 MyInfo (統計佈局=任務cond對映!) 199→200 背包(28B條目)
   105→106 名單(exp!) 107→108 房間清單 433→434 好友 425→426 信箱
@@ -21,8 +22,8 @@ connect ──► server 發 694 (門檻 0x2580) ──► client 送 682 (帳�
 129 開戰→130廣播(17欄+16×s32) → 各員 183 載入完→184 → 187→188 開打
 
 【頻道伺服器 TCP :40201 (握手=693 GL_TCPCONNSUCC; 681 清單指向此 port)】
-connect → server 發 693 → client 送 143 (nick + n100/ext_count
-  雙 token 回送) → 144 (n108: 0=OK 3=踢出 — token 不符即踢)
+connect → server 發 693 → client 送 143 (String[24] identity + n100/ext_count
+  handoff claims) → 144 (n108: 1/2=OK, 3=踢出；server 需把 claim 綁定成功 681)
   → [CLobbyChannel 層自動] 195 GC_ENTERCHANNEL(group,channel,replay)
   → 196 (result 十碼表; 成功=⭐UDP host/port 正主 + ch_type
      [3=AI→sub_875680 關卡塊] ) → state 119:=2 → tick 清 CClientData
