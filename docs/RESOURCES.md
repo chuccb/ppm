@@ -247,18 +247,41 @@ hand*.tga 互證: 那是「試衣間手部貼圖」快取)
 - `voice_customize_contents.xml` (UTF-16LE BOM, root `vcustomizelistTable`):
   15 角色區塊 `<hayate index="2">`…`<devilgirl index="2">`, 每區塊
   `<Voice00>`..`<Voice92>`(缺 87) 共 **92 情境**; 每情境 27 句 speech =
-  `command_1..9` / `tactics_1..9` / `infomation_1..9` (client 拼字如此)。
-  全檔 40052 tags。語音表的 voice_item 偏移對到 (情境, 類別, 句序)。
-- `voice_customize_path.xml` (UTF-8, root `vcustomizepathTable`): 91 個
-  `<soundsNN>` 區塊 (sounds..sounds92, 缺 87) — first_path
-  `sound\soundsNN` + 15 個 `sub_path_<角色>` (cacao/dallae/hana/lich/
-  loki/maru/momo/nari/pero/robotgirl_12/spy_11/wooka/tsunderegirl/
-  magicgirl/devilgirl) = 語音檔路徑。
+  `command_1..9` / `tactics_1..9` / `infomation_1..9` (client 拼字如此;
+  speech 為屬性 `speech="…"`, 全檔 1380×27 = **37,260 句**)。語音表的
+  voice_item 偏移 = 情境編號 (VoiceNN → NN), 對到 (情境, 類別, 句序)。
+- `voice_customize_path.xml` (UTF-8, root `vcustomizepathTable`): **92 個**
+  `<soundsNN>` 區塊 (sounds..sounds92, 缺 87; 首塊 `<sounds index="0">`
+  無尾碼) — first_path `sound\soundsNN` + 每塊 15 個 `sub_path_<角色>`
+  (92×15 = 1,380 tags) = 語音檔路徑。
 - 15 角色 codename 對照 (sub_8859B0 switch 0..14 與 sub_path 一一對應):
   0 maru 1 nari 2 dallae 3 lich 4 cacao 5 loki 6 hana 7 momo 8 wooka
   9 pero 10 spy_11 11 robotgirl_12 12 tsunderegirl 13 magicgirl 14 devilgirl
   — 等同 ICT_* 角色 (NORMAL_BOY…DEVILGIRL), character/models/type1..15
   = idx+1。base_voice 兩枚 s16 即選 sounds index。
+
+**15 角色身份全對照 (卌八輪彙整 — 語音 codename ↔ 商店顯示名 ↔
+char_type ↔ item_id)**: contents.xml 角色區塊序 (0..14) 即 char_idx;
+商店 item_id 19,900,001..19,900,015 = char_type 1..15 (§5c), 故
+`char_type = char_idx + 1`:
+
+| char_idx | codename (sub_8859B0) | 商店/顯示名 (itemdata) | char_type | item_id |
+|---|---|---|---|---|
+| 0 | maru | ハヤテ (hayate) | 1 | 19900001 |
+| 1 | nari | ティナ (tina) | 2 | 19900002 |
+| 2 | dallae | ミリィ (milly) | 3 | 19900003 |
+| 3 | lich | サイラス (Cyrus) | 4 | 19900004 |
+| 4 | cacao | ドッドン (Doddon) | 5 | 19900005 |
+| 5 | loki | ガイ (Guy) | 6 | 19900006 |
+| 6 | hana | テリシア (Tericia) | 7 | 19900007 |
+| 7 | momo | アルル (alulu) | 8 | 19900008 |
+| 8 | wooka | ヴァン (van) | 9 | 19900009 |
+| 9 | pero | フッド (hood) | 10 | 19900010 |
+| 10 | spy_11 | リカ (rika) | 11 | 19900011 |
+| 11 | robotgirl_12 | レム (rem) | 12 | 19900012 |
+| 12 | tsunderegirl | エリス (eris) | 13 | 19900013 |
+| 13 | magicgirl | ルコット (lucott) | 14 | 19900014 |
+| 14 | devilgirl | ルーシー (lucy) | 15 | 19900015 |
 
 ## 5e. 版本考古 (廿一輪)
 - 根 datarevision.txt = 811034967 (patch 版本號)

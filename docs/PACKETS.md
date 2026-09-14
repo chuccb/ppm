@@ -1430,7 +1430,9 @@ byte 偏移 (this 為物件基址):
 ```
 +4     u8   slot_current (198 尾段寫)
 +60    char nick[24]     (wire str)
-+88    u8   char_type    (wire u8; 1..14 = ICT_* 角色)
++88    u8   char_type    (wire u8; 1..15 = ICT_* 角色 — 1=maru/hayate…
+                         15=devilgirl/lucy, 對應 item_id 19900001..15;
+                         語音 char_idx = char_type−1)
 +92    s32  [23] wire level (參考值)
 +96    s32  [24] exp
 +100   s32  [25] level ← client 由 exp 查表 sub_403360 重算
