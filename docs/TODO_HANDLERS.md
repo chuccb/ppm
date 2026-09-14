@@ -1,7 +1,7 @@
 # Server handler 待辦清單 (廿四輪自動盤點)
 
 > 「client 有 builder、server 尚無 handler」的 REQ 全表 — 附自動抽出
-> 的寫入序列, 按此實作 handler 即可。已實作 83 個 REQ handler
+> 的寫入序列, 按此實作 handler 即可。已實作 89 個 REQ handler
 > (Auth/Lobby/Shop/Stats/Clan/Quest/Friend/Room/Channel/Voice/
 > BattleRelay/Warehouse/Join)。
 >
@@ -80,6 +80,19 @@
 > 266 → 267 依 flag 回 code; 268 → 269 回 code 0 (無遊戲狀態機,
 > code 6/7 成功態留待後續, 不硬編未確認欄位)。詳 PACKETS.md §3.15f。
 >
+> 五十輪 (comm 簇落地 — 437/438、378/379、726/727、836/837、439-442):
+> 逐函數定案並實作 — 378/379 radio (u8 team, u8 face 頁*9+項目, u8 slot,
+> u8 len≤64, wchar[len]; REQ/ACK 同構原樣轉播全房); 726/727 對戰觀戰聊天
+> (str nick + str message, ⚠ ANSI 與 728 的 wstr 不同); 437/438 房廣播
+> (u8 flag + s32 len + raw, flag 語意無從確認 — builder 無呼叫者、client
+> 無 438 case, 原樣轉播); 836/837 喊話 (s32 uid + s32 strlen + str text →
+> u8 flag + s32 uid + s32 timer + str nick + s32 raw_len + raw, timer=1
+> 非0 保持可喊, client 3s 牆鐘限流); 439/440 好友聊天 (s32 uid + 3×str →
+> u8 status + 2×str [+comment], status 0/1/2/3 = 不存在/離線/訊息/找不到,
+> 上線遞送+回聲); 441/442 好友位置 (str nick → u8 status [+3×u8], 私服
+> 一律大廳/找不到)。msgtableres 0x1EF/0x1F0/0x1D8/0x1D9/0x21D/0x21E/
+> 0x314/0x3AF 文字已補 RESOURCES.md §8。詳 PACKETS.md §3.15c + §3.15g。
+>
 > 下一輪可做: 269 code 6/7 成功態 (需遊戲狀態機, sub_885D00 尾塊
 > 待確認); GM/MASTER 群 (275-299/394-416/822-831/883-885, 需權限
 > 分級); matching room 群 (983/986/988); AI 模式群 (918-944);
@@ -127,7 +140,6 @@
 | 360 | GG_TSURRESPON_REQ | `s32` |
 | 370 | GL_CHANGECHANNEL_REQ | `u8` |
 | 374 | GR_GETCRYSTAL_REQ | `u8` |
-| 378 | GR_RADIOMSG_REQ | `u8 u8 u8 u8 rawN` |
 | 394 | MASTER_ROOMINFO_REQ | `u8` |
 | 398 | MASTER_SVRCLASS_REQ | `u8` |
 | 400 | MASTER_CONNTYPE_REQ | `u8` |
@@ -139,9 +151,6 @@
 | 416 | MASTER_KILLALL_REQ | `(空)` |
 | 418 | MASTER_RESETTCPGROUPINFO_REQ | `str s32` |
 | 423 | GL_MSG_READ_REQ | `str` |
-| 437 | GG_ROOMBROADCAST_REQ | `u8 s32 rawN` |
-| 439 | GL_FRIEND_CHAT_REQ | `s32 str str str` |
-| 441 | GL_FRIEND_WHERE_REQ | `str` |
 | 443 | GG_STEALSUCK_REQ | `u8 s16` |
 | 445 | GG_STEALPUSH_REQ | `u8 s16` |
 | 453 | GS_DELETEGIFT_REQ | `s32 s32` |
@@ -172,7 +181,6 @@
 | 716 | GG_CHANGEWPQUICKSLOT_REQ | `s16 s16 s16 s16` |
 | 718 | GR_START_VOTING_REQ | `s32 s32 s32` |
 | 724 | GL_COMBISKILLITEM_REQ | `s32 s32 s32 s32` |
-| 726 | GG_OBSERVERCHAT_REQ | `str str` |
 | 730 | GG_GETPULP_REQ | `u8` |
 | 733 | GG_SPAWNPULP_REQ | `(空)` |
 | 736 | GG_PULPSTEAL_REQ | `u8` |
@@ -205,7 +213,6 @@
 | 830 | MASTER_CHAT_FORCE_BAN_REQ | `u8 str s32` |
 | 831 | MASTER_RESET_PACKET_DELAY_ALLOW_TIME_SEC_REQ | `s32` |
 | 834 | GL_DATA_RECV_COMPLETED_REQ | `s32` |
-| 836 | GL_SHOUTCHAT_REQ | `s32 s32 str` |
 | 838 | GR_CLAN_JOIN_RECOMMAND_REQUEST_REQ | `u8 s32` |
 | 841 | MASTER_SETALL_EVENTEXP_REQ | `f32` |
 | 843 | MASTER_SETALL_EVENTPAGE_REQ | `f32` |

@@ -1304,7 +1304,7 @@ u8+slot 系列)
     (對應 weapon_parts_catalog 10,648 條)
 ```
 
-### 3.15c 好友/訊息家族 419-441 (九輪讀畢)
+### 3.15c 好友/訊息家族 419-441 (九輪讀畢; 439-442 本輪補完)
 ```
 419 GL_MSG_ADD_REQ → 420 ACK (sub_559810): str to_nick, u8 x, u8 result
     (0=成功 1=對方拒收 2=信箱滿; 讀序 str→u8→u8)
@@ -1319,9 +1319,59 @@ u8+slot 系列)
 435 GL_FRIEND_INFO_REQ: str nick → 436 ACK (sub_55B2C0):
     u8 count, count×{str nick, u8 online(1=線上), [online: str where,
     u8 channel] } → sub_5382D0(nick, online, where, ch+1)
-439 GL_FRIEND_CHAT_REQ: s32 uid(dword_F2A684), str to_nick,
-    str from_nick, str message (ANSI ×3)
-441 GL_FRIEND_WHERE_REQ: (查所在頻道)
+439 GL_FRIEND_CHAT_REQ (sub_55B510): s32 uid(dword_F2A684), str my_nick,
+    str friend_nick, str message (ANSI ×3; message ≤180 才送)
+440 GL_FRIEND_CHAT_ACK (sub_55B660): u8 status, str nick1, str nick2,
+    [status==2: str comment] — status:
+      0=0x1EF「%s というキャラクター名は存在しません」
+      1=0x1F0「%s さんはオフラインです」
+      2=0x1D9「← %s さんのコメント」(comment=訊息本文)
+      3=0x1D8「%s さんを見つけることが出来ませんでした」
+    ⚠ nick1/nick2 讀後僅推進游標 (顯示靠全域伙伴名 unk_23193F0
+    sub_401B20 + comment); client 不本地顯示己方訊息 → server 需回聲
+441 GL_FRIEND_WHERE_REQ (sub_55B940): str nick (查所在位置)
+442 GL_FRIEND_WHERE_ACK (sub_55B9F0): u8 status;
+    status==1 → u8 where_type, u8 channel, u8 room_no —
+      where_type 11=教學(0x314「%sさんはチュートリアル中です」),
+      9/10=大師/線上(依 v25==當前頻道 → 進房 v24, 否則切頻道),
+      其他=大廳(0x21E「%sさんはロビーで待機中です」, channel/room 不讀)
+    status==2/0 → 0x21D「%sさんの情報が見つかりませんでした。\r\n
+      リトライしてください。」(只讀 status, 不讀後續)
+```
+
+### 3.15g comm 簇 437/438・378/379・726/727・836/837 (本輪逐函數定案)
+
+```
+437 GG_ROOMBROADCAST_REQ (sub_55B430): u8 flag + s32 len + raw[len]。
+    ⚠ flag/blob 語意無從確認 — builder 無直接呼叫者 (經函式指標/訊息表),
+    且 dispatcher 與房訊息表皆無 438 case (client 從不解析 438), 屬
+    遺留/特殊工具 opcode。server 依 REQ→ACK 慣例原樣轉播全房 (438 同構),
+    不硬編欄位。
+
+378 GR_RADIOMSG_REQ (sub_5593A0): u8 team(*(player+320) 0/1), u8 face
+    (頁*9+項目, 0..26 無線電選單), u8 slot(發話者自身 sub_67D010),
+    u8 len(≤64 wchar 字數), wchar[len] (2*len bytes)。
+    builder 呼叫者 (radio 選單): n8=項目(0..8) + 9*頁(0..2), v9=*(player+320)
+379 GR_RADIOMSG_ACK (sub_74C500): 與 378 完全同構 — u8 team, u8 face
+    (n2=face/9 列, n8=face%9 行), u8 slot, u8 len(≤0x40 截斷),
+    wchar[len]。以 slot 定位發話者、face 查選單語音 (sub_889A10),
+    僅 n2!=2 (非戰鬥中) 且收者非自己時顯示 → server 原樣轉播全房即可。
+
+726 GG_OBSERVERCHAT_REQ (builder case 10 @4169xx): str my_nick, str message
+    ⚠ ANSI str — 與 728 GR_OBSERVERCHAT 的 wstr 不同!
+727 GG_OBSERVERCHAT_ACK (dispatcher 727 → sub_58D840 → sub_74A540):
+    str nick, str message — 全房轉播。
+
+836 GL_SHOUTCHAT_REQ (sub_583370): s32 uid(自己 dword_EE8CB4),
+    s32 strlen, str text。client 前置: 3s 牆鐘限流 (dword_1D0D24C < 0xBB8)
+    + CHAT_SHOUT 動作表 entry[4]!=0 (p_p_p_p_p_n1189, sub_526E20 掃 5120
+    條目, key=unk_E975A8, entry[4]=+214)。
+837 GL_SHOUTCHAT_ACK (sub_583C20): u8 flag(0/1 皆顯示), s32 uid,
+    s32 timer, str nick, s32 raw_len, raw[raw_len] (訊息無 NUL, 長度前綴)。
+    uid==dword_EE8CB4 (自己) → client 把 CHAT_SHOUT 動作表 cooldown 設為
+    timer (0=不可再喊, 非0=可再喊)。timer 精確單位原服未明 (與 391 同款
+    server 動作值), 私服送 1 保持可用, 由 client 3s 牆鐘限流防洗頻。
+    GL = 大廳全域 → 廣播全服。
 ```
 
 ### 3.15b 房間戰鬥流程 GR 家族 (九輪讀畢)

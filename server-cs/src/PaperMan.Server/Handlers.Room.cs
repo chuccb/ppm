@@ -162,6 +162,11 @@ public static class RoomHandlers
         add(Opcode.GR_TEAMSHUFFLECHANGE_REQ, TeamShuffleChange);
         add(Opcode.GR_TEAMSHUFFLE_REQ, TeamShuffle);
         add(Opcode.GR_SOCCER_REQ, SoccerChange);
+
+        // comm 簇 (本輪精讀) — 對戰/大廳聊天 relay, 全屬「REQ 原樣轉播 ACK」
+        add(Opcode.GR_RADIOMSG_REQ, Radio);
+        add(Opcode.GG_ROOMBROADCAST_REQ, RoomBroadcast);
+        add(Opcode.GG_OBSERVERCHAT_REQ, ObserverChatGame);
     }
 
     // 129 REQ: u8 n125 → 130 ACK (sub_562870 讀序):
@@ -643,6 +648,74 @@ public static class RoomHandlers
         await RoomManager.BroadcastAsync(room, new Packet(Opcode.GR_OBSERVERCHAT_ACK)
             .WriteWStr(sender)
             .WriteWStr(message));
+    }
+
+    // 726 GG_OBSERVERCHAT_REQ (builder case 10): str my_nick, str message —
+    //   對戰中的觀戰者聊天 (⚠ ANSI str, 與 728 GR_OBSERVERCHAT 的 wstr 不同)
+    // → 727 ACK (dispatcher 727 → sub_58D840 → sub_74A540): str nick,
+    //   str message — 以 nick 定址顯示, 全房轉播。client 已附 nick,
+    //   原樣轉播即可。
+    private static async ValueTask ObserverChatGame(Session session, Packet packet, ServerContext context)
+    {
+        var sender = packet.ReadStr();
+        var message = packet.ReadStr();
+        if (!TryGetRoom(session, context, out var room, out _) || message.Length == 0)
+        {
+            return;
+        }
+
+        await RoomManager.BroadcastAsync(room, new Packet(Opcode.GG_OBSERVERCHAT_ACK)
+            .WriteStr(sender.Length > 0 ? sender : session.Nickname)
+            .WriteStr(message));
+    }
+
+    // 378 GR_RADIOMSG_REQ (sub_5593A0): u8 team(*(player+320) 0/1),
+    //   u8 face(頁*9+項目, 0..26 無線電選單), u8 slot(發話者自身),
+    //   u8 len(≤64 wchar 字數), wchar[len] (2*len bytes)
+    // → 379 ACK (sub_74C500): 完全同構 — 以 slot 定位發話者、face 查選單
+    //   語音。builder 已附 slot/team/face, server 原樣轉播全房即可 (不重組)。
+    private static async ValueTask Radio(Session session, Packet packet, ServerContext context)
+    {
+        if (packet.Length < 4 || !TryGetRoom(session, context, out var room, out _))
+        {
+            return;
+        }
+
+        _ = packet.ReadU8();                                 // team (0/1)
+        _ = packet.ReadU8();                                 // face (0..26)
+        _ = packet.ReadU8();                                 // slot (發話者自身)
+        byte len = packet.ReadU8();                          // wchar 字數
+        if (len > 64 || 2 * len > packet.Remaining)
+        {
+            return;                                          // 對齊 client 上限 (sub_5593A0/74C500)
+        }
+
+        // 378/379 wire 同構 → 原樣轉播 (欄位皆 client 端已定, 不硬編)
+        await RoomManager.BroadcastAsync(room,
+            new Packet(Opcode.GR_RADIOMSG_ACK).WriteRaw(packet.Payload));
+    }
+
+    // 437 GG_ROOMBROADCAST_REQ (sub_55B430): u8 flag + s32 len + raw[len]。
+    //   ⚠ flag/blob 語意無從確認: builder 無直接呼叫者 (經函式指標/訊息表),
+    //   且 dispatcher 與房訊息表皆無 438 case — client 從不解析 438,
+    //   屬遺留/特殊工具 opcode。server 依 REQ→ACK 慣例原樣轉播全房 (438
+    //   同構), 不硬編欄位。
+    private static async ValueTask RoomBroadcast(Session session, Packet packet, ServerContext context)
+    {
+        if (packet.Length < 5 || !TryGetRoom(session, context, out var room, out _))
+        {
+            return;
+        }
+
+        _ = packet.ReadU8();                                 // flag (語意未明, 原樣保留)
+        uint len = packet.ReadU32();                         // 後隨 blob 長度
+        if (len > (uint)packet.Remaining)
+        {
+            return;
+        }
+
+        await RoomManager.BroadcastAsync(room,
+            new Packet(Opcode.GG_ROOMBROADCAST_ACK).WriteRaw(packet.Payload));
     }
 
     // 990 GR_DAMAGEROOM_REQ (sub_56F950): u8 — 房主切換 double damage

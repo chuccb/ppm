@@ -37,4 +37,7 @@ public sealed class SessionRegistry
     /// <summary>依暱稱查線上 session (null = 離線)。</summary>
     public Session? Find(string nickname) =>
         _byNick.TryGetValue(nickname, out var session) ? session : null;
+
+    /// <summary>全部已註冊 session 快照 (836 GL_SHOUTCHAT 全服喊話廣播用)。</summary>
+    public IEnumerable<Session> All => _byNick.Values;
 }
