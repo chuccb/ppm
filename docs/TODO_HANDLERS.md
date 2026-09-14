@@ -239,8 +239,11 @@
 >    `dword_F2A684` server-domain meaning。144 的 daily PG、rank flag、level/KD
 >    restrictions、net-café 4×u8+8×raw4 shape，及 142 calendar 已經 source-verified，
 >    不再列為未知。
-> 2. 實作並以實包驗證 UDP relay，才實際提供 196/142 下發的 `UdpHost`/`UdpPort`。
->    確認 141 的 packed wall-clock 與部署時區預期；也以實包驗證 684
+> 2. 已實作並下發 source-proven AES-only UDP-private 19→empty-20 control
+>    endpoint；它不是 relay。後續必須先逐一追完 `sub_595E80` 各 case、371 的
+>    secondary socket、`sub_596330` send callers 與 remote-address/correlation
+>    data flow，才能判斷是否有可實作的 relay。確認 141 的 packed wall-clock 與
+>    部署時區預期；也以實包驗證 684
 >    `GL_LOGIN_DUPLICATE` 的方向與 payload（現有 C export 沒有可歸屬的 builder/
 >    reader，不能猜測發送）。
 > 3. 補 type-3 channel 的 `sub_875680` 196 AI tail；在完整 reader/writer與可重現

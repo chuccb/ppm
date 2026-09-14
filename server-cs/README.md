@@ -16,10 +16,12 @@ server-cs/
     │   ├── ChannelBootstrapWire.cs # 142/144/196 + packed calendar contract
     │   ├── PaperLz.cs              # LZSS ← sub_591600 / sub_591900
     │   ├── PaperAes.cs             # AES-128-CFB-128 (IV=0) ← sub_403430/4042A0/404470
-    │   └── PacketCodec.cs          # 送收管線 ← sub_593280 / sub_5930C0
-    ├── PaperMan.Server/            # TCP 伺服器
+    │   ├── PacketCodec.cs          # TCP 送收管線 ← sub_593280 / sub_5930C0
+    │   └── UdpPacketCodec.cs       # UDP AES-only datagram framing ← sub_595980 / sub_595A60
+    ├── PaperMan.Server/            # TCP server + narrowly evidenced UDP control
     │   ├── Program.cs              # 入口 (top-level, 每連線一 task)
     │   ├── ServerContext.cs        # listener/681/bootstrap 組態 + LoginCode
+    │   ├── UdpControlServer.cs     # private encrypted 19→empty-20 source reply only
     │   ├── ChannelAdmissionRegistry.cs # 681→143 IP-bound one-use handoff
     │   ├── Session.cs              # 9600B 緩衝框架, 錯包全丟 (sub_555280 行為)
     │   ├── Router.cs               # FrozenDictionary 路由 (≈ sub_58B010 switch)
@@ -46,6 +48,7 @@ dotnet run --project server-cs/src/PaperMan.Server
 # 第一次執行：自動建立 db/paperman.db、所有 schema、676 筆 packet catalog、
 #              預設 server_config。
 # 40200 = 登入伺服器 (握手 694); 40201 = 頻道伺服器 (握手 693, 自動 +1)
+# 40202 = UDP-private control endpoint (encrypted 19 → empty 20, auto +2)
 
 # 可選：在有 .NET 10 SDK 的機器先驗證。
 dotnet build server-cs/PaperMan.slnx
@@ -57,6 +60,17 @@ dotnet run --project server-cs/src/PaperMan.SelfTest
   (Hex-Rays 9.4 重導出直接展開字串來源) 完整還原, 並以獨立 AES 實作
   + FIPS-197 測試向量三重驗證。預設啟用 (`PaperAes.DefaultKey`);
   server 預設啟用；目前 zero-configuration launch 不讀 command-line 覆寫。
+- **UDP-private 19→20 only (Fact/HIGH)**：successful 196 advertises `UdpHost` /
+  `UdpPort`; `Program` binds it before it opens either TCP listener.
+  `UdpControlServer` decrypts AES-only private opcode 19, validates every
+  source-proven field, then replies to the source address with an **empty but
+  still 16-byte-AES-encrypted** private opcode 20. It deliberately does not
+  authorize the reported player/slot/name values, does not apply TCP LZ, and
+  does not claim P2P, relay, NAT, or the behavior of other private UDP opcodes.
+  Evidence and unknowns are maintained in `../docs/PACKETS.md` “UDP private
+  transport and the only implemented control exchange”. `PaperMan.SelfTest`
+  includes byte-level 19/20 checks plus a loopback source-address response test;
+  it still needs execution on a machine with the .NET 10 SDK.
 - **零參數、可攜 DB bootstrap**：`schema.sql` 與 `packets.tsv` 是 assembly 的
   embedded resources。`Db` 會建立父目錄、以 WAL/foreign keys 開啟 SQLite、套用
   idempotent schema、seed 676 筆 opcode 與未存在的運維預設值；既有玩家與管理者
@@ -122,8 +136,9 @@ dotnet run --project server-cs/src/PaperMan.SelfTest
 - 送出 (`sub_593280`): 首次送出時 w3:=原始大小 → (w0≥門檻時) LZ 壓縮
   (**w3 不變**, w0:=壓縮後) → **一律** AES-128-CFB-128 (IV=0, 補齊 16, **w2:=加密前大小**,
   w0:=對齊後)。⚠ w2 由且僅由 AES 層寫入; 加密失敗原版客戶端 ExitProcess。
-- 接收 (`sub_555280`): AES 解密 (驗 w0≥16、16 對齊、==align16(w2)、<0x2578)
-  → 若 w3≥門檻且 w0<w3 → LZ 解壓 (結果須==w3 且 <0x2580); 失敗丟整緩衝。
+- 接收 (`sub_555280`): AES 解密 (驗 w0≥16、16 對齊、==align16(w2)、<0x2578；
+  **w2=0 仍是有效的 16-byte encrypted frame**) → 若 w3≥門檻且 w0<w3 → LZ
+  解壓 (結果須==w3 且 <0x2580); 失敗丟整緩衝。
 - dispatcher `sub_58B010` 有 365 個 case, 含 **27 個未註冊 opcode**
   (203, 995..1010 等) — 協定實際延伸到 1010; 未知 opcode 靜默忽略。
 - popcount+XOR「seal」層 (`sub_5923D0/592420`) 為**死碼**, 無呼叫者, 不實作。

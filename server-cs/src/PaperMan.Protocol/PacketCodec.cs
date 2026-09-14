@@ -149,17 +149,19 @@ public sealed class PacketCodec(byte[]? aesKey = null, ushort compressThreshold 
         // --- AES 解密 (sub_593110 驗證群) ---
         if (_aes is not null)
         {
-            bool isEncrypted = w0 >= 16 && (w0 & 0xF) == 0 && w2 > 0 && w0 == Align16(w2) && w0 < MaxEncryptedSize;
-            if (isEncrypted)
+            // sub_593110 accepts w2 == 0: an empty logical payload is still
+            // encrypted as one 16-byte CFB block (w0=16, w2=0). Do not treat
+            // a zero-length frame as plaintext once this codec has an AES key.
+            bool isEncrypted = w0 >= 16 && (w0 & 0xF) == 0 && w0 == Align16(w2) && w0 < MaxEncryptedSize;
+            if (!isEncrypted)
             {
-                var decrypted = (byte[])payload.Clone();
-                _aes.DecryptCfb(decrypted);                    // sub_404470 (n2_4=2 → CFB-128, IV=0)
-                payload = decrypted[..w2];                     // word0 := word2
+                throw new InvalidDataException(
+                    $"invalid AES frame: w0={w0}, w2={w2}; expected 16-byte padded ciphertext");
             }
-            else if (w0 == 0 && w2 == 0)
-            {
-                payload = [];
-            }
+
+            var decrypted = (byte[])payload.Clone();
+            _aes.DecryptCfb(decrypted);                        // sub_404470 (n2_4=2 → CFB-128, IV=0)
+            payload = decrypted[..w2];                         // word0 := word2
         }
 
         // --- LZ 解壓 (sub_592E50: w3 ≥ 門檻且目前大小 < w3) ---

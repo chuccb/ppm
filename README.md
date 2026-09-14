@@ -18,7 +18,7 @@
 | `db/smoke_test.py` | 模擬 登入→建角→購物→背包分頁→開房→結算→好友/訊息/任務/公會 全流程的 DB 讀寫測試 |
 | `db/paperman.db` | 開發模式的預設 SQLite 資料庫（不存在時由 C# server 自動建立） |
 | `server/packet.py` | wire 協議 Packet 參考實作 (Python, 逐函數對應反編譯), 含自測 |
-| `server-cs/` | **C# 14 / .NET 10 伺服器** (協定層 + TCP 伺服器 + SQLite 存取層 + 自測), 見 `server-cs/README.md` |
+| `server-cs/` | **C# 14 / .NET 10 伺服器** (協定層 + login/channel TCP + source-proven UDP-private 19→20 control + SQLite + 自測), 見 `server-cs/README.md` |
 
 ## 快速開始
 
@@ -44,8 +44,9 @@ python3 db/import_pats.py        # 資源目錄灌 DB (需先以 server/pmfile.p
   壓縮 (`sub_591600`, **w3** 保留壓前大小) → **一律** AES-128-CFB-128
   加密（IV=0；`sub_4042A0`，補齊 16，**w2**=加密前大小） →
   `WSASend(this+24, size+8)`
-- 接收 `sub_5930C0`: AES 解密 (驗 16 對齊 + `w0==align16(w2)`) →
-  (w3≥門檻且 w0<w3 時) LZ 解壓 (`sub_591900`, 結果須==w3), 壞包整緩衝丟棄
+- 接收 `sub_5930C0`: AES 解密 (驗 16 對齊 + `w0==align16(w2)`；**w2=0
+  仍需解出一個 16-byte AES block**) → (w3≥門檻且 w0<w3 時) LZ 解壓
+  (`sub_591900`, 結果須==w3), 壞包整緩衝丟棄
 - ⚠️ popcount checksum + XOR「seal」層 (`sub_5923D0/sub_592420`) 為
   **死碼** (無呼叫者), 二次深挖後已自管線剔除 — 詳見 `docs/PACKETS.md` §1.4
 - 壓縮門檻由 `GL_ACCOUNTCONNSUCC(694)` 的 u16 協商：client **只接受 <0x2580**，

@@ -564,8 +564,11 @@ public static class LobbyHandlers
         var ack = new Packet(Opcode.GL_CHANGECHANNEL_ACK)
             .WriteU8(1)                                     // status 1 = 成功
             .WriteU8(ch)                                    // channel_id
-            .WriteStr(context.Config.PublicHost)            // host ip
-            .WriteS32(context.Config.ChannelPort + 1)       // UDP port
+            // This is sub_570100 → sub_596E60's *secondary* UDP address.
+            // Do not substitute the successful-196 UdpHost/UdpPort here:
+            // client evidence has not established the two fields' equivalence.
+            .WriteStr(context.Config.PublicHost)
+            .WriteS32(context.Config.ChannelPort + 1)       // independent s32; native consumer takes low u16
             .WriteU8(0);                                    // extra
 
         await session.SendAsync(ack);

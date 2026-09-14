@@ -69,9 +69,11 @@ public sealed record ServerConfig
     public int ChannelPort => checked(Port + 1);
 
     /// <summary>
-    /// 196 / 142 下發的 UDP endpoint。預設是 channel port 的下一個 port；
-    /// 若 UDP relay 不在同一機器，設定 <see cref="UdpHostOverride"/> 與
-    /// <see cref="UdpPortOverride"/>。
+    /// 196 / 142 下發的 IPv4 UDP control endpoint。預設是 channel port 的下一個
+    /// port。The implemented server behavior is only private 19→empty-20; this
+    /// setting must not be read as a claim that a UDP relay exists. Set
+    /// <see cref="UdpHostOverride"/> / <see cref="UdpPortOverride"/> only when
+    /// that control endpoint is hosted on another IPv4 machine.
     /// </summary>
     public string UdpHost => UdpHostOverride ?? PublicHost;
     public string? UdpHostOverride { get; init; }
@@ -164,9 +166,20 @@ public sealed record ServerConfig
     /// <summary>Fails before listeners are opened when a value would overflow a native fixed buffer or wire field.</summary>
     public ServerConfig Validate()
     {
-        if (!IPAddress.TryParse(ListenHost, out _))
+        if (!IPAddress.TryParse(ListenHost, out var listenAddress)
+            || listenAddress.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
         {
-            throw new ArgumentException("Listen host must be a numeric IPv4 or IPv6 address.", nameof(ListenHost));
+            // CUDPManager creates socket(AF_INET, SOCK_DGRAM) and the server
+            // now owns that advertised endpoint as well as the TCP listeners.
+            throw new ArgumentException("Listen host must be a numeric IPv4 address.", nameof(ListenHost));
+        }
+
+        if (!IPAddress.TryParse(UdpHost, out var udpAddress)
+            || udpAddress.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
+        {
+            // sub_596DA0 passes the successful-196 endpoint to inet_addr.
+            // A DNS name or IPv6 literal is not a client-compatible UDP host.
+            throw new ArgumentException("UDP host must be a numeric IPv4 address.", nameof(UdpHost));
         }
 
         // Need login, channel, and (by default) UDP ports without overflow.
@@ -177,7 +190,7 @@ public sealed record ServerConfig
 
         if (UdpPort is < 1 or > ushort.MaxValue)
         {
-            throw new ArgumentOutOfRangeException(nameof(UdpPortOverride), "UDP port must be in 1..65535.");
+            throw new ArgumentOutOfRangeException(nameof(UdpPort), "UDP port must be in 1..65535.");
         }
 
         // CLobbyLogin::sub_43E500 receives 694 but retains its initial 0x2580

@@ -29,13 +29,18 @@ connect → server 發 693 → client 送 143 (String[24] identity + n100/ext_co
   ⭐UDP host/port + ch_type tail；第三 byte=active channel index；
      [3=AI→sub_875680 關卡塊] ) → state 119:=2 → tick 清 CClientData
   → 場景切換 (9=大廳/8=AI/2=回放) → CLobbyMainRoom 自動送 107
-  → UDP session (op18→141→142 位址再確認；142 含 active-channel byte +
-     packed year/month/day/hour/minute calendar)   【bootstrap 再驗證】
-port 佈局: 40200 登入(694) / 40201 頻道(693) / 40202 UDP(未來 relay)
+  → IPv4 UDP manager configured to 196 endpoint. Private op18 can issue the
+     one-shot 141→142 endpoint confirmation; 142 contains active-channel byte +
+     packed year/month/day/hour/minute calendar.   【bootstrap 再驗證】
+port 佈局: 40200 登入(694) / 40201 頻道(693) / 40202 UDP control endpoint
 
-【戰鬥 (P2P + relay)】
-UDP 打洞 (私有編號 2-34, sub_595E80; 32→33/34 移動同步);
-UDP 失敗 → TCP 備援 165/166 (第六層戰場引擎 subtype 1-9)
+【UDP evidence boundary】
+The client has a distinct private dispatcher (`sub_595E80`). Its only completed
+server behavior here is encrypted private 19 → empty private 20, which prevents
+the native sixth-attempt TCP 139 fallback. P2P/NAT/relay and generic gameplay
+claims for the rest of the private namespace are **UNRESOLVED**.
+
+【戰鬥 TCP catalog】
 GG 中繼三模式: slot前綴轉發 / 復活六模式同構 / 聊天過濾
 戰後: 133→134 回房; GP_CH*C 戰績上報 (絕對值+MAX單調);
   ACK 自動推進任務 (sub_92EF00 事件)
@@ -77,8 +82,8 @@ server-side transition 可搜尋、可記錄、可替換；它們不依賴 143 �
 | ③ 登入層 | 0x43E651 | 681/694/882 |
 | ④ 轉蛋控制器 | 0x84A000 | 701 (11組轉輪) |
 | ⑤ 語音系統 | sub_885D00 (CVCustomizeManager) | 791-796、378/379 及 114/269/765/985 成員負載尾塊 |
-| ⑥ 戰場引擎 | sub_749B90 (1D37560) | 166 subtype 1-9 (TCP 備援同步) |
-| + UDP 層 | sub_595E80 | 私有 2-34 + 153-164 (32→33/34 移動) |
+| ⑥ 戰場引擎 | sub_749B90 (1D37560) | TCP catalog 166 subtype 1-9; its relation to UDP is UNRESOLVED |
+| + UDP 層 | sub_595E80 | private UDP dispatcher; private 20 completion is direct evidence, remaining case semantics require per-case proof |
 
 ## 3. 資料層 (7 表 37,044 條真實日版)
 
@@ -95,9 +100,13 @@ parts_ability 413 (31欄彈道) / recommend 3,180 / protocol 676
 
 ## 4b. C# Server 結構（2026-09 整理）
 
-`Program` 只負責建立 DB、固定組態、Router 與 login/channel listeners；每個
-socket 的 receive loop 按收到順序 `await Router.DispatchAsync`，不把同一
-session 的 stateful request 平行化。
+`Program` 只負責建立 DB、固定組態、Router、login/channel TCP listeners，及
+`UdpControlServer`；每個 TCP socket 的 receive loop 按收到順序
+`await Router.DispatchAsync`，不把同一 session 的 stateful request 平行化。
+UDP 端點同樣串列處理收到的 datagram，但它是無 state 的、source-address
+回覆的 19→20 control exchange，不是 TCP session dispatcher。Native client shutdown is
+explicitly *not* copied: it uses `TerminateThread` before `closesocket`; the C# endpoint
+uses cancellation and disposes its socket only after its receive loop exits.
 
 - `Session` 持有單一 TCP socket 的 connection state、account identity、room
   seat、send gate；`ChannelEntryCompleted` 明確表示 143 handoff 與 195→196
@@ -113,6 +122,9 @@ session 的 stateful request 平行化。
 - `ChannelAdmissionRegistry` 只保存一次性的 681→143 handoff；`RoomManager` /
   `SessionRegistry` 只持有 process-local live state。SQLite 是 account、inventory、
   quest 等可持久狀態的唯一來源。
+- `UdpControlServer` 與 `UdpPacketCodec` 是刻意分離的 UDP-private 層：前者只
+  parse source-proven opcode 19 並回覆空 opcode 20，後者只做 native AES framing
+  （不帶 TCP LZ）。client-reported UDP values 不取得 `Session` 或 DB authority。
 
 此切分是依 socket lifecycle 與 protocol domain，而非為了套用通用 pattern；
 重要 side effect 仍可從 Router → Handler → Db / RoomManager 直接追蹤。
@@ -121,7 +133,9 @@ session 的 stateful request 平行化。
 
 - handlers: 42 個獨立 opcode (19 個經通用轉發器)
 - 覆蓋: 登入/大廳/商店(買賣禮)/好友/信箱/任務/戰隊/戰績/
-  房間全流程/開戰鏈/戰鬥中繼/查人/場景
+  房間全流程/開戰鏈/戰鬥 TCP relay/查人/場景，以及 UDP-private 19→空 20 control
+- UDP 範圍: 只實作 source-proven AES-only 19→20；其餘 private UDP opcode、P2P/
+  NAT/relay 語意均未實作且不宣稱已定性
 - 死協定 ~80 條已定性 (PM 中控/GV 工具/韓版安全) — 無需實作
 - 待辦: docs/TODO_HANDLERS.md (照自動序列施工)
 

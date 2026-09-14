@@ -124,7 +124,9 @@ offset 8   ...  payload (小端, 緊湊, 無對齊)
 - `sub_5927F0/sub_592850` 內嵌 packet: u16 opcode + **u32** size + payload。
 - 拷貝建構 (sub_592030/592110/592600) 會校正讀寫游標的相對位移。
 - UDP 路徑 (sub_595A60, CUDPManager) 也走同一 AES 解密 (sub_5930C0),
-  但長度來自 recvfrom 而非累積 buffer。
+  但長度來自 recvfrom 而非累積 buffer，且它沒有 TCP 的 LZ 階段；empty
+  logical payload remains one encrypted 16-byte block. See the UDP-private
+  evidence boundary below rather than applying the TCP pipeline wholesale.
 
 **AES 細節 (sub_403430 = key schedule 初始化) — 金鑰已完整還原:**
 - 全域常數: `n16_0=16` (block), `n10=10` (rounds) → **AES-128**
@@ -268,8 +270,8 @@ stay explicitly wire-oriented, not guessed as account or endpoint identities.
 | GQ_ | Quest | 15 |
 | GV_ | GM Viewer 工具 | 13 |
 | GX_ | XIGNCODE 反外掛 | 3 |
-| PM_ | P2P master / UDP 中繼 | 16 |
-| UDP_/TCP_/Y_ | NAT 打洞與存活偵測 | 14 |
+| PM_ | channel / connection bootstrap (individual backend roles require evidence) | 16 |
+| UDP_/TCP_/Y_ | transport-related catalog names; do not infer one common protocol | 14 |
 | MASTER_ | GM/運維指令 | 79 |
 | SECURITY_ | AhnLab HackShield | 2 |
 
@@ -277,7 +279,8 @@ _REQ = client→server, _ACK = server→client, _NOTIFY/_NOTICE = server 推播�
 慣例: `ACK = REQ opcode + 1` (登入例外: GL_LOGIN_ACK=681 < REQ=682)。
 
 主 dispatcher (client 端 lobby): `sub_58B010` — `switch(sub_591EE0(pkt))`
-處理所有 ACK。遊戲內 UDP/戰鬥 packet 走 GameNetwork (0x2313148 物件)。
+處理 TCP catalog ACK。它先轉發到場景與 `CGameRule`；UDP datagram 則另由
+`CUDPManager::sub_595A60 → sub_595E80` 的 private dispatcher 處理。
 
 **多層分發 (五輪發現)**: `sub_58B010` 進 switch 前先呼叫兩個前置轉發器,
 所以有些 opcode **不在主 switch 的 306 個 case 裡**也會被處理:
@@ -290,61 +293,161 @@ _REQ = client→server, _ACK = server→client, _NOTIFY/_NOTICE = server 推播�
      ×3 組), **809** (s32)
    - `IVotingNetwork::sub_9BF430`: **719/720/722/723** (投票系統)
 2. `CGameRule::sub_67CF90(n9_0, pkt)` — 遊戲規則層攔截。
-**UDP 私有 opcode 空間 (五輪確認)**: `sub_595A60` (CUDPManager 收包:
-recvfrom ≤9600 → 同一 Packet 檢核 `sub_591D50` + AES 解密 `sub_5930C0`)
-→ `sub_595E80` 的 switch 用**獨立編號 2–34** (2,4,5,6,8,10,12,13,14,15,
-18,20,22,24,26,28,29,31,33,34 + 154 UDP_ALL_PING_ACK / 158
-UDP_TCP_DEAD_ACK 兩個註冊表編號)。UDP 戰鬥協定的編號與 TCP 註冊表
-**不共用**, 私服做 relay 時不可混淆兩個空間。
-七輪補: **154 UDP_ALL_PING_ACK** (sub_5965D0) = `u8 count,
-count×{u8 room_slot, u8 ping_grade}` — 以 slot 對照房間成員表更新
-ping 顯示; **158 UDP_TCP_DEAD_ACK** (sub_596910) = 無 payload 的
-斷線通知。
-九輪補 (CUDPManager 打洞/測延遲層, 物件 0x1324330):
-- 通用條目頭: `u8 slot_uid` + 16B blob (sub_592C40) 或 `u8 + f32/u32`
-- **4** (sub_593AB0): `u8 count, count×{u8 uid, 16B addr_blob}` —
-  對方地址表; 回覆時 ctor(5) 帶 `u8 my_slot(n2==2 時 -2), u32 tick`
-- **5** (sub_593E60): `u8 uid, f32 tick` — 打洞探測; 首見該 uid 記錄
-  來源位址 (recvfrom 的 sockaddr @1326944) 並回 ctor(6)
-- **6** (sub_5940E0): `u8 uid, f32 tick` — 打洞回應確認
-- **8/24** (sub_596940): 空 payload keep-alive
-- **10/12/13/14** (sub_594460/5946C0/594A10/594CA0): `u8 uid, 16B blob`
-  + 回覆 `u8 slot, u32 tick, 3×...` — 中繼協商序列
-- **15** (sub_593DF0) / **29** (sub_593E20): 短探測
-- **22** (sub_5964E0): `u8, u8 count, count×{u8 uid, f32 rtt}` —
-  RTT 表回報
-- 18/20/26/28/31/33/34: 狀態機推進 (無/極短 payload)
-私服結論: 這層只做 P2P 打洞與測速, 中繼伺服器只需回聲/轉發,
-不需理解 16B blob 內容 (原樣轉發即可)。
+## 2.5 UDP private transport and the only implemented control exchange (2026-09 revalidation)
 
-**UDP P2P 完整協定圖 (卅輪 — 收發兩端配對)**:
-```
-op  送端(builder)              收端(handler)         語意
-2                              sub_593A60            session 建立
-4                              sub_593AB0: u8 n+     地址表廣播
-                               n×{u8 uid,16B addr}
-5   u8 uid, s32 tick           sub_593E60            打洞探測 →
-6   u8 uid, s32 tick           sub_5940E0            探測回應
-9   u8×3, s32          →10     sub_594460            中繼協商
-13  u8 uid, s32        →13/14  sub_594A10/594CA0     中繼保活
-15  u8×2                       sub_593DF0            短探測
-17  (空)/str                   —                     keepalive
-19  u8,u8,s8,u8,s32,str →20    sub_5968C0            P2P 訊息
-21  u8×3, s32×3         →22    sub_5964E0: u8,u8 n,  RTT 量測
-                               n×{u8 uid,f32 rtt}
-32  u8,u8,u8,s32,u8,s8, →33/34 sub_594EC0/594F20:    ⭐移動同步!
-    u16 x,y,z                  u8×5, u16 x,y,z       (兩型收端)
-28  —                          u8×3                  狀態通知
-154/158                        ping表/斷線 (七輪)
-```
-奇數=送 偶數=收 的 P2P 對稱設計; 32→33/34 = 位置封包 (u16 量化座標,
-與 GG_DROPWEAPON 的 s16×3 同一座標系)。中繼伺服器只需在打洞失敗時
-原樣轉發 — 無需解 16B addr blob。
+> **Scope boundary — Fact/HIGH unless labelled otherwise.** `sub_595E80` is a
+> separate UDP-private dispatcher. Its numbers are **not** the TCP opcode catalog
+> (`sub_9D2050` / `Opcode.cs`). Earlier wording in this document calling this
+> layer “P2P”, “NAT hole punching”, “relay”, or a general UDP-ready handshake
+> overstated the available evidence and is withdrawn. The client proof below
+> establishes one control retry and its completion only.
 
-**Y_TCP_INF 165/166 — TCP 備援戰鬥同步 (卅輪 — 第六處理層!)**:
-UDP 打洞失敗時, 戰鬥事件改走 TCP 165 (client 送) / 166 (收) —
-166 handler = sub_58D820 → **sub_749B90 (戰場引擎物件 1D37560,
-第六個封包處理層)**:
+### Transport lifecycle
+
+| Conclusion | Native evidence | Confidence |
+|---|---|---|
+| A successful TCP `196 GC_ENTERCHANNEL_ACK` supplies the primary endpoint used to initialise this UDP transport. | `CLobbyChannel::sub_4179D0` reads the ANSI host then `s32` port only in its `result==1` tail; `sub_58ED30 → sub_595C90` passes the host and low `u16` port onward. | HIGH |
+| The same successful-196 host/port is initially copied into a **separate secondary address field**. | Immediately after `sub_58ED30`, `sub_4179D0` calls `sub_596E60(&unk_1326908, cp, hostshort)`. `sub_596E60` writes a distinct sockaddr at offsets `+40..+55`; 142 (`sub_5565D0`) and 371 (`sub_570100`) also overwrite that secondary field. This initial equality does **not** prove that the two destinations remain interchangeable. | HIGH |
+| Client transport is IPv4 UDP and is bound locally to `0.0.0.0:27000`. | `sub_596D60` calls `socket(AF_INET, SOCK_DGRAM, 0)`; `sub_596DA0` calls `bind` with `htonl(0)` and CUDPSocket's constructor default port 27000. It stores the configured remote host with `inet_addr` and `htons(port)`. | HIGH |
+| The native client starts a receive thread before declaring the manager active. | `sub_595C90` opens/configures `dword_1324360`, creates/resumes a suspended `CUDPThread`, then calls `Sleep(1000)` and only then sets manager `+52=1`. The native function does not test the open/bind/thread-create return values before that sequence. | HIGH |
+| Native stop is forceful rather than a join/close handshake. | `sub_58AF90 → sub_595D50 → sub_5957F0` clears active then `sub_597350` calls `TerminateThread`, `CloseHandle`, clears the handle, and only afterwards `sub_597040` calls `closesocket`. The infinite receiver loop has no cooperative stop check. **Inference/HIGH:** this ordering permits a receive/dispatch shutdown race; no join is present. | HIGH |
+| UDP is a datagram transport with the shared 8-byte `Packet` header and AES-CFB-128, but **without TCP LZ**. | `sub_595980` does only `sub_591F90 → sub_592F60 → sendto`; it never calls `sub_592CE0`/`sub_592E00`. `sub_595A60` does `recvfrom(…,9600) → sub_591FB0/sub_591D50 → sub_5930C0`; it never calls LZ decompression. | HIGH |
+| A logical empty UDP packet is still encrypted to a 16-byte ciphertext. | `sub_592FB0` and `sub_593110` align a zero `word0/word2` to the AES block size before encryption/decryption. | HIGH |
+| The receiver accepts a received datagram at least `word0+8` bytes long; trailing bytes are not passed to the packet parser. | `sub_595A60` tests `received >= sub_591F00(packet)+8`; it does not require equality. | HIGH |
+
+UDP header interpretation in this path is therefore:
+
+```
+u16le word0 = ciphertext byte count (always 16-byte aligned)
+u16le word1 = UDP-private opcode
+u16le word2 = unpadded pre-AES payload byte count
+u16le word3 = original pre-send payload byte count
+byte[word0] = AES-128-CFB-128 ciphertext, zero IV, fixed client key
+```
+
+`word2` and `word3` are both the uncompressed payload length on the directly
+observed UDP sends. This is **not** permission to infer that every possible UDP
+packet has no additional history or application state; it only records that the
+native UDP send path omits the TCP compression stage.
+
+### Private opcode 19 → 20
+
+`sub_596670(CUDPNetworkManager)` is the source of the only currently implemented
+server behavior. On a normal retry it builds private opcode **19** in this exact
+order (all scalar values are little-endian because the packet primitives write
+native little-endian scalars):
+
+| Offset | Wire type | Client source | Meaning / evidence boundary |
+|---:|---|---|---|
+| 0 | `u8` | `*sub_417D00()` via `sub_592920` | active channel index; set by the 142/196 channel paths. |
+| 1 | `u8` | `CMyData + 5` (`byte_EE896D`) | current room-member slot. `sub_537690` writes it from room/join response slot fields and callers use it to select the local room member. |
+| 2 | `s8` | `CMyData + 840 == 2` via `sub_5928E0` | exact boolean comparison only; the domain of `CMyData+840` remains **UNRESOLVED**. Normal client emissions are 0 or 1. |
+| 3 | `s8` | `-2` when `CMyData+840==2`, otherwise `CMyData+13`, via `sub_592920` | source-dependent one-byte value. Its non-special domain is **UNRESOLVED**; do not rename it team/mode/peer id. |
+| 4 | `s32` | `CMyData + 844` (`dword_EE8CB4`) via `sub_592A20` | client-reported local player identifier. It is compared with player records during room/join processing; no server-side authorization rule is recovered. |
+| 8 | NUL-terminated CP949/ANSI string | `sub_537740(CMyData)` = `CMyData + 896`, via `sub_5926F0` | local nickname. It is copied from character UI data and reused in client chat/name comparisons. No length prefix; emission includes the NUL. |
+
+The object provenance is direct: global `byte_EE8968` is a large `CMyData`, not
+the decompiler's false `char[4]` declaration (`sub_AD91B0` constructs it and
+`sub_ADC240` destroys it). Accessors in `00536D70..00537740` establish the
+object-relative offsets. The payload is `9 + encodedNicknameByteCount` bytes,
+where the final one byte is the NUL. Its exact semantic names remain intentionally
+source-oriented where the binary does not prove a domain interpretation.
+
+**Retry/completion state machine:**
+
+1. `sub_595C90` sets control next-tick (`CUDPNetworkManager+40`) and retry count
+   (`+44`) to zero. The first call to `sub_596670` can consequently send now.
+2. The direct callers are `sub_4070B0`, `sub_407290`, and the game-start screen
+   tick `CLobbyGameStart::sub_43C380`. They poll this routine while their own UI/
+   game transitions wait; it is not a generic always-on UDP heartbeat.
+3. When `timeGetTime() >= manager+40` and retry count is at most 100, a normal
+   call sends opcode 19 to the primary `196` endpoint, clears global
+   `byte_1D0CFE7`, records a tick at `+36`, schedules `+40 = now + 500`, then
+   increments `+44`. The increment and schedule happen even if `sendto` failed
+   (its return is merely accumulated into raw global `dword_1D0CFF4`).
+4. Attempt six increments the count from 5 to 6, calls TCP `sub_560720` (catalog
+   opcode `139 GG_EXITGAME_REQ`), then stores 101. Values above 100 suppress
+   further normal sends. This is a client-observable fallback, not a retry policy
+   the server may freely redesign.
+5. Before building 19, `sub_596670` checks `sub_67F120`: it observes whether the
+   current local game-mode object reports internal state **9**. If true, the same
+   completion mutation occurs locally without an opcode-19 send. The label for
+   mode state 9 is **UNRESOLVED**.
+6. UDP opcode **20** reaches `sub_595E80` only while the manager is active, a
+   global dispatch dependency is non-null, and `sub_67EAC0()==0`. Case 20 calls
+   `sub_5968C0`, which reads **zero payload fields**, sets `byte_1D0CFE7=1`,
+   clears manager retry/control fields `+44`, `+8`, and `+4`, timestamps `+24`,
+   and calls `sub_594F00`. The latter only clears `byte_1324331`.
+7. `byte_1D0CFE7` is a broader game-transition gate, not an opcode-20 receipt
+   bit: `CLobbyGameStart::sub_43C2A0` also sets it for internal mode states 6 or
+   15, and several lobby/game transition functions clear it. Those clears do not
+   themselves reset the retry counter. There is therefore no basis for treating
+   op20 as an idempotent, authenticated session admission message.
+
+`sub_4070B0` additionally compares `timeGetTime()` with an externally maintained
+`dword_1326980`; `sub_407290` stops when external `n0x64 > 100`. The setters and
+units of those outer limits are not fully recovered, so no numeric timeout beyond
+the 500-ms scheduler and sixth-send fallback is claimed here.
+
+### Server implementation boundary
+
+`PaperMan.Protocol/UdpPacketCodec.cs` encodes exactly the native UDP AES-only
+framing. AES-CFB encryption is **not** an authentication/MAC result, and no
+native server admission token is recovered. `PaperMan.Server/UdpControlServer.cs` binds the advertised IPv4
+`UdpHost/UdpPort`, parses only the complete opcode-19 shape above, and immediately
+returns an **empty, encrypted private opcode 20** to the datagram source. Empty is
+intentional: `sub_5968C0` does not consume a packet field. The endpoint is
+stateless and does **not** turn the reported channel/slot/player/nickname fields
+into authority, because the original server-side admission/correlation behavior
+has not been recovered.
+
+This minimum exists to prevent the directly evidenced sixth-attempt TCP 139
+fallback. It is not a claim that the remaining private opcode cases are a relay,
+peer-to-peer protocol, NAT traversal, or complete gameplay transport. Unsupported
+private opcodes are logged and ignored. Future work must evidence each case's
+builder, receiver, state dependencies, remote-address usage, and server behavior
+before expanding this endpoint.
+
+### Adjacent send/address flows recovered, deliberately not implemented
+
+The following is recorded because it is necessary counter-evidence against
+turning 19→20 into a made-up general UDP protocol. It is **Fact/HIGH** for the
+listed reads/writes and branches, but not a conclusion about the original
+server's business rules.
+
+| Native path | Directly observed behavior | Server consequence |
+|---|---|---|
+| `sub_595D80 → sub_596330` | The periodic path runs only while manager `+52` is active, `n2 != 2`, `sub_67F120()!=1`, and `sub_67EC20()!=1`. It passes raw manager `+72` into `sub_596330`; that field's provenance remains **UNRESOLVED**. `sub_596330` does nothing when bit `0x08` is set. Otherwise it emits primary-destination opcode 21: `u8 channel, u8 roomSlot, u8 sourceDependentSlot, s32 dword_EE8CB4, s32 manager+4, s32 dword_EE8978`. The two final values retain source-oriented names. | No opcode 21 is emitted or accepted by this server. Its trigger and server correlation are not recovered. |
+| `sub_5937D0 → sub_593830` | State byte zero calls `sub_593830`. For `n2==2`, it sends primary opcode 15 (`u8 channel,u8 roomSlot`) three times, stores state 7. Otherwise, if elapsed since `dword_F2563C` exceeds 1000 and global `n0x3E8==0`, it sends primary opcode 1 (`u8 channel,u8 roomSlot,u8 sourceDependentSlot,s32 clientPlayerId`) and refreshes that tick. State 4 delegates to `sub_5941D0`; state 7 returns true. | Do not use this as a “ready” or P2P state name. No 1/15 behavior is implemented. |
+| inbound 4 → `sub_593AB0` | A one-shot global guard admits only its first execution. It reads `u8 count`, then `count×{u8 participantKey,raw16 addressBlob}`; it maps each key through the 16 local member records, returns immediately for an unknown key (after any preceding mutations), stores matching blobs, and sends opcode 5 (`u8 sourceDependentSlot,raw4 dword_F25640`) three times directly to every matching nonlocal stored 16-byte address. It then stores state 4. | A raw16 blob is used as a sockaddr argument in this path, but its server generation/lifetime is not recovered. Do not create, relay, or zero-fill it. |
+| inbound 5 → `sub_593E60` | It reads `u8 participantKey,raw4`. On first receipt for a matching member key it snapshots the `recvfrom` source sockaddr into that member's 16-byte storage, creates opcode 6 (`u8 sourceDependentSlot,raw4 dword_F25640`), and sends it three times directly to that received source; later receives only increment a byte counter. | This proves direct received-address reuse in this client branch, not the identity/authentication or server role. No 5/6 behavior is implemented. |
+| `sub_596E60` versus CUDPSocket's stored primary | `sub_596DA0` sets primary sockaddr at CUDPSocket `+24..+39`; `sub_596E60` sets secondary sockaddr at `unk_1326908 +40..+55`. `sub_595900` sends packet 17 to primary, `sub_595940` sends it to secondary, and `sub_595980` is the explicit-address send primitive. | Endpoint config must remain separate in future design even though successful 196 initially copies the same pair into both fields. |
+
+**Opcode-21 correction / exact layout.** The decompiler names around `sub_596330`
+are misleading and should not be silently converted into player semantics. Its
+payload is exactly:
+
+```
+u8  activeChannelIndex          = *sub_417D00()
+u8  currentRoomSlot             = byte_EE896D
+u8  sourceDependentSlot          = (n2 == 2) ? 0xFE : n0x10
+s32 clientReportedPlayerId       = dword_EE8CB4
+s32 managerOffsetPlus4Raw        = CUDPNetworkManager + 4
+s32 cMyDataOffsetPlus844Raw      = dword_EE8978
+```
+
+The sixth field is **not** a second copy of `clientReportedPlayerId`: source
+addresses distinguish `dword_EE8CB4` from `dword_EE8978`. The latter is an
+unresolved `CMyData`-adjacent raw integer; the temporary variable name `v14`
+in the decompile is not evidence of meaning. This table replaces the earlier
+ambiguous prose and is Fact/HIGH for order/width/value source, UNRESOLVED for
+both `manager+4` and `dword_EE8978` semantics.
+
+**Y_TCP_INF 165/166 — TCP catalog packet pair (evidence boundary)**:
+`166` is forwarded by `sub_58D820` to `sub_749B90` on the battle-engine object.
+The client code inspected here does **not** prove that this pair is a fallback for
+private UDP, nor that it is activated by NAT traversal; that older conclusion is
+withdrawn. The field-reader notes below remain a separate TCP parser record:
 ```
 166 = u8 slot, u8 subtype:
   1 = 位置心跳 (u8)          2 = 動作狀態
@@ -354,9 +457,10 @@ UDP 打洞失敗時, 戰鬥事件改走 TCP 165 (client 送) / 166 (收) —
   6 = 特殊 (f32, u16, s32, 6×f32, u8, str)
   7 = 聊天/表情 (str)   8/9 = 狀態
 ```
-165 REQ 三變體 (17-20 欄) = 對應子型的送端 (座標 f32 全精度 —
-與 UDP 32 的 u16 量化互補: TCP 精確/UDP 高頻)。
-→ 私服 relay: 166 原樣轉發給房內其他人即可 (= GG 模式3)。
+165 has multiple builder variants. The relationship of those variants to private
+UDP opcode 32 and the original server's routing/admission behavior remains
+**UNRESOLVED**; a relay implementation must not rely on the withdrawn
+TCP-fallback interpretation.
 
 **戰隊隧道協定 (五輪發現)**: `GC_CLAN_PROTOCOL_REQ(583)/_ACK(584)` 是
 **容器封包** — payload 第一個欄位是 `s32 sub_opcode`, 之後才是子協定
@@ -903,7 +1007,7 @@ handler 不在 dispatcher 也不在 CLobbyShop — 在**轉蛋動畫控制器**
 937 AI_FEVER_END: u8; 942 獎勵選擇開始: u8+s32+u8×2+s32×2
 960 DROPWEAPON_DESTROY: u8+u16 (掉落武器消失)
 994 GG_ASSISTPOINT: u8×2+s32+u8×2+s32×3 (助攻點數 → cond36 事件源!)
-155/156 Y_UDP_HOLE_INF: UDP 打洞層 (sub_595E80 編號 155/156 處理)
+155/156 Y_UDP_HOLE_INF: catalog names only. `sub_595E80`'s verified switch has no 155/156 case; their transport role is **UNRESOLVED**.
 無 payload 通知: 766/778/811/833/889/908 (純觸發)
 ```
 
@@ -1062,7 +1166,7 @@ GG 戰鬥事件中繼 (server 原樣轉發即可) 與 MASTER_* GM 工具組。
     s32 channel_id (→ sub_417D00()[1])
     u8  channel_index (result==1 時由 sub_4177B0 寫入 active channel)
     **僅 result==1 續讀**:
-      str  udp_host      ⭐ UDP 打洞伺服器位址!
+      str  udp_host      ⭐ UDP control endpoint (no P2P/NAT role inferred)
       s32  udp_port      (sub_58ED30 存 + sub_596E60 取 low u16 填 sockaddr)
       u8   endpoint_opaque → 1D0CFE4
       u8   channel_type (==3 → 續讀 AI multi 大塊 sub_875680:
@@ -1256,8 +1360,9 @@ code 6/7 成功態留待後續, 不硬編未確認欄位)。
 ### 3.15d 連線生命週期 103/141-144（bootstrap 再驗證）
 ```
 103 GE_LOGOUT_REQ (sub_58D660): 無 payload — client 登出通知
-141 PM_CONNECT_REQ (sub_556530): 無 payload。由 UDP op 18 的一次性 latch
-    觸發，是 UDP session 建立後的 endpoint 再確認，而非 TCP 登入。
+141 PM_CONNECT_REQ (sub_556530): 無 payload。由 private UDP op18 的一次性
+    latch 觸發，是 UDP manager 已配置後的 endpoint 再確認，而非 TCP 登入；這
+    不能單獨證明 P2P/NAT/session-admission semantics.
 142 PM_CONNECT_ACK (sub_5565D0):
     str endpoint_host (client fixed buffer char[20]，最多 19 ANSI bytes)
     s32 endpoint_port (raw 4B；sub_58ED30/sub_596E60 實際只取 low u16)
@@ -1584,7 +1689,7 @@ u8+slot 系列)
 | 834 | `GL_DATA_RECV_COMPLETED_REQ` | `sub_583120` | C2S | `s32 user_id` |
 | 835 | `GL_DATA_RECV_COMPLETED_ACK` | `sub_5831D0` | S2C | `(空)` |
 | 370 | `GL_CHANGECHANNEL_REQ` | `sub_570030` | C2S | `u8 channel_id` |
-| 371 | `GL_CHANGECHANNEL_ACK` | `sub_570100` | S2C | `u8 status, u8 channel_id, str host_ip, s32 host_port, u8 extra` |
+| 371 | `GL_CHANGECHANNEL_ACK` | `sub_570100` | S2C | `u8 status, u8 channel_id, str host_ip, s32 host_port, u8 extra`; client passes this independently to `sub_596E60` (secondary UDP address field). Its relation to successful-196 primary endpoint is **UNRESOLVED**; do not merge endpoint state. |
 | 131 | `GR_FORCEOUT_REQ` | `sub_56EC10` | C2S | `u8 target_slot` (房主踢人) |
 | 132 | `GR_FORCEOUT_ACK` | `sub_56ECC0` | S2C | `u8 status(1), u8 target_slot` (廣播並移除成員) |
 | 718 | `GR_START_VOTING_REQ` | `sub_A191D0` | C2S | `s32 target_slot, s32 reason, s32 initiator_slot` |
@@ -1957,7 +2062,8 @@ dispatcher case 102 → `sub_58D6F0` 立即 `ctor(101)` 回送
 ✔ 場景 vtable 層      699/703/707/807/809 (CLobbyShop), 719-723
                       (IVotingNetwork), 788 (sub_407360)
 ✔ 登入層 0x43E651     681/694/882
-✔ UDP 層 sub_595E80   2-34 私有編號 + 153-164 + 155/156 HOLE_INF
+✔ UDP transport evidence   separate `sub_595E80` private dispatcher; only 19→empty-20 server exchange implemented
+△ remaining private cases   values/case labels exist but transport/domain meaning is UNRESOLVED pending per-case analysis
 ✘ 真·死協定 ~80 條    無 builder 無 parser 無別層引用:
    PM_MASTER/ID/LOGOUT/CH_SERVER (145-152 舊版中控殘留),
    GR_STARTTIME/AUTOCHANGE/CRYSTAL 系 (棄用模式),
@@ -1965,7 +2071,7 @@ dispatcher case 102 → `sub_58D6F0` 立即 `ctor(101)` 回送
    GS_STOREOK/NEWGIFT/HUKUBUKURO/PRESENTPACKAGE (棄用商店流程),
    SECURITY_AHNLAB/NPGAMEGUARD (韓版安全模組, 日版不用),
    MASTER_TEST/UPITEM 等 GM 殘留, *_BASE 佔位 (100/560/580/680)
-→ 私服無需理會死協定; 622 條活協定全部有佈局/序列記錄。
+→ 私服無需理會死協定; the 622 TCP-catalog live entries have their recorded layout/sequence scope. The separate private UDP dispatcher is excluded from that catalog count and remains only partially evidenced as stated above.
 ```
 
 ## 3.98 CClientData 記憶體總圖 (廿七輪彙整 — 歷輪碎片權威版)

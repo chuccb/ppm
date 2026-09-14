@@ -4,7 +4,8 @@
 //   2) PaperLz 壓縮/解壓 round-trip (高重複、隨機、RLE、文字)
 //   3) PacketCodec 明文/AES/壓縮 管線 round-trip
 //   4) header 欄位語意 (w0/w2/w3) — w2 僅 AES 層寫, w3 = 原始大小
-//   5) 681/682/693/694 and 141/142/143/144/195/196 bootstrap wire contracts
+//   5) UDP-private 19 -> empty 20 AES-only datagram and source-reply contract
+//   6) 681/682/693/694 and 141/142/143/144/195/196 bootstrap wire contracts
 //   6) 681→143 source-IP / one-use admission rules
 //   7) zero-argument SQLite bootstrap, account upgrades, and legacy migration
 // 用法: dotnet run --project src/PaperMan.SelfTest
@@ -65,6 +66,18 @@ async Task<(TcpClient ServerClient, TcpClient PeerClient)> CreateConnectedTcpCli
         peerClient.Dispose();
         throw;
     }
+}
+
+int GetAvailableIpv4UdpPort()
+{
+    using var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+    socket.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+    if (socket.LocalEndPoint is not IPEndPoint endpoint)
+    {
+        throw new InvalidOperationException("The UDP test socket has no IPv4 endpoint.");
+    }
+
+    return endpoint.Port;
 }
 
 // ---- 1. Packet 原語 ---------------------------------------------------------
@@ -767,6 +780,12 @@ foreach (var (label, codec) in codecs)
     Check("w2 = 加密前大小 4 (僅 AES 層寫)", w2 == 4);
     Check("w3 = 原始大小 4", w3 == 4);
 
+    byte[] emptyAesFrame = codec.Encode(new Packet(Opcode.GT_PING_ACK));
+    Check("generic AES empty payload is one encrypted block",
+        BinaryPrimitives.ReadUInt16LittleEndian(emptyAesFrame) == 16
+        && BinaryPrimitives.ReadUInt16LittleEndian(emptyAesFrame.AsSpan(4)) == 0
+        && codec.Decode(emptyAesFrame).Length == 0);
+
     // 壓縮管線: w3 = 原始大小, w2 = 加密前(=壓縮後)大小
     var (_, compressingCodec) = codecs[2];                               // aes+compress, 門檻 64
     var big = new Packet(Opcode.GL_MYITEM_ACK);
@@ -837,7 +856,102 @@ foreach (var (_, codec) in codecs)
     Check("golden frame: decode", back.Opcode == Opcode.GT_PING_ACK && back.ReadS32() == 123);
 }
 
-// ---- 7. 語音封包簇與 sub_885D00 wire 格式 round-trip (本輪新增) -------------
+// ---- 7. UDP-private 19 -> empty 20 control framing -------------------------
+// sub_595980 / sub_595A60 use AES only: no TCP LZ stage, and even an empty
+// completion is a 16-byte ciphertext with w2=w3=0.
+{
+    using var udpCodec = new UdpPacketCodec();
+    var requestPacket = new Packet((Opcode)UdpPrivateOpcode.ControlRequest)
+        .WriteU8(3)
+        .WriteU8(7)
+        .WriteS8(0)
+        .WriteS8(-2)
+        .WriteS32(42)
+        .WriteStr("테스트닉");
+
+    byte[] requestFrame = udpCodec.Encode(requestPacket);
+    ushort requestW0 = BinaryPrimitives.ReadUInt16LittleEndian(requestFrame);
+    ushort requestW2 = BinaryPrimitives.ReadUInt16LittleEndian(requestFrame.AsSpan(4));
+    ushort requestW3 = BinaryPrimitives.ReadUInt16LittleEndian(requestFrame.AsSpan(6));
+    var request = UdpControlRequest.Read(udpCodec.DecodeDatagram(requestFrame));
+    Check("udp 19 uses AES-only Packet header",
+        requestW0 == ((requestPacket.Length + 15) & ~15)
+        && requestW2 == requestPacket.Length
+        && requestW3 == requestPacket.Length);
+    Check("udp 19 exact field order", request.ActiveChannelIndex == 3
+        && request.CurrentRoomSlot == 7
+        && request.SourceModeEqualsTwoFlag == 0
+        && request.SourceDependentSlot == -2
+        && request.ClientReportedPlayerId == 42
+        && request.LocalNickname == "테스트닉");
+
+    byte[] completionFrame = udpCodec.Encode(new Packet((Opcode)UdpPrivateOpcode.ControlCompletion));
+    ushort completionW0 = BinaryPrimitives.ReadUInt16LittleEndian(completionFrame);
+    ushort completionW2 = BinaryPrimitives.ReadUInt16LittleEndian(completionFrame.AsSpan(4));
+    ushort completionW3 = BinaryPrimitives.ReadUInt16LittleEndian(completionFrame.AsSpan(6));
+    Packet completion = udpCodec.DecodeDatagram(completionFrame);
+    Check("udp empty 20 remains AES-encrypted", completionW0 == 16 && completionW2 == 0 && completionW3 == 0);
+    Check("udp empty 20 decodes to no payload", completion.OpcodeRaw == 20 && completion.Length == 0);
+
+    var payloadWithNoUdpLz = new Packet((Opcode)UdpPrivateOpcode.ControlRequest)
+        .WriteRaw(new byte[64]);
+    byte[] noLzFrame = udpCodec.Encode(payloadWithNoUdpLz);
+    Check("udp codec never applies TCP LZ",
+        BinaryPrimitives.ReadUInt16LittleEndian(noLzFrame) == 64
+        && BinaryPrimitives.ReadUInt16LittleEndian(noLzFrame.AsSpan(4)) == 64
+        && BinaryPrimitives.ReadUInt16LittleEndian(noLzFrame.AsSpan(6)) == 64);
+
+    byte[] trailingDatagram = [.. requestFrame, 0xAA, 0xBB];
+    Check("udp native-compatible trailing bytes are ignored",
+        UdpControlRequest.Read(udpCodec.DecodeDatagram(trailingDatagram)).LocalNickname == "테스트닉");
+}
+
+// ---- 8. UDP control endpoint source-address completion ----------------------
+{
+    int udpPort = GetAvailableIpv4UdpPort();
+    var config = new ServerConfig
+    {
+        ListenHost = "127.0.0.1",
+        PublicHost = "127.0.0.1",
+        UdpPortOverride = udpPort,
+    }.Validate();
+
+    using var server = new UdpControlServer(config);
+    using var serverStop = new CancellationTokenSource();
+    Task serverTask = server.RunAsync(serverStop.Token);
+    using var client = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+    using var clientCodec = new UdpPacketCodec();
+    using var receiveStop = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+    var request = new Packet((Opcode)UdpPrivateOpcode.ControlRequest)
+        .WriteU8(1).WriteU8(2).WriteS8(1).WriteS8(3).WriteS32(4).WriteStr("udp-test");
+
+    try
+    {
+        byte[] requestFrame = clientCodec.Encode(request);
+        _ = await client.SendToAsync(requestFrame, SocketFlags.None, server.LocalEndpoint, receiveStop.Token);
+
+        var responseBuffer = new byte[UdpPacketCodec.MaxDatagramSize];
+        SocketReceiveFromResult response = await client.ReceiveFromAsync(
+            responseBuffer,
+            SocketFlags.None,
+            new IPEndPoint(IPAddress.Any, 0),
+            receiveStop.Token);
+        Packet completion = clientCodec.DecodeDatagram(responseBuffer.AsSpan(0, response.ReceivedBytes));
+        Check("udp endpoint replies 20 to request source",
+            completion.OpcodeRaw == (ushort)UdpPrivateOpcode.ControlCompletion && completion.Length == 0);
+    }
+    catch (OperationCanceledException)
+    {
+        Check("udp endpoint replies 20 to request source", false);
+    }
+    finally
+    {
+        serverStop.Cancel();
+        await serverTask;
+    }
+}
+
+// ---- 9. 語音封包簇與 sub_885D00 wire 格式 round-trip (本輪新增) -------------
 // 驗證 sub_885D00 (85B: s16 base1, s16 base2, 27×{s16, u8}),
 // 792 單人 (86B: u8 char + 85B), 794 全量 (1 + 15×86 = 1291B),
 // 795 變體 A/B, 796 ACK, 378/379 RadioMsg, 114 / 269 負載尾塊。

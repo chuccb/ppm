@@ -21,7 +21,8 @@ Console.WriteLine(
     $"""
      [paperman] handlers : {router.Count}
      [paperman] database : {db.DatabasePath} ({(db.Initialization.CreatedDatabaseFile ? "created" : "ready")}; {db.Initialization.ProtocolPacketDefinitionCount} protocol definitions)
-     [paperman] aes      : {(config.AesKey is null ? "OFF (明文模式)" : "ON")}
+     [paperman] aes TCP  : {(config.AesKey is null ? "OFF (明文模式)" : "ON")}
+     [paperman] aes UDP  : ON (native fixed key; AES-only)
      [paperman] compress : threshold 0x{config.EffectiveCompressionThreshold:X4}{(config.EffectiveCompressionThreshold >= PacketCodec.NeverCompress ? " (停用)" : "")}
      """);
 
@@ -29,12 +30,18 @@ Console.WriteLine(
 // 指示的頻道 host:port — 單機模式用兩個 port 區分角色:
 //   config.Port     → 登入伺服器 (握手 694 GL_ACCOUNTCONNSUCC)
 //   config.Port + 1 → 頻道伺服器 (握手 693 GL_TCPCONNSUCC)
+//   config.UdpPort  → private UDP 19 → 20 control completion
+//
+// Construct/bind all three before opening TCP listeners: a successful 196 must
+// never advertise a UDP endpoint this process failed to own at startup.
+using var udpControlServer = new UdpControlServer(config);
 var loginListener = new TcpListener(IPAddress.Parse(config.ListenHost), config.Port);
 var channelListener = new TcpListener(IPAddress.Parse(config.ListenHost), config.ChannelPort);
 loginListener.Start();
 channelListener.Start();
 Console.WriteLine($"[paperman] login   server on {config.ListenHost}:{config.Port}");
 Console.WriteLine($"[paperman] channel server on {config.ListenHost}:{config.ChannelPort}");
+Console.WriteLine($"[paperman] udp     control endpoint on {udpControlServer.LocalEndpoint}");
 
 using var cts = new CancellationTokenSource();
 Console.CancelKeyPress += (_, e) =>
@@ -65,7 +72,8 @@ Task AcceptLoopAsync(TcpListener listener, ServerRole role) => Task.Run(async ()
 
 await Task.WhenAll(
     AcceptLoopAsync(loginListener, ServerRole.Login),
-    AcceptLoopAsync(channelListener, ServerRole.Channel));
+    AcceptLoopAsync(channelListener, ServerRole.Channel),
+    udpControlServer.RunAsync(cts.Token));
 
 loginListener.Stop();
 channelListener.Stop();

@@ -23,8 +23,9 @@
 //      **ACK opcode** 廣播 (REQ opcode 無 dispatcher case, 會被忽略)。
 //
 // 復活五連 (342/360/455/746/909/971) 與 Y_TCP_INF/PM_TSPOSUPDATE 維持
-// 既有實作。戰鬥語意 (傷害/勝負) 由 client P2P 決定 — server 只驗證
-// (在房內)+廣播, 與原版 relay 行為一致。
+// 既有實作。這些 TCP handler 的 room validation/broadcast is an explicit
+// server implementation boundary; the recovered client does not prove an
+// original-server P2P/relay authority model or its relation to private UDP.
 // =============================================================================
 using PaperMan.Protocol;
 
@@ -69,9 +70,10 @@ public static class BattleRelayHandlers
 
     public static void Register(Registrar add)
     {
-        // Y_TCP_INF (165→166): TCP 備援戰鬥同步 (卅輪 — 第六處理層
-        // sub_749B90 subtype 1-9)。165 REQ 首欄無 slot — server 轉發時
-        // 以 166 = u8 slot + 原 payload 補上。
+        // Y_TCP_INF (165→166): client TCP catalog parser reaches sub_749B90
+        // subtype 1-9. 165 REQ 首欄無 slot — this server implementation
+        // forwards as 166 = u8 slot + original payload. Its relationship to
+        // private UDP is unresolved; it must not be called a UDP fallback.
         add(Opcode.Y_TCP_INF_REQ, MakeSlotRelay(Opcode.Y_TCP_INF_ACK));
 
         // PM_TSPOSUPDATE (271→272): TS 模式位置更新 — 同上轉發
