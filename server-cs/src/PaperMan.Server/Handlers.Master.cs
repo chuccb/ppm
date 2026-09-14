@@ -203,8 +203,8 @@ public static class MasterHandlers
         await session.SendAsync(new Packet(Opcode.MASTER_EVENTEXP_ACK).WriteF32(rate));
     }
 
-    // 416 MASTER_KILLALL_REQ (空) → 417 ACK: 踢除所有人
-    private static async ValueTask KillAll(Session session, Packet packet, ServerContext context)
+    // 416 MASTER_KILLALL_REQ (空) → 全服踢除
+    private static ValueTask KillAll(Session session, Packet packet, ServerContext context)
     {
         foreach (var s in context.Sessions.All)
         {
@@ -214,7 +214,7 @@ public static class MasterHandlers
             }
         }
 
-        await session.SendAsync(new Packet(Opcode.MASTER_KILLALL_ACK));
+        return ValueTask.CompletedTask;
     }
 
     // 822 MASTER_CHAT_BAN_REQ (sub_582770: u8 mode, u8 dur, str nick) → 823 ACK (sub_5827C0)
@@ -226,21 +226,21 @@ public static class MasterHandlers
         await session.SendAsync(new Packet(Opcode.MASTER_CHAT_BAN_ACK));
     }
 
-    // 824 MASTER_USERLIST_REQ (sub_582840: u8 mode, s32 page) → 825 ACK (sub_582890)
+    // 824 MASTER_USERLIST_REQ (sub_582840: u8 mode, s32 page) → 825 MASTER_LOBBY_USERLIST_ACK (sub_582890)
     private static async ValueTask UserList(Session session, Packet packet, ServerContext context)
     {
-        var ack = new Packet(Opcode.MASTER_USERLIST_ACK)
+        var ack = new Packet(Opcode.MASTER_LOBBY_USERLIST_ACK)
             .WriteU8(0);                                     // count = 0
         await session.SendAsync(ack);
     }
 
-    // 830 MASTER_CHAT_FORCE_BAN_REQ (sub_582B90: u8 mode, str nick, s32 dur) → 831 ACK (sub_582BE0)
+    // 830 MASTER_CHAT_FORCE_BAN_REQ (sub_582B90: u8 mode, str nick, s32 dur) → 823 MASTER_CHAT_BAN_ACK
     private static async ValueTask ChatForceBan(Session session, Packet packet, ServerContext context)
     {
         _ = packet.Remaining >= 1 ? packet.ReadU8() : (byte)0;
         _ = packet.ReadStr();
         _ = packet.Remaining >= 4 ? packet.ReadS32() : 0;
-        await session.SendAsync(new Packet(Opcode.MASTER_CHAT_FORCE_BAN_ACK));
+        await session.SendAsync(new Packet(Opcode.MASTER_CHAT_BAN_ACK));
     }
 
     // 841 MASTER_SETALL_EVENTEXP_REQ (f32 rate) → 842 ACK: f32 rate

@@ -81,6 +81,13 @@ public sealed class Room
     public bool TeamShuffle { get; set; }                   // 隊打散開關 (368/369; GAMEROOM_TEAMSHUFFLE)
     public bool Soccer { get; set; }                        // 足球模式開關 (969/970; GAMEROOM_SOCCER → mode+14)
 
+    /// <summary>戰鬥進行中旗標 (130 GR_START 開戰設為 true, 134 GR_END 設為 false)。</summary>
+    public bool Playing { get; set; }
+
+    /// <summary>判斷指定 session 是否為當前房主。</summary>
+    public bool IsMaster(Session session) =>
+        Members.TryGetValue(MasterSlot, out var master) && ReferenceEquals(master, session);
+
     /// <summary>
     /// TH 模式最近一次植彈的隊伍 (0/1) — 316 GG_HACKSTART_REQ 首欄即 team,
     /// 但開駭可能失敗, 故只在 318 GG_HACKSUCC_REQ (正式武裝成功) 記下;
@@ -211,6 +218,7 @@ public sealed class Room
         Members.Clear();
         foreach (var (slot, member) in next)
         {
+            member.SlotNo = slot;
             Members[slot] = member;
         }
 
@@ -239,7 +247,7 @@ public sealed class RoomManager
                 Password = pass,
                 MapId = mapId,
                 Rule = rule,
-                SlotMask = (ushort)((1 << Math.Clamp(maxPlayers, 2, 16)) - 1),
+                SlotMask = (ushort)((1 << Math.Clamp((int)maxPlayers, 2, 16)) - 1),
             };
 
             if (!_rooms.TryAdd(no, room))
@@ -249,6 +257,8 @@ public sealed class RoomManager
 
             room.Members[0] = master;
             room.MasterSlot = 0;
+            master.RoomNo = no;
+            master.SlotNo = 0;
             return room;
         }
 
@@ -275,6 +285,7 @@ public sealed class RoomManager
         bool wasMaster = slot == room.MasterSlot;
         room.Members.TryRemove(slot, out _);
         member.RoomNo = null;
+        member.SlotNo = null;
 
         if (room.Members.IsEmpty)
         {

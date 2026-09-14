@@ -87,7 +87,7 @@ public static class VoiceHandlers
         }
     }
 
-    private static void ReadBlock(Packet packet, out short base1, out short base2, Db.VoiceSlot[] slots)
+    private static void ReadBlock(Packet packet, out short base1, out short base2, out Db.VoiceSlot[] slots)
     {
         base1 = packet.ReadS16();
         base2 = packet.ReadS16();

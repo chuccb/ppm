@@ -48,8 +48,8 @@ public sealed record ServerConfig
 
     public static ServerConfig FromArgs(string[] args) => new()
     {
-        Port = args.Length > 1 ? int.Parse(args[1]) : 40200,
-        AesKey = args.Length > 2 switch
+        Port = args.Length > 1 && int.TryParse(args[1], out int p) ? p : 40200,
+        AesKey = (args.Length > 2) switch
         {
             true when args[2] is "off" or "plain" => null,   // 明文模式
             true => Convert.FromHexString(args[2]),          // 自訂金鑰

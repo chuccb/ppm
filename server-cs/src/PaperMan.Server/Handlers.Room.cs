@@ -217,6 +217,7 @@ public static class RoomHandlers
             ack.WriteS32(0);                                // per-slot 值
         }
 
+        room.Playing = true;
         room.ResetLoading();
         await RoomManager.BroadcastAsync(room, ack);
     }
@@ -292,6 +293,7 @@ public static class RoomHandlers
             .WriteBool(IsTeamMode(room.Rule))               // mode+12 是否隊伍房 (sub_56A7B0: sub_438990?1:0)
             .WriteU8(0)                                     // +109 room_type_B (client 僅鏡像)
             .WriteBool(room.TeamShuffle);                   // mode+13 隊打散開關 (368/369)
+        room.Playing = false;
         await RoomManager.BroadcastAsync(room, ack);
     }
 
@@ -1132,7 +1134,7 @@ public static class RoomHandlers
         }
 
         byte targetSlot = packet.Remaining >= 1 ? packet.ReadU8() : (byte)0xFF;
-        if (!room.Members.TryGetValue(targetSlot, out var targetSession))
+        if (!room.Members.TryGetValue(targetSlot, out var targetSession) || targetSession is null)
         {
             return;
         }

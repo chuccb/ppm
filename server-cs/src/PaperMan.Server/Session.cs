@@ -26,6 +26,10 @@ public sealed class Session(TcpClient client, PacketCodec codec, long id) : IDis
 
     /// <summary>目前所在房號 (null = 大廳)。</summary>
     public byte? RoomNo { get; set; }
+
+    /// <summary>目前所在房內槽位 (0..15, null = 未入座)。</summary>
+    public byte? SlotNo { get; set; }
+
     public bool Authenticated => AccountId != 0;
 
     private readonly NetworkStream _stream = client.GetStream();

@@ -212,6 +212,9 @@ public sealed class Packet(Opcode opcode)
         return this;
     }
 
+    /// <summary>WriteRaw 別名，供 byte 陣列/Span 寫入。</summary>
+    public Packet WriteBytes(ReadOnlySpan<byte> data) => WriteRaw(data);
+
     /// <summary>sub_592BA0: u16 長度前綴 + raw bytes。</summary>
     public Packet WriteBlob(ReadOnlySpan<byte> data) =>
         WriteU16((ushort)data.Length).WriteRaw(data);
