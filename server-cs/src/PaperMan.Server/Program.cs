@@ -97,7 +97,9 @@ async Task RunSessionAsync(TcpClient client, long sessionId, ServerRole role, Ca
             _ => new Packet(Opcode.GL_ACCOUNTCONNSUCC)
                     .WriteU16(config.CompressThreshold),
         };
+        Console.WriteLine($"[s{sessionId}] sending greeting handshake ({greeting.Opcode}) to {session.Remote}...");
         await session.SendAsync(greeting, cancellationToken);
+        Console.WriteLine($"[s{sessionId}] greeting handshake sent, entering packet receive loop");
 
         await foreach (var packet in session.ReceiveAsync(cancellationToken))
         {
@@ -106,12 +108,12 @@ async Task RunSessionAsync(TcpClient client, long sessionId, ServerRole role, Ca
             {
                 if (!await router.DispatchAsync(session, packet, ctx))
                 {
-                    Console.WriteLine($"[s{sessionId}] unhandled {packet}");
+                    Console.WriteLine($"[s{sessionId}] ?? unhandled packet {packet}");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[s{sessionId}] handler {packet.Opcode} error: {ex.Message}");
+                Console.WriteLine($"[s{sessionId}] !! handler exception for {packet.Opcode}: {ex}");
             }
 
             // 登入綁定暱稱後註冊進線上對照表 (191 GR_CALLUSER 反查目標連線)。
@@ -124,11 +126,11 @@ async Task RunSessionAsync(TcpClient client, long sessionId, ServerRole role, Ca
     }
     catch (OperationCanceledException)
     {
-        // 伺服器關閉中 — 靜默結束
+        Console.WriteLine($"[s{sessionId}] session cancelled (server shutting down)");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"[s{sessionId}] session error: {ex.Message}");
+        Console.WriteLine($"[s{sessionId}] !! session error: {ex}");
     }
     finally
     {

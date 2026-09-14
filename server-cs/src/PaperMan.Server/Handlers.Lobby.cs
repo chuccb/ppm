@@ -276,10 +276,12 @@ public static class LobbyHandlers
         var info = session.UserId != 0 ? context.Db.GetMyInfo(session.UserId) : null;
         if (info is null)
         {
+            Console.WriteLine($"[s{session.Id}] GL_MYINFO_REQ: user not found (UserId={session.UserId}), sending false");
             await session.SendAsync(new Packet(Opcode.GL_MYINFO_ACK).WriteBool(false));
             return;
         }
 
+        Console.WriteLine($"[s{session.Id}] GL_MYINFO_REQ: generating CClientData for '{info.Nickname}' (UserId={info.UserId}, Level={info.Level}, Cash={info.Cash}, GP={info.GamePoint})");
         await session.SendAsync(BuildMyInfoAck(
             info,
             context.Db.GetCharacters(info.UserId),
@@ -432,16 +434,21 @@ public static class LobbyHandlers
         int start = packet.Remaining >= 4 ? packet.ReadS32() : 0;
         var ack = new Packet(Opcode.GL_MYITEM_ACK).WriteBool(true).WriteS32(start);
 
+        int count = 0;
         if (session.UserId != 0)
         {
             foreach (var it in context.Db.GetInventoryPage(session.UserId, start))
+            {
                 ack.WriteS32(it.Slot).WriteS32(it.ItemId)
                    .WriteF32(it.F1).WriteF32(it.F2)
                    .WriteS32(it.PeriodDaysLeft)
                    .WriteU8(0)                                     // extra (sub_524B70 a3=1)
                    .WriteU16(it.DuraCur);
+                count++;
+            }
         }
 
+        Console.WriteLine($"[s{session.Id}] GL_MYITEM_REQ: start={start}, item count={count}");
         await session.SendAsync(ack.WriteS32(-1));                       // sentinel
     }
 
@@ -460,6 +467,7 @@ public static class LobbyHandlers
             _ => 1,                                         // 可用 → 0xE0 訊息
         };
 
+        Console.WriteLine($"[s{session.Id}] GM_CHECKNICK_REQ: nick='{nick}' -> result={result}");
         await session.SendAsync(new Packet(Opcode.GM_CHECKNICK_ACK).WriteU8(result));
     }
 
@@ -481,6 +489,7 @@ public static class LobbyHandlers
             }
         }
 
+        Console.WriteLine($"[s{session.Id}] GM_CREATENICK_REQ: nick='{nick}', accountId={session.AccountId} -> result={result}, userId={session.UserId}");
         await session.SendAsync(new Packet(Opcode.GM_CREATENICK_ACK).WriteU8(result));
     }
 

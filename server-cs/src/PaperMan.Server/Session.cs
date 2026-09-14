@@ -40,6 +40,7 @@ public sealed class Session(TcpClient client, PacketCodec codec, long id) : IDis
     public async Task SendAsync(Packet packet, CancellationToken cancellationToken = default)
     {
         var frame = codec.Encode(packet);
+        Console.WriteLine($"[s{Id}] >> SEND {packet.Opcode}({packet.OpcodeRaw}) payload={packet.Length}B frame={frame.Length}B");
 
         await _sendGate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
@@ -65,15 +66,18 @@ public sealed class Session(TcpClient client, PacketCodec codec, long id) : IDis
             }
             catch (Exception e) when (e is IOException or SocketException)
             {
+                Console.WriteLine($"[s{Id}] connection terminated by remote: {e.Message}");
                 yield break;                                 // 對端斷線
             }
 
             if (n == 0)
             {
+                Console.WriteLine($"[s{Id}] connection gracefully closed by remote (EOF)");
                 yield break;                                 // 正常關閉
             }
 
             _rxLen += n;
+            Console.WriteLine($"[s{Id}] received {n} bytes from socket (buffered total: {_rxLen}B)");
 
             while (TryTakeFrame() is { } pkt)
             {
@@ -91,22 +95,34 @@ public sealed class Session(TcpClient client, PacketCodec codec, long id) : IDis
 
             if (frameLen > _rxBuf.Length)
             {
+                Console.WriteLine($"[s{Id}] !! INVALID frame length {frameLen} > {_rxBuf.Length}, dropping buffer");
                 _rxLen = 0;                                  // 不可能的長度 → 整緩衝丟棄
                 return null;
             }
 
             if (_rxLen < frameLen)
             {
+                Console.WriteLine($"[s{Id}] partial frame ({_rxLen}/{frameLen}B), waiting for more data");
                 return null;                                 // 半包, 等更多資料 (sub_591D50)
             }
+
+            ushort w0 = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(_rxBuf.AsSpan(0, 2));
+            ushort op = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(_rxBuf.AsSpan(2, 2));
+            ushort w2 = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(_rxBuf.AsSpan(4, 2));
+            ushort w3 = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(_rxBuf.AsSpan(6, 2));
+            Console.WriteLine($"[s{Id}] raw frame header: w0={w0}(payloadLen), op={op}(0x{op:X4}/{(Opcode)op}), w2={w2}(encOrigLen), w3={w3}(origLen), totalFrame={frameLen}B");
 
             Packet? pkt;
             try
             {
                 pkt = codec.Decode(_rxBuf.AsSpan(0, frameLen));
+                var hexSnippet = Convert.ToHexString(pkt.Payload.Slice(0, Math.Min(pkt.Length, 32)));
+                Console.WriteLine($"[s{Id}] << RECV {pkt.Opcode}({pkt.OpcodeRaw}) payload={pkt.Length}B hex=[{hexSnippet}{(pkt.Length > 32 ? "..." : "")}]");
             }
-            catch
+            catch (Exception ex)
             {
+                var hex = Convert.ToHexString(_rxBuf.AsSpan(0, Math.Min(frameLen, 48)));
+                Console.WriteLine($"[s{Id}] !! DECODE ERROR: {ex.Message} (frame {frameLen}B: [{hex}{(frameLen > 48 ? "..." : "")}])");
                 _rxLen = 0;                                  // 原版: 解不開 → 清空緩衝
                 return null;
             }

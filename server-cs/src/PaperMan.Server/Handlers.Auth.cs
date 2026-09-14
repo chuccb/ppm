@@ -36,15 +36,18 @@ public static class AuthHandlers
         var account = packet.ReadStr();
         var token = packet.ReadStr();
         ulong hwObf = packet.Remaining >= 8 ? packet.ReadU64() : 0;
-        _ = packet.Remaining >= 1 ? packet.ReadU8() : (byte)0;  // security_state
-        _ = packet.ReadRaw(Math.Min(24, packet.Remaining));     // 版本/指紋塊
+        byte secState = packet.Remaining >= 1 ? packet.ReadU8() : (byte)0;  // security_state
+        _ = packet.ReadRaw(Math.Min(24, packet.Remaining));                 // 版本/指紋塊
 
         // 還原: hw32 = hi32 ^ 0xB1A9D7C7; lo32 恆 0x0E 可作完整性檢查
         uint hw32 = (uint)(hwObf >> 32) ^ 0xB1A9D7C7;
         bool hwValid = (uint)hwObf == 0x0E;
         ulong hwKey = hwValid ? hw32 : hwObf;              // 異常時保留原始值供記錄
 
+        Console.WriteLine($"[s{session.Id}] -> GL_LOGIN_REQ parsed: account='{account}', tokenLen={token.Length}, hwKey=0x{hwKey:X8}(valid={hwValid}), secState={secState}");
+
         var r = context.Db.Login(account, token, hwKey);
+        Console.WriteLine($"[s{session.Id}] -> Db.Login result: {r.Result} (UserId={r.UserId}, Nick='{r.Nickname}', GP={r.GamePoint}, Cash={r.Cash})");
 
         if (r.Result is LoginCode.Ok)
         {
@@ -54,7 +57,9 @@ public static class AuthHandlers
         // ⚠ 694 絕不可在此重發 — client 的 694 handler (0x43F...) 讀完門檻
         //   會呼叫 sub_43DF00 再送一次 682 → 無限登入迴圈。
         //   694 屬連線建立時的歡迎包 (見 Program.RunSessionAsync)。
-        await session.SendAsync(BuildLoginAck(r, context.Config));
+        var ack = BuildLoginAck(r, context.Config);
+        Console.WriteLine($"[s{session.Id}] -> Sending GL_LOGIN_ACK (payload={ack.Length}B, result={r.Result})");
+        await session.SendAsync(ack);
     }
 
     /// <summary>681 結構: 見 docs/PACKETS.md §1.4 GL_LOGIN_ACK。</summary>

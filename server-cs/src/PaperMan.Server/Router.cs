@@ -48,9 +48,11 @@ public sealed class Router
     {
         if (!_table.TryGetValue(packet.OpcodeRaw, out var handler))
         {
+            Console.WriteLine($"[s{session.Id}] ?? UNMAPPED OPCODE: {packet.Opcode} ({packet.OpcodeRaw} / 0x{packet.OpcodeRaw:X4})");
             return false;
         }
 
+        Console.WriteLine($"[s{session.Id}] >> DISPATCH {packet.Opcode} ({packet.OpcodeRaw})");
         await handler(session, packet, context).ConfigureAwait(false);
         return true;
     }
