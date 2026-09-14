@@ -1812,9 +1812,11 @@ foreach (var (_, codec) in codecs)
     var p454 = new Packet(Opcode.GS_DELETEGIFT_ACK).WriteU8(1).WriteS32(10).WriteS32(20);
     Check("454 Delete Gift ACK", p454.ReadU8() == 1 && p454.ReadS32() == 10);
 
-    // 802/803 Destroy Item
-    var p803 = new Packet(Opcode.GS_DESTROYITEM_ACK).WriteU8(0).WriteU8(0).WriteS32(1000).WriteS32(500).WriteU8(1).WriteS32(5).WriteS32(0);
-    Check("803 Destroy Item ACK", p803.ReadU8() == 0 && p803.ReadU8() == 0);
+    // 802's request layout is unresolved.  The only safe 803 response is the
+    // consumer's fully evidenced no-mutation failure arm.
+    var p803 = new Packet(Opcode.GS_DESTROYITEM_ACK).WriteU8(1).WriteU8(0).WriteU8(0);
+    Check("803 Destroy Item failure ACK", p803.ReadU8() != 0 && p803.ReadU8() == 0
+        && p803.ReadU8() == 0 && p803.Remaining == 0);
 
     // 876/877 Daily Quest
     var p877 = new Packet(Opcode.GQ_QUEST_ACCEPT_DAILY_ACK).WriteU8(0).WriteS32(0);

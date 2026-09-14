@@ -202,7 +202,7 @@
 | 795 | GI_CHANGE_VOICEITEMSLOT_REQ | 2處 | `u8 u8 s16 s16 u8 u8 s16 u8 \|\| s32 s16 s16 s16 u8` |
 | 799 | GT_CRITICAL_ERROR_REPORT | 1處 | `s32 s16 s32 s32 s32 u8 u8 s32 u8 u8 s32 u8 u8 s32 u8 s32 u8 s32` |
 | 800 | MASTER_XTRAP_RELOAD | 1處 | `(空)` |
-| 802 | GS_DESTROYITEM_REQ | 1處 | `s32 s32 u8 s32 s32` |
+| 802 | GS_DESTROYITEM_REQ | UNRESOLVED | The old five-field row did not come from an evidenced request constructor; it must not be used as a server parser. |
 | 804 | MASTER_RELOAD_HIDDEN_ITEM_LIST_REQ | 1處 | `(空)` |
 | 806 | GS_HIDDEN_ITEM_LIST_REQ | 2處 | `s16` |
 | 808 | GS_GET_RECOMMENDSET_INFO_REQ | 1處 | `s32 s32 s32 s32 s32 s32 s32 s32 s32 s32` |

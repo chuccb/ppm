@@ -141,7 +141,7 @@
 >    - 310/311: 購買新角色 (characters 插入, users.game_point 扣款)。
 > ③ **商城/背包/信件/任務 (453/454, 802/803, 423/424, 876/877, 878/879)**:
 >    - 453/454: 刪除禮物 (gifts 刪除);
->    - 802/803: 銷毀背包道具 (inventory 刪除/減量, 回傳剩餘數與 PG/CASH);
+>    - 802/803: request layout remains **UNRESOLVED**. The server deliberately emits only the fully evidenced no-mutation failure `{u8 nonzero_result,u8 raw_code,u8 affected_count=0}`; it does not delete or decrement inventory.
 >    - 423/424: 信件標記已讀 (messages.is_read = 1);
 >    - 876/877: 每日任務接取 (回傳 13B 任務結構);
 >    - 878/879: 榮譽任務完成確認 (榮譽標題與稱號)。

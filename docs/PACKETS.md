@@ -1775,8 +1775,8 @@ u8+slot 系列)
 | 311 | `GS_BUYCHAR_ACK` | `sub_5728A0` | S2C | `u8 status(1), s32 slot, s32 char_type, s32 exp, s32 cash, s32 gp, s32 dura` |
 | 453 | `GS_DELETEGIFT_REQ` | `sub_57BC40` | C2S | `s32 gift_uid, s32 item_id` |
 | 454 | `GS_DELETEGIFT_ACK` | `sub_57BCF0` | S2C | `u8 status(1), s32 gift_uid, s32 item_id` |
-| 802 | `GS_DESTROYITEM_REQ` | `sub_894E70` | C2S | `s32 inv_id, s32 item_id, u8 type, s32 char_slot, s32 count` |
-| 803 | `GS_DESTROYITEM_ACK` | `sub_895EE0` | S2C | `u8 err(0), u8 unk(0), s32 pg, s32 cash, u8 count(1), s32 inv_id, s32 remain(0)` |
+| 802 | `GS_DESTROYITEM_REQ` | **UNRESOLVED** | C2S | The earlier five-field claim was not an evidenced packet constructor (`sub_894E70` is not one). Do not consume request-dependent fields or mutate inventory until the actual builder and its caller are reconciled. |
+| 803 | `GS_DESTROYITEM_ACK` | `sub_895EE0` | S2C | `u8 result, u8 raw_code`; if `result!=0`, then `u8 affected_count` + `affected_count×{s32 raw_id,u8 raw_value}`. The success arm instead consumes `s32 raw_value_a, s32 coupon_after, u8 affected_count` + `affected_count×{s32 item_id,s32 remaining_raw}`. Only the failure arm is currently safe to emit. |
 | 423 | `GL_MSG_READ_REQ` | `sub_55A3C0` | C2S | `str msg_id` |
 | 424 | `GL_MSG_READ_ACK` | `sub_55A4F0` | S2C | `u8 status(1), str msg_id` |
 | 876 | `GQ_QUEST_ACCEPT_DAILY_REQ` | `sub_91D730` | C2S | `(空)` |

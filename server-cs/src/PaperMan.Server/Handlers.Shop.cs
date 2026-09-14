@@ -219,34 +219,18 @@ public static class ShopHandlers
         await session.SendAsync(ack);
     }
 
-    // 802 GS_DESTROYITEM_REQ (sub_894E70): s32 inv_id, s32 item_id, u8 type, s32 char_slot, s32 count
-    // → 803 GS_DESTROYITEM_ACK (sub_895EE0): u8 err(0=成功), u8 unk(0), s32 pg, s32 cash, u8 count_affected, count×{s32 inv_id, s32 remain}
+    // 803 is safe to reject without decoding 802: sub_895EE0 requires this
+    // exact failure arm {u8 nonzero_result, u8 raw_code, u8 affected_count}.
+    // The native 802 request builder has not been reconciled with the old
+    // parser, so consuming request-dependent fields here could destroy a
+    // different item.  Do not mutate inventory until that wire contract is
+    // established.
     private static async ValueTask DestroyItem(Session session, Packet packet, ServerContext context)
     {
-        int invSlot = packet.ReadS32();
-        int itemId = packet.Remaining >= 4 ? packet.ReadS32() : 0;
-        bool ok = session.UserId != 0 && context.Db.DestroyInventoryItem(session.UserId, invSlot, itemId);
-
-        var ack = new Packet(Opcode.GS_DESTROYITEM_ACK);
-        if (ok)
-        {
-            var info = context.Db.GetMyInfo(session.UserId);
-            int cash = context.Db.GetCash(session.UserId);
-            ack.WriteU8(0)                                  // err 0 = 成功
-               .WriteU8(0)                                  // unk
-               .WriteS32((int)(info?.Gp ?? 0))
-               .WriteS32(cash)
-               .WriteU8(1)                                  // 1 個 affected
-               .WriteS32(invSlot)
-               .WriteS32(0);                                // 剩餘 0 (已刪除)
-        }
-        else
-        {
-            ack.WriteU8(1)                                  // err != 0 失敗
-               .WriteU8(0);
-        }
-
-        await session.SendAsync(ack);
+        await session.SendAsync(new Packet(Opcode.GS_DESTROYITEM_ACK)
+            .WriteU8(1)                                     // nonzero: failure arm
+            .WriteU8(0)                                     // raw_code: semantic unresolved
+            .WriteU8(0));                                   // no affected records
     }
 
     // 698 GP_ENTER_PEPACHI_REQ (sub_580640, 空)
