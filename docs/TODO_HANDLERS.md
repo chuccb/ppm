@@ -60,10 +60,18 @@
 >    voice_slots (char_idx 0..14 + 2×base_voice + 27×(item,flag))。
 >    792 的 char_idx 由 users.current_char 的 char_type 推出。
 >
+> 卌八輪 (倉庫簇 855-863 落地): 856/863 的 70B 狀態塊定案為
+> 7×10B {s32 count, s32 到期(位元打包日期 sub_48B9A0), u8 loaded, u8
+> pad}; 到期欄非秒數而是 (年-2000)<<24|月<<19|日<<13|時<<7|分。
+> 859/861 REQ = u8 tab + s32 slot (5B); 860/862 ACK 6B header (u8 err,
+> u8 tab, s32 slot) + 28B 物品 + s32 tab_count。862 err 5 = 背包滿
+> (0x49E), 1/2/3/4/6/7 = 0x49A。落地 Db.Warehouse.cs (warehouse_items
+> /warehouse_lockers, 頁籤預設全持有) + Handlers.Warehouse.cs。
+> 855 的 s32 = dword_EE8CB4 自己 uid (驗證用, 私服以 session 為準)。
+>
 > 下一輪可做: GM/MASTER 群 (275-299/394-416/822-831/883-885, 需權限
-> 分級); warehouse 群 (855-861); matching room 群 (983/986/988);
-> AI 模式群 (918-944); 130/134 的 +146/+150 原服語意 (client 存而不讀,
-> 送 0 已安全)。
+> 分級); matching room 群 (983/986/988); AI 模式群 (918-944);
+> 130/134 的 +146/+150 原服語意 (client 存而不讀, 送 0 已安全)。
 
 | op | 名稱 | REQ 寫入序列 |
 |---|---|---|
@@ -196,10 +204,6 @@
 | 843 | MASTER_SETALL_EVENTPAGE_REQ | `f32` |
 | 845 | MASTER_VIEWALL_EVENTSTATE_REQ | `(空)` |
 | 849 | MASTER_TNMT_VIEW_STATE_REQ | `(空)` |
-| 855 | GL_MYWAREHOUSEINFO_REQ | `s32` |
-| 857 | GL_MYWAREHOUSEITEMLIST_REQ | `raw1` |
-| 859 | GL_PUSH_TO_WAREHOUSE_REQ | `raw5` |
-| 861 | GL_POP_TO_WAREHOSUE_REQ | `raw5` |
 | 871 | GQ_QUEST_SUCCESS_REQ | `raw4` |
 | 873 | GQ_QUEST_COMPLETE_REQ | `raw4` |
 | 876 | GQ_QUEST_ACCEPT_DAILY_REQ | `(空)` |

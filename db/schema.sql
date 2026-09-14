@@ -454,6 +454,35 @@ CREATE TABLE IF NOT EXISTS voice_slots (
 ) STRICT, WITHOUT ROWID;
 
 -- ----------------------------------------------------------------------------
+-- 18b. 角色倉庫 — GL_MYWAREHOUSE* (855-863), n11==19 倉庫場景
+--   7 頁籤 0..6 (tab0 不用); 容量 sub_4F9B10: tab1=100, tab2/3/4=300, tab5/6=3000。
+--   物品 28B 條目與背包 inventory 同構 (sub_524F70/sub_4FC540);
+--   856/863 狀態塊 = 7 × 10B {s32 count, s32 到期(位元打包日期), u8 loaded, u8 pad}。
+-- ----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS warehouse_items (
+    user_id        INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    tab            INTEGER NOT NULL CHECK (tab BETWEEN 1 AND 6),
+    slot           INTEGER NOT NULL CHECK (slot >= 0),      -- 倉庫頁籤內 slot
+    item_id        INTEGER NOT NULL REFERENCES item_catalog(item_id),
+    stat_f1        REAL    NOT NULL DEFAULT 0,              -- f32 #1 (同背包)
+    stat_f2        REAL    NOT NULL DEFAULT 0,              -- f32 #2
+    period_days    INTEGER NOT NULL DEFAULT 0,
+    expires_at     INTEGER,                                 -- epoch; NULL=永久
+    durability_cur INTEGER NOT NULL DEFAULT 0 CHECK (durability_cur BETWEEN 0 AND 65535),
+    durability_max INTEGER NOT NULL DEFAULT 0 CHECK (durability_max BETWEEN 0 AND 65535),
+    acquired_at    INTEGER NOT NULL DEFAULT (unixepoch()),
+    PRIMARY KEY (user_id, tab, slot)
+) STRICT, WITHOUT ROWID;
+
+-- 頁籤租期 (expires_at epoch; 0/<=0 = 未持有 — client sub_4FA950 視為空)
+CREATE TABLE IF NOT EXISTS warehouse_lockers (
+    user_id    INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    tab        INTEGER NOT NULL CHECK (tab BETWEEN 1 AND 6),
+    expires_at INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (user_id, tab)
+) STRICT, WITHOUT ROWID;
+
+-- ----------------------------------------------------------------------------
 -- 19. 遊戲中心 — GL_GAMECENTER_REC(472)/RANKING(480)/COIN(482)
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS gamecenter_records (

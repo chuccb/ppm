@@ -131,6 +131,53 @@ step('protocol_packets lookup')
 assert c.execute("SELECT opcode FROM protocol_packets WHERE name='GL_MYINFO_ACK'").fetchone()[0] == 198
 assert c.execute("SELECT name FROM protocol_packets WHERE opcode=682").fetchone()[0] == 'GL_LOGIN_REQ'
 
+# --- 12. 倉庫 (GL_MYWAREHOUSE* 855-863) ---
+step('warehouse lockers bootstrap + push/pop')
+# 856 狀態塊資料: 補齊 6 頁籤 (INSERT OR IGNORE), 回 {tab, count, expires_at}
+c.executemany('INSERT OR IGNORE INTO warehouse_lockers(user_id,tab,expires_at) VALUES (?,?,?)',
+              [(uid, t, 4102444800) for t in range(1, 7)])
+info = c.execute("""
+    SELECT w.tab, COUNT(i.item_id),
+           CASE WHEN w.expires_at <= 0 THEN 0 ELSE w.expires_at END
+    FROM warehouse_lockers w
+    LEFT JOIN warehouse_items i ON i.user_id = w.user_id AND i.tab = w.tab
+    WHERE w.user_id = ? GROUP BY w.tab ORDER BY w.tab
+""", (uid,)).fetchall()
+assert len(info) == 6 and all(row[1] == 0 for row in info), info
+
+# 859 push: 買入件入背包 → 搬進倉庫 tab1 (最小空 slot)
+c.execute("INSERT INTO item_catalog(item_id,name,kind,price_gp,durability) VALUES (9001,'倉庫測試槍',3,1000,40)")
+inv_slot = c.execute("""
+    SELECT IFNULL(MIN(t.slot+1),0) FROM
+      (SELECT -1 AS slot UNION SELECT slot FROM inventory WHERE user_id=?) t
+    WHERE t.slot+1 NOT IN (SELECT slot FROM inventory WHERE user_id=?)
+""", (uid, uid)).fetchone()[0]
+c.execute("INSERT INTO inventory(user_id,slot,item_id,period_days,durability_cur,durability_max) VALUES (?,?,9001,7,40,40)", (uid, inv_slot))
+wh_slot = c.execute("""
+    SELECT IFNULL(MIN(t.slot+1),0) FROM
+      (SELECT -1 AS slot UNION SELECT slot FROM warehouse_items WHERE user_id=? AND tab=1) t
+    WHERE t.slot+1 NOT IN (SELECT slot FROM warehouse_items WHERE user_id=? AND tab=1)
+""", (uid, uid)).fetchone()[0]
+assert wh_slot == 0, wh_slot
+c.execute('DELETE FROM inventory WHERE user_id=? AND slot=?', (uid, inv_slot))
+c.execute("""INSERT INTO warehouse_items
+    (user_id,tab,slot,item_id,stat_f1,stat_f2,period_days,expires_at,durability_cur,durability_max)
+    VALUES (?,1,?,9001,0,0,7,NULL,40,40)""", (uid, wh_slot))
+assert c.execute('SELECT COUNT(*) FROM warehouse_items WHERE user_id=? AND tab=1', (uid,)).fetchone()[0] == 1
+
+# 861 pop: 倉庫搬回背包 (最小空 slot = 原背包 slot 已空出)
+back = c.execute("""
+    SELECT IFNULL(MIN(t.slot+1),0) FROM
+      (SELECT -1 AS slot UNION SELECT slot FROM inventory WHERE user_id=?) t
+    WHERE t.slot+1 NOT IN (SELECT slot FROM inventory WHERE user_id=?)
+""", (uid, uid)).fetchone()[0]
+assert back == inv_slot, (back, inv_slot)
+c.execute('DELETE FROM warehouse_items WHERE user_id=? AND tab=1 AND slot=?', (uid, wh_slot))
+c.execute("""INSERT INTO inventory
+    (user_id,slot,item_id,stat_f1,stat_f2,period_days,expires_at,durability_cur,durability_max)
+    VALUES (?,?,9001,0,0,7,NULL,40,40)""", (uid, back))
+assert c.execute('SELECT COUNT(*) FROM warehouse_items WHERE user_id=? AND tab=1', (uid,)).fetchone()[0] == 0
+
 con.commit()
 fk = con.execute('PRAGMA foreign_key_check').fetchall()
 assert not fk, fk

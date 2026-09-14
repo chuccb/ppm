@@ -923,17 +923,48 @@ festival: 681 的 3 頻道組 ↔ 195 的 group 序號互證; 頻道類型 n2==3
 私服要點: 快照結構 = 114 (ENTERROOM sub_type==2) 的擴充版; 兩者成員
 條目欄位順序一致 (交叉驗證), 269 多了戰鬥中狀態 (alive/dead/觀戰目標)。
 
-### 3.15c3 倉庫五連 856-863 (廿二輪 — n11==19 倉庫場景)
+### 3.15c3 倉庫五連 855-863 (廿二輪 + 卌八輪補完 — n11==19 倉庫場景)
 ```
-856 GL_MYWAREHOUSEINFO_ACK: (n11==19 才處理) 倉庫基本資訊
-858 GL_MYWAREHOUSEITEMLIST_ACK (sub_4FACE0): u8 err, u8;
-    err!=0 → ≤5 錯誤碼 (0x49C 訊息);
+855 GL_MYWAREHOUSEINFO_REQ (sub_585550): s32 self_uid
+    (= dword_EE8CB4 自己 uid; builder 同時彈 0x49B「アイテム情報を要請中…」)
+856 GL_MYWAREHOUSEINFO_ACK (sub_4FAC80): u8 err; err==0 → raw 0x46=70B
+    倉庫狀態塊 (i_45 @0x1D0D259) = 7 頁籤 × 10B:
+      {s32 count, s32 到期(位元打包日期), u8 loaded, u8 pad}
+    err!=0 → 不套用 UI (無訊息)。到期欄為 sub_48B9A0 打包
+    (年-2000)<<24|月<<19|日<<13|時<<7|分; sub_5309C0 解出後以
+    0x495「期間:残り %dヶ月 %d日 %d時間 %d分」顯示; 0=未持有 →
+    sub_4FA950 回 1 (空)。count 供容量 gauge (sub_4F7760: 滿載變紅) —
+    ⚠ 858 列表不回填 count, 僅 860/862 尾 s32 經 sub_4FB200 更新。
+857 GL_MYWAREHOUSEITEMLIST_REQ (sub_585630): u8 tab (1..6;
+    ⚠ sub_4FB3A0 以 i_45[10*i] (count 的低 byte) 當 tab token —
+    count 低 byte ≠ tab 號時自動載入會選錯頁籤 (client 端 quirk,
+    原版亦然); 開倉 UI CLobbyWareHouse::sub_4F5DF0 另以 1..6
+    逐頁籤直送, 使用者手動點頁籤即正常。私服照送真實 count
+    (供 sub_4F7760 gauge 正確), 此 quirk 僅影響開倉自動載入)
+858 GL_MYWAREHOUSEITEMLIST_ACK (sub_4FACE0): u8 err, u8 tab;
+    err 1..5 → 0x49C「ロッカー情報のロードに失敗しました。」;
     err==0 → s32 count, s32 total, count×{s32 slot(<0 停),
-    s32 item_id(需過 sub_535020), f32 f1, f32 f2, s32 period,
-    u8 kind, u16 dura(複製為 dura_max)} — 與背包 28B 條目同構!
-860/862 PUSH/POP_TO_WAREHOUSE_ACK: 存入/取出確認
-863 GL_CHANGED_WAREHOUSEINFO_ACK (sub_4FB180): raw 0x46=70B
-    倉庫狀態塊
+    s32 item_id(≤0 停; 需過 sub_535020), f32 f1, f32 f2, s32 period,
+    u8 kind, u16 dura(複製為 dura_max)} — 28B 條目與背包同構!
+    (count==total → 一次載完 → 標 loaded)
+859 GL_PUSH_TO_WAREHOUSE_REQ (sub_585720): u8 tab + s32 inv_slot
+    (5B; 由 sub_4F9800 呼叫 — 先 sub_4F9B10 檢查容量, 滿 → 0x493
+    「ロッカーに空きがありません。」)
+860 GL_PUSH_TO_WAREHOUSE_ACK (sub_4FAEF0): u8 err, u8 tab, s32 slot
+    (6B header); err 1..9 → 0x49A「アイテム移動が失敗しました。」;
+    err==0 → 28B 物品{s32 slot(新倉庫 slot), s32 item_id, f32, f32,
+    s32 period, u8 kind, u16 dura} + s32 tab_count(sub_4FB200 更新 count)
+861 GL_POP_TO_WAREHOSUE_REQ (sub_585820): u8 tab + s32 wh_slot (5B;
+    由 sub_4F9860 呼叫)
+862 GL_POP_TO_WAREHOSUE_ACK (sub_4FB020): u8 err, u8 tab, s32 slot;
+    case 0 → 28B 物品 + s32 tab_count (sub_4F9900 → sub_4F9660 →
+    sub_524F70 入背包, slot 欄 client 讀而不用、背包自動配槽);
+    case 1/2/3/4/6/7 → 0x49A; case 5 → 0x49E「インベントリーに空きが
+    ありません。」; case 8/9 → 無訊息
+863 GL_CHANGED_WAREHOUSEINFO_ACK (sub_4FB180): raw 70B 狀態塊
+    (頁籤租期異動才推; 私服頁籤租期恆定, 不需推)
+容量 (sub_4F9B10): tab1=100, tab2/3/4=300, tab5/6=3000, tab0=0。
+物品 kind = item_catalog.kind (0..20); period = 剩餘天數。
 ```
 
 ### 3.15c4 訊息/喊話/物品推播 (廿二輪)
