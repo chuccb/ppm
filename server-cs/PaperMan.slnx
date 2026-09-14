@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="src/PaperMan.Protocol/PaperMan.Protocol.csproj" />
+  <Project Path="src/PaperMan.Server/PaperMan.Server.csproj" />
+  <Project Path="src/PaperMan.SelfTest/PaperMan.SelfTest.csproj" />
+</Solution>

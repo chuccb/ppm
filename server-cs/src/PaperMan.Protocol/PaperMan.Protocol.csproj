@@ -8,9 +8,10 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
-  <ItemGroup>
-    <!-- CP949 (韓文 ANSI) 字串編碼 -->
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.0" />
-  </ItemGroup>
+  <!--
+    CP949 (韓文 ANSI) 編碼由 .NET 10 shared framework 自動提供
+    (System.Text.Encoding.CodePages 已內建, NU1510); 勿再加 PackageReference,
+    否則 restore 直接報 NU1510。
+  -->
 
 </Project>

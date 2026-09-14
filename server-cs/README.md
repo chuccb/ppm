@@ -5,7 +5,7 @@
 
 ```
 server-cs/
-├── PaperMan.sln
+├── PaperMan.slnx                  # .NET 10 新式 XML solution (sln 已淘汰)
 ├── tools/gen_opcodes.py            # db/packets.tsv → Opcode.cs (勿手改 Opcode.cs)
 └── src/
     ├── PaperMan.Protocol/          # 純協定層 (無 IO 依賴)
@@ -34,9 +34,9 @@ server-cs/
 
 ```bash
 cd server-cs
-dotnet build                                   # 需要 nuget 還原兩個套件:
-                                               #   Microsoft.Data.Sqlite
-                                               #   System.Text.Encoding.CodePages
+dotnet build                                   # 只需還原 1 個套件: Microsoft.Data.Sqlite 10.0.12
+                                               #   (CP949 編碼已內建於 .NET 10 shared framework,
+                                               #    無需 System.Text.Encoding.CodePages — 加了反而 NU1510)
 dotnet run --project src/PaperMan.SelfTest     # 先跑自測 (codec round-trip)
 dotnet run --project src/PaperMan.Server -- ../db/paperman.db 40200
 # 40200 = 登入伺服器 (握手 694); 40201 = 頻道伺服器 (握手 693, 自動 +1)

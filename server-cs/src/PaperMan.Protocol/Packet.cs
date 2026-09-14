@@ -36,7 +36,8 @@ public sealed class Packet(Opcode opcode)
     public const int MaxPayload = 9592;
     public const int HeaderSize = 8;
 
-    /// <summary>CP949 (韓服 ANSI, lstrlenA 語意)。初始化時註冊 CodePages provider。</summary>
+    /// <summary>CP949 (韓服 ANSI, lstrlenA 語意)。初始化時註冊 CodePages provider
+    /// (.NET 10 shared framework 內建, 無需 NuGet 套件)。</summary>
     public static readonly Encoding Ansi = CreateAnsi();
 
     private static Encoding CreateAnsi()
