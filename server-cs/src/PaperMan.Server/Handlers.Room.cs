@@ -52,8 +52,81 @@ public static class RoomHandlers
             [4] = 23,                                       // TeamSteal (TW_)
             [8] = 51,                                       // Pulp'n Roll (PNR)
             [9] = 89,                                       // GunShooting
-            [12] = 98,                                      // SOCCER
+            // ⚠ [12]=98 為 system/map_StartIndex.xml 的權威值 (SOCCER→98),
+            // 但 maplist.pat 的 soccer bit (0x4000) 實際落在 99/100
+            // (スルルスタジアム); 98 是 TeamSurvival 圖 (TS_33_tutor_castle,
+            // modes=0x0002)。client sub_426930 在改模式時**就是寫 98** —
+            // 此處鏡像 client 原行為, 不做「校正」(校正反而與 client 不一致)。
+            [12] = 98,                                      // SOCCER (client 原值)
         }.ToFrozenDictionary();
+
+    /// <summary>
+    /// mode → maplist.pat `modes` bitmask 位 (docs/RESOURCES.md §4b,
+    /// sub_53FBB0 模式枚舉 + map_StartIndex modeName + 檔名前綴三方互證)。
+    /// mode 與 bit **不同編號** — 如 mode 0 (TeamDeath) ↔ bit 2。
+    /// 無條目的 mode (5 練習 / 7 聊天 / 14 未用) 不參與地圖過濾。
+    /// </summary>
+    private static readonly FrozenDictionary<byte, byte> ModeMapBit =
+        new Dictionary<byte, byte>
+        {
+            [0] = 2,                                        // TeamDeath     → TD  (bit 2)
+            [1] = 0,                                        // FreeForAll    → PS  (bit 0)
+            [2] = 3,                                        // TeamHacking   → TH  (bit 3)
+            [3] = 1,                                        // TeamSurvival  → TS  (bit 1)
+            [4] = 4,                                        // TeamSteal     → TW  (bit 4)
+            [6] = 5,                                        // Tutorial      → TU  (bit 5; bit 6 為活動/事件疊加)
+            [8] = 9,                                        // Pulp'n Roll   → PNR (bit 9)
+            [9] = 10,                                       // GunShooting   → AI  (bit 10)
+            [10] = 12,                                      // Occupy        → OCC (bit 12)
+            [11] = 13,                                      // AI Multi      → PVE (bit 13)
+            [12] = 14,                                      // Soccer        → TS  worldcup (bit 14)
+            [13] = 15,                                      // OccupyRenewal → OCC2 (bit 15)
+            [15] = 11,                                      // WeaponTest    → ECT (bit 11)
+        }.ToFrozenDictionary();
+
+    /// <summary>
+    /// 依 mode 過濾/校正地圖: 若 mode 有對應 bit 且 request 地圖不支援該 mode
+    /// (map_catalog.modes 未含該 bit), 回退該 mode 預設圖; 目錄查無此地圖
+    /// (無法求證) 或 mode 無過濾規則時原樣放行 — 不硬編造欄位。
+    /// 回退值也再驗一次: 預設圖本身不支援該 mode 時 (如 SOCCER 預設 98 無
+    /// soccer bit) 改取目錄第一張支援該 mode 的圖, 保證結果必合法。
+    /// </summary>
+    private static byte ResolveMap(byte requested, byte mode, Db db)
+    {
+        if (!ModeMapBit.TryGetValue(mode, out byte bit))
+        {
+            return requested;                               // 練習/聊天等 mode 不篩圖
+        }
+
+        var catalog = db.GetMapModes();
+        if (!catalog.TryGetValue(requested, out int modes))
+        {
+            return requested;                               // 目錄無此圖 → 無法驗證, 放行
+        }
+
+        int mask = 1 << bit;
+        if ((modes & mask) != 0)
+        {
+            return requested;                               // 該 mode 可用
+        }
+
+        if (ModeDefaultMap.TryGetValue(mode, out byte fallback)
+            && catalog.TryGetValue(fallback, out int fallbackModes)
+            && (fallbackModes & mask) != 0)
+        {
+            return fallback;                                // mode 預設圖可用
+        }
+
+        foreach (var (mapId, mapModes) in catalog)          // 預設圖不可用 → 第一張合法圖
+        {
+            if ((mapModes & mask) != 0)
+            {
+                return mapId;
+            }
+        }
+
+        return requested;                                   // 目錄無任何支援圖 → 放行
+    }
 
     public static void Register(Registrar add)
     {
@@ -361,10 +434,10 @@ public static class RoomHandlers
             return;
         }
 
-        room.MapId = mapId;
+        room.MapId = ResolveMap(mapId, room.Rule, context.Db);  // 121 依 mode→bit 過濾
 
         await RoomManager.BroadcastAsync(room,
-            new Packet(Opcode.GR_MAPCHANGE_ACK).WriteU8(mapId));
+            new Packet(Opcode.GR_MAPCHANGE_ACK).WriteU8(room.MapId));
     }
 
     // ═══════════ 房設定簇 (REQ 限房主, ACK 以同值廣播全房) ═══════════
@@ -444,10 +517,12 @@ public static class RoomHandlers
         }
 
         room.Rule = mode;
-        if (ModeDefaultMap.TryGetValue(mode, out var defaultMap))
-        {
-            room.MapId = defaultMap;                        // client 端 sub_426930 同源重置
-        }
+        // client 端 sub_426930(mode) 會把 map 回推成該 mode 預設圖寫 +130;
+        // server 鏡像: 有預設圖的 mode 重置, 其餘保留; 兩者皆再經 ResolveMap
+        // 依 mode→bit 過濾 (防呆, 正常預設圖必合法故為 no-op)。
+        room.MapId = ResolveMap(
+            ModeDefaultMap.TryGetValue(mode, out byte defaultMap) ? defaultMap : room.MapId,
+            mode, context.Db);
 
         await RoomManager.BroadcastAsync(room, new Packet(Opcode.GR_RULECHANGE_ACK).WriteU8(mode));
     }
@@ -687,6 +762,7 @@ public static class RoomHandlers
         var pass = hasPass != 0 ? packet.ReadStr() : null;
         byte rule = packet.Remaining > 0 ? packet.ReadU8() : (byte)0;
         byte max = packet.Remaining > 0 ? packet.ReadU8() : (byte)16;
+        mapId = ResolveMap(mapId, rule, context.Db);        // 111 依 mode→bit 過濾可選地圖
 
         var room = session.UserId != 0
             ? context.Rooms.Create(session, mapId, title, pass, rule, max)

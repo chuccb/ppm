@@ -236,12 +236,29 @@ miRun) 等 31 項彈道參數的修正 — weaponparts↔partsability 第九次�
 | URLList_01.xml | 正版端點 (dl.paperman.jp, bill.paperman.jp, hangame.co.jp) | 網頁跳轉 |
 | TimeLimit_NotUse_IP.xml | 防沉迷白名單 IP | — |
 | netcafe_contents.xml | 網咖特典 (UTF-16) | PopUpNetCafeShop |
-| voice_customize_contents.xml | 語音自訂 (UTF-16) | 695 kind 語音 |
+| voice_customize_contents.xml | 語音自訂 (UTF-16LE; 15 角色×92 情境×27 句) | 791–796 voice_slots |
 | CharacterFitting.xml | 試衣間預設 (hand*.tga ← data.pat 快取!) | — |
 | face_contents.xml | 臉型清單 | 角色創建 |
 
 (CharacterFitting 引用 hand12.tga — 與 data.pat 快取表的 15 個
 hand*.tga 互證: 那是「試衣間手部貼圖」快取)
+
+**語音自訂兩 XML (卌七輪全解 — 791..796 資料源)**:
+- `voice_customize_contents.xml` (UTF-16LE BOM, root `vcustomizelistTable`):
+  15 角色區塊 `<hayate index="2">`…`<devilgirl index="2">`, 每區塊
+  `<Voice00>`..`<Voice92>`(缺 87) 共 **92 情境**; 每情境 27 句 speech =
+  `command_1..9` / `tactics_1..9` / `infomation_1..9` (client 拼字如此)。
+  全檔 40052 tags。語音表的 voice_item 偏移對到 (情境, 類別, 句序)。
+- `voice_customize_path.xml` (UTF-8, root `vcustomizepathTable`): 91 個
+  `<soundsNN>` 區塊 (sounds..sounds92, 缺 87) — first_path
+  `sound\soundsNN` + 15 個 `sub_path_<角色>` (cacao/dallae/hana/lich/
+  loki/maru/momo/nari/pero/robotgirl_12/spy_11/wooka/tsunderegirl/
+  magicgirl/devilgirl) = 語音檔路徑。
+- 15 角色 codename 對照 (sub_8859B0 switch 0..14 與 sub_path 一一對應):
+  0 maru 1 nari 2 dallae 3 lich 4 cacao 5 loki 6 hana 7 momo 8 wooka
+  9 pero 10 spy_11 11 robotgirl_12 12 tsunderegirl 13 magicgirl 14 devilgirl
+  — 等同 ICT_* 角色 (NORMAL_BOY…DEVILGIRL), character/models/type1..15
+  = idx+1。base_voice 兩枚 s16 即選 sounds index。
 
 ## 5e. 版本考古 (廿一輪)
 - 根 datarevision.txt = 811034967 (patch 版本號)

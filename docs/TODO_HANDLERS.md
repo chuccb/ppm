@@ -49,10 +49,21 @@
 > ③ 111 建房/169 改模式的 mode 值現在可用 map_catalog.modes
 > (bitmask) 做「該模式可選地圖」驗證, server 尚未做 — 列下一輪。
 >
+> 卌七輪 (111/169 地圖過濾 + 語音簇定案):
+> ① 111/121 依 mode→bit 過濾可選地圖落地 — ModeMapBit (mode→bit,
+>    見 RESOURCES.md §4b) + ResolveMap: 建房/換圖時該 mode 不支援的
+>    地圖回退 mode 預設圖 (ModeDefaultMap); map_catalog 查無/mode 無
+>    規則時原樣放行 (不硬編)。Db.GetMapModes 讀 map_catalog。
+> ② 語音 791–796 wire 佈局全定案並更正 docs (792=整塊覆寫、794=u8
+>    count 前綴, 非先前誤判的 795 變體鏡像); Handlers.Voice.cs 改為
+>    真解析 795 兩變體 (依長度 1780B 判別) 並落地 voice_customize/
+>    voice_slots (char_idx 0..14 + 2×base_voice + 27×(item,flag))。
+>    792 的 char_idx 由 users.current_char 的 char_type 推出。
+>
 > 下一輪可做: GM/MASTER 群 (275-299/394-416/822-831/883-885, 需權限
 > 分級); warehouse 群 (855-861); matching room 群 (983/986/988);
 > AI 模式群 (918-944); 130/134 的 +146/+150 原服語意 (client 存而不讀,
-> 送 0 已安全); 111/169 依 mode→bit 過濾可選地圖 (map_catalog.modes)。
+> 送 0 已安全)。
 
 | op | 名稱 | REQ 寫入序列 |
 |---|---|---|

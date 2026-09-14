@@ -662,21 +662,38 @@ kind 0/1/14 與 12/13/17 (可覆寫類) 走覆寫路徑, 其他 kind 重複購�
   = 5×32B 倉庫頁狀態塊
 【783→784 NewMsgCount】REQ 空 (sub_5643E0); 784 (sub_564480):
   s32 count → dword_F0C104 → UI vtbl+72(count!=0) 信箱紅點
-【791→792 VoiceItemSlot】REQ 空 (CVCustomizeManager::
-  SendPacketMyVoiceCustomize; debug 字串洩類名!); this+289 防重入;
-  792 ACK 經第五層 sub_885D00→vtbl+16 解析 (佈局=795 變體A 鏡像)
-【793→794 VoiceItemSlotAll】REQ 空 (SendPacketMyVoiceCustomizeAll);
-  794 = 795 變體B 鏡像: 20×{s32 char_idx, s16 base_voice, s16 x2,
-  3×9×{s16 voice_item, u8 flag}} — 3 類 (command/tactics/infomation)
-  ×9 句 = voice_customize_contents.xml 的 command_1..9/tactics_1..9/
-  infomation_1..9 完全互證 (Extracted 實測)!
-【795→796 ChangeVoiceSlot】REQ 兩變體:
-  A (sub_885F10, 單角色差分): u8 char, u8 base_changed,
-    [s16 voice,s16], 3×{u8 n, ≤9×{u8 slot(1..9), s16 item, u8 flag}}
-  B (sub_886330, 全量): 同 794 結構
-  796 ACK (sub_885E40, 卅六輪全文): u8 err, u8; err≠0 → 訊息 0x3FB
-  + 續讀 792 單角色塊 (server 回滾用); this+290 pending 佇列自動重送
-  — 防重入設計: 791 進行中 (this+289) 的變更先入佇列
+【791→792 VoiceItemSlot】REQ 空 (sub_885590; 無 debug 字串 — 類名
+  CVCustomizeManager 由 793/794/795 的 debug 字串洩漏); this+289 防重入;
+  792 ACK 經 sub_885D00 → CMyVoiceCustomize **vtbl+12** = sub_876B00 解析,
+  佈局 = u8 char_idx + 全量單角色塊 (86B):
+    `u8 char_idx, s16 base_voice1, s16 base_voice2, 3×9×{s16 item, u8 flag}`
+  (⚠ 卌七輪更正: 792 是**整塊覆寫**, 非 795 變體A 差分鏡像)
+【793→794 VoiceItemSlotAll】REQ 空 (sub_885C00 = SendPacketMyVoiceCustomizeAll);
+  794 經 sub_885DA0 → CMyVoiceCustomize **vtbl+16** = sub_876C90 解析:
+    `u8 count, count×(u8 char_idx + 全量單角色塊)`
+  (⚠ 卌七輪更正: 794 是 **u8 count 前綴**, 非 795 變體B 的 20×s32;
+   server 送 count=15 即全角色)
+【795→796 ChangeVoiceSlot】REQ 兩變體 (client→server 依長度判別 —
+  B 固定 20×89=1780B, A ≤117B):
+  A (sub_885F10, 單角色差分): `u8 char_idx, u8 base_changed,
+    [s16,s16], 3×{u8 n, ≤9×{u8 slot(1..9), s16 item, u8 flag}}`
+  B (sub_886330, 全量): `20×{s32 char_idx, s16, s16, 3×9×{s16,u8}}`
+  796 ACK (sub_885E40): `u8 err, u8`(第二 byte 讀而未用); err≠0 →
+  訊息 0x3FB「ボイスカスタマイズ設定保存に失敗しました。設定内容を
+  もう一度確認してください。」並重拉 792 回滾; this+290 pending 佇列
+  自動重送 (791 進行中 this+289 的變更先入佇列)
+【語音 char_idx】0..14 = maru/nari/dallae/lich/cacao/loki/hana/momo/
+  wooka/pero/spy_11/robotgirl_12/tsunderegirl/magicgirl/devilgirl
+  (sub_8859B0 名字表; character/models/type1..15 = idx+1); 15..19 為
+  client 變體B 保留槽 (全 0)。**char_type 為 1-based** (1..15 = 同序
+  15 角色; spy_11/robotgirl_12 的名字即內嵌其 char_type 11/12), 故
+  語音 char_idx = char_type − 1。voice_item = 語音表偏移 (unk_EAFC40
+  起, 0=角色原生), flag = 該槽位置 1..9 (0=未自訂/預設; UI 選格時寫
+  i+1, server 原樣回傳)。base_voice×2 s16 選語音組 (voice_customize_path.xml
+  的 sounds index) — 3 類 command/tactics/infomation ×9 句與
+  voice_customize_contents.xml 的 command_1..9/tactics_1..9/
+  infomation_1..9 互證 (Extracted 實測)。⚠ 變體B (sub_886330) 全 exe
+  無呼叫者 = **client 死碼**, 實際只會收到變體A。
 ```
 
 ### 3.13 GQ_QUEST 任務家族 (八輪全家讀畢)
@@ -1124,6 +1141,14 @@ NUL), 故 server 必送 — 新房間 = team_mode(2 若 mode∈{0,2,3,4,8,10,
 client 實際載入的 `system/map_StartIndex.xml` — ⚠ ui/ 根目錄另有一份
 舊版 modeStartIndex 不同, 以 system/ 為準): 0→106 1→104 2→14 3→107
 4→23 8→51 9→89 12→98; 其餘 mode (5/6/7/10/11/13/15/16) 無條目 → 保留原圖。
+⚠ 交叉確認發現: modeStartIndex[SOCCER]=98 但 98 是 TeamSurvival 圖
+(TS_33_tutor_castle, modes=0x0002), 真正 soccer bit(0x4000) 落在 99/100
+(スルルスタジアム) — client sub_426930 **就是寫 98**, server 鏡像不「校正」。
+**mode→bit 地圖過濾 (卌七輪落地)**: server 在 111 建房 / 121 換圖 / 169
+改模式時以 maplist `modes` bitmask 驗證 map↔mode 相容性
+(RoomHandlers.ResolveMap): 該 mode 有 bit 且 map 不含此 bit → 回退預設圖,
+預設圖亦不含時取目錄第一張含該 bit 的圖; 目錄查無/mode 無規則 → 原樣放行
+(不硬編)。mode→bit 對照見 RESOURCES.md §4b。
 
 ### 3.15b3 TeamHacking 駭入/炸彈協定 317-333 (廿二輪 — TH 模式核心)
 ```

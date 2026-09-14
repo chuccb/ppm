@@ -426,14 +426,31 @@ CREATE INDEX IF NOT EXISTS idx_shop_tx_user ON shop_transactions(user_id, create
 
 -- ----------------------------------------------------------------------------
 -- 18. 聲音自訂槽 — GL_VOICEITEMSLOT(791)/GI_VOICEITEMSLOT_ALL(793)/CHANGE(795)
---     (CVCustomizeManager::SendPacketMyVoiceCustomizeAll)
+--     (CVCustomizeManager::SendPacketMyVoiceCustomize / ...All / ...Change)
+--
+--   語音 char_idx = 0..14 (0=maru…14=devilgirl, sub_8859B0 名字表;
+--   character/models/type1..15 = idx+1)。wire 語音塊:
+--     s16 base_voice1, s16 base_voice2,
+--     3 類 (command/tactics/infomation) × 9 句 × {s16 item, u8 flag}
+--     → slot_no 0..26 (i*9+j), item = voice_item (語音表偏移), flag 原樣儲存。
 -- ----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS voice_customize (
+    user_id     INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    char_idx    INTEGER NOT NULL CHECK (char_idx BETWEEN 0 AND 14),
+    base_voice1 INTEGER NOT NULL DEFAULT 0,
+    base_voice2 INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (user_id, char_idx)
+) STRICT, WITHOUT ROWID;
+
 CREATE TABLE IF NOT EXISTS voice_slots (
-    user_id   INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-    char_type INTEGER NOT NULL,
-    slot_no   INTEGER NOT NULL,
-    item_id   INTEGER NOT NULL DEFAULT 0,
-    PRIMARY KEY (user_id, char_type, slot_no)
+    user_id  INTEGER NOT NULL,
+    char_idx INTEGER NOT NULL CHECK (char_idx BETWEEN 0 AND 14),
+    slot_no  INTEGER NOT NULL CHECK (slot_no BETWEEN 0 AND 26),
+    item_id  INTEGER NOT NULL DEFAULT 0,
+    flag     INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (user_id, char_idx, slot_no),
+    FOREIGN KEY (user_id, char_idx)
+        REFERENCES voice_customize(user_id, char_idx) ON DELETE CASCADE
 ) STRICT, WITHOUT ROWID;
 
 -- ----------------------------------------------------------------------------
