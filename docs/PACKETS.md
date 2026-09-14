@@ -895,6 +895,73 @@ ACK 13 欄 = server 附 drop_id+item 詳情); 474-483 射擊館 — 476 END
 334/336/338 SEEDKEY/UNIQUEKEY/DETECTCRACK = 反作弊挑戰 (安全模組直接
 組包, 私服可忽略)。
 
+### 3.15d3a OCC 與地面武器 — dispatcher/解析器交叉驗證 (五十六輪)
+
+本節只記錄已由 **REQ builder → `sub_58B010` case → ACK parser** 三處交叉
+確認的資料；未知值不以 `0` 佯裝已知。
+
+#### OCC 902–908
+
+三個 C2S builder 完全同構：`sub_564CF0` (902 start)、`sub_565120`
+(904 success)、`sub_565470` (906 fail) 都寫：
+
+```
+u8 point_id, u8 claimed_slot, s32 claimed_user_id
+```
+
+`point_id` 是 controller field + 1；ACK parser 對 `point_id - 1` 設下
+`< 3` 防護（`sub_771490`、`sub_7713C0`），故可接受範圍是 **1..3**。
+`claimed_user_id` 的 builder 來源是 `dword_EE8CB4`，即本機登入玩家 uid；
+`claimed_slot` 是本機戰場 slot（bot 分支為 254）。伺服器因此必須以 session
+的 room membership、slot 與 uid 驗證三者，而非把 client 自報身份中繼。
+
+| C2S → S2C | 已確認 ACK layout | client 行為 |
+|---|---|---|
+| 902 → 903 | `u8 action, u8 point, u8 actor_slot, u8 capture_participant_count, s32 actor_uid` | `action==0` 時 `sub_564E30` → `sub_771490(point-1, actor_slot, capture_participant_count, actor_uid)` |
+| 904 → 905 | `u8 action, u8 point, u8 slot_a, u8 slot_b` | 原版 Occupy `action==0` → `sub_771550(point-1, slot_a, slot_b)`；Renewal client 只讀前二欄，因此四欄 payload 對兩者皆安全 |
+| 906 → 907 | `u8 action, u8 point, u8 actor_slot, u8 capture_participant_count, s32 actor_uid` | `action==0` → `sub_771670(point-1, actor_slot, capture_participant_count)` |
+| 908 | `(空)` | `sub_565850` 純觸發 `sub_771770`，尚未由可重現條件證明何時可發 |
+
+`RoomBattleState` 是每房、受 `System.Threading.Lock` 保護的短生命週期狀態：
+start 只能認領 idle point、success/fail 只能由同一 `(slot, uid)` 轉換；`GR_START`
+與 `GR_END` 都清空它。903/907 的 `controller_value` 寫入 controller `+24`；
+`sub_768210` 只接受 `1..2` 的活動值、`sub_76A4B0` 對大於 1 加速計時，故存為
+`CaptureParticipantCount`。目前尚無位置聚合器，start actor 是唯一可驗證的參與者，
+所以由狀態導出 `1`，而非以 `0` 當 padding。905 的兩個 slot 都從已驗證的
+start actor 取得，絕不信任 REQ 的自報欄位。玩家離房時會取消該玩家尚在
+capturing 的 claim（已完成的據點留至本局結束），防止斷線 slot 永久鎖點。
+
+#### 地面武器 959–963
+
+dispatcher mapping 已定案：959 → `sub_5666D0` (create)、960 →
+`sub_566B30` (destroy)、961 → `sub_566BF0` (initial/list)、963 →
+`sub_5672E0` (get-and-drop ACK)。完整 wire 讀序：
+
+```
+959 create: u16 drop_id, u8 actor_slot, s32 actor_data, u16 weapon,
+            s16 x, s16 y, s16 z, u16 meta_a, u16 meta_b, f32 value, raw[32]
+960 destroy: u8 count, count×u16 drop_id       # id 0 提早停止
+961 list:    u8 count, count×(959 的單一條目) # id 0 提早停止
+962 request: s16 ground_drop_id, s16 action_offset, u8 quick_slot,
+             s16 data_a, s16 data_b, f32 value
+963 ACK:     u8 result;
+             result==0 才讀 u8 actor_slot, s32 actor_data, u16 drop_id,
+             u8 quick_slot, u16 weapon, s16 x, s16 y, s16 z;
+             weapon!=0 才追加 u16 meta_a, u16 meta_b, u16 meta_c,
+             f32 value, raw[32]
+```
+
+`sub_566F50` 證實 962 的精確寫入序；`sub_5672E0` 只以首 byte 判斷
+`result == 0` 才讀後續，任何非零均是拒絕路徑。現階段 server 收到已驗證的
+962 會只回請求 session 的 `result=1`：959/961 都是 S2C，專案尚沒有可從地圖
+資料或原服封包驗證的掉落物 seed，因此不得偽造一個成功 963（會使 client 刪除
+指定 drop id 並按未證實的座標／32B weapon state 建物件）。`result=1` 是此
+boolean 分支的真值，不是假定的官方細分 error code。
+
+下一步要讓 962 成功：先取得可重現的 959/961 capture 或可驗證的地圖掉落物
+定義，再在 `RoomBattleState` 加入 `drop_id → 完整 959 state` 表，將「取舊物、
+生成替換物、960 destroy、963 ACK」置於同一把 room lock；不可直接 relay。
+
 ### 3.15d2 剩餘家族速覽 (廿二輪終掃)
 ```
 984 GL_MATCHINGROOM_MAKE_ACK  (sub_5865A0): u8 result — 配對房建立

@@ -89,6 +89,11 @@ public static class BattleRelayHandlers
         add(Opcode.GG_GET_BALL_REQ, MakeSoccerEvent(Opcode.GG_GET_BALL_ACK));
         add(Opcode.GG_GET_GOAL_REQ, MakeSoccerEvent(Opcode.GG_GET_GOAL_ACK));
 
+        // 有狀態的戰場物件不是 blind relay。各 handler 只接受房內、slot 與
+        // uid 都和 session 相符的 REQ，並以 Room.BattleState 原子轉換。
+        OccupyHandlers.Register(add);
+        DropWeaponHandlers.Register(add);
+
         foreach (var (req, ack) in Respawns)
         {
             add(req, MakeRespawn(ack));
@@ -217,7 +222,7 @@ public static class BattleRelayHandlers
         };
 
     /// <summary>取 session 所在房與其 slot (非房內回 false)。</summary>
-    private static bool TryFindRoomSlot(Session session, ServerContext context, out Room room, out byte slot)
+    internal static bool TryFindRoomSlot(Session session, ServerContext context, out Room room, out byte slot)
     {
         room = null!;
         slot = 0;

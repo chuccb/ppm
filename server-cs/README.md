@@ -23,7 +23,8 @@ server-cs/
     │   ├── Handlers.Auth.cs        # 682→681+694, ping
     │   ├── Handlers.Lobby.cs       # 105/107/197/199/210/212
     │   ├── Handlers.Shop.cs        # 356/204/695
-    │   └── Handlers.Stats.cs       # GP_CH*C 戰績家族 (18 REQ + 882 推播)
+    │   ├── Handlers.Stats.cs       # GP_CH*C 戰績家族 (18 REQ + 882 推播)
+    │   └── Handlers.BattleObjects.cs # OCC 902–907 權威狀態 + 962 安全拒絕
     └── PaperMan.SelfTest/          # 不需客戶端的 codec 自測
 ```
 
@@ -50,6 +51,11 @@ dotnet run --project src/PaperMan.Server -- ../db/paperman.db 40200
 - **壓縮門檻**: 預設送 `0x2580` (=9600) 給 `GL_ACCOUNTCONNSUCC(694)` → 客戶端
   永不壓縮, 與原版預設一致, 可簡化除錯。
 - LZ 演算法已用 Python 逐行移植做過 310 組 round-trip 驗證 (含 fuzz)。
+- **有狀態戰場物件**: OCC 902/904/906 只接受 playing 的 Occupy 房成員，
+  檢查 self-reported slot/uid 後才在每房 `RoomBattleState` lock 中作
+  start/success/fail 轉換；962 在缺少經驗證的 959/961 掉落物 seed 前只回
+  1-byte rejection，絕不偽造成功 ACK。完整證據與後續工作見
+  `../docs/PACKETS.md` §3.15d3a。
 
 ## 協定要點 (詳見 ../docs/PACKETS.md)
 

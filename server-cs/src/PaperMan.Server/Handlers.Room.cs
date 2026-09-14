@@ -219,6 +219,7 @@ public static class RoomHandlers
 
         room.Playing = true;
         room.ResetLoading();
+        room.BattleState.BeginMatch();                       // 同一把 state lock 內開始新局並清除前局
         await RoomManager.BroadcastAsync(room, ack);
     }
 
@@ -294,6 +295,7 @@ public static class RoomHandlers
             .WriteU8(0)                                     // +109 room_type_B (client 僅鏡像)
             .WriteBool(room.TeamShuffle);                   // mode+13 隊打散開關 (368/369)
         room.Playing = false;
+        room.BattleState.EndMatch();                         // 同一把 state lock 內封閉並清掉本局 OCC
         await RoomManager.BroadcastAsync(room, ack);
     }
 

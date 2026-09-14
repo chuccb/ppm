@@ -409,5 +409,55 @@ foreach (var (_, codec) in codecs)
     Check("945 Reset Slot ACK wire", p945.ReadU8() == 1);
 }
 
+// ---- 10. OCC 與地面武器條件式 payload（五十六輪） --------------------------
+{
+    // 902/904/906 的 builder 同構: u8 point, u8 self slot, s32 self uid.
+    var p902 = new Packet(Opcode.GG_OCC_START_REQ).WriteU8(3).WriteU8(7).WriteS32(12345);
+    Check("902 Occupy start REQ = 6B",
+        p902.Length == 6 && p902.ReadU8() == 3 && p902.ReadU8() == 7 && p902.ReadS32() == 12345);
+
+    // 903/907 action=0 的 parser 都讀完整 8B，沒有舊表格誤列的第六欄。
+    var p903 = new Packet(Opcode.GG_OCC_START_ACK)
+        .WriteU8(0).WriteU8(3).WriteU8(7).WriteU8(1).WriteS32(12345);
+    Check("903 Occupy start ACK = 8B",
+        p903.Length == 8 && p903.ReadU8() == 0 && p903.ReadU8() == 3
+        && p903.ReadU8() == 7 && p903.ReadU8() == 1 && p903.ReadS32() == 12345);
+
+    var p905 = new Packet(Opcode.GG_OCC_SUCC_ACK).WriteU8(0).WriteU8(3).WriteU8(7).WriteU8(7);
+    Check("905 Occupy success ACK = 4B", p905.Length == 4 && p905.ReadU8() == 0 && p905.ReadU8() == 3);
+
+    var p907 = new Packet(Opcode.GG_OCC_FAIL_ACK)
+        .WriteU8(0).WriteU8(3).WriteU8(7).WriteU8(1).WriteS32(12345);
+    Check("907 Occupy fail ACK = 8B",
+        p907.Length == 8 && p907.ReadU8() == 0 && p907.ReadU8() == 3
+        && p907.ReadU8() == 7 && p907.ReadU8() == 1 && p907.ReadS32() == 12345);
+
+    // 962 是固定 13B；963 失敗則只有 result，client 不得讀 success tail。
+    var p962 = new Packet(Opcode.GG_DROPWEAPON_GET_AND_DROP_REQ)
+        .WriteS16(unchecked((short)0xC001)).WriteS16(100).WriteU8(2)
+        .WriteS16(3).WriteS16(4).WriteF32(99.5f);
+    Check("962 get-and-drop REQ = 13B", p962.Length == 13);
+
+    var p963Rejected = new Packet(Opcode.GG_DROPWEAPON_GET_AND_DROP_ACK).WriteBool(true);
+    Check("963 rejection is nonzero 1B result",
+        p963Rejected.Length == 1 && p963Rejected.ReadU8() != 0 && p963Rejected.Remaining == 0);
+
+    // result==0 + weapon!=0: 17B base + 42B metadata/state tail = 59B.
+    byte[] weaponState = [.. Enumerable.Range(0, 32).Select(i => (byte)i)];
+    var p963Success = new Packet(Opcode.GG_DROPWEAPON_GET_AND_DROP_ACK)
+        .WriteU8(0).WriteU8(7).WriteS32(12345).WriteU16(0xC001).WriteU8(2).WriteU16(100)
+        .WriteS16(10).WriteS16(20).WriteS16(30)
+        .WriteU16(3).WriteU16(4).WriteU16(5).WriteF32(99.5f).WriteRaw(weaponState);
+    Check("963 success with weapon state = 59B",
+        p963Success.Length == 59
+        && p963Success.ReadU8() == 0 && p963Success.ReadU8() == 7
+        && p963Success.ReadS32() == 12345 && p963Success.ReadU16() == 0xC001
+        && p963Success.ReadU8() == 2 && p963Success.ReadU16() == 100
+        && p963Success.ReadS16() == 10 && p963Success.ReadS16() == 20 && p963Success.ReadS16() == 30
+        && p963Success.ReadU16() == 3 && p963Success.ReadU16() == 4 && p963Success.ReadU16() == 5
+        && Math.Abs(p963Success.ReadF32() - 99.5f) < 1e-6f
+        && p963Success.ReadRaw(32).SequenceEqual(weaponState) && p963Success.Remaining == 0);
+}
+
 Console.WriteLine($"\n{pass} passed, {fail} failed");
 return fail == 0 ? 0 : 1;

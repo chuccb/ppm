@@ -264,7 +264,7 @@
 | 891 | GC_QUERY_CLANRANKING_ACK | sub_424620 | `u8 s32` |
 | 893 | MASTER_RELOAD_CLANRANKING_ACK | sub_585CB0 | `(無直接讀取/轉發)` |
 | 895 | GR_TEAMSHUFFLE_ACK | sub_585E70 | `(無直接讀取/轉發)` |
-| 903 | GG_OCC_START_ACK | sub_564E30 | `u8 u8 u8 u8 s32 f32/s32` |
+| 903 | GG_OCC_START_ACK | sub_564E30 | `u8 u8 u8 u8 s32` |
 | 905 | GG_OCC_SUCC_ACK | sub_565230 | `u8 u8 u8 u8` |
 | 907 | GG_OCC_FAIL_ACK | sub_565560 | `u8 u8 u8 u8 s32` |
 | 908 | GG_OCC_AB_SUCC_NOTIFY | sub_565850 | `(無直接讀取/轉發)` |
@@ -291,10 +291,10 @@
 | 949 |  | sub_58EF00 | `u8` |
 | 954 |  | sub_57DA20 | `s8/bool` |
 | 958 |  | sub_565E00 | `(無直接讀取/轉發)` |
-| 959 | GG_DROPWEAPON_CREATE_NOTIFY | sub_5666D0 | `u16 u8 s32 u16 s16 s16 s16 u16 u16 f32` |
-| 960 | GG_DROPWEAPON_DESTROY_NOTIFY | sub_566B30 | `u8 u16` |
-| 961 | GG_DROPWEAPON_INFO_NOTIFY | sub_566BF0 | `u8 u16 u8 s32 u16 s16 s16 s16 u16 u16 f32` |
-| 963 | GG_DROPWEAPON_GET_AND_DROP_ACK | sub_5672E0 | `u8 u8 s32 u16 u8 u16 s16 s16 s16 u16 u16 u16 f32` |
+| 959 | GG_DROPWEAPON_CREATE_NOTIFY | sub_5666D0 | `u16 u8 s32 u16 s16 s16 s16 u16 u16 f32 raw32` |
+| 960 | GG_DROPWEAPON_DESTROY_NOTIFY | sub_566B30 | `u8 count, count×u16` (0 id stops early) |
+| 961 | GG_DROPWEAPON_INFO_NOTIFY | sub_566BF0 | `u8 count, count×(u16 u8 s32 u16 s16 s16 s16 u16 u16 f32 raw32)` (0 id stops early) |
+| 963 | GG_DROPWEAPON_GET_AND_DROP_ACK | sub_5672E0 | `u8 result, [result==0: u8 s32 u16 u8 u16 s16 s16 s16, [weapon!=0: u16 u16 u16 f32 raw32]]` |
 | 965 | GG_GET_BALL_ACK | sub_566040 | `u8 u8` |
 | 966 | GG_RESPAWN_BALL_ACK | sub_565EF0 | `(無直接讀取/轉發)` |
 | 968 | GG_GET_GOAL_ACK | sub_566200 | `u8 u8` |
