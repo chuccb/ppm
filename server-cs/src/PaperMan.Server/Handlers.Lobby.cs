@@ -281,7 +281,7 @@ public static class LobbyHandlers
             return;
         }
 
-        Console.WriteLine($"[s{session.Id}] GL_MYINFO_REQ: generating CClientData for '{info.Nickname}' (UserId={info.UserId}, Level={info.Level}, Cash={info.Cash}, GP={info.GamePoint})");
+        Console.WriteLine($"[s{session.Id}] GL_MYINFO_REQ: generating CClientData for '{info.Nickname}' (UserId={info.UserId}, Level={info.Level}, Cash={info.Cash}, GP={info.Gp})");
         await session.SendAsync(BuildMyInfoAck(
             info,
             context.Db.GetCharacters(info.UserId),
