@@ -33,6 +33,7 @@ public sealed class Router
         FriendHandlers.Register(Add);
         RoomHandlers.Register(Add);
         BattleRelayHandlers.Register(Add);
+        JoinHandlers.Register(Add);
         ChannelHandlers.Register(Add);
         VoiceHandlers.Register(Add);
         WarehouseHandlers.Register(Add);

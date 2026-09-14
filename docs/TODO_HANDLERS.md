@@ -1,8 +1,9 @@
 # Server handler 待辦清單 (廿四輪自動盤點)
 
 > 「client 有 builder、server 尚無 handler」的 REQ 全表 — 附自動抽出
-> 的寫入序列, 按此實作 handler 即可。已實作 67 個 REQ handler
-> (Auth/Lobby/Shop/Stats/Clan/Quest/Friend/Room/Channel/Voice)。
+> 的寫入序列, 按此實作 handler 即可。已實作 83 個 REQ handler
+> (Auth/Lobby/Shop/Stats/Clan/Quest/Friend/Room/Channel/Voice/
+> BattleRelay/Warehouse/Join)。
 >
 > 本輪 (房間設定/聊天簇) 新增: 139 GG_EXITGAME、167/169/171/173/175
 > /177、340/364/712、728 觀戰聊天、990 GR_DAMAGEROOM (db/packets.tsv
@@ -69,7 +70,18 @@
 > /warehouse_lockers, 頁籤預設全持有) + Handlers.Warehouse.cs。
 > 855 的 s32 = dword_EE8CB4 自己 uid (驗證用, 私服以 session 為準)。
 >
-> 下一輪可做: GM/MASTER 群 (275-299/394-416/822-831/883-885, 需權限
+> 卌九輪 (GL_JOIN 簇 260-269 落地): 房單進房流程逐函數定案 — 260/262
+> /264 REQ = u8 / u8 str / u8; 265 ACK 10 欄頭 + count×(slot,str,u8),
+> 其中 +408/+410/+416 全程無讀者 (送 0 安全), +409 map/+411 time/
+> +412 round/+414 item 由 sub_515DE0 顯示; 267 = u8 code u8 flag
+> (code 0=玩家/1=觀戰); 268 = u8 room_no u8 flag (0=PLAY/1=OBSERVE);
+> 269 code 6=玩家自身快照 / 7=觀戰全房快照。落地 Handlers.Join.cs:
+> 260/262/264 → 261/263/265 完整 (房單進房 + 密碼關卡 + 房資訊);
+> 266 → 267 依 flag 回 code; 268 → 269 回 code 0 (無遊戲狀態機,
+> code 6/7 成功態留待後續, 不硬編未確認欄位)。詳 PACKETS.md §3.15f。
+>
+> 下一輪可做: 269 code 6/7 成功態 (需遊戲狀態機, sub_885D00 尾塊
+> 待確認); GM/MASTER 群 (275-299/394-416/822-831/883-885, 需權限
 > 分級); matching room 群 (983/986/988); AI 模式群 (918-944);
 > 130/134 的 +146/+150 原服語意 (client 存而不讀, 送 0 已安全)。
 
@@ -83,11 +95,6 @@
 | 230 | GP_CHLOSSC_REQ | `s32` |
 | 232 | GP_CHKILLC_REQ | `s32` |
 | 244 | GP_CHTKILLC_REQ | `s32` |
-| 260 | GL_JOIN_REQ | `u8` |
-| 262 | GL_JOINPASS_REQ | `u8 str` |
-| 264 | GL_JOININFO_REQ | `u8` |
-| 266 | GL_JOINGAME_REQ | `u8 u8` |
-| 268 | GL_JOINPLAY_REQ | `u8 u8` |
 | 275 | MASTER_MEMO_REQ | `wstr` |
 | 277 | MASTER_MEMOALL_REQ | `wstr` |
 | 279 | MASTER_USERCUT_REQ | `u8 str` |

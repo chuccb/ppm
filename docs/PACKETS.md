@@ -742,8 +742,10 @@ kind 0/1/14 與 12/13/17 (可覆寫類) 走覆寫路徑, 其他 kind 重複購�
 ```
 765 CLAN_TNMT_ENTERROOM_ACK (25欄): 前綴與 114 進房完全同構
     (u8+s32+u8+str...) — 錦標賽進房 = 114 的克隆
-265 GL_JOININFO_ACK (25欄): {u8 map,u8,u8,u16 win,u8 max,u8,u16,u8,
-    u16,u8,str title} ×2 組 — 跨頻道跟隨好友的目標房資訊
+265 GL_JOININFO_ACK (10 欄頭 + 玩家清單; 見 §3.15f 逐欄定案): {u8
+    status, u8 map, u8 count, u8 B, u16 slot_mask, u8 C, u8 time,
+    u16 round, u8 item, u16 G} + count×{u8 slot, str name, u8}
+    — 房單進房的目標房資訊 (非「跟隨好友」; 舊誤記)
 257 GL_ENTERROOMOB_ACK (19欄): 觀戰進房 (114 的觀戰版)
 486 GAMEROOM_PROGRESSTIME (23欄): 房間進行時間+成員狀態同步
 986 GR_MATCHINGROOM_START_ACK (17欄): 與 130 GR_START_ACK 完全同構
@@ -906,11 +908,15 @@ festival: 681 的 3 頻道組 ↔ 195 的 group 序號互證; 頻道類型 n2==3
 中途加入/觀戰的「全房間快照」。頂層: `u8 n7` switch:
 - 0: 失敗, 通知 UI (sub_406F20(0))
 - 1..5, 8, 9: 各種拒絕碼 (sub_406F20(n7))
-- 6: **觀戰者自己入房** — `s32 v482, u8 slot(≤16), str nick` +
-  CClientData 嵌入 (sub_524360) + `u8, s16, s16, s16` (角色外觀) +
-  `s32, s32, s32 custom_tex, str(64)` + 4×武器組 {s16 equipped,
-  kk!=3 → s16×2... , equipped→8×s32 parts} + `u8` + [8×s32] + ...
-- 7 (fall-through 主體): **完整房間+全成員快照**:
+- 6: **以玩家身份入房 (自身快照)** — `s32 uid, u8 char_slot(≤16),
+  str nick` + CClientData 嵌入 (sub_524360) + `u8, s16, s16, s16`
+  (角色外觀) + `s32, s32, s32 custom_tex, str(64)` + 4×武器組
+  {s16 equipped, kk!=3 → s16×2... , equipped→8×s32 parts} +
+  `u8` + [8×s32] + sub_527550 技能 + sub_527D00 快速槽 + sub_885D00
+  尾塊(未完全確認) — 對應 268 REQ flag==0 (PLAY); 舊稿標「觀戰者」
+  為誤標, 已更正
+- 7 (fall-through 主體): **觀戰加入 (完整房間+全成員快照)** — 對應
+  268 REQ flag==1 (OBSERVE):
   房間頭: `s32 room_uid, s32 elapsed_ms (同 130 的時間基準), u8 map, u8 count(jj_1),
   u8 room_no, u8 rule, u16 win, u8 max, u8, u16, u8 flags(bit0/1 拆),
   u8 has_pass, u16, u8, u8, u8 obs` + `u8×4 (n2_10 等模式旗標)`
@@ -922,6 +928,75 @@ festival: 681 的 3 頻道組 ↔ 195 的 group 序號互證; 頻道類型 n2==3
   str(64)`, 4×武器組 (kk!=3 帶 sub-slot, equipped→8×s32 parts), u8 + 8×s32
 私服要點: 快照結構 = 114 (ENTERROOM sub_type==2) 的擴充版; 兩者成員
 條目欄位順序一致 (交叉驗證), 269 多了戰鬥中狀態 (alive/dead/觀戰目標)。
+
+### 3.15f GL_JOIN 簇 260-269 全流程 (四十九輪逐函數定案)
+
+房單 (108) 點「入室」→ 進房/加入進行中遊戲的流程; 與 113 ENTERROOM
+(快速/受邀進房) 的差別在於: 由房單 UI 驅動 + 密碼關卡 + 觀戰分支。
+client 端函數地址見括號, 訊息文字出自 msgtableres.lang (§8)。
+
+```
+流程 (client 側狀態機, room 列表 UI 物件 dword_E9FE70):
+  密碼房: 262 (u8 room_no str pass) ──sub_449810──► 263
+          263 == 0 → 0x92「ルーム入室失敗」(房單停留)
+          263 != 0 → 轉發 260
+  一般:   260 (u8 room_no) ──sub_4498C0 (0x8E「ルーム入室中」)──► 261
+          261 code: 0=0x3E「データ読み込み中」, 1=0x43「ゲーム終了中」,
+                    2=可進房 → 發 264 (房在狀態11/可觀戰時另發 266),
+                    3=0x32C「参加できるゲームルームがありません」
+  264 (u8 room_no) ──sub_5156E0──► 265 房資訊 → 顯示房 UI (sub_515DE0)
+  房 UI 點 PLAY/OBSERVE → byte_1D0CFE6=0/1 → 266 (u8 room_no u8 flag)
+          ──sub_574910 (0x45「ゲーム参加要請中」)──► 267
+  267 code 全為「接受」(sub_516900): 0/2/3→狀態1, 1/4→狀態2(存 flag),
+          5→狀態5; code 1/4 把 flag 寫回 byte_1D0CFE6
+  268 (u8 room_no u8 flag) ──CLobbyJoinGame::sub_43C730──► 269
+          269: 6=玩家自身快照, 7=觀戰全房快照, 其餘=回房單(sub_406F20)
+```
+
+**265 GL_JOININFO_ACK (sub_574550) 逐欄** — 寫入「目前房」物件
+(dword_EA063C; n2_0==3 TeamSurvival 分支寫 byte_E9FBA8, 佈局同構):
+```
+u8  status   → modeUI+12 (0=可進房/PLAY・OBSERVE 鈕可用; ≠0=禁)
+u8  map      → +409  sub_515DE0 顯示「ROOM_MAP」
+u8  count    → +1   人數
+u8  B        → +408  存而不讀 (全程無讀者) ─ 送 0
+u16 slot_mask→ +6   槽位點陣 (bit=1 可入座)
+u8  C        → +410  存而不讀 ─ 送 0
+u8  time     → +411  顯示「ROOM_TIME」
+u16 round    → +412  顯示「ROOM_ROUND」
+u8  item     → +414  顯示「ROOM_ITEM」
+u16 G        → +416  存而不讀 ─ 送 0
+count × { u8 slot, str name(24B 讀入 v14[6]), u8 讀後丟棄(v13 無引用) ─ 送 0 }
+```
+sub_515DE0 只顯示 map/time/round/item 四欄 — +408/+410/+416 與
+114 的 +146/+150 同為「wire 送、client 存而不讀」, 送 0 安全。
+
+**267 GL_JOINGAME_ACK (sub_5749E0)** = `u8 code, u8 flag`:
+sub_516900(room, v2, code, flag) — flag 於 code∈{1,4} 寫回
+byte_1D0CFE6; 故 code=0(玩家)/1(觀戰), flag 回傳 268 的觀戰旗標。
+
+**268 GL_JOINPLAY_REQ (sub_574A60)** = `u8 room_no, u8 flag`
+(flag = byte_1D0CFE6: 0=PLAY 玩家 / 1=OBSERVE 觀戰)。
+
+**269 成功態旗標對應**: code 6 ↔ flag 0 (玩家自身快照, 存進 slot
+sub_56B310 找到的空槽 m_0[240780*slot]); code 7 ↔ flag 1 (觀戰,
+房物件欄位 + 全成員快照寫入房單 entry sub_407E80(::this_15, room_no)
+— 與 108 同款房物件欄位 +105/+109/+110/+128/+129/+130/+136/+144/
++146/+148/+150/+185, modeUI+12/+13 由 sub_74F450/sub_74F4D0 寫入)。
+
+**房物件欄位再確認** (sub_53F830 ctor + 269 code 7 寫入路徑交叉,
+與 §3.15b2 getter 定案一致):
++105 cur_players (sub_44E970), +106 has_pass, +107=1 (active 房),
++108 room_type_A / +109 room_type_B (ROOMTYPE 兩 bit, sub_44E7B0/
+sub_44DA70), +110 u16 slot_mask (sub_53FB10 展開 +112..+127 逐槽
+旗標 + 重算 +129=popcount), +128 double_damage, +130 map
+(sub_540280), +132 modeUI (sub_53FBB0 以 mode 值 0..15 new 出
+Cy*ModeLobbyUI), +136 time, +144 u16 win, +146 (存而不讀),
++148 u16 kill, +150 (存而不讀), +185 (bool)。
+
+私服落地 (Handlers.Join.cs): 260/262/264 → 261/263/265 完整;
+266 → 267 依 flag 回 code; 268 → 269 回 code 0 (無進行中遊戲狀態機,
+code 6/7 成功態留待後續, 不硬編未確認欄位)。
 
 ### 3.15c3 倉庫五連 855-863 (廿二輪 + 卌八輪補完 — n11==19 倉庫場景)
 ```

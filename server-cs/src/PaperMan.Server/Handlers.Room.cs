@@ -850,10 +850,10 @@ public static class RoomHandlers
     // ---- 114 序列化助手 (sub_56B360 佈局) --------------------------------
 
     /// <summary>成員的完整負載資料 (與 198 MyInfo 同源)。</summary>
-    private readonly record struct MemberData(
+    internal readonly record struct MemberData(
         Db.MyInfo? Info, Db.CharSlot? CurChar, List<Db.WeaponGroup> Groups, Db.Slots Slots);
 
-    private static MemberData LoadMemberData(Db db, Session member)
+    internal static MemberData LoadMemberData(Db db, Session member)
     {
         var info = db.GetMyInfo(member.UserId);
         var chars = db.GetCharacters(member.UserId);
@@ -917,7 +917,7 @@ public static class RoomHandlers
     }
 
     /// <summary>sub_type==1 單人進房通知 (給既有成員)。</summary>
-    private static void WriteMemberNotice(Packet ack, Session member, byte slot, MemberData data)
+    internal static void WriteMemberNotice(Packet ack, Session member, byte slot, MemberData data)
     {
         ack.WriteS32((int)member.UserId)
            .WriteU8(slot)
