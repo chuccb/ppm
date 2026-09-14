@@ -132,7 +132,15 @@ public sealed partial class Db : IDisposable
                 using var cmd = Cmd(
                     "INSERT INTO users(account_id,nickname) VALUES(@a,@n) RETURNING user_id",
                     ("@a", accountId), ("@n", nick));
-                return (long)cmd.ExecuteScalar()!;
+                long userId = (long)cmd.ExecuteScalar()!;
+
+                using var stCmd = Cmd("INSERT OR IGNORE INTO user_stats(user_id) VALUES(@u)", ("@u", userId));
+                stCmd.ExecuteNonQuery();
+
+                using var charCmd = Cmd("INSERT OR IGNORE INTO characters(user_id,slot_no,char_type) VALUES(@u,0,1)", ("@u", userId));
+                charCmd.ExecuteNonQuery();
+
+                return userId;
             }
             catch (SqliteException)
             {

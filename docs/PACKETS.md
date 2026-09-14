@@ -1140,17 +1140,22 @@ code 6/7 成功態留待後續, 不硬編未確認欄位)。
     str nick, s32 n100 (681 回送), s8 1, s32 ext_count (681 回送)
     — **唯一觸發點 = 693 handler sub_57CAE0** (兩個 caller: 自身
     wrapper + 693)。雙 token 可作 session 驗證 (十三輪)
-144 PM_UDPSTART_ACK — **雙層處理** (卅三輪精讀):
+144 PM_UDPSTART_ACK — **雙層處理** (逐行反編譯驗證 sub_555D50 / sub_4179D0):
     dispatcher 層 sub_555D50 讀:
-      u8 n108, u8 flag65, s32→1D0D23C, str(64) 頻道名, s32×3, f32,
-      f32/s32, u8 flag66 [flag66≠0: u8×4 + 8×s32 → sub_A1C800]
-      n108≠0 錯誤碼: 1→0xA4(格式7082 重複登入) 2→0xCF(53)
-      3→0x11B(54 踢出) — 各自彈窗
-    第二層 CLobbyChannel::sub_4179D0 case 144 (n108==0 才會走到):
+      u8 n108: 狀態碼 (⭐ 1 = 成功 mode 1, 2 = 成功 mode 2; 0 = 失敗彈窗 code 38;
+               3 = 踢出 code 52, 4 = code 53, 5 = code 54, 101..108 = code 55..62)
+      u8 flag65: 存入 byte_132432D
+      s32 session_id: 存入 dword_1D0D23C
+      str(40) channel_name: 頻道名
+      s32 v72, s32 v68, s32 v70: 參數
+      f32 v75: 參數
+      s32 v69: 存入 dword_F2A684
+      u8 flag66: 存入 byte_EE8CB1 / byte_EE896C
+      [flag66≠0: u8 v73, u8 v63, u8 v64, u8 v67, 8×s32 v62 → sub_A1C800]
+    第二層 CLobbyChannel::sub_4179D0 case 144 (n108==1/2 成功時):
       **呼叫 sub_56FF40(group@this+129, channel@this+131) = 送出
       195 GC_ENTERCHANNEL_REQ** — 144 成功的真正下一步!
-    (⚠ 卅二輪「144 尾端 ctor(141)」為誤讀 — 141 由 UDP op18
-     一次性 latch 觸發 sub_596300, 屬 UDP 建立後的補充回報)
+    (⚠ 141 由 UDP op18 一次性 latch 觸發 sub_596300, 屬 UDP 建立後的補充回報)
 ```
 
 ### 3.15b2 房間管理/戰場雜項 (廿二輪掃畢; 卅八輪補 REQ 端+設定簇)

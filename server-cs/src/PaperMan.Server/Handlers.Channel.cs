@@ -24,13 +24,15 @@ namespace PaperMan.Server;
 
 public static class ChannelHandlers
 {
-    /// <summary>144 的 n108 狀態碼 (sub_555D50 錯誤分支: 1=重複登入 2=?, 3=踢出)。</summary>
+    // 144 的 n108: 1=成功(mode1), 2=成功(mode2), 3=踢出 code 52, 4=code 53, 5=code 54; 0=失敗 code 38 彈窗
     private enum UdpStartStatus : byte
     {
-        Ok = 0,
-        DuplicateLogin = 1,
-        Rejected = 2,
-        Kicked = 3,
+        Fail = 0,               // 0 = sub_9A7DE0: code 38 彈窗
+        Ok = 1,                 // 1 = 成功 (mode 1: n2_10=2, byte_1D0D237=0, n3_4=3)
+        OkAlt = 2,              // 2 = 成功 (mode 2: n2_10=2, byte_1D0D237=1, n3_4=0)
+        Kicked = 3,             // 3 = 踢出 (code 52)
+        DuplicateLogin = 4,     // 4 = code 53
+        Rejected = 5,           // 5 = code 54
     }
 
     /// <summary>196 的 result 碼 — 卅四輪全表 (sub_4177B0 十碼)。</summary>
@@ -87,7 +89,7 @@ public static class ChannelHandlers
         await session.SendAsync(ack);
     }
 
-    // 195 → 196: 頻道選擇確認 + 下發 UDP 打洞目標 (卅三輪 — 正主在這!)
+    // 195 → 196: 頻道選擇確認 + 下發 UDP 打洞目標 (CLobbyChannel::sub_4179D0 case 196)
     private static async ValueTask EnterChannel(Session session, Packet packet, ServerContext context)
     {
         byte group = packet.ReadU8();
@@ -95,16 +97,16 @@ public static class ChannelHandlers
         _ = packet.Remaining > 0 ? packet.ReadU8() : (byte)0;   // replay flag
 
         var ack = new Packet(Opcode.GC_ENTERCHANNEL_ACK)
-            .WriteU8((byte)EnterChannelResult.Ok)
-            .WriteS32(group << 8 | channel)                 // channel_id → 417D00()[1]
-            .WriteU8(0)                                     // v17
+            .WriteU8((byte)EnterChannelResult.Ok)           // v16 = 1 (Ok)
+            .WriteS32(group << 8 | channel)                 // v15 = channel_id → *(sub_417D00() + 1)
+            .WriteU8(channel)                               // v17 → *sub_417D00() = v17
             // --- result==1 成功塊 ---
             .WriteStr(context.Config.PublicHost)            // ⭐ UDP 打洞位址
             .WriteS32(context.Config.ChannelPort + 1)       //    (預留 :40202)
-            .WriteU8(0)                                     // → 1D0CFE4
-            .WriteU8(0)                                     // channel_type (0=一般; 3=AI 需大塊)
-            .WriteF32(0f)                                   // flags (bit0 → 1D0D21B)
-            .WriteU8(5);                                    // n5 → 417D00()[8] (client 預設 5)
+            .WriteU8(0)                                     // → unk_1D0CFE4
+            .WriteU8(0)                                     // n2: channel_type (0=一般; 3=AI 需大塊)
+            .WriteS32(0)                                    // v11: flags (bit0 → byte_1D0D21B)
+            .WriteU8(5);                                    // n5 → sub_417D00()[8] (client 預設 5)
 
         await session.SendAsync(ack);
     }
@@ -116,7 +118,7 @@ public static class ChannelHandlers
             .WriteStr(context.Config.PublicHost)
             .WriteS32(context.Config.ChannelPort + 1)
             .WriteU8(0)
-            .WriteF32(0f));
+            .WriteS32(0));
     }
 
     // 193 GC_CHANNEL_REQ (sub_550790): u32 n2 — 戰隊頻道資料請求

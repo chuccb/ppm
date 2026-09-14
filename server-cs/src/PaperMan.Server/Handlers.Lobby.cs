@@ -296,7 +296,7 @@ public static class LobbyHandlers
     {
         var st = info.Stats;
         // wire 第 2 欄是 char_type (+88; §3.98 總圖), 不是 slot — 查當前角色槽的型別。
-        byte currentCharType = chars.FirstOrDefault(c => c.SlotNo == info.CurrentChar)?.CharType ?? (byte)0;
+        byte currentCharType = chars.FirstOrDefault(c => c.SlotNo == info.CurrentChar)?.CharType ?? (byte)1;
 
         // 統計欄位佈局 — 十二輪以任務條件檢查器 sub_9252D0 逐欄破解:
         //   cond5→dword[37]=wins, cond6→[38]=losses, cond3→[39]=kills,
@@ -366,13 +366,25 @@ public static class LobbyHandlers
         Db.MyInfo info, ushort giftCount)
     {
         // --- sub_524010 角色槽 (≤20, 每個 u8 type + 12×u16 裝備) ---
-        ack.WriteU8((byte)Math.Min(chars.Count, 20));
-        foreach (var c in chars.Take(20))
+        if (chars.Count == 0)
         {
-            ack.WriteU8(c.CharType);
-            foreach (var eq in c.Equip)
+            ack.WriteU8(1);                                        // 保底 1 個現役角色槽
+            ack.WriteU8(1);                                        // char_type=1 (Hayate)
+            for (int i = 0; i < 12; i++)
             {
-                ack.WriteU16(eq);
+                ack.WriteU16(0);
+            }
+        }
+        else
+        {
+            ack.WriteU8((byte)Math.Min(chars.Count, 20));
+            foreach (var c in chars.Take(20))
+            {
+                ack.WriteU8(c.CharType);
+                foreach (var eq in c.Equip)
+                {
+                    ack.WriteU16(eq);
+                }
             }
         }
 

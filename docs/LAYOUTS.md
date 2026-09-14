@@ -46,6 +46,7 @@
 | 190 | GR_CHANGEMASTER_ACK | sub_56FBF0 | `u8` |
 | 192 | GR_CALLUSER_ACK | sub_56FE10 | `u8 str` |
 | 194 | GC_CHANNEL_ACK | sub_56FE90 | `u8` |
+| 196 | GC_ENTERCHANNEL_ACK | sub_4179D0 | `u8 s32 u8 [str s32 u8 u8 s32 u8]` |
 | 198 | GL_MYINFO_ACK | sub_570550 | `s8/bool s32 u16 s32 u8 u8` |
 | 200 | GL_MYITEM_ACK | sub_570AB0 | `s8/bool` |
 | 201 | GL_MYPARTSUP_ACK | sub_95A3B0 | `s32 f32/s32 f32/s32 s8/bool f32/s32 f32/s32` |
