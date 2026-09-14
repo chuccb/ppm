@@ -146,34 +146,61 @@ public static class ShopHandlers
         await session.SendAsync(ack);
     }
 
-    // 310 GS_BUYCHAR_REQ (sub_529680): 6×s32 (char_type, item1..item5)
-    // → 311 GS_BUYCHAR_ACK (sub_5728A0): u8 ok(1=成功), 6×s32
+    // 310 GS_BUYCHAR_REQ (sub_572790): s32 body_item_id followed by five
+    // scalar s32 values. The native builder widens its five char arguments;
+    // their server-domain meaning is UNRESOLVED, so the canonical body is the
+    // only evidence-backed creation input. Require all six words rather than
+    // accepting a truncated request.
+    //
+    // 311 GS_BUYCHAR_ACK (sub_5728A0): u8 ok; if ok, six full IDs in wire order
+    // body, face, head, top, bottom, shoes; then always u8 account_update_target
+    // and s32 account_update_value. Target 0 is the native no-update branch.
     private static async ValueTask BuyCharacter(Session session, Packet packet, ServerContext context)
     {
-        int charType = packet.Remaining >= 4 ? packet.ReadS32() : 0;
-        var existing = context.Db.GetCharacters(session.UserId);
-        byte slotNo = (byte)existing.Count;
-        // Validate the signed wire value before narrowing it to u8. Otherwise
-        // 257/256/etc. could wrap into a legitimate canonical character type.
-        bool ok = session.UserId != 0
-            && slotNo < 20
-            && Db.IsCanonicalCharacterType(charType)
-            && context.Db.BuyCharacter(session.UserId, slotNo, (byte)charType);
-
-        var ack = new Packet(Opcode.GS_BUYCHAR_ACK).WriteU8(ok ? (byte)1 : (byte)0);
-        if (ok)
+        if (packet.Remaining != 24)
         {
-            var info = context.Db.GetMyInfo(session.UserId);
-            int cash = context.Db.GetCash(session.UserId);
-            ack.WriteS32(slotNo)
-               .WriteS32(charType)
-               .WriteS32((int)(info?.Exp ?? 0))
-               .WriteS32(cash)
-               .WriteS32((int)(info?.Gp ?? 0))
-               .WriteS32(100);                              // 出廠耐久
+            await session.SendAsync(BuildBuyCharacterAcknowledgement(false, default));
+            return;
         }
 
-        await session.SendAsync(ack);
+        int bodyItemId = packet.ReadS32();
+        for (int i = 0; i < 5; i++)
+        {
+            _ = packet.ReadS32();                            // five widened native char arguments
+        }
+
+        bool hasCanonicalBody = Db.TryGetCanonicalCharacterType(bodyItemId, out byte charType);
+        List<Db.CharSlot> existing = session.UserId != 0
+            ? context.Db.GetCharacters(session.UserId)
+            : [];
+        byte slotNo = (byte)existing.Count;
+        bool ok = hasCanonicalBody
+            && session.UserId != 0
+            && slotNo < 20
+            && context.Db.BuyCharacter(session.UserId, slotNo, charType);
+
+        Db.CanonicalStarterAppearance starter = ok
+            ? Db.GetCanonicalStarterAppearance(charType)
+            : default;
+        await session.SendAsync(BuildBuyCharacterAcknowledgement(ok, starter));
+    }
+
+    private static Packet BuildBuyCharacterAcknowledgement(
+        bool ok, Db.CanonicalStarterAppearance starter)
+    {
+        var ack = new Packet(Opcode.GS_BUYCHAR_ACK).WriteBool(ok);
+        if (ok)
+        {
+            ack.WriteS32(starter.BodyItemId)
+               .WriteS32(starter.FaceItemId)
+               .WriteS32(starter.HeadItemId)
+               .WriteS32(starter.TopItemId)
+               .WriteS32(starter.BottomItemId)
+               .WriteS32(starter.ShoesItemId);
+        }
+
+        return ack.WriteU8(0)                                // account_update_target: no update
+                  .WriteS32(0);                              // ignored for target 0
     }
 
     // 453 GS_DELETEGIFT_REQ (sub_57BC40): s32 gift_uid, s32 item_id

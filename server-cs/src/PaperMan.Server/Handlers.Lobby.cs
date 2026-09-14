@@ -373,10 +373,16 @@ public static class LobbyHandlers
             // Defensive formatter fallback only. Successful Login persists the
             // same canonical starter; never use an all-zero body because the
             // native 198 availability gate emits resource 0xCC / code 63.
-            ack.WriteU8(1);                                        // one character record
-            ack.WriteU8(1);                                        // canonical type 1 (Hayate)
-            ack.WriteU16(1);                                       // 19,900,001 body offset
-            for (int i = 1; i < 12; i++)
+            Db.CanonicalStarterAppearance starter = Db.GetCanonicalStarterAppearance(1);
+            ack.WriteU8(1)                                        // one character record
+               .WriteU8(1)                                        // canonical type 1 (Hayate)
+               .WriteU16(starter.BodyOffset)
+               .WriteU16(starter.HeadOffset)
+               .WriteU16(starter.FaceOffset)
+               .WriteU16(starter.TopOffset)
+               .WriteU16(starter.BottomOffset)
+               .WriteU16(starter.ShoesOffset);
+            for (int i = 6; i < 12; i++)
             {
                 ack.WriteU16(0);
             }

@@ -43,9 +43,16 @@ try:
 except sqlite3.IntegrityError:
     pass
 
-# --- 2. 角色槽 (GM_CREATECHAR 214, ≤20) ---
-step('characters (slot 0..19 bound)')
-c.execute('INSERT INTO characters(user_id,slot_no,char_type) VALUES (?,0,1)', (uid,))
+# --- 2. 角色槽 (GM_CREATECHAR 214 / native normal appearance order, ≤20) ---
+step('characters (slot 0..19 bound; canonical six-word starter)')
+# The first six legacy-named columns retain native ordinal meaning:
+# body, head, face, top, bottom, shoes. Type 1 maps to six raw offsets of 1.
+c.execute('''INSERT INTO characters(
+             user_id,slot_no,char_type,eq_primary,eq_secondary,eq_melee,
+             eq_grenade,eq_head,eq_face)
+             VALUES (?,0,1,1,1,1,1,1,1)''', (uid,))
+assert c.execute('''SELECT eq_primary,eq_secondary,eq_melee,eq_grenade,eq_head,eq_face
+                    FROM characters WHERE user_id=? AND slot_no=0''', (uid,)).fetchone() == (1, 1, 1, 1, 1, 1)
 try:
     c.execute('INSERT INTO characters(user_id,slot_no,char_type) VALUES (?,20,1)', (uid,))
     raise AssertionError('slot 20 應該被 CHECK 擋下')

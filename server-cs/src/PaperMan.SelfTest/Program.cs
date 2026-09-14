@@ -68,6 +68,22 @@ async Task<(TcpClient ServerClient, TcpClient PeerClient)> CreateConnectedTcpCli
     }
 }
 
+async Task<Packet> ReadServerPacketAsync(NetworkStream stream, PacketCodec codec)
+{
+    byte[] header = new byte[Packet.HeaderSize];
+    await stream.ReadExactlyAsync(header);
+
+    int frameLength = PacketCodec.FrameLength(header);
+    byte[] frame = new byte[frameLength];
+    header.CopyTo(frame, 0);
+    if (frameLength > header.Length)
+    {
+        await stream.ReadExactlyAsync(frame.AsMemory(header.Length));
+    }
+
+    return codec.Decode(frame);
+}
+
 int GetAvailableIpv4UdpPort()
 {
     using var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
@@ -127,7 +143,7 @@ bool IsNative198StarterAcknowledgement(Packet acknowledgement)
 
     for (int i = 0; i < 12; i++)
     {
-        if (reader.ReadU16() != (i == 0 ? 1 : 0))
+        if (reader.ReadU16() != (i < 6 ? 1 : 0))
         {
             return false;
         }
@@ -179,6 +195,32 @@ bool IsNative198StarterAcknowledgement(Packet acknowledgement)
         && reader.Remaining == 0;
 }
 
+bool IsNative311StarterAcknowledgement(Packet acknowledgement, int bodyItemId)
+{
+    var reader = Packet.FromPayload(acknowledgement.Opcode, acknowledgement.Payload);
+    return acknowledgement.Opcode == Opcode.GS_BUYCHAR_ACK
+        && reader.ReadBool()
+        && reader.ReadS32() == bodyItemId
+        && reader.ReadS32() == 10_100_010  // face: wire comes before head
+        && reader.ReadS32() == 10_000_015
+        && reader.ReadS32() == 10_200_022
+        && reader.ReadS32() == 10_300_012
+        && reader.ReadS32() == 10_400_012
+        && reader.ReadU8() == 0            // account_update_target: no update
+        && reader.ReadS32() == 0
+        && reader.Remaining == 0;
+}
+
+bool IsNative311FailureAcknowledgement(Packet acknowledgement)
+{
+    var reader = Packet.FromPayload(acknowledgement.Opcode, acknowledgement.Payload);
+    return acknowledgement.Opcode == Opcode.GS_BUYCHAR_ACK
+        && !reader.ReadBool()
+        && reader.ReadU8() == 0
+        && reader.ReadS32() == 0
+        && reader.Remaining == 0;
+}
+
 // ---- 1. Packet 原語 ---------------------------------------------------------
 {
     var inner = new Packet(Opcode.GT_PING_ACK).WriteS32(7);
@@ -219,7 +261,7 @@ bool IsNative198StarterAcknowledgement(Packet acknowledgement)
     var starterInfo = new Db.MyInfo(7, "Starter", 1, 0, 0, 0, 0, starterStats);
     Packet myInfo = LobbyHandlers.BuildMyInfoAck(
         starterInfo,
-        [new Db.CharSlot(0, 1, [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])],
+        [new Db.CharSlot(0, 1, [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0])],
         [],
         new Db.Slots(new int[9], new int[7]),
         giftCount: 0);
@@ -688,6 +730,22 @@ bool IsNative198StarterAcknowledgement(Packet acknowledgement)
                     .WriteU8(channelConfig.ChannelIndex)
                     .WriteU8(0),
                 channelContext);
+            Packet udpStartAcknowledgement = await ReadServerPacketAsync(clientPeer.GetStream(), channelCodec);
+            Packet enterChannelAcknowledgement = await ReadServerPacketAsync(clientPeer.GetStream(), channelCodec);
+
+            bool characterPurchaseWasProcessed = await router.DispatchAsync(
+                channelSession,
+                new Packet(Opcode.GS_BUYCHAR_REQ)
+                    .WriteS32(19_900_002)
+                    .WriteS32(0).WriteS32(0).WriteS32(0).WriteS32(0).WriteS32(0),
+                channelContext);
+            Packet characterPurchaseAcknowledgement = await ReadServerPacketAsync(clientPeer.GetStream(), channelCodec);
+            bool truncatedCharacterPurchaseWasProcessed = await router.DispatchAsync(
+                channelSession,
+                new Packet(Opcode.GS_BUYCHAR_REQ).WriteS32(19_900_003),
+                channelContext);
+            Packet truncatedCharacterPurchaseAcknowledgement = await ReadServerPacketAsync(clientPeer.GetStream(), channelCodec);
+            List<Db.CharSlot> charactersAfterPurchase = secondOpen.GetCharacters(newAccount.UserId);
 
             Check("SQLite first login provisions a playable identity",
                 !secondOpen.Initialization.CreatedDatabaseFile
@@ -695,28 +753,40 @@ bool IsNative198StarterAcknowledgement(Packet acknowledgement)
                 && newAccount is { Result: LoginCode.Ok, AccountId: > 0, UserId: > 0, Nickname: "BootstrapAccount" }
                 && provisionedIdentity is { UserId: > 0, Nickname: "BootstrapAccount", CurrentChar: 0 }
                 && freshCharacters is [{ SlotNo: 0, CharType: 1 }]
-                && freshCharacters[0].Equip.SequenceEqual([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+                && freshCharacters[0].Equip.SequenceEqual([1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0])
                 && duplicateUserId == 0
                 && acceptedPassword is { Result: LoginCode.Ok, UserId: > 0, Nickname: "BootstrapAccount" }
                 && rejectedPassword.Result == LoginCode.BadCredentials);
             Check("channel entry completes only after successful 195 → 196",
                 handoffWasProcessed
+                && udpStartAcknowledgement.Opcode == Opcode.PM_UDPSTART_ACK
                 && channelSession.Authenticated
                 && channelWasNotEnteredAfterHandoff
                 && selectionWasProcessed
+                && enterChannelAcknowledgement.Opcode == Opcode.GC_ENTERCHANNEL_ACK
                 && channelSession.ChannelEntryCompleted);
+            Check("310 → 311 returns the complete native type-2 starter vector",
+                characterPurchaseWasProcessed
+                && IsNative311StarterAcknowledgement(characterPurchaseAcknowledgement, 19_900_002)
+                && charactersAfterPurchase is [_, { SlotNo: 1, CharType: 2 }]
+                && charactersAfterPurchase[1].Equip.SequenceEqual([2, 15, 10, 22, 12, 12, 0, 0, 0, 0, 0, 0]));
+            Check("310 rejects a truncated request with the complete native failure shape",
+                truncatedCharacterPurchaseWasProcessed
+                && IsNative311FailureAcknowledgement(truncatedCharacterPurchaseAcknowledgement)
+                && charactersAfterPurchase.Count == 2);
         }
 
-        // Concrete legacy fixture: a canonical type-1 record lost only its
-        // primary body. Keep a nonzero type-2 body beside it to prove repair
-        // does not rewrite historical nonzero equipment.
+        // Concrete legacy fixtures: a canonical type-1 record lost its body;
+        // its existing type-2 neighbor has one historical nonzero head while
+        // the other canonical words are missing.
         using (var connection = OpenExistingSqlite(temporaryDatabasePath))
         using (var command = connection.CreateCommand())
         {
             command.CommandText = """
                 UPDATE characters SET eq_primary=0 WHERE user_id=@userId AND slot_no=0;
-                INSERT INTO characters(user_id,slot_no,char_type,eq_primary)
-                VALUES(@userId,1,2,7);
+                UPDATE characters
+                SET eq_primary=2, eq_secondary=99, eq_melee=0, eq_grenade=0, eq_head=0, eq_face=0
+                WHERE user_id=@userId AND slot_no=1;
                 """;
             command.Parameters.AddWithValue("@userId", bootstrapUserId);
             command.ExecuteNonQuery();
@@ -748,27 +818,50 @@ bool IsNative198StarterAcknowledgement(Packet acknowledgement)
                 clientFingerprint: new byte[24],
                 remoteIp: "127.0.0.1");
             List<Db.CharSlot> repairedCharacters = thirdOpen.GetCharacters(bootstrapUserId);
+            ushort[][] canonicalStarterOffsets =
+            [
+                [1, 1, 1, 1, 1, 1],
+                [2, 15, 10, 22, 12, 12],
+                [3, 28, 19, 45, 25, 24],
+                [4, 41, 28, 66, 36, 41],
+                [5, 55, 37, 90, 47, 52],
+                [6, 123, 111, 157, 99, 105],
+                [7, 124, 112, 167, 109, 115],
+                [8, 125, 113, 177, 119, 125],
+                [9, 126, 114, 187, 129, 135],
+                [10, 127, 115, 197, 139, 145],
+                [11, 1096, 839, 1069, 974, 952],
+                [12, 1428, 865, 1205, 1069, 1009],
+                [13, 1600, 866, 1213, 1072, 1012],
+                [14, 792, 385, 428, 376, 360],
+                [15, 30220, 920, 10011, 10011, 10114],
+            ];
             bool createsCanonicalBodies = thirdOpen.CreateChar(bootstrapUserId, 2, 2)
                 && thirdOpen.BuyCharacter(bootstrapUserId, 3, 3)
-                && !thirdOpen.CreateChar(bootstrapUserId, 4, 0)
-                && !thirdOpen.BuyCharacter(bootstrapUserId, 4, 16);
+                && Enumerable.Range(4, 12).All(charType =>
+                    thirdOpen.CreateChar(bootstrapUserId, (byte)charType, (byte)charType))
+                && !thirdOpen.CreateChar(bootstrapUserId, 16, 0)
+                && !thirdOpen.BuyCharacter(bootstrapUserId, 16, 16);
             List<Db.CharSlot> createdCharacters = thirdOpen.GetCharacters(bootstrapUserId);
+            bool everyCanonicalStarterPersists = createdCharacters
+                .Where(character => character.SlotNo != 1)
+                .All(character => character.Equip.AsSpan(0, 6)
+                    .SequenceEqual(canonicalStarterOffsets[character.CharType - 1]));
 
-            Check("verified login repairs only zero canonical bodies and keeps selection playable",
+            Check("verified login fills only missing canonical words and keeps selection playable",
                 repairedLogin is { Result: LoginCode.Ok, UserId: > 0 }
                 && repairedCharacters.Count == 2
                 && repairedCharacters[0] is { SlotNo: 0, CharType: 1 }
-                && repairedCharacters[0].Equip[0] == 1
+                && repairedCharacters[0].Equip.SequenceEqual([1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0])
                 && repairedCharacters[1] is { SlotNo: 1, CharType: 2 }
-                && repairedCharacters[1].Equip[0] == 7
+                && repairedCharacters[1].Equip.SequenceEqual([2, 99, 10, 22, 12, 12, 0, 0, 0, 0, 0, 0])
                 && thirdOpen.GetMyInfo(bootstrapUserId) is { CurrentChar: 0 });
-            Check("GM and purchase character creation persist canonical bodies and reject invalid types",
+            Check("GM and purchase creation persist all 15 native starter vectors and reject invalid types",
                 createsCanonicalBodies
-                && createdCharacters.Count == 4
+                && createdCharacters.Count == 16
+                && everyCanonicalStarterPersists
                 && createdCharacters[2] is { SlotNo: 2, CharType: 2 }
-                && createdCharacters[2].Equip[0] == 2
-                && createdCharacters[3] is { SlotNo: 3, CharType: 3 }
-                && createdCharacters[3].Equip[0] == 3);
+                && createdCharacters[3] is { SlotNo: 3, CharType: 3 });
 
             Db.LoginResult legacyLogin = thirdOpen.Login(
                 accountName: "LegacyAccount",
@@ -783,7 +876,7 @@ bool IsNative198StarterAcknowledgement(Packet acknowledgement)
             Check("legacy orphan account receives a player identity and PBKDF2 upgrade",
                 legacyLogin is { Result: LoginCode.Ok, AccountId: > 0, UserId: > 0, Nickname: "LegacyAccount" }
                 && legacyCharacters is [{ SlotNo: 0, CharType: 1 }]
-                && legacyCharacters[0].Equip[0] == 1);
+                && legacyCharacters[0].Equip.SequenceEqual([1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0]));
         }
 
         using (var connection = OpenExistingSqlite(temporaryDatabasePath))

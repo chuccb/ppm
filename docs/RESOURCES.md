@@ -228,6 +228,89 @@ miRun) 等 31 項彈道參數的修正 — weaponparts↔partsability 第九次�
 (198 `sub_524010` character record 的 u8 char_type 即此編號；basic block 的
 `+88` u8 是另一個 CHARSLOT list index) — 第六次互證。
 
+## 5c-1. Native canonical starter appearance (character body template)
+
+This section deliberately separates the native **canonical normal appearance**
+from a body item, the 12 persistent appearance slots, temporary visual changes,
+and shop recommendations.  The distinction matters: a similarly named XML
+record or a PAV thumbnail is not, by itself, starter-state evidence.
+
+### Evidence ledger
+
+| Conclusion | Classification / confidence | Direct provenance |
+|---|---|---|
+| Each body `19900001..19900015` has one complete head/face/top/bottom/shoes vector. | **Fact / HIGH** | The five switch tables `sub_402FF0`, `sub_4030A0`, `sub_403150`, `sub_403200`, `sub_4032B0` in `PaperMan.exe.c`. |
+| The vector is part of the native character-creation visual model, rather than only a shop display. | **Fact / HIGH** | `CLobbyCharMake::sub_41B330` passes body plus all five map results to `sub_4148D0`; `sub_41BDE0` passes mapped face/head offsets with the selected body into `sub_572EB0` (opcode 214). |
+| The vector materializes ordinary character state when normal pieces are absent. | **Fact / HIGH** | `sub_522580(mask, a2)` writes mapped components into `a2[2..6]` from body `a2[1]`. `CPaperCtrl::sub_5B40E0` additionally fills mapped head/face/top/bottom/shoes when its normal appearance record has an absent head/body-template prefix. |
+| All 75 mapped component records are compatible free normal-avatar resources. | **Fact / HIGH** | Decoded `cfg/ItemData.pat`: matching character type, `kind=6`, price `0`; every item has a matching `origin/main:Extracted/item/avatar/%02d_%05d_%02d.pav` asset. This corroborates the native state mapping; it does not establish it alone. |
+| A private server should persist and acknowledge these six values for a newly created canonical character. | **Inference / MEDIUM** | The facts above plus the exact 311 reader establish the client-side canonical creation state and its accepted wire representation. The original server executable that generated historical 311 responses is unavailable. |
+
+### Raw offset map
+
+Offsets below are the u16 category-relative values used by the native normal
+appearance record.  Add bases `19900000`, `10000000`, `10100000`, `10200000`,
+`10300000`, and `10400000` respectively for body/head/face/top/bottom/shoes.
+The table is a direct transcription of the five native switch tables; in
+particular type 8 is `face=113, top=177, bottom=119, shoes=125`, and type 11
+head is `1096` (full ID `10001096`), not the previously misread `584`.
+
+| type / body offset | head | face | top | bottom | shoes |
+|---:|---:|---:|---:|---:|---:|
+| 1 | 1 | 1 | 1 | 1 | 1 |
+| 2 | 15 | 10 | 22 | 12 | 12 |
+| 3 | 28 | 19 | 45 | 25 | 24 |
+| 4 | 41 | 28 | 66 | 36 | 41 |
+| 5 | 55 | 37 | 90 | 47 | 52 |
+| 6 | 123 | 111 | 157 | 99 | 105 |
+| 7 | 124 | 112 | 167 | 109 | 115 |
+| 8 | 125 | 113 | 177 | 119 | 125 |
+| 9 | 126 | 114 | 187 | 129 | 135 |
+| 10 | 127 | 115 | 197 | 139 | 145 |
+| 11 | 1096 | 839 | 1069 | 974 | 952 |
+| 12 | 1428 | 865 | 1205 | 1069 | 1009 |
+| 13 | 1600 | 866 | 1213 | 1072 | 1012 |
+| 14 | 792 | 385 | 428 | 376 | 360 |
+| 15 | 30220 | 920 | 10011 | 10011 | 10114 |
+
+### State domains that must not be conflated
+
+| Domain | What the native evidence says | Classification / confidence |
+|---|---|---|
+| Character body item (`199xxxxx`) | It selects a character identity/body and indexes the five template maps. It is the first normal appearance word, not a weapon or a recommendation set. | **Fact / HIGH** |
+| 198/247 character record | `sub_524010`/`sub_524360` carry `u8 char_type` then 12 u16 normal appearance offsets: body, head, face, top, bottom, shoes, outer/set, eye, hair accessory, face accessory, head accessory, special. | **Fact / HIGH** |
+| Canonical starter prefix | It is only the first six normal record words from the table above. The native maps do not name or populate the last six slots, so server bootstrap leaves those unrelated optional slots unchanged/empty. | **Fact / HIGH** for scope; **Inference / MEDIUM** for server persistence policy. |
+| Weapons, skill/quick items, and other props | Weapon groups (`sub_524660`) and skill/quick blocks are separate 198 state, not arguments or results of the five body maps. No native/resource dataflow in this corpus establishes a per-character starter weapon, consumable, or last-six-slot item. | **Fact / HIGH** for separation; **UNRESOLVED** for any historical per-character starter-item policy. |
+| Fitting XML | `Extracted/ui/system/CharacterFitting.xml` is a `CHANGE_AVATAR_PROPERTY` fitting/preview source. Its hand textures and values are not a persistent starter vector. | **Fact / HIGH** |
+| Cooki transformation | `CharacterToCooki.xml` is `CHANGE_AVATAR_TO_COOKI_PROPERTY`; `CCharToCookiProperty::sub_993E40` snapshots normal appearance and `sub_9942D0` restores it. It is temporary override state. | **Fact / HIGH** |
+| RecommandItem / Total_Package XML | These are shop recommendation/package presentation data. They have no observed write to the persistent 12-slot character record and are not used as starter-default evidence. | **Fact / HIGH** for their UI/resource role; **UNRESOLVED** for any unobserved original-server pricing/business policy. |
+
+### Server storage and wire boundary
+
+The existing database column names predate this reconstruction.  Their first
+six *ordinal* fields, not their labels, store the native prefix:
+`eq_primary..eq_face = body, head, face, top, bottom, shoes`.  This preserves
+`GetCharacters` → 198/247 serialization order.  During login repair the server
+fills only zero values on rows whose body is absent or already equals their
+canonical `char_type`; it never changes a nonzero appearance word and leaves a
+noncanonical nonzero body unresolved rather than inventing a replacement.
+
+`GS_BUYCHAR` 310 receives the full body ID plus five native scalar words whose
+server-domain semantics remain **UNRESOLVED**.  `GS_BUYCHAR_ACK` 311 has an
+independently verified accepted creation vector: success, full IDs in **body,
+face, head, top, bottom, shoes** wire order, followed by its always-read
+neutral `u8=0, s32=0` account-update tail.  See `PACKETS.md §3.15pre1a` for the
+reader-level layout.
+
+### Evidence-bounded next work
+
+1. Capture a real native 310 request (or recover the original server) to name
+   its five trailing scalar words and verify character-price/currency policy.
+2. Capture original successful and failed 311 responses to replace the bounded
+   malformed-request assumption and identify `account_update_target` 1/2/3.
+3. Do **not** add a weapon, consumable, recommendation-set, Cooki, fitting, or
+   last-six-slot "starter" value until a native field/state write path supports
+   it; the current evidence only establishes the six-word normal prefix.
+
 ## 5d. system XML 資料表 (二十輪全掃)
 
 | 檔案 | 內容 | 對應 opcode |
@@ -242,7 +325,7 @@ miRun) 等 31 項彈道參數的修正 — weaponparts↔partsability 第九次�
 | TimeLimit_NotUse_IP.xml | 防沉迷白名單 IP | — |
 | netcafe_contents.xml | 網咖特典 (UTF-16) | PopUpNetCafeShop |
 | voice_customize_contents.xml | 語音自訂 (UTF-16LE; 15 角色×92 情境×27 句) | 791–796 voice_slots |
-| CharacterFitting.xml | 試衣間預設 (hand*.tga ← data.pat 快取!) | — |
+| CharacterFitting.xml | 試衣間 temporary fitting/preview state (hand*.tga ← data.pat 快取；非 persistent default) | — |
 | face_contents.xml | 臉型清單 | 角色創建 |
 
 (CharacterFitting 引用 hand12.tga — 與 data.pat 快取表的 15 個

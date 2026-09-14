@@ -133,18 +133,28 @@ public sealed partial class Db
             return false;
         }
 
+        CanonicalStarterAppearance starter = GetCanonicalStarterAppearance(charType);
         lock (_gate)
         {
             try
             {
                 using var cmd = Cmd("""
-                    INSERT INTO characters(user_id,slot_no,char_type,eq_primary)
-                    VALUES(@u,@s,@c,@body)
+                    INSERT INTO characters(
+                        user_id, slot_no, char_type,
+                        eq_primary, eq_secondary, eq_melee, eq_grenade, eq_head, eq_face)
+                    VALUES(
+                        @userId, @slotNo, @charType,
+                        @body, @head, @face, @top, @bottom, @shoes)
                     """,
-                    ("@u", userId),
-                    ("@s", slotNo),
-                    ("@c", charType),
-                    ("@body", (int)CanonicalBodyOffset(charType)));
+                    ("@userId", userId),
+                    ("@slotNo", slotNo),
+                    ("@charType", charType),
+                    ("@body", (int)starter.BodyOffset),
+                    ("@head", (int)starter.HeadOffset),
+                    ("@face", (int)starter.FaceOffset),
+                    ("@top", (int)starter.TopOffset),
+                    ("@bottom", (int)starter.BottomOffset),
+                    ("@shoes", (int)starter.ShoesOffset));
                 return cmd.ExecuteNonQuery() == 1;
             }
             catch (SqliteException)
@@ -256,7 +266,10 @@ public sealed partial class Db
         }
     }
 
-    /// <summary>購買新角色槽 (GS_BUYCHAR 310/311)。</summary>
+    /// <summary>
+    /// 購買新角色槽 (GS_BUYCHAR 310/311)。Writes the same six native normal
+    /// appearance words as creation; 311 expands them to full item IDs.
+    /// </summary>
     public bool BuyCharacter(long userId, byte slotNo, byte charType, int priceGp = 0)
     {
         if (slotNo >= 20 || !IsCanonicalCharacterType(charType) || priceGp < 0)
@@ -264,6 +277,7 @@ public sealed partial class Db
             return false;
         }
 
+        CanonicalStarterAppearance starter = GetCanonicalStarterAppearance(charType);
         lock (_gate)
         {
             using var tx = _conn.BeginTransaction();
@@ -283,18 +297,28 @@ public sealed partial class Db
                 }
 
                 using var ins = Cmd("""
-                    INSERT INTO characters(user_id, slot_no, char_type, eq_primary)
-                    VALUES(@u, @s, @c, @body)
-                    ON CONFLICT(user_id, slot_no) DO UPDATE SET
-                        char_type=excluded.char_type,
-                        eq_primary=excluded.eq_primary
+                    INSERT INTO characters(
+                        user_id, slot_no, char_type,
+                        eq_primary, eq_secondary, eq_melee, eq_grenade, eq_head, eq_face)
+                    VALUES(
+                        @userId, @slotNo, @charType,
+                        @body, @head, @face, @top, @bottom, @shoes)
                     """,
-                    ("@u", userId),
-                    ("@s", (int)slotNo),
-                    ("@c", (int)charType),
-                    ("@body", (int)CanonicalBodyOffset(charType)));
+                    ("@userId", userId),
+                    ("@slotNo", (int)slotNo),
+                    ("@charType", (int)charType),
+                    ("@body", (int)starter.BodyOffset),
+                    ("@head", (int)starter.HeadOffset),
+                    ("@face", (int)starter.FaceOffset),
+                    ("@top", (int)starter.TopOffset),
+                    ("@bottom", (int)starter.BottomOffset),
+                    ("@shoes", (int)starter.ShoesOffset));
                 ins.Transaction = tx;
-                ins.ExecuteNonQuery();
+                if (ins.ExecuteNonQuery() != 1)
+                {
+                    tx.Rollback();
+                    return false;
+                }
 
                 tx.Commit();
                 return true;

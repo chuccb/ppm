@@ -182,24 +182,72 @@ public sealed partial class Db : IDisposable
     private const int MaximumAcceptedPasswordIterations = 1_000_000;
     private const int SqliteConstraintErrorCode = 19; // SQLITE_CONSTRAINT primary result code
 
-    // ItemData's 19,900,001..19,900,015 body records carry their matching
-    // character type at +532. The native 198 availability check requires the
-    // first character equipment word to be nonzero, so a created canonical
-    // character needs its matching body offset rather than the SQL default 0.
+    // Native maps 0x402FF0/0x4030A0/0x403150/0x403200/0x4032B0 complete a
+    // 19,900,001..19,900,015 body into its six-piece normal appearance.
+    // The first six persisted words retain native ordinal order despite their
+    // pre-existing SQL names: body, head, face, top, bottom, shoes.
     private const byte FirstCanonicalCharacterType = 1;
     private const byte LastCanonicalCharacterType = 15;
+    private const int CharacterBodyItemBase = 19_900_000;
+
+    internal readonly record struct CanonicalStarterAppearance(
+        ushort BodyOffset, ushort HeadOffset, ushort FaceOffset, ushort TopOffset,
+        ushort BottomOffset, ushort ShoesOffset)
+    {
+        public int BodyItemId => CharacterBodyItemBase + BodyOffset;
+        public int HeadItemId => 10_000_000 + HeadOffset;
+        public int FaceItemId => 10_100_000 + FaceOffset;
+        public int TopItemId => 10_200_000 + TopOffset;
+        public int BottomItemId => 10_300_000 + BottomOffset;
+        public int ShoesItemId => 10_400_000 + ShoesOffset;
+    }
+
+    // Extracted directly from the five native body-template switch tables.
+    // Keep this compact raw-offset form because 198/247 persistence uses u16
+    // category-relative values, while 311 expands the same values to full IDs.
+    private static readonly CanonicalStarterAppearance[] CanonicalStarterAppearances =
+    [
+        new(1, 1, 1, 1, 1, 1),
+        new(2, 15, 10, 22, 12, 12),
+        new(3, 28, 19, 45, 25, 24),
+        new(4, 41, 28, 66, 36, 41),
+        new(5, 55, 37, 90, 47, 52),
+        new(6, 123, 111, 157, 99, 105),
+        new(7, 124, 112, 167, 109, 115),
+        new(8, 125, 113, 177, 119, 125),
+        new(9, 126, 114, 187, 129, 135),
+        new(10, 127, 115, 197, 139, 145),
+        new(11, 1096, 839, 1069, 974, 952),
+        new(12, 1428, 865, 1205, 1069, 1009),
+        new(13, 1600, 866, 1213, 1072, 1012),
+        new(14, 792, 385, 428, 376, 360),
+        new(15, 30220, 920, 10011, 10011, 10114),
+    ];
 
     internal static bool IsCanonicalCharacterType(int charType) =>
         charType is >= FirstCanonicalCharacterType and <= LastCanonicalCharacterType;
 
-    private static ushort CanonicalBodyOffset(byte charType)
+    internal static bool TryGetCanonicalCharacterType(int bodyItemId, out byte charType)
+    {
+        if (bodyItemId is >= CharacterBodyItemBase + FirstCanonicalCharacterType
+            and <= CharacterBodyItemBase + LastCanonicalCharacterType)
+        {
+            charType = (byte)(bodyItemId - CharacterBodyItemBase);
+            return true;
+        }
+
+        charType = 0;
+        return false;
+    }
+
+    internal static CanonicalStarterAppearance GetCanonicalStarterAppearance(byte charType)
     {
         if (!IsCanonicalCharacterType(charType))
         {
             throw new ArgumentOutOfRangeException(nameof(charType));
         }
 
-        return charType;
+        return CanonicalStarterAppearances[charType - FirstCanonicalCharacterType];
     }
 
     public sealed record LoginResult(
@@ -346,28 +394,65 @@ public sealed partial class Db : IDisposable
     }
 
     /// <summary>
-    /// Repairs only the bodyless rows that contradict the native availability
-    /// invariant. Existing nonzero body/cosmetic data remains untouched: the
-    /// client evidence proves the zero-to-canonical repair, not a rewrite of
-    /// historical custom loadouts.
+    /// Repairs only missing words in a valid canonical body template. The six
+    /// columns are the native normal-order prefix (body, head, face, top,
+    /// bottom, shoes), not their old SQL labels. A noncanonical nonzero body is
+    /// historical state with no evidence-backed replacement, so it is untouched.
+    /// Every nonzero equipment word is preserved.
     /// </summary>
     private bool EnsurePlayableCharacterStateUnlocked(long userId)
     {
         using var transaction = _conn.BeginTransaction();
 
-        using (var repairBodies = Cmd("""
-            UPDATE characters
-            SET eq_primary = char_type
+        var incompleteCanonicalSlots = new List<(int SlotNo, byte CharacterType)>();
+        using (var findIncompleteSlots = Cmd("""
+            SELECT slot_no, char_type
+            FROM characters
             WHERE user_id = @userId
               AND char_type BETWEEN @firstType AND @lastType
-              AND eq_primary = 0
+              AND (eq_primary = 0 OR eq_primary = char_type)
+              AND (eq_primary = 0 OR eq_secondary = 0 OR eq_melee = 0
+                   OR eq_grenade = 0 OR eq_head = 0 OR eq_face = 0)
             """,
             ("@userId", userId),
             ("@firstType", (int)FirstCanonicalCharacterType),
             ("@lastType", (int)LastCanonicalCharacterType)))
         {
-            repairBodies.Transaction = transaction;
-            repairBodies.ExecuteNonQuery();
+            findIncompleteSlots.Transaction = transaction;
+            using var reader = findIncompleteSlots.ExecuteReader();
+            while (reader.Read())
+            {
+                incompleteCanonicalSlots.Add((reader.GetInt32(0), (byte)reader.GetInt32(1)));
+            }
+        }
+
+        foreach (var (slotNo, charType) in incompleteCanonicalSlots)
+        {
+            CanonicalStarterAppearance starter = GetCanonicalStarterAppearance(charType);
+            using var repairSlot = Cmd("""
+                UPDATE characters
+                SET eq_primary = CASE WHEN eq_primary = 0 THEN @body ELSE eq_primary END,
+                    eq_secondary = CASE WHEN eq_secondary = 0 THEN @head ELSE eq_secondary END,
+                    eq_melee = CASE WHEN eq_melee = 0 THEN @face ELSE eq_melee END,
+                    eq_grenade = CASE WHEN eq_grenade = 0 THEN @top ELSE eq_grenade END,
+                    eq_head = CASE WHEN eq_head = 0 THEN @bottom ELSE eq_head END,
+                    eq_face = CASE WHEN eq_face = 0 THEN @shoes ELSE eq_face END
+                WHERE user_id = @userId AND slot_no = @slotNo
+                """,
+                ("@body", (int)starter.BodyOffset),
+                ("@head", (int)starter.HeadOffset),
+                ("@face", (int)starter.FaceOffset),
+                ("@top", (int)starter.TopOffset),
+                ("@bottom", (int)starter.BottomOffset),
+                ("@shoes", (int)starter.ShoesOffset),
+                ("@userId", userId),
+                ("@slotNo", slotNo));
+            repairSlot.Transaction = transaction;
+            if (repairSlot.ExecuteNonQuery() != 1)
+            {
+                transaction.Rollback();
+                return false;
+            }
         }
 
         int currentCharacterIndex;
@@ -417,16 +502,30 @@ public sealed partial class Db : IDisposable
                 return false;
             }
 
+            CanonicalStarterAppearance starter = GetCanonicalStarterAppearance(FirstCanonicalCharacterType);
             using var addStarter = Cmd("""
-                INSERT INTO characters(user_id, slot_no, char_type, eq_primary)
-                VALUES(@userId, @slotNo, @charType, @bodyOffset)
+                INSERT INTO characters(
+                    user_id, slot_no, char_type,
+                    eq_primary, eq_secondary, eq_melee, eq_grenade, eq_head, eq_face)
+                VALUES(
+                    @userId, @slotNo, @charType,
+                    @body, @head, @face, @top, @bottom, @shoes)
                 """,
                 ("@userId", userId),
                 ("@slotNo", emptySlot),
                 ("@charType", (int)FirstCanonicalCharacterType),
-                ("@bodyOffset", (int)CanonicalBodyOffset(FirstCanonicalCharacterType)));
+                ("@body", (int)starter.BodyOffset),
+                ("@head", (int)starter.HeadOffset),
+                ("@face", (int)starter.FaceOffset),
+                ("@top", (int)starter.TopOffset),
+                ("@bottom", (int)starter.BottomOffset),
+                ("@shoes", (int)starter.ShoesOffset));
             addStarter.Transaction = transaction;
-            addStarter.ExecuteNonQuery();
+            if (addStarter.ExecuteNonQuery() != 1)
+            {
+                transaction.Rollback();
+                return false;
+            }
 
             // 198 omits physical slot numbers. It selects the sorted character
             // record by position, so account for any preserved legacy rows.
@@ -705,13 +804,29 @@ public sealed partial class Db : IDisposable
             // trg_users_bootstrap provides user_stats and all four weapon
             // groups. The explicit character remains server policy, so it
             // belongs in this transaction rather than a post-commit repair.
-            using var characterCommand = Cmd(
-                "INSERT INTO characters(user_id,slot_no,char_type,eq_primary) VALUES(@userId,0,@charType,@bodyOffset)",
+            CanonicalStarterAppearance starter = GetCanonicalStarterAppearance(FirstCanonicalCharacterType);
+            using var characterCommand = Cmd("""
+                INSERT INTO characters(
+                    user_id, slot_no, char_type,
+                    eq_primary, eq_secondary, eq_melee, eq_grenade, eq_head, eq_face)
+                VALUES(
+                    @userId, 0, @charType,
+                    @body, @head, @face, @top, @bottom, @shoes)
+                """,
                 ("@userId", userId),
                 ("@charType", (int)FirstCanonicalCharacterType),
-                ("@bodyOffset", (int)CanonicalBodyOffset(FirstCanonicalCharacterType)));
+                ("@body", (int)starter.BodyOffset),
+                ("@head", (int)starter.HeadOffset),
+                ("@face", (int)starter.FaceOffset),
+                ("@top", (int)starter.TopOffset),
+                ("@bottom", (int)starter.BottomOffset),
+                ("@shoes", (int)starter.ShoesOffset));
             characterCommand.Transaction = transaction;
-            characterCommand.ExecuteNonQuery();
+            if (characterCommand.ExecuteNonQuery() != 1)
+            {
+                transaction.Rollback();
+                return 0;
+            }
 
             transaction.Commit();
             return userId;

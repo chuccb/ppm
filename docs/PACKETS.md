@@ -2006,6 +2006,56 @@ wire[11] 基底 11,000,000  特殊/ヘアパズル          +169
 → **DB item_catalog 種子 (1001/2001) 與真實 id 空間不符**, 實用時
 必須以上述區段填目錄, 否則 client 過不了 sub_535020 驗證。
 
+### 3.15pre1a GS_BUYCHAR (310/311) — canonical body-template creation
+
+**REQ 310 — Fact / HIGH:** `sub_572790` first obtains `n99=sub_533F50(a1)`
+and returns unless `n99==99` (the character-body item category).  It then
+writes exactly six `s32` values through `sub_592A20`: the full body item ID
+followed by five scalar arguments.  The decompiler prototype renders the
+latter arguments as `char`, while the packet primitive serializes all six as
+`s32`; their original-server business meaning is **UNRESOLVED**.  A server must
+therefore require the complete 24-byte request and validate the full body-ID
+range, but must not invent a name or validation rule for the trailing five
+words.
+
+**ACK 311 — Fact / HIGH:** `sub_5728A0` reads:
+
+```
+u8  ok
+if ok:
+    s32 body_full_id
+    s32 face_full_id
+    s32 head_full_id
+    s32 top_full_id
+    s32 bottom_full_id
+    s32 shoes_full_id
+u8  account_update_target
+s32 account_update_value
+```
+
+The non-intuitive face-before-head wire order is direct parser dataflow:
+`v24,v30,v31,v25,v27,v28` are read in that order, then stored as
+`body=v24`, `head=v31`, `face=v30`, `top=v25`, `bottom=v27`, `shoes=v28` after
+subtracting bases `19900000`, `10000000`, `10100000`, `10200000`, `10300000`,
+`10400000`.  `sub_5831F0` is called on every full item ID before storage.
+
+The tail is read even after a failed `ok`: `account_update_target` changes one
+of three client globals only for values 1, 2, or 3; its concrete business name
+is **UNRESOLVED**.  `target=0, value=0` is the explicit parser no-update path,
+so it is the safe neutral response for the private server.  The old shape
+`ok + slot/exp/cash/gp/durability` is not a 311 layout and must not be emitted.
+
+**Assumption / LOW (bounded malformed-request behavior):** the original server's
+response/disconnect choice for a deliberately truncated 310 request is not
+observable from this client-only corpus. The private server returns the
+parser-valid failed-311 form above (`ok=0`, neutral tail) and performs no state
+mutation; it does not accept, truncate, or turn the request into a success.
+
+**Inference / MEDIUM:** combined with the native body-template maps documented
+in `RESOURCES.md §5c-1`, newly created canonical characters should receive the
+complete six-ID vector.  This matches the client’s materialized creation state;
+the original server’s historic 311 producer is not available.
+
 ### 3.15pre2 GL_CLIENTINFO (246/247) — 查看他人資料 (十一輪發現)
 247 ACK (sub_573EB0): `u8 ok(==1)` → **sub_523BF0 完整基本資料塊**
 (與 198 首段完全同構 — 21×欄位 + 48B blob) + **sub_524360 單角色外觀**

@@ -119,14 +119,15 @@ CREATE TABLE IF NOT EXISTS user_stats (
 CREATE TABLE IF NOT EXISTS characters (
     user_id      INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     slot_no      INTEGER NOT NULL CHECK (slot_no BETWEEN 0 AND 19),
-    char_type    INTEGER NOT NULL DEFAULT 0,     -- u8 角色種類 (GS_BUYCHAR 310)
-    -- 12 個外觀欄位 (u16 = 類別內偏移, 0=空) — sub_524010 讀 12 個 u16
-    -- 十八輪真值: [0]=角色(19.9M) [1]=髮型 [2]=臉 [3]=上衣 [4]=下裝
-    -- [5]=鞋 [6]=外套 [7]=眼部 [8]=髮飾 [9]=臉飾 [10]=頭飾 [11]=特殊
-    -- (欄名沿用舊稱, 對應順序如上; 武器另走武器編組表)
-    -- Canonical playable type t (1..15) requires body offset t here:
-    -- ItemData 19,900,000+t has +532=t and native 198 treats 0 as unavailable.
-    -- Keep DEFAULT 0 for optional/legacy rows; Db repairs only valid type+t zero rows.
+    char_type    INTEGER NOT NULL DEFAULT 0,     -- u8 client-record type (canonical 310 body-derived)
+    -- 12 個外觀欄位 (u16 = 類別內偏移, 0=空) — sub_524010 讀 12 個 u16。
+    -- Native ordinal: [0]=角色(19.9M) [1]=髮型 [2]=臉 [3]=上衣 [4]=下裝
+    -- [5]=鞋 [6]=外套 [7]=眼部 [8]=髮飾 [9]=臉飾 [10]=頭飾 [11]=特殊。
+    -- 欄名沿用舊 schema；eq_primary..eq_face 的前六欄按 ordinal 依序是
+    -- body/head/face/top/bottom/shoes，不能按 SQL 名稱重排；武器另走編組表。
+    -- Db 對 canonical type 1..15 寫入 native body-template 的完整前六項。
+    -- DEFAULT 0 保留給 optional/legacy 資料；Db 只補 valid canonical body 的
+    -- 缺失零值，絕不覆寫現有非零外觀值。
     eq_primary   INTEGER NOT NULL DEFAULT 0,
     eq_secondary INTEGER NOT NULL DEFAULT 0,
     eq_melee     INTEGER NOT NULL DEFAULT 0,
