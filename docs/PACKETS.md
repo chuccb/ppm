@@ -970,6 +970,11 @@ count × { u8 slot, str name(24B 讀入 v14[6]), u8 讀後丟棄(v13 無引用) 
 ```
 sub_515DE0 只顯示 map/time/round/item 四欄 — +408/+410/+416 與
 114 的 +146/+150 同為「wire 送、client 存而不讀」, 送 0 安全。
+資源佐證: `ui/PopUpJoinRoom.xml` 的控制項名就是這四欄 —
+ROOM_MAP/ROOM_ROUND/ROOM_TIME/ROOM_ITEM (另 ROOM_NO/ROOM_NAME +
+BTN_JOIN/BTN_CANCEL), 即 265 落地後彈出的「進房確認」彈窗; 房單
+`ui/lobbymain.xml` 的 ROOM_PLAY/ROOM_WAIT 兩 sprite 即房在進行中/
+等待中的狀態圖示 (ROOMSTART=開戰 129、ENTERROOM=進房 113)。
 
 **267 GL_JOINGAME_ACK (sub_5749E0)** = `u8 code, u8 flag`:
 sub_516900(room, v2, code, flag) — flag 於 code∈{1,4} 寫回
