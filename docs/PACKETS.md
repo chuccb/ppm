@@ -846,8 +846,9 @@ handler 不在 dispatcher 也不在 CLobbyShop — 在**轉蛋動畫控制器**
 
 2. **復活六連同構**: 342 SOLO / 360 TSUR / 455 EXERCISE / 746 PNR /
    909 OCC / 971 SOCCER — REQ `s32 token` → ACK
-   `u8 slot, u8, s16 x, s16 y, s16 z`。(449 GG_STEALRESPON 無 builder
-   亦無 dispatcher case, 未納入)
+   `u8 slot, u8, s16 x, s16 y, s16 z`。(455 例外: REQ = `s32 s8`,
+   sub_55C620 多寫一個 s8 旗標 byte_1D37B79, server 讀 s32 即可忽略 s8;
+   449 GG_STEALRESPON 無 builder 亦無 dispatcher case, 未納入)
 
 3. **聊天四連 344-350**: REQ = `s32 tex, u8 slot, str msg`; ACK
    345/347/349/351 (sub_58D870/58D8A0/58D8D0/58D900 → sub_74A5F0 →
