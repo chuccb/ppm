@@ -201,7 +201,7 @@ public static class DropWeaponHandlers
             return;
         }
 
-        if (!BattleRelayHandlers.TryFindRoomSlot(session, context, out Room room, out _))
+        if (!BattleRelayHandlers.TryFindRoomSlot(session, context, out Room? room, out _))
         {
             return;
         }
