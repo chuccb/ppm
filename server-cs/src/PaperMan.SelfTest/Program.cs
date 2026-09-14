@@ -496,8 +496,10 @@ int GetAvailableIpv4UdpPort()
                 fingerprintSource: LoginFingerprintSource.Unavailable,
                 clientFingerprint: fingerprint,
                 remoteIp: "127.0.0.1");
-            long createdUserId = secondOpen.CreateNick(newAccount.AccountId, "BootstrapNickname");
             long duplicateUserId = secondOpen.CreateNick(newAccount.AccountId, "BootstrapNickname");
+            Db.MyInfo? provisionedIdentity = newAccount.UserId > 0
+                ? secondOpen.GetMyInfo(newAccount.UserId)
+                : null;
             Db.LoginResult acceptedPassword = secondOpen.Login(
                 accountName: "BootstrapAccount",
                 passwordOrToken: "fresh-password",
@@ -519,9 +521,9 @@ int GetAvailableIpv4UdpPort()
             var channelContext = new ServerContext(secondOpen, channelConfig);
             channelContext.ChannelAdmissions.Issue(
                 accountId: newAccount.AccountId,
-                userId: createdUserId,
+                userId: newAccount.UserId,
                 loginName: "BootstrapAccount",
-                nickname: "BootstrapNickname",
+                nickname: newAccount.Nickname,
                 billingUiMode: channelConfig.BillingUiMode,
                 featureExtensionCount: 0,
                 remoteIp: "127.0.0.1",
@@ -557,13 +559,14 @@ int GetAvailableIpv4UdpPort()
                     .WriteU8(0),
                 channelContext);
 
-            Check("SQLite second open preserves database and operator configuration",
+            Check("SQLite first login provisions a playable identity",
                 !secondOpen.Initialization.CreatedDatabaseFile
                 && secondOpen.Initialization.ProtocolPacketDefinitionCount == 676
-                && newAccount is { Result: LoginCode.Ok, AccountId: > 0, UserId: 0 }
-                && createdUserId > 0
+                && newAccount is { Result: LoginCode.Ok, AccountId: > 0, UserId: > 0, Nickname: "BootstrapAccount" }
+                && provisionedIdentity is { UserId: > 0, Nickname: "BootstrapAccount" }
+                && secondOpen.GetCharacters(newAccount.UserId) is [{ SlotNo: 0, CharType: 1 }]
                 && duplicateUserId == 0
-                && acceptedPassword is { Result: LoginCode.Ok, UserId: > 0, Nickname: "BootstrapNickname" }
+                && acceptedPassword is { Result: LoginCode.Ok, UserId: > 0, Nickname: "BootstrapAccount" }
                 && rejectedPassword.Result == LoginCode.BadCredentials);
             Check("channel entry completes only after successful 195 → 196",
                 handoffWasProcessed
@@ -598,8 +601,9 @@ int GetAvailableIpv4UdpPort()
                 fingerprintSource: LoginFingerprintSource.Unavailable,
                 clientFingerprint: new byte[24],
                 remoteIp: "127.0.0.1");
-            Check("legacy SHA256 credential authenticates once for PBKDF2 upgrade",
-                legacyLogin is { Result: LoginCode.Ok, AccountId: > 0 });
+            Check("legacy orphan account receives a player identity and PBKDF2 upgrade",
+                legacyLogin is { Result: LoginCode.Ok, AccountId: > 0, UserId: > 0, Nickname: "LegacyAccount" }
+                && thirdOpen.GetCharacters(legacyLogin.UserId) is [{ SlotNo: 0, CharType: 1 }]);
         }
 
         using (var connection = OpenExistingSqlite(temporaryDatabasePath))

@@ -77,8 +77,13 @@ dotnet run --project server-cs/src/PaperMan.SelfTest
   設定不會被覆寫。開發時預設使用 repository `db/paperman.db`；publish 後使用
   executable 旁的 `data/paperman.db`。只有需要自訂持久化位置時才設定環境變數
   `PAPERMAN_DATABASE_PATH`，不需要 command-line argument。
-- **帳密與 migration guard**：新帳號使用 PBKDF2-SHA256（210,000 iterations、
-  per-account random 16-byte salt、32-byte derived hash）；有效的舊
+- **帳密、初始玩家與 migration guard**：新帳號使用 PBKDF2-SHA256（210,000
+  iterations、per-account random 16-byte salt、32-byte derived hash）；成功登入
+  必定有可供 197→198 讀取的 `users` row、stats/groups 與 starter character。
+  預設暱稱優先使用合法的登入名稱；若不符合 Client 2..16 CP949-byte 限制則使用
+  `P` 加 account id 的 base-36 值。這是讓單機私服新帳號可直接進大廳的 Server
+  policy；Client 對 198 的 `success=0` 會顯示 code 17，不可拿它表示「尚未建角」。
+  既有的 account-only row 會在密碼驗證後補齊 player identity。有效的舊
   `SHA256(salt + password)` 登入後立即升級。舊 DB 的 682 欄位會 rename/migrate，
   並用 trigger 補強 SQLite 無法以 `ALTER TABLE` 補上的 raw24 fingerprint 長度限制。
 - **壓縮門檻**: 預設送 `0x2580` (=9600) 給 `GL_ACCOUNTCONNSUCC(694)` → 客戶端

@@ -188,9 +188,11 @@ public sealed partial class Db : IDisposable
 
     /// <summary>
     /// Authenticates GL_LOGIN_REQ(682), records its verified metadata, and
-    /// provisions an otherwise unknown private-server account on its first
-    /// valid login. New credentials use PBKDF2-SHA256; valid legacy SHA-256
-    /// rows are upgraded transparently after successful authentication.
+    /// ensures that every accepted account has a playable identity. The client
+    /// requests 197→198 immediately after entering a channel; a success 681
+    /// with no user row makes that native 198 reader show its database error.
+    /// New credentials use PBKDF2-SHA256; valid legacy SHA-256 rows are
+    /// upgraded transparently after successful authentication.
     /// </summary>
     public LoginResult Login(
         string accountName,
@@ -211,7 +213,7 @@ public sealed partial class Db : IDisposable
 
         lock (_gate)
         {
-            var account = FindAccountForLogin(accountName);
+            AccountForLogin? account = FindAccountForLogin(accountName);
             if (account is null)
             {
                 long accountId = CreateAccountForFirstLogin(
@@ -228,7 +230,13 @@ public sealed partial class Db : IDisposable
                     return new LoginResult(LoginCode.BadCredentials);
                 }
 
-                return new LoginResult(LoginCode.Ok, AccountId: accountId);
+                account = FindAccountForLogin(accountName);
+                if (account is null)
+                {
+                    return new LoginResult(LoginCode.Unavailable);
+                }
+
+                return CreateSuccessfulLoginResult(account, accountName);
             }
 
             if (account.IsBanned)
@@ -245,25 +253,101 @@ public sealed partial class Db : IDisposable
                 return new LoginResult(LoginCode.BadCredentials);
             }
 
-            var result = new LoginResult(
-                LoginCode.Ok,
-                AccountId: account.AccountId,
-                UserId: account.UserId,
-                Nickname: account.Nickname,
-                Cash: account.Cash,
-                GamePoint: account.GamePoint,
-                Level: account.Level,
-                Exp: account.Exp);
             UpdateSuccessfulLoginMetadata(
-                result.AccountId,
+                account.AccountId,
                 clientDataRevision,
                 fingerprintSource,
                 clientFingerprint,
                 remoteIp,
                 upgradeCredentials: verification.RequiresUpgrade ? CreatePasswordCredentials(passwordOrToken) : null);
-            return result;
+            return CreateSuccessfulLoginResult(account, accountName);
         }
     }
+
+    /// <summary>
+    /// Supplies the user id and nickname required by successful 681/143/197
+    /// flow. A prior account-only auto-registration is repaired here after its
+    /// password has been verified.
+    /// </summary>
+    private LoginResult CreateSuccessfulLoginResult(AccountForLogin account, string accountName)
+    {
+        PlayerIdentity? identity = EnsurePlayerIdentity(account, accountName);
+        if (identity is null)
+        {
+            return new LoginResult(LoginCode.Unavailable);
+        }
+
+        return new LoginResult(
+            LoginCode.Ok,
+            AccountId: account.AccountId,
+            UserId: identity.UserId,
+            Nickname: identity.Nickname,
+            Cash: account.Cash,
+            GamePoint: account.GamePoint,
+            Level: account.Level,
+            Exp: account.Exp);
+    }
+
+    /// <summary>
+    /// The client trace proves it does not ask to create a nickname before its
+    /// first 197. Create an explicit private-server starter identity instead of
+    /// returning a success 681 whose 198 cannot be consumed.
+    /// </summary>
+    private PlayerIdentity? EnsurePlayerIdentity(AccountForLogin account, string accountName)
+    {
+        if (account.UserId > 0 && account.Nickname.Length > 0)
+        {
+            return new PlayerIdentity(account.UserId, account.Nickname);
+        }
+
+        string generatedNickname = CreateGeneratedNickname(account.AccountId);
+        string initialNickname = IsNativeNicknameLength(accountName)
+            ? accountName
+            : generatedNickname;
+
+        long userId = CreateNickUnlocked(account.AccountId, initialNickname);
+        if (userId > 0)
+        {
+            return new PlayerIdentity(userId, initialNickname);
+        }
+
+        // A manually created player can already use the login-name nickname.
+        // The account-id form is deterministic, compact, and unique across
+        // ordinary first-login accounts.
+        if (initialNickname == generatedNickname)
+        {
+            return null;
+        }
+
+        userId = CreateNickUnlocked(account.AccountId, generatedNickname);
+        return userId > 0 ? new PlayerIdentity(userId, generatedNickname) : null;
+    }
+
+    private static bool IsNativeNicknameLength(string nickname) =>
+        Packet.Ansi.GetByteCount(nickname) is >= 2 and <= 16;
+
+    /// <summary>
+    /// Encodes every positive Int64 account id in base-36, keeping the `P`
+    /// prefix plus worst-case value within the client's 2..16-byte name input
+    /// limit.
+    /// </summary>
+    private static string CreateGeneratedNickname(long accountId)
+    {
+        const string Digits = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        Span<char> characters = stackalloc char[13];
+        ulong value = (ulong)accountId;
+        int firstCharacter = characters.Length;
+        do
+        {
+            characters[--firstCharacter] = Digits[(int)(value % 36)];
+            value /= 36;
+        }
+        while (value > 0);
+
+        return "P" + new string(characters[firstCharacter..]);
+    }
+
+    private sealed record PlayerIdentity(long UserId, string Nickname);
 
     private AccountForLogin? FindAccountForLogin(string accountName)
     {
@@ -463,34 +547,44 @@ public sealed partial class Db : IDisposable
 
         lock (_gate)
         {
-            using var transaction = _conn.BeginTransaction();
-            try
-            {
-                using var userCommand = Cmd(
-                    "INSERT INTO users(account_id,nickname) VALUES(@accountId,@nickname) RETURNING user_id",
-                    ("@accountId", accountId), ("@nickname", nickname));
-                userCommand.Transaction = transaction;
-                long userId = (long)userCommand.ExecuteScalar()!;
+            return CreateNickUnlocked(accountId, nickname);
+        }
+    }
 
-                // trg_users_bootstrap provides user_stats and all four weapon
-                // groups. The explicit character remains server policy, so it
-                // belongs in this transaction rather than a post-commit repair.
-                using var characterCommand = Cmd(
-                    "INSERT INTO characters(user_id,slot_no,char_type) VALUES(@userId,0,1)",
-                    ("@userId", userId));
-                characterCommand.Transaction = transaction;
-                characterCommand.ExecuteNonQuery();
+    /// <summary>
+    /// Creates a user, its trigger-provided stats/groups, and starter character
+    /// in one transaction. Callers that already hold the database gate use this
+    /// rather than attempting a nested lock.
+    /// </summary>
+    private long CreateNickUnlocked(long accountId, string nickname)
+    {
+        using var transaction = _conn.BeginTransaction();
+        try
+        {
+            using var userCommand = Cmd(
+                "INSERT INTO users(account_id,nickname) VALUES(@accountId,@nickname) RETURNING user_id",
+                ("@accountId", accountId), ("@nickname", nickname));
+            userCommand.Transaction = transaction;
+            long userId = (long)userCommand.ExecuteScalar()!;
 
-                transaction.Commit();
-                return userId;
-            }
-            catch (SqliteException exception) when (exception.SqliteErrorCode == SqliteConstraintErrorCode)
-            {
-                // This is the normal domain failure path: duplicate nickname,
-                // already-created identity, or an invalid account reference.
-                // Other SQLite failures must reach the session error log.
-                return 0;
-            }
+            // trg_users_bootstrap provides user_stats and all four weapon
+            // groups. The explicit character remains server policy, so it
+            // belongs in this transaction rather than a post-commit repair.
+            using var characterCommand = Cmd(
+                "INSERT INTO characters(user_id,slot_no,char_type) VALUES(@userId,0,1)",
+                ("@userId", userId));
+            characterCommand.Transaction = transaction;
+            characterCommand.ExecuteNonQuery();
+
+            transaction.Commit();
+            return userId;
+        }
+        catch (SqliteException exception) when (exception.SqliteErrorCode == SqliteConstraintErrorCode)
+        {
+            // This is the normal domain failure path: duplicate nickname,
+            // already-created identity, or an invalid account reference.
+            // Other SQLite failures must reach the session error log.
+            return 0;
         }
     }
 

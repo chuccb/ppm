@@ -561,7 +561,8 @@ print fingerprint bytes or the password/token in logs.
 
 ### 3.2 GL_MYINFO_ACK (198) — handler sub_570550 → CClientData 反序列化
 ```
-bool    success
+bool    success                 0 時直接顯示 resource 0x70 / code 17
+                               （「資料庫連線障害」）；不是可用的空玩家狀態
 若 success:
   s32   user_id (v19)
   --- sub_523BF0: 基本資料 ---
