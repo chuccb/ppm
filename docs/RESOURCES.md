@@ -173,7 +173,11 @@ modeName + maplist 檔名前綴三方互證; 舊表 bit1/2/3/4 的語意已更�
 | 14 | TS(worldcup) | 12 | SOCCER | CyTeamSoccerMode | サッカー |
 | 15 | OCC2 | 13 | — | CyOccupyRenewalMode | new占領 |
 
-(mode 5 Practice / 7 ChattingRoom 無專屬地圖; bit 7/8 未用。)
+(mode 5 Practice / 7 ChattingRoom 無專屬地圖; bit 7/8 未用。
+⚠ bit 5 (0x20) 只出現在 3 張純 TU 圖 (map 0/101/102 = TU_01..03);
+bit 6 (0x40) 則出現在全部 6 張教學可用圖 — 另 3 張為複用圖:
+77=TW_13 池袋X-mas、78=PS_11 冬の街、86=ECT_01 WeaponPreview。
+故「教學可選」過濾位取 **bit 6** (server ModeMapBit[6]=6)。)
 建房時 client 以 `(map.modes >> bit) & 1` 過濾該模式可選地圖;
 `mode` 是 room 的模式值 (0..13/15, 見 §7), `bit` 是上表對應的
 maplist `modes` 位 — 兩者**不是同一編號** (如 mode 0=TeamDeath↔bit2)。
@@ -370,7 +374,9 @@ KNIFECHECK(近戰限定房)、ALLMODE/LOCALMODE_SECRET(顯示用) —
 
 **roommake.xml** (建房 UI) 下拉值域:
 - GAMEMODE 可選 mode = **{0,1,2,3,4,5,8,10,11,12,13}** (無 6/7/9/14/15 —
-  教學/聊天/射擊館/足球/武器試射不走一般建房; 7 由 CHKBTN_CHATROOM 勾出)
+  教學/聊天/射擊館/武器試射不走一般建房; 7 由 CHKBTN_CHATROOM 勾出;
+  ⚠ 足球=12 **有**在建房下拉內, 另 GAMEROOM_SOCCER checkbox 是獨立的
+  房規則旗標 (969/970 → mode rule +14), 兩者不同)
 - USERS 可選人數 = **{2,4,6,8,10,12,14,16}**
 - CHKBTN_CHATROOM (勾選=聊天房 mode 7) / CHKBTN_NOSKILL (無技背景)
 - ROOMNAME textlimit=120, PASSWORD_INPUT textlimit=8

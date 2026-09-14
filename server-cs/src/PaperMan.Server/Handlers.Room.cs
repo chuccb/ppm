@@ -74,7 +74,7 @@ public static class RoomHandlers
             [2] = 3,                                        // TeamHacking   → TH  (bit 3)
             [3] = 1,                                        // TeamSurvival  → TS  (bit 1)
             [4] = 4,                                        // TeamSteal     → TW  (bit 4)
-            [6] = 5,                                        // Tutorial      → TU  (bit 5; bit 6 為活動/事件疊加)
+            [6] = 6,                                        // Tutorial      → TU  (bit 6=0x40; bit 5=0x20 為純 TU 專用圖)
             [8] = 9,                                        // Pulp'n Roll   → PNR (bit 9)
             [9] = 10,                                       // GunShooting   → AI  (bit 10)
             [10] = 12,                                      // Occupy        → OCC (bit 12)
@@ -520,11 +520,18 @@ public static class RoomHandlers
         // client 端 sub_426930(mode) 會把 map 回推成該 mode 預設圖寫 +130;
         // server 鏡像: 有預設圖的 mode 重置, 其餘保留; 兩者皆再經 ResolveMap
         // 依 mode→bit 過濾 (防呆, 正常預設圖必合法故為 no-op)。
+        byte oldMap = room.MapId;
         room.MapId = ResolveMap(
             ModeDefaultMap.TryGetValue(mode, out byte defaultMap) ? defaultMap : room.MapId,
             mode, context.Db);
 
         await RoomManager.BroadcastAsync(room, new Packet(Opcode.GR_RULECHANGE_ACK).WriteU8(mode));
+        // 例外: SOCCER 預設圖 98 是 TS 圖 (map_StartIndex 原廠 bug), ResolveMap
+        // 會回退成 99 — client 卻仍照 98 寫 +130; 補發 122 把 client 拉回一致。
+        if (room.MapId != oldMap)
+        {
+            await RoomManager.BroadcastAsync(room, new Packet(Opcode.GR_MAPCHANGE_ACK).WriteU8(room.MapId));
+        }
     }
 
     // 171 GR_WINCHANGE_REQ (sub_56F520): u16 win_count — 房主改勝場目標
