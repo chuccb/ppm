@@ -47,14 +47,17 @@ public static class ChannelHandlers
                 throw new InvalidDataException("PM_UDPSTART_REQ has trailing data.");
             }
 
-            bool claimed = requiredOne == 1
-                && context.ChannelAdmissions.TryClaim(
-                    billingUiMode,
-                    featureExtensionCount,
-                    session.RemoteIp,
-                    DateTimeOffset.UtcNow,
-                    out var admission);
-            if (claimed)
+            if (requiredOne != 1)
+            {
+                status = UdpStartResult.UnauthorizedAccount;
+                Console.WriteLine($"[s{session.Id}] rejected channel handoff with an invalid literal for identity '{ToLogSafe(identity)}'");
+            }
+            else if (context.ChannelAdmissions.TryClaim(
+                billingUiMode,
+                featureExtensionCount,
+                session.RemoteIp,
+                DateTimeOffset.UtcNow,
+                out ChannelAdmission? admission))
             {
                 session.BindAuthentication(
                     admission.AccountId,

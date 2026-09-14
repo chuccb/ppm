@@ -19,6 +19,7 @@
 //   894/895 隊打散執行 — 對應 room 欄位見 Rooms.cs 與 §3.15b2 總圖。
 // =============================================================================
 using System.Collections.Frozen;
+using System.Diagnostics.CodeAnalysis;
 using PaperMan.Protocol;
 
 namespace PaperMan.Server;
@@ -465,9 +466,13 @@ public static class RoomHandlers
     // 房主自己的 UI 也會卡在 pending。
 
     /// <summary>取得 session 所在房與其 slot; 任一不成立回 false。</summary>
-    private static bool TryGetRoom(Session session, ServerContext context, out Room room, out byte slot)
+    private static bool TryGetRoom(
+        Session session,
+        ServerContext context,
+        [NotNullWhen(true)] out Room? room,
+        out byte slot)
     {
-        room = null!;
+        room = null;
         slot = 0;
 
         if (session.RoomNo is not { } roomNo || context.Rooms.Find(roomNo) is not { } r)
@@ -475,12 +480,12 @@ public static class RoomHandlers
             return false;
         }
 
-        room = r;
-        foreach (var (s, member) in r.Members)
+        foreach (var (memberSlot, member) in r.Members)
         {
             if (ReferenceEquals(member, session))
             {
-                slot = s;
+                room = r;
+                slot = memberSlot;
                 return true;
             }
         }

@@ -14,6 +14,7 @@
 // (權威清單見下方 GameMode — sub_53FBB0 mode factory 的 16 路 switch)。
 // =============================================================================
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using PaperMan.Protocol;
 
 namespace PaperMan.Server;
@@ -119,14 +120,14 @@ public sealed class RoomBattleState
         byte pointId,
         byte actorSlot,
         int actorUserId,
-        out OccupyPointSnapshot snapshot,
+        [NotNullWhen(true)] out OccupyPointSnapshot? snapshot,
         out bool stateChanged)
     {
         lock (_gate)
         {
             if (!_matchActive || !IsValidPoint(pointId))
             {
-                snapshot = null!;
+                snapshot = null;
                 stateChanged = false;
                 return false;
             }
@@ -138,7 +139,7 @@ public sealed class RoomBattleState
                     || current.ActorSlot != actorSlot
                     || current.ActorUserId != actorUserId)
                 {
-                    snapshot = null!;
+                    snapshot = null;
                     stateChanged = false;
                     return false;
                 }
@@ -165,7 +166,7 @@ public sealed class RoomBattleState
         byte pointId,
         byte actorSlot,
         int actorUserId,
-        out OccupyPointSnapshot snapshot,
+        [NotNullWhen(true)] out OccupyPointSnapshot? snapshot,
         out bool stateChanged)
     {
         lock (_gate)
@@ -175,7 +176,7 @@ public sealed class RoomBattleState
                 || current.ActorSlot != actorSlot
                 || current.ActorUserId != actorUserId)
             {
-                snapshot = null!;
+                snapshot = null;
                 stateChanged = false;
                 return false;
             }
@@ -189,7 +190,7 @@ public sealed class RoomBattleState
 
             if (current.Phase != OccupyPointPhase.Capturing)
             {
-                snapshot = null!;
+                snapshot = null;
                 stateChanged = false;
                 return false;
             }
@@ -202,7 +203,7 @@ public sealed class RoomBattleState
     }
 
     /// <summary>僅啟動者可以送 OCC_FAIL；成功或他人的事件不可清除狀態。</summary>
-    public bool TryFailOccupy(byte pointId, byte actorSlot, int actorUserId, out OccupyPointSnapshot snapshot)
+    public bool TryFailOccupy(byte pointId, byte actorSlot, int actorUserId, [NotNullWhen(true)] out OccupyPointSnapshot? snapshot)
     {
         lock (_gate)
         {
@@ -212,7 +213,7 @@ public sealed class RoomBattleState
                 || current.ActorSlot != actorSlot
                 || current.ActorUserId != actorUserId)
             {
-                snapshot = null!;
+                snapshot = null;
                 return false;
             }
 

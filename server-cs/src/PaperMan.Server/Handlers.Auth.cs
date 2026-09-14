@@ -5,6 +5,7 @@
 // CLobbyLogin::sub_43E500 receives it and immediately calls sub_43DF00 to emit
 // 682.  Therefore this file must never send 694 after 682/681.
 // =============================================================================
+using System.Diagnostics.CodeAnalysis;
 using PaperMan.Protocol;
 
 namespace PaperMan.Server;
@@ -89,9 +90,12 @@ public static class AuthHandlers
         }
     }
 
-    private static bool TryReadValidLoginRequest(Packet packet, out LoginRequest request, out uint dataRevision)
+    private static bool TryReadValidLoginRequest(
+        Packet packet,
+        [NotNullWhen(true)] out LoginRequest? request,
+        out uint dataRevision)
     {
-        request = default!;
+        request = null;
         dataRevision = 0;
 
         try

@@ -14,6 +14,7 @@
 // fails safely instead of guessing based on an unproven String[24] meaning.
 // =============================================================================
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PaperMan.Server;
 
@@ -98,14 +99,14 @@ public sealed class ChannelAdmissionRegistry
         int featureExtensionCount,
         string remoteIp,
         DateTimeOffset now,
-        out ChannelAdmission admission)
+        [NotNullWhen(true)] out ChannelAdmission? admission)
     {
         // Claim selection and consumption must share the Issue lock. Otherwise
         // a concurrent login could add a second indistinguishable same-NAT
         // claim after the ambiguity scan but before the first claim is removed.
+        admission = null;
         lock (_issueGate)
         {
-            admission = default!;
             ChannelAdmission? candidate = null;
             Guid candidateId = Guid.Empty;
 

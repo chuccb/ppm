@@ -27,6 +27,7 @@
 // server implementation boundary; the recovered client does not prove an
 // original-server P2P/relay authority model or its relation to private UDP.
 // =============================================================================
+using System.Diagnostics.CodeAnalysis;
 using PaperMan.Protocol;
 
 namespace PaperMan.Server;
@@ -224,9 +225,13 @@ public static class BattleRelayHandlers
         };
 
     /// <summary>取 session 所在房與其 slot (非房內回 false)。</summary>
-    internal static bool TryFindRoomSlot(Session session, ServerContext context, out Room room, out byte slot)
+    internal static bool TryFindRoomSlot(
+        Session session,
+        ServerContext context,
+        [NotNullWhen(true)] out Room? room,
+        out byte slot)
     {
-        room = null!;
+        room = null;
         slot = 0;
 
         if (session.RoomNo is not { } roomNo || context.Rooms.Find(roomNo) is not { } r)
@@ -234,12 +239,12 @@ public static class BattleRelayHandlers
             return false;
         }
 
-        room = r;
-        foreach (var (s, member) in r.Members)
+        foreach (var (memberSlot, member) in r.Members)
         {
             if (ReferenceEquals(member, session))
             {
-                slot = s;
+                room = r;
+                slot = memberSlot;
                 return true;
             }
         }

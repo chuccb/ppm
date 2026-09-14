@@ -8,6 +8,7 @@
 //
 // 逐函數證據：docs/PACKETS.md §3.15d3a、docs/LAYOUTS.md 903/905/907/963。
 // =============================================================================
+using System.Diagnostics.CodeAnalysis;
 using PaperMan.Protocol;
 
 namespace PaperMan.Server;
@@ -26,7 +27,7 @@ public static class OccupyHandlers
     //   u8 point_id (client field + 1, 因此 wire 值 1..3),
     //   u8 claimed_slot, s32 claimed_user_id (dword_EE8CB4)。
     // claimed identity 是 client 自報欄位，絕不能原樣轉給其他玩家。
-    private sealed record Request(byte PointId, byte ClaimedSlot, int ClaimedUserId);
+    private sealed record OccupyRequest(byte PointId, byte ClaimedSlot, int ClaimedUserId);
 
     /// <summary>
     /// 902 → 903。903 的 0 action 分支讀
@@ -35,13 +36,17 @@ public static class OccupyHandlers
     /// </summary>
     private static async ValueTask Start(Session session, Packet packet, ServerContext context)
     {
-        if (!TryGetAuthorizedRequest(session, packet, context, out var room, out var request)
-            || !room.BattleState.TryStartOccupy(
-                request.PointId,
-                request.ClaimedSlot,
-                request.ClaimedUserId,
-                out var state,
-                out bool stateChanged))
+        if (!TryReadAuthorizedRequest(session, packet, context, out Room? room, out OccupyRequest? request))
+        {
+            return;
+        }
+
+        if (!room.BattleState.TryStartOccupy(
+            request.PointId,
+            request.ClaimedSlot,
+            request.ClaimedUserId,
+            out var state,
+            out bool stateChanged))
         {
             return;
         }
@@ -64,13 +69,17 @@ public static class OccupyHandlers
     /// </summary>
     private static async ValueTask Succeed(Session session, Packet packet, ServerContext context)
     {
-        if (!TryGetAuthorizedRequest(session, packet, context, out var room, out var request)
-            || !room.BattleState.TryCompleteOccupy(
-                request.PointId,
-                request.ClaimedSlot,
-                request.ClaimedUserId,
-                out var state,
-                out bool stateChanged))
+        if (!TryReadAuthorizedRequest(session, packet, context, out Room? room, out OccupyRequest? request))
+        {
+            return;
+        }
+
+        if (!room.BattleState.TryCompleteOccupy(
+            request.PointId,
+            request.ClaimedSlot,
+            request.ClaimedUserId,
+            out var state,
+            out bool stateChanged))
         {
             return;
         }
@@ -96,9 +105,13 @@ public static class OccupyHandlers
     /// </summary>
     private static async ValueTask Fail(Session session, Packet packet, ServerContext context)
     {
-        if (!TryGetAuthorizedRequest(session, packet, context, out var room, out var request)
-            || !room.BattleState.TryFailOccupy(
-                request.PointId, request.ClaimedSlot, request.ClaimedUserId, out var state))
+        if (!TryReadAuthorizedRequest(session, packet, context, out Room? room, out OccupyRequest? request))
+        {
+            return;
+        }
+
+        if (!room.BattleState.TryFailOccupy(
+            request.PointId, request.ClaimedSlot, request.ClaimedUserId, out var state))
         {
             return;
         }
@@ -114,20 +127,32 @@ public static class OccupyHandlers
             .WriteU8(state.CaptureParticipantCount)
             .WriteS32(state.ActorUserId);
 
-    private static bool TryGetAuthorizedRequest(
+    private static bool TryReadAuthorizedRequest(
         Session session,
         Packet packet,
         ServerContext context,
-        out Room room,
-        out Request request)
+        [NotNullWhen(true)] out Room? room,
+        [NotNullWhen(true)] out OccupyRequest? request)
     {
-        room = null!;
-        request = null!;
+        room = null;
+        request = null;
 
         // 三個 client builder 都精確寫入 6 bytes；拒絕截斷和未證實的尾隨變體。
-        if (packet.Remaining != 6
-            || !BattleRelayHandlers.TryFindRoomSlot(session, context, out room, out var actualSlot)
-            || !IsOccupyMode(room))
+        if (packet.Remaining != 6)
+        {
+            return false;
+        }
+
+        if (!BattleRelayHandlers.TryFindRoomSlot(
+            session,
+            context,
+            out Room? sessionRoom,
+            out byte actualSlot))
+        {
+            return false;
+        }
+
+        if (!IsOccupyMode(sessionRoom))
         {
             return false;
         }
@@ -142,7 +167,8 @@ public static class OccupyHandlers
             return false;
         }
 
-        request = new(pointId, claimedSlot, claimedUserId);
+        room = sessionRoom;
+        request = new OccupyRequest(pointId, claimedSlot, claimedUserId);
         return true;
     }
 
@@ -158,70 +184,45 @@ public static class OccupyHandlers
 /// <summary>GG_DROPWEAPON_GET_AND_DROP_REQ（962）的安全失敗回覆。</summary>
 public static class DropWeaponHandlers
 {
+    // sub_566F50 writes u16, u16, u8, u16, u16, f32 without a variable tail.
+    private const int GetAndDropRequestLength = 13;
+
     public static void Register(Registrar add) =>
         add(Opcode.GG_DROPWEAPON_GET_AND_DROP_REQ, GetAndDrop);
 
-    // sub_566F50 確認的 962 layout。名稱只對已由資料流確認的欄位下結論：
-    // 第一欄是 v45+22（現有地面 weapon id）；第二欄會作為 action 表 offset
-    // 查詢；最後欄是該 action 的 f32 值。中間兩個 s16 的原始語意尚未可證。
-    private sealed record GetAndDropRequest(
-        ushort GroundWeaponId,
-        ushort WeaponActionOffset,
-        byte QuickSlot,
-        ushort WeaponDataA,
-        ushort WeaponDataB,
-        float WeaponValue);
-
     private static async ValueTask GetAndDrop(Session session, Packet packet, ServerContext context)
     {
-        if (packet.Remaining != 13
-            || !BattleRelayHandlers.TryFindRoomSlot(session, context, out var room, out _)
-            || !room.BattleState.IsMatchActive)
+        // This endpoint has no verified 959/961 object seed or state
+        // transition, so framing is the only request validation with an
+        // observable effect today. Do not invent ranges for unimplemented
+        // object fields.
+        if (packet.Remaining != GetAndDropRequestLength)
         {
             return;
         }
 
-        var request = new GetAndDropRequest(
-            ReadSerializedU16(packet),
-            ReadSerializedU16(packet),
-            packet.ReadU8(),
-            ReadSerializedU16(packet),
-            ReadSerializedU16(packet),
-            packet.ReadF32());
+        if (!BattleRelayHandlers.TryFindRoomSlot(session, context, out Room room, out _))
+        {
+            return;
+        }
 
-        // 962 的 client builder / 963 parser 已完整定出 wire layout，但 959/961 是
-        // server→client only，現有專案尚未有可驗證的地圖掉落物來源來 seed 每房物件
-        // 表。若此時硬造 963 成功包，client 會刪除 GroundWeaponId 並以未證實的
-        // 位置、32-byte weapon state 建新物件，必然造成 desync。
+        if (!room.BattleState.IsMatchActive)
+        {
+            return;
+        }
+
+        // 962's builder and 963's parser establish the wire shape, but 959/961
+        // are server-to-client only and no evidenced map-object source can seed
+        // a room object table. A fabricated success would make the client
+        // replace GroundWeaponId with an object whose position/state is unknown.
         //
-        // 963 的首欄唯一已證語意是「0 成功，任何非零不再讀後續 payload」
-        // (sub_5672E0)。因此安全地回 bool true（wire 1）只給請求者；這不是猜測
-        // error-code，也不會向房內其他玩家宣告不存在的物件。保留 request 的完整
-        // 嚴格解析與基本值域檢查，讓未來有 959/961 seed 時可接上狀態機。
-        if (!IsPlausible(request))
-        {
-            await SendRejectedAsync(session);
-            return;
-        }
-
+        // sub_5672E0 proves only this result behavior: 0 means success and a
+        // nonzero value stops further payload parsing. Send the proven nonzero
+        // shape to the requester and do not broadcast a nonexistent object.
         await SendRejectedAsync(session);
     }
 
     /// <summary>963 的 fail 分支只需要首個 nonzero result byte。</summary>
-    private static ValueTask SendRejectedAsync(Session session) =>
+    private static Task SendRejectedAsync(Session session) =>
         session.SendAsync(new Packet(Opcode.GG_DROPWEAPON_GET_AND_DROP_ACK).WriteBool(true));
-
-    /// <summary>
-    /// Builder uses the signed-16 writer for parameters declared unsigned-16 in
-    /// <c>sub_566F50</c>; retain the bits as <see cref="System.UInt16"/> rather than rejecting
-    /// high-bit ids as negative.
-    /// </summary>
-    private static ushort ReadSerializedU16(Packet packet) =>
-        unchecked((ushort)packet.ReadS16());
-
-    private static bool IsPlausible(GetAndDropRequest request) =>
-        request.GroundWeaponId != 0
-        && request.QuickSlot < 8                           // client stores weapon state in 8 entries
-        && float.IsFinite(request.WeaponValue)
-        && request.WeaponValue >= 0;
 }
