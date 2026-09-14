@@ -4,6 +4,7 @@
 // 直接承載逆向得到的值域 (slot 0..5119, period 白名單, 角色槽 0..19...)。
 // =============================================================================
 using Microsoft.Data.Sqlite;
+using PaperMan.Protocol;
 
 namespace PaperMan.Server;
 
@@ -19,6 +20,51 @@ public sealed partial class Db : IDisposable
         using var cmd = _conn.CreateCommand();
         cmd.CommandText = "PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON; PRAGMA synchronous=NORMAL;";
         cmd.ExecuteNonQuery();
+        MigrateLegacyLoginMetadataColumns();
+    }
+
+    /// <summary>
+    /// Preserves old database data while correcting 682 field names. sub_43DF00
+    /// proves the decoded u32 comes from datarevision.txt; sub_9A8790 and
+    /// sub_9A86A0 prove raw24 is storage serial or fallback adapter MAC.
+    /// </summary>
+    private void MigrateLegacyLoginMetadataColumns()
+    {
+        using var columns = Cmd("PRAGMA table_info(accounts)");
+        using var reader = columns.ExecuteReader();
+        bool hasLegacyHardwareKey = false;
+        bool hasClientDataRevision = false;
+        bool hasLegacySecurityState = false;
+        bool hasFingerprintSource = false;
+        bool hasClientFingerprint = false;
+        while (reader.Read())
+        {
+            string name = reader.GetString(1);
+            hasLegacyHardwareKey |= name.Equals("hw_key", StringComparison.OrdinalIgnoreCase);
+            hasClientDataRevision |= name.Equals("client_data_revision", StringComparison.OrdinalIgnoreCase);
+            hasLegacySecurityState |= name.Equals("security_state", StringComparison.OrdinalIgnoreCase);
+            hasFingerprintSource |= name.Equals("fingerprint_source", StringComparison.OrdinalIgnoreCase);
+            hasClientFingerprint |= name.Equals("client_fingerprint", StringComparison.OrdinalIgnoreCase);
+        }
+
+        reader.Close();
+        if (hasLegacyHardwareKey && !hasClientDataRevision)
+        {
+            using var migrate = Cmd("ALTER TABLE accounts RENAME COLUMN hw_key TO client_data_revision");
+            migrate.ExecuteNonQuery();
+        }
+
+        if (hasLegacySecurityState && !hasFingerprintSource)
+        {
+            using var migrate = Cmd("ALTER TABLE accounts RENAME COLUMN security_state TO fingerprint_source");
+            migrate.ExecuteNonQuery();
+        }
+
+        if (!hasClientFingerprint && (hasClientDataRevision || hasLegacyHardwareKey))
+        {
+            using var migrate = Cmd("ALTER TABLE accounts ADD COLUMN client_fingerprint BLOB");
+            migrate.ExecuteNonQuery();
+        }
     }
 
     public void Dispose() => _conn.Dispose();
@@ -38,8 +84,19 @@ public sealed partial class Db : IDisposable
         int Cash = 0, long GamePoint = 0, int Level = 1, long Exp = 0);
 
     /// <summary>GL_LOGIN_REQ(682) 驗證; 密碼 = SHA256(salt + token)。</summary>
-    public LoginResult Login(string account, string tokenOrPass, ulong hwKey)
+    public LoginResult Login(
+        string account,
+        string tokenOrPass,
+        uint clientDataRevision,
+        LoginFingerprintSource fingerprintSource,
+        byte[] clientFingerprint)
     {
+        ArgumentNullException.ThrowIfNull(clientFingerprint);
+        if (clientFingerprint.Length != 24)
+        {
+            throw new ArgumentException("682 fingerprint must contain exactly 24 bytes.", nameof(clientFingerprint));
+        }
+
         lock (_gate)
         {
             using var cmd = Cmd("""
@@ -56,7 +113,7 @@ public sealed partial class Db : IDisposable
                 if (!string.IsNullOrWhiteSpace(account))
                 {
                     CreateAccount(account, tokenOrPass);
-                    return Login(account, tokenOrPass, hwKey);
+                    return Login(account, tokenOrPass, clientDataRevision, fingerprintSource, clientFingerprint);
                 }
                 return new(LoginCode.BadCredentials);
             }
@@ -83,8 +140,18 @@ public sealed partial class Db : IDisposable
             r.Close();
 
             using var upd = Cmd(
-                "UPDATE accounts SET hw_key=@h, last_login_at=unixepoch() WHERE account_id=@a",
-                ("@h", unchecked((long)hwKey)), ("@a", result.AccountId));
+                """
+                UPDATE accounts
+                SET client_data_revision=@r,
+                    fingerprint_source=@s,
+                    client_fingerprint=@f,
+                    last_login_at=unixepoch()
+                WHERE account_id=@a
+                """,
+                ("@r", (long)clientDataRevision),
+                ("@s", (byte)fingerprintSource),
+                ("@f", clientFingerprint),
+                ("@a", result.AccountId));
             upd.ExecuteNonQuery();
             return result;
         }

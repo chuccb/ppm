@@ -22,7 +22,7 @@
 //     4) 失敗 → 原版丟棄整個累積緩衝
 //
 //   ⚠ 死碼: sub_5923D0/sub_592420 (popcount+XOR "seal") 無呼叫者, 不實作。
-//   ⚠ n2_4 (AES 模式) 於封包路徑無初始化 → ECB。
+//   ⚠ 封包路徑傳入 n2_4=2 → AES-128-CFB-128，IV 為全零。
 //   ⚠ n0x2580 門檻初始 9600 = 永不壓縮; 由 GL_ACCOUNTCONNSUCC(694) u16 協商。
 // =============================================================================
 using System.Buffers.Binary;
@@ -38,14 +38,29 @@ public sealed class PacketCodec(byte[]? aesKey = null, ushort compressThreshold 
     private const int MaxEncryptedSize = 0x2578;
 
     /// <summary>
-    /// n0x2580 全域門檻 (per-connection, 由 694 協商)。
-    /// 0 視同關閉 (原版 sub_593280 亦有 n0x2580&gt;0 檢查)。
+    /// n0x2580 per-connection compression threshold, negotiated by 694.
+    /// Zero normalizes to the native no-compression default. A value greater
+    /// than <see cref="NeverCompress"/> is invalid: the client ignores such a
+    /// 694 greeting and retains 0x2580, while a server using the larger value
+    /// would fail to decompress otherwise valid client frames.
     /// </summary>
     public ushort CompressThreshold
     {
         get;
-        set => field = value == 0 ? NeverCompress : value;   // C# 14 field keyword
-    } = compressThreshold == 0 ? NeverCompress : compressThreshold;
+        set => field = NormalizeCompressionThreshold(value); // C# 14 field keyword
+    } = NormalizeCompressionThreshold(compressThreshold);
+
+    private static ushort NormalizeCompressionThreshold(ushort requested)
+    {
+        if (requested > NeverCompress)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(requested),
+                "The native 694 negotiation supports only 0 or 1..0x2580.");
+        }
+
+        return requested == 0 ? NeverCompress : requested;
+    }
 
     /// <summary>AES-128 金鑰 (原生金鑰見 PaperAes.DefaultKey)。null = 明文模式 (自測/代理)。</summary>
     public bool Encrypted => _aes is not null;

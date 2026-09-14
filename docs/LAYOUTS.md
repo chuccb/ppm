@@ -4,13 +4,30 @@
 > 已與 5 個歷輪手工佈局抽查比對全部吻合 (106/118/120/122/142)。
 >
 > 型別對照: u8=sub_592940, s8/bool=592900, s8=592980, u16=592A00,
-> s16=5929C0, s32=592A40/592AA0, u32=592A80, f32/s32=592AC0 (4B),
-> f32=592B40, u64=592B00, str=592730 (NUL ANSI), wstr=5927B0 (UTF-16),
+> s16=5929C0, s32=592A40/592AA0, u32=592A80, raw4=592AC0 (caller determines
+> semantics; 142/144/196 contain both signed/raw4 fields—see bootstrap notes),
+> f32=592B40, u64=592B00,
+> str=592730 (NUL ANSI), wstr=5927B0 (UTF-16),
 > raw16=592C40。
 >
 > ⚠ 此表為「讀取序列」非精確佈局: 條件分支/迴圈會使實際 wire 依
 > 內容變化 — 精確語意以 PACKETS.md 手工條目為準; 本表用於快速
 > 查閱與覆蓋保證 (300/306 case, 6 個非 sub 直呼)。
+
+
+### Bootstrap fields cross-checked in native source (2026-09)
+
+| op | Exact field meanings beyond the generated read sequence | Native evidence |
+|---:|---|---|
+| 142 | `str endpoint_host` (client `char[20]`), raw4/s32 port whose low u16 is used, `u8 active_channel_index`, then packed calendar `u32`: `(year-2000)<<24 \| month<<19 \| day<<13 \| hour<<7 \| minute`. | `sub_5565D0`, `sub_534F20` |
+| 144 | `u8 result`, `u8 rank-restricted flag`, `s32 daily-login PG notice`, `str[40] channel`, two read-but-unused `s32`, level `s32`, K/D `f32`, propagated raw4 request context, `u8 has_net_cafe`, then exactly `u8×4 + raw4×8` when present. | `sub_555D50`, `sub_A1C800`, CP932 msg table ids 0xC9/0x11C/0x31B… |
+| 196 | Prefix is always `u8 result, s32 channel_id, u8 active_channel_index`; the seven-field endpoint tail exists **only when result==1**. | `CLobbyChannel::sub_4179D0`, `sub_4177B0` |
+| 693 | Empty packet; its handler displays message 0xFF then immediately builds/sends 143. | `sub_57CAE0`, `sub_555C60` |
+
+`694` is handled by `CLobbyLogin::sub_43E500` outside this dispatcher table: its
+u16 replaces the initial 9600 compression threshold only when `<0x2580`; at or
+above the ceiling it is ignored. `681` result is read as raw4 but its branch
+selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout.
 
 | op | 名稱 | handler | 讀取序列 |
 |---|---|---|---|
@@ -32,8 +49,8 @@
 | 134 | GR_END_ACK | sub_562EA0 | `u8 u8 u8 u8 u8 u16 u8 u8 u16 u8 s8/bool u16 s8/bool s8/bool s8/bool s8/bool u8 u8` |
 | 136 | GR_CHANGESLOT_ACK | sub_56EF40 | `u8 u8 u8 f32/s32 s32 u8 u8 s32` |
 | 140 | GG_EXITGAME_ACK | sub_563430 | `u8 u8` |
-| 142 | PM_CONNECT_ACK | sub_5565D0 | `str s32 u8 f32/s32` |
-| 144 | PM_UDPSTART_ACK | sub_555D50 | `u8 u8 s32 str s32 s32 s32 f32 f32/s32 u8 u8 u8 u8 u8 s32` |
+| 142 | PM_CONNECT_ACK | sub_5565D0 | `str s32 u8 u32` |
+| 144 | PM_UDPSTART_ACK | sub_555D50 | `u8 u8 s32 str s32 s32 s32 f32 u32 u8 [u8 u8 u8 u8 s32×8]` |
 | 160 | TCP_UDP_DEAD_ACK | sub_58D790 | `(無直接讀取/轉發)` |
 | 166 | Y_TCP_INF_ACK | sub_58D820 | `(無直接讀取/轉發)` |
 | 168 | GR_CHANGEUSER_ACK | sub_56F410 | `u16` |
@@ -46,7 +63,7 @@
 | 190 | GR_CHANGEMASTER_ACK | sub_56FBF0 | `u8` |
 | 192 | GR_CALLUSER_ACK | sub_56FE10 | `u8 str` |
 | 194 | GC_CHANNEL_ACK | sub_56FE90 | `u8` |
-| 196 | GC_ENTERCHANNEL_ACK | sub_4179D0 | `u8 s32 u8 [str s32 u8 u8 s32 u8]` |
+| 196 | GC_ENTERCHANNEL_ACK | sub_4179D0 | `u8 s32 u8 [str s32 u8 u8 u32 u8]` |
 | 198 | GL_MYINFO_ACK | sub_570550 | `s8/bool s32 u16 s32 u8 u8` |
 | 200 | GL_MYITEM_ACK | sub_570AB0 | `s8/bool` |
 | 201 | GL_MYPARTSUP_ACK | sub_95A3B0 | `s32 f32/s32 f32/s32 s8/bool f32/s32 f32/s32` |
@@ -264,7 +281,7 @@
 | 891 | GC_QUERY_CLANRANKING_ACK | sub_424620 | `u8 s32` |
 | 893 | MASTER_RELOAD_CLANRANKING_ACK | sub_585CB0 | `(無直接讀取/轉發)` |
 | 895 | GR_TEAMSHUFFLE_ACK | sub_585E70 | `(無直接讀取/轉發)` |
-| 903 | GG_OCC_START_ACK | sub_564E30 | `u8 u8 u8 u8 s32 f32/s32` |
+| 903 | GG_OCC_START_ACK | sub_564E30 | `u8 u8 u8 u8 s32` |
 | 905 | GG_OCC_SUCC_ACK | sub_565230 | `u8 u8 u8 u8` |
 | 907 | GG_OCC_FAIL_ACK | sub_565560 | `u8 u8 u8 u8 s32` |
 | 908 | GG_OCC_AB_SUCC_NOTIFY | sub_565850 | `(無直接讀取/轉發)` |
@@ -291,10 +308,10 @@
 | 949 |  | sub_58EF00 | `u8` |
 | 954 |  | sub_57DA20 | `s8/bool` |
 | 958 |  | sub_565E00 | `(無直接讀取/轉發)` |
-| 959 | GG_DROPWEAPON_CREATE_NOTIFY | sub_5666D0 | `u16 u8 s32 u16 s16 s16 s16 u16 u16 f32` |
-| 960 | GG_DROPWEAPON_DESTROY_NOTIFY | sub_566B30 | `u8 u16` |
-| 961 | GG_DROPWEAPON_INFO_NOTIFY | sub_566BF0 | `u8 u16 u8 s32 u16 s16 s16 s16 u16 u16 f32` |
-| 963 | GG_DROPWEAPON_GET_AND_DROP_ACK | sub_5672E0 | `u8 u8 s32 u16 u8 u16 s16 s16 s16 u16 u16 u16 f32` |
+| 959 | GG_DROPWEAPON_CREATE_NOTIFY | sub_5666D0 | `u16 u8 s32 u16 s16 s16 s16 u16 u16 f32 raw32` |
+| 960 | GG_DROPWEAPON_DESTROY_NOTIFY | sub_566B30 | `u8 count, count×u16` (0 id stops early) |
+| 961 | GG_DROPWEAPON_INFO_NOTIFY | sub_566BF0 | `u8 count, count×(u16 u8 s32 u16 s16 s16 s16 u16 u16 f32 raw32)` (0 id stops early) |
+| 963 | GG_DROPWEAPON_GET_AND_DROP_ACK | sub_5672E0 | `u8 result, [result==0: u8 s32 u16 u8 u16 s16 s16 s16, [weapon!=0: u16 u16 u16 f32 raw32]]` |
 | 965 | GG_GET_BALL_ACK | sub_566040 | `u8 u8` |
 | 966 | GG_RESPAWN_BALL_ACK | sub_565EF0 | `(無直接讀取/轉發)` |
 | 968 | GG_GET_GOAL_ACK | sub_566200 | `u8 u8` |

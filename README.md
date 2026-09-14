@@ -37,13 +37,15 @@ python3 db/import_pats.py        # 資源目錄灌 DB (需先以 server/pmfile.p
 [u16 payload_size][u16 opcode][u16 w2][u16 w3=orig_size][payload ≤9592B]
 ```
 - 傳送 `sub_555090` → `sub_593280`: w3=原始大小 → (w0≥門檻時) 自製 LZ
-  壓縮 (`sub_591600`, w2=壓前大小) → **一律** AES-128-ECB 加密
-  (`sub_4042A0`, 補齊 16, w2=加密前大小) → `WSASend(this+24, size+8)`
+  壓縮 (`sub_591600`, **w3** 保留壓前大小) → **一律** AES-128-CFB-128
+  加密（IV=0；`sub_4042A0`，補齊 16，**w2**=加密前大小） →
+  `WSASend(this+24, size+8)`
 - 接收 `sub_5930C0`: AES 解密 (驗 16 對齊 + `w0==align16(w2)`) →
   (w3≥門檻且 w0<w3 時) LZ 解壓 (`sub_591900`, 結果須==w3), 壞包整緩衝丟棄
 - ⚠️ popcount checksum + XOR「seal」層 (`sub_5923D0/sub_592420`) 為
   **死碼** (無呼叫者), 二次深挖後已自管線剔除 — 詳見 `docs/PACKETS.md` §1.4
-- 壓縮門檻由 `GL_ACCOUNTCONNSUCC(694)` 的 u16 協商, 預設 0x2580(9600)=永不壓縮
+- 壓縮門檻由 `GL_ACCOUNTCONNSUCC(694)` 的 u16 協商：client **只接受 <0x2580**，
+  預設/規範化值 0x2580(9600)=永不壓縮；server 拒絕更大值以避免 LZ 協商失配
 - AES-128 金鑰**已還原**: EUC-KR 字串「트렁크점령전머지」=
   `C6AEB7B7C5A9C1A1B7C9C0FCB8D3C1F6` (`sub_403430` 字串字面量, 過測試向量)
 - 字串: NUL 結尾 ANSI (CP949), 無長度前綴 (`sub_5926F0` = `lstrlenA`+1);
@@ -118,13 +120,16 @@ route table / 日誌 / `packet_stats` 監控。
 
 - `PaperMan.Protocol` — 純協定層: `Opcode.cs` (670 opcodes, 由
   `tools/gen_opcodes.py` 從 `db/packets.tsv` 產生)、`Packet.cs` (讀寫原語)、
-  `PaperLz.cs` / `PaperAes.cs` / `PacketCodec.cs` (真實 LZ+AES 管線)。
+  `LoginWire.cs` (682/681/693/694) 與 `ChannelBootstrapWire.cs`
+  (142/144/196 + packed calendar) 的具名 wire contract、`PaperLz.cs` /
+  `PaperAes.cs` / `PacketCodec.cs` (真實 LZ+AES 管線)。
 - `PaperMan.Server` — TCP 伺服器: 9600B 框架 (`Session.cs`)、SQLite 存取層
-  (`Db.cs`, 交易式購物/登入/暱稱/背包分頁)、封包 handlers
-  (登入 681/694、大廳、商店、送禮 296/297、戰隊隧道 583/584、
-  GP_CH*C 戰績 18 REQ/ACK 對 + 882 推播、房間 111–194/340–367/712–728、
-  語音 791–796、倉庫 855–863)。AES 原生金鑰已內建。
-- `PaperMan.SelfTest` — 不需遊戲客戶端的 codec round-trip 自測。
+  (`Db.cs`, 交易式購物/登入/暱稱/背包分頁)、login/channel 雙 listener、
+  `ChannelAdmissionRegistry` 的 681→143 單次交接，以及封包 handlers
+  (681/694、143/144、195/196、大廳、商店、送禮 296/297、戰隊隧道
+  583/584、GP_CH*C 戰績 18 REQ/ACK 對 + 882 推播、房間
+  111–194/340–367/712–728、語音 791–796、倉庫 855–863)。AES 原生金鑰已內建。
+- `PaperMan.SelfTest` — 不需遊戲客戶端的 codec + login/channel wire layout 自測。
 - LZ 演算法另以 Python 逐行移植跑過 310 組 round-trip/fuzz 驗證。
 
 本沙箱無法安裝 .NET SDK (所有鏡像被網路封鎖), 原始碼未經編譯 —

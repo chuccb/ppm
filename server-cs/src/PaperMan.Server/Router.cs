@@ -46,6 +46,39 @@ public sealed class Router
     /// <summary>回傳 false = 無 handler (原版 default: return)。</summary>
     public async ValueTask<bool> DispatchAsync(Session session, Packet packet, ServerContext context)
     {
+        // The account and channel listeners intentionally share a codec but
+        // not an authority boundary. A client may only use 682 (and pong 101)
+        // before it transitions to a fresh Channel-role TCP session.
+        if (session.Role is ServerRole.Login
+            && packet.Opcode is not Opcode.GT_PING_REQ and not Opcode.GL_LOGIN_REQ)
+        {
+            Console.WriteLine($"[s{session.Id}] !! rejected {packet.Opcode} on Login listener");
+            return true;
+        }
+
+        if (session.Role is ServerRole.Channel && packet.Opcode is Opcode.GL_LOGIN_REQ)
+        {
+            Console.WriteLine($"[s{session.Id}] !! rejected GL_LOGIN_REQ on Channel listener");
+            return true;
+        }
+
+        // The fresh channel socket carries no account state until its one 143
+        // claim succeeds. The native CLobbyChannel wrapper nevertheless sends
+        // 195 immediately after *every* delivered 144, including a rejected
+        // 143. Permit only that non-authorizing request so ChannelHandlers can
+        // return an explicit non-success 196; do not let the socket reach any
+        // lobby, economy, social, or room handler merely because it connected
+        // to the public channel port.
+        if (session.Role is ServerRole.Channel
+            && !session.Authenticated
+            && packet.Opcode is not Opcode.GT_PING_REQ
+            and not Opcode.PM_UDPSTART_REQ
+            and not Opcode.GC_ENTERCHANNEL_REQ)
+        {
+            Console.WriteLine($"[s{session.Id}] !! rejected {packet.Opcode} before channel handoff");
+            return true;
+        }
+
         if (!_table.TryGetValue(packet.OpcodeRaw, out var handler))
         {
             Console.WriteLine($"[s{session.Id}] ?? UNMAPPED OPCODE: {packet.Opcode} ({packet.OpcodeRaw} / 0x{packet.OpcodeRaw:X4})");

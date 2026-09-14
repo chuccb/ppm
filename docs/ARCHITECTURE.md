@@ -7,9 +7,10 @@
 
 ```
 【登入伺服器 TCP :40200 (握手=694 GL_ACCOUNTCONNSUCC)】
-connect ──► server 發 694 (門檻 0x2580) ──► client 送 682 (帳密+MAC指紋)
-        ──► server 回 681 (result=1 + 伺服器清單 + ext 等級gate + Tricod)
-        ──► client 進帳號大廳 (state 2)
+connect ──► server 發一次 694 (門檻 0x2580) ──► client 送 682 (帳密+硬體指紋)
+        ──► server 回 681 (result=1 + 伺服器清單 + account/net-café feature ext + Tricod)
+        ──► client 以 681 清單的 host:port 建立獨立頻道 TCP（帳號 TCP 的
+            關閉時機未由此段 parser 單獨證實）
 選頻道: 195 → 196; 進大廳: 250 (無回包) → client 自拉:
   197→198 MyInfo (統計佈局=任務cond對映!) 199→200 背包(28B條目)
   105→106 名單(exp!) 107→108 房間清單 433→434 好友 425→426 信箱
@@ -21,13 +22,15 @@ connect ──► server 發 694 (門檻 0x2580) ──► client 送 682 (帳�
 129 開戰→130廣播(17欄+16×s32) → 各員 183 載入完→184 → 187→188 開打
 
 【頻道伺服器 TCP :40201 (握手=693 GL_TCPCONNSUCC; 681 清單指向此 port)】
-connect → server 發 693 → client 送 143 (nick + n100/ext_count
-  雙 token 回送) → 144 (n108: 0=OK 3=踢出 — token 不符即踢)
-  → [CLobbyChannel 層自動] 195 GC_ENTERCHANNEL(group,channel,replay)
-  → 196 (result 十碼表; 成功=⭐UDP host/port 正主 + ch_type
+connect → server 發 693 → client 送 143 (String[24] identity + n100/ext_count
+  handoff claims) → 144 (1/2=success；3=version mismatch、4=already connected、
+  5=unauthorized；server 需把 claim 綁定成功 681) → [CLobbyChannel 層會送]
+  195 GC_ENTERCHANNEL(group,channel,replay) → 196（**只有 result=1** 才有
+  ⭐UDP host/port + ch_type tail；第三 byte=active channel index；
      [3=AI→sub_875680 關卡塊] ) → state 119:=2 → tick 清 CClientData
   → 場景切換 (9=大廳/8=AI/2=回放) → CLobbyMainRoom 自動送 107
-  → UDP session (op18→141→142 位址再確認)   【卅三/卅四輪全鏈閉環】
+  → UDP session (op18→141→142 位址再確認；142 含 active-channel byte +
+     packed year/month/day/hour/minute calendar)   【bootstrap 再驗證】
 port 佈局: 40200 登入(694) / 40201 頻道(693) / 40202 UDP(未來 relay)
 【戰鬥 (P2P + relay)】
 UDP 打洞 (私有編號 2-34, sub_595E80; 32→33/34 移動同步);
@@ -65,7 +68,7 @@ parts_ability 413 (31欄彈道) / recommend 3,180 / protocol 670
 
 ## 4. 加密四件套 (全部互逆驗證)
 
-1. wire AES-128-ECB (key=트렁크점령전머지, 黃金向量三實作互證)
+1. wire AES-128-CFB-128 (IV=0; key=트렁크점령전머지, 黃金向量三實作互證)
 2. wire LZSS (dist≤1023, len 3-66, 門檻 694 協商)
 3. pmFile per-byte 滾動 (keystream FA5387AD/0F3A94AA/48945DCA/1A68DCCF)
 4. data.pat 容器 (pmFile→ROL混淆→zlib 1.2.3→CRC自帶表)

@@ -56,7 +56,10 @@ offset 8   ...  payload (小端, 緊湊, 無對齊)
 |------|------|------|
 | sub_592920,sub_5928E0,sub_592960 (寫) / sub_592900,sub_592940,sub_592980 (讀) | u8 (1B) | 1 |
 | sub_5929A0,sub_5929E0 (寫) / sub_592A00,sub_5929C0 (讀) | u16/s16 | 2 |
-| sub_592A20,sub_592A60,sub_592B20 (寫) / sub_592A40,sub_592AC0,sub_592A80 (讀) | s32/u32/float | 4 |
+| sub_592A20 / sub_592A40 | s32 | 4 |
+| sub_592A60 / sub_592A80 | u32 | 4 |
+| sub_592B20 / sub_592B40 | IEEE-754 f32 | 4 |
+| sub_592AC0 | raw4; semantics come from its caller (142 calendar / 144 request context / 196 client flags are raw4 uses) | 4 |
 | sub_592AE0 / sub_592B00 | u64 | 8 |
 | sub_5926F0 / sub_592730 | ANSI 字串 (lstrlenA+1, 含 NUL) | 變長 |
 | sub_592770 / sub_5927B0 | UTF-16 字串 (2*len+2) | 變長 |
@@ -85,7 +88,8 @@ offset 8   ...  payload (小端, 緊湊, 無對齊)
      ⚠ 第二輪筆誤更正: 壓縮層寫的是 word3, 不是 word2
 3. 一律 AES 加密: sub_592F60 → sub_592FB0
      n16 = 16-byte 對齊上取 (空 payload 也補一個 block); n16 ≥ 0x2578 → 失敗
-     sub_4042A0(key_schedule, buf, n16, n2_4)   n2_4=1 CBC-加密 / 2 CBC-XOR先 / 其他 ECB
+     sub_4042A0(key_schedule, buf, n16, n2_4)   n2_4=1 CBC / 2 128-bit CFB / 0 ECB；
+     封包路徑固定傳入 n2_4=2（CFB-128, IV=0）
      word2 := 加密前 word0 (**(WORD**)(this+16)), word0 := n16, flag|=4
      ⚠ word2 由且僅由 AES 層寫入
 4. WSASend(this+24, word0 + 8); 加密失敗 → 客戶端 ExitProcess(0)!
@@ -149,8 +153,12 @@ offset 8   ...  payload (小端, 緊湊, 無對齊)
 
 **壓縮門檻協商 + 登入觸發 (694 的雙重功用, 十一輪定案)**:
 全域 `n0x2580` 初始 0x2580(9600, 即「從不壓縮」)。
-`GL_ACCOUNTCONNSUCC(694)` 攜帶一個 u16, 若 <0x2580 則更新門檻
-(0x43E651 的 `n694==694` 分支) — **由伺服器決定是否啟用壓縮**。
+`GL_ACCOUNTCONNSUCC(694)` 攜帶一個 u16，**只有嚴格小於** `0x2580`
+才覆寫門檻 (0x43E651 的 `n694==694` 分支)；`0x2580` 或更大值都被
+client 忽略並保留 9600。故 server 的 694 值與 `PacketCodec` 值必須是同
+一個 `0..0x2580` 規範化門檻；若讓 server 使用 `>0x2580`，client 在
+9600..server-threshold 範圍送入的 LZ frame 便不會被 server 解壓。
+實作對 `0` 規範為 `0x2580`，拒絕 `>0x2580`。
 ⚠ 更關鍵的第二功用: 讀完門檻後緊接呼叫 `sub_43DF00` = **682 登入
 REQ 的 builder** (帳密欄位先驗證 sub_43DD60: 只允許 [0-9A-Za-z@],
 非法則顯示 0xE1 訊息不送包)。所以 **694 是登入流程的觸發器**:
@@ -160,8 +168,10 @@ REQ 的 builder** (帳密欄位先驗證 sub_43DD60: 只允許 [0-9A-Za-z@],
 
 **GL_LOGIN_ACK(681) 完整結構** (0x43E651 同函數 `n694==681` 分支):
 ```
-s32  result           1=成功, 2=帳密錯(0x42), 其他≠0=一般失敗(0x23D);
-                      0xC8..0xD6 逐碼定案 (十一輪, 字串表 id):
+raw4 result           native 以 raw 4B 讀入，但分支只檢查 low byte；
+                      low byte 1=成功、0=一般失敗、2=帳密錯(0x42)。
+                      成功/失敗封包均應完整寫一個 s32 word；0xC8..0xD6
+                      是低 byte 的逐碼 failure UI：
                       0xC8=200 帳號封鎖彈窗(0x70/17)
                       0xC9=201 / 0xCA=202 維護中(0x23E)
                       0xCB=203 / 0xD2=210 重複登入(0xA4)
@@ -174,26 +184,62 @@ s32  result           1=成功, 2=帳密錯(0x42), 其他≠0=一般失敗(0x23D
                       0xD6=214 GM 帳號 IP 不允許 (硬編碼英文訊息)
 若 result==1:
   s32  user_no        (dword_EE8970)
-  s32  n100           (伺服器等級參數, ==100 時檢查特殊 UI)
-  s32  ext_count      >0 時: s32 a, s32 b, u8 c → sub_A1C870(頻道保留資訊)
+  s32  n100           原樣保存，143 會回送；100/101 也會開啟 client 的
+                       CHARGE UI。後端業務名稱未能由 native code 確認，
+                       應視為 opaque billing/charge UI mode，不是「玩家等級」
+                       或 route token。
+  s32  ext_count      0 = 無帳號/網咖 feature extension；>0 時 client **只讀
+                       一組** `s32 first, s32 second, u8 feature_flag` 再交給
+                       sub_A1C870。count 存在 dword_231800C，非零會影響多個
+                       *_NETCAFE UI gate，故私服安全子集只能送 0 或 1。
   s16  server_count
   repeat server_count:                 ← 伺服器清單
     s16  server_id
-    str  name  (ANSI)
-    str  host  (v124, 16B buffer)
-    s16  port  (⚠ 填頻道伺服器 port! sub_58AD90 以 offset 118 的 port 連線)
-    u8   flag
-    s16  group
-    repeat 3:                          ← 每台 3 個頻道分組
+    str  name  (ANSI; native char[50]，內容最多 49 bytes)
+    str  host  (v124 char[16]，內容最多 15 bytes)
+    s16  port  (⚠ 讀取函式是 sub_5929C0；其 16-bit bit pattern 隨後作
+                Winsock u_short port 使用，故 40201 等 >32767 port 合法)
+    u8   flag                          (意義尚未確定)
+    s16  group                         (意義尚未確定)
+    repeat 3:                          ← 每台固定 3 個頻道分組
       s16  ch_count
-      若 ch_count > 0 (⚠ 即使 >1 也只讀一個條目 — 四輪驗證確認):
+      若 ch_count > 0 (⚠ 即使 >1 client 也只讀一個條目):
         u8   ch_type
-        str  ch_name
-        s16  ch_port
-        u8   ch_flag
+        str  ch_name                   (char[50]，內容最多 49 bytes)
+        s16  ch_port                   (同樣是 u_short bit pattern)
+        u8   ch_flag                   (意義尚未確定)
         若 ch_type==3: u8 extra
-  u32  x2 (v142,v137 → 帳號計費/會員資訊)
+  s32  billing_first, billing_second   (v142,v137 → Tricod account/billing client;
+                                        名稱未知，非 u32)
 ```
+
+**2026-09 login cross-check / server guardrails.** `server-cs` now puts this
+wire contract in `PaperMan.Protocol/LoginWire.cs`, including a self-test that
+mimics the native read order. `GL_LOGIN_REQ(682)` is structurally exact:
+`str account, str password_or_token, u64 packed_data_revision, u8 fingerprint_source,
+raw[24]`; no optional/trailing bytes are accepted. The client builder emits a
+low fixed dword of `0x0000000E` and high dword
+`dataRevision ^ 0xB1A9D7C7`; it is decoded only when that guard matches. The
+revision comes from `datarevision.txt`; raw[24] is the separate
+security/device fingerprint material.
+
+The native client makes a **new** channel TCP connection after 681. Its 143
+identity comes from `String[24]` and is therefore limited to 23 ANSI bytes;
+its `n100` path passes through a signed-char local before its s32 write. The
+server consequently validates a lossless signed-byte billing/charge UI mode
+and grants a short-lived, source-IP-bound, one-use account→channel admission. Crucially, it
+does **not** use the identity as an account/nickname key: the available C
+export proves the `String[24]` size and reuse but not its authoritative writer.
+If two live logins from one IP have identical native echo values, the server
+rejects the 143 as ambiguous rather than guessing an identity mapping. This is
+the safest behavior available before a writer trace or observed packet settles
+the identity semantics; 143 itself is not a cryptographic credential.
+
+The final two billing words still have no backend semantic recovery. For 144,
+the source plus CP932 `Extracted/ui/lang/msgtableres.lang` now establishes
+several previously opaque roles: daily PG notice, rank warning, restriction
+thresholds, and its optional `sNetCafeInfo` shape. The remaining raw fields
+stay explicitly wire-oriented, not guessed as account or endpoint identities.
 
 ---
 
@@ -375,19 +421,33 @@ sub_54DD70), 1..7 = 錯誤碼 (重名/GP 不足/等級不夠...)。
 
 ### 3.1 GL_LOGIN_REQ (682) — 客戶端 builder (30873 行附近)
 ```
-string  account          (sub_401B50 回傳, ANSI)
-string  account2/token   (同上再寫一次)
-u64     hw 混淆值        (見下)
-u8      n2               (十八輪定案: 2=無法取得, 否則 = sub_9A86A0
-                          「是否取得 MAC」 — GetAdaptersInfo 實作)
-byte[24] 機器指紋         (sub_9A8790: 機器識別字串 ≤23B+NUL;
-                          sub_9A7B90 失敗時全零 — 這就是常見的
-                          全零指紋塊。伺服器可存字串做多開檢測)
+string  account              (sub_401B50 回傳, ANSI)
+string  password_or_token    (同上第二次轉換；wire 本身沒有獨立長度欄)
+u64     packed_data_revision (見下；不是 hardware key)
+u8      fingerprint_source   2=storage serial, 1=fallback first adapter MAC,
+                              0=兩者皆不可得
+byte[24] fingerprint          source=2: hard-drive serial bytes，超過 23 bytes
+                              則第 23 byte 改 `~`；source=1: 前 6 bytes 為
+                              GetAdaptersInfo 第一個 adapter MAC，餘位為零；
+                              source=0: 全零
 ```
-hw 混淆 (四輪交叉驗證精確化): `v5 = (u64)hw32 << 32` (hw32 來自 this+396),
-`wire = sub_592AE0(pkt, (v5|0xAA)^0xA4, HIDWORD(v5)^0xB1A9D7C7)`
-→ **lo32(wire) = 0x0E 恆定** (0xAA^0xA4), **hi32(wire) = hw32 ^ 0xB1A9D7C7**。
-伺服器還原: `hw32 = hi32(wire) ^ 0xB1A9D7C7`, 並可用 lo32==0x0E 驗完整性。
+**2026-09 native primitive re-check.** `sub_43CBA0`/`sub_43CCF0` loads
+`datarevision.txt` into `this+396`; `sub_43DF00` writes
+`sub_592AE0(pkt, (revision<<32 | 0xAA)^0xA4,
+revision^0xB1A9D7C7)`. Since `sub_592AE0` copies exactly eight contiguous
+little-endian bytes from its two stack words, **lo32(wire)=0x0000000E** and
+**hi32(wire)=revision^0xB1A9D7C7**. The server restores
+`revision=hi32^0xB1A9D7C7` and validates the low-word guard.
+
+Fingerprint source comes directly from the builder: `sub_9A8790` first tries
+its storage-identification list and copies at most 23 bytes into the zeroed
+24-byte block; only when it fails does `sub_9A86A0` use `GetAdaptersInfo` and
+copy a six-byte MAC. Thus source=2 does **not** mean failure, and the packed
+u64 does **not** identify a machine. Server stores the exact raw24, its source
+code, and content revision separately. It additionally rejects impossible
+source/raw24 combinations (source 0 nonzero bytes, source 1 nonzero bytes after
+its six-byte MAC, or source 2 without the required final NUL); it does not
+print fingerprint bytes or the password/token in logs.
 
 ### 3.2 GL_MYINFO_ACK (198) — handler sub_570550 → CClientData 反序列化
 ```
@@ -895,6 +955,73 @@ ACK 13 欄 = server 附 drop_id+item 詳情); 474-483 射擊館 — 476 END
 334/336/338 SEEDKEY/UNIQUEKEY/DETECTCRACK = 反作弊挑戰 (安全模組直接
 組包, 私服可忽略)。
 
+### 3.15d3a OCC 與地面武器 — dispatcher/解析器交叉驗證 (五十六輪)
+
+本節只記錄已由 **REQ builder → `sub_58B010` case → ACK parser** 三處交叉
+確認的資料；未知值不以 `0` 佯裝已知。
+
+#### OCC 902–908
+
+三個 C2S builder 完全同構：`sub_564CF0` (902 start)、`sub_565120`
+(904 success)、`sub_565470` (906 fail) 都寫：
+
+```
+u8 point_id, u8 claimed_slot, s32 claimed_user_id
+```
+
+`point_id` 是 controller field + 1；ACK parser 對 `point_id - 1` 設下
+`< 3` 防護（`sub_771490`、`sub_7713C0`），故可接受範圍是 **1..3**。
+`claimed_user_id` 的 builder 來源是 `dword_EE8CB4`，即本機登入玩家 uid；
+`claimed_slot` 是本機戰場 slot（bot 分支為 254）。伺服器因此必須以 session
+的 room membership、slot 與 uid 驗證三者，而非把 client 自報身份中繼。
+
+| C2S → S2C | 已確認 ACK layout | client 行為 |
+|---|---|---|
+| 902 → 903 | `u8 action, u8 point, u8 actor_slot, u8 capture_participant_count, s32 actor_uid` | `action==0` 時 `sub_564E30` → `sub_771490(point-1, actor_slot, capture_participant_count, actor_uid)` |
+| 904 → 905 | `u8 action, u8 point, u8 slot_a, u8 slot_b` | 原版 Occupy `action==0` → `sub_771550(point-1, slot_a, slot_b)`；Renewal client 只讀前二欄，因此四欄 payload 對兩者皆安全 |
+| 906 → 907 | `u8 action, u8 point, u8 actor_slot, u8 capture_participant_count, s32 actor_uid` | `action==0` → `sub_771670(point-1, actor_slot, capture_participant_count)` |
+| 908 | `(空)` | `sub_565850` 純觸發 `sub_771770`，尚未由可重現條件證明何時可發 |
+
+`RoomBattleState` 是每房、受 `System.Threading.Lock` 保護的短生命週期狀態：
+start 只能認領 idle point、success/fail 只能由同一 `(slot, uid)` 轉換；`GR_START`
+與 `GR_END` 都清空它。903/907 的 `controller_value` 寫入 controller `+24`；
+`sub_768210` 只接受 `1..2` 的活動值、`sub_76A4B0` 對大於 1 加速計時，故存為
+`CaptureParticipantCount`。目前尚無位置聚合器，start actor 是唯一可驗證的參與者，
+所以由狀態導出 `1`，而非以 `0` 當 padding。905 的兩個 slot 都從已驗證的
+start actor 取得，絕不信任 REQ 的自報欄位。玩家離房時會取消該玩家尚在
+capturing 的 claim（已完成的據點留至本局結束），防止斷線 slot 永久鎖點。
+
+#### 地面武器 959–963
+
+dispatcher mapping 已定案：959 → `sub_5666D0` (create)、960 →
+`sub_566B30` (destroy)、961 → `sub_566BF0` (initial/list)、963 →
+`sub_5672E0` (get-and-drop ACK)。完整 wire 讀序：
+
+```
+959 create: u16 drop_id, u8 actor_slot, s32 actor_data, u16 weapon,
+            s16 x, s16 y, s16 z, u16 meta_a, u16 meta_b, f32 value, raw[32]
+960 destroy: u8 count, count×u16 drop_id       # id 0 提早停止
+961 list:    u8 count, count×(959 的單一條目) # id 0 提早停止
+962 request: s16 ground_drop_id, s16 action_offset, u8 quick_slot,
+             s16 data_a, s16 data_b, f32 value
+963 ACK:     u8 result;
+             result==0 才讀 u8 actor_slot, s32 actor_data, u16 drop_id,
+             u8 quick_slot, u16 weapon, s16 x, s16 y, s16 z;
+             weapon!=0 才追加 u16 meta_a, u16 meta_b, u16 meta_c,
+             f32 value, raw[32]
+```
+
+`sub_566F50` 證實 962 的精確寫入序；`sub_5672E0` 只以首 byte 判斷
+`result == 0` 才讀後續，任何非零均是拒絕路徑。現階段 server 收到已驗證的
+962 會只回請求 session 的 `result=1`：959/961 都是 S2C，專案尚沒有可從地圖
+資料或原服封包驗證的掉落物 seed，因此不得偽造一個成功 963（會使 client 刪除
+指定 drop id 並按未證實的座標／32B weapon state 建物件）。`result=1` 是此
+boolean 分支的真值，不是假定的官方細分 error code。
+
+下一步要讓 962 成功：先取得可重現的 959/961 capture 或可驗證的地圖掉落物
+定義，再在 `RoomBattleState` 加入 `drop_id → 完整 959 state` 表，將「取舊物、
+生成替換物、960 destroy、963 ACK」置於同一把 room lock；不可直接 relay。
+
 ### 3.15d2 剩餘家族速覽 (廿二輪終掃)
 ```
 984 GL_MATCHINGROOM_MAKE_ACK  (sub_5865A0): u8 result — 配對房建立
@@ -919,28 +1046,28 @@ GG 戰鬥事件中繼 (server 原樣轉發即可) 與 MASTER_* GM 工具組。
 
 ### 3.15d5 GC_ENTERCHANNEL 195/196 — 頻道選擇完整協定 (卅三輪)
 ```
-195 REQ (sub_56FF40; 由 CLobbyChannel 於 144 成功後自動送):
+195 REQ (sub_56FF40; CLobbyChannel 的 144 wrapper 每次收到 144 都會送):
     u8 group    (頻道群組 = 681 清單 3 組之序, CLobbyChannel+129)
     u8 channel  (組內頻道編號, +131)
     u8 replay   (回放模組啟用 flag — sub_7338D0/sub_735DE0 檢查)
 
 196 ACK (CLobbyChannel::sub_4179D0 case 196 — 不在 dispatcher!
          經 vtable 場景層分發):
-    u8  result — 卅四輪全表 (sub_4177B0 十碼):
-        1=成功 (417D00()[0]:=v17 頻道號回顯, state:=2);
-        0=頻道滿(0xDA) 2=維護(0x148) 3=版本不符(0x328)
-        6=(0x3A6) 8=(0x3A7) 4/5/7/9=一般錯誤(0x1A5)
-    s32 v15      (→ sub_417D00()[1] 頻道 id)
-    u8  v17      (與 result 一起進 sub_4177B0 錯誤表)
-    result==1 續讀:
+    u8  result — sub_4177B0 表：
+        1=成功 (417D00()[0]:=v17 active channel index, state:=2);
+        0=頻道滿(0xDA), 2=階級限制(0x148), 3=必須有 clan(0x328),
+        6=(0x3A6), 8=(0x3A7), 4/5/7/9=一般錯誤(0x1A5)
+    s32 channel_id (→ sub_417D00()[1])
+    u8  channel_index (result==1 時由 sub_4177B0 寫入 active channel)
+    **僅 result==1 續讀**:
       str  udp_host      ⭐ UDP 打洞伺服器位址!
-      s32  udp_port      (sub_58ED30 存 + sub_596E60 直填 sockaddr)
-      u8   → 1D0CFE4
-      u8   n2 (頻道類型; ==3 → 續讀 AI multi 大塊 sub_875680:
+      s32  udp_port      (sub_58ED30 存 + sub_596E60 取 low u16 填 sockaddr)
+      u8   endpoint_opaque → 1D0CFE4
+      u8   channel_type (==3 → 續讀 AI multi 大塊 sub_875680:
               s32×2, str, f32×4, u8×3, s32×2, u8×6, s32×2... —
               AI 協力頻道的關卡/波次參數!)
-      f32  v11 (bit0 → byte_1D0D21B 旗標)
-      u8   n5 → sub_417D00()[8] (預設 5)
+      raw4 client_flags (sub_592AC0；bit0 → byte_1D0D21B，⚠ 非 f32)
+      u8   client_default → sub_417D00()[8] (native read target 預設 5)
 ```
 **196 成功後的閉環 (卅四輪)**: state 119:=2 → CLobbyChannel tick
 (sub_415F90) 清 CClientData + 場景切換 sub_405EB0(9=大廳/8=AI 頻道
@@ -1115,7 +1242,8 @@ code 6/7 成功態留待後續, 不硬編未確認欄位)。
     PM_UDPSTART_REQ builder**! **頻道伺服器**握手鏈 (卅一輪正名 —
     使用者釐清 + PM 家族=頻道管理語意):
     client 連上頻道 TCP → server 發 693 → client 顯示 0xFF 訊息並
-    送 143 (nick + n100 + ext_count 回送) → server 回 144。
+    送 143 (`String[24]` identity + n100 + ext_count 回送；identity 的帳號/
+    nickname 語意尚未由 writer 證實) → server 回 144。
     完整雙握手: **登入伺服器 = 694 GL_ACCOUNTCONNSUCC → 682 → 681**;
     **頻道伺服器 = 693 GL_TCPCONNSUCC → 143 → 144**。
     681 的伺服器清單 (host+port+3頻道組) 就是頻道伺服器的位址來源;
@@ -1123,40 +1251,78 @@ code 6/7 成功態留待後續, 不硬編未確認欄位)。
     即連線 → 693 觸發。
 ```
 
-### 3.15d 連線生命週期 103/141-144 (九輪讀畢)
+### 3.15d 連線生命週期 103/141-144（bootstrap 再驗證）
 ```
 103 GE_LOGOUT_REQ (sub_58D660): 無 payload — client 登出通知
-141 PM_CONNECT_REQ (sub_556530): 無 payload — 進房 TCP 握手
-142 PM_CONNECT_ACK (sub_5565D0): str host, s32 port, u8→1D0CFE4?,
-    f32→word_1D0D1F8 — host/port 經 sub_596E60 直填 UDP sockaddr。
-    141 REQ 的觸發 = **UDP op 18** (sub_596300, n0x3E8_1 一次性
-    latch) — 屬 UDP session 建立後的位址再確認/重連路徑。
-    **頻道進入正鏈 (卅三輪定案, 取代卅二輪誤讀)**:
-    connect → 693 → 143 (token) → 144 (n108=0, 雙層處理) →
-    [CLobbyChannel 層] 195 GC_ENTERCHANNEL(group,channel,replay) →
-    196 (result==1: **UDP host/port 在這裡!** sub_596E60) →
-    UDP session 開始 (2→4→5/6 打洞) → UDP op18 → 141 → 142 (再確認)
-143 PM_UDPSTART_REQ (sub_555C60; 卅三輪全鏈定案):
-    str nick, s32 n100 (681 回送), s8 1, s32 ext_count (681 回送)
-    — **唯一觸發點 = 693 handler sub_57CAE0** (兩個 caller: 自身
-    wrapper + 693)。雙 token 可作 session 驗證 (十三輪)
-144 PM_UDPSTART_ACK — **雙層處理** (逐行反編譯驗證 sub_555D50 / sub_4179D0):
-    dispatcher 層 sub_555D50 讀:
-      u8 n108: 狀態碼 (⭐ 1 = 成功 mode 1, 2 = 成功 mode 2; 0 = 失敗彈窗 code 38;
-               3 = 踢出 code 52, 4 = code 53, 5 = code 54, 101..108 = code 55..62)
-      u8 flag65: 存入 byte_132432D
-      s32 session_id: 存入 dword_1D0D23C
-      str(40) channel_name: 頻道名
-      s32 v72, s32 v68, s32 v70: 參數
-      f32 v75: 參數
-      s32 v69: 存入 dword_F2A684
-      u8 flag66: 存入 byte_EE8CB1 / byte_EE896C
-      [flag66≠0: u8 v73, u8 v63, u8 v64, u8 v67, 8×s32 v62 → sub_A1C800]
-    第二層 CLobbyChannel::sub_4179D0 case 144 (n108==1/2 成功時):
-      **呼叫 sub_56FF40(group@this+129, channel@this+131) = 送出
-      195 GC_ENTERCHANNEL_REQ** — 144 成功的真正下一步!
-    (⚠ 141 由 UDP op18 一次性 latch 觸發 sub_596300, 屬 UDP 建立後的補充回報)
+141 PM_CONNECT_REQ (sub_556530): 無 payload。由 UDP op 18 的一次性 latch
+    觸發，是 UDP session 建立後的 endpoint 再確認，而非 TCP 登入。
+142 PM_CONNECT_ACK (sub_5565D0):
+    str endpoint_host (client fixed buffer char[20]，最多 19 ANSI bytes)
+    s32 endpoint_port (raw 4B；sub_58ED30/sub_596E60 實際只取 low u16)
+    u8  active_channel_index (寫入 `sub_417D00()[0]`)
+    u32 packed_calendar_time (sub_534F20 解為 WORD 年/月/日/時/分：
+        `(year-2000)<<24 | month<<19 | day<<13 | hour<<7 | minute`；wire
+        沒有時區，server 必須明確選擇要編碼的 wall-clock zone)
+
+143 PM_UDPSTART_REQ (sub_555C60; 693 的唯一 bootstrap 觸發):
+    str identity (`String[24]`，此匯出尚不能定名，最多 23 ANSI bytes)
+    s32 n100 (681 回送；native signed-char temporary 擴展為 4B)
+    u8  literal 1
+    s32 ext_count (681 回送)
+    這是可比對 handoff claim，不是密碼學 credential；server 必須把它綁定
+    最近成功的 681 session。`String[24]` 的 writer 尚未定位，不能猜為
+    account/nickname。
+
+144 PM_UDPSTART_ACK (sub_555D50 完整讀取後才分支):
+    u8  result
+    u8  rank_restricted_server_flag (`==1 && rank>10` 顯示 resource 0x11C:
+        「目前的階級不能連線到所選 server」)
+    s32 daily_login_reward_pg (存 dword_1D0D23C；>0 顯示 CP932 table 0xC9:
+        「本日 login confirmed, %d PG awarded」；不是 session id)
+    str channel_name (char[40]，最多 39 ANSI bytes)
+    s32 reserved_after_name_1 (sub_555D50 讀取後未使用)
+    s32 reserved_after_name_2 (同上)
+    s32 channel_restriction_level (result 6/8/9/10 的 %d；8/10 顯示 value-1)
+    f32 channel_restriction_kdr (result 7/8/9/10 的 %.1f)
+    raw4 client_request_context (sub_592AC0 → dword_F2A684；client 隨後
+        原樣帶入多個 request，但 server-domain 意義尚未證實，非 s32)
+    u8  has_net_cafe_info
+    if nonzero: u8×4 + raw4/s32×8，依序交 `sub_A1C800` 初始化
+        `sNetCafeInfo`；完整可發送 shape 已在 C# `NetCafeBootstrapInfo`
+        建模，四個 byte/八個 slot 的業務域仍未命名。
+
+    result 1=正常成功（state 2, normal path），2=alternate success mode；
+    3=版本不符(0xA4), 4=已連線(0xCF), 5=未授權 ID(0x11B),
+    6=中級 channel level 限制(0x31B), 7=中級 channel K/D 限制(0x31C),
+    8=light server 限制(0x32D), 9=beginner server 限制(0x321),
+    10=intermediate server 限制(0x334), 101..108=帳號/認證失敗資源
+    0xB6/0x10B/0x98/0xDB/0x11E/0x3F/0xC8/default。
+
+    第二層 `CLobbyChannel::sub_4179D0` 的 case 144 **不再檢查 result**
+    就呼叫 `sub_56FF40(group@this+129, channel@this+131)` 送出 195；因此
+    server 即使拒絕 143，也應把未認證的後續 195 回成明確的 non-success
+    196，而不可讓它取得任何 authenticated lobby authority。
+
+195 GC_ENTERCHANNEL_REQ (sub_56FF40): `u8 group, u8 channel, u8 replay`。
+196 GC_ENTERCHANNEL_ACK (CLobbyChannel::sub_4179D0，不走主 dispatcher):
+    u8 result, s32 channel_id, u8 channel_index
+    **只有 result==1** 才續讀 `str endpoint_host, s32 endpoint_port,
+    u8 endpoint_opaque, u8 channel_type, raw4 client_flags, u8 client_default`。
+    result 1 會把第三欄寫成 active channel index；0=channel full (0xDA),
+    2=rank restricted (0x148), 3=clan required (0x328), 4/5/7/9=generic
+    error (0x1A5), 6/8 有各自 resource。`client_flags & 1` 是已證實的
+    native flag；`channel_type==3` 還要求 `sub_875680` AI tail，現行 server
+    因尚未實作該 tail 而拒絕 type-3 設定。
 ```
+
+**C# bootstrap guardrails（source-verified）。** `LoginWire.cs` 管 681/682/
+693/694；`ChannelBootstrapWire.cs` 管 142/144/196 的完整可表示形狀與 142
+日期位元編碼。`ServerConfig` 在開 listener 前拒絕 694 的 `>0x2580`，把
+142 的 channel byte 綁定已廣告的唯一 `ChannelIndex`，並以可注入時鐘與
+明確 `ProtocolTimeZone` 建立即時 calendar field。144 不再把 per-connection
+session id 偽裝成 daily PG；可選網咖尾段在完整 4×u8+8×raw4 model 有值時才
+送出。SelfTest 對 142 bit layout、144 optional shape、196 success-tail 及
+694 ceiling 做 source-level byte-order assertions。
 
 ### 3.15b2 房間管理/戰場雜項 (廿二輪掃畢; 卅八輪補 REQ 端+設定簇)
 ```

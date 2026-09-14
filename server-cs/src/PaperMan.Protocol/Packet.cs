@@ -16,7 +16,8 @@
 //     u8     sub_592920/592960 w, sub_592940/592980 r    s8  sub_5928E0/592900
 //     u16    sub_5929A0 w, sub_592A00 r                  s16 sub_5929E0/5929C0
 //     s32    sub_592A20 w, sub_592A40 r                  u32 sub_592A60/592A80
-//     u64    sub_592AE0/592B00, 592B60/592B80 (兩對)     f32 sub_592B20/592B40, 592AC0
+//     u64    sub_592AE0/592B00, 592B60/592B80 (兩對)     f32 sub_592B20/592B40
+//     raw4   sub_592A60/592A80 or 592AC0 (semantic signedness from caller)
 //     16B    sub_592C20 w, sub_592C40 r (GUID/hash 塊)
 //     str    sub_5926F0 w (lstrlenA+1, 含 NUL), sub_592730 r
 //     wstr   sub_592770 w (lstrlenW*2+2), sub_5927B0 r
@@ -269,7 +270,7 @@ public sealed class Packet(Opcode opcode)
     public ulong ReadU64() =>
         BinaryPrimitives.ReadUInt64LittleEndian(Take(8));
 
-    /// <summary>sub_592AC0。</summary>
+    /// <summary>sub_592B40。</summary>
     public float ReadF32() =>
         BinaryPrimitives.ReadSingleLittleEndian(Take(4));
 
@@ -293,6 +294,32 @@ public sealed class Packet(Opcode opcode)
         var str = Ansi.GetString(_buf, ReadPos, end - ReadPos);
         ReadPos = end + 1;
         return str;
+    }
+
+    /// <summary>
+    /// 嚴格讀取一個 NUL 結尾 ANSI 字串。用於原生 reader 寫入固定長度
+    /// stack buffer 的協定欄位；缺 NUL 或內容超過 buffer 時立即拒絕，
+    /// 不讓下一個欄位在錯位下繼續被解析。
+    /// </summary>
+    public string ReadNulTerminatedAnsiString(int maxContentBytes)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(maxContentBytes);
+        if (Remaining <= 0)
+        {
+            throw new EndOfStreamException($"missing NUL-terminated string at {ReadPos}/{Length} (op={Opcode})");
+        }
+
+        int scanLength = Math.Min(Remaining, checked(maxContentBytes + 1));
+        int end = Array.IndexOf(_buf, (byte)0, ReadPos, scanLength);
+        if (end < 0)
+        {
+            throw new InvalidDataException(
+                $"unterminated ANSI string exceeds {maxContentBytes} byte(s) at {ReadPos}/{Length} (op={Opcode})");
+        }
+
+        var value = Ansi.GetString(_buf, ReadPos, end - ReadPos);
+        ReadPos = end + 1;
+        return value;
     }
 
     /// <summary>sub_5927B0: UTF-16LE 讀到雙 NUL。</summary>

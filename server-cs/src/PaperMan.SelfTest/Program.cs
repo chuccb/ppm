@@ -4,11 +4,14 @@
 //   2) PaperLz 壓縮/解壓 round-trip (高重複、隨機、RLE、文字)
 //   3) PacketCodec 明文/AES/壓縮 管線 round-trip
 //   4) header 欄位語意 (w0/w2/w3) — w2 僅 AES 層寫, w3 = 原始大小
+//   5) 681/682/693/694 and 141/142/143/144/195/196 bootstrap wire contracts
+//   6) 681→143 source-IP / one-use admission rules
 // 用法: dotnet run --project src/PaperMan.SelfTest
 // =============================================================================
 using System.Buffers.Binary;
 using System.Security.Cryptography;
 using PaperMan.Protocol;
+using PaperMan.Server;
 
 int pass = 0, fail = 0;
 
@@ -56,6 +59,353 @@ void Check(string name, bool ok)
 
     var rawStrPkt = Packet.FromPayload(Opcode.GL_LOGIN_REQ, "UserNoNul"u8);
     Check("non-nul terminated ReadStr returns text safely", rawStrPkt.ReadStr() == "UserNoNul");
+}
+
+// ---- 1b. Login / channel bootstrap wire contract ---------------------------
+{
+    const uint revision = 0x1234ABCD;
+    ulong obfuscatedDataRevision = ((ulong)(revision ^ 0xB1A9D7C7u) << 32) | 0x0000000Eu;
+    var loginRequestPacket = new Packet(Opcode.GL_LOGIN_REQ)
+        .WriteStr("Alpha9@")
+        .WriteStr("not-logged")
+        .WriteU64(obfuscatedDataRevision)
+        .WriteU8(2)
+        .WriteRaw(new byte[24]);
+    var loginRequest = LoginWire.ReadRequest(Packet.FromPayload(loginRequestPacket.Opcode, loginRequestPacket.Payload));
+    Check("682 exact request fields", loginRequest.AccountName == "Alpha9@"
+        && loginRequest.PasswordOrToken == "not-logged"
+        && loginRequest.FingerprintSource == LoginFingerprintSource.StorageSerial
+        && loginRequest.Fingerprint.Length == 24);
+    Check("682 data revision decode", LoginWire.TryDecodeDataRevision(loginRequest.ObfuscatedDataRevision, out uint decodedDataRevision)
+        && decodedDataRevision == revision);
+    Check("682 revision low-word guard", !LoginWire.TryDecodeDataRevision(obfuscatedDataRevision ^ 1, out _));
+
+    var groups = new LoginChannelEntry?[]
+    {
+        new LoginChannelEntry(0, "Normal", 40201, 0),
+        null,
+        new LoginChannelEntry(3, "AI", 40202, 9, TypeThreeExtension: 0x7E),
+    };
+    var loginAck = LoginWire.CreateAcknowledgement(new LoginAcknowledgement(
+        ResultCode: 1,
+        Success: new LoginAcknowledgementSuccess(
+            UserId: 77,
+            BillingUiMode: 101,
+            FeatureExtension: new LoginFeatureExtension(0x11111111, -7, FeatureFlag: 0xA5),
+            Servers:
+            [
+                new LoginServerEntry(-2, "Private", "127.0.0.1", 40201, 4, -3, groups),
+            ],
+            Billing: new LoginBillingMetadata(unchecked((int)0x89ABCDEF), 0x10203040))));
+
+    // This reader intentionally follows CLobbyLogin::sub_43E500, including
+    // its exactly-three groups and one-record-only group interpretation.
+    var nativeReader = Packet.FromPayload(loginAck.Opcode, loginAck.Payload);
+    bool native681Layout = nativeReader.ReadS32() == 1
+        && nativeReader.ReadS32() == 77
+        && nativeReader.ReadS32() == 101
+        && nativeReader.ReadS32() == 1
+        && nativeReader.ReadS32() == 0x11111111
+        && nativeReader.ReadS32() == -7
+        && nativeReader.ReadU8() == 0xA5
+        && nativeReader.ReadS16() == 1
+        && nativeReader.ReadS16() == -2
+        && nativeReader.ReadNulTerminatedAnsiString(49) == "Private"
+        && nativeReader.ReadNulTerminatedAnsiString(15) == "127.0.0.1"
+        && nativeReader.ReadS16() == unchecked((short)40201)
+        && nativeReader.ReadU8() == 4
+        && nativeReader.ReadS16() == -3;
+
+    // Group 0: one normal channel. Group 1: empty. Group 2: one type-3
+    // channel, whose extra trailing byte is mandatory.
+    native681Layout &= nativeReader.ReadS16() == 1
+        && nativeReader.ReadU8() == 0
+        && nativeReader.ReadNulTerminatedAnsiString(49) == "Normal"
+        && nativeReader.ReadS16() == unchecked((short)40201)
+        && nativeReader.ReadU8() == 0
+        && nativeReader.ReadS16() == 0
+        && nativeReader.ReadS16() == 1
+        && nativeReader.ReadU8() == 3
+        && nativeReader.ReadNulTerminatedAnsiString(49) == "AI"
+        && nativeReader.ReadS16() == unchecked((short)40202)
+        && nativeReader.ReadU8() == 9
+        && nativeReader.ReadU8() == 0x7E
+        && nativeReader.ReadS32() == unchecked((int)0x89ABCDEF)
+        && nativeReader.ReadS32() == 0x10203040
+        && nativeReader.Remaining == 0;
+    Check("681 success exact native reader order", native681Layout);
+
+    var failureAck = LoginWire.CreateAcknowledgement(new LoginAcknowledgement((int)2));
+    var failureReader = Packet.FromPayload(failureAck.Opcode, failureAck.Payload);
+    Check("681 failure is result word only", failureAck.Length == 4
+        && failureReader.ReadS32() == 2
+        && failureReader.Remaining == 0);
+
+    var accountGreeting = LoginWire.CreateAccountConnectionSuccess(0x2580);
+    var accountGreetingReader = Packet.FromPayload(accountGreeting.Opcode, accountGreeting.Payload);
+    Check("694 is one u16 threshold", accountGreeting.Opcode == Opcode.GL_ACCOUNTCONNSUCC
+        && accountGreetingReader.ReadU16() == 0x2580
+        && accountGreetingReader.Remaining == 0);
+    Check("693 is empty", LoginWire.CreateTcpConnectionSuccess().Opcode == Opcode.GL_TCPCONNSUCC
+        && LoginWire.CreateTcpConnectionSuccess().Length == 0);
+
+    // sub_5565D0 decodes the final 142 word as calendar bit fields, not as
+    // opaque configuration. Its channel byte becomes the active channel index.
+    var calendarTime = new PmConnectCalendarTime(2026, 9, 15, 14, 23);
+    var pmConnectAck = ChannelBootstrapWire.CreatePmConnectAcknowledgement(
+        new ChannelEndpoint("198.51.100.42", 40202),
+        channelIndex: 0,
+        calendarTime: calendarTime);
+    var pmConnectReader = Packet.FromPayload(pmConnectAck.Opcode, pmConnectAck.Payload);
+    uint expectedCalendarWord = (26u << 24) | (9u << 19) | (15u << 13) | (14u << 7) | 23u;
+    Check("142 endpoint, active channel, and packed calendar", pmConnectReader.ReadNulTerminatedAnsiString(19) == "198.51.100.42"
+        && pmConnectReader.ReadS32() == 40202
+        && pmConnectReader.ReadU8() == 0
+        && pmConnectReader.ReadU32() == expectedCalendarWord
+        && PmConnectCalendarTime.FromWireValue(expectedCalendarWord) == calendarTime
+        && pmConnectReader.Remaining == 0);
+
+    // sub_555D50 always reads 144's mandatory fields and, when flag66 is set,
+    // exactly four u8 values plus eight raw dwords for sNetCafeInfo.
+    var udpStartAck = ChannelBootstrapWire.CreateUdpStartAcknowledgement(new UdpStartAcknowledgement(
+        UdpStartResult.Success,
+        RankRestrictedServerFlag: 1,
+        DailyLoginRewardPoints: 25,
+        ChannelName: "Ch.1",
+        ReservedValueAfterChannelNameOne: 11,
+        ReservedValueAfterChannelNameTwo: 12,
+        ChannelRestrictionLevel: 13,
+        ChannelRestrictionKdr: 1.5f,
+        ClientRequestContextValue: 0xAABBCCDD,
+        NetCafeInfo: new NetCafeBootstrapInfo(1, 2, 3, 4, [10, 20, 30, 40, 50, 60, 70, 80])));
+    var udpStartReader = Packet.FromPayload(udpStartAck.Opcode, udpStartAck.Payload);
+    bool native144Layout = udpStartReader.ReadU8() == (byte)UdpStartResult.Success
+        && udpStartReader.ReadU8() == 1
+        && udpStartReader.ReadS32() == 25
+        && udpStartReader.ReadNulTerminatedAnsiString(39) == "Ch.1"
+        && udpStartReader.ReadS32() == 11
+        && udpStartReader.ReadS32() == 12
+        && udpStartReader.ReadS32() == 13
+        && Math.Abs(udpStartReader.ReadF32() - 1.5f) < 1e-6
+        && udpStartReader.ReadU32() == 0xAABBCCDD
+        && udpStartReader.ReadU8() == 1
+        && udpStartReader.ReadU8() == 1
+        && udpStartReader.ReadU8() == 2
+        && udpStartReader.ReadU8() == 3
+        && udpStartReader.ReadU8() == 4;
+    for (int slot = 1; slot <= 8; slot++)
+    {
+        native144Layout &= udpStartReader.ReadS32() == slot * 10;
+    }
+    Check("144 complete optional net-café shape", native144Layout && udpStartReader.Remaining == 0);
+
+    // The 196 reader consumes its endpoint tail only when result == 1; its
+    // third prefix byte becomes the selected channel index.
+    var enterChannelAck = ChannelBootstrapWire.CreateEnterChannelAcknowledgement(new EnterChannelAcknowledgement(
+        EnterChannelResult.Success,
+        ChannelId: 77,
+        ChannelIndex: 0,
+        Endpoint: new ChannelEndpoint("198.51.100.42", 40202),
+        EndpointOpaqueByte: 0xA1,
+        ChannelType: 0,
+        ClientFlags: 1,
+        ClientDefaultValue: 5));
+    var enterChannelReader = Packet.FromPayload(enterChannelAck.Opcode, enterChannelAck.Payload);
+    Check("196 successful full native shape", enterChannelReader.ReadU8() == (byte)EnterChannelResult.Success
+        && enterChannelReader.ReadS32() == 77
+        && enterChannelReader.ReadU8() == 0
+        && enterChannelReader.ReadNulTerminatedAnsiString(19) == "198.51.100.42"
+        && enterChannelReader.ReadS32() == 40202
+        && enterChannelReader.ReadU8() == 0xA1
+        && enterChannelReader.ReadU8() == 0
+        && enterChannelReader.ReadU32() == 1
+        && enterChannelReader.ReadU8() == 5
+        && enterChannelReader.Remaining == 0);
+
+    var rejectedEnterChannelAck = ChannelBootstrapWire.CreateEnterChannelAcknowledgement(
+        new EnterChannelAcknowledgement(EnterChannelResult.GenericError4, ChannelId: 77, ChannelIndex: 0));
+    var rejectedEnterChannelReader = Packet.FromPayload(
+        rejectedEnterChannelAck.Opcode,
+        rejectedEnterChannelAck.Payload);
+    Check("196 rejection has prefix and no success tail", rejectedEnterChannelAck.Length == 6
+        && rejectedEnterChannelReader.ReadU8() == (byte)EnterChannelResult.GenericError4
+        && rejectedEnterChannelReader.ReadS32() == 77
+        && rejectedEnterChannelReader.ReadU8() == 0
+        && rejectedEnterChannelReader.Remaining == 0);
+
+    bool rejectedEndpointOn196Failure = false;
+    try
+    {
+        ChannelBootstrapWire.CreateEnterChannelAcknowledgement(new EnterChannelAcknowledgement(
+            EnterChannelResult.GenericError4,
+            ChannelId: 77,
+            ChannelIndex: 0,
+            Endpoint: new ChannelEndpoint("198.51.100.42", 40202)));
+    }
+    catch (ArgumentException)
+    {
+        rejectedEndpointOn196Failure = true;
+    }
+    Check("196 rejects an impossible endpoint tail on failure", rejectedEndpointOn196Failure);
+
+    bool rejectedNullNetCafeSlots = false;
+    bool rejectedWrongSizedNetCafeSlots = false;
+    try
+    {
+        ChannelBootstrapWire.CreateUdpStartAcknowledgement(new UdpStartAcknowledgement(
+            UdpStartResult.Success,
+            0,
+            0,
+            "Ch.1",
+            0,
+            0,
+            0,
+            0,
+            0,
+            new NetCafeBootstrapInfo(0, 0, 0, 0, null!)));
+    }
+    catch (ArgumentNullException)
+    {
+        rejectedNullNetCafeSlots = true;
+    }
+
+    try
+    {
+        ChannelBootstrapWire.CreateUdpStartAcknowledgement(new UdpStartAcknowledgement(
+            UdpStartResult.Success,
+            0,
+            0,
+            "Ch.1",
+            0,
+            0,
+            0,
+            0,
+            0,
+            new NetCafeBootstrapInfo(0, 0, 0, 0, [1, 2, 3])));
+    }
+    catch (ArgumentException)
+    {
+        rejectedWrongSizedNetCafeSlots = true;
+    }
+    Check("144 rejects null net-café slots", rejectedNullNetCafeSlots);
+    Check("144 rejects non-eight net-café slots", rejectedWrongSizedNetCafeSlots);
+
+    bool rejectedInvalidConfiguredNetCafeSlots = false;
+    try
+    {
+        new ServerConfig
+        {
+            UdpStartMetadata = UdpStartAcknowledgementMetadata.Neutral with
+            {
+                NetCafeInfo = new NetCafeBootstrapInfo(0, 0, 0, 0, [1, 2, 3]),
+            },
+        }.Validate();
+    }
+    catch (ArgumentException)
+    {
+        rejectedInvalidConfiguredNetCafeSlots = true;
+    }
+    Check("ServerConfig rejects malformed 144 net-café settings", rejectedInvalidConfiguredNetCafeSlots);
+
+    bool rejectedInvalidCalendarDate = false;
+    bool rejectedInvalidCalendarEncoding = false;
+    try
+    {
+        new PmConnectCalendarTime(2026, 2, 29, 0, 0).ToWireValue();
+    }
+    catch (ArgumentOutOfRangeException)
+    {
+        rejectedInvalidCalendarDate = true;
+    }
+
+    try
+    {
+        PmConnectCalendarTime.FromWireValue(26u << 24);
+    }
+    catch (ArgumentOutOfRangeException)
+    {
+        rejectedInvalidCalendarEncoding = true;
+    }
+    Check("142 rejects an invalid Gregorian date", rejectedInvalidCalendarDate);
+    Check("142 rejects an invalid packed calendar", rejectedInvalidCalendarEncoding);
+
+    var normalizedZeroThresholdGreeting = LoginWire.CreateAccountConnectionSuccess(0);
+    var normalizedZeroThresholdReader = Packet.FromPayload(
+        normalizedZeroThresholdGreeting.Opcode,
+        normalizedZeroThresholdGreeting.Payload);
+    using var zeroThresholdCodec = new PacketCodec(aesKey: null, compressThreshold: 0);
+    Check("694 canonicalizes zero threshold to native ceiling",
+        normalizedZeroThresholdReader.ReadU16() == PacketCodec.NeverCompress
+        && normalizedZeroThresholdReader.Remaining == 0
+        && zeroThresholdCodec.CompressThreshold == PacketCodec.NeverCompress);
+
+    bool rejectedOutOfRangeThreshold = false;
+    try
+    {
+        new ServerConfig { CompressThreshold = PacketCodec.NeverCompress + 1 }.Validate();
+    }
+    catch (ArgumentOutOfRangeException)
+    {
+        rejectedOutOfRangeThreshold = true;
+    }
+    Check("694 rejects client-ignored compression threshold", rejectedOutOfRangeThreshold);
+
+    bool rejectedUnterminatedRequest = false;
+    try
+    {
+        LoginWire.ReadRequest(Packet.FromPayload(Opcode.GL_LOGIN_REQ, "unterminated"u8));
+    }
+    catch (Exception exception) when (exception is InvalidDataException or EndOfStreamException)
+    {
+        rejectedUnterminatedRequest = true;
+    }
+    Check("682 rejects malformed NUL field", rejectedUnterminatedRequest);
+}
+
+// ---- 1c. Login-to-channel admission contract -------------------------------
+{
+    var admissions = new ChannelAdmissionRegistry();
+    var now = new DateTimeOffset(2026, 9, 15, 12, 0, 0, TimeSpan.FromHours(8));
+    admissions.Issue(
+        accountId: 10,
+        userId: 20,
+        loginName: "Alpha9",
+        nickname: "",
+        billingUiMode: 100,
+        featureExtensionCount: 0,
+        remoteIp: "203.0.113.9",
+        lifetime: TimeSpan.FromMinutes(2),
+        now: now);
+
+    Check("143 admission rejects wrong source", !admissions.TryClaim(
+        billingUiMode: 100,
+        featureExtensionCount: 0,
+        remoteIp: "203.0.113.10",
+        now: now,
+        out _));
+    Check("143 admission claims exact native echo once", admissions.TryClaim(
+        billingUiMode: 100,
+        featureExtensionCount: 0,
+        remoteIp: "203.0.113.9",
+        now: now,
+        out var claimedAdmission)
+        && claimedAdmission.AccountId == 10
+        && !admissions.TryClaim(100, 0, "203.0.113.9", now, out _));
+
+    // The String[24] writer is not known, so two otherwise indistinguishable
+    // login handoffs behind one NAT must fail closed instead of guessing an
+    // account/nickname identity alias.
+    admissions.Issue(11, 21, "Bravo", "B", 100, 0, "203.0.113.11", TimeSpan.FromMinutes(2), now);
+    admissions.Issue(12, 22, "Charlie", "C", 100, 0, "203.0.113.11", TimeSpan.FromMinutes(2), now);
+    Check("143 admission rejects ambiguous NAT claims", !admissions.TryClaim(100, 0, "203.0.113.11", now, out _));
+
+    admissions.Issue(13, 23, "Delta", "D", 101, 1, "203.0.113.12", TimeSpan.FromSeconds(1), now);
+    Check("143 admission expires before claim", !admissions.TryClaim(
+        101,
+        1,
+        "203.0.113.12",
+        now.AddSeconds(1),
+        out _));
 }
 
 // ---- 2. PaperLz -------------------------------------------------------------
@@ -407,6 +757,56 @@ foreach (var (_, codec) in codecs)
     // 944/945 Reset Game Room Slot
     var p945 = new Packet(Opcode.GR_RESET_GAMEROOMSLOT_ACK).WriteU8(1);
     Check("945 Reset Slot ACK wire", p945.ReadU8() == 1);
+}
+
+// ---- 10. OCC 與地面武器條件式 payload（五十六輪） --------------------------
+{
+    // 902/904/906 的 builder 同構: u8 point, u8 self slot, s32 self uid.
+    var p902 = new Packet(Opcode.GG_OCC_START_REQ).WriteU8(3).WriteU8(7).WriteS32(12345);
+    Check("902 Occupy start REQ = 6B",
+        p902.Length == 6 && p902.ReadU8() == 3 && p902.ReadU8() == 7 && p902.ReadS32() == 12345);
+
+    // 903/907 action=0 的 parser 都讀完整 8B，沒有舊表格誤列的第六欄。
+    var p903 = new Packet(Opcode.GG_OCC_START_ACK)
+        .WriteU8(0).WriteU8(3).WriteU8(7).WriteU8(1).WriteS32(12345);
+    Check("903 Occupy start ACK = 8B",
+        p903.Length == 8 && p903.ReadU8() == 0 && p903.ReadU8() == 3
+        && p903.ReadU8() == 7 && p903.ReadU8() == 1 && p903.ReadS32() == 12345);
+
+    var p905 = new Packet(Opcode.GG_OCC_SUCC_ACK).WriteU8(0).WriteU8(3).WriteU8(7).WriteU8(7);
+    Check("905 Occupy success ACK = 4B", p905.Length == 4 && p905.ReadU8() == 0 && p905.ReadU8() == 3);
+
+    var p907 = new Packet(Opcode.GG_OCC_FAIL_ACK)
+        .WriteU8(0).WriteU8(3).WriteU8(7).WriteU8(1).WriteS32(12345);
+    Check("907 Occupy fail ACK = 8B",
+        p907.Length == 8 && p907.ReadU8() == 0 && p907.ReadU8() == 3
+        && p907.ReadU8() == 7 && p907.ReadU8() == 1 && p907.ReadS32() == 12345);
+
+    // 962 是固定 13B；963 失敗則只有 result，client 不得讀 success tail。
+    var p962 = new Packet(Opcode.GG_DROPWEAPON_GET_AND_DROP_REQ)
+        .WriteS16(unchecked((short)0xC001)).WriteS16(100).WriteU8(2)
+        .WriteS16(3).WriteS16(4).WriteF32(99.5f);
+    Check("962 get-and-drop REQ = 13B", p962.Length == 13);
+
+    var p963Rejected = new Packet(Opcode.GG_DROPWEAPON_GET_AND_DROP_ACK).WriteBool(true);
+    Check("963 rejection is nonzero 1B result",
+        p963Rejected.Length == 1 && p963Rejected.ReadU8() != 0 && p963Rejected.Remaining == 0);
+
+    // result==0 + weapon!=0: 17B base + 42B metadata/state tail = 59B.
+    byte[] weaponState = [.. Enumerable.Range(0, 32).Select(i => (byte)i)];
+    var p963Success = new Packet(Opcode.GG_DROPWEAPON_GET_AND_DROP_ACK)
+        .WriteU8(0).WriteU8(7).WriteS32(12345).WriteU16(0xC001).WriteU8(2).WriteU16(100)
+        .WriteS16(10).WriteS16(20).WriteS16(30)
+        .WriteU16(3).WriteU16(4).WriteU16(5).WriteF32(99.5f).WriteRaw(weaponState);
+    Check("963 success with weapon state = 59B",
+        p963Success.Length == 59
+        && p963Success.ReadU8() == 0 && p963Success.ReadU8() == 7
+        && p963Success.ReadS32() == 12345 && p963Success.ReadU16() == 0xC001
+        && p963Success.ReadU8() == 2 && p963Success.ReadU16() == 100
+        && p963Success.ReadS16() == 10 && p963Success.ReadS16() == 20 && p963Success.ReadS16() == 30
+        && p963Success.ReadU16() == 3 && p963Success.ReadU16() == 4 && p963Success.ReadU16() == 5
+        && Math.Abs(p963Success.ReadF32() - 99.5f) < 1e-6f
+        && p963Success.ReadRaw(32).SequenceEqual(weaponState) && p963Success.Remaining == 0);
 }
 
 Console.WriteLine($"\n{pass} passed, {fail} failed");

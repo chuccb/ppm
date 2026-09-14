@@ -183,10 +183,39 @@
 >    - 944/945: 房間槽位重置。
 > ④ **自測與 DB 測試**: `Db.GameCenter.cs` 擴充個人紀錄與排行榜查詢; `smoke_test.py` 增測 Step 15-16; 測試全數通過。
 >
+> 五十六輪 (OCC 902–907 狀態機 + 962 安全拒絕):
+> ① 以 builder、`sub_58B010`、parser 三向驗證 902/904/906 的同構 6B
+>    REQ（`point_id, claimed_slot, claimed_user_id`）及 903/905/907 ACK。
+>    新增 `Handlers.BattleObjects.cs` 和每房 `RoomBattleState`：只接受
+>    playing 的 Occupy/OccupyRenewal 房內成員，slot/uid 必須與 session 一致；
+>    start→success/fail 在 room lock 內原子轉換，GR_START/GR_END 皆清除狀態。
+> ② 962 的 request 13B 序列與 963 的條件式 1B/17B/59B ACK 已確認。
+>    959/961 沒有可驗證的 server-side seed 前，handler 只給請求者 `result=1`
+>    （client 已證任何非零均不讀 success tail），禁止虛構掉落物成功包。
+> ③ 更正 LAYOUTS.md：903 實際為 8B 而非誤列的 12B；959/961 補完整 raw32，
+>    960/961 count/0-id early-stop 與 963 optional tail 全記錄。SelfTest 加入
+>    902/903/905/907/962/963（含 963 的 1B/59B 分支）wire round-trip。詳
+>    PACKETS.md §3.15d3a。
+>
 > 下一輪可做:
-> 1. 佔領模式/染布/紙漿搶奪與破壞模式 (730-741, 902-906);
-> 2. 武器丟棄與地面拾取 (962);
-> 3. 戰隊錦標賽進階流程 (756-776)。
+> 1. 取得一組已知正常及一組拒絕的 681→143→144→195→196 實包，定位
+>    `String[24]` 的 writer（仍不能猜為 account/nickname）、681 extension 的兩個
+>    s32、尾端 billing s32×2、144 的兩個 read-but-unused raw4 與 propagated
+>    `dword_F2A684` server-domain meaning。144 的 daily PG、rank flag、level/KD
+>    restrictions、net-café 4×u8+8×raw4 shape，及 142 calendar 已經 source-verified，
+>    不再列為未知。
+> 2. 實作並以實包驗證 UDP relay，才實際提供 196/142 下發的 `UdpHost`/`UdpPort`。
+>    確認 141 的 packed wall-clock 與部署時區預期；也以實包驗證 684
+>    `GL_LOGIN_DUPLICATE` 的方向與 payload（現有 C export 沒有可歸屬的 builder/
+>    reader，不能猜測發送）。
+> 3. 補 type-3 channel 的 `sub_875680` 196 AI tail；在完整 reader/writer與可重現
+>    AI config 前，保持 `ServerConfig` 拒絕 type-3，而不送 truncated success tail。
+> 4. 取得 Pulp’n Roll 733/734 initial-state 和 959/961 ground-weapon 實包，建立
+>    可重現的 per-room object seed，才實作 730–742 Pulp 與 962 成功交換。
+> 5. 精讀並實作戰隊錦標賽進階流程 (756–776)：先對每項 builder/dispatcher/
+>    parser 做欄位對照，再決定使用既有 `clan_tournaments`/entries schema 的範圍。
+> 6. 以 OCC 實包驗證 `CaptureParticipantCount` 是否可由位置聚合增加到 2，以及
+>    908 的可發送條件；目前只有單一已驗證 start actor，不能硬編成 team/slot。
 
 | op | 名稱 | REQ 寫入序列 |
 |---|---|---|
@@ -249,8 +278,4 @@
 | 887 | GX_XIGNCODE_DATA_REQ | `rawN` |
 | 890 | GC_QUERY_CLANRANKING_REQ | `(空)` |
 | 892 | MASTER_RELOAD_CLANRANKING_REQ | `(空)` |
-| 902 | GG_OCC_START_REQ | `u8 u8 s32` |
-| 904 | GG_OCC_SUCC_REQ | `u8 u8 s32` |
-| 906 | GG_OCC_FAIL_REQ | `u8 u8 s32` |
-| 962 | GG_DROPWEAPON_GET_AND_DROP_REQ | `s16 s16 u8 s16 s16 f32` |
 

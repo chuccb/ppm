@@ -5,6 +5,16 @@
 > 完整版=s32+str+wstr 與 120 ACK 同構) 與 585 (尾欄 s32 非 u8)。
 > 型別: u8=592920, s8=5928E0, u16=5929A0, s16=5929E0, s32=592A20/AA0,
 > u32=592A60, u64=592AE0, f32=592B20, str=5926F0, wstr=592770, rawN=592580。
+>
+> **登入轉接欄位限制（2026-09 重新交叉確認）**：682 是嚴格的
+> `str account, str password_or_token, u64 packed_data_revision, u8 fingerprint_source,
+> raw24 fingerprint`，沒有 optional tail。143 的 `str` 源自 native
+> `String[24]`（內容最多 23 ANSI bytes），後三欄依序為 681 回送的 `n100`
+> （經 signed-char 暫存再以 s32 寫出）、常數 `u8 1`、681 `ext_count`。
+> 因此 143 是新 channel TCP connection 對最近 681 的 handoff claim，而不能
+> 當作已驗證登入本身。141 是 UDP op18 觸發的 empty endpoint-confirmation
+> request（`sub_556530`）；195 三個 byte 依序為 681 的 group、group-local
+> channel index、replay-module availability（`sub_56FF40`）。
 
 | op | 名稱 | 出現處 | 寫入序列 (變體) |
 |---|---|---|---|
@@ -25,7 +35,7 @@
 | 135 | GR_CHANGESLOT_REQ | 1處 | `u8 u8` |
 | 139 | GG_EXITGAME_REQ | 2處 | `(空)` |
 | 141 | PM_CONNECT_REQ | 1處 | `(空)` |
-| 143 | PM_UDPSTART_REQ | 1處 | `str s32 s8 s32` |
+| 143 | PM_UDPSTART_REQ | 1處 | `str s32 u8(固定 1) s32` |
 | 165 | Y_TCP_INF_REQ | 17處 | `u8 u8 s32 u16 u16 u16 u16 u16 u16 u16 u8 u8 u8 u8 s16 u8 s16 s16 f32 u16 \|\| u8 u8 u8 u8 u8 s16 f32 f32 f32 f32 s32 s32 u8 u8 u8 u8 s32 u8 \|\| u8 u8 u8 u8 s16 f32 f32 u8 u8 u8 s32 s32 u8 u8 u8 u8 s32` |
 | 167 | GR_CHANGEUSER_REQ | 1處 | `s16` |
 | 169 | GR_RULECHANGE_REQ | 1處 | `u8` |
