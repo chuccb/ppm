@@ -166,9 +166,18 @@ public sealed partial class Db
     }
 
     // ------------------------------------------------------------- loadout
-    /// <summary>sub_524660 武器編組 — equipped(與 sub1..3) 為 u16 類別內索引, 0=空。</summary>
+    /// <summary>
+    /// sub_524660 weapon profile.  Groups 0..2 hold primary/secondary/melee/
+    /// throw offsets; group 3 holds the PRIMARYSLOT switch-weapon offset only.
+    /// All u16 values are category-relative offsets, where zero is empty.
+    /// </summary>
     public sealed record WeaponGroup(
-        byte GroupNo, ushort Equipped, ushort Sub1, ushort Sub2, ushort Sub3, int[] Parts);
+        byte GroupNo,
+        ushort PrimaryOffset,
+        ushort SecondaryOffset,
+        ushort MeleeOffset,
+        ushort ThrowOffset,
+        int[] Parts);
 
     /// <summary>sub_527550 的 9 UI-item 與 sub_527D00 的已選 NewSkill profile 七 puzzle IDs。</summary>
     public sealed record Slots(int[] Skill, int[] NewSkillPuzzleIds);
@@ -186,16 +195,7 @@ public sealed partial class Db
             using var r = cmd.ExecuteReader();
             while (r.Read())
             {
-                var parts = new int[8];
-                for (int i = 0; i < parts.Length; i++)
-                {
-                    parts[i] = r.GetInt32(5 + i);
-                }
-
-                list.Add(new(
-                    (byte)r.GetInt32(0), (ushort)r.GetInt32(1),
-                    (ushort)r.GetInt32(2), (ushort)r.GetInt32(3), (ushort)r.GetInt32(4),
-                    parts));
+                list.Add(ReadWeaponGroup(r));
             }
 
             return list;

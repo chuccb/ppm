@@ -76,7 +76,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 213 | GM_CREATENICK_ACK | sub_572E70 | `u8` |
 | 215 | GM_CREATECHAR_ACK | sub_572F80 | `u8` |
 | 219 | GI_CHANGEDATA_ACK | sub_573230 | `u8` |
-| 221 | GI_CHANGEWP_ACK | sub_5735F0 | `u8` |
+| 221 | GI_CHANGEWP_ACK | sub_5735F0 | `u8 count, count×{u8 group,u16 primary,[3×u16 group!=3],[8×s32 primary!=0]}` |
 | 223 | GP_CHPLAYC_ACK | sub_556730 | `s32` |
 | 225 | GP_CHROUNDC_ACK | sub_556780 | `s32` |
 | 227 | GP_CHDISC_ACK | sub_5567A0 | `s32` |
@@ -169,7 +169,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 452 | GS_NEWGIFT_ACK | sub_57BE30 | `u16 s32 s32 s32 str` |
 | 454 | GS_DELETEGIFT_ACK | sub_57BCF0 | `u8 s32 s32` |
 | 456 | GG_EXERCISERESPON_ACK | sub_55C340 | `u8 u8 s16 s16 s16` |
-| 458 | GI_CHANGEITEMSLOT_ACK | sub_573860 | `(無直接讀取/轉發)` |
+| 458 | GI_CHANGEITEMSLOT_ACK | sub_573860 | `9×s32 UI ids + 3×{u8 rawFlag,s32 itemId,s32 itemStateRaw}` (exact 63B) |
 | 462 | GS_USE_PAPERCODEGIFT_ACK | sub_57CC90 | `(無直接讀取/轉發)` |
 | 465 | GS_USE_PAPERCODEGIFT_IGNORE_DUPLICATED_ITEM_ACK | sub_57CDD0 | `u8` |
 | 467 | GI_CHANGE_SKILLITEMSLOT_ACK | sub_573A70 | `u8 resultRaw, u8 unknown, u8 count, count×{u8 profile, raw32}` |
@@ -287,7 +287,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 908 | GG_OCC_AB_SUCC_NOTIFY | sub_565850 | `(無直接讀取/轉發)` |
 | 910 | GG_OCC_RESPON_ACK | sub_559150 | `u8 u8 s16 s16 s16` |
 | 911 | GL_SCHEDULED_GM_NOTICE_NOTIFY | sub_578AC0 | `str` |
-| 913 | GL_WEAPONPARTS_EQUIP_CHANGE_ACK | sub_95B180 | `u8 u8 f32/s32 f32/s32 f32/s32` |
+| 913 | GL_WEAPONPARTS_EQUIP_CHANGE_ACK | sub_95B180 | `u8 errorRaw`; only zero → `u8 op,s32 weapon,s32 part,[s32 oldPart for op2]` |
 | 914 |  | sub_565A00 | `u8` |
 | 919 | GR_AI_GET_REWARD_ITEM_ACK | sub_761B20 | `u8 u8 s32 u8 s32 u8 u8 s32 u8 s32` |
 | 921 | GR_AI_APPEARED_BOT_NOTIFY | sub_6061A0 | `u16 u16 u16 u16 u16` |

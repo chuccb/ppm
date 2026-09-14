@@ -578,18 +578,20 @@ bool    success                 0 時直接顯示 resource 0x70 / code 17
   s32     x2                  (this+112,116)
   byte[48] extra blob         (this+208)
   u8      slot_current        (this+4)
-  --- sub_524010: 角色槽 (最多 20 個) ---
+  --- sub_524010: character normal appearance records (最多 20 個) ---
   u8      char_count
   repeat char_count (≤20):
     u8    char_type
-    u16   x12  (裝備欄位: 主武/副武/近戰/投擲/頭/臉/上衣/下裝/手/背/特殊/套裝)
-  --- sub_524660: 武器編組 (4 組) ---
+    u16   x12: body, head, face, top, bottom, shoes, outer/set, eye,
+              hair accessory, face accessory, head accessory, special
+              (all category-relative normal-appearance offsets; no weapons)
+  --- sub_524660: player weapon loadout groups (最多 4) ---
   u8      group_count (≤4)
   repeat:
     u8    group_no
-    u16   equipped_flag
-    if group_no != 3: u16 x3 (sub-slot)
-    if equipped_flag: s32 x8 (parts item ids)
+    u16   primary_offset
+    if group_no != 3: u16 secondary_offset, melee_offset, throw_offset
+    if primary_offset != 0: s32 x8 (weapon part IDs)
   --- sub_527550 (sub_522480): 9×s32 — 無前導 count! (五輪修正)
       每個非零 id 需過 sub_535020 目錄驗證, 失敗 → client 錯誤 10
       ⭐ 五十四輪字串完全揭露 (sub_4C4990 / sub_4C4E70 陣列):
@@ -631,14 +633,19 @@ CClientData 的 sub_523A50 (523BF0+524010+524660+524B70(a3=0)) 其實屬於
   byte 恰為 `1..15`。`sub_533FB0` 直接回傳同一 `+532` byte；`sub_526730`
   將角色第一個 equipment offset 重建為此 body item 後使用該 lookup。
 
-**Inference / HIGH**
+**Inference / MEDIUM (server persistence policy)**
 
-- 因此 Server 建立 canonical type `t`（`1..15`）時必須持久化
-  `eq_primary=t`，使 wire 的第一個 `u16` 重建 `19,900,000+t`。type 1 starter
-  的值嚴格為 `1`（Hayate body `19,900,001`）；其餘 11 個外觀 offset 可為 0。
-- 成功驗證登入時，type `1..15` 且 `eq_primary=0` 的既有 character row 可安全
-  修成 `eq_primary=char_type`。此修復還須令 current slot/index 指向有 body 的
-  已序列化記錄；任何非零歷史 body/cosmetic 值不在這個修復範圍內。
+- The five native body-template maps establish the first six ordinary appearance
+  words, not only the body. Therefore a Server-created canonical type `t`
+  (`1..15`) persists the exact `body/head/face/top/bottom/shoes` vector from
+  `RESOURCES.md §5c-1`; type 1 is six strict `1` offsets. The final six
+  normal-appearance words remain zero unless another evidence-backed operation
+  owns them.
+- At successful verified login, a type `1..15` row with an absent or canonical
+  body can have only *missing* words in that six-word template repaired. The
+  repair must also select an emitted record with a nonzero body. It must never
+  replace a nonzero historic body/cosmetic value, grant weapons/UI items, or
+  guess one of the final six appearance words.
 
 **Assumption / bounded**
 
@@ -1762,8 +1769,8 @@ u8+slot 系列)
 | 313 | `GI_CHANGESLOT_ACK` | `sub_573320` | S2C | `u8 slot_no` |
 | 466 | `GI_CHANGE_SKILLITEMSLOT_REQ` | `sub_5738A0` | C2S | `u8 target_profile, u8 previous_update_raw, [u8 previous_profile, 7×s32 puzzle]`; raw 0→2B, nonzero→31B |
 | 467 | `GI_CHANGE_SKILLITEMSLOT_ACK` | `sub_573A70` | S2C | `u8 resultRaw, u8 unknownHeaderRaw, u8 count, count×{u8 profile, raw32}` |
-| 912 | `GL_WEAPONPARTS_EQUIP_CHANGE_REQ`| `sub_9591F0` | C2S | `u8 op_type, s32 weapon_id, s32 part_id, [s32 old_part]` |
-| 913 | `GL_WEAPONPARTS_EQUIP_CHANGE_ACK`| `sub_95B180` | S2C | `u8 err(0), u8 op_type, s32 weapon_id, s32 part_id, [s32 old_part]` |
+| 912 | `GL_WEAPONPARTS_EQUIP_CHANGE_REQ`| `sub_95AEF0` sender / `sub_9591F0` part lookup | C2S | op 0 remove / 1 install: `u8,s32 weapon,s32 part`; op 2 replace: plus `s32 old_part` |
+| 913 | `GL_WEAPONPARTS_EQUIP_CHANGE_ACK`| `sub_95B180` | S2C | `u8 errorRaw`; only `0` continues with the matching 912 body; nonzero error values unresolved |
 | 310 | `GS_BUYCHAR_REQ` | `sub_529680` | C2S | `s32 char_type, 5×s32 items` |
 | 311 | `GS_BUYCHAR_ACK` | `sub_5728A0` | S2C | `u8 status(1), s32 slot, s32 char_type, s32 exp, s32 cash, s32 gp, s32 dura` |
 | 453 | `GS_DELETEGIFT_REQ` | `sub_57BC40` | C2S | `s32 gift_uid, s32 item_id` |
@@ -1999,15 +2006,18 @@ wire[8]  基底 10,700,000  髮飾 (花飾り)            +166
 wire[9]  基底 10,800,000  臉飾 (絆創膏)            +167
 wire[10] 基底 10,900,000  頭飾 (カチューシャ)      +168
 wire[11] 基底 11,000,000  特殊/ヘアパズル          +169
-武器不在此 12 槽 — 武器走 15.3M/15.4M 段 + 武器編組 (sub_524660)。
+武器不在此 12 槽 — primary/secondary/melee/throw weapons use the 12.1M/
+12.2M/12.3M/12.4M families and the separate `sub_524660` loadout groups.
 ```
 (sub_5280F0 寫回時同公式驗證 sub_535020, 逐槽失敗碼 99/1/2...)
 其他已定案的 id 區段:
 - 15,300,007 (E975A7) = 戰隊常數; 15,300,032 (E975C0) = 205 特判 id
 - 15,301,001..15,302,000 = 204/205 可購段 A = **福袋/袋物段** (830 條:
   福袋(☆)/武器袋/ボイス袋 — AK Paper 種子恰在此段)
-- 15,304,001..15,306,000 = **稱號段** (568 條) = 198 的 9×s32 稱號槽
-  驗證段 (十二輪「房間武器顯示段」說法更正)
+- 15,304,001..15,306,000 = **稱號段** (568 條). It is a catalog family,
+  not a claim that all nine 198 `sub_527550` UI ordinals are title slots:
+  `sub_4C6120` assigns the NAME and MASTER controls their own narrower ranges;
+  the complete per-ordinal ranges are in `RESOURCES.md §5c-2`.
 - 15,310,001..15,320,000 = 可購段 B = **合購袋段** (443 條: SOUL
   WEAPON DUO 袋等)
 - 11,010,001..11,070,000 = **ヘアパズル段** (1,273 條) = 7×s32 拼圖槽
@@ -2136,10 +2146,11 @@ dispatcher case 102 → `sub_58D6F0` 立即 `ctor(101)` 回送
   u8(+185), u8(+128), u8 mode+14` +
   count×成員條目 {s32 uid, u8 slot, str nick, u8 crown, u8 status,
   s32 exp, u8 char_type, u8 observer(1=OB 簡版, 不再讀負載), [負載]};
-  成員負載 = `u8 角色槽 0..0x13, u8 char_type, 12×u16 equip (sub_524360),
-  s32 custom_tex, s32 tex_crc, str tex_name, 武器組×4 (固定四組:
-  u16 equipped, [3×u16 sub 若組≠3], [8×s32 parts 若 equipped≠0]),
-  u8 extra_flag([8×s32] 若≠0), 9×s32 技能 (sub_527550),
+  成員負載 = `u8 角色槽 0..0x13, u8 char_type, 12×u16 normal appearance
+  (sub_524360), s32 custom_tex, s32 tex_crc, str tex_name, 武器 loadout×4
+  (u16 primary, [secondary/melee/throw when group!=3],
+  [8×s32 parts when primary!=0]), u8 extra_flag([8×s32] 若≠0),
+  9×s32 UI items (sub_527550),
   raw u8 n5 + selected NewSkill profile 7×s32 puzzle IDs (sub_527D00), sub_885D00 語音塊 (85B:
   s16 base1, s16 base2, 27×{s16 item, u8 flag})`;
   ==3: 同 ==1 的單人更新 (以 slot 定址)
@@ -2151,12 +2162,39 @@ dispatcher case 102 → `sub_58D6F0` 立即 `ctor(101)` 回送
   count×{u8 slot_idx, u16 item×12 (sub_5244E0: 1+12 欄位)}` — 只送有
   變更的角色槽 (sub_525450 差異偵測)
 - **219 GI_CHANGEDATA_ACK** (sub_573230): `u8 result` → UI 解鎖 + 重繪
-- **220 GI_CHANGEWP_REQ** (builder @0x573380): `u8 count, count×{u8 group_no,
-  s16 equipped, [3×s16 若 group_no!=3], [8×u32 parts 若 equipped!=0]}`
-  (sub_524A50 — 與 198 的 sub_524660 讀端完全鏡像; 只送有變更的編組,
-  差異偵測 sub_525680)
-- **221 GI_CHANGEWP_ACK** (sub_5735F0): `u8 result` + 特殊模式 10 時
-  的 slot 更新通知
+- **220 GI_CHANGEWP_REQ** (sub_573340): `u8 changedCount`, then
+  `changedCount×{u8 groupNo, u16 primaryOffset, [u16 secondaryOffset,
+  u16 meleeOffset, u16 throwOffset when groupNo != 3],
+  [8×s32 partId when primaryOffset != 0]}`. `sub_525680` sends only groups
+  differing from its last authoritative CClientData snapshot. `sub_4C7C00`
+  establishes groups 0..2 as primary/secondary/melee/throw profiles and group
+  3 as a primary-only switch weapon; all fields are category-relative offsets,
+  not flags.
+- **221 GI_CHANGEWP_ACK** (sub_5735F0): same repeated group structure. The
+  receiver starts from a fresh CClientData and copies it over the global
+  profile after reading the packet. **Inference / HIGH:** an ACK to a delta
+  220 must therefore return the complete authoritative four-group state;
+  returning only the changed records would clear all omitted groups locally.
+  Server now uses that full snapshot after atomically validating/persisting a
+  delta; malformed or unowned input has no invented success response.
+- **912 GL_WEAPONPARTS_EQUIP_CHANGE_REQ** (sub_95AEF0) — **Fact / HIGH:**
+  exact forms are `{u8 operation, s32 weaponId, s32 partId}` for operations
+  `0` (remove) and `1` (install into an empty part position), or the 13-byte
+  `{u8 operation=2, s32 weaponId, s32 partId, s32 oldPartId}` replacement
+  form. `sub_9591F0` obtains the eight current part IDs, and the sender emits
+  operation 0 only when the selected current part matches, operation 1 when
+  the position is empty, and operation 2 when replacing a nonzero current
+  part. `sub_95B180` derives the affected `0..7` part-array index from eight
+  contiguous full-ID intervals `15210001..15220000`, …,
+  `15280001..15290000`; this independently matches the `weaponparts.pat`
+  column group. It updates every current loadout row whose primary weapon is
+  `weaponId`, not a character's normal appearance.
+- **913 GL_WEAPONPARTS_EQUIP_CHANGE_ACK** (sub_95B180) — **Fact / HIGH:**
+  its first `u8 errorRaw` gates the rest: nonzero returns without consuming or
+  changing the local parts state; only zero reads the operation/body matching
+  912. **UNRESOLVED:** the original server's nonzero error values and its exact
+  ownership/expiry policy. Current server code consequently leaves 912/913
+  unimplemented rather than replying fake success.
 - **466 GI_CHANGE_SKILLITEMSLOT_REQ** (sub_5738A0) — **Fact / HIGH:**
   exact body is either 2 bytes `{u8 targetProfile, u8 previousProfileUpdateRaw=0}`
   or 31 bytes `{u8 targetProfile, u8 previousProfileUpdateRaw!=0,
@@ -2244,9 +2282,11 @@ byte 偏移 (this 為物件基址):
 +628   13×u16×20 = wire 讀入鏡像 (sub_524010 的 157+13i 區)
 +840   5120×28B 背包 {flags,id,f1,f2,period,kind,dura×2}
 +36117 s32  禮物數; +36119 1024×23B 禮物條目
-+36095 區   9×s32 稱號槽 (sub_527550)
-+144201 u8  武器編組數; +144204 4×44B 編組
-       {u8 no, u16 equipped, 3×u16 sub, 8×u32 parts}
++36095 區   9×s32 UI-item slots (sub_527550: crosshair/name/master/ability/
+             EXP boost/PG boost/extra ability×2/VOICE; see RESOURCES §5c-2)
++144201 u8  weapon loadout group count; +144204 4×44B groups
+       {u8 no, u16 primary, 3×u16 secondary/melee/throw, 8×u32 parts};
+       group 3 is the primary-only switch-weapon wire form
 +144420 28B 已選 NewSkill profile 的 7×s32 ヘアパズル (sub_527D00)
 +144452 u8  raw n5（語意 UNRESOLVED）
 ```
@@ -2259,8 +2299,10 @@ byte 偏移 (this 為物件基址):
 
 1. **背包上限 5120 格、每包分頁 100 條** (sub_524B70) → `inventory.slot 0..5119`。
 2. **角色槽最多 20** (sub_524010 迴圈上限 20) → `characters.slot_no 0..19`，
-   每角色 12 個裝備 u16 欄位。
-3. **武器編組固定 4 組** (sub_524660 上限 4)，每組 1 個 flag + 3 個副欄 + 8 個 parts。
+   每角色 12 個 normal-appearance u16 欄位（不是武器欄位）。
+3. **武器 loadout 固定 4 組** (sub_524660 上限 4)：groups 0..2 各有
+   primary/secondary/melee/throw offsets；group 3 is primary-only switch
+   weapon; a nonempty primary carries 8 parts.
 4. **9-slot UI-item block** (sub_522480) 與 **NewSkill 5×7 profile**（selected record 由 sub_527AF0 讀 0x1C=7*4）分離儲存；466 操作後者。
 5. **戰績 19 個計數器** (GP_CH*C 家族)。
 6. **道具屬性**: item_id(s32), 兩個 float(耐久/強化), period(天), kind(u8), durability(u16)。

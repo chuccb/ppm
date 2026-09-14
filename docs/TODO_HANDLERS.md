@@ -135,9 +135,9 @@
 > ② **角色與裝備 (214/215, 218/219, 220/221, 312/313, 466/467, 912/913, 310/311)**:
 >    - 214/215: 角色初創 (u8 char_type, 3×s16 equip);
 >    - 218/219 & 312/313: 角色槽切換 (u8 slot_no → users.current_char);
->    - 220/221: 武器組全量裝備更新 (4×weapon_groups);
+>    - 220/221: 武器組 delta 寫入、全量 4×weapon_groups ACK，且驗證 owned/unexpired item 和 `weaponparts.pat` compatibility；
 >    - 466/467: NewSkill 五 profile 切換／上一 profile 七 puzzle IDs 持久化；255 snapshot 與 raw packed-minute expiry 見 `PACKETS.md`（不寫入 9-slot `skill_slots`）;
->    - 912/913: 武器零件裝備/更換 (op_type 1/2, weapon_id, part_id);
+>    - 912/913: **尚未實作**。已確認 op 0 remove / 1 install / 2 replace 和 913 `errorRaw` gate；原服 error values、授權及到期/持久化效果仍需確認，不可回假成功。
 >    - 310/311: 購買新角色 (characters 插入, users.game_point 扣款)。
 > ③ **商城/背包/信件/任務 (453/454, 802/803, 423/424, 876/877, 878/879)**:
 >    - 453/454: 刪除禮物 (gifts 刪除);
@@ -275,7 +275,7 @@
 | 418 | MASTER_RESETTCPGROUPINFO_REQ | `str s32` |
 | 443 | GG_STEALSUCK_REQ | `u8 s16` — ACK 444=u8,u8,u16×3 分數組, 需計分狀態機 (勿轉發) |
 | 445 | GG_STEALPUSH_REQ | `u8 s16` — ACK 446=u8,u8,u16×3 分數組, 需計分狀態機 (勿轉發) |
-| 457 | GI_CHANGEITEMSLOT_REQ | `(空)` |
+| 457 | GI_CHANGEITEMSLOT_REQ | `9×s32` (36B); ACK needs exact 63B tail producer semantics before implementation |
 | 461 | GS_USE_PAPERCODEGIFT_REQ | `str` |
 | 464 | GS_USE_PAPERCODEGIFT_IGNORE_DUPLICATED_ITEM_REQ | `u8 str` |
 | 571 | GV_TEST_REQ | `str str` |

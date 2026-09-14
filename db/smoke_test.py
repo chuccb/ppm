@@ -96,8 +96,23 @@ rows = c.execute('SELECT * FROM v_inventory_wire WHERE user_id=? ORDER BY slot L
 assert len(rows) == 2 and rows[0][5] in (29, 30)   # period_days_left
 
 # --- 4. 武器編組 (GI_CHANGEWP 220) ---
-step('weapon_groups update')
-c.execute('UPDATE weapon_groups SET equipped=1, part0=15301001 WHERE user_id=? AND group_no=0', (uid,))
+step('weapon_groups and weaponparts compatibility catalog')
+# sub_527DB0 expands the group-0 primary offset from base 12,100,000.
+# weaponparts.pat's exact (gun,group,slot,part) relation belongs in its own
+# table; it is neither a character appearance value nor a starter grant.
+c.execute("INSERT INTO item_catalog(item_id,name,kind) VALUES (12100016,'Primary test',0)")
+c.execute("INSERT INTO item_catalog(item_id,name,kind) VALUES (15210001,'Barrel test',0)")
+c.execute('INSERT INTO inventory(user_id,slot,item_id,period_days) VALUES (?,2,12100016,0)', (uid,))
+c.execute('INSERT INTO inventory(user_id,slot,item_id,period_days) VALUES (?,3,15210001,0)', (uid,))
+c.execute('INSERT INTO weapon_parts_catalog(gun_item_id,grp,slot,part_item_id) VALUES (12100016,0,0,15210001)')
+c.execute('UPDATE weapon_groups SET equipped=1, part0=15210001 WHERE user_id=? AND group_no=0', (uid,))
+assert c.execute('SELECT equipped,part0 FROM weapon_groups WHERE user_id=? AND group_no=0', (uid,)).fetchone() == (1, 15210001)
+assert c.execute('SELECT 1 FROM weapon_parts_catalog WHERE gun_item_id=12100016 AND grp=0 AND part_item_id=15210001').fetchone() == (1,)
+try:
+    c.execute('UPDATE weapon_groups SET equipped=65536 WHERE user_id=? AND group_no=0', (uid,))
+    raise AssertionError('weapon primary offset 65536 should violate its native u16 CHECK')
+except sqlite3.IntegrityError:
+    pass
 
 # --- 5. 房間 (GL_MAKEROOM 111 / GR_CHANGESLOT 135) ---
 step('rooms / room_slots')

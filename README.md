@@ -68,8 +68,8 @@ python3 db/import_pats.py        # 資源目錄灌 DB (需先以 server/pmfile.p
 | 事實 | 來源 | Schema 對應 |
 |------|------|-------------|
 | 背包 5120 格, 100/頁 | `sub_524B70` | `inventory.slot CHECK 0..5119` |
-| 角色槽 ≤20, 12 裝備位 | `sub_524010` | `characters` |
-| 武器編組固定 4 組, 8 parts | `sub_524660` | `weapon_groups` + bootstrap trigger |
+| 角色槽 ≤20, 12 個 normal-appearance 位 | `sub_524010` | `characters` |
+| 武器 loadout 固定 4 組，非空 primary 有 8 parts | `sub_524660` / `sub_4C7C00` | `weapon_groups` + bootstrap trigger |
 | 9 個 UI-item + 已選 NewSkill profile 的 7 puzzle IDs | `sub_522480` / `sub_527AF0` (0x1C) | `skill_slots` + `new_skill_profiles` |
 | 戰績 19 計數器 | GP_CH*C 家族 | `user_stats` |
 | 房間 ≤210, 10 槽 | `sub_568CE0` | `rooms/room_slots` CHECK |

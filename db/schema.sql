@@ -150,10 +150,10 @@ CREATE TABLE IF NOT EXISTS characters (
 CREATE TABLE IF NOT EXISTS weapon_groups (
     user_id   INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     group_no  INTEGER NOT NULL CHECK (group_no BETWEEN 0 AND 3),
-    equipped  INTEGER NOT NULL DEFAULT 0,     -- u16 flag (144206)
-    sub1      INTEGER NOT NULL DEFAULT 0,     -- u16 (144208)  group_no==3 時不用
-    sub2      INTEGER NOT NULL DEFAULT 0,     -- u16 (144210)
-    sub3      INTEGER NOT NULL DEFAULT 0,     -- u16 (144212)
+    equipped  INTEGER NOT NULL DEFAULT 0 CHECK (equipped BETWEEN 0 AND 65535), -- legacy name: u16 primary offset (144206)
+    sub1      INTEGER NOT NULL DEFAULT 0 CHECK (sub1 BETWEEN 0 AND 65535),     -- legacy name: u16 secondary offset (144208); group 3 absent
+    sub2      INTEGER NOT NULL DEFAULT 0 CHECK (sub2 BETWEEN 0 AND 65535),     -- legacy name: u16 melee offset (144210)
+    sub3      INTEGER NOT NULL DEFAULT 0 CHECK (sub3 BETWEEN 0 AND 65535),     -- legacy name: u16 throw offset (144212)
     part0     INTEGER NOT NULL DEFAULT 0,     -- 8×s32 parts (144216..)
     part1     INTEGER NOT NULL DEFAULT 0,
     part2     INTEGER NOT NULL DEFAULT 0,
@@ -209,6 +209,17 @@ CREATE TABLE IF NOT EXISTS new_skill_profiles (
 -- ----------------------------------------------------------------------------
 -- 7. 道具目錄 (靜態資料, 由客戶端資料檔匯入) — sub_570B00 的 kind 白名單
 -- ----------------------------------------------------------------------------
+-- Exact per-weapon compatible parts from cfg/weaponparts.pat.  A normal
+-- fresh server creates this empty; db/import_pats.py is responsible for the
+-- resource import.  An empty catalog intentionally permits no part equip.
+CREATE TABLE IF NOT EXISTS weapon_parts_catalog (
+    gun_item_id  INTEGER NOT NULL,
+    grp          INTEGER NOT NULL CHECK (grp BETWEEN 0 AND 7),
+    slot         INTEGER NOT NULL CHECK (slot BETWEEN 0 AND 9),
+    part_item_id INTEGER NOT NULL,
+    PRIMARY KEY (gun_item_id, grp, slot)
+) STRICT, WITHOUT ROWID;
+
 CREATE TABLE IF NOT EXISTS item_catalog (
     item_id     INTEGER PRIMARY KEY,
     name        TEXT,

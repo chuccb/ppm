@@ -57,7 +57,7 @@
 | 214 | GM_CREATECHAR_REQ | 1處 | `u8 s16 s16 s16` |
 | 216 | GL_ENTERROOMPASS_REQ | 1處 | `u8 str` |
 | 218 | GI_CHANGEDATA_REQ | 1處 | `u8` |
-| 220 | GI_CHANGEWP_REQ | 3處 | `u8` |
+| 220 | GI_CHANGEWP_REQ | 3處 | `u8 count, count×weaponGroup`; group = `u8 group, u16 primary, [3×u16 when group!=3], [8×s32 parts when primary!=0]` |
 | 230 | GP_CHLOSSC_REQ | 1處 | `s32` |
 | 232 | GP_CHKILLC_REQ | 1處 | `s32` |
 | 244 | GP_CHTKILLC_REQ | 1處 | `s32` |
@@ -139,7 +139,7 @@
 | 445 | GG_STEALPUSH_REQ | 1處 | `u8 s16` |
 | 453 | GS_DELETEGIFT_REQ | 1處 | `s32 s32` |
 | 455 | GG_EXERCISERESPON_REQ | 1處 | `s32 s8` |
-| 457 | GI_CHANGEITEMSLOT_REQ | 1處 | `(空)` |
+| 457 | GI_CHANGEITEMSLOT_REQ | 1處 | `9×s32` (exact 36B UI-item IDs; sub_5275A0) |
 | 461 | GS_USE_PAPERCODEGIFT_REQ | 1處 | `str` |
 | 463 | GS_ENTERPAPERCODEGIFT_NOTIFY | 1處 | `(空)` |
 | 464 | GS_USE_PAPERCODEGIFT_IGNORE_DUPLICATED_ITEM_REQ | 1處 | `u8 str` |
@@ -248,7 +248,7 @@
 | 904 | GG_OCC_SUCC_REQ | 1處 | `u8 u8 s32` |
 | 906 | GG_OCC_FAIL_REQ | 1處 | `u8 u8 s32` |
 | 909 | GG_OCC_RESPON_REQ | 1處 | `s32` |
-| 912 | GL_WEAPONPARTS_EQUIP_CHANGE_REQ | 3處 | `u8 s32 s32 s32 \|\| u8 s32 s32` |
+| 912 | GL_WEAPONPARTS_EQUIP_CHANGE_REQ | 3處 | op 0/1: `u8 op,s32 weapon,s32 part`; op 2: plus `s32 oldPart` |
 | 918 | GR_AI_GET_REWARD_ITEM_REQ | 1處 | `u8` |
 | 922 | GR_AI_DAMAGE_SHIELD_REQ | 1處 | `s16 s16 s16 f32` |
 | 924 | GR_AI_RECHARGE_MAGAZINE_START_REQ | 1處 | `u8 u8 u8` |

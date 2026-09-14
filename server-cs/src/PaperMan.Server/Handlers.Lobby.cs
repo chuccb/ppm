@@ -435,15 +435,15 @@ public static class LobbyHandlers
         {
             var wg = weaponGroups.FirstOrDefault(x => x.GroupNo == g);
             ack.WriteU8(g)
-               .WriteU16(wg?.Equipped ?? (ushort)0);
+               .WriteU16(wg?.PrimaryOffset ?? (ushort)0);
             if (g != 3)
             {
-                ack.WriteU16(wg?.Sub1 ?? (ushort)0)
-                    .WriteU16(wg?.Sub2 ?? (ushort)0)
-                    .WriteU16(wg?.Sub3 ?? (ushort)0);
+                ack.WriteU16(wg?.SecondaryOffset ?? (ushort)0)
+                    .WriteU16(wg?.MeleeOffset ?? (ushort)0)
+                    .WriteU16(wg?.ThrowOffset ?? (ushort)0);
             }
 
-            if (wg is { Equipped: not 0 })
+            if (wg is { PrimaryOffset: not 0 })
             {
                 foreach (var part in wg.Parts)
                 {
@@ -649,35 +649,123 @@ public static class LobbyHandlers
         await session.SendAsync(new Packet(Opcode.GI_CHANGESLOT_ACK).WriteU8(slotNo));
     }
 
-    // 220 GI_CHANGEWP_REQ (sub_573340 / sub_57C270: u8 count, repeat weapon_group)
-    // → 221 ACK (sub_5735F0): u8 count(4), 4×weapon_group
+    // 220 GI_CHANGEWP_REQ (sub_573340): u8 changedCount followed by only the
+    // groups whose local profile differs.  221's receiver builds a fresh
+    // CClientData and then replaces the global profile, so the server reply
+    // must instead carry the authoritative *four-group* snapshot.
     private static async ValueTask ChangeWeapon(Session session, Packet packet, ServerContext context)
     {
-        var groups = session.UserId != 0 ? context.Db.GetWeaponGroups(session.UserId) : [];
-        var ack = new Packet(Opcode.GI_CHANGEWP_ACK).WriteU8(4);
-
-        for (byte g = 0; g < 4; g++)
+        if (session.UserId == 0)
         {
-            var wg = groups.FirstOrDefault(x => x.GroupNo == g);
-            ack.WriteU8(g)
-               .WriteU16(wg?.Equipped ?? (ushort)0);
-            if (g != 3)
-            {
-                ack.WriteU16(wg?.Sub1 ?? (ushort)0)
-                   .WriteU16(wg?.Sub2 ?? (ushort)0)
-                   .WriteU16(wg?.Sub3 ?? (ushort)0);
-            }
-
-            if (wg is { Equipped: not 0 })
-            {
-                foreach (var part in wg.Parts)
-                {
-                    ack.WriteS32(part);
-                }
-            }
+            throw new InvalidDataException("GI_CHANGEWP_REQ requires an authenticated player identity.");
         }
 
-        await session.SendAsync(ack);
+        List<Db.WeaponGroup> changedGroups = ReadWeaponGroupChanges(packet);
+        if (!context.Db.TryChangeWeaponGroups(session.UserId, changedGroups, out List<Db.WeaponGroup> groups))
+        {
+            // The 221 client parser exposes no rejection status byte.  Do not
+            // forge an all-zero/full snapshot or a nominal success: retain the
+            // existing profile and let the malformed/unauthorized request fail.
+            throw new InvalidDataException("GI_CHANGEWP_REQ failed wire, ownership, or resource compatibility validation.");
+        }
+
+        var acknowledgement = new Packet(Opcode.GI_CHANGEWP_ACK).WriteU8(4);
+        foreach (Db.WeaponGroup group in groups)
+        {
+            WriteWeaponGroup(acknowledgement, group);
+        }
+
+        await session.SendAsync(acknowledgement);
+    }
+
+    private static List<Db.WeaponGroup> ReadWeaponGroupChanges(Packet packet)
+    {
+        if (packet.Remaining < 1)
+        {
+            throw new InvalidDataException("GI_CHANGEWP_REQ is missing its group count.");
+        }
+
+        byte changedCount = packet.ReadU8();
+        if (changedCount is 0 or > 4)
+        {
+            throw new InvalidDataException("GI_CHANGEWP_REQ group count must be 1..4.");
+        }
+
+        var groups = new List<Db.WeaponGroup>(changedCount);
+        var seenGroupNumbers = new HashSet<byte>();
+        for (int i = 0; i < changedCount; i++)
+        {
+            if (packet.Remaining < 3)
+            {
+                throw new InvalidDataException("GI_CHANGEWP_REQ has a truncated group prefix.");
+            }
+
+            byte groupNumber = packet.ReadU8();
+            ushort primaryOffset = packet.ReadU16();
+            if (groupNumber >= 4 || !seenGroupNumbers.Add(groupNumber))
+            {
+                throw new InvalidDataException("GI_CHANGEWP_REQ has an invalid or duplicate group number.");
+            }
+
+            ushort secondaryOffset = 0;
+            ushort meleeOffset = 0;
+            ushort throwOffset = 0;
+            if (groupNumber != 3)
+            {
+                if (packet.Remaining < 6)
+                {
+                    throw new InvalidDataException("GI_CHANGEWP_REQ has a truncated non-switch group.");
+                }
+
+                secondaryOffset = packet.ReadU16();
+                meleeOffset = packet.ReadU16();
+                throwOffset = packet.ReadU16();
+            }
+
+            var parts = new int[8];
+            if (primaryOffset != 0)
+            {
+                if (packet.Remaining < 32)
+                {
+                    throw new InvalidDataException("GI_CHANGEWP_REQ has a truncated primary part array.");
+                }
+
+                for (int part = 0; part < parts.Length; part++)
+                {
+                    parts[part] = packet.ReadS32();
+                }
+            }
+
+            groups.Add(new Db.WeaponGroup(
+                groupNumber, primaryOffset, secondaryOffset, meleeOffset, throwOffset, parts));
+        }
+
+        if (packet.Remaining != 0)
+        {
+            throw new InvalidDataException("GI_CHANGEWP_REQ has trailing bytes.");
+        }
+
+        return groups;
+    }
+
+    private static void WriteWeaponGroup(Packet packet, Db.WeaponGroup group)
+    {
+        packet.WriteU8(group.GroupNo)
+              .WriteU16(group.PrimaryOffset);
+        if (group.GroupNo != 3)
+        {
+            packet.WriteU16(group.SecondaryOffset)
+                  .WriteU16(group.MeleeOffset)
+                  .WriteU16(group.ThrowOffset);
+        }
+
+        if (group.PrimaryOffset != 0)
+        {
+            foreach (int part in group.Parts)
+            {
+                packet.WriteS32(part);
+            }
+        }
     }
 
     // 466 → 467 (sub_5738A0 / sub_573A70): target profile, a conditional
@@ -720,26 +808,40 @@ public static class LobbyHandlers
         await session.SendAsync(acknowledgement);
     }
 
-    // 912 GL_WEAPONPARTS_EQUIP_CHANGE_REQ (sub_9591F0): u8 op_type, s32 weapon_id, s32 part_id, [s32 old_part]
-    // → 913 ACK (sub_95B180): u8 err(0=成功), u8 op_type, s32 weapon_id, s32 part_id, [s32 old_part]
-    private static async ValueTask ChangeWeaponParts(Session session, Packet packet, ServerContext context)
+    // 912/913: the exact three operation forms are now known, but the native
+    // corpus does not disclose original-server failure values or its complete
+    // ownership/expiry mutation contract.  Parse strictly and fail closed;
+    // never retain the former non-persistent fake 913 success.
+    private static ValueTask ChangeWeaponParts(Session session, Packet packet, ServerContext context)
     {
-        byte opType = packet.Remaining >= 1 ? packet.ReadU8() : (byte)1;
-        int weaponId = packet.Remaining >= 4 ? packet.ReadS32() : 0;
-        int partId = packet.Remaining >= 4 ? packet.ReadS32() : 0;
-        int oldPartId = (opType == 2 && packet.Remaining >= 4) ? packet.ReadS32() : 0;
-
-        var ack = new Packet(Opcode.GL_WEAPONPARTS_EQUIP_CHANGE_ACK)
-            .WriteU8(0)                                     // err 0 = 成功
-            .WriteU8(opType)
-            .WriteS32(weaponId)
-            .WriteS32(partId);
-
-        if (opType == 2)
+        if (session.UserId == 0 || packet.Remaining < 1)
         {
-            ack.WriteS32(oldPartId);
+            throw new InvalidDataException("GL_WEAPONPARTS_EQUIP_CHANGE_REQ requires an authenticated operation.");
         }
 
-        await session.SendAsync(ack);
+        byte operation = packet.ReadU8();
+        if (operation is not (0 or 1 or 2))
+        {
+            throw new InvalidDataException("GL_WEAPONPARTS_EQUIP_CHANGE_REQ has an unknown operation.");
+        }
+
+        int requiredOperandBytes = operation == 2 ? 12 : 8;
+        if (packet.Remaining != requiredOperandBytes)
+        {
+            throw new InvalidDataException("GL_WEAPONPARTS_EQUIP_CHANGE_REQ has an invalid operation shape.");
+        }
+
+        _ = packet.ReadS32(); // weaponId — retained only after the mutation contract is complete.
+        _ = packet.ReadS32(); // partId
+        if (operation == 2)
+        {
+            _ = packet.ReadS32(); // oldPartId
+        }
+
+        // sub_95B180 consumes no body at all when 913.errorRaw != 0, but the
+        // original nonzero code values are unresolved.  Sending an invented
+        // error or a success ACK is both less faithful than rejecting with no
+        // state mutation and no fabricated packet.
+        throw new NotSupportedException("GL_WEAPONPARTS_EQUIP_CHANGE_REQ mutation and 913 failure values remain unresolved.");
     }
 }

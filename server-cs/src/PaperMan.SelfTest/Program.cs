@@ -896,6 +896,159 @@ bool IsNative311FailureAcknowledgement(Packet acknowledgement)
             newSkillChangeLayout &= newSkillChangeReader.ReadS32() == 0
                 && newSkillChangeReader.Remaining == 0;
 
+            // 220 accepts only owned category-relative weapons and exact
+            // weaponparts.pat compatibility.  Insert a tiny, self-contained
+            // catalog fixture: one item from each loadout family and one
+            // barrel that is truly compatible with the primary weapon.
+            using (var connection = OpenExistingSqlite(temporaryDatabasePath))
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = """
+                    INSERT INTO item_catalog(item_id,name,kind) VALUES
+                        (12100016,'primary test',0),
+                        (12200001,'secondary test',0),
+                        (12300001,'melee test',0),
+                        (12400001,'throw test',0),
+                        (15210001,'compatible barrel test',0),
+                        (15210002,'incompatible barrel test',0),
+                        (15210003,'unowned compatible barrel test',0);
+                    INSERT INTO inventory(user_id,slot,item_id,period_days) VALUES
+                        (@userId,0,12100016,0), (@userId,1,12200001,0),
+                        (@userId,2,12300001,0), (@userId,3,12400001,0),
+                        (@userId,4,15210001,0), (@userId,5,15210002,0);
+                    INSERT INTO weapon_parts_catalog(gun_item_id,grp,slot,part_item_id)
+                    VALUES(12100016,0,0,15210001), (12100016,0,1,15210003);
+                    """;
+                command.Parameters.AddWithValue("@userId", newAccount.UserId);
+                command.ExecuteNonQuery();
+            }
+
+            var changeWeaponRequest = new Packet(Opcode.GI_CHANGEWP_REQ)
+                .WriteU8(1)                 // one changed group (group zero)
+                .WriteU8(0)
+                .WriteU16(16)               // 12,100,016 primary
+                .WriteU16(1)                // 12,200,001 secondary
+                .WriteU16(1)                // 12,300,001 melee
+                .WriteU16(1)                // 12,400,001 throw
+                .WriteS32(15_210_001);      // weaponparts.pat group 0
+            for (int partSlot = 1; partSlot < 8; partSlot++)
+            {
+                changeWeaponRequest.WriteS32(0);
+            }
+
+            bool weaponChangeWasProcessed = await router.DispatchAsync(
+                channelSession, changeWeaponRequest, channelContext);
+            Packet weaponChangeAcknowledgement = await ReadServerPacketAsync(clientPeer.GetStream(), channelCodec);
+            var weaponChangeReader = Packet.FromPayload(
+                weaponChangeAcknowledgement.Opcode, weaponChangeAcknowledgement.Payload);
+            bool weaponChangeLayout = weaponChangeAcknowledgement.Opcode == Opcode.GI_CHANGEWP_ACK
+                && weaponChangeAcknowledgement.Length == 63 // count + 41B group0 + 9B group1/2 + 3B group3
+                && weaponChangeReader.ReadU8() == 4
+                && weaponChangeReader.ReadU8() == 0
+                && weaponChangeReader.ReadU16() == 16
+                && weaponChangeReader.ReadU16() == 1
+                && weaponChangeReader.ReadU16() == 1
+                && weaponChangeReader.ReadU16() == 1
+                && weaponChangeReader.ReadS32() == 15_210_001;
+            for (int partSlot = 1; weaponChangeLayout && partSlot < 8; partSlot++)
+            {
+                weaponChangeLayout &= weaponChangeReader.ReadS32() == 0;
+            }
+
+            for (byte group = 1; weaponChangeLayout && group < 4; group++)
+            {
+                weaponChangeLayout &= weaponChangeReader.ReadU8() == group
+                    && weaponChangeReader.ReadU16() == 0;
+                if (group != 3)
+                {
+                    weaponChangeLayout &= weaponChangeReader.ReadU16() == 0
+                        && weaponChangeReader.ReadU16() == 0
+                        && weaponChangeReader.ReadU16() == 0;
+                }
+            }
+            weaponChangeLayout &= weaponChangeReader.Remaining == 0;
+
+            bool rejectedTruncatedWeaponPacket = false;
+            try
+            {
+                await router.DispatchAsync(
+                    channelSession,
+                    new Packet(Opcode.GI_CHANGEWP_REQ).WriteU8(1).WriteU8(0),
+                    channelContext);
+            }
+            catch (InvalidDataException)
+            {
+                rejectedTruncatedWeaponPacket = true;
+            }
+            List<Db.WeaponGroup> afterTruncatedPacketRejection = secondOpen.GetWeaponGroups(newAccount.UserId);
+
+            bool IsPersistedWeaponSnapshot(IReadOnlyList<Db.WeaponGroup> snapshot) => snapshot is
+            [
+                { GroupNo: 0, PrimaryOffset: 16, SecondaryOffset: 1, MeleeOffset: 1, ThrowOffset: 1,
+                  Parts: [15_210_001, 0, 0, 0, 0, 0, 0, 0] },
+                { GroupNo: 1, PrimaryOffset: 0, SecondaryOffset: 0, MeleeOffset: 0, ThrowOffset: 0 },
+                { GroupNo: 2, PrimaryOffset: 0, SecondaryOffset: 0, MeleeOffset: 0, ThrowOffset: 0 },
+                { GroupNo: 3, PrimaryOffset: 0, SecondaryOffset: 0, MeleeOffset: 0, ThrowOffset: 0 },
+            ];
+
+            bool rejectedDuplicatePrimary = !secondOpen.TryChangeWeaponGroups(
+                newAccount.UserId,
+                [new Db.WeaponGroup(1, 16, 0, 0, 0, new int[8])],
+                out List<Db.WeaponGroup> rejectedWeaponSnapshot);
+            List<Db.WeaponGroup> afterDuplicateRejection = secondOpen.GetWeaponGroups(newAccount.UserId);
+
+            using (var connection = OpenExistingSqlite(temporaryDatabasePath))
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = """
+                    UPDATE inventory SET expires_at=1
+                    WHERE user_id=@userId AND item_id=12100016
+                    """;
+                command.Parameters.AddWithValue("@userId", newAccount.UserId);
+                command.ExecuteNonQuery();
+            }
+            bool rejectedExpiredPrimary = !secondOpen.TryChangeWeaponGroups(
+                newAccount.UserId,
+                [new Db.WeaponGroup(0, 16, 0, 1, 1, [15_210_001, 0, 0, 0, 0, 0, 0, 0])],
+                out List<Db.WeaponGroup> expiredPrimarySnapshot);
+            List<Db.WeaponGroup> afterExpiredPrimaryRejection = secondOpen.GetWeaponGroups(newAccount.UserId);
+
+            using (var connection = OpenExistingSqlite(temporaryDatabasePath))
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = """
+                    UPDATE inventory SET expires_at=NULL
+                    WHERE user_id=@userId AND item_id=12100016
+                    """;
+                command.Parameters.AddWithValue("@userId", newAccount.UserId);
+                command.ExecuteNonQuery();
+            }
+            bool rejectedUnownedPrimary = !secondOpen.TryChangeWeaponGroups(
+                newAccount.UserId,
+                [new Db.WeaponGroup(0, 17, 1, 1, 1, new int[8])],
+                out List<Db.WeaponGroup> unownedPrimarySnapshot);
+            List<Db.WeaponGroup> afterUnownedPrimaryRejection = secondOpen.GetWeaponGroups(newAccount.UserId);
+            bool rejectedUnownedCompatiblePart = !secondOpen.TryChangeWeaponGroups(
+                newAccount.UserId,
+                [new Db.WeaponGroup(0, 16, 1, 1, 1, [15_210_003, 0, 0, 0, 0, 0, 0, 0])],
+                out List<Db.WeaponGroup> unownedPartSnapshot);
+            List<Db.WeaponGroup> afterUnownedPartRejection = secondOpen.GetWeaponGroups(newAccount.UserId);
+            bool rejectedIncompatibleOwnedPart = !secondOpen.TryChangeWeaponGroups(
+                newAccount.UserId,
+                [new Db.WeaponGroup(0, 16, 1, 1, 1, [15_210_002, 0, 0, 0, 0, 0, 0, 0])],
+                out List<Db.WeaponGroup> incompatiblePartSnapshot);
+            List<Db.WeaponGroup> afterIncompatiblePartRejection = secondOpen.GetWeaponGroups(newAccount.UserId);
+            bool rejectedPartsWithoutPrimary = !secondOpen.TryChangeWeaponGroups(
+                newAccount.UserId,
+                [new Db.WeaponGroup(0, 0, 1, 1, 1, [15_210_001, 0, 0, 0, 0, 0, 0, 0])],
+                out List<Db.WeaponGroup> partsWithoutPrimarySnapshot);
+            List<Db.WeaponGroup> afterPartsWithoutPrimaryRejection = secondOpen.GetWeaponGroups(newAccount.UserId);
+            bool rejectedSwitchWeaponSubslots = !secondOpen.TryChangeWeaponGroups(
+                newAccount.UserId,
+                [new Db.WeaponGroup(3, 0, 1, 0, 0, new int[8])],
+                out List<Db.WeaponGroup> switchWeaponSubslotsSnapshot);
+            List<Db.WeaponGroup> afterSwitchWeaponSubslotsRejection = secondOpen.GetWeaponGroups(newAccount.UserId);
+
             Check("SQLite first login provisions a playable identity",
                 !secondOpen.Initialization.CreatedDatabaseFile
                 && secondOpen.Initialization.ProtocolPacketDefinitionCount == 676
@@ -930,6 +1083,37 @@ bool IsNative311FailureAcknowledgement(Packet acknowledgement)
             Check("466 → 467 returns the persisted raw32 profile, never a truncated placeholder",
                 newSkillChangeWasProcessed
                 && newSkillChangeLayout);
+            Check("220 → 221 applies one validated delta and returns a complete four-group snapshot",
+                weaponChangeWasProcessed
+                && weaponChangeLayout
+                && IsPersistedWeaponSnapshot(afterDuplicateRejection));
+            Check("220 rejects a truncated native record without mutation",
+                rejectedTruncatedWeaponPacket
+                && IsPersistedWeaponSnapshot(afterTruncatedPacketRejection));
+            Check("220 rejects a duplicate primary without mutating the authoritative snapshot",
+                rejectedDuplicatePrimary
+                && rejectedWeaponSnapshot.Count == 0
+                && IsPersistedWeaponSnapshot(afterDuplicateRejection));
+            Check("220 rejects expired, unowned, and incompatible items without mutation",
+                rejectedExpiredPrimary
+                && expiredPrimarySnapshot.Count == 0
+                && IsPersistedWeaponSnapshot(afterExpiredPrimaryRejection)
+                && rejectedUnownedPrimary
+                && unownedPrimarySnapshot.Count == 0
+                && IsPersistedWeaponSnapshot(afterUnownedPrimaryRejection)
+                && rejectedUnownedCompatiblePart
+                && unownedPartSnapshot.Count == 0
+                && IsPersistedWeaponSnapshot(afterUnownedPartRejection)
+                && rejectedIncompatibleOwnedPart
+                && incompatiblePartSnapshot.Count == 0
+                && IsPersistedWeaponSnapshot(afterIncompatiblePartRejection));
+            Check("220 rejects parts without a primary and switch-weapon subslots without mutation",
+                rejectedPartsWithoutPrimary
+                && partsWithoutPrimarySnapshot.Count == 0
+                && IsPersistedWeaponSnapshot(afterPartsWithoutPrimaryRejection)
+                && rejectedSwitchWeaponSubslots
+                && switchWeaponSubslotsSnapshot.Count == 0
+                && IsPersistedWeaponSnapshot(afterSwitchWeaponSubslotsRejection));
         }
 
         // Concrete legacy fixtures: a canonical type-1 record lost its body;

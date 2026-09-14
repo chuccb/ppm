@@ -196,19 +196,84 @@ FilterWord / ExceptionWord / soundprops 同模式。
 **15.xM 服務/衍生段**: 15.2M=PG點數包, 15.300M=服務(修理/改名),
 15.301M=福袋, **15.304M=稱號** (キリ番ゲッター — 十二輪誤標「房間
 武器顯示段」已更正), 15.4M=戰鬥語音 (ハヤテ戦闘(基本)...)。
-**改裝件 8 組 (weaponparts.pat 81 欄完整版, 10,648 條 100% 目錄命中)**:
+**改裝件 8 組 (weaponparts.pat 81 欄完整版)**:
 ```
 grp0 = 15.21M バレル (槍管)     grp1 = 15.22M トリガ (扳機)
 grp2 = 15.23M フロントサイト    grp3 = 15.24M グリップ (握把)
 grp4 = 15.25M ストック (槍托)   grp5 = 15.26M ドットサイト (紅點)
-grp6 = 15.278M ペイント弾 (彈藥皮膚, 5,089 條)
+grp6 = 15.278M ペイント弾 (彈藥皮膚)
 grp7 = 15.288M 整槍配色 (L96 A1 Color...)
 ```
-partsability.pat (413 條) 的 id 段 15.21M..15.28M **正好覆蓋全部 8 組**
-(49/37/37/58/58/19/20/135 條) — 它是「改裝件效果差分表」: 每件對
-recoil/range/damage/shot_delay/姿勢精度 (miJump/miSit/miStand/miWalk/
-miRun) 等 31 項彈道參數的修正 — weaponparts↔partsability 第九次互證。
-→ 220/221 武器編組的 8×u32 parts 欄位即此 8 組!
+**Fact / HIGH (main `Extracted` resource cross-check):** the first row declares
+1,108 gun rows. Their 80 part columns produce exactly 10,648 nonzero
+`(gun_item_id, grp, part_item_id)` compatibility references for 280 distinct
+parts; a part occurs in one `grp` only. These are **compatibility edges**, not
+10,648 different items and not starter grants. The native 913 receiver partitions
+its IDs by the contiguous 8 intervals `15,210,001..15,220,000` through
+`15,280,001..15,290,000`, respectively, and writes that matching 0..7 part
+position. Thus the resource `grp` and native part-array index are independently
+aligned.
+
+`partsability.pat` has 413 parameter rows (49/37/37/58/58/19/20/135 by those
+same eight intervals). All 280 parts accepted by `weaponparts.pat` occur there;
+133 additional effect rows are not referenced by the current compatibility list.
+It is therefore an effect-delta table — recoil/range/damage/shot_delay and
+`miJump`/`miSit`/`miStand`/`miWalk`/`miRun` among 31 columns — **not** the
+compatibility authority and not a grant source.
+
+### 5a3. Weapon loadout domains and 220/221 authority boundary (current verification)
+
+**Fact / HIGH.** `sub_4C7C00` names the four u16 columns shown by the loadout UI:
+three profile rows (group `0..2`) contain `PRIMARYSLOT`, `SECONDARYSLOT`,
+`MELEESLOT`, and `THROWSLOT`; group `3` is the primary-only
+`SWITCHWEAPONSLOT`. `sub_527DB0` expands their nonzero u16 category offsets with
+bases `12,100,000`, `12,200,000`, `12,300,000`, and `12,400,000` respectively.
+They are player loadout state, not the 12 u16 character-normal-appearance words.
+The old database column names `equipped/sub1/sub2/sub3` are retained only for
+migration compatibility; their actual meanings are primary/secondary/melee/throw
+offsets.
+
+**Fact / HIGH.** `sub_573340` emits opcode 220 as a delta: `u8 changedCount`,
+then only `sub_525680`-different groups, each serialized by `sub_524A50` as
+`u8 group, u16 primary, [u16 secondary, melee, throw when group != 3],
+[8×s32 parts when primary != 0]`. `sub_5735F0` reads opcode 221 into a fresh
+object and copies that object over the current profile; consequently the server
+response must contain the full authoritative four-group snapshot, not merely the
+request delta. This corrects the older “220 response-only” conclusion.
+
+**Fact / HIGH.** `sub_4C9440` fills the first three profile rows and rejects
+nonzero duplicate offsets within each weapon family; it also rejects a primary
+already present in the switch-weapon row. A selected primary causes
+`sub_9591F0` to materialize its eight current parts, so the 220 wire carries the
+parts only with a nonzero primary. This UI filtering is client behavior, not
+historical-server authorization evidence.
+
+**Inference / MEDIUM (server policy).** Server-side 220 accepts only items that
+are actually owned and unexpired and parts that match the exact imported
+`weaponparts.pat` row. A fresh database has an intentionally empty compatibility
+table, so it fails closed until the resource importer supplies it. The native
+client does not reveal the original server's authorization result code; rejected
+220 has no invented success payload or state mutation.
+
+**UNRESOLVED.** Neither client initialization, the static resource tables, nor
+any observed packet producer establishes a character-specific starter primary,
+secondary, melee, throw weapon, or part. Empty bootstrap loadout containers are
+not evidence of an equipment grant.
+
+**Implementation status (not native evidence).** `Db.WeaponLoadout.cs` applies
+only the submitted delta in one SQLite transaction, validates the merged
+four-row state, and returns it in order for 221. `PaperMan.SelfTest` contains a
+routed 220→221 63-byte full-snapshot case plus no-mutation negative cases for a
+truncated record, duplicate primary, expired/unowned primary, unowned compatible
+part, owned incompatible part, parts with an empty primary, and group-3
+secondary/melee/throw words. The checked-in C# test has **not been executed in
+this environment** because no `dotnet` SDK/compiler is installed. Separately,
+the Python schema smoke test and an in-memory import of the decoded
+`weaponparts.pat` have run: the latter inserted 10,648 rows and confirmed a
+known `(12100016, grp=0, 15210001)` edge while rejecting its wrong-group and
+wrong-gun variants. This only verifies schema/import data, not C# runtime
+behavior.
+
 (RecommandItem 頭兩行: 1030=資料行數, 20=概念類別數)
 
 ## 5b. 十六輪補充實測
@@ -284,6 +349,42 @@ head is `1096` (full ID `10001096`), not the previously misread `584`.
 | Fitting XML | `Extracted/ui/system/CharacterFitting.xml` is a `CHANGE_AVATAR_PROPERTY` fitting/preview source. Its hand textures and values are not a persistent starter vector. | **Fact / HIGH** |
 | Cooki transformation | `CharacterToCooki.xml` is `CHANGE_AVATAR_TO_COOKI_PROPERTY`; `CCharToCookiProperty::sub_993E40` snapshots normal appearance and `sub_9942D0` restores it. It is temporary override state. | **Fact / HIGH** |
 | RecommandItem / Total_Package XML | These are shop recommendation/package presentation data. They have no observed write to the persistent 12-slot character record and are not used as starter-default evidence. | **Fact / HIGH** for their UI/resource role; **UNRESOLVED** for any unobserved original-server pricing/business policy. |
+
+### 5c-2. 9-slot UI items and 457/458 boundary
+
+**Fact / HIGH.** The persistent 198/247 `sub_527550 → sub_522480` block is
+exactly nine `s32` item IDs, with no count. `sub_4C4990`/`sub_4C6120` apply the
+following control-specific inclusive ranges when a player selects an item:
+
+| ordinal | UI label | accepted full-ID interval |
+|---:|---|---|
+| 0 | CROSSHAIR | `15305001..15305100` |
+| 1 | NAME | `15304001..15305000` |
+| 2 | MASTER | `15305301..15305400` |
+| 3 | ABILITY | `15305401..15305600` |
+| 4 | BOOST_EXP | `15305601..15305700` |
+| 5 | BOOST_PG | `15305701..15305800` |
+| 6, 7, 8 | EXTRA_ABILITY, EXTRA_ABILITY, VOICE | `15305801..15306000` |
+
+Slot 8's VOICE label and its shared extra-ability range are both direct facts.
+The `153051xx` legacy-voice-looking gap and `154xxxxx` voice records are **not**
+therefore interchangeable with slot 8; their entitlement/storage relation is
+**UNRESOLVED**. These UI IDs are player state and are not body-template,
+appearance-slot, NewSkill puzzle, or temporary-transformation values.
+
+**Fact / HIGH.** `sub_573770` sends opcode 457 only after `sub_5274D0` detects a
+difference, then `sub_5275A0` serializes the exact 36-byte `9×s32` block.
+`sub_573860` reads opcode 458 as those nine `s32` values plus exactly three
+`{u8 rawFlag, s32 itemId, s32 itemStateRaw}` records (63 bytes total).
+`sub_528C40` ignores `rawFlag`; if `itemId != 0`, it finds the matching local
+inventory record by ID and writes `itemStateRaw` at record dword 4 (`+16`).
+
+**UNRESOLVED.** No producer-side 458 trace in this corpus names that dword's
+business semantics or establishes which three inventory records must be sent.
+The server therefore does **not** implement 457/458 yet: it must not emit a
+short ACK, fabricate `rawFlag`, or substitute zero records merely to satisfy the
+length. The completed source/parser facts above are intentionally retained for a
+future producer/consumer trace.
 
 ### Server storage and wire boundary
 

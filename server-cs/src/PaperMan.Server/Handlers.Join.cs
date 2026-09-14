@@ -251,14 +251,14 @@ public static class JoinHandlers
             for (byte g = 0; g < 4; g++)
             {
                 var wg = data.Groups.FirstOrDefault(x => x.GroupNo == g);
-                ack.WriteU16(wg?.Equipped ?? (ushort)0);
+                ack.WriteU16(wg?.PrimaryOffset ?? (ushort)0);
                 if (g != 3)
                 {
-                    ack.WriteU16(wg?.Sub1 ?? (ushort)0)
-                       .WriteU16(wg?.Sub2 ?? (ushort)0)
-                       .WriteU16(wg?.Sub3 ?? (ushort)0);
+                    ack.WriteU16(wg?.SecondaryOffset ?? (ushort)0)
+                       .WriteU16(wg?.MeleeOffset ?? (ushort)0)
+                       .WriteU16(wg?.ThrowOffset ?? (ushort)0);
                 }
-                if (wg is { Equipped: not 0 })
+                if (wg is { PrimaryOffset: not 0 })
                 {
                     foreach (var part in wg.Parts)
                     {
@@ -335,14 +335,14 @@ public static class JoinHandlers
                 for (byte g = 0; g < 4; g++)
                 {
                     var wg = data.Groups.FirstOrDefault(x => x.GroupNo == g);
-                    ack.WriteU16(wg?.Equipped ?? (ushort)0);
+                    ack.WriteU16(wg?.PrimaryOffset ?? (ushort)0);
                     if (g != 3)
                     {
-                        ack.WriteU16(wg?.Sub1 ?? (ushort)0)
-                           .WriteU16(wg?.Sub2 ?? (ushort)0)
-                           .WriteU16(wg?.Sub3 ?? (ushort)0);
+                        ack.WriteU16(wg?.SecondaryOffset ?? (ushort)0)
+                           .WriteU16(wg?.MeleeOffset ?? (ushort)0)
+                           .WriteU16(wg?.ThrowOffset ?? (ushort)0);
                     }
-                    if (wg is { Equipped: not 0 })
+                    if (wg is { PrimaryOffset: not 0 })
                     {
                         foreach (var part in wg.Parts)
                         {
