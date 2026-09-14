@@ -216,6 +216,22 @@
 >    新增 682 raw24 schema constraint test。仍須在有 .NET 10 SDK 的環境做完整 build
 >    與 SelfTest 實跑（本輪文件不得把未跑結果稱作通過）。
 >
+> 五十八輪（登入／頻道 state boundary 再整理）:
+> ① **Fact / HIGH**：重新逐行核對 `CLobbyLogin::sub_43E500`：694 讀完 u16
+>    後唯一直接呼叫 `sub_43DF00`（682 builder）；681 low-byte 1 讀完 success
+>    tail 後設 `this+131=1` 並呼叫 `sub_43E450`。同一正常 login conversation
+>    沒有第二個 682 builder call。
+> ② 因此 server 以 **Inference / HIGH** 拒絕成功 681 後的重複 682，防止越序
+>    request 覆寫已綁定 account。143 成功現在只建立 channel handoff；195 的
+>    成功 196 寫入完成後才設 `Session.ChannelEntryCompleted`，此前 Router 僅允許
+>    ping / 143 / 195。這是 state-machine guard，不是宣稱已還原原廠 server code。
+> ③ 674 次 `sub_9EAF50` direct call 已用 C export 範圍重新計數；catalog 的 676
+>    unique rows 包含未在 name registry 的 990/991 補名。`PACKETS.md` 現分開
+>    記錄這兩個數字，避免將 inference 混成 source fact。
+> ④ 必須在有 .NET 10 SDK 及真實 client 的環境驗證：正常 143→195→196→107
+>    應仍可完整進大廳；錯誤 144 後的 195/196 形狀與重複 682/195 的實際 native
+>    error/disconnect 行為仍屬 **UNRESOLVED**，不可虛構 failure response。
+>
 > 下一輪可做:
 > 1. 取得一組已知正常及一組拒絕的 681→143→144→195→196 實包，定位
 >    `String[24]` 的 writer（仍不能猜為 account/nickname）、681 extension 的兩個

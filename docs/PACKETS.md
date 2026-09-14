@@ -247,8 +247,10 @@ stay explicitly wire-oriented, not guessed as account or endpoint identities.
 
 `sub_9D2050` 用 `sub_9EAF50(name, id, ...)` 把 **674 個** packet 名稱註冊進
 全域 map `dword_2317F50` (packet-viewer / debug 名稱表)。ID 即 wire opcode。
-完整清單見 `db/packets.tsv` (672 個唯一 ID, 100–994；GS_BASE=100)。
-其中 990/991 為本輪以 UI 字串補名 (sub_9D2050 名稱表未註冊)。
+完整清單見 `db/packets.tsv`（**676** 個唯一 ID，100–994；GS_BASE=100）。
+其中 674 筆來自 `sub_9D2050` 的直接 registration；990/991 是本輪以 UI
+字串補名、未在該名稱表註冊的兩筆。此處刻意分開「source registration count」
+與「本地 catalog row count」，避免將補名誤當成反編譯的直接事實。
 
 命名規約:
 | 前綴 | 子系統 | 數量 |

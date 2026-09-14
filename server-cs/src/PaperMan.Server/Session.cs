@@ -37,14 +37,48 @@ public sealed class Session(TcpClient client, PacketCodec codec, long id, Server
 
     public bool Authenticated => AccountId != 0;
 
+    /// <summary>
+    /// True only after this channel TCP connection received a successful 196.
+    /// A successful 143 authenticates the connection, but does not yet permit
+    /// lobby/game requests: the native client first selects its 681-advertised
+    /// channel through 195 → 196.
+    /// </summary>
+    public bool ChannelEntryCompleted { get; private set; }
+
     /// <summary>Applies one verified login or login-to-channel handoff atomically.</summary>
     internal void BindAuthentication(long accountId, long userId, string loginName, string nickname)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(accountId);
+        if (Authenticated)
+        {
+            throw new InvalidOperationException("A session cannot be authenticated twice.");
+        }
+
         AccountId = accountId;
         UserId = userId;
         LoginName = loginName;
         Nickname = nickname;
+    }
+
+    /// <summary>Records the state transition caused by a successful 195 → 196 exchange.</summary>
+    internal void CompleteChannelEntry()
+    {
+        if (Role != ServerRole.Channel)
+        {
+            throw new InvalidOperationException("Only a channel-listener session can enter a channel.");
+        }
+
+        if (!Authenticated)
+        {
+            throw new InvalidOperationException("A channel session must complete 143 before it can enter a channel.");
+        }
+
+        if (ChannelEntryCompleted)
+        {
+            throw new InvalidOperationException("A channel session cannot enter its channel twice.");
+        }
+
+        ChannelEntryCompleted = true;
     }
 
     private readonly NetworkStream _stream = client.GetStream();

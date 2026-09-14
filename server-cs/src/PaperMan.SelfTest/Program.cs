@@ -10,6 +10,8 @@
 // 用法: dotnet run --project src/PaperMan.SelfTest
 // =============================================================================
 using System.Buffers.Binary;
+using System.Net;
+using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Data.Sqlite;
@@ -43,6 +45,26 @@ SqliteConnection OpenExistingSqlite(string databasePath)
     }.ConnectionString);
     connection.Open();
     return connection;
+}
+
+async Task<(TcpClient ServerClient, TcpClient PeerClient)> CreateConnectedTcpClientsAsync()
+{
+    using var listener = new TcpListener(IPAddress.Loopback, 0);
+    listener.Start();
+
+    var peerClient = new TcpClient();
+    try
+    {
+        var listenerEndpoint = (IPEndPoint)listener.LocalEndpoint;
+        Task<TcpClient> acceptedClient = listener.AcceptTcpClientAsync();
+        await peerClient.ConnectAsync(IPAddress.Loopback, listenerEndpoint.Port);
+        return (await acceptedClient, peerClient);
+    }
+    catch
+    {
+        peerClient.Dispose();
+        throw;
+    }
 }
 
 // ---- 1. Packet 原語 ---------------------------------------------------------
@@ -476,6 +498,48 @@ SqliteConnection OpenExistingSqlite(string databasePath)
             secondOpen.LogPacket((ushort)Opcode.GT_PING_REQ, isReceive: true, bytes: 12);
             secondOpen.LogPacket(ushort.MaxValue, isReceive: true, bytes: 12);
 
+            ServerConfig channelConfig = new ServerConfig { AesKey = null }.Validate();
+            var channelContext = new ServerContext(secondOpen, channelConfig);
+            channelContext.ChannelAdmissions.Issue(
+                accountId: newAccount.AccountId,
+                userId: createdUserId,
+                loginName: "BootstrapAccount",
+                nickname: "BootstrapNickname",
+                billingUiMode: channelConfig.BillingUiMode,
+                featureExtensionCount: 0,
+                remoteIp: "127.0.0.1",
+                lifetime: TimeSpan.FromMinutes(1),
+                now: DateTimeOffset.UtcNow);
+
+            var (serverClient, peerClient) = await CreateConnectedTcpClientsAsync();
+            using var clientPeer = peerClient;
+            using var channelCodec = new PacketCodec(
+                aesKey: null,
+                compressThreshold: PacketCodec.NeverCompress);
+            using var channelSession = new Session(
+                client: serverClient,
+                codec: channelCodec,
+                id: 1,
+                role: ServerRole.Channel);
+            Router router = Router.Build();
+
+            bool handoffWasProcessed = await router.DispatchAsync(
+                channelSession,
+                new Packet(Opcode.PM_UDPSTART_REQ)
+                    .WriteStr("unresolved-143-identity")
+                    .WriteS32(channelConfig.BillingUiMode)
+                    .WriteU8(1)
+                    .WriteS32(0),
+                channelContext);
+            bool channelWasNotEnteredAfterHandoff = !channelSession.ChannelEntryCompleted;
+            bool selectionWasProcessed = await router.DispatchAsync(
+                channelSession,
+                new Packet(Opcode.GC_ENTERCHANNEL_REQ)
+                    .WriteU8(channelConfig.ChannelGroupIndex)
+                    .WriteU8(channelConfig.ChannelIndex)
+                    .WriteU8(0),
+                channelContext);
+
             Check("SQLite second open preserves database and operator configuration",
                 !secondOpen.Initialization.CreatedDatabaseFile
                 && secondOpen.Initialization.ProtocolPacketDefinitionCount == 676
@@ -484,6 +548,12 @@ SqliteConnection OpenExistingSqlite(string databasePath)
                 && duplicateUserId == 0
                 && acceptedPassword is { Result: LoginCode.Ok, UserId: > 0, Nickname: "BootstrapNickname" }
                 && rejectedPassword.Result == LoginCode.BadCredentials);
+            Check("channel entry completes only after successful 195 → 196",
+                handoffWasProcessed
+                && channelSession.Authenticated
+                && channelWasNotEnteredAfterHandoff
+                && selectionWasProcessed
+                && channelSession.ChannelEntryCompleted);
         }
 
         string legacySalt = "legacy-salt";

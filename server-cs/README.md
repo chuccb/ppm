@@ -83,9 +83,11 @@ dotnet run --project server-cs/src/PaperMan.SelfTest
 - **兩個角色、兩條 TCP connection**：登入 listener 連線時只發一次
   `694 GL_ACCOUNTCONNSUCC(u16 compression threshold)`；681 清單所列的頻道
   listener 則只發一次空 payload `693 GL_TCPCONNSUCC`。`Router` 會拒絕在
-  channel listener 收 682、在 login listener 使用其他 lobby opcode，且在
-  channel 143 claim 成功前只允許 ping/143；唯一例外是 native 每個 144 後都會
-  送出的 195，未認證時它只會得到無 endpoint tail 的拒絕 196。
+  channel listener 收 682、在 login listener 使用其他 lobby opcode，且拒絕
+  成功 681 後的重複 682。143 claim 成功只完成帳號 handoff；直到 195 收到成功
+  196、且該 196 已實際寫入 socket，才允許 lobby / room / economy / gameplay
+  requests。唯一例外是 native 每個 144 後都會送出的 195，未認證時它只會得到
+  無 endpoint tail 的拒絕 196。
 - **682 的真實欄位**：`str account, str password_or_token, u64 packed_data_revision,
   u8 fingerprint_source, raw[24] fingerprint`。u64 的高 32 bits 是
   `datarevision.txt ^ 0xB1A9D7C7`，低 32 bits 必為 `0x0000000E`；它不是硬體

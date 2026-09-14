@@ -32,6 +32,7 @@ connect → server 發 693 → client 送 143 (String[24] identity + n100/ext_co
   → UDP session (op18→141→142 位址再確認；142 含 active-channel byte +
      packed year/month/day/hour/minute calendar)   【bootstrap 再驗證】
 port 佈局: 40200 登入(694) / 40201 頻道(693) / 40202 UDP(未來 relay)
+
 【戰鬥 (P2P + relay)】
 UDP 打洞 (私有編號 2-34, sub_595E80; 32→33/34 移動同步);
 UDP 失敗 → TCP 備援 165/166 (第六層戰場引擎 subtype 1-9)
@@ -39,6 +40,25 @@ GG 中繼三模式: slot前綴轉發 / 復活六模式同構 / 聊天過濾
 戰後: 133→134 回房; GP_CH*C 戰績上報 (絕對值+MAX單調);
   ACK 自動推進任務 (sub_92EF00 事件)
 ```
+
+### 登入／頻道的 server state boundary（2026-09 重新整理）
+
+下表刻意區分 client 端可直接證實的 **Fact**，與為了不讓 server 接受
+client 不會正常送出的越序 request 而採用的 **Inference**。後者不是對原廠
+server 實作的宣稱。
+
+| 轉換 | 證據／信心 | Server 行為 |
+|---|---|---|
+| Login TCP connect → 694 → 682 | **Fact / HIGH**：`CLobbyLogin::sub_43E500` 的 694 分支讀 u16 後直接呼叫 `sub_43DF00`；後者是 682 builder。 | Program 只在新 login socket 發一次 694。 |
+| 681 result low byte = 1 | **Fact / HIGH**：同一 reader 設 `this+131=1`，完成 server list 後呼叫 `sub_43E450`；682 builder 只在 694 分支出現。 | **Inference / HIGH**：拒絕同一 login socket 的第二個 682，避免覆寫已確認的 account identity；仍允許 101 pong。 |
+| 新 Channel TCP → 693 → 143 → 144 | **Fact / HIGH**：681 讀出的 host/port 用於獨立 channel connection；`sub_555C60` 寫出 143 的固定順序。 | 143 只可 claim 一個尚未使用的 681 admission；143 成功僅代表 handoff 已驗證。 |
+| 195 → successful 196 | **Fact / HIGH**：196 reader 僅在 `result==1` 讀 endpoint tail，並進入 selected channel 的後續場景。 | **Inference / HIGH**：只在成功 196 寫入完成後標記 `ChannelEntryCompleted`；在此之前拒絕 lobby、room、economy 與 gameplay request。 |
+| 143 未通過後的 195 | **Fact / MEDIUM**：native channel wrapper 仍會在收到 144 後送 195；196 有完整非成功形狀。 | 保留 195，回傳沒有 endpoint tail 的非成功 196；不因此授權 socket。 |
+
+這些 boundary 都集中在 `Router`、`Session`、`ChannelHandlers`，使每一個
+server-side transition 可搜尋、可記錄、可替換；它們不依賴 143 的
+`String[24]` 語意（該 writer 仍是 **UNRESOLVED**）。
+
 
 ### 生命週期終章 (卅五輪 — 斷線/登出/房主遷移)
 - 103 GE_LOGOUT: 空 payload; 104 ACK = 死協定 → server 只解綁不回包
@@ -73,13 +93,29 @@ parts_ability 413 (31欄彈道) / recommend 3,180 / protocol 676
 3. pmFile per-byte 滾動 (keystream FA5387AD/0F3A94AA/48945DCA/1A68DCCF)
 4. data.pat 容器 (pmFile→ROL混淆→zlib 1.2.3→CRC自帶表)
 
-## 4b. C# 結構 (卅四輪 — partial 依領域拆分)
+## 4b. C# Server 結構（2026-09 整理）
 
-Db = 4 partial: Db.cs (連線/帳號/暱稱/LogPacket 160行) +
-Db.Player (MyInfo/戰績) + Db.Economy (背包/賣/禮/信箱) +
-Db.Social (好友/任務/戰隊) — 共用基礎 (_conn/_gate/Cmd) 集中主檔,
-領域 helper 各自持有。Handlers 11 檔按子系統分 + 2 個泛型轉發器
-(BattleRelay 三模式 / Stats 表驅動)。
+`Program` 只負責建立 DB、固定組態、Router 與 login/channel listeners；每個
+socket 的 receive loop 按收到順序 `await Router.DispatchAsync`，不把同一
+session 的 stateful request 平行化。
+
+- `Session` 持有單一 TCP socket 的 connection state、account identity、room
+  seat、send gate；`ChannelEntryCompleted` 明確表示 143 handoff 與 195→196
+  channel entry 之間的不同 state。
+- `Router` 是唯一的 opcode registry 與 listener/state boundary；它不承載
+  gameplay policy。各 `Handlers.*` 檔以協定子系統切分（Auth、Channel、Lobby、
+  Room、Join、BattleRelay、BattleObjects、Shop、Stats、Clan、Quest、Friend、
+  Voice、Warehouse、Master、GameCenter、Ai），使 opcode 的處理位置可直接搜尋。
+- `Db` 依實際 persistence domain 分成 8 個 partial：主檔（connection、
+  bootstrap、account、nickname、packet stats）以及 Player、Economy、Social、
+  Rooms、Voice、Warehouse、GameCenter。共用 connection / lock / command creation
+  只放在主檔；跨表不可分割操作在發生處以明確 transaction 包住。
+- `ChannelAdmissionRegistry` 只保存一次性的 681→143 handoff；`RoomManager` /
+  `SessionRegistry` 只持有 process-local live state。SQLite 是 account、inventory、
+  quest 等可持久狀態的唯一來源。
+
+此切分是依 socket lifecycle 與 protocol domain，而非為了套用通用 pattern；
+重要 side effect 仍可從 Router → Handler → Db / RoomManager 直接追蹤。
 
 ## 5. Server 現況
 

@@ -111,7 +111,17 @@ public static class ChannelHandlers
             // As above.
         }
 
-        await session.SendAsync(CreateEnterChannelAcknowledgement(result, selectedChannel, context.Config));
+        Packet acknowledgement = CreateEnterChannelAcknowledgement(result, selectedChannel, context.Config);
+        await session.SendAsync(acknowledgement);
+
+        // The receive loop awaits this handler, so completing the state only
+        // after the success 196 was written preserves client-observable packet
+        // order. A write failure leaves the connection unentered and is handled
+        // by the session's normal disconnect path.
+        if (result == EnterChannelResult.Success && !session.ChannelEntryCompleted)
+        {
+            session.CompleteChannelEntry();
+        }
     }
 
     /// <summary>141 → 142, issued after UDP op18 asks for its endpoint confirmation.</summary>
