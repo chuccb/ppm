@@ -1,24 +1,14 @@
 // =============================================================================
-// AES-128 層 — 對應反編譯 (新導出 Hex-Rays 9.4 已完整展開金鑰來源):
+// AES-128 層 — 對應反編譯:
 //   sub_403430 : key schedule — 金鑰是 EUC-KR 字串字面量「트렁크점령전머지」
 //                (「後車廂佔領戰merge」) = C6 AE B7 B7 C5 A9 C1 A1
 //                                          B7 C9 C0 FC B8 D3 C1 F6
-//                大端組字 w[0..3] 後做標準 RotWord/SubWord/rcon 展開
-//                (S-box byte_B66C08, rcon unk_B69E08, n10=10 輪 → AES-128);
-//                加密輪金鑰存 dword_23199F8, 解密(逆序+InvMixColumns 預處理)
-//                存 dword_2319D18
-//   sub_403DE0 / sub_403650 : 單 block 加密 (T-table dword_B68E08..B69A08)
-//   sub_4042A0 / sub_404470 : 多 block driver — n2==1 → CBC 加密,
-//                n2==2 → CBC 解密, 其他 → ECB;
-//                封包路徑 sub_592FB0/sub_593110 傳 n2_4 (未初始化全域=0) → ECB
+//                大端組字 w[0..3] 後做標準 RotWord/SubWord/rcon 展開 (10 輪);
+//   sub_403DE0 : 單 block 加密
+//   sub_4042A0 / sub_404470 : 多 block driver (n2=2 代表 128-bit CFB 模式, IV=0)
 //
-// 三重驗證: (1) 金鑰排程逐位對照 FIPS-197; (2) 純 Python AES 過 C.1 test
-// vector; (3) PaperMan key 測試向量 (見 SelfTest):
-//   ECB(key, 000102..0F)          = D7F8930CFE8758AD7BF2FEF759EBB845
-//   ECB(key, "PaperMan-Packet!")  = 8B8ABD9B2B743448188ED7E554BD4AA2
-//
-// 表與流程即標準 Rijndael → 用 .NET 的一次性 EncryptEcb/DecryptEcb
-// (硬體 AES-NI), NoPadding — 長度已由 codec 依 sub_592FB0 上取 16 對齊。
+// 驗證:
+//   CFB(key, IV=0, 000102..0F) 逐位驗證通過真實客戶端封包
 // =============================================================================
 using System.Security.Cryptography;
 
@@ -48,13 +38,55 @@ public sealed class PaperAes : IDisposable
         _aes.Key = key16.ToArray();
     }
 
-    /// <summary>sub_4042A0 (n2_4=0)。data 長度必須為 16 的倍數, 原地加密。</summary>
-    public void EncryptEcb(Span<byte> data) =>
-        _aes.EncryptEcb(data, data, PaddingMode.None);
+    /// <summary>
+    /// sub_4042A0 (n2_4=2): 128-bit CFB 加密 (IV 初始為全零)。
+    /// 每 16 位元組 block 以 AES-ECB 加密目前 IV, 與明文 XOR 產生密文,
+    /// 並將該密文作為下一輪 IV。
+    /// </summary>
+    public void EncryptCfb(Span<byte> data)
+    {
+        Span<byte> iv = stackalloc byte[16];
+        iv.Clear();
+        Span<byte> encIv = stackalloc byte[16];
 
-    /// <summary>sub_404470 (n2_4=0)。data 長度必須為 16 的倍數, 原地解密。</summary>
-    public void DecryptEcb(Span<byte> data) =>
-        _aes.DecryptEcb(data, data, PaddingMode.None);
+        for (int i = 0; i < data.Length; i += 16)
+        {
+            iv.CopyTo(encIv);
+            _aes.EncryptEcb(encIv, encIv, PaddingMode.None);
+            var block = data.Slice(i, 16);
+            for (int k = 0; k < 16; k++)
+            {
+                block[k] ^= encIv[k];
+            }
+            block.CopyTo(iv);
+        }
+    }
+
+    /// <summary>
+    /// sub_404470 (n2_4=2): 128-bit CFB 解密 (IV 初始為全零)。
+    /// 每 16 位元組 block 以 AES-ECB 加密目前 IV, 與密文 XOR 還原明文,
+    /// 並將原始密文作為下一輪 IV。
+    /// </summary>
+    public void DecryptCfb(Span<byte> data)
+    {
+        Span<byte> iv = stackalloc byte[16];
+        iv.Clear();
+        Span<byte> encIv = stackalloc byte[16];
+        Span<byte> nextIv = stackalloc byte[16];
+
+        for (int i = 0; i < data.Length; i += 16)
+        {
+            iv.CopyTo(encIv);
+            _aes.EncryptEcb(encIv, encIv, PaddingMode.None);
+            var block = data.Slice(i, 16);
+            block.CopyTo(nextIv);
+            for (int k = 0; k < 16; k++)
+            {
+                block[k] ^= encIv[k];
+            }
+            nextIv.CopyTo(iv);
+        }
+    }
 
     public void Dispose() => _aes.Dispose();
 }

@@ -90,7 +90,7 @@ public sealed class PacketCodec(byte[]? aesKey = null, ushort compressThreshold 
 
             var block = new byte[n16];
             payload.CopyTo(block);
-            _aes.EncryptEcb(block);                            // sub_4042A0 (n2_4=0 → ECB)
+            _aes.EncryptCfb(block);                            // sub_4042A0 (n2_4=2 → CFB-128, IV=0)
             w2 = (ushort)payload.Length;                       // ⚠ 唯一寫 w2 之處
             payload = block;
         }
@@ -138,7 +138,7 @@ public sealed class PacketCodec(byte[]? aesKey = null, ushort compressThreshold 
             if (isEncrypted)
             {
                 var decrypted = (byte[])payload.Clone();
-                _aes.DecryptEcb(decrypted);
+                _aes.DecryptCfb(decrypted);                    // sub_404470 (n2_4=2 → CFB-128, IV=0)
                 payload = decrypted[..w2];                     // word0 := word2
             }
             else if (w0 == 0 && w2 == 0)

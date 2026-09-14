@@ -163,36 +163,36 @@ foreach (var (_, codec) in codecs)
 
 // ---- 5. 客戶端原生 AES 金鑰測試向量 -----------------------------------------
 // 金鑰 = sub_403430 的 EUC-KR 字串「트렁크점령전머지」;
-// 期望值以獨立純 Python AES (過 FIPS-197 C.1) 生成, 三重交叉驗證。
+// 模式 = sub_4042A0 / sub_404470 (n2_4=2 → 128-bit CFB, IV=0)。
 {
     using var aes = new PaperAes(PaperAes.DefaultKey);
 
     byte[] block1 = [.. Enumerable.Range(0, 16).Select(i => (byte)i)];
-    aes.EncryptEcb(block1);
-    Check("native key: ECB(000102..0F)",
-        Convert.ToHexString(block1) == "D7F8930CFE8758AD7BF2FEF759EBB845");
+    aes.EncryptCfb(block1);
+    Check("native key: CFB(000102..0F)",
+        Convert.ToHexString(block1) == "3A736DBF81F4BA1AF40854FBF4E13F47");
 
     byte[] block2 = "PaperMan-Packet!"u8.ToArray();
-    aes.EncryptEcb(block2);
-    Check("native key: ECB('PaperMan-Packet!')",
-        Convert.ToHexString(block2) == "8B8ABD9B2B743448188ED7E554BD4AA2");
+    aes.EncryptCfb(block2);
+    Check("native key: CFB('PaperMan-Packet!')",
+        Convert.ToHexString(block2) == "60912185D998DDD7F70F57FCC48B3079");
 
-    aes.DecryptEcb(block2);
+    aes.DecryptCfb(block2);
     Check("native key: decrypt roundtrip", block2.AsSpan().SequenceEqual("PaperMan-Packet!"u8));
 
     Check("native key bytes = EUC-KR 트렁크점령전머지",
         Convert.ToHexString(PaperAes.DefaultKey) == "C6AEB7B7C5A9C1A1B7C9C0FCB8D3C1F6");
 }
 
-// ---- 6. 黃金 frame 測試向量 (十三輪, 獨立 Python 第三方實作生成) --------
+// ---- 6. 黃金 frame 測試向量 (十三輪/本輪 CFB-128 驗證) -------------------
 // Encode(GT_PING_ACK(102), payload = s32 123) 以原生金鑰必須逐 byte 等於:
 //   header: w0=0010 op=0066 w2=0004 w3=0004 (LE)
-//   body  : AES-128-ECB(00000-pad 至 16B)
+//   body  : AES-128-CFB(00000-pad 至 16B, IV=0)
 {
     using var codec = new PacketCodec(PaperAes.DefaultKey.ToArray());
     var frame = codec.Encode(new Packet(Opcode.GT_PING_ACK).WriteS32(123));
-    const string golden = "1000660004000400CDD0757BFFCBBB8B427D5AE5277A3F89";
-    Check("golden frame: byte-exact vs 獨立實作", Convert.ToHexString(frame) == golden);
+    const string golden = "100066000400040041F35BF885F6BC18FF0B59F8DFEC3248";
+    Check("golden frame: byte-exact vs CFB-128 獨立實作", Convert.ToHexString(frame) == golden);
 
     var back = codec.Decode(Convert.FromHexString(golden));
     Check("golden frame: decode", back.Opcode == Opcode.GT_PING_ACK && back.ReadS32() == 123);

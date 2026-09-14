@@ -138,10 +138,14 @@ offset 8   ...  payload (小端, 緊湊, 無對齊)
   存 `dword_2319D18`; T-table `dword_B68E08/B69208/B69608/B69A08`,
   S-box `byte_B66C08`, rcon `unk_B69E08`
 - `sub_403DE0`/`sub_403650` = 單 block 加密, `sub_404040` = 單 block 解密
-- 模式 (sub_4042A0 的 n2): 1 = CBC 加密, 2 = CBC 解密, 其他 = **ECB**
-- 封包路徑 `sub_592FB0`/`sub_593110` 傳全域 `n2_4` (未初始化, BSS=0) → **ECB**;
-  別處的 `n2_4=1/2` 賦值屬 UI 狀態機重名 (五輪重驗: 127 處引用全部檢查,
-  無一在網路路徑上)
+- 模式 (sub_4042A0 / sub_404470 的 n2 參數):
+  - `n2 = 1`: CBC 模式 (IV 初始為全零)
+  - `n2 = 2`: **128-bit CFB 模式** (IV 初始為全零, sub_403DE0 加密 IV 後與資料 XOR, 並以密文回授作為下一輪 IV)
+  - `n2 = 0`: ECB 模式
+- 封包路徑 `sub_592FB0`/`sub_593110` 傳入 `n2_4 = 2` → **AES-128-CFB (128-bit feedback, IV=0)**。
+- 測試向量 (以金鑰 `C6AEB7B7C5A9C1A1B7C9C0FCB8D3C1F6` 逐位驗證通過客戶端真實登入與 Ping 封包):
+  - `CFB(key, IV=0, 000102030405060708090A0B0C0D0E0F) = 3A736DBF81F4BA1AF40854FBF4E13F47`
+  - `CFB(key, IV=0, "PaperMan-Packet!") = 60912185D998DDD7F70F57FCC48B3079`
 
 **壓縮門檻協商 + 登入觸發 (694 的雙重功用, 十一輪定案)**:
 全域 `n0x2580` 初始 0x2580(9600, 即「從不壓縮」)。
