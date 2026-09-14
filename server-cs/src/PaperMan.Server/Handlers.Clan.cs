@@ -22,6 +22,7 @@ public static class ClanHandlers
     {
         add(Opcode.GC_CLAN_CREATE_REQ, Create);
         add(Opcode.GC_CLAN_PROTOCOL_REQ, Tunnel);
+        add(Opcode.GL_CLAN_TNMT_ENTERROOM_REQ, ClanTournamentEnterRoom);
     }
 
     /// <summary>586 的 result 碼 (sub_54CB90 的 switch 分支)。</summary>
@@ -99,5 +100,61 @@ public static class ClanHandlers
                 break;
             }
         }
+    }
+
+    // 764 GL_CLAN_TNMT_ENTERROOM_REQ (sub_57E8F0: u8 room_no, s32 clan_id)
+    // → 765 GL_CLAN_TNMT_ENTERROOM_ACK (sub_57E9A0: 與 114 同構, 錦標賽版進房, 含 sub_885D00 語音塊)
+    private static async ValueTask ClanTournamentEnterRoom(Session session, Packet packet, ServerContext context)
+    {
+        byte roomNo = packet.ReadU8();
+        int clanId = packet.Remaining >= 4 ? packet.ReadS32() : 0;
+        _ = clanId;
+
+        var room = context.Rooms.Find(roomNo);
+        byte? slot = room?.TakeFreeSlot();
+
+        if (room is null || slot is null || session.UserId == 0)
+        {
+            await session.SendAsync(new Packet(Opcode.GL_CLAN_TNMT_ENTERROOM_ACK).WriteU8(0));
+            return;
+        }
+
+        room.Members[slot.Value] = session;
+        session.RoomNo = roomNo;
+
+        // 1. 廣播給既有成員: sub_type==1
+        var newMember = RoomHandlers.LoadMemberData(context.Db, session);
+        var joinNotice = new Packet(Opcode.GL_CLAN_TNMT_ENTERROOM_ACK).WriteU8(1);
+        RoomHandlers.WriteMemberNotice(joinNotice, session, slot.Value, newMember);
+        await RoomManager.BroadcastAsync(room, joinNotice, except: session);
+
+        // 2. 給進房者: sub_type==2
+        var fullState = new Packet(Opcode.GL_CLAN_TNMT_ENTERROOM_ACK).WriteU8(2);
+        // sub_57E9A0 case 2 房狀態頭 (同 114 case 2)
+        fullState.WriteS32(room.RoomUid)
+                 .WriteU8(room.MapId)
+                 .WriteU8((byte)room.Members.Count)
+                 .WriteU8(room.RoomNo)
+                 .WriteU8(room.OpenSlotCount)
+                 .WriteU16(room.MaxSlotMask)
+                 .WriteU8(room.Rule)
+                 .WriteU8(room.TimeLimit)
+                 .WriteU16(room.WinCount)
+                 .WriteU8(room.ItemMode)
+                 .WriteU8(0)                                    // skill_off
+                 .WriteU16(0)
+                 .WriteU8(0)
+                 .WriteU8(0)
+                 .WriteU8((byte)(string.IsNullOrEmpty(room.Password) ? 0 : 1))
+                 .WriteU8(0)
+                 .WriteU8(0);
+
+        foreach (var (memberSlot, member) in room.Members.OrderBy(kv => kv.Key))
+        {
+            RoomHandlers.WriteMemberEntry(fullState, member, memberSlot, memberSlot == room.MasterSlot,
+                RoomHandlers.LoadMemberData(context.Db, member));
+        }
+
+        await session.SendAsync(fullState);
     }
 }

@@ -212,6 +212,101 @@ public sealed partial class Db
     }
 
     // ------------------------------------------------------------- stats/misc
+    /// <summary>教學步驟索引 (GL_TUTORIALINDEX 685/686 與 689/690)。</summary>
+    public int GetTutorialIndex(long userId)
+    {
+        lock (_gate)
+        {
+            using var cmd = Cmd(
+                "SELECT flags1 FROM users WHERE user_id=@u", ("@u", userId));
+            return Convert.ToInt32(cmd.ExecuteScalar() ?? 0);
+        }
+    }
+
+    public bool SetTutorialIndex(long userId, int tutorialIndex)
+    {
+        lock (_gate)
+        {
+            using var cmd = Cmd(
+                "UPDATE users SET flags1=@t, updated_at=unixepoch() WHERE user_id=@u",
+                ("@t", tutorialIndex), ("@u", userId));
+            return cmd.ExecuteNonQuery() == 1;
+        }
+    }
+
+    /// <summary>切換現役角色槽 (GI_CHANGEDATA 218/219, GI_CHANGESLOT 312/313)。</summary>
+    public bool SetCurrentChar(long userId, byte slotNo)
+    {
+        lock (_gate)
+        {
+            using var cmd = Cmd(
+                "UPDATE users SET current_char=@s, updated_at=unixepoch() WHERE user_id=@u AND @s BETWEEN 0 AND 19",
+                ("@s", (int)slotNo), ("@u", userId));
+            return cmd.ExecuteNonQuery() == 1;
+        }
+    }
+
+    /// <summary>購買新角色槽 (GS_BUYCHAR 310/311)。</summary>
+    public bool BuyCharacter(long userId, byte slotNo, byte charType, int priceGp = 0)
+    {
+        lock (_gate)
+        {
+            using var tx = _conn.BeginTransaction();
+            try
+            {
+                if (priceGp > 0)
+                {
+                    using var pay = Cmd(
+                        "UPDATE users SET game_point=game_point-@p WHERE user_id=@u AND game_point>=@p",
+                        ("@p", priceGp), ("@u", userId));
+                    pay.Transaction = tx;
+                    if (pay.ExecuteNonQuery() != 1)
+                    {
+                        tx.Rollback();
+                        return false;
+                    }
+                }
+
+                using var ins = Cmd("""
+                    INSERT INTO characters(user_id, slot_no, char_type)
+                    VALUES(@u, @s, @c)
+                    ON CONFLICT(user_id, slot_no) DO UPDATE SET char_type=@c
+                    """, ("@u", userId), ("@s", (int)slotNo), ("@c", (int)charType));
+                ins.Transaction = tx;
+                ins.ExecuteNonQuery();
+
+                tx.Commit();
+                return true;
+            }
+            catch
+            {
+                tx.Rollback();
+                return false;
+            }
+        }
+    }
+
+    /// <summary>更新技能槽 (GI_CHANGE_SKILLITEMSLOT 466/467)。</summary>
+    public bool UpdateSkillSlot(long userId, byte slotKind, byte idx, int itemId)
+    {
+        lock (_gate)
+        {
+            using var cmd = Cmd("""
+                INSERT INTO skill_slots(user_id, slot_kind, idx, item_id)
+                VALUES(@u, @k, @i, @item)
+                ON CONFLICT(user_id, slot_kind, idx) DO UPDATE SET item_id=@item
+                """, ("@u", userId), ("@k", (int)slotKind), ("@i", (int)idx), ("@item", itemId));
+            try
+            {
+                return cmd.ExecuteNonQuery() == 1;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+    }
+
     /// <summary>
     /// GP_CH*C: client REQ 帶「新的絕對累計值」(sub_5567F0 等) — 只允許
     /// 單調遞增 (MAX), 防倒退/重播; 回傳確認後的 total。

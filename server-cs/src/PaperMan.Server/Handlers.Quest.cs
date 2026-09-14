@@ -31,6 +31,8 @@ public static class QuestHandlers
         add(Opcode.GL_SERVER_DATETIME_REQ, ServerDateTime);
         add(Opcode.GQ_QUEST_ACCEPT_REQ, Accept);
         add(Opcode.GQ_QUEST_CANCEL_REQ, Cancel);
+        add(Opcode.GQ_QUEST_ACCEPT_DAILY_REQ, AcceptDaily);
+        add(Opcode.GQ_QUEST_USER_COMPLETE_HONOR_REQ, CompleteHonor);
     }
 
     // 865 (sub_585AB0): s32 unix_time — client 用來對時每日任務重置
@@ -76,6 +78,30 @@ public static class QuestHandlers
                .WriteS32(questIndex)
                .WriteS32(0);
         }
+
+        await session.SendAsync(ack);
+    }
+
+    // 876 GQ_QUEST_ACCEPT_DAILY_REQ (sub_91D730, 空) → 877 ACK (sub_91D7E0):
+    //   u8 err (0=成功), s32 count (每日任務數), count×13B 快照
+    private static async ValueTask AcceptDaily(Session session, Packet packet, ServerContext context)
+    {
+        var ack = new Packet(Opcode.GQ_QUEST_ACCEPT_DAILY_ACK)
+            .WriteU8(0)                                     // err 0 = 成功
+            .WriteS32(0);                                   // 0 個額外每日任務
+
+        await session.SendAsync(ack);
+    }
+
+    // 878 GQ_QUEST_USER_COMPLETE_HONOR_REQ (sub_91C9D0: s8 flag) → 879 ACK (sub_91CAA0):
+    //   u8 err (0=成功), str title, raw payload
+    private static async ValueTask CompleteHonor(Session session, Packet packet, ServerContext context)
+    {
+        _ = packet.Remaining >= 1 ? packet.ReadU8() : (byte)0;
+
+        var ack = new Packet(Opcode.GQ_QUEST_USER_COMPLETE_HONOR_ACK)
+            .WriteU8(0)                                     // err 0 = 成功
+            .WriteStr("Honor");
 
         await session.SendAsync(ack);
     }

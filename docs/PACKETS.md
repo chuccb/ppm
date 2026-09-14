@@ -417,8 +417,10 @@ bool    success
     if equipped_flag: s32 x8 (parts item ids)
   --- sub_527550 (sub_522480): 9×s32 — 無前導 count! (五輪修正)
       每個非零 id 需過 sub_535020 目錄驗證, 失敗 → client 錯誤 10
-      ⭐ 十九輪語意定案: 驗證段 15,304,001..15,306,000 = **稱號段**
-      (キリ番ゲッター等 568 條) → 這 9 個 s32 是「持有稱號槽」!
+      ⭐ 五十四輪字串完全揭露 (sub_4C4990 / sub_4C4E70 陣列):
+      9 個槽位依序為: [0] Crosshair (準心), [1] NAME (名牌), [2] MASTER (大師稱號),
+      [3] ABILITY (主能力), [4] BOOST_EXP (經驗加成), [5] BOOST_PG (PG加成),
+      [6] EXTRA_ABILITY (額外能力1), [7] EXTRA_ABILITY (額外能力2), [8] VOICE (語音自訂)!
   --- sub_527D00: u8 n5 (+144452) + raw 28B = 7×s32 (sub_527AF0);
       非零 id 同樣驗證, 失敗 → client 錯誤 9
       ⭐ 驗證段 11,010,001..11,070,000 = **ヘアパズル段** (1,273 條,
@@ -672,7 +674,7 @@ kind 0/1/14 與 12/13/17 (可覆寫類) 走覆寫路徑, 其他 kind 重複購�
   794 經 sub_885DA0 → CMyVoiceCustomize **vtbl+16** = sub_876C90 解析:
     `u8 count, count×(u8 char_idx + 全量單角色塊)`
   (⚠ 卌七輪更正: 794 是 **u8 count 前綴**, 非 795 變體B 的 20×s32;
-   server 送 count=15 即全角色)
+   server 送 count=15 即全角色, 總長 1 + 15×86 = 1291B)
 【795→796 ChangeVoiceSlot】REQ 兩變體 (client→server 依長度判別 —
   B 固定 20×89=1780B, A ≤117B):
   A (sub_885F10, 單角色差分): `u8 char_idx, u8 base_changed,
@@ -680,8 +682,21 @@ kind 0/1/14 與 12/13/17 (可覆寫類) 走覆寫路徑, 其他 kind 重複購�
   B (sub_886330, 全量): `20×{s32 char_idx, s16, s16, 3×9×{s16,u8}}`
   796 ACK (sub_885E40): `u8 err, u8`(第二 byte 讀而未用); err≠0 →
   訊息 0x3FB「ボイスカスタマイズ設定保存に失敗しました。設定内容を
-  もう一度確認してください。」並重拉 792 回滾; this+290 pending 佇列
+  もう一度確認してください。」並重拉 792 回滾 (呼叫 sub_885D00(this, a2, -1, 0)); this+290 pending 佇列
   自動重送 (791 進行中 this+289 的變更先入佇列)
+【⭐ sub_885D00 全景呼叫圖 (五十一輪全 exe 逐呼叫點定案)】
+  `int __thiscall sub_885D00(this, packet, slot_or_char, mode)`
+  - `this`: CVCustomizeManager 單例 (sub_44D750)
+  - `mode==1`: 本地角色語音 → CMyVoiceCustomize::sub_876B00 (vtbl+12, 讀 86B)
+  - `mode==2`: 房間成員語音 → CGameInUserVoiceCustomize::sub_8765F0 (vtbl+12, 讀 85B: `s16,s16,27×{s16,u8}`)
+  - `mode<=0 / slot<0`: 使用快取的 mode/slot (792/796 回退專用)
+  **全 exe 共有 6 個封包呼叫 sub_885D00 解析語音塊**:
+  1. `114 GR_ENTERROOM_ACK` (sub_56B360): case 1(單人進房)、case 2(自身進房成員迴圈)、case 3(單人更新) 皆以 mode=2 讀 85B 尾塊
+  2. `269 GL_JOINPLAY_ACK` (sub_574B20): case 6(玩家加入快照)、case 7(觀戰全房成員迴圈) 皆以 mode=2 讀 85B 尾塊
+  3. `765 GL_CLAN_TNMT_ENTERROOM_ACK` (sub_57E9A0): case 1/2/3 錦標賽進房成員條目皆以 mode=2 讀 85B 尾塊
+  4. `985 GL_ENTERMATCHINGROOM_ACK` (sub_586610): case 1/2 配對房進房成員條目皆以 mode=2 讀 85B 尾塊
+  5. `792 GL_VOICEITEMSLOT_ACK` (sub_58B010 dispatcher case 792): 以 mode=0/slot=-1 經 CMyVoiceCustomize 讀 86B
+  6. `796 GI_CHANGE_VOICEITEMSLOT_ACK` (sub_885E40): err!=0 儲存失敗時呼叫 sub_885D00 回滾設定
 【語音 char_idx】0..14 = maru/nari/dallae/lich/cacao/loki/hana/momo/
   wooka/pero/spy_11/robotgirl_12/tsunderegirl/magicgirl/devilgirl
   (sub_8859B0 名字表; character/models/type1..15 = idx+1); 15..19 為
@@ -699,6 +714,9 @@ kind 0/1/14 與 12/13/17 (可覆寫類) 走覆寫路徑, 其他 kind 重複購�
   ⚠ 變體B (sub_886330) 全 exe 無呼叫者 = **client 死碼**, 實際只會
   收到變體A。語音檔實體 `sound\soundsNN\<codename>\Radio_Message\`
   = command/tactics/information 三夾, `Voice\` 夾 = 本嗓 — 見 RESOURCES.md。
+【378→379 RadioMsg 無線電語音廣播】
+  378 REQ (sub_5593A0): `u8 team, u8 face(0..26 選單序號=3類×9句), u8 slot, u8 len(≤64), wchar[len]`
+  379 ACK (sub_74C500): 欄位同構; client 依 face/slot/team 查 CVCustomizeManager 播放對應 wav
 ```
 
 ### 3.13 GQ_QUEST 任務家族 (八輪全家讀畢)
@@ -930,7 +948,7 @@ festival: 681 的 3 頻道組 ↔ 195 的 group 序號互證; 頻道類型 n2==3
 = AI 頻道 (bitmask 1024 段地圖) — 與 ch_type==3 讀 extra byte
 (二輪 681 佈局) 同源!
 
-### 3.15e GL_JOINPLAY_ACK (269) — sub_574B20, 1524 行巨型函數 (十輪讀畢)
+### 3.15e GL_JOINPLAY_ACK (269) — sub_574B20, 1524 行巨型函數 (全鏈定案)
 中途加入/觀戰的「全房間快照」。頂層: `u8 n7` switch:
 - 0: 失敗, 通知 UI (sub_406F20(0))
 - 1..5, 8, 9: 各種拒絕碼 (sub_406F20(n7))
@@ -938,22 +956,27 @@ festival: 681 的 3 頻道組 ↔ 195 的 group 序號互證; 頻道類型 n2==3
   str nick` + CClientData 嵌入 (sub_524360) + `u8, s16, s16, s16`
   (角色外觀) + `s32, s32, s32 custom_tex, str(64)` + 4×武器組
   {s16 equipped, kk!=3 → s16×2... , equipped→8×s32 parts} +
-  `u8` + [8×s32] + sub_527550 技能 + sub_527D00 快速槽 + sub_885D00
-  尾塊(未完全確認) — 對應 268 REQ flag==0 (PLAY); 舊稿標「觀戰者」
-  為誤標, 已更正
+  `u8 extra_flag` + (extra_flag≠0 時 8×s32) + sub_527550 技能 (9×s32) +
+  sub_527D00 快速槽 (u8+7×s32) + **sub_885D00 語音自訂 85B 尾塊**
+  (`s16 base1, s16 base2, 27×{s16 item, u8 flag}`) — 對應 268 REQ flag==0 (PLAY)
 - 7 (fall-through 主體): **觀戰加入 (完整房間+全成員快照)** — 對應
   268 REQ flag==1 (OBSERVE):
   房間頭: `s32 room_uid, s32 elapsed_ms (同 130 的時間基準), u8 map, u8 count(jj_1),
   u8 room_no, u8 rule, u16 win, u8 max, u8, u16, u8 flags(bit0/1 拆),
-  u8 has_pass, u16, u8, u8, u8 obs` + `u8×4 (n2_10 等模式旗標)`
+  u8 has_pass, u16, u8, u8, u8 obs` + `u8×4 (模式旗標)`
   然後 count× 成員條目:
   `s32 uid, u8 slot, str nick, u8 team, u8 ready(1&1→0 特例),
   s32, s32, s32 custom_tex, u8 alive, u8 dead_flag` +
   [alive==0: 16B blob, u16×2, u16, u16×2, s8 觀戰目標] +
-  strcmp 自己→special, `u8 char_type, s16×3 外觀`, `s32×2, s32 tex,
-  str(64)`, 4×武器組 (kk!=3 帶 sub-slot, equipped→8×s32 parts), u8 + 8×s32
-私服要點: 快照結構 = 114 (ENTERROOM sub_type==2) 的擴充版; 兩者成員
-條目欄位順序一致 (交叉驗證), 269 多了戰鬥中狀態 (alive/dead/觀戰目標)。
+  `u8 char_slot, u8 char_type, 12×u16 equip (sub_524360)`, `u8 char_type, s16×3 外觀`,
+  `s32×2, s32 tex_crc, str(64) tex_name`, 4×武器組 (kk!=3 帶 sub-slot, equipped→8×s32 parts),
+  `u8 extra_flag` (+8×s32 若≠0), [模式特定: rule 12 足球 u8 / rule 13 占領 s32],
+  `u8 active_weapon_flag` (+武器件組 若≠0), sub_527550 技能 (9×s32),
+  sub_527D00 快速槽 (u8+7×s32), **sub_885D00 語音自訂 85B 尾塊**
+  (`s16 base1, s16 base2, 27×{s16 item, u8 flag}`), 5×u8 局內旗標。
+  尾部: 7×u8 局狀態 + s32(n0x3E8) + u8 + {u8, s32, s16×2, u8} + 16×s32 比分/戰績。
+私服要點: 快照結構 = 114 (ENTERROOM sub_type==2) 的戰時擴充版; 兩者成員
+條目欄位順序一致 (交叉驗證), 269 多了戰鬥中狀態 (alive/dead/觀戰目標/武器件)。
 
 ### 3.15f GL_JOIN 簇 260-269 全流程 (四十九輪逐函數定案)
 
@@ -1367,6 +1390,66 @@ u8+slot 系列)
 
 ### 3.15g comm 簇 437/438・378/379・726/727・836/837 (本輪逐函數定案)
 
+### 3.15h 系統、角色、商城、投票與轉蛋封包簇 (五十三輪全鏈定案)
+
+| Opcode | 封包名稱 | 來源函數 | 方向 | Wire 格式 |
+|---|---|---|---|---|
+| 685 | `GL_TUTORIALINDEX_REQ` | `sub_55C6F0` | C2S | `(空)` |
+| 686 | `GL_TUTORIALINDEX_ACK` | `sub_55C790` | S2C | `s32 tutorial_index` (旗標/步驟) |
+| 689 | `GL_TUTORIAL_INDEX_SET_REQ` | `sub_55C7D0` | C2S | `s32 tutorial_index` |
+| 690 | `GL_TUTORIAL_INDEX_SET_ACK` | `sub_582530` | S2C | `s32 tutorial_index` (或 u8 status) |
+| 704 | `GL_LEVEL_KILL_LIMIT_REQ` | `sub_582570` | C2S | `(空)` |
+| 705 | `GL_LEVEL_KILL_LIMIT_ACK` | `sub_55C9B0` | S2C | `s32 kill_limit, f32 exp_rate, s32 max_level_limit` (12B) |
+| 706 | `GL_BILLTOKEN_REQ` | `sub_460480` | C2S | `(空)` |
+| 707 | `GL_BILLTOKEN_ACK` | `sub_46AD00` | S2C | `str token` |
+| 787 | `GL_RACKINGWEB_TOKEN_REQ` | `sub_581E40` | C2S | `(空)` |
+| 788 | `GL_RACKINGWEB_TOKEN_ACK` | `sub_44BEA0` | S2C | `str token` |
+| 834 | `GL_DATA_RECV_COMPLETED_REQ` | `sub_583120` | C2S | `s32 user_id` |
+| 835 | `GL_DATA_RECV_COMPLETED_ACK` | `sub_5831D0` | S2C | `(空)` |
+| 370 | `GL_CHANGECHANNEL_REQ` | `sub_570030` | C2S | `u8 channel_id` |
+| 371 | `GL_CHANGECHANNEL_ACK` | `sub_570100` | S2C | `u8 status, u8 channel_id, str host_ip, s32 host_port, u8 extra` |
+| 131 | `GR_FORCEOUT_REQ` | `sub_56EC10` | C2S | `u8 target_slot` (房主踢人) |
+| 132 | `GR_FORCEOUT_ACK` | `sub_56ECC0` | S2C | `u8 status(1), u8 target_slot` (廣播並移除成員) |
+| 718 | `GR_START_VOTING_REQ` | `sub_A191D0` | C2S | `s32 target_slot, s32 reason, s32 initiator_slot` |
+| 719 | `GR_START_VOTING_ACK` | `sub_9BF430` | S2C | `u8 status(1)` (給發起人) |
+| 720 | `GR_START_VOTING` | `sub_9BF430` | S2C | `s32 target, s32 reason, s32 initiator, s32 duration, u8 team` (廣播) |
+| 721 | `GR_DO_VOTING` | `sub_A192B0` | C2S | `u8 vote` (1=同意, 2=反對) |
+| 722 | `GR_VOTING_RESULT` | `sub_9BF430` | S2C | `s32 target, u8 result` (1=通過踢出, 0=否決) |
+| 214 | `GM_CREATECHAR_REQ` | `sub_532AA0` | C2S | `u8 char_type, s16 hair, s16 face, s16 coat` |
+| 215 | `GM_CREATECHAR_ACK` | `sub_572F80` | S2C | `u8 status(0=成功)` |
+| 218 | `GI_CHANGEDATA_REQ` | `sub_523A00` | C2S | `u8 char_slot` |
+| 219 | `GI_CHANGEDATA_ACK` | `sub_573230` | S2C | `u8 status(1=成功)` |
+| 220 | `GI_CHANGEWP_REQ` | `sub_573340` | C2S | `u8 count, repeat weapon_group` |
+| 221 | `GI_CHANGEWP_ACK` | `sub_5735F0` | S2C | `u8 count(4), 4×weapon_group` |
+| 312 | `GI_CHANGESLOT_REQ` | `sub_523FB0` | C2S | `u8 slot_no` |
+| 313 | `GI_CHANGESLOT_ACK` | `sub_573320` | S2C | `u8 slot_no` |
+| 466 | `GI_CHANGE_SKILLITEMSLOT_REQ` | `sub_5273C0` | C2S | `u8 char_slot, u8 slot_idx, s32 item_id` |
+| 467 | `GI_CHANGE_SKILLITEMSLOT_ACK` | `sub_573A70` | S2C | `u8 err(0), u8 char_slot, u8 count(1), u8 slot_idx, raw32 skill` |
+| 912 | `GL_WEAPONPARTS_EQUIP_CHANGE_REQ`| `sub_9591F0` | C2S | `u8 op_type, s32 weapon_id, s32 part_id, [s32 old_part]` |
+| 913 | `GL_WEAPONPARTS_EQUIP_CHANGE_ACK`| `sub_95B180` | S2C | `u8 err(0), u8 op_type, s32 weapon_id, s32 part_id, [s32 old_part]` |
+| 310 | `GS_BUYCHAR_REQ` | `sub_529680` | C2S | `s32 char_type, 5×s32 items` |
+| 311 | `GS_BUYCHAR_ACK` | `sub_5728A0` | S2C | `u8 status(1), s32 slot, s32 char_type, s32 exp, s32 cash, s32 gp, s32 dura` |
+| 453 | `GS_DELETEGIFT_REQ` | `sub_57BC40` | C2S | `s32 gift_uid, s32 item_id` |
+| 454 | `GS_DELETEGIFT_ACK` | `sub_57BCF0` | S2C | `u8 status(1), s32 gift_uid, s32 item_id` |
+| 802 | `GS_DESTROYITEM_REQ` | `sub_894E70` | C2S | `s32 inv_id, s32 item_id, u8 type, s32 char_slot, s32 count` |
+| 803 | `GS_DESTROYITEM_ACK` | `sub_895EE0` | S2C | `u8 err(0), u8 unk(0), s32 pg, s32 cash, u8 count(1), s32 inv_id, s32 remain(0)` |
+| 423 | `GL_MSG_READ_REQ` | `sub_55A3C0` | C2S | `str msg_id` |
+| 424 | `GL_MSG_READ_ACK` | `sub_55A4F0` | S2C | `u8 status(1), str msg_id` |
+| 876 | `GQ_QUEST_ACCEPT_DAILY_REQ` | `sub_91D730` | C2S | `(空)` |
+| 877 | `GQ_QUEST_ACCEPT_DAILY_ACK` | `sub_91D7E0` | S2C | `u8 err(0), s32 count(0), count×13B snapshot` |
+| 878 | `GQ_QUEST_USER_COMPLETE_HONOR_REQ` | `sub_91C9D0` | C2S | `s8 flag` |
+| 879 | `GQ_QUEST_USER_COMPLETE_HONOR_ACK` | `sub_91CAA0` | S2C | `u8 err(0), str title, raw blob` |
+| 698 | `GP_ENTER_PEPACHI_REQ` | `sub_580640` | C2S | `(空)` |
+| 699 | `GP_ENTER_PEPACHI_ACK` | `sub_46AD00` | S2C | `u8 status(1), s32 coins, s32 cash` |
+| 700 | `GP_START_GAME_REQ` | `sub_580790` | C2S | `u8 count, s32 coin_type` |
+| 701 | `GP_START_GAME_ACK` | `sub_84A000` | S2C | `u8 status(1), s32 win_item_id, s32 win_count, s32 remain_coins` |
+| 702 | `GP_PEPACHI_LIST_REQ` | `sub_580970` | C2S | `(空)` |
+| 703 | `GP_PEPACHI_LIST_ACK` | `sub_46AD00` | S2C | `s32 count_normal, s32 count_rare, repeat s32 item_id` |
+| 900 | `GS_CAPSULEMACHINE_START_REQ` | `sub_58D5D0` | C2S | `u8 count, s32 machine_id` |
+| 901 | `GS_CAPSULEMACHINE_START_ACK` | `sub_9A1A30` | S2C | `u8 status(1), s32 win_item_id, s32 remain_tokens` |
+
+
+
 ```
 437 GG_ROOMBROADCAST_REQ (sub_55B430): u8 flag + s32 len + raw[len]。
     ⚠ flag/blob 語意無從確認 — builder 無直接呼叫者 (經函式指標/訊息表),
@@ -1399,6 +1482,96 @@ u8+slot 系列)
     server 動作值), 私服送 1 保持可用, 由 client 3s 牆鐘限流防洗頻。
     GL = 大廳全域 → 廣播全服。
 ```
+
+### 3.15i GM / MASTER 管理指令簇 (五十五輪全鏈定案)
+
+| Opcode | 封包名稱 | 來源函數 | 方向 | Wire 格式與行為 |
+|---|---|---|---|---|
+| 275 | `MASTER_MEMO_REQ` | `sub_578830` | C2S | `wstr memo` (GM 私人通知) |
+| 276 | `MASTER_MEMO_ACK` | `sub_578920` | S2C | `wstr memo` (顯示 GM 私訊彈窗) |
+| 277 | `MASTER_MEMOALL_REQ` | `sub_5789D0` | C2S | `wstr memo` (全服系統廣播) |
+| 278 | `MASTER_MEMOALL_ACK` | `sub_578BC0` | S2C | `wstr memo` (全體在線玩家彈窗廣播) |
+| 279 | `MASTER_USERCUT_REQ` | `sub_578E50` | C2S | `u8 mode, str nick` (強制踢線) |
+| 280 | `MASTER_USERCUT_ACK` | `sub_578FB0` | S2C | `(空)` |
+| 281 | `MASTER_USERCUT2_REQ` | `sub_578F00` | C2S | `s32 uid` (依 UID 強制踢線) |
+| 282 | `MASTER_USERCUT2_ACK` | — | S2C | `(空)` |
+| 283 | `MASTER_ROOMCUT_REQ` | `sub_578FF0` | C2S | `u8 room_no` (強制解散房間) |
+| 284 | `MASTER_ROOMCUT_ACK` | — | S2C | `(空)` |
+| 285 | `MASTER_MSET_REQ` | `sub_579040` | C2S | `u8 flag` (設定 GM 隱身/管理旗標) |
+| 286 | `MASTER_MSET_ACK` | `sub_578D20` | S2C | `u8 flag` |
+| 287 | `MASTER_PRINTUSER_REQ` | `sub_579100` | C2S | `(空)` (查詢在線人數) |
+| 288 | `MASTER_PRINTUSER_ACK` | — | S2C | `s32 user_count` |
+| 289 | `MASTER_USERINFO_REQ` | `sub_579780` | C2S | `str nick` (查詢玩家資料) |
+| 290 | `MASTER_USERINFO_ACK` | `sub_579830` | S2C | `bool found, s32 uid, str nick` (全量快照) |
+| 291 | `MASTER_LISTCUT_REQ` | `sub_579E70` | C2S | `str nick` |
+| 292 | `MASTER_LISTCUT_ACK` | — | S2C | `(空)` |
+| 293 | `MASTER_USERINFODB_REQ` | `sub_57A490` | C2S | `str nick` (查 DB 用戶) |
+| 294 | `MASTER_USERINFODB_ACK` | `sub_57A540` | S2C | `bool found, s32 uid, str nick` |
+| 394 | `MASTER_ROOMINFO_REQ` | `sub_5790A0` | C2S | `u8 room_no` (查詢房內成員與 IP) |
+| 395 | `MASTER_ROOMINFO_ACK` | `sub_579160` | S2C | `u8 count, count×(u8 slot, str nick, str ip)` |
+| 402 | `MASTER_EVENTPAGE_REQ` | `sub_579450` | C2S | `f32 rate` (設定活動 PG 倍率) |
+| 403 | `MASTER_EVENTPAGE_ACK` | `sub_579500` | S2C | `f32 rate` |
+| 404 | `MASTER_EVENTEXP_REQ` | `sub_5795A0` | C2S | `f32 rate` (設定活動 EXP 倍率) |
+| 405 | `MASTER_EVENTEXP_ACK` | `sub_579650` | S2C | `f32 rate` |
+| 416 | `MASTER_KILLALL_REQ` | `sub_579DB0` | C2S | `(空)` (全服強制踢線維護) |
+| 417 | `MASTER_KILLALL_ACK` | — | S2C | `(空)` |
+| 822 | `MASTER_CHAT_BAN_REQ` | `sub_582770` | C2S | `u8 mode, u8 duration_min, str nick` (禁言) |
+| 823 | `MASTER_CHAT_BAN_ACK` | `sub_5827C0` | S2C | `u8 status` |
+| 824 | `MASTER_USERLIST_REQ` | `sub_582840` | C2S | `u8 mode, s32 page` (分頁玩家清單) |
+| 825 | `MASTER_USERLIST_ACK` | `sub_582890` | S2C | `u8 count, count×(s32 uid, str nick)` |
+| 830 | `MASTER_CHAT_FORCE_BAN_REQ` | `sub_582B90` | C2S | `u8 mode, str nick, s32 duration_sec` |
+| 831 | `MASTER_CHAT_FORCE_BAN_ACK` | `sub_582BE0` | S2C | `u8 status` |
+| 841 | `MASTER_SETALL_EVENTEXP_REQ` | `sub_584280` | C2S | `f32 rate` |
+| 842 | `MASTER_SETALL_EVENTEXP_ACK` | — | S2C | `f32 rate` |
+| 843 | `MASTER_SETALL_EVENTPAGE_REQ` | `sub_584340` | C2S | `f32 rate` |
+| 844 | `MASTER_SETALL_EVENTPAGE_ACK` | — | S2C | `f32 rate` |
+| 845 | `MASTER_VIEWALL_EVENTSTATE_REQ` | `sub_584400` | C2S | `(空)` |
+| 846 | `MASTER_VIEWALL_EVENTSTATE_ACK` | `sub_584400` | S2C | `f32 exp_rate, f32 page_rate` |
+| 883 | `MASTER_FIND_USER_REQ` | `sub_579B10` | C2S | `s32 uid` (追蹤玩家所在頻道與房間) |
+| 884 | `MASTER_FIND_USER_ACK` | `sub_579BC0` | S2C | `u8 status(1=找到), s32 uid, str nick, u8 channel, u8 room_no` |
+| 885 | `MASTER_PLAY_WITH_REQ` | `sub_579C70` | C2S | `s32 uid` (GM 瞬移進入目標房間) |
+| 886 | `MASTER_PLAY_WITH_ACK` | — | S2C | `u8 status` |
+
+### 3.15j 遊戲中心 GameCenter 迷你遊戲協定 (五十五輪全鏈定案)
+
+| Opcode | 封包名稱 | 來源函數 | 方向 | Wire 格式與行為 |
+|---|---|---|---|---|
+| 472 | `GL_GAMECENTER_REC_REQ` | `sub_5848B0` | C2S | `s16 game_id` (查詢小遊戲紀錄) |
+| 473 | `GL_GAMECENTER_REC_ACK` | `sub_584910` | S2C | `s16 game_id, s32 high_score, u8 top3_cnt, u8 top10_cnt, u8 v24, u8 v35, s16 v28, s32 v30, raw16, u8 v23` |
+| 474 | `GG_GAMECENTER_GAME_START_REQ` | `sub_584E20` | C2S | `s16 game_id, u8 stage` |
+| 475 | `GG_GAMECENTER_GAME_START_ACK` | `sub_584E80` | S2C | `u8 status(1), s16 game_id, u8 stage` |
+| 476 | `GG_GAMECENTER_GAME_END_REQ` | `sub_584EE0` | C2S | `s16 game_id, raw24 score_data, raw44 stats_data` |
+| 477 | `GG_GAMECENTER_GAME_END_ACK` | `sub_564A00` / `sub_76E450` | S2C | `s16 game_id, raw32, raw44, s16, s32 high_score, raw24, raw8, s32 score, s32 reward_gp, s32 reward_exp, s32 rank, s8, u8, u8, s8, s8` |
+| 478 | `GG_GAMECENTER_GAME_PLAY_CHECK_REQ` | `sub_564A40` | C2S | `raw36 check_data` (小遊戲反作弊心跳) |
+| 479 | `GG_GAMECENTER_GAME_PLAY_CHECK_ACK` | — | S2C | `u8 status(1)` |
+| 480 | `GG_GAMECENTER_RANKING_REQ` | `sub_585020` | C2S | `s16 game_id, u8 mode` |
+| 481 | `GG_GAMECENTER_RANKING_ACK` | `sub_585080` | S2C | `s16 game_id, u8 v18, s16 v13, s32 v14, u8 count, count×(0x38 排名條目)` |
+| 483 | `GG_GAMECENTER_GAME_START_OK_REQ` | `sub_584F10` | C2S | `s16 game_id` |
+| 484 | `GG_GAMECENTER_GAME_START_OK_ACK` | `sub_584F70` | S2C | `s16, u8 status(1), u16 game_id, s32` |
+| 485 | `GL_GET_GAMEROOM_PROGRESSTIME_REQ` | `sub_56AD90` | C2S | `u8 room_no` (查詢戰局進行時間) |
+| 486 | `GL_GET_GAMEROOM_PROGRESSTIME_ACK` | `sub_56AE30` | S2C | `u8 n3, s16 room_no, u8 id, s32 elapsed_sec, u8, s8, u8, s8, u8, s8, u8, s8` |
+
+### 3.15k AI / PVE 防衛戰模式協定 (五十五輪全鏈定案)
+
+| Opcode | 封包名稱 | 來源函數 | 方向 | Wire 格式與行為 |
+|---|---|---|---|---|
+| 918 | `GR_AI_GET_REWARD_ITEM_REQ` | `sub_761AC0` | C2S | `u8 reward_idx` (PVE 結算抽獎) |
+| 919 | `GR_AI_GET_REWARD_ITEM_ACK` | `sub_761B20` | S2C | `u8 idx, u8 status(0=成功), s32 item_id, u8 slot, s32 count, u8 flag` |
+| 922 | `GR_AI_DAMAGE_SHIELD_REQ` | `sub_7616B0` | C2S | `s16 shield_id, s16 damage, s16 remain, f32 unk` (防衛核心受損) |
+| 923 | `GR_AI_DAMAGE_SHIELD_ACK` | `sub_761710` | S2C | `s16 shield_id, s16 damage, s16 remain, f32 unk` (房間廣播同步) |
+| 924 | `GR_AI_RECHARGE_MAGAZINE_START_REQ` | `sub_558350` | C2S | `u8 slot, u8 team, u8 unk` (彈藥補給開始) |
+| 925 | `GR_AI_RECHARGE_MAGAZINE_START_ACK` | `sub_558550` | S2C | `u8 slot, u8 team, u8 unk` (房間廣播) |
+| 926 | `GR_AI_RECHARGE_MAGAZINE_END_REQ` | `sub_5586B0` | C2S | `u8 slot, u8 team, s8 status` (彈藥補給完成) |
+| 927 | `GR_AI_RECHARGE_MAGAZINE_END_ACK` | `sub_558880` | S2C | `u8 slot, u8 team, u8 status` (房間廣播) |
+| 928 | `GR_AI_CONTINUE_START_REQ` | `sub_761DB0` | C2S | `s32 continue_count` (PVE 接關復活) |
+| 929 | `GR_AI_CONTINUE_START_ACK` | `sub_761E90` | S2C | `u8 status(1=成功), s32 continue_count` |
+| 935 | `GR_AI_FEVER_START_REQ` | `sub_7622C0` | C2S | `(空)` (啟動 Fever 狂暴狀態) |
+| 936 | `GR_AI_FEVER_START_ACK` | `sub_7623A0` | S2C | `u8 status(1), u8 flag(0), s32 duration_ms(10000), u8 type(1)` |
+| 939 | `GR_AI_GO_NEXT_WAVE_REQ` | `sub_75CE40` | C2S | `(空)` (波次切換推進) |
+| 940 | `GR_AI_GO_NEXT_WAVE_ACK` | `sub_7613D0` | S2C | `u8 next_wave, s32 wave_time` |
+| 944 | `GR_RESET_GAMEROOMSLOT_REQ` | `sub_585E90` | C2S | `(空)` (重置房間槽位) |
+| 945 | `GR_RESET_GAMEROOMSLOT_ACK` | `sub_585F30` | S2C | `u8 status(1)` |
+
 
 ### 3.15b 房間戰鬥流程 GR 家族 (九輪讀畢)
 ```
@@ -1580,7 +1753,8 @@ dispatcher case 102 → `sub_58D6F0` 立即 `ctor(101)` 回送
   s32 custom_tex, s32 tex_crc, str tex_name, 武器組×4 (固定四組:
   u16 equipped, [3×u16 sub 若組≠3], [8×s32 parts 若 equipped≠0]),
   u8 extra_flag([8×s32] 若≠0), 9×s32 技能 (sub_527550),
-  u8 n5 + 7×s32 快速槽 (sub_527D00)`;
+  u8 n5 + 7×s32 快速槽 (sub_527D00), sub_885D00 語音塊 (85B:
+  s16 base1, s16 base2, 27×{s16 item, u8 flag})`;
   ==3: 同 ==1 的單人更新 (以 slot 定址)
 - **110 GL_ROOMINFOCHANGE_ACK** (sub_569240): `bool ok, u8 sub_type` +
   sub_type 1/2: room_no + 標題/密碼/規則變更組; 3..9: u8 room_no 單欄位

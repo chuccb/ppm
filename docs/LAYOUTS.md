@@ -123,7 +123,7 @@
 | 367 |  | sub_586090 | `s8/bool` |
 | 369 | GR_TEAMSHUFFLECHANGE_ACK | sub_585D90 | `s8/bool` |
 | 371 | GL_CHANGECHANNEL_ACK | sub_570100 | `u8 u8 str s32 u8` |
-| 379 | GR_RADIOMSG_ACK | sub_559510 | `(無直接讀取/轉發)` |
+| 379 | GR_RADIOMSG_ACK | sub_559510 (sub_74C500) | `u8 u8 u8 u8 wstr` |
 | 381 | GP_CHMKILLC_ACK | sub_556CB0 | `(無直接讀取/轉發)` |
 | 383 | GP_CHUKILLC_ACK | sub_556D10 | `(無直接讀取/轉發)` |
 | 385 | GP_CHZKILLC_ACK | sub_556D70 | `(無直接讀取/轉發)` |
@@ -218,6 +218,9 @@
 | 782 | GL_RECEIVE_NEW_MSG | sub_5643C0 | `(無直接讀取/轉發)` |
 | 784 | GL_NEW_MSG_COUNT_ACK | sub_564480 | `s32` |
 | 786 | GL_FRIEND_ADD_PROCESS_ACK | sub_5645B0 | `u8 str u8` |
+| 792 | GL_VOICEITEMSLOT_ACK | sub_885D00 (vtbl+12 sub_876B00) | `u8 s16 s16 27×(s16 u8)` |
+| 794 | GI_VOICEITEMSLOT_ALL_ACK | sub_885DA0 (vtbl+16 sub_876C90) | `u8 count×(u8 s16 s16 27×(s16 u8))` |
+| 796 | GI_CHANGE_VOICEITEMSLOT_ACK | sub_885E40 | `u8 u8` |
 | 810 | GS_HIDDENMAP_LIST_ACK | sub_582250 | `s32 s32` |
 | 811 | GR_PROBABILITY_APPLY_NOTIFY | sub_58EE30 | `(無直接讀取/轉發)` |
 | 813 | MASTER_SPECIAL_ABILITY_ITEMSLOT_PROBABILITY_APPLY_ACK | sub_58EE60 | `s8/bool` |

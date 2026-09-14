@@ -43,6 +43,7 @@ public static class FriendHandlers
         add(Opcode.GL_MSG_ADD_REQ, MsgSend);
         add(Opcode.GL_MSG_RECVLIST_REQ, MsgList);
         add(Opcode.GL_MSG_DEL_REQ, MsgDelete);
+        add(Opcode.GL_MSG_READ_REQ, MsgRead);
         add(Opcode.GL_NEW_MSG_COUNT_REQ, NewMessageCount);
         add(Opcode.GL_FRIEND_CHAT_REQ, FriendChat);
         add(Opcode.GL_FRIEND_WHERE_REQ, FriendWhere);
@@ -117,6 +118,19 @@ public static class FriendHandlers
             && context.Db.DeleteMessage(session.UserId, msgId);
 
         await session.SendAsync(new Packet(Opcode.GL_MSG_DEL_ACK)
+            .WriteU8(ok ? (byte)1 : (byte)0)
+            .WriteStr(key));
+    }
+
+    // REQ(423) sub_55A3C0: str msg_key → ACK(424) sub_55A4F0: u8 ok, str key
+    private static async ValueTask MsgRead(Session session, Packet packet, ServerContext context)
+    {
+        var key = packet.ReadStr();
+        bool ok = session.UserId != 0
+            && long.TryParse(key, out long msgId)
+            && context.Db.MarkMessageRead(session.UserId, msgId);
+
+        await session.SendAsync(new Packet(Opcode.GL_MSG_READ_ACK)
             .WriteU8(ok ? (byte)1 : (byte)0)
             .WriteStr(key));
     }

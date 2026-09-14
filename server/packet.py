@@ -198,4 +198,81 @@ if __name__ == '__main__':
     b = Packet.from_bytes(a.to_bytes())
     assert b.unseal()
     assert (b.read_s8(), b.read_s32(), b.read_s32(), b.read_s32()) == (1, 0, 3, 1001)
+
+    # 語音 792 (GL_VOICEITEMSLOT_ACK) 86B 單角色塊 (sub_876B00 讀序)
+    v792 = Packet(792)
+    v792.write_u8(1)         # char_idx = 1 (nari/tina)
+    v792.write_s16(10).write_s16(20)  # base1, base2
+    for i in range(27):
+        v792.write_s16(500 + i).write_u8(1 + (i % 9))
+    assert len(v792.buf) == 86, f'expected 86B, got {len(v792.buf)}'
+    v792.seal()
+    v792_dec = Packet.from_bytes(v792.to_bytes())
+    assert v792_dec.unseal()
+    assert v792_dec.read_u8() == 1
+    assert (v792_dec.read_s16(), v792_dec.read_s16()) == (10, 20)
+    for i in range(27):
+        assert (v792_dec.read_s16(), v792_dec.read_u8()) == (500 + i, 1 + (i % 9))
+    assert v792_dec.rpos == len(v792_dec.buf)
+
+    # 語音 794 (GI_VOICEITEMSLOT_ALL_ACK) 1291B 全 15 角色塊 (sub_876C90 讀序)
+    v794 = Packet(794)
+    v794.write_u8(15)        # count = 15
+    for c in range(15):
+        v794.write_u8(c)
+        v794.write_s16(c).write_s16(c * 2)
+        for i in range(27):
+            v794.write_s16(0).write_u8(0)
+    assert len(v794.buf) == 1 + 15 * 86 == 1291, f'expected 1291B, got {len(v794.buf)}'
+
+    # 378/379 RadioMsg (sub_5593A0 / sub_74C500)
+    r378 = Packet(378)
+    r378.write_u8(0)         # team
+    r378.write_u8(3)         # face (0..26)
+    r378.write_u8(1)         # slot
+    r378.write_u8(4)         # len
+    r378.write_raw("Help".encode('utf-16-le'))
+    assert len(r378.buf) == 4 + 8 == 12
+
+    # sub_885D00 嵌入 114 成員負載尾塊 (85B: base1, base2, 27*(item, flag))
+    v885 = Packet(114)
+    v885.write_s16(1).write_s16(2)
+    for i in range(27):
+        v885.write_s16(i).write_u8(1)
+    assert len(v885.buf) == 85
+
+    # 系統/角色/商城/任務/投票 (686, 705, 371, 132, 720, 424, 454, 803, 877, 699, 901)
+    p686 = Packet(686).write_s32(5)
+    assert p686.read_s32() == 5
+
+    p705 = Packet(705).write_s32(50).write_f32(1.0).write_s32(30)
+    assert p705.read_s32() == 50 and p705.read_f32() == 1.0 and p705.read_s32() == 30
+
+    p371 = Packet(371).write_u8(1).write_u8(2).write_str("127.0.0.1").write_s32(10000).write_u8(0)
+    assert p371.read_u8() == 1 and p371.read_u8() == 2 and p371.read_str() == "127.0.0.1"
+
+    p132 = Packet(132).write_u8(1).write_u8(3)
+    assert p132.read_u8() == 1 and p132.read_u8() == 3
+
+    p720 = Packet(720).write_s32(2).write_s32(1).write_s32(0).write_s32(30).write_u8(0)
+    assert p720.read_s32() == 2 and p720.read_s32() == 1
+
+    p424 = Packet(424).write_u8(1).write_str("101")
+    assert p424.read_u8() == 1 and p424.read_str() == "101"
+
+    p454 = Packet(454).write_u8(1).write_s32(10).write_s32(20)
+    assert p454.read_u8() == 1 and p454.read_s32() == 10 and p454.read_s32() == 20
+
+    p803 = Packet(803).write_u8(0).write_u8(0).write_s32(1000).write_s32(500).write_u8(1).write_s32(5).write_s32(0)
+    assert p803.read_u8() == 0 and p803.read_u8() == 0
+
+    p877 = Packet(877).write_u8(0).write_s32(0)
+    assert p877.read_u8() == 0 and p877.read_s32() == 0
+
+    p699 = Packet(699).write_u8(1).write_s32(100).write_s32(50)
+    assert p699.read_u8() == 1 and p699.read_s32() == 100
+
+    p901 = Packet(901).write_u8(1).write_s32(1001).write_s32(99)
+    assert p901.read_u8() == 1 and p901.read_s32() == 1001
+
     print('packet.py self-test OK ✔')

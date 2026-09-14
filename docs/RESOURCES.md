@@ -549,3 +549,34 @@ roommake 結論。
 > 註: 這些是二進位貼圖, 不入版控 (參考 .gitignore 慣例只收小文字
 > 資源)。尺寸/格式可用 `PIL.Image.open` 直接讀 DDS/TGA 頭確認;
 > 本環境無視覺檢視器, 上述判讀依據 = 檔名 + XML 引用 + 模式枚舉互證。
+
+---
+
+## 9. 客戶端字串解密與 UI 槽位/改裝/倉庫定名對照 (五十四輪更新)
+
+五十四輪對 `PaperMan.exe.c` 進行了反編譯字串修復，揭露了大量先前為 `&off_XXXXXX` 偏移的 UI 標籤、技能槽、改裝件與倉庫頁籤字串：
+
+### 9.1 sub_527550 的 9 個技能/能力槽（Ability Slots）正式名稱
+對應 `sub_4C4990` 與 `sub_4C4E70` 的 9 個槽位陣列：
+1. `Crosshair` (0): 準心自訂
+2. `NAME` (1): 名稱/暱稱卡
+3. `MASTER` (2): 大師/稱號
+4. `ABILITY` (3): 主能力
+5. `BOOST_EXP` (4): 經驗值加成
+6. `BOOST_PG` (5): PG (Game Point) 加成
+7. `EXTRA_ABILITY` (6): 額外能力 1
+8. `EXTRA_ABILITY` (7): 額外能力 2
+9. `VOICE` (8): 角色語音槽
+
+### 9.2 武器零件改裝槽（Weapon Parts Slots）與標記
+對應 `sub_4C50A0`、`sub_95B180`：
+- 改裝槽位：`PARTS_01` 至 `PARTS_07` (7 個改裝槽)
+- 零件設定：`PARTS_SET_%d`, `PARTS_SET_MOUSE_%d`, `PARTS_SET_EMPTY_%d`
+- 操作按鈕：`PARTS_EQUIP`, `PARTS_CLEAR`
+- 狀態標籤：`COUPON_MARK`, `ONLY_NETCAFE_MARK`, `RECYCLE_OUTLINE`, `PARTS_WAITING`
+
+### 9.3 倉庫頁籤（Warehouse Tabs）
+對應 `sub_4F0240`：
+- 頁籤 ID：`WAREHOUSE_1` 至 `WAREHOUSE_6`
+- 格式字串：`L"WAREHOUSE_%d"`、`L"WARE_TAB_%d"`
+

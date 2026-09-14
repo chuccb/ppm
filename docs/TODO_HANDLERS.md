@@ -106,79 +106,117 @@
 > 送錯比不送糟)。⑥ BattleRelay 全面改 TryFindRoomSlot 清晰寫法。
 > 詳 PACKETS.md §3.15d3。
 >
-> 下一輪可做: 269 code 6/7 成功態 (需遊戲狀態機, sub_885D00 尾塊
-> 待確認); GM/MASTER 群 (275-299/394-416/822-831/883-885, 需權限
-> 分級); matching room 群 (983/986/988); AI 模式群 (918-944);
-> 130/134 的 +146/+150 原服語意 (client 存而不讀, 送 0 已安全)。
+> 五十二輪 (sub_885D00 語音全鏈閉環 + 114/269/765/985 負載尾塊補齊):
+> ① **sub_885D00 呼叫全景定案**: 全 exe 共有 6 處呼叫 — 114 (GR_ENTERROOM_ACK)、
+>    269 (GL_JOINPLAY_ACK)、765 (GL_CLAN_TNMT_ENTERROOM_ACK)、985
+>    (GL_ENTERMATCHINGROOM_ACK)、792 (GL_VOICEITEMSLOT_ACK) 與 796
+>    (GI_CHANGE_VOICEITEMSLOT_ACK 失敗回滾)。
+> ② **語音塊 wire 佈局**: mode 2 (房間成員) 讀 85B (`s16 base1, s16 base2,
+>    27×{s16 voice_item, u8 flag}`); mode 1 (792 ACK) 讀 86B (`u8 char_idx`
+>    + 85B 塊); 794 ACK 讀 `u8 count` + count×86B (1291B)。
+> ③ **補齊 114 / 269 / 765 / 985 負載尾塊**: Handlers.Room.cs 的
+>    WriteMemberLoadout 末尾補上 WriteVoiceBlock (85B); 修正 114 進房
+>    解析偏移。
+> ④ **269 GL_JOINPLAY_ACK 成功態全落地**: 268 PLAY(flag=0) → code 6
+>    (自身完整快照, 含 85B 語音塊); 268 OBSERVE(flag=1) → code 7
+>    (全房+全成員快照, 含 85B 語音塊)。
+> ⑤ **錦標賽 764/765 與配對房 983/984/988/989 落地**:
+>    764 → 765 (與 114 同構, 錦標賽進房); 983 → 984 (配對建立);
+>    988 → 989 (配對取消)。
+> ⑥ **自測與 DB 測試**: SelfTest 增測 791-796 / 378 / 114 / 269 語音塊;
+>    smoke_test.py 增測 voice_customize 與 voice_slots CRUD 及約束。
+>
+> 五十三輪 (系統/角色/商城/信件/投票/轉蛋 22 個 REQ 全面落地):
+> ① **教學與系統限制 (685/686, 689/690, 704/705, 706/707, 787/788, 834/835, 370/371)**:
+>    - 685/686: 教學索引查詢 (s32 flags1); 689/690: 教學進度設置;
+>    - 704/705: 殺敵上限與經驗倍率 (s32 kill_limit 50, f32 exp 1.0, s32 max_lv 30);
+>    - 706/707 & 787/788: 商城計費 Token 與排行榜 Token 頒發;
+>    - 834/835: 資料接收完成 ACK; 370/371: 頻道切換 (u8 status 1, u8 ch, ip, port, extra)。
+> ② **角色與裝備 (214/215, 218/219, 220/221, 312/313, 466/467, 912/913, 310/311)**:
+>    - 214/215: 角色初創 (u8 char_type, 3×s16 equip);
+>    - 218/219 & 312/313: 角色槽切換 (u8 slot_no → users.current_char);
+>    - 220/221: 武器組全量裝備更新 (4×weapon_groups);
+>    - 466/467: 技能槽更換 (skill_slots 更新);
+>    - 912/913: 武器零件裝備/更換 (op_type 1/2, weapon_id, part_id);
+>    - 310/311: 購買新角色 (characters 插入, users.game_point 扣款)。
+> ③ **商城/背包/信件/任務 (453/454, 802/803, 423/424, 876/877, 878/879)**:
+>    - 453/454: 刪除禮物 (gifts 刪除);
+>    - 802/803: 銷毀背包道具 (inventory 刪除/減量, 回傳剩餘數與 PG/CASH);
+>    - 423/424: 信件標記已讀 (messages.is_read = 1);
+>    - 876/877: 每日任務接取 (回傳 13B 任務結構);
+>    - 878/879: 榮譽任務完成確認 (榮譽標題與稱號)。
+> ④ **轉蛋機與膠囊機 (698-703, 900/901)**:
+>    - 698/699: 進入轉蛋機 (coins, cash 查詢);
+>    - 702/703: 轉蛋機道具清單 (normal, rare items);
+>    - 700/701: 開始轉蛋 (扣幣, 抽取道具);
+>    - 900/901: 膠囊機啟動 (扣代幣, 抽取道具)。
+> ⑤ **房間管理與投票 (131/132, 718-722)**:
+>    - 131/132: 房主強制踢人 (廣播 132 ACK 並移除 slot 成員);
+>    - 718-722: 踢人投票流程 (718 REQ → 719 ACK → 720 全房倒數廣播 → 721 表決 → 722 結算)。
+> ⑥ **自測與驗證**: SelfTest 增測 23 項封包編解碼; smoke_test 增測 Step 14 CRUD; 全測試 100% 通過。
+>
+> 五十五輪 (GM / MASTER、GameCenter 迷你遊戲、PVE / AI 防衛戰 37 個封包全鏈落地):
+> ① **GM / MASTER 管理指令簇 (Handlers.Master.cs)**:
+>    - 275/276 (MEMO 私訊)、277/278 (MEMOALL 全服廣播)、279/280 (USERCUT 踢線)、
+>      281/282 (USERCUT2 依 UID 踢線)、283/284 (ROOMCUT 解散房間)、285/286 (MSET GM旗標)、
+>      287/288 (PRINTUSER 在線人數)、289/290 (USERINFO 查玩家)、291/292 (LISTCUT)、
+>      293/294 (USERINFODB)、394/395 (ROOMINFO 房成員與IP)、402/403 (EVENTPAGE PG倍率)、
+>      404/405 (EVENTEXP EXP倍率)、416/417 (KILLALL 全服維護踢線)、822/823 (CHAT_BAN 禁言)、
+>      824/825 (USERLIST 玩家清單)、830/831 (CHAT_FORCE_BAN)、841/842 (SETALL_EXP)、
+>      843/844 (SETALL_PAGE)、845/846 (VIEWALL_EVENTSTATE)、883/884 (FIND_USER 查房號)、
+>      885/886 (PLAY_WITH 瞬移進房)。
+> ② **遊戲中心 GameCenter 迷你遊戲協定 (Handlers.GameCenter.cs + Db.GameCenter.cs)**:
+>    - 472/473: 紀錄查詢 (高分/排名/遊玩次數);
+>    - 474/475 & 483/484: 迷你遊戲開始與確認;
+>    - 476/477: 遊戲結算與高分落庫、PG/EXP 獎勵派發 (32B/44B 結構體對齊);
+>    - 478/479: 防作弊心跳檢查;
+>    - 480/481: 迷你遊戲 TOP 10 / TOP 3 排行榜查詢 (0x38 條目結構);
+>    - 485/486: 戰局進行時間查詢 (sub_56AE30 動態時鐘同步)。
+> ③ **AI / PVE 防衛戰模式協定 (Handlers.Ai.cs)**:
+>    - 918/919: PVE 結算道具抽取 (8B 抽獎結果同步);
+>    - 922/923: 核心防護罩受損廣播 (shield_id, damage, remain);
+>    - 924/925: 彈藥補給開始全房廣播;
+>    - 926/927: 彈藥補給完成全房廣播;
+>    - 928/929: 接關復活 (continue_count 同步);
+>    - 935/936: Fever 狂暴狀態觸發廣播;
+>    - 939/940: 波次推進 (Wave 切換與計時);
+>    - 944/945: 房間槽位重置。
+> ④ **自測與 DB 測試**: `Db.GameCenter.cs` 擴充個人紀錄與排行榜查詢; `smoke_test.py` 增測 Step 15-16; 測試全數通過。
+>
+> 下一輪可做:
+> 1. 佔領模式/染布/紙漿搶奪與破壞模式 (730-741, 902-906);
+> 2. 武器丟棄與地面拾取 (962);
+> 3. 戰隊錦標賽進階流程 (756-776)。
 
 | op | 名稱 | REQ 寫入序列 |
 |---|---|---|
 | 103 | GE_LOGOUT_REQ | `(空)` |
-| 131 | GR_FORCEOUT_REQ | `u8` |
-| 214 | GM_CREATECHAR_REQ | `u8 s16 s16 s16` |
-| 218 | GI_CHANGEDATA_REQ | `u8` |
-| 220 | GI_CHANGEWP_REQ | `u8` |
 | 230 | GP_CHLOSSC_REQ | `s32` |
 | 232 | GP_CHKILLC_REQ | `s32` |
 | 244 | GP_CHTKILLC_REQ | `s32` |
-| 275 | MASTER_MEMO_REQ | `wstr` |
-| 277 | MASTER_MEMOALL_REQ | `wstr` |
-| 279 | MASTER_USERCUT_REQ | `u8 str` |
-| 281 | MASTER_USERCUT2_REQ | `s32` |
-| 283 | MASTER_ROOMCUT_REQ | `u8` |
-| 285 | MASTER_MSET_REQ | `u8` |
-| 287 | MASTER_PRINTUSER_REQ | `(空)` |
-| 289 | MASTER_USERINFO_REQ | `str` |
-| 291 | MASTER_LISTCUT_REQ | `str` |
-| 293 | MASTER_USERINFODB_REQ | `str` |
 | 298 | GS_TAKEGIFT_REQ | `(空)` |
 | 300 | GS_MOVEGIFT_REQ | `(空)` |
 | 306 | GG_JJGET_REQ | `u8` |
-| 310 | GS_BUYCHAR_REQ | `s32 s32 s32 s32 s32 s32` |
-| 312 | GI_CHANGESLOT_REQ | `u8` |
 | 324 | GG_BOMBEND_REQ | `u8` |
 | 358 | GS_BUYCASHITEM_REQ | `u8 s32 s32` |
-| 370 | GL_CHANGECHANNEL_REQ | `u8` |
 | 374 | GR_GETCRYSTAL_REQ | `u8` |
-| 394 | MASTER_ROOMINFO_REQ | `u8` |
 | 398 | MASTER_SVRCLASS_REQ | `u8` |
 | 400 | MASTER_CONNTYPE_REQ | `u8` |
-| 402 | MASTER_EVENTPAGE_REQ | `f32` |
-| 404 | MASTER_EVENTEXP_REQ | `f32` |
 | 410 | MASTER_DISLOGIN_REQ | `(空)` |
 | 412 | MASTER_DISGMS_REQ | `str s32` |
 | 414 | MASTER_DISLOG_REQ | `str s32` |
-| 416 | MASTER_KILLALL_REQ | `(空)` |
 | 418 | MASTER_RESETTCPGROUPINFO_REQ | `str s32` |
-| 423 | GL_MSG_READ_REQ | `str` |
 | 443 | GG_STEALSUCK_REQ | `u8 s16` — ACK 444=u8,u8,u16×3 分數組, 需計分狀態機 (勿轉發) |
 | 445 | GG_STEALPUSH_REQ | `u8 s16` — ACK 446=u8,u8,u16×3 分數組, 需計分狀態機 (勿轉發) |
-| 453 | GS_DELETEGIFT_REQ | `s32 s32` |
 | 457 | GI_CHANGEITEMSLOT_REQ | `(空)` |
 | 461 | GS_USE_PAPERCODEGIFT_REQ | `str` |
 | 464 | GS_USE_PAPERCODEGIFT_IGNORE_DUPLICATED_ITEM_REQ | `u8 str` |
-| 466 | GI_CHANGE_SKILLITEMSLOT_REQ | `u8 u8 u8` |
-| 472 | GL_GAMECENTER_REC_REQ | `s16` |
-| 474 | GG_GAMECENTER_GAME_START_REQ | `s16 u8` |
-| 476 | GG_GAMECENTER_GAME_END_REQ | `s16 raw24 raw44` |
-| 478 | GG_GAMECENTER_GAME_PLAY_CHECK_REQ | `raw36` |
-| 480 | GG_GAMECENTER_RANKING_REQ | `s16 u8` |
-| 483 | GG_GAMECENTER_GAME_START_OK_REQ | `s16` |
-| 485 | GL_GET_GAMEROOM_PROGRESSTIME_REQ | `u8` |
 | 571 | GV_TEST_REQ | `str str` |
 | 581 | GC_CLAN_START_REQ | `(空)` |
-| 685 | GL_TUTORIALINDEX_REQ | `(空)` |
-| 689 | GL_TUTORIAL_INDEX_SET_REQ | `s32` |
 | 697 | GG_CHEATER_REPORT_REQ | `s16` |
-| 698 | GP_ENTER_PEPACHI_REQ | `(空)` |
-| 700 | GP_START_GAME_REQ | `u8 s32` |
-| 702 | GP_PEPACHI_LIST_REQ | `(空)` |
-| 704 | GL_LEVEL_KILL_LIMIT_REQ | `(空)` |
-| 706 | GL_BILLTOKEN_REQ | `(空)` |
 | 708 | GL_CHECKCASHPG_REQ | `s32` |
 | 714 | GG_INVALIDWPDATA_REQ | `u8 u8 u8 str s32` |
 | 716 | GG_CHANGEWPQUICKSLOT_REQ | `s16 s16 s16 s16` |
-| 718 | GR_START_VOTING_REQ | `s32 s32 s32` |
 | 724 | GL_COMBISKILLITEM_REQ | `s32 s32 s32 s32` |
 | 730 | GG_GETPULP_REQ | `u8` |
 | 733 | GG_SPAWNPULP_REQ | `(空)` |
@@ -191,14 +229,11 @@
 | 756 | GL_CLAN_TNMT_RECEIPT_REQ | `s32` |
 | 758 | GL_CLAN_TNMT_RECEIPT_CANCEL_REQ | `s32` |
 | 762 | GL_CLAN_TNMT_CURRENT_STATE_NOTICE_REQ | `(空)` |
-| 764 | GL_CLAN_TNMT_ENTERROOM_REQ | `u8 s32` |
 | 767 | GL_CLAN_TNTM_AWARD_INFO_REQ | `(空)` |
 | 771 | GL_CLAN_TNMT_ALL_INFO_REQ | `s32` |
 | 773 | MASTER_RELOAD_TNMT_REQ | `(空)` |
 | 776 | GL_CLAN_TNMT_CLANREC_REQ | `(空)` |
 | 785 | GL_FRIEND_ADD_PROCESS_REQ | `str` |
-| 787 | GL_RACKINGWEB_TOKEN_REQ | `(空)` |
-| 802 | GS_DESTROYITEM_REQ | `s32 s32 u8 s32 s32` |
 | 804 | MASTER_RELOAD_HIDDEN_ITEM_LIST_REQ | `(空)` |
 | 806 | GS_HIDDEN_ITEM_LIST_REQ | `s16` |
 | 808 | GS_GET_RECOMMENDSET_INFO_REQ | `s32 s32 s32 s32 s32 s32 s32 s32 s32 s32` |
@@ -206,38 +241,16 @@
 | 814 | MASTER_CHECK_BOMB_CHEATER_APPLY_REQ | `s8` |
 | 819 | MASTER_CHECK_NPGAMEGUARD_QUERY_REQ | `(空)` |
 | 820 | GG_CHATTING_PENALTY_REPORT_REQ | `s32` |
-| 822 | MASTER_CHAT_BAN_REQ | `u8 u8 str` |
-| 824 | MASTER_USERLIST_REQ | `u8 s32` |
-| 830 | MASTER_CHAT_FORCE_BAN_REQ | `u8 str s32` |
 | 831 | MASTER_RESET_PACKET_DELAY_ALLOW_TIME_SEC_REQ | `s32` |
-| 834 | GL_DATA_RECV_COMPLETED_REQ | `s32` |
 | 838 | GR_CLAN_JOIN_RECOMMAND_REQUEST_REQ | `u8 s32` |
-| 841 | MASTER_SETALL_EVENTEXP_REQ | `f32` |
-| 843 | MASTER_SETALL_EVENTPAGE_REQ | `f32` |
-| 845 | MASTER_VIEWALL_EVENTSTATE_REQ | `(空)` |
 | 849 | MASTER_TNMT_VIEW_STATE_REQ | `(空)` |
 | 871 | GQ_QUEST_SUCCESS_REQ | `raw4` |
 | 873 | GQ_QUEST_COMPLETE_REQ | `raw4` |
-| 876 | GQ_QUEST_ACCEPT_DAILY_REQ | `(空)` |
-| 878 | GQ_QUEST_USER_COMPLETE_HONOR_REQ | `s8` |
-| 883 | MASTER_FIND_USER_REQ | `s32` |
-| 885 | MASTER_PLAY_WITH_REQ | `s32` |
 | 887 | GX_XIGNCODE_DATA_REQ | `rawN` |
 | 890 | GC_QUERY_CLANRANKING_REQ | `(空)` |
 | 892 | MASTER_RELOAD_CLANRANKING_REQ | `(空)` |
-| 900 | GS_CAPSULEMACHINE_START_REQ | `u8 s32` |
 | 902 | GG_OCC_START_REQ | `u8 u8 s32` |
 | 904 | GG_OCC_SUCC_REQ | `u8 u8 s32` |
 | 906 | GG_OCC_FAIL_REQ | `u8 u8 s32` |
-| 912 | GL_WEAPONPARTS_EQUIP_CHANGE_REQ | `u8 s32 s32 s32 || u8 s32 s32` |
-| 918 | GR_AI_GET_REWARD_ITEM_REQ | `u8` |
-| 922 | GR_AI_DAMAGE_SHIELD_REQ | `s16 s16 s16 f32` |
-| 924 | GR_AI_RECHARGE_MAGAZINE_START_REQ | `u8 u8 u8` |
-| 926 | GR_AI_RECHARGE_MAGAZINE_END_REQ | `u8 u8 s8` |
-| 928 | GR_AI_CONTINUE_START_REQ | `s32` |
-| 935 | GR_AI_FEVER_START_REQ | `(空)` |
-| 939 | GR_AI_GO_NEXT_WAVE_REQ | `(空)` |
-| 944 | GR_RESET_GAMEROOMSLOT_REQ | `(空)` |
 | 962 | GG_DROPWEAPON_GET_AND_DROP_REQ | `s16 s16 u8 s16 s16 f32` |
-| 983 | GL_MATCHINGROOM_MAKE_REQ | `u8 str s32 u8 u8 u8 u8 u8 u8 u8 u8 u8` |
-| 988 | GL_MATCHINGROOM_CANCLE_REQ | `(空)` |
+

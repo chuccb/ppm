@@ -178,6 +178,72 @@ c.execute("""INSERT INTO inventory
     VALUES (?,?,9001,0,0,7,NULL,40,40)""", (uid, back))
 assert c.execute('SELECT COUNT(*) FROM warehouse_items WHERE user_id=? AND tab=1', (uid,)).fetchone()[0] == 0
 
+# --- 13. 語音自訂 (791-796) ---
+step('voice customize (791-796)')
+c.execute("INSERT INTO voice_customize(user_id,char_idx,base_voice1,base_voice2) VALUES (?,0,1,2)", (uid,))
+c.executemany("INSERT INTO voice_slots(user_id,char_idx,slot_no,item_id,flag) VALUES (?,0,?,?,?)",
+              [(uid, s, 100 + s, 1 + (s % 9)) for s in range(27)])
+assert c.execute("SELECT COUNT(*) FROM voice_slots WHERE user_id=? AND char_idx=0", (uid,)).fetchone()[0] == 27
+row = c.execute("SELECT base_voice1, base_voice2 FROM voice_customize WHERE user_id=? AND char_idx=0", (uid,)).fetchone()
+assert row == (1, 2), row
+
+# 測試 constraints: char_idx 0..14, slot_no 0..26
+try:
+    c.execute("INSERT INTO voice_customize(user_id,char_idx) VALUES (?,15)", (uid,))
+    assert False, "char_idx 15 should violate CHECK constraint"
+except sqlite3.IntegrityError:
+    pass
+
+try:
+    c.execute("INSERT INTO voice_slots(user_id,char_idx,slot_no) VALUES (?,0,27)", (uid,))
+    assert False, "slot_no 27 should violate CHECK constraint"
+except sqlite3.IntegrityError:
+    pass
+
+# --- 14. 系統 / 角色 / 商店 / 訊息 CRUD ---
+step('tutorial, characters, messages, gifts CRUD')
+c.execute("UPDATE users SET flags1=5 WHERE user_id=?", (uid,))
+assert c.execute("SELECT flags1 FROM users WHERE user_id=?", (uid,)).fetchone()[0] == 5
+
+c.execute("UPDATE users SET current_char=1 WHERE user_id=?", (uid,))
+assert c.execute("SELECT current_char FROM users WHERE user_id=?", (uid,)).fetchone()[0] == 1
+
+c.execute("INSERT INTO characters(user_id, slot_no, char_type) VALUES (?, 1, 2)", (uid,))
+assert c.execute("SELECT char_type FROM characters WHERE user_id=? AND slot_no=1", (uid,)).fetchone()[0] == 2
+
+c.execute("INSERT INTO skill_slots(user_id, slot_kind, idx, item_id) VALUES (?, 0, 1, 1001) ON CONFLICT(user_id, slot_kind, idx) DO UPDATE SET item_id=1001", (uid,))
+assert c.execute("SELECT item_id FROM skill_slots WHERE user_id=? AND slot_kind=0 AND idx=1", (uid,)).fetchone()[0] == 1001
+
+c.execute("UPDATE messages SET is_read=1 WHERE to_user_id=1000", ()) # test update query syntax
+
+# --- 15. 遊戲中心 (GL_GAMECENTER_REC 472 / RANKING 480 / END 476) ---
+step('gamecenter records & rankings (472-484)')
+c.execute("""INSERT INTO gamecenter_records(user_id, game_no, high_score, coins, play_count, updated_at)
+             VALUES (?, 1, 15000, 10, 5, unixepoch())""", (uid,))
+c.execute("""INSERT INTO gamecenter_records(user_id, game_no, high_score, coins, play_count, updated_at)
+             VALUES (?, 1, 28000, 20, 12, unixepoch())""", (uid2,))
+gc_row = c.execute("SELECT high_score, play_count FROM gamecenter_records WHERE user_id=? AND game_no=1", (uid,)).fetchone()
+assert gc_row == (15000, 5), gc_row
+
+top_rank = c.execute("""
+    SELECT u.nickname, r.high_score
+    FROM gamecenter_records r
+    JOIN users u ON u.user_id = r.user_id
+    WHERE r.game_no = 1
+    ORDER BY r.high_score DESC
+    LIMIT 1
+""").fetchone()
+assert top_rank == ('PaperBob', 28000), top_rank
+
+# --- 16. 安全與 GM 管理日誌 (security_events / server_config) ---
+step('security events & GM server config (275-294, 822-831)')
+c.execute("INSERT INTO security_events(user_id, event_type, detail) VALUES (?, 4, 'Chat ban 10 mins')", (uid2,))
+sec_row = c.execute("SELECT event_type, detail FROM security_events WHERE user_id=?", (uid2,)).fetchone()
+assert sec_row == (4, 'Chat ban 10 mins'), sec_row
+
+c.execute("INSERT OR REPLACE INTO server_config(key, value) VALUES ('event_exp_rate', '200')")
+assert c.execute("SELECT value FROM server_config WHERE key='event_exp_rate'").fetchone()[0] == '200'
+
 con.commit()
 fk = con.execute('PRAGMA foreign_key_check').fetchall()
 assert not fk, fk

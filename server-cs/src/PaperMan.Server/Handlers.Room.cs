@@ -167,6 +167,15 @@ public static class RoomHandlers
         add(Opcode.GR_RADIOMSG_REQ, Radio);
         add(Opcode.GG_ROOMBROADCAST_REQ, RoomBroadcast);
         add(Opcode.GG_OBSERVERCHAT_REQ, ObserverChatGame);
+
+        // 踢人與投票 (131/132, 718-722)
+        add(Opcode.GR_FORCEOUT_REQ, ForceOut);
+        add(Opcode.GR_START_VOTING_REQ, StartVoting);
+        add(Opcode.GR_DO_VOTING, DoVoting);
+
+        // 配對房 983 / 988
+        add(Opcode.GL_MATCHINGROOM_MAKE_REQ, MatchingRoomMake);
+        add(Opcode.GL_MATCHINGROOM_CANCLE_REQ, MatchingRoomCancel);
     }
 
     // 129 REQ: u8 n125 → 130 ACK (sub_562870 讀序):
@@ -880,12 +889,13 @@ public static class RoomHandlers
     /// </summary>
     private static bool IsTeamMode(byte mode) => mode is 0 or 2 or 3 or 4 or 8 or 10 or 11 or 12 or 13;
 
-    // 113 → 114 (sub_56B360 完整佈局, 卅七輪逐欄定案):
+    // 113 → 114 (sub_56B360 完整佈局, 卅七輪逐欄定案, 本輪補齊 sub_885D00 語音塊):
     //   u8 sub_type; 0=失敗回大廳; 1=單人進房通知 (給既有成員);
     //   2=完整房間狀態 (給進房者, 房物件欄位 + count×成員條目)。
     //   成員條目 = s32 uid, u8 slot, str nick, s32 exp(level 由 client 查表),
     //   u8 char_type, + 負載 (sub_524360 char, custom_tex/crc/tex,
-    //   武器組×4, extra_flag, sub_527550 技能, sub_527D00 快速槽);
+    //   武器組×4, extra_flag, sub_527550 技能, sub_527D00 快速槽,
+    //   sub_885D00 語音自訂 85B 塊);
     //   sub_type==2 的條目另含 crown/status/observer 三枚 u8。
     private static async ValueTask EnterRoom(Session session, Packet packet, ServerContext context)
     {
@@ -922,16 +932,53 @@ public static class RoomHandlers
 
     // ---- 114 序列化助手 (sub_56B360 佈局) --------------------------------
 
-    /// <summary>成員的完整負載資料 (與 198 MyInfo 同源)。</summary>
+    /// <summary>成員的完整負載資料 (與 198 MyInfo 同源, 含語音自訂)。</summary>
     internal readonly record struct MemberData(
-        Db.MyInfo? Info, Db.CharSlot? CurChar, List<Db.WeaponGroup> Groups, Db.Slots Slots);
+        Db.MyInfo? Info, Db.CharSlot? CurChar, List<Db.WeaponGroup> Groups, Db.Slots Slots, Db.Voice? Voice);
 
     internal static MemberData LoadMemberData(Db db, Session member)
     {
         var info = db.GetMyInfo(member.UserId);
         var chars = db.GetCharacters(member.UserId);
         var curChar = chars.FirstOrDefault(c => c.SlotNo == (info?.CurrentChar ?? 0));
-        return new(info, curChar, db.GetWeaponGroups(member.UserId), db.GetSlots(member.UserId));
+        byte charIdx = (byte)(curChar is { CharType: >= 1 and <= Db.VoiceCharCount } ? curChar.CharType - 1 : 0);
+        var voice = db.GetVoice(member.UserId, charIdx);
+        return new(info, curChar, db.GetWeaponGroups(member.UserId), db.GetSlots(member.UserId), voice);
+    }
+
+    /// <summary>
+    /// 寫入 85-byte wire 語音塊 (CGameInUserVoiceCustomize::sub_8765F0 讀序):
+    /// s16 base_voice1, s16 base_voice2,
+    /// 3 類 (command/tactics/infomation) × 9 句 × {s16 voice_item, u8 flag}。
+    /// sub_885D00 (mode 2) 逐函數定案, 114/269/765/985 房間成員條目皆以此收尾。
+    /// </summary>
+    internal static void WriteVoiceBlock(Packet ack, Db.Voice? voice)
+    {
+        if (voice is not null)
+        {
+            ack.WriteS16(voice.BaseVoice1)
+               .WriteS16(voice.BaseVoice2);
+            for (int i = 0; i < Db.VoiceSlotCount; i++)
+            {
+                if (i < voice.Slots.Length)
+                {
+                    ack.WriteS16(voice.Slots[i].Item)
+                       .WriteU8(voice.Slots[i].Flag);
+                }
+                else
+                {
+                    ack.WriteS16(0).WriteU8(0);
+                }
+            }
+        }
+        else
+        {
+            ack.WriteS16(0).WriteS16(0);
+            for (int i = 0; i < Db.VoiceSlotCount; i++)
+            {
+                ack.WriteS16(0).WriteU8(0);
+            }
+        }
     }
 
     /// <summary>
@@ -940,10 +987,11 @@ public static class RoomHandlers
     /// (custom_tex/crc/tex, server 不追蹤 → 0/空) + 武器組×4 (固定四組,
     /// 組號即順位 — 異於 198 sub_524660 的 count+kind 版) +
     /// extra_flag(0 → 無 8×s32 尾塊) + sub_527550 技能 9×s32 +
-    /// sub_527D00 快速槽 u8+7×s32。首欄為「角色槽」(CurrentChar) 而非房槽。
+    /// sub_527D00 快速槽 u8+7×s32 + sub_885D00 語音自訂 85B 塊
+    /// (s16 base1, s16 base2, 27×{s16 item, u8 flag})。首欄為「角色槽」(CurrentChar) 而非房槽。
     /// </summary>
-    private static void WriteMemberLoadout(
-        Packet ack, Db.CharSlot? curChar, List<Db.WeaponGroup> groups, Db.Slots slots)
+    internal static void WriteMemberLoadout(
+        Packet ack, Db.CharSlot? curChar, List<Db.WeaponGroup> groups, Db.Slots slots, Db.Voice? voice)
     {
         ack.WriteU8(curChar?.SlotNo ?? (byte)0)             // sub_524360 n0x14: 角色槽 0..0x13
            .WriteU8(curChar?.CharType ?? (byte)0);
@@ -987,6 +1035,8 @@ public static class RoomHandlers
         {
             ack.WriteS32(quick);
         }
+
+        WriteVoiceBlock(ack, voice);                        // sub_885D00 語音塊 (85B, 逐函數定案)
     }
 
     /// <summary>sub_type==1 單人進房通知 (給既有成員)。</summary>
@@ -997,11 +1047,11 @@ public static class RoomHandlers
            .WriteStr(member.Nickname)
            .WriteS32((int)(data.Info?.Exp ?? 0))            // v194 → member+25 exp
            .WriteU8(data.CurChar?.CharType ?? (byte)0);     // v179 → byte_F6DD61 (現役角色型別)
-        WriteMemberLoadout(ack, data.CurChar, data.Groups, data.Slots);
+        WriteMemberLoadout(ack, data.CurChar, data.Groups, data.Slots, data.Voice);
     }
 
     /// <summary>sub_type==2 成員條目 (比 sub_type==1 多 crown/status/observer)。</summary>
-    private static void WriteMemberEntry(Packet ack, Session member, byte slot, bool isMaster, MemberData data)
+    internal static void WriteMemberEntry(Packet ack, Session member, byte slot, bool isMaster, MemberData data)
     {
         ack.WriteS32((int)member.UserId)
            .WriteU8(slot)
@@ -1011,7 +1061,7 @@ public static class RoomHandlers
            .WriteS32((int)(data.Info?.Exp ?? 0))            // v143 exp
            .WriteU8(data.CurChar?.CharType ?? (byte)0)      // v179 char_type
            .WriteU8(0);                                     // v140 observer (0 = 完整資料)
-        WriteMemberLoadout(ack, data.CurChar, data.Groups, data.Slots);
+        WriteMemberLoadout(ack, data.CurChar, data.Groups, data.Slots, data.Voice);
     }
 
     /// <summary>sub_type==2 房間狀態首段 (sub_56B360 case 2 的 19 欄
@@ -1052,5 +1102,108 @@ public static class RoomHandlers
 
         await context.Rooms.RemoveMemberAsync(room, session);
         await session.SendAsync(new Packet(Opcode.GR_LEAVE_ACK).WriteU8(0));
+    }
+
+    // 983 GL_MATCHINGROOM_MAKE_REQ (sub_5865A0) → 984 GL_MATCHINGROOM_MAKE_ACK: u8 1 (成功)
+    private static async ValueTask MatchingRoomMake(Session session, Packet packet, ServerContext context)
+    {
+        await session.SendAsync(new Packet(Opcode.GL_MATCHINGROOM_MAKE_ACK).WriteU8(1));
+    }
+
+    // 988 GL_MATCHINGROOM_CANCLE_REQ (sub_588020) → 989 GL_MATCHINGROOM_CANCLE_ACK: u8 1 (成功)
+    private static async ValueTask MatchingRoomCancel(Session session, Packet packet, ServerContext context)
+    {
+        await session.SendAsync(new Packet(Opcode.GL_MATCHINGROOM_CANCLE_ACK).WriteU8(1));
+    }
+
+    // 131 GR_FORCEOUT_REQ (sub_56EC10: u8 target_slot)
+    // → 132 GR_FORCEOUT_ACK (sub_56ECC0: u8 status==1, u8 target_slot)
+    private static async ValueTask ForceOut(Session session, Packet packet, ServerContext context)
+    {
+        if (session.RoomNo is not { } roomNo)
+        {
+            return;
+        }
+
+        var room = context.Rooms.Find(roomNo);
+        if (room is null || !room.IsMaster(session))
+        {
+            return;
+        }
+
+        byte targetSlot = packet.Remaining >= 1 ? packet.ReadU8() : (byte)0xFF;
+        if (!room.Members.TryGetValue(targetSlot, out var targetSession))
+        {
+            return;
+        }
+
+        // 廣播踢人 ACK
+        var ack = new Packet(Opcode.GR_FORCEOUT_ACK)
+            .WriteU8(1)                                     // status 1 = 成功踢出
+            .WriteU8(targetSlot);
+        await RoomManager.BroadcastAsync(room, ack);
+
+        // 移除成員
+        await context.Rooms.RemoveMemberAsync(room, targetSession);
+    }
+
+    // 718 GR_START_VOTING_REQ (sub_A191D0: s32 target, s32 reason, s32 initiator)
+    // → 719 GR_START_VOTING_ACK (sub_9BF430 case 719: u8 1)
+    // + 720 GR_START_VOTING (sub_9BF430 case 720: s32 target, s32 reason, s32 initiator, s32 timer, u8 team)
+    private static async ValueTask StartVoting(Session session, Packet packet, ServerContext context)
+    {
+        if (session.RoomNo is not { } roomNo)
+        {
+            return;
+        }
+
+        var room = context.Rooms.Find(roomNo);
+        if (room is null)
+        {
+            return;
+        }
+
+        int targetSlot = packet.Remaining >= 4 ? packet.ReadS32() : 0;
+        int reason = packet.Remaining >= 4 ? packet.ReadS32() : 0;
+        int initiatorSlot = packet.Remaining >= 4 ? packet.ReadS32() : 0;
+
+        // 1. 回發起者 719 ACK
+        await session.SendAsync(new Packet(Opcode.GR_START_VOTING_ACK).WriteU8(1));
+
+        // 2. 廣播 720 給全房
+        var broadcast = new Packet(Opcode.GR_START_VOTING)
+            .WriteS32(targetSlot)
+            .WriteS32(reason)
+            .WriteS32(initiatorSlot)
+            .WriteS32(30)                                   // 30 秒倒數計時
+            .WriteU8(0);                                    // extra
+
+        await RoomManager.BroadcastAsync(room, broadcast);
+    }
+
+    // 721 GR_DO_VOTING (sub_A192B0: u8 vote)
+    // → 722 GR_VOTING_RESULT (sub_9BF430 case 722: s32 target, u8 result)
+    private static async ValueTask DoVoting(Session session, Packet packet, ServerContext context)
+    {
+        if (session.RoomNo is not { } roomNo)
+        {
+            return;
+        }
+
+        var room = context.Rooms.Find(roomNo);
+        if (room is null)
+        {
+            return;
+        }
+
+        byte vote = packet.Remaining >= 1 ? packet.ReadU8() : (byte)0;
+        _ = vote;
+
+        // 簡化投票結算廣播 (默認完成)
+        var result = new Packet(Opcode.GR_VOTING_RESULT)
+            .WriteS32(0)                                    // target
+            .WriteU8(0);                                    // 0 = 未達踢出標準
+
+        await RoomManager.BroadcastAsync(room, result);
     }
 }

@@ -361,4 +361,42 @@ public sealed partial class Db
         }
     }
 
+    /// <summary>標記信件已讀 (GL_MSG_READ 423/424)。</summary>
+    public bool MarkMessageRead(long userId, long msgId)
+    {
+        lock (_gate)
+        {
+            using var cmd = Cmd(
+                "UPDATE messages SET is_read=1 WHERE msg_id=@m AND to_user_id=@u",
+                ("@m", msgId), ("@u", userId));
+            return cmd.ExecuteNonQuery() == 1;
+        }
+    }
+
+    /// <summary>刪除禮物 (GS_DELETEGIFT 453/454)。</summary>
+    public bool DeleteGift(long userId, long giftId, int itemId)
+    {
+        lock (_gate)
+        {
+            using var cmd = Cmd("""
+                DELETE FROM gifts
+                WHERE gift_id=@g AND to_user_id=@u AND (item_id=@i OR @i=0)
+                """, ("@g", giftId), ("@u", userId), ("@i", itemId));
+            return cmd.ExecuteNonQuery() == 1;
+        }
+    }
+
+    /// <summary>銷毀/丟棄道具 (GS_DESTROYITEM 802/803)。</summary>
+    public bool DestroyInventoryItem(long userId, int invSlot, int itemId)
+    {
+        lock (_gate)
+        {
+            using var cmd = Cmd("""
+                DELETE FROM inventory
+                WHERE user_id=@u AND slot=@s AND (item_id=@i OR @i=0)
+                """, ("@u", userId), ("@s", invSlot), ("@i", itemId));
+            return cmd.ExecuteNonQuery() == 1;
+        }
+    }
+
 }

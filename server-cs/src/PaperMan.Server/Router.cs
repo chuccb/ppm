@@ -37,6 +37,9 @@ public sealed class Router
         ChannelHandlers.Register(Add);
         VoiceHandlers.Register(Add);
         WarehouseHandlers.Register(Add);
+        MasterHandlers.Register(Add);
+        GameCenterHandlers.Register(Add);
+        AiHandlers.Register(Add);
         return new(table);
     }
 

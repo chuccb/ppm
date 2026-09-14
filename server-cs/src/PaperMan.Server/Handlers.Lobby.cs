@@ -27,6 +27,23 @@ public static class LobbyHandlers
         add(Opcode.GL_CLIENTINFO_REQ, ClientInfo);
         add(Opcode.GL_MYINFO_OPEN, MyInfoOpen);
         add(Opcode.GL_SHOUTCHAT_REQ, Shout);
+
+        // 教學 / 等級限制 / Token / 通訊完成 / 換頻道
+        add(Opcode.GL_TUTORIALINDEX_REQ, TutorialIndex);
+        add(Opcode.GL_TUTORIAL_INDEX_SET_REQ, TutorialIndexSet);
+        add(Opcode.GL_LEVEL_KILL_LIMIT_REQ, LevelKillLimit);
+        add(Opcode.GL_BILLTOKEN_REQ, BillToken);
+        add(Opcode.GL_RACKINGWEB_TOKEN_REQ, RankingWebToken);
+        add(Opcode.GL_DATA_RECV_COMPLETED_REQ, DataRecvCompleted);
+        add(Opcode.GL_CHANGECHANNEL_REQ, ChangeChannel);
+
+        // 角色建立 / 角色槽 / 裝備更換 / 武器 / 技能 / 零件
+        add(Opcode.GM_CREATECHAR_REQ, CreateChar);
+        add(Opcode.GI_CHANGEDATA_REQ, ChangeData);
+        add(Opcode.GI_CHANGEWP_REQ, ChangeWeapon);
+        add(Opcode.GI_CHANGESLOT_REQ, ChangeSlot);
+        add(Opcode.GI_CHANGE_SKILLITEMSLOT_REQ, ChangeSkillSlot);
+        add(Opcode.GL_WEAPONPARTS_EQUIP_CHANGE_REQ, ChangeWeaponParts);
     }
 
     // 270 GL_MYINFO_OPEN (sub_556680): s8 — 個資公開開關 (單向通知,
@@ -468,4 +485,180 @@ public static class LobbyHandlers
     }
 
     private static bool IsValidNick(string nick) => nick.Length is >= 2 and <= 16;
+
+    // 685 GL_TUTORIALINDEX_REQ (sub_55C6F0, 空) → 686 ACK (sub_55C790): s32 index
+    private static async ValueTask TutorialIndex(Session session, Packet packet, ServerContext context)
+    {
+        int index = session.UserId != 0 ? context.Db.GetTutorialIndex(session.UserId) : 0;
+        await session.SendAsync(new Packet(Opcode.GL_TUTORIALINDEX_ACK).WriteS32(index));
+    }
+
+    // 689 GL_TUTORIAL_INDEX_SET_REQ (sub_55C7D0: s32 index) → 690 ACK (sub_582530): s32 index
+    private static async ValueTask TutorialIndexSet(Session session, Packet packet, ServerContext context)
+    {
+        int index = packet.Remaining >= 4 ? packet.ReadS32() : 0;
+        if (session.UserId != 0)
+        {
+            context.Db.SetTutorialIndex(session.UserId, index);
+        }
+
+        await session.SendAsync(new Packet(Opcode.GL_TUTORIAL_INDEX_SET_ACK).WriteS32(index));
+    }
+
+    // 704 GL_LEVEL_KILL_LIMIT_REQ (sub_582570, 空)
+    // → 705 ACK (sub_55C9B0): s32 kill_limit, f32 exp_rate, s32 max_level_limit
+    private static async ValueTask LevelKillLimit(Session session, Packet packet, ServerContext context)
+    {
+        var ack = new Packet(Opcode.GL_LEVEL_KILL_LIMIT_ACK)
+            .WriteS32(50)                                   // 殺敵上限 50
+            .WriteF32(1.0f)                                 // 經驗倍率 1.0
+            .WriteS32(30);                                  // 最大等級限制 30
+
+        await session.SendAsync(ack);
+    }
+
+    // 706 GL_BILLTOKEN_REQ (sub_460480, 空) → 707 ACK (sub_46AD00 case 707): str token
+    private static async ValueTask BillToken(Session session, Packet packet, ServerContext context)
+    {
+        await session.SendAsync(new Packet(Opcode.GL_BILLTOKEN_ACK).WriteStr("TOKEN_PAPERMAN_OK"));
+    }
+
+    // 787 GL_RACKINGWEB_TOKEN_REQ (sub_581E40, 空) → 788 ACK (sub_44BEA0): str token
+    private static async ValueTask RankingWebToken(Session session, Packet packet, ServerContext context)
+    {
+        await session.SendAsync(new Packet(Opcode.GL_RACKINGWEB_TOKEN_ACK).WriteStr("RANKING_TOKEN_OK"));
+    }
+
+    // 834 GL_DATA_RECV_COMPLETED_REQ (sub_583120: s32 uid) → 835 ACK (sub_5831D0): 空包
+    private static async ValueTask DataRecvCompleted(Session session, Packet packet, ServerContext context)
+    {
+        await session.SendAsync(new Packet(Opcode.GL_DATA_RECV_COMPLETED_ACK));
+    }
+
+    // 370 GL_CHANGECHANNEL_REQ (sub_570030: u8 channel_id)
+    // → 371 ACK (sub_570100): u8 status(1=成功), u8 channel_id, str host_ip, s32 host_port, u8 extra
+    private static async ValueTask ChangeChannel(Session session, Packet packet, ServerContext context)
+    {
+        byte ch = packet.Remaining >= 1 ? packet.ReadU8() : (byte)0;
+        var ack = new Packet(Opcode.GL_CHANGECHANNEL_ACK)
+            .WriteU8(1)                                     // status 1 = 成功
+            .WriteU8(ch)                                    // channel_id
+            .WriteStr("127.0.0.1")                          // host ip
+            .WriteS32(10000)                                // host port
+            .WriteU8(0);                                    // extra
+
+        await session.SendAsync(ack);
+    }
+
+    // 214 GM_CREATECHAR_REQ (sub_532AA0: u8 char_type, s16 hair, s16 face, s16 coat)
+    // → 215 ACK (sub_572F80 / sub_550170): u8 status(0=成功)
+    private static async ValueTask CreateChar(Session session, Packet packet, ServerContext context)
+    {
+        byte charType = packet.Remaining >= 1 ? packet.ReadU8() : (byte)1;
+        bool ok = session.UserId != 0 && context.Db.CreateChar(session.UserId, 0, charType);
+        await session.SendAsync(new Packet(Opcode.GM_CREATECHAR_ACK).WriteU8(ok ? (byte)0 : (byte)1));
+    }
+
+    // 218 GI_CHANGEDATA_REQ (sub_523A00: u8 char_slot)
+    // → 219 ACK (sub_573230): u8 status(1=成功)
+    private static async ValueTask ChangeData(Session session, Packet packet, ServerContext context)
+    {
+        byte slotNo = packet.Remaining >= 1 ? packet.ReadU8() : (byte)0;
+        if (session.UserId != 0)
+        {
+            context.Db.SetCurrentChar(session.UserId, slotNo);
+        }
+
+        await session.SendAsync(new Packet(Opcode.GI_CHANGEDATA_ACK).WriteU8(1));
+    }
+
+    // 312 GI_CHANGESLOT_REQ (sub_523FB0: u8 slot_no)
+    // → 313 ACK (sub_573320): u8 slot_no
+    private static async ValueTask ChangeSlot(Session session, Packet packet, ServerContext context)
+    {
+        byte slotNo = packet.Remaining >= 1 ? packet.ReadU8() : (byte)0;
+        if (session.UserId != 0)
+        {
+            context.Db.SetCurrentChar(session.UserId, slotNo);
+        }
+
+        await session.SendAsync(new Packet(Opcode.GI_CHANGESLOT_ACK).WriteU8(slotNo));
+    }
+
+    // 220 GI_CHANGEWP_REQ (sub_573340 / sub_57C270: u8 count, repeat weapon_group)
+    // → 221 ACK (sub_5735F0): u8 count(4), 4×weapon_group
+    private static async ValueTask ChangeWeapon(Session session, Packet packet, ServerContext context)
+    {
+        var groups = session.UserId != 0 ? context.Db.GetWeaponGroups(session.UserId) : [];
+        var ack = new Packet(Opcode.GI_CHANGEWP_ACK).WriteU8(4);
+
+        for (byte g = 0; g < 4; g++)
+        {
+            var wg = groups.FirstOrDefault(x => x.GroupNo == g);
+            ack.WriteU8(g)
+               .WriteU16(wg?.Equipped ?? (ushort)0);
+            if (g != 3)
+            {
+                ack.WriteU16(wg?.Sub1 ?? (ushort)0)
+                   .WriteU16(wg?.Sub2 ?? (ushort)0)
+                   .WriteU16(wg?.Sub3 ?? (ushort)0);
+            }
+
+            if (wg is { Equipped: not 0 })
+            {
+                foreach (var part in wg.Parts)
+                {
+                    ack.WriteS32(part);
+                }
+            }
+        }
+
+        await session.SendAsync(ack);
+    }
+
+    // 466 GI_CHANGE_SKILLITEMSLOT_REQ (sub_5273C0: u8 char_slot, u8 slot_idx, s32 item_id)
+    // → 467 ACK (sub_573A70): u8 err(0=成功), u8 char_slot, u8 count, count×(u8 slot, raw32)
+    private static async ValueTask ChangeSkillSlot(Session session, Packet packet, ServerContext context)
+    {
+        byte charSlot = packet.Remaining >= 1 ? packet.ReadU8() : (byte)0;
+        byte slotIdx = packet.Remaining >= 1 ? packet.ReadU8() : (byte)0;
+        int itemId = packet.Remaining >= 4 ? packet.ReadS32() : 0;
+
+        if (session.UserId != 0)
+        {
+            context.Db.UpdateSkillSlot(session.UserId, slotKind: 0, slotIdx, itemId);
+        }
+
+        var ack = new Packet(Opcode.GI_CHANGE_SKILLITEMSLOT_ACK)
+            .WriteU8(0)                                     // err 0 = 成功
+            .WriteU8(charSlot)
+            .WriteU8(1)                                     // count = 1
+            .WriteU8(slotIdx)
+            .WriteRaw(new byte[32]);                        // 32B skill struct
+
+        await session.SendAsync(ack);
+    }
+
+    // 912 GL_WEAPONPARTS_EQUIP_CHANGE_REQ (sub_9591F0): u8 op_type, s32 weapon_id, s32 part_id, [s32 old_part]
+    // → 913 ACK (sub_95B180): u8 err(0=成功), u8 op_type, s32 weapon_id, s32 part_id, [s32 old_part]
+    private static async ValueTask ChangeWeaponParts(Session session, Packet packet, ServerContext context)
+    {
+        byte opType = packet.Remaining >= 1 ? packet.ReadU8() : (byte)1;
+        int weaponId = packet.Remaining >= 4 ? packet.ReadS32() : 0;
+        int partId = packet.Remaining >= 4 ? packet.ReadS32() : 0;
+        int oldPartId = (opType == 2 && packet.Remaining >= 4) ? packet.ReadS32() : 0;
+
+        var ack = new Packet(Opcode.GL_WEAPONPARTS_EQUIP_CHANGE_ACK)
+            .WriteU8(0)                                     // err 0 = 成功
+            .WriteU8(opType)
+            .WriteS32(weaponId)
+            .WriteS32(partId);
+
+        if (opType == 2)
+        {
+            ack.WriteS32(oldPartId);
+        }
+
+        await session.SendAsync(ack);
+    }
 }

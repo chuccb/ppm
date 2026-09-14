@@ -19,6 +19,13 @@ public static class ShopHandlers
         add(Opcode.GS_BUY_ONCEITEM_REQ, BuyOnceItem);
         add(Opcode.GS_GIVEGIFT_REQ, GiveGift);
         add(Opcode.GS_SELLITEM_REQ, SellItem);
+        add(Opcode.GS_BUYCHAR_REQ, BuyCharacter);
+        add(Opcode.GS_DELETEGIFT_REQ, DeleteGift);
+        add(Opcode.GS_DESTROYITEM_REQ, DestroyItem);
+        add(Opcode.GP_ENTER_PEPACHI_REQ, EnterPepachi);
+        add(Opcode.GP_PEPACHI_LIST_REQ, PepachiList);
+        add(Opcode.GP_START_GAME_REQ, StartPepachi);
+        add(Opcode.GS_CAPSULEMACHINE_START_REQ, StartCapsuleMachine);
     }
 
     // REQ(208) sub_572AD0: s32 slot_idx — 賣出單件
@@ -135,6 +142,126 @@ public static class ShopHandlers
                .WriteS32(0)
                .WriteS32(0);
         }
+
+        await session.SendAsync(ack);
+    }
+
+    // 310 GS_BUYCHAR_REQ (sub_529680): 6×s32 (char_type, item1..item5)
+    // → 311 GS_BUYCHAR_ACK (sub_5728A0): u8 ok(1=成功), 6×s32
+    private static async ValueTask BuyCharacter(Session session, Packet packet, ServerContext context)
+    {
+        int charType = packet.Remaining >= 4 ? packet.ReadS32() : 0;
+        var existing = context.Db.GetCharacters(session.UserId);
+        byte slotNo = (byte)existing.Count;
+        bool ok = session.UserId != 0 && slotNo < 20 && context.Db.BuyCharacter(session.UserId, slotNo, (byte)charType);
+
+        var ack = new Packet(Opcode.GS_BUYCHAR_ACK).WriteU8(ok ? (byte)1 : (byte)0);
+        if (ok)
+        {
+            var info = context.Db.GetMyInfo(session.UserId);
+            int cash = context.Db.GetCash(session.UserId);
+            ack.WriteS32(slotNo)
+               .WriteS32(charType)
+               .WriteS32((int)(info?.Exp ?? 0))
+               .WriteS32(cash)
+               .WriteS32((int)(info?.Gp ?? 0))
+               .WriteS32(100);                              // 出廠耐久
+        }
+
+        await session.SendAsync(ack);
+    }
+
+    // 453 GS_DELETEGIFT_REQ (sub_57BC40): s32 gift_uid, s32 item_id
+    // → 454 GS_DELETEGIFT_ACK (sub_57BCF0): u8 ok(1=成功), s32 gift_uid, s32 item_id
+    private static async ValueTask DeleteGift(Session session, Packet packet, ServerContext context)
+    {
+        int giftUid = packet.ReadS32();
+        int itemId = packet.Remaining >= 4 ? packet.ReadS32() : 0;
+        bool ok = session.UserId != 0 && context.Db.DeleteGift(session.UserId, giftUid, itemId);
+
+        var ack = new Packet(Opcode.GS_DELETEGIFT_ACK)
+            .WriteU8(ok ? (byte)1 : (byte)0)
+            .WriteS32(giftUid)
+            .WriteS32(itemId);
+
+        await session.SendAsync(ack);
+    }
+
+    // 802 GS_DESTROYITEM_REQ (sub_894E70): s32 inv_id, s32 item_id, u8 type, s32 char_slot, s32 count
+    // → 803 GS_DESTROYITEM_ACK (sub_895EE0): u8 err(0=成功), u8 unk(0), s32 pg, s32 cash, u8 count_affected, count×{s32 inv_id, s32 remain}
+    private static async ValueTask DestroyItem(Session session, Packet packet, ServerContext context)
+    {
+        int invSlot = packet.ReadS32();
+        int itemId = packet.Remaining >= 4 ? packet.ReadS32() : 0;
+        bool ok = session.UserId != 0 && context.Db.DestroyInventoryItem(session.UserId, invSlot, itemId);
+
+        var ack = new Packet(Opcode.GS_DESTROYITEM_ACK);
+        if (ok)
+        {
+            var info = context.Db.GetMyInfo(session.UserId);
+            int cash = context.Db.GetCash(session.UserId);
+            ack.WriteU8(0)                                  // err 0 = 成功
+               .WriteU8(0)                                  // unk
+               .WriteS32((int)(info?.Gp ?? 0))
+               .WriteS32(cash)
+               .WriteU8(1)                                  // 1 個 affected
+               .WriteS32(invSlot)
+               .WriteS32(0);                                // 剩餘 0 (已刪除)
+        }
+        else
+        {
+            ack.WriteU8(1)                                  // err != 0 失敗
+               .WriteU8(0);
+        }
+
+        await session.SendAsync(ack);
+    }
+
+    // 698 GP_ENTER_PEPACHI_REQ (sub_580640, 空)
+    // → 699 GP_ENTER_PEPACHI_ACK (sub_46AD00 case 699): u8 status(1), s32 coins, s32 cash
+    private static async ValueTask EnterPepachi(Session session, Packet packet, ServerContext context)
+    {
+        int cash = session.UserId != 0 ? context.Db.GetCash(session.UserId) : 0;
+        var ack = new Packet(Opcode.GP_ENTER_PEPACHI_ACK)
+            .WriteU8(1)
+            .WriteS32(100)                                  // coins
+            .WriteS32(cash);
+
+        await session.SendAsync(ack);
+    }
+
+    // 702 GP_PEPACHI_LIST_REQ (sub_580970, 空)
+    // → 703 GP_PEPACHI_LIST_ACK (sub_46AD00 case 703): s32 normal_count, s32 rare_count, repeat s32 item_id
+    private static async ValueTask PepachiList(Session session, Packet packet, ServerContext context)
+    {
+        var ack = new Packet(Opcode.GP_PEPACHI_LIST_ACK)
+            .WriteS32(0)                                    // normal_count
+            .WriteS32(0);                                   // rare_count
+
+        await session.SendAsync(ack);
+    }
+
+    // 700 GP_START_GAME_REQ (sub_580790): u8 count, s32 coin_type
+    // → 701 GP_START_GAME_ACK (sub_84A000): u8 status(1), s32 win_item_id, s32 win_count, s32 remain_coins
+    private static async ValueTask StartPepachi(Session session, Packet packet, ServerContext context)
+    {
+        var ack = new Packet(Opcode.GP_START_GAME_ACK)
+            .WriteU8(1)                                     // status 1 = 成功
+            .WriteS32(0)                                    // win item
+            .WriteS32(1)
+            .WriteS32(99);                                  // remain coins
+
+        await session.SendAsync(ack);
+    }
+
+    // 900 GS_CAPSULEMACHINE_START_REQ (sub_58D5D0): u8 count, s32 machine_id
+    // → 901 GS_CAPSULEMACHINE_START_ACK (sub_9A1A30): u8 status(1), s32 win_item_id, s32 remain_tokens
+    private static async ValueTask StartCapsuleMachine(Session session, Packet packet, ServerContext context)
+    {
+        var ack = new Packet(Opcode.GS_CAPSULEMACHINE_START_ACK)
+            .WriteU8(1)                                     // status 1 = 成功
+            .WriteS32(0)                                    // win item
+            .WriteS32(99);                                  // remain tokens
 
         await session.SendAsync(ack);
     }
