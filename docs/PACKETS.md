@@ -823,29 +823,54 @@ handler 不在 dispatcher 也不在 CLobbyShop — 在**轉蛋動畫控制器**
 無 payload 通知: 766/778/811/833/889/908 (純觸發)
 ```
 
-### 3.15d3 GG 戰鬥中繼全 58 對 — 轉發模式分類 (廿五輪自動配對)
-Server 的 GG 處理 = **驗證 + 廣播**, 三種模式:
-1. **slot 前綴轉發** (最常見): ACK = `u8 actor_slot` + REQ 原欄位
-   [+附加]。實證: 316 駭入 (REQ u8 → ACK u8+u8), 318 駭入成功
-   (REQ u8+6×f32 → ACK 同+u8), 326/328/330 拆彈, 737/739/741 破壞,
-   730 奪紙漿, 820 檢舉, 902/906 佔領
-2. **復活五連同構**: 342 SOLO / 360 TSUR / 455 EXERCISE / 746 PNR /
-   909 OCC / 971 SOCCER — REQ 全是 `s32 (respawn token)`,
-   ACK 全是 `u8 slot, u8, s16 x, s16 y, s16 z` (座標指派) —
-   六個模式共用一個復活協定!
-3. **聊天四連**: 344/346/348/350 (live/team/dead/teamdead) REQ 全 =
-   `s32 tex, u8 slot, str msg`; ACK 端無讀取 (client 以自身緩衝顯示)
-   → server 依模式過濾聽眾後原樣轉發
-其他: 443/445/447 奪寶三連 (ACK u8+u8+u16×3 分數組); 964/967 足球
-(得球/進球 = u8×2); 749 GIMMICK (s32×2+u8); 752 地圖重載;
-962 掉落武器 (REQ 6 欄 → ACK 13 欄 = server 附 drop_id+item 詳情);
-474-483 射擊館 — 476 END 成績塊解構 (廿五輪): raw24 =
-{tick, 0, user_no(sub_525070), uid(EE8CB4), score, wave} 6×s32;
-raw44 = {…, [12]=命中, [7]/[8]/[9]=擊殺分類, [5]=fever} 11×s32
-(sub_8EE1D0 射擊館統計物件); 478 CHECK raw36 防作弊快照;
-716 快速槽 4×s16; 437 房間廣播 (u8+s32+rawN 自由載荷)。
-334/336/338 SEEDKEY/UNIQUEKEY/DETECTCRACK = 反作弊挑戰 (REQ/ACK 皆
-無 builder/parser — 由安全模組直接組包, 私服可忽略)。
+### 3.15d3 GG 戰鬥中繼 — 逐函數定案 (本輪更正廿五輪「三模式」簡化)
+⚠ 廿五輪把 GG 全族簡化為「slot 前綴轉發」是**錯的** — 逐函數重讀後
+各族佈局不同, 已按下列真值重寫 server (Handlers.BattleRelay.cs):
+
+1. **TH 駭入/炸彈簇 316-331 — REQ 首欄是「team」(0/1) 不是 slot**:
+   ```
+   316 GG_HACKSTART_REQ  (sub_556E90): u8 team
+   317 _ACK (sub_557040): u8 team, u8 slot        → sub_766490(team<2 定址隊列)
+   318 GG_HACKSUCC_REQ   (sub_5571E0): u8 team, 6×f32 (爆點座標/計時)
+   319 _ACK (sub_557400): u8 team, 6×f32, u8 slot → sub_7664C0
+   320 GG_HACKFAIL_REQ   (sub_557580): u8 team
+   321 _ACK (sub_557730): u8 team  (⚠ 無 slot!)
+   322 GG_BOMBSUCC_REQ   (sub_557830): 空
+   323 _ACK (sub_5579A0): u8 team  (爆炸的炸彈屬哪隊)
+   326/328/330 GG_UNHACK* (sub_557B80/557DE0/5580A0): u8 team
+   327/329/331 _ACK (sub_557D30/557F90/558250): u8 team, u8 slot
+   ```
+   → ACK = REQ 原欄位 + **尾附**發話者 slot (321/323 例外不加 slot);
+   323 的 team 由 318 武裝成功時記下 (room.BombTeam), 未植彈即收 322
+   則忽略 (316 開駭失敗不記隊)。
+
+2. **復活六連同構**: 342 SOLO / 360 TSUR / 455 EXERCISE / 746 PNR /
+   909 OCC / 971 SOCCER — REQ `s32 token` → ACK
+   `u8 slot, u8, s16 x, s16 y, s16 z`。(449 GG_STEALRESPON 無 builder
+   亦無 dispatcher case, 未納入)
+
+3. **聊天四連 344-350**: REQ = `s32 tex, u8 slot, str msg`; ACK
+   345/347/349/351 (sub_58D870/58D8A0/58D8D0/58D900 → sub_74A5F0 →
+   sub_748E40) 讀 `s32, u8, str` — **同構但必須以 ACK opcode 廣播**
+   (REQ opcode 344/346/348/350 在 dispatcher 無 case, 會被 client 忽略)。
+   n3_1 = 0/1/5/6 對應 live/team/dead/teamdead 顯示通道。
+
+4. **足球 964/967**: REQ 皆空 (sub_565F60/sub_566120); 965/968
+   (sub_566040/sub_566200) 讀 `u8 flag, u8 slot` — flag 0 = 事件成立
+   (得球/進球), 1 = 收回 → server 回 [0, slot]。
+
+5. **奪寶 443/445/447 — 不可轉發**: REQ `u8, s16` (sub_55BDC0/sub_55C060);
+   444/446/448 (sub_55BE80/sub_55C120) 讀 `u8, u8, u16×3` 分數組 —
+   需奪寶計分狀態機才能產出, server 目前**不註冊** (送錯比不送更糟)。
+
+其他未展開: 737/739/741 破壞, 730 奪紙漿, 820 檢舉, 902/906 佔領,
+749 GIMMICK (s32×2+u8), 752 地圖重載, 962 掉落武器 (REQ 6 欄 →
+ACK 13 欄 = server 附 drop_id+item 詳情); 474-483 射擊館 — 476 END
+成績塊 (raw24 = {tick, 0, user_no, uid, score, wave} 6×s32; raw44
+= {…, [12]=命中, [7]/[8]/[9]=擊殺分類, [5]=fever} 11×s32, sub_8EE1D0);
+478 CHECK raw36 防作弊快照; 716 快速槽 4×s16。
+334/336/338 SEEDKEY/UNIQUEKEY/DETECTCRACK = 反作弊挑戰 (安全模組直接
+組包, 私服可忽略)。
 
 ### 3.15d2 剩餘家族速覽 (廿二輪終掃)
 ```
@@ -1269,8 +1294,8 @@ client 實際載入的 `system/map_StartIndex.xml` — ⚠ ui/ 根目錄另有�
 ### 3.15b3 TeamHacking 駭入/炸彈協定 317-333 (廿二輪 — TH 模式核心)
 ```
 317 GG_HACKSTART_ACK  (sub_557040): u8 team, u8 slot — 開始駭入
-319 GG_HACKSUCC_ACK   (sub_557400): u8 n2 + 4×f32 (爆點座標/計時) —
-                      駭入成功, 炸彈啟動
+319 GG_HACKSUCC_ACK   (sub_557400): u8 n2(team) + 6×f32 (爆點座標/計時) +
+                      u8 slot — 駭入成功, 炸彈啟動 (⚠ 首欄 team 非 slot)
 321 GG_HACKFAIL_ACK   (sub_557730): u8 — 駭入失敗
 323 GG_BOMBSUCC_ACK   (sub_5579A0): u8 n2 — 爆炸成功 (回合結束)
 325 GG_BOMBEND_ACK    (unknown_libname_88): — 拆除/結束

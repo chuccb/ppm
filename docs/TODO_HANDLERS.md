@@ -1,7 +1,7 @@
 # Server handler 待辦清單 (廿四輪自動盤點)
 
 > 「client 有 builder、server 尚無 handler」的 REQ 全表 — 附自動抽出
-> 的寫入序列, 按此實作 handler 即可。已實作 89 個 REQ handler
+> 的寫入序列, 按此實作 handler 即可。已實作 120+ 個 REQ handler (本輪起以 Router 實際註冊數為準)
 > (Auth/Lobby/Shop/Stats/Clan/Quest/Friend/Room/Channel/Voice/
 > BattleRelay/Warehouse/Join)。
 >
@@ -93,6 +93,19 @@
 > 一律大廳/找不到)。msgtableres 0x1EF/0x1F0/0x1D8/0x1D9/0x21D/0x21E/
 > 0x314/0x3AF 文字已補 RESOURCES.md §8。詳 PACKETS.md §3.15c + §3.15g。
 >
+> 五十一輪 (GG 戰鬥中繼重驗 — 更正廿五輪「slot 前綴」簡化, 修兩處潛伏
+> bug): ① **139 GG_EXITGAME 重複註冊** — BattleRelay 與 Room 都 add(139),
+> Router.Dictionary.Add 會擲例外 → 啟動即崩 (本機無 dotnet 從未跑過, 潛伏);
+> 已自 BattleRelay 移除 (Room 的 ExitGame 才是正主)。② **344/346/348/350
+> 聊天 relay 用 REQ opcode 廣播** — client 只對 345/347/349/351 有
+> dispatcher case, REQ opcode 會被忽略 → 已改以 ACK opcode 廣播。
+> ③ TH 簇 316-331 逐函數定案: REQ 首欄是 team 非 slot; ACK = REQ + 尾附
+> slot (321/323 例外); 322 空 REQ → 323 [BombTeam] (Room.BombTeam 只於 318 武裝成功記下)。
+> ④ 足球 964/967 空 REQ → ACK [u8 flag=0, u8 slot]。⑤ 奪寶 443/445/447
+> ACK 是分數組 (u8,u8,u16×3), 需計分狀態機 → 自轉發器移除 (不註冊,
+> 送錯比不送糟)。⑥ BattleRelay 全面改 TryFindRoomSlot 清晰寫法。
+> 詳 PACKETS.md §3.15d3。
+>
 > 下一輪可做: 269 code 6/7 成功態 (需遊戲狀態機, sub_885D00 尾塊
 > 待確認); GM/MASTER 群 (275-299/394-416/822-831/883-885, 需權限
 > 分級); matching room 群 (983/986/988); AI 模式群 (918-944);
@@ -123,21 +136,8 @@
 | 306 | GG_JJGET_REQ | `u8` |
 | 310 | GS_BUYCHAR_REQ | `s32 s32 s32 s32 s32 s32` |
 | 312 | GI_CHANGESLOT_REQ | `u8` |
-| 316 | GG_HACKSTART_REQ | `u8` |
-| 318 | GG_HACKSUCC_REQ | `u8 f32 f32 f32 f32 f32 f32` |
-| 320 | GG_HACKFAIL_REQ | `u8` |
-| 322 | GG_BOMBSUCC_REQ | `(空)` |
 | 324 | GG_BOMBEND_REQ | `u8` |
-| 326 | GG_UNHACKSTART_REQ | `u8` |
-| 328 | GG_UNHACKSUCC_REQ | `u8` |
-| 330 | GG_UNHACKFAIL_REQ | `u8` |
-| 342 | GG_SOLORESPON_REQ | `s32` |
-| 344 | GG_LIVECHAT_REQ | `s32 u8 str` |
-| 346 | GG_TEAMCHAT_REQ | `s32 u8 str` |
-| 348 | GG_DEADCHAT_REQ | `s32 u8 str` |
-| 350 | GG_TEAMDEADCHAT_REQ | `s32 u8 str` |
 | 358 | GS_BUYCASHITEM_REQ | `u8 s32 s32` |
-| 360 | GG_TSURRESPON_REQ | `s32` |
 | 370 | GL_CHANGECHANNEL_REQ | `u8` |
 | 374 | GR_GETCRYSTAL_REQ | `u8` |
 | 394 | MASTER_ROOMINFO_REQ | `u8` |
@@ -151,10 +151,9 @@
 | 416 | MASTER_KILLALL_REQ | `(空)` |
 | 418 | MASTER_RESETTCPGROUPINFO_REQ | `str s32` |
 | 423 | GL_MSG_READ_REQ | `str` |
-| 443 | GG_STEALSUCK_REQ | `u8 s16` |
-| 445 | GG_STEALPUSH_REQ | `u8 s16` |
+| 443 | GG_STEALSUCK_REQ | `u8 s16` — ACK 444=u8,u8,u16×3 分數組, 需計分狀態機 (勿轉發) |
+| 445 | GG_STEALPUSH_REQ | `u8 s16` — ACK 446=u8,u8,u16×3 分數組, 需計分狀態機 (勿轉發) |
 | 453 | GS_DELETEGIFT_REQ | `s32 s32` |
-| 455 | GG_EXERCISERESPON_REQ | `s32 s8` |
 | 457 | GI_CHANGEITEMSLOT_REQ | `(空)` |
 | 461 | GS_USE_PAPERCODEGIFT_REQ | `str` |
 | 464 | GS_USE_PAPERCODEGIFT_IGNORE_DUPLICATED_ITEM_REQ | `u8 str` |
@@ -187,7 +186,6 @@
 | 737 | GG_DESTROY_START_REQ | `u8` |
 | 739 | GG_DESTROY_SUCC_REQ | `u8` |
 | 741 | GG_DESTROY_FAIL_REQ | `u8` |
-| 746 | GG_PNR_RESPON_REQ | `s32` |
 | 749 | GG_GIMMICK_DAMAGE_REQ | `(空)` |
 | 752 | GG_MAPINFO_RELOAD_REQ | `(空)` |
 | 756 | GL_CLAN_TNMT_RECEIPT_REQ | `s32` |
@@ -231,7 +229,6 @@
 | 902 | GG_OCC_START_REQ | `u8 u8 s32` |
 | 904 | GG_OCC_SUCC_REQ | `u8 u8 s32` |
 | 906 | GG_OCC_FAIL_REQ | `u8 u8 s32` |
-| 909 | GG_OCC_RESPON_REQ | `s32` |
 | 912 | GL_WEAPONPARTS_EQUIP_CHANGE_REQ | `u8 s32 s32 s32 || u8 s32 s32` |
 | 918 | GR_AI_GET_REWARD_ITEM_REQ | `u8` |
 | 922 | GR_AI_DAMAGE_SHIELD_REQ | `s16 s16 s16 f32` |
@@ -242,8 +239,5 @@
 | 939 | GR_AI_GO_NEXT_WAVE_REQ | `(空)` |
 | 944 | GR_RESET_GAMEROOMSLOT_REQ | `(空)` |
 | 962 | GG_DROPWEAPON_GET_AND_DROP_REQ | `s16 s16 u8 s16 s16 f32` |
-| 964 | GG_GET_BALL_REQ | `(空)` |
-| 967 | GG_GET_GOAL_REQ | `(空)` |
-| 971 | GG_SOCCER_RESPON_REQ | `s32` |
 | 983 | GL_MATCHINGROOM_MAKE_REQ | `u8 str s32 u8 u8 u8 u8 u8 u8 u8 u8 u8` |
 | 988 | GL_MATCHINGROOM_CANCLE_REQ | `(空)` |

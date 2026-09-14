@@ -81,6 +81,15 @@ public sealed class Room
     public bool TeamShuffle { get; set; }                   // 隊打散開關 (368/369; GAMEROOM_TEAMSHUFFLE)
     public bool Soccer { get; set; }                        // 足球模式開關 (969/970; GAMEROOM_SOCCER → mode+14)
 
+    /// <summary>
+    /// TH 模式最近一次植彈的隊伍 (0/1) — 316 GG_HACKSTART_REQ 首欄即 team,
+    /// 但開駭可能失敗, 故只在 318 GG_HACKSUCC_REQ (正式武裝成功) 記下;
+    /// 322 GG_BOMBSUCC_REQ 為空 payload, server 需回 323 [u8 team] 告知
+    /// 哪隊的炸彈爆炸。null = 本回合尚無人成功植彈 (此時 322 無從回覆,
+    /// 依「未確認不硬編」原則直接忽略)。
+    /// </summary>
+    public byte? BombTeam { get; set; }
+
     /// <summary>slot → session (最多 16 人)。</summary>
     public ConcurrentDictionary<byte, Session> Members { get; } = new();
 
