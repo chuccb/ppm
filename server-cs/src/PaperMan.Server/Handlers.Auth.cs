@@ -33,18 +33,27 @@ public static class AuthHandlers
     //   → lo32(wire) = 0xAA^0xA4 = 0x0E (恆定), hi32(wire) = hw32^0xB1A9D7C7
     private static async ValueTask Login(Session session, Packet packet, ServerContext context)
     {
+        Console.WriteLine($"[s{session.Id}] -> Login payload hex ({packet.Length}B): {Convert.ToHexString(packet.Payload)}");
+
         var account = packet.ReadStr();
         var token = packet.ReadStr();
         ulong hwObf = packet.Remaining >= 8 ? packet.ReadU64() : 0;
         byte secState = packet.Remaining >= 1 ? packet.ReadU8() : (byte)0;  // security_state
-        _ = packet.ReadRaw(Math.Min(24, packet.Remaining));                 // 版本/指紋塊
+        var extra = packet.ReadRaw(Math.Min(24, packet.Remaining));         // 版本/指紋塊
 
         // 還原: hw32 = hi32 ^ 0xB1A9D7C7; lo32 恆 0x0E 可作完整性檢查
         uint hw32 = (uint)(hwObf >> 32) ^ 0xB1A9D7C7;
         bool hwValid = (uint)hwObf == 0x0E;
         ulong hwKey = hwValid ? hw32 : hwObf;              // 異常時保留原始值供記錄
 
-        Console.WriteLine($"[s{session.Id}] -> GL_LOGIN_REQ parsed: account='{account}', tokenLen={token.Length}, hwKey=0x{hwKey:X8}(valid={hwValid}), secState={secState}");
+        // 避免不可見字元破壞終端行顯示
+        string safeAccount = string.Create(account.Length, account, (span, src) =>
+        {
+            for (int i = 0; i < src.Length; i++)
+                span[i] = char.IsControl(src[i]) ? '.' : src[i];
+        });
+
+        Console.WriteLine($"[s{session.Id}] -> GL_LOGIN_REQ parsed: account='{safeAccount}' (len={account.Length}), tokenLen={token.Length}, hwKey=0x{hwKey:X8}(valid={hwValid}), secState={secState}");
 
         var r = context.Db.Login(account, token, hwKey);
         Console.WriteLine($"[s{session.Id}] -> Db.Login result: {r.Result} (UserId={r.UserId}, Nick='{r.Nickname}', GP={r.GamePoint}, Cash={r.Cash})");

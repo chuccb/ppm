@@ -110,14 +110,16 @@ public sealed class Session(TcpClient client, PacketCodec codec, long id) : IDis
             ushort op = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(_rxBuf.AsSpan(2, 2));
             ushort w2 = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(_rxBuf.AsSpan(4, 2));
             ushort w3 = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(_rxBuf.AsSpan(6, 2));
+            var rawHex = Convert.ToHexString(_rxBuf.AsSpan(0, frameLen));
             Console.WriteLine($"[s{Id}] raw frame header: w0={w0}(payloadLen), op={op}(0x{op:X4}/{(Opcode)op}), w2={w2}(encOrigLen), w3={w3}(origLen), totalFrame={frameLen}B");
+            Console.WriteLine($"[s{Id}] raw wire bytes: {rawHex}");
 
             Packet? pkt;
             try
             {
                 pkt = codec.Decode(_rxBuf.AsSpan(0, frameLen));
-                var hexSnippet = Convert.ToHexString(pkt.Payload.Slice(0, Math.Min(pkt.Length, 32)));
-                Console.WriteLine($"[s{Id}] << RECV {pkt.Opcode}({pkt.OpcodeRaw}) payload={pkt.Length}B hex=[{hexSnippet}{(pkt.Length > 32 ? "..." : "")}]");
+                var hexSnippet = Convert.ToHexString(pkt.Payload);
+                Console.WriteLine($"[s{Id}] << RECV {pkt.Opcode}({pkt.OpcodeRaw}) payload={pkt.Length}B hex=[{hexSnippet}]");
             }
             catch (Exception ex)
             {
