@@ -283,6 +283,38 @@ char_type ↔ item_id)**: contents.xml 角色區塊序 (0..14) 即 char_idx;
 | 13 | magicgirl | ルコット (lucott) | 14 | 19900014 |
 | 14 | devilgirl | ルーシー (lucy) | 15 | 19900015 |
 
+⚠ contents.xml 角色區塊 0..9 用**顯示名** (hayate…hood)、10..14 用
+**codename** (spy_11…devilgirl); 載入器只比對名稱、不讀 `index="2"`
+屬性 (所有區塊都寫 2, 未見用途), **文件順序 = char_idx 0..14**
+(CVCustomizeScriptProperty::sub_88B310 依子節點序傳 i 當 char_idx)。
+
+**語音檔實體結構 (卌八輪 — `Extracted/sound/` 1,777 檔實測)**: 每
+「情境/套件」是一個資料夾, 內含 15 角色 × 27 句 Radio_Message +
+整組 Voice 本嗓:
+
+```
+sound\soundsNN\<codename>\Radio_Message\<codename>_command\   <codename>_command_01..09.wav
+                              \<codename>_tactics\           <codename>_tactics_01..09.wav
+                              \<codename>_information\       <codename>_information_01..09.wav
+sound\soundsNN\<codename>\Voice\<codename>_cry|die|drop|jump|kill|...>_NN.wav
+```
+
+- `sounds`(無尾碼, index 0)= 角色**原生嗓** (Voice00 → voice_item 0);
+  `sounds01`..`sounds92`(缺 87)= 92 個可選套件。
+- 播放器 `sub_888220` (00888220) 的拼裝格式
+  `%s\%s\Radio_Message\%s_%s\%s_%s_%02d.wav` (base\codename\codename\
+  category\codename\category\NN) 與上面目錄完全吻合; 另 `Voice\`
+  子夾是 base_voice (cry/die/drop/jump/kill…)。這把 **27 句 = command/
+  tactics/information 三類 × 9 槽** 釘死在磁碟上。
+- **UI 五頁籤 → 協定對照** (VoiceCustomizeMain.xml tab):
+  `VOICE_CUSTOMIZE_FIGHT`=base_voice1(戦闘)、`_EMOTION`=base_voice2
+  (感情)、`_COMMAND`=command、`_STRATEGY`=tactics、`_STATEMENT`=
+  infomation — 即語音塊 `s16 base_voice1, s16 base_voice2,
+  3×9×(s16 voice_item, u8 flag)` 的 2+3 組成來源。對應 UI 檔:
+  `VoiceCustomize_Fight_Emotion.xml`(WAR+EMOTION 兩 select)、
+  `VoiceCustomize_zxv.xml`(COMMAND/STRATEGY/STATEMENT 共用, 9 列),
+  `VoiceCustomize_zxvPopup.xml`(改選彈窗)。
+
 ## 5e. 版本考古 (廿一輪)
 - 根 datarevision.txt = 811034967 (patch 版本號)
 - map/maplist.dat = **舊版明文** (head f32 v1.02, 67 圖, 832B/條,
@@ -410,6 +442,10 @@ sub_408140/684190 載入本檔) — 全 exe 共 851 個唯一「字面常數」i
 | 0x90 | ゲームルームに接続しています…防火牆提示 | 進房等待 |
 | 0xDA | 定員オーバーのため…チャンネル接続不可 | 頻道滿 |
 | 0x107 | キャラクターはプレゼントできません | 送禮 |
+| 0x3F8 | 選択されているボイスセットに一括変更します。よろしいですか？ | 語音套件批次變更確認 |
+| 0x3F9 | 戦闘/感情ボイスは個別設定ができません。選択したボイスに一括変更しますか？ | 語音 base 語音批次變更確認 |
+| 0x3FA | 選択したボイスに変更しますか？ | 語音變更確認 |
+| 0x3FB | ボイスカスタマイズ設定保存に失敗しました… | 795 儲存失敗 (796 回退告警) |
 
 **108 房名預設表 = entry 309..325** (sub_568CE0 `state+309` 查表 —
 state 0..16 即「預設房名」, state<0 才送自訂房名 inline):

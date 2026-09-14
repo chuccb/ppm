@@ -692,8 +692,13 @@ kind 0/1/14 與 12/13/17 (可覆寫類) 走覆寫路徑, 其他 kind 重複購�
   i+1, server 原樣回傳)。base_voice×2 s16 選語音組 (voice_customize_path.xml
   的 sounds index) — 3 類 command/tactics/infomation ×9 句與
   voice_customize_contents.xml 的 command_1..9/tactics_1..9/
-  infomation_1..9 互證 (Extracted 實測)。⚠ 變體B (sub_886330) 全 exe
-  無呼叫者 = **client 死碼**, 實際只會收到變體A。
+  infomation_1..9 互證 (Extracted 實測)。⚠ base_voice1(戦闘)/base_voice2
+  (感情) 是**成對批次更動**: 訊息 0x3F9「戦闘/感情ボイスは個別設定が
+  できません…一括変更」= 選語音組時兩者一起換 (UI 五頁籤 FIGHT+EMOTION
+  合併於 VoiceCustomize_Fight_Emotion.xml 的佐證); 27 槽才各自獨立。
+  ⚠ 變體B (sub_886330) 全 exe 無呼叫者 = **client 死碼**, 實際只會
+  收到變體A。語音檔實體 `sound\soundsNN\<codename>\Radio_Message\`
+  = command/tactics/information 三夾, `Voice\` 夾 = 本嗓 — 見 RESOURCES.md。
 ```
 
 ### 3.13 GQ_QUEST 任務家族 (八輪全家讀畢)
