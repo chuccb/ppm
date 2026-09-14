@@ -276,25 +276,40 @@ public sealed class Packet(Opcode opcode)
     /// <summary>sub_592730: 讀到 NUL。maxBytes 對應客戶端定長 buffer。</summary>
     public string ReadStr(int maxBytes = MaxPayload)
     {
-        int end = Array.IndexOf(_buf, (byte)0, ReadPos, Math.Min(Remaining, maxBytes));
-        if (end < 0)
+        if (Remaining <= 0)
         {
-            throw new EndOfStreamException($"unterminated string (op={Opcode})");
+            return string.Empty;
         }
 
-        var s = Ansi.GetString(_buf, ReadPos, end - ReadPos);
+        int limit = Math.Min(Remaining, maxBytes);
+        int end = Array.IndexOf(_buf, (byte)0, ReadPos, limit);
+        if (end < 0)
+        {
+            var s = Ansi.GetString(_buf, ReadPos, limit);
+            ReadPos += limit;
+            return s.TrimEnd('\0');
+        }
+
+        var str = Ansi.GetString(_buf, ReadPos, end - ReadPos);
         ReadPos = end + 1;
-        return s;
+        return str;
     }
 
     /// <summary>sub_5927B0: UTF-16LE 讀到雙 NUL。</summary>
     public string ReadWStr()
     {
+        if (Remaining < 2)
+        {
+            ReadPos = Length;
+            return string.Empty;
+        }
+
         int i = ReadPos;
         while (i + 1 < Length && (_buf[i] != 0 || _buf[i + 1] != 0))
         {
             i += 2;
         }
+
         var s = Encoding.Unicode.GetString(_buf, ReadPos, i - ReadPos);
         ReadPos = Math.Min(i + 2, Length);
         return s;

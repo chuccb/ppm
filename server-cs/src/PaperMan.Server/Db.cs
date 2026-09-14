@@ -52,6 +52,12 @@ public sealed partial class Db : IDisposable
 
             if (!r.Read())
             {
+                r.Close();
+                if (!string.IsNullOrWhiteSpace(account))
+                {
+                    CreateAccount(account, tokenOrPass);
+                    return Login(account, tokenOrPass, hwKey);
+                }
                 return new(LoginCode.BadCredentials);
             }
 

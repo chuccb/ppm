@@ -134,14 +134,17 @@ public sealed class PacketCodec(byte[]? aesKey = null, ushort compressThreshold 
         // --- AES 解密 (sub_593110 驗證群) ---
         if (_aes is not null)
         {
-            bool valid = w0 >= 16 && (w0 & 0xF) == 0 && w0 == Align16(w2) && w0 < MaxEncryptedSize;
-            if (!valid)
+            bool isEncrypted = w0 >= 16 && (w0 & 0xF) == 0 && w2 > 0 && w0 == Align16(w2) && w0 < MaxEncryptedSize;
+            if (isEncrypted)
             {
-                throw new InvalidDataException($"bad encrypted frame (w0={w0}, w2={w2})");
+                var decrypted = (byte[])payload.Clone();
+                _aes.DecryptEcb(decrypted);
+                payload = decrypted[..w2];                     // word0 := word2
             }
-
-            _aes.DecryptEcb(payload);
-            payload = payload[..w2];                           // word0 := word2
+            else if (w0 == 0 && w2 == 0)
+            {
+                payload = [];
+            }
         }
 
         // --- LZ 解壓 (sub_592E50: w3 ≥ 門檻且目前大小 < w3) ---

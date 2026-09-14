@@ -48,6 +48,14 @@ void Check(string name, bool ok)
     var innerBack = q.ReadPacket();
     Check("embedded packet", innerBack.Opcode == Opcode.GT_PING_ACK && innerBack.ReadS32() == 7);
     Check("fully consumed", q.Remaining == 0);
+
+    // 測試空字串與無結尾字串的安全讀取
+    var emptyPkt = Packet.FromPayload(Opcode.GL_LOGIN_REQ, []);
+    Check("empty payload ReadStr returns empty", emptyPkt.ReadStr() == string.Empty);
+    Check("empty payload ReadWStr returns empty", emptyPkt.ReadWStr() == string.Empty);
+
+    var rawStrPkt = Packet.FromPayload(Opcode.GL_LOGIN_REQ, "UserNoNul"u8);
+    Check("non-nul terminated ReadStr returns text safely", rawStrPkt.ReadStr() == "UserNoNul");
 }
 
 // ---- 2. PaperLz -------------------------------------------------------------

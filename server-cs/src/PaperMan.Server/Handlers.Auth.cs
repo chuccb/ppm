@@ -35,9 +35,9 @@ public static class AuthHandlers
     {
         var account = packet.ReadStr();
         var token = packet.ReadStr();
-        ulong hwObf = packet.ReadU64();
-        _ = packet.ReadU8();                                    // security_state
-        _ = packet.ReadRaw(Math.Min(24, packet.Remaining));          // 版本/指紋塊
+        ulong hwObf = packet.Remaining >= 8 ? packet.ReadU64() : 0;
+        _ = packet.Remaining >= 1 ? packet.ReadU8() : (byte)0;  // security_state
+        _ = packet.ReadRaw(Math.Min(24, packet.Remaining));     // 版本/指紋塊
 
         // 還原: hw32 = hi32 ^ 0xB1A9D7C7; lo32 恆 0x0E 可作完整性檢查
         uint hw32 = (uint)(hwObf >> 32) ^ 0xB1A9D7C7;
