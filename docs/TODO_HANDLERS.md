@@ -201,7 +201,8 @@
 >    - 478/479: 防作弊心跳檢查;
 >    - 480/481: 迷你遊戲 TOP 10 / TOP 3 排行榜查詢 (0x38 條目結構);
 >    - 485/486: 戰局進行時間查詢 (sub_56AE30 動態時鐘同步)。
-> ③ **AI / PVE 防衛戰模式協定 (Handlers.Ai.cs)**:
+> ③ **AI / PVE 防衛戰模式協定** (`Handlers.Ai.Registry.cs` + direct
+>    `Handlers.GR_AI_*.cs` / `Handlers.GR_RESET_GAMEROOMSLOT.cs`):
 >    - 918/919: PVE 結算道具抽取 (8B 抽獎結果同步);
 >    - 922/923: 核心防護罩受損廣播 (shield_id, damage, remain);
 >    - 924/925: 彈藥補給開始全房廣播;
