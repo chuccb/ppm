@@ -301,18 +301,19 @@
 > 每一列只描述目前看得到的 C2S framing 或 safe boundary；它不是對 response、
 > mutation、ownership 或 original-service policy 的授權。新增 handler 前請先依
 > [`README.md`](README.md) 的 evidence chain 補齊所有缺口。
+>
+> **這張表只列「尚未註冊 handler」的 opcode。** 實作一個 opcode 後必須把它
+> 的列刪掉，否則清單會謊報工作量。`verify_server_layout.py` 會交叉比對本表
+> 與 generator 實際探索到的 direct entries，兩者衝突即建置失敗。
+> (2026-09 修正: 230/232/244/358/806 早已實作卻仍留在表上，已移除。)
 
 | op | 名稱 | REQ 寫入序列 |
 |---|---|---|
 | 103 | GE_LOGOUT_REQ | `(空)` |
-| 230 | GP_CHLOSSC_REQ | `s32` |
-| 232 | GP_CHKILLC_REQ | `s32` |
-| 244 | GP_CHTKILLC_REQ | `s32` |
 | 298 | GS_TAKEGIFT_REQ | `(空)` |
 | 300 | GS_MOVEGIFT_REQ | `(空)` |
 | 306 | GG_JJGET_REQ | `u8` |
 | 324 | GG_BOMBEND_REQ | `u8` |
-| 358 | GS_BUYCASHITEM_REQ | `u8 count, count×{s32 itemId,s32 clientCalculatedPrice}` |
 | 374 | GR_GETCRYSTAL_REQ | `u8` |
 | 398 | MASTER_SVRCLASS_REQ | `u8` |
 | 400 | MASTER_CONNTYPE_REQ | `u8` |
@@ -351,7 +352,6 @@
 | 776 | GL_CLAN_TNMT_CLANREC_REQ | `(空)` |
 | 785 | GL_FRIEND_ADD_PROCESS_REQ | `str` |
 | 804 | MASTER_RELOAD_HIDDEN_ITEM_LIST_REQ | `(空)` |
-| 806 | GS_HIDDEN_ITEM_LIST_REQ | exact `s16 category`; direct shop emitters use `1..13`, `15..24` (not 14), parts initialization uses 25. Server returns only the fully parsed zero-record 807 arm `{u8 rawHeader=0,u16 count=0,u16 echoedCategory}` for those selectors. Historical record source/filter/variant/period/blob policy remains UNRESOLVED; nonzero records are deliberately withheld because 22–24's nonzero blob path blindly interprets fifteen raw pairs after copying into fixed client workspace. |
 | 808 | GS_GET_RECOMMENDSET_INFO_REQ | `s32 count, count×s32 recommendationId`; native sender emits only when `count>0` |
 | 812 | MASTER_SPECIAL_ABILITY_ITEMSLOT_PROBABILITY_APPLY_REQ | `s8` |
 | 814 | MASTER_CHECK_BOMB_CHEATER_APPLY_REQ | `s8` |

@@ -18,6 +18,7 @@ ROOT = Path(__file__).resolve().parents[2]
 SERVER = ROOT / "server-cs" / "src" / "PaperMan.Server"
 HANDLERS = SERVER / "Handlers"
 GENERATOR_PROJECT = ROOT / "server-cs" / "src" / "PaperMan.HandlerGenerator"
+TODO_HANDLERS = ROOT / "docs" / "TODO_HANDLERS.md"
 SHIPPED_NAME = "AnalyzerReleases.Shipped.md"
 UNSHIPPED_NAME = "AnalyzerReleases.Unshipped.md"
 OPCODE_SOURCE = ROOT / "db" / "packets.tsv"
@@ -129,6 +130,36 @@ def read_release_rows(path: Path) -> dict[str, tuple[str, str]]:
             fail(f"{path}:{number} duplicate release entry for {rule_id}")
         rows[rule_id] = (parts[1], parts[2])
     return rows
+
+
+TODO_ROW = re.compile(r"(?m)^\| (?P<opcode>\d+) \| (?P<token>\w+) \|")
+
+
+def verify_unimplemented_inventory(direct_entries: dict[str, Path], generated: dict[str, int]) -> int:
+    """docs/TODO_HANDLERS.md must not list an opcode that already has a handler.
+
+    The inventory is the queue of remaining work. When an opcode ships and its
+    row survives, the document overstates what is left and the next reader
+    re-researches something that is already done.
+    """
+    implemented = {generated[token] for token in direct_entries if token in generated}
+    rows = [(int(match["opcode"]), match["token"])
+            for match in TODO_ROW.finditer(TODO_HANDLERS.read_text(encoding="utf-8"))]
+    if not rows:
+        fail(f"{TODO_HANDLERS} has no unimplemented-inventory rows to check")
+
+    stale = sorted((opcode, token) for opcode, token in rows if opcode in implemented)
+    if stale:
+        listed = ", ".join(f"{opcode} {token}" for opcode, token in stale)
+        fail(f"{TODO_HANDLERS} lists implemented opcodes as unimplemented: {listed}")
+
+    mislabelled = sorted(
+        (opcode, token) for opcode, token in rows
+        if token in generated and generated[token] != opcode)
+    if mislabelled:
+        listed = ", ".join(f"{opcode} {token}" for opcode, token in mislabelled)
+        fail(f"{TODO_HANDLERS} rows disagree with the generated catalog: {listed}")
+    return len(rows)
 
 
 def verify_analyzer_release_tracking() -> int:
@@ -251,12 +282,15 @@ def main() -> None:
     if direct_sources & shared_sources:
         fail("a handler source has conflicting direct/shared ownership")
 
+    pending = verify_unimplemented_inventory(direct_entries, generated)
+
     print(
         "server layout OK: "
         f"{len(catalog)} catalog opcodes; generated discovery finds {len(direct_entries)} direct entries "
         f"across {len(family_classes)} handler classes; {len(direct_sources)} direct + "
         f"{len(shared_sources | explicit_non_entry_sources)} support-only = {len(all_handler_sources)} handler sources; "
-        f"{tracked_rules} analyzer rules release-tracked"
+        f"{tracked_rules} analyzer rules release-tracked; "
+        f"{pending} opcodes still queued in TODO_HANDLERS.md"
     )
 
 
