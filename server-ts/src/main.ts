@@ -6,10 +6,11 @@
  * than invent a plausible rule — see STYLE.md.
  */
 
-import { assertCatalogue } from "./opcodes.ts";
+import { OPCODE_COUNT } from "./opcodes.ts";
 import { Store } from "./store.ts";
-import type { GameServer } from "./login.ts";
+import type { GameServer } from "./wire/GL_LOGIN_ACK.ts";
 import { listen } from "./session.ts";
+import { Registry } from "./wire.ts";
 
 const host = Bun.env["PM_HOST"] ?? "0.0.0.0";
 const port = Number(Bun.env["PM_PORT"] ?? 40200);
@@ -20,8 +21,8 @@ const log = (message: string): void => {
   console.log(`[${new Date().toISOString()}] ${message}`);
 };
 
-assertCatalogue(); // fail fast if the opcode catalogue and this build disagree
-
+// Filenames under src/wire/ are the registration; an unknown name throws here.
+const wire = Registry.load();
 const store = new Store(dbPath);
 
 // Deployment policy, not reverse-engineered fact: what to advertise.
@@ -37,9 +38,10 @@ const servers: readonly GameServer[] = [
   },
 ];
 
-const server = listen({ hostname: host, port, store, servers, log });
+const server = listen({ hostname: host, port, store, servers, wire, log });
 
 log(`login server on ${host}:${port}`);
+log(`${OPCODE_COUNT} opcodes known; ${wire.summary}`);
 log(`sqlite ${store.sqliteVersion} at ${dbPath}`);
 log(`bun ${Bun.version} (${Bun.revision.slice(0, 9)})`);
 

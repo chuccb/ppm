@@ -1,12 +1,15 @@
 import { describe, expect, test } from "bun:test";
 import { decode } from "../src/packet.ts";
-import { Op } from "../src/opcodes.ts";
-import { GT_PING_ACK } from "../src/keepalive.ts";
+import { opcodeFor } from "../src/opcodes.ts";
+import { Registry } from "../src/wire.ts";
+
+const wire = Registry.load();
+const GT_PING_ACK = () => wire.build("GT_PING_ACK");
 
 describe("keepalive", () => {
   test("102 is the server-initiated heartbeat, with an empty payload", () => {
     const r = decode(GT_PING_ACK().encode());
-    expect(r.opcode).toBe(Op.GT_PING_ACK);
+    expect(r.opcode).toBe(opcodeFor("GT_PING_ACK"));
     expect(r.remaining).toBe(0);
   });
 
@@ -18,8 +21,8 @@ describe("keepalive", () => {
   test("the direction is 102 out, 101 back", () => {
     // Guards against "fixing" the apparent REQ/ACK inversion: the client's
     // dispatcher handles 102 by building 101, and has no 102 builder at all.
-    expect(Op.GT_PING_ACK).toBe(102);
-    expect(Op.GT_PING_REQ).toBe(101);
+    expect(opcodeFor("GT_PING_ACK")).toBe(102);
+    expect(opcodeFor("GT_PING_REQ")).toBe(101);
     expect(GT_PING_ACK().opcode).toBe(102);
   });
 });

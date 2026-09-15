@@ -13,16 +13,28 @@ audience. Two rules dominate everything else:
 
 Follow `db/packets.tsv`, which is the reverse-engineered source of truth.
 
-| Thing | Convention | Example |
-|---|---|---|
-| Opcode constant | official name, verbatim | `GL_LOGIN_REQ` |
-| Handler for a REQ | `on` + official name | `onGL_LOGIN_REQ` |
-| Builder for an ACK | official name, verbatim | `GL_LOGIN_ACK({ ... })` |
-| Everything else | normal camelCase | `frameLength`, `verifyLogin` |
+**The opcode name lives in the filename, and nowhere else.** One module per
+packet under `src/wire/`, named exactly as the catalogue names it:
 
-`SCREAMING_SNAKE` in an otherwise camelCase codebase looks odd for about five
-seconds, then pays for itself every time you cross-reference the docs. The
-shouty names mark exactly the boundary where our code meets the wire.
+```
+src/wire/GL_LOGIN_REQ.ts   *_REQ  -> inbound handler, default (reader, session)
+src/wire/GL_LOGIN_ACK.ts   others -> outbound builder, default (op, ...args)
+```
+
+Inside the module the name never appears again — not in a constant, not in a
+comment header, not in `new Packet(...)`. The builder receives its own opcode
+as the first argument, so there is nothing to repeat and nothing to keep in
+sync. To find the code for a packet, open the file with that name.
+
+Everything else is normal camelCase: `frameLength`, `verifyLogin`.
+
+Two guards make the convention enforceable rather than aspirational:
+
+- `wire/index.ts` lists the modules, so `reply("GL_LOGON_ACK")` is a *compile*
+  error and a builder's argument types are checked at each call site.
+- At startup the registry cross-checks that list against the directory and
+  every filename against `db/packets.tsv`. A file that is unlisted, a listing
+  with no file, or a name that is not a real opcode all fail immediately.
 
 Opcode families from the catalogue, for orientation:
 `GL_` lobby · `GG_` in-game relay · `GR_` room · `GS_` shop · `GP_` play ·

@@ -4,11 +4,11 @@
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { Packet, PacketStream, type Reader } from "../src/packet.ts";
-import { Op } from "../src/opcodes.ts";
+import { opcodeFor } from "../src/opcodes.ts";
 import { Store } from "../src/store.ts";
-import { listen } from "../src/session.ts";
-import { Result, type GameServer } from "../src/login.ts";
-import { PING_INTERVAL_MS } from "../src/keepalive.ts";
+import { PING_INTERVAL_MS, listen } from "../src/session.ts";
+import { Registry } from "../src/wire.ts";
+import { Result, type GameServer } from "../src/wire/GL_LOGIN_ACK.ts";
 
 const servers: readonly GameServer[] = [
   {
@@ -34,6 +34,7 @@ beforeAll(async () => {
     port: 0, // ephemeral
     store,
     servers,
+    wire: Registry.load(),
     log: () => {},
   });
   port = listener.port;
@@ -104,7 +105,7 @@ function connectClient() {
 
 function loginRequest(account: string, password: string): Packet {
   const high = BigInt((811034967 ^ 0xb1a9d7c7) >>> 0);
-  return new Packet(Op.GL_LOGIN_REQ)
+  return new Packet(opcodeFor("GL_LOGIN_REQ"))
     .str(account)
     .str(password)
     .u64((high << 32n) | 0xf1e1ab0en)
@@ -117,7 +118,7 @@ describe("live login over TCP", () => {
     const client = connectClient();
     const socket = await client.ready;
     const greeting = await client.next();
-    expect(greeting.opcode).toBe(Op.GL_ACCOUNTCONNSUCC);
+    expect(greeting.opcode).toBe(opcodeFor("GL_ACCOUNTCONNSUCC"));
     expect(greeting.u16()).toBe(0x2580);
     socket.end();
   });
@@ -129,7 +130,7 @@ describe("live login over TCP", () => {
 
     socket.write(loginRequest("alice", "hunter2").encode());
     const ack = await client.next();
-    expect(ack.opcode).toBe(Op.GL_LOGIN_ACK);
+    expect(ack.opcode).toBe(opcodeFor("GL_LOGIN_ACK"));
     expect(ack.s32()).toBe(Result.Success);
     expect(ack.s32()).toBeGreaterThan(0); // user_no
     socket.end();
@@ -142,7 +143,7 @@ describe("live login over TCP", () => {
 
     socket.write(loginRequest("alice", "wrong").encode());
     const ack = await client.next();
-    expect(ack.opcode).toBe(Op.GL_LOGIN_ACK);
+    expect(ack.opcode).toBe(opcodeFor("GL_LOGIN_ACK"));
     expect(ack.s32()).toBe(Result.BadCredentials);
     socket.end();
   });
@@ -153,7 +154,7 @@ describe("live login over TCP", () => {
     const socket = await client.ready;
     await client.next(); // 694
 
-    socket.write(new Packet(Op.GT_PING_REQ).encode());
+    socket.write(new Packet(opcodeFor("GT_PING_REQ")).encode());
 
     // The heartbeat is far off, so any traffic now would be a wrong reply.
     expect(PING_INTERVAL_MS).toBeGreaterThan(1000);
@@ -161,7 +162,7 @@ describe("live login over TCP", () => {
 
     // Only a real request should produce traffic.
     socket.write(loginRequest("alice", "hunter2").encode());
-    expect((await client.next()).opcode).toBe(Op.GL_LOGIN_ACK);
+    expect((await client.next()).opcode).toBe(opcodeFor("GL_LOGIN_ACK"));
     socket.end();
   });
 

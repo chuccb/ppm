@@ -15,7 +15,7 @@ reverse-engineering notes in [`../docs/`](../docs/).
 
 ```bash
 bun install
-bun test          # 53 tests
+bun test          # 52 tests
 bun run typecheck # tsc --noEmit, clean
 bun start         # login server on 0.0.0.0:40200
 ```
@@ -32,14 +32,21 @@ src/packet.ts    the whole wire format: header, cipher, reader, writer, reassemb
 src/aes.ts       AES-128 + CFB-128, the client's cipher
 src/opcodes.ts   676-opcode catalogue, loaded from db/packets.tsv
 src/store.ts     accounts on bun:sqlite
-src/login.ts     GL_ACCOUNTCONNSUCC -> GL_LOGIN_REQ -> GL_LOGIN_ACK
-src/keepalive.ts GT_PING_ACK out, GT_PING_REQ back
+src/wire.ts      filename -> opcode registry
+src/wire/        one module per packet, named after the opcode
 src/session.ts   per-connection dispatch, and Bun.listen
 src/main.ts      entry point
 ```
 
-Builders are named after the opcode they produce, so grepping an official name
-from `docs/PACKETS.md` lands on the code that implements it.
+**One packet, one file, named after the opcode.** The name appears in the
+filename and nowhere else — the module gets its opcode injected, so nothing
+inside it repeats the name. To find the code for a packet from
+`docs/PACKETS.md`, open the file with that name:
+
+```
+src/wire/GL_LOGIN_REQ.ts   *_REQ  -> inbound handler
+src/wire/GL_LOGIN_ACK.ts   others -> outbound builder
+```
 
 ## Protocol facts this implements
 

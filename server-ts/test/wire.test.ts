@@ -1,22 +1,19 @@
 import { describe, expect, test } from "bun:test";
 import { Packet, decode } from "../src/packet.ts";
-import { Op } from "../src/opcodes.ts";
-import { Store } from "../src/store.ts";
-import {
-  GL_ACCOUNTCONNSUCC,
-  GL_LOGIN_ACK,
-  GL_LOGIN_ACK_rejected,
-  type GameServer,
-  Result,
-  login,
-  readGL_LOGIN_REQ,
-} from "../src/login.ts";
+import { opcodeFor } from "../src/opcodes.ts";
+import { Registry, type BuilderArgs, type BuilderName } from "../src/wire.ts";
+import { Result, type GameServer } from "../src/wire/GL_LOGIN_ACK.ts";
+import { read as readCredentials } from "../src/wire/GL_LOGIN_REQ.ts";
+
+const wire = Registry.load();
+const build = <N extends BuilderName>(name: N, ...args: BuilderArgs<N>) =>
+  decode(wire.build(name, ...args).encode());
 
 /** Build a 682 exactly as the client's builder does. */
 function clientLoginRequest(account: string, password: string, dataRevision = 811034967) {
   const low = 0xf1e1ab0en;
   const high = BigInt((dataRevision ^ 0xb1a9d7c7) >>> 0);
-  return new Packet(Op.GL_LOGIN_REQ)
+  return new Packet(opcodeFor("GL_LOGIN_REQ"))
     .str(account)
     .str(password)
     .u64((high << 32n) | low)
@@ -28,21 +25,21 @@ const reread = (packet: Packet) => decode(packet.encode());
 
 describe("694 — compression threshold and login trigger", () => {
   test("carries the threshold as a u16", () => {
-    const reader = reread(GL_ACCOUNTCONNSUCC());
+    const reader = build("GL_ACCOUNTCONNSUCC");
     expect(reader.opcode).toBe(694);
     expect(reader.u16()).toBe(0x2580); // compression disabled
   });
 
   test("rejects a threshold the client would ignore", () => {
-    expect(() => GL_ACCOUNTCONNSUCC(0x2581)).toThrow(RangeError);
-    expect(() => GL_ACCOUNTCONNSUCC(0)).toThrow(RangeError);
+    expect(() => wire.build("GL_ACCOUNTCONNSUCC", 0x2581)).toThrow(RangeError);
+    expect(() => wire.build("GL_ACCOUNTCONNSUCC", 0)).toThrow(RangeError);
   });
 });
 
 describe("682 — login request", () => {
   test("parses the exact client shape", () => {
     const reader = reread(clientLoginRequest("alice", "hunter2"));
-    const request = readGL_LOGIN_REQ(reader);
+    const request = readCredentials(reader);
     expect(request.account).toBe("alice");
     expect(request.password).toBe("hunter2");
     expect(request.dataRevision).toBe(811034967);
@@ -51,28 +48,28 @@ describe("682 — login request", () => {
   });
 
   test("rejects a bad guard dword", () => {
-    const packet = new Packet(Op.GL_LOGIN_REQ)
+    const packet = new Packet(opcodeFor("GL_LOGIN_REQ"))
       .str("a")
       .str("b")
       .u64(0n) // guard absent
       .u8(0)
       .zeros(24);
-    expect(() => readGL_LOGIN_REQ(reread(packet))).toThrow(/guard mismatch/);
+    expect(() => readCredentials(reread(packet))).toThrow(/guard mismatch/);
   });
 
   test("rejects trailing bytes", () => {
     const packet = clientLoginRequest("alice", "pw").u8(0xff);
-    expect(() => readGL_LOGIN_REQ(reread(packet))).toThrow(/trailing/);
+    expect(() => readCredentials(reread(packet))).toThrow(/trailing/);
   });
 
   test("rejects a truncated fingerprint", () => {
-    const packet = new Packet(Op.GL_LOGIN_REQ)
+    const packet = new Packet(opcodeFor("GL_LOGIN_REQ"))
       .str("a")
       .str("b")
       .u64(0xf1e1ab0en)
       .u8(0)
       .zeros(8);
-    expect(() => readGL_LOGIN_REQ(reread(packet))).toThrow(RangeError);
+    expect(() => readCredentials(reread(packet))).toThrow(RangeError);
   });
 });
 
@@ -90,16 +87,14 @@ describe("681 — login ack", () => {
   ];
 
   test("failure writes a full s32 word", () => {
-    const reader = reread(GL_LOGIN_ACK_rejected(Result.BadCredentials));
+    const reader = build("GL_LOGIN_ACK", Result.BadCredentials);
     expect(reader.opcode).toBe(681);
     expect(reader.s32()).toBe(2);
     expect(reader.remaining).toBe(0);
   });
 
   test("success round-trips in the documented field order", () => {
-    const reader = reread(
-      GL_LOGIN_ACK(7, servers),
-    );
+    const reader = build("GL_LOGIN_ACK", { userNo: 7, servers });
 
     expect(reader.s32()).toBe(Result.Success);
     expect(reader.s32()).toBe(7); // user_no
@@ -128,14 +123,15 @@ describe("681 — login ack", () => {
   });
 
   test("a type-3 channel carries the extra byte", () => {
-    const reader = reread(
-      GL_LOGIN_ACK(1, [
+    const reader = build("GL_LOGIN_ACK", {
+      userNo: 1,
+      servers: [
         {
           ...servers[0]!,
           channelGroups: [[{ type: 3, name: "AI", port: 1, flag: 0, extra: 9 }], [], []],
         },
-      ]),
-    );
+      ],
+    });
     for (let i = 0; i < 4; i++) reader.s32();
     reader.s16();
     reader.s16();
@@ -154,29 +150,11 @@ describe("681 — login ack", () => {
 
   test("insists on exactly three channel groups", () => {
     expect(() =>
-      GL_LOGIN_ACK(1, [{ ...servers[0]!, channelGroups: [[]] }]),
+      wire.build("GL_LOGIN_ACK", {
+        userNo: 1,
+        servers: [{ ...servers[0]!, channelGroups: [[]] }],
+      }),
     ).toThrow(/three channel groups/);
   });
 
-  test("end-to-end: good and bad credentials", async () => {
-    const store = new Store();
-    await store.createAccount("alice", "hunter2");
-
-    const good = await login(
-      store,
-      readGL_LOGIN_REQ(reread(clientLoginRequest("alice", "hunter2"))),
-      servers,
-    );
-    expect(good.accountId).toBeGreaterThan(0);
-    expect(reread(good.reply).s32()).toBe(Result.Success);
-
-    const bad = await login(
-      store,
-      readGL_LOGIN_REQ(reread(clientLoginRequest("alice", "nope"))),
-      servers,
-    );
-    expect(bad.accountId).toBeNull();
-    expect(reread(bad.reply).s32()).toBe(Result.BadCredentials);
-    store.close();
-  });
 });
