@@ -69,18 +69,52 @@ def catalog_opcodes() -> set[int]:
     return opcodes
 
 
-BODY = re.compile(r"_BYTE \*__stdcall (\w+)\(void \*a1\)\s*\r?\n\{(.*?)\r?\n\}", re.S)
-# 748 GR_SELECTRANDOMMAP_ACK and 122 GR_MAPCHANGE_ACK decompile to identical
-# bodies: read one u8, hand it to the same map setter on the same room object.
-# docs/PACKETS.md 3.15q relies on that, so assert it rather than trusting prose.
-EQUIVALENT_HANDLERS = ("sub_564090", "sub_56E530")
+FUNCTION_HEAD = re.compile(r"\n[A-Za-z_][^\n]*\b(sub_[0-9A-Fa-f]+)\([^)]*\)\s*\r?\n\{")
+TABLE_HANDLER = re.compile(r"^\| (\d+) \| [^|]*\| (sub_[0-9A-Fa-f]+) \|", re.M)
+
+# Exactly three pairs of S2C opcodes decompile to byte-identical handler
+# bodies; docs/PACKETS.md 3.15q and 3.15q2 depend on the list being complete,
+# so re-derive it rather than trusting the prose.
+EQUIVALENT_PAIRS = [(122, 748), (276, 278), (361, 972)]
 
 
-def handler_body(text: str, name: str) -> str | None:
-    for found, body in BODY.findall(text):
-        if found == name:
-            return re.sub(r"\s+", " ", body).strip()
-    return None
+def handler_bodies(text: str) -> dict[str, str]:
+    """Body of every sub_* function in the dump, whitespace-normalised."""
+    bodies = {}
+    for match in FUNCTION_HEAD.finditer(text):
+        start = match.end()
+        depth = 1
+        index = start
+        while index < len(text) and depth:
+            character = text[index]
+            if character == "{":
+                depth += 1
+            elif character == "}":
+                depth -= 1
+            index += 1
+        bodies[match.group(1)] = re.sub(r"\s+", " ", text[start:index - 1]).strip()
+    return bodies
+
+
+def check_equivalent_handlers(text: str) -> None:
+    bodies = handler_bodies(text)
+    table = {int(op): handler for op, handler in TABLE_HANDLER.findall(
+        LAYOUTS.read_text(encoding="utf-8"))}
+
+    groups: dict[str, set[tuple[int, str]]] = {}
+    for opcode, handler in table.items():
+        if handler in bodies:
+            groups.setdefault(bodies[handler], set()).add((opcode, handler))
+    found = sorted(tuple(sorted(opcode for opcode, _ in members))
+                   for members in groups.values()
+                   if len({handler for _, handler in members}) > 1)
+
+    expected = sorted(tuple(sorted(pair)) for pair in EQUIVALENT_PAIRS)
+    if found != expected:
+        print("dispatcher verification failed: identical-handler groups changed")
+        print(f"  expected {expected}")
+        print(f"  found    {found}")
+        raise SystemExit(1)
 
 
 def main() -> None:
@@ -89,13 +123,7 @@ def main() -> None:
         return
 
     text = DUMP.read_text(encoding="utf-8", errors="replace")
-    first, second = (handler_body(text, name) for name in EQUIVALENT_HANDLERS)
-    if first is None or second is None or first != second:
-        print("dispatcher verification failed: 748/122 handlers are no longer identical")
-        print(f"  {EQUIVALENT_HANDLERS[0]}: {first}")
-        print(f"  {EQUIVALENT_HANDLERS[1]}: {second}")
-        raise SystemExit(1)
-
+    check_equivalent_handlers(text)
     cases = dispatcher_cases(text)
     documented = table_opcodes(LAYOUTS)
     missing = sorted(cases - documented)

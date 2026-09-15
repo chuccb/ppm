@@ -2385,6 +2385,30 @@ return sub_42FC50(dword_EA10D0, v2);   return sub_42FC50(dword_EA10D0, v2);
 但**選圖規則本身**（可選池、是否排除當前圖、誰有權觸發）仍無
 client 可證事實，維持 UNRESOLVED，現在不應主動發送 748。
 
+### 3.15q2 全表掃描：只有 **3 組** S2C opcode 共用完全相同的 handler 本體
+
+把 `LAYOUTS.md` 的每個 S2C handler 從 dump 取出函式本體、正規化空白後兩兩比對
+（285 個相異 handler），**只有三組**是「不同函式、相同實作」：
+
+| 組 | opcode | handler | 共用實作的意義 |
+|---|---|---|---|
+| A | `122 GR_MAPCHANGE_ACK` / `748 GR_SELECTRANDOMMAP_ACK` | `sub_56E530` / `sub_564090` | 讀 `u8` mapId → 同一個 `sub_42FC50`（全檔僅這 2 處呼叫），見 §3.15q |
+| B | `276 MASTER_MEMO_ACK` / `278 MASTER_MEMOALL_ACK` | `sub_578920` / `sub_578BC0` | 讀 `wstr` → 同一個 `sub_541BF0(dword_F2A688, Buffer, 10000)` 系統訊息顯示器，逾時參數同為 10000ms |
+| C | `361 GG_TSURRESPON_ACK` / `972 GG_SOCCER_RESPON_ACK` | `sub_558DD0` / `sub_566400` | 戰鬥中繼的同構回應（釣り／足球共用同一套 respawn/回應處理） |
+
+**這個掃描的價值在於「反面」。** 它證明**其餘 282 個 S2C handler 都各自不同**，
+所以不能因為兩個 opcode 名稱相近就假設它們同構 —— 除上述三組外，
+每個 ACK 都必須各自照 `LAYOUTS.md` 的欄位序實作。
+
+三組的共同模式也一致：**同一種資料、兩個觸發情境**
+（手動改圖 vs 隨機選圖、單人備忘 vs 全體備忘、釣魚 vs 足球的同型回應）。
+B 組同時說明 276/278 對伺服器而言只是**同一則系統訊息的兩種送達對象**，
+欄位完全相同。
+
+**界線。** 「實作相同」只證明**客戶端處理相同**，不證明伺服器可以互換使用：
+觸發權限、對象範圍（單人 vs 全體）仍屬 service policy，維持 UNRESOLVED。
+可用 `verify_dispatcher_coverage.py` 複驗 A 組恆等式。
+
 ### 3.15p Pepachi 701 的 `reelC` = 伺服器指定的演出級別 (本輪, resource+native 互證)
 
 701 每筆獎品三元組的第三欄 `reelC` **不是外觀參數，而是抽獎結果的級別**，
