@@ -186,9 +186,27 @@ offset 8   ...  payload (小端, 緊湊, 無對齊)
   - `n2 = 2`: **128-bit CFB 模式** (IV 初始為全零, sub_403DE0 加密 IV 後與資料 XOR, 並以密文回授作為下一輪 IV)
   - `n2 = 0`: ECB 模式
 - 封包路徑 `sub_592FB0`/`sub_593110` 傳入 `n2_4 = 2` → **AES-128-CFB (128-bit feedback, IV=0)**。
-- 測試向量 (以金鑰 `C6AEB7B7C5A9C1A1B7C9C0FCB8D3C1F6` 逐位驗證通過客戶端真實登入與 Ping 封包):
-  - `CFB(key, IV=0, 000102030405060708090A0B0C0D0E0F) = 3A736DBF81F4BA1AF40854FBF4E13F47`
-  - `CFB(key, IV=0, "PaperMan-Packet!") = 60912185D998DDD7F70F57FCC48B3079`
+- ⚠ **兩個 CFB 測試向量互相矛盾，已證實至少一個有誤（Bun server 實作時發現）：**
+  ```
+  舊記 CFB(key, IV=0, 000102030405060708090A0B0C0D0E0F) = 3A736DBF81F4BA1AF40854FBF4E13F47
+  舊記 CFB(key, IV=0, "PaperMan-Packet!")               = 60912185D998DDD7F70F57FCC48B3079
+  ```
+  CFB 首個區塊的 keystream 為 `AES(IV)`，**與明文無關**，故兩式反推的 keystream
+  必須相同。實測：
+  ```
+  ks = c ^ p   由向量1 → 3A726FBC85F1BC1DFC015EF0F8EC3148
+              由向量2 → 30F051E0ABD5BCB9DA5F369FAFEE4458   (僅 1/16 位元組相同)
+  ```
+  **兩者不可能同時成立。** 正確的 keystream 由本專案獨立實作的 AES-128 算出：
+  ```
+  AES(key, 00×16) = 3AF35BF885F6BC18FF0B59F8DFEC3248
+  ⇒ CFB(key, IV=0, 000102030405060708090A0B0C0D0E0F) = 3AF259FB81F3BA1FF70253F3D3E13C47
+  ⇒ CFB(key, IV=0, "PaperMan-Packet!")               = 6A922B9DF7BBDD76D25B389BB4894669
+  ```
+  該實作**通過 FIPS-197 C.1 附錄向量**，且**兩個 ECB 向量逐位相符**
+  （`D7F8930C...` 與 `8B8ABD9B...`），故 AES 核心與金鑰均無誤 ——
+  出錯的只有上面兩行 CFB 期望值。**以本節新值為準**，
+  驗證見 `server-ts/test/aes.test.ts`。
 
 **壓縮門檻協商 + 登入觸發 (694 的雙重功用, 十一輪定案)**:
 全域 `n0x2580` 初始 0x2580(9600, 即「從不壓縮」)。
