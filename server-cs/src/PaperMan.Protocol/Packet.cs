@@ -221,8 +221,11 @@ public sealed class Packet(Opcode opcode)
         WriteU16((ushort)data.Length).WriteRaw(data);
 
     /// <summary>sub_5927F0: 內嵌 packet = u16 opcode + u32 size + payload。</summary>
-    public Packet WritePacket(Packet inner) =>
-        WriteU16(inner.OpcodeRaw).WriteU32((uint)inner.Length).WriteRaw(inner.Payload);
+    public Packet WritePacket(Packet inner)
+    {
+        ArgumentNullException.ThrowIfNull(inner);
+        return WriteU16(inner.OpcodeRaw).WriteU32((uint)inner.Length).WriteRaw(inner.Payload);
+    }
 
     // ------------------------------------------------------------------- read
     private ReadOnlySpan<byte> Take(int byteCount)

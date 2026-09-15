@@ -73,6 +73,9 @@ public static class ClanTunnel
     }
 
     /// <summary>自 583 REQ 取出子協定編號 (payload 首 s32)。</summary>
-    public static ClanSubOp ReadSubOp(Packet req) =>
-        (ClanSubOp)req.ReadS32();
+    public static ClanSubOp ReadSubOp(Packet req)
+    {
+        ArgumentNullException.ThrowIfNull(req);
+        return (ClanSubOp)req.ReadS32();
+    }
 }

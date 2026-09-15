@@ -38,6 +38,7 @@ public sealed record UdpControlRequest(
     /// <summary>Parses the whole source-proven opcode-19 payload, including its required NUL.</summary>
     public static UdpControlRequest Read(Packet packet)
     {
+        ArgumentNullException.ThrowIfNull(packet);
         if (packet.OpcodeRaw != (ushort)UdpPrivateOpcode.ControlRequest)
         {
             throw new ArgumentException(

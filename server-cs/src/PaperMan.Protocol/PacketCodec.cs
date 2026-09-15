@@ -80,6 +80,7 @@ public sealed class PacketCodec(byte[]? aesKey = null, ushort compressThreshold 
     /// <summary>組出完整 wire frame: [w0 size][w1 opcode][w2][w3] + payload。</summary>
     public byte[] Encode(Packet packet)
     {
+        ArgumentNullException.ThrowIfNull(packet);
         ReadOnlySpan<byte> payload = packet.Payload;
         ushort w2 = 0;
         ushort w3 = (ushort)payload.Length;                    // sub_591F90 (首次送出)
