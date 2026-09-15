@@ -730,6 +730,40 @@ map id 81 `AI_01_Monster.pmm` 與 89 `AI_02_Monster.pmm`，
 三張 `TU_*` 同時帶 Practice 與 Tutorial 兩個 bit。
 一律讀 bitmask，不要讀檔名。
 
+## 5d-6. 一條完全閉合的四來源引用鏈（射擊館 GunShooting）
+
+本輪最有價值的不是單一數值，而是**證明整套交叉引用機制可以走通**。
+以射擊館為例，四個彼此獨立的來源串成一條無斷點的鏈：
+
+```
+maplist.pat            map id 81  → maps\AI_01_Monster.pmm，bitmask 1024 = GunShooting(9)
+   ↓ 同一個 id
+gamecenter_map_info.xml  <GUNSHOOTING_MAP_INFO index="81" ...
+                          mapname="ロボットたちの反乱" shieldhp="1000" feverTime="3000"
+                          langScenarioID="1085" langDialogueID="1084" langClearID="1128">
+   ↓ 同一個 lang id
+msgtableres.lang       entry 1085 = 「最新鋭のロボット工場で、原因不明のトラブル発生！…」
+                       entry 1084 = 開場對話、entry 1128 = 過關台詞
+   ↓ 同一個 modeIndex
+map_StartIndex.xml     modeName="GunShooting" modeIndex=9 modeStartIndex=89
+```
+
+* `maplist.pat` 中 GunShooting 的**全部**地圖恰為 81 與 89，
+  而 `gamecenter_map_info.xml` 也**恰有**這兩筆 —— 兩份獨立資源互相印證，
+  且證明該 XML 的 `index` 欄是 **maplist 的 map id**，不是 modeIndex。
+* langID 解出的劇情文字與 XML 的 `mapname` 語意一致
+  （81＝「ロボットたちの反乱」↔ 訊息提到ロボット工場；
+  89＝「記憶の手掛かり」↔ 訊息講尋找記憶的魔法石），
+  確認 `msgtableres.lang` 的 `entry i = lines[i+3]` 解碼規則正確。
+* 第二張圖的 `modeStartIndex=89` 與 map id 89 同值，說明
+  `map_StartIndex.xml` 的 `modeStartIndex` 是「該模式的預設起始地圖 id」。
+
+**方法論結論。** 資源檔之間以 **id 而非名稱**互相引用：
+map id、item id、lang id 三類 id 各自貫穿多個檔案。
+任何新分析都應先確定手上的數字是哪一類 id，再跨檔解析；
+本輪的三個反例（檔名前綴推模式、`index` 誤認為 modeIndex、
+1808B 記憶體結構誤當檔案 stride）都源自跳過這一步。
+
 ## 5e. 版本考古 (廿一輪)
 - 根 datarevision.txt = 811034967 (patch 版本號)
 - map/maplist.dat = **舊版明文** (head f32 v1.02, 67 圖, 832B/條,
