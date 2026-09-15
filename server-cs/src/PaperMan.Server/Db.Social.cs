@@ -153,7 +153,7 @@ public sealed partial class Db
                     "INSERT INTO clans(name, leader_id, emblem_id) VALUES(@n, @u, @e) RETURNING clan_id",
                     ("@n", name), ("@u", leaderUserId), ("@e", (int)emblem));
                 ins.Transaction = tx;
-                long clanId = Convert.ToInt64(ins.ExecuteScalar()!);
+                long clanId = ReadRequiredReturnedInt64(ins, "Creating a clan");
 
                 using var mem = Cmd(
                     "INSERT INTO clan_members(clan_id, user_id, rank) VALUES(@c, @u, 2)",

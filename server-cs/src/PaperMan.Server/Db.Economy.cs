@@ -213,7 +213,7 @@ public sealed partial class Db
                     "UPDATE users SET game_point = game_point + @g WHERE user_id=@u RETURNING game_point",
                     ("@g", refund), ("@u", userId));
                 pay.Transaction = tx;
-                long gpAfter = Convert.ToInt64(pay.ExecuteScalar()!);
+                long gpAfter = ReadRequiredReturnedInt64(pay, "Crediting a recycled-item refund");
 
                 tx.Commit();
                 return (true, itemId, gpAfter);

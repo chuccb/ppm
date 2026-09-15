@@ -159,21 +159,35 @@ public sealed class Session(TcpClient client, PacketCodec codec, long id, Server
             ushort op = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(_rxBuf.AsSpan(2, 2));
             ushort w2 = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(_rxBuf.AsSpan(4, 2));
             ushort w3 = System.Buffers.Binary.BinaryPrimitives.ReadUInt16LittleEndian(_rxBuf.AsSpan(6, 2));
-            var rawHex = Convert.ToHexString(_rxBuf.AsSpan(0, frameLen));
+            bool isLoginRequest = op == (ushort)Opcode.GL_LOGIN_REQ;
             Console.WriteLine($"[s{Id}] raw frame header: w0={w0}(payloadLen), op={op}(0x{op:X4}/{(Opcode)op}), w2={w2}(encOrigLen), w3={w3}(origLen), totalFrame={frameLen}B");
-            Console.WriteLine($"[s{Id}] raw wire bytes: {rawHex}");
+            if (isLoginRequest)
+            {
+                // 682 includes the password/token and raw24 fingerprint. Do
+                // not make either recoverable from routine protocol logs.
+                Console.WriteLine($"[s{Id}] raw wire bytes: <redacted GL_LOGIN_REQ credentials>");
+            }
+            else
+            {
+                Console.WriteLine($"[s{Id}] raw wire bytes: {Convert.ToHexString(_rxBuf.AsSpan(0, frameLen))}");
+            }
 
             Packet? pkt;
             try
             {
                 pkt = codec.Decode(_rxBuf.AsSpan(0, frameLen));
-                var hexSnippet = Convert.ToHexString(pkt.Payload);
-                Console.WriteLine($"[s{Id}] << RECV {pkt.Opcode}({pkt.OpcodeRaw}) payload={pkt.Length}B hex=[{hexSnippet}]");
+                string payloadLog = isLoginRequest
+                    ? "<redacted GL_LOGIN_REQ credentials>"
+                    : Convert.ToHexString(pkt.Payload);
+                Console.WriteLine($"[s{Id}] << RECV {pkt.Opcode}({pkt.OpcodeRaw}) payload={pkt.Length}B hex=[{payloadLog}]");
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                var hex = Convert.ToHexString(_rxBuf.AsSpan(0, Math.Min(frameLen, 48)));
-                Console.WriteLine($"[s{Id}] !! DECODE ERROR: {ex.Message} (frame {frameLen}B: [{hex}{(frameLen > 48 ? "..." : "")}])");
+                string framePreview = isLoginRequest
+                    ? "<redacted GL_LOGIN_REQ credentials>"
+                    : Convert.ToHexString(_rxBuf.AsSpan(0, Math.Min(frameLen, 48)));
+                string truncatedMarker = isLoginRequest || frameLen <= 48 ? "" : "...";
+                Console.WriteLine($"[s{Id}] !! DECODE ERROR: {exception.Message} (frame {frameLen}B: [{framePreview}{truncatedMarker}])");
                 _rxLen = 0;                                  // 原版: 解不開 → 清空緩衝
                 return null;
             }

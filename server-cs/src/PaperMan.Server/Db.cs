@@ -173,6 +173,22 @@ public sealed partial class Db : IDisposable
         return cmd;
     }
 
+    /// <summary>
+    /// Reads a mandatory integer returned by a SQLite <c>RETURNING</c> command.
+    /// A missing row is a database invariant failure, not a zero-valued domain
+    /// result; callers keep their transaction active so its disposal rolls back.
+    /// </summary>
+    private static long ReadRequiredReturnedInt64(SqliteCommand command, string operation)
+    {
+        object? scalar = command.ExecuteScalar();
+        if (scalar is null or DBNull)
+        {
+            throw new InvalidOperationException($"{operation} did not return its required integer value.");
+        }
+
+        return Convert.ToInt64(scalar);
+    }
+
     // ------------------------------------------------------------- accounts
     private const string PasswordHashAlgorithm = "PBKDF2-SHA256";
     private const int PasswordHashIterations = 210_000;
@@ -799,7 +815,7 @@ public sealed partial class Db : IDisposable
                 "INSERT INTO users(account_id,nickname) VALUES(@accountId,@nickname) RETURNING user_id",
                 ("@accountId", accountId), ("@nickname", nickname));
             userCommand.Transaction = transaction;
-            long userId = (long)userCommand.ExecuteScalar()!;
+            long userId = ReadRequiredReturnedInt64(userCommand, "Creating a user");
 
             // trg_users_bootstrap provides user_stats and all four weapon
             // groups. The explicit character remains server policy, so it

@@ -172,7 +172,10 @@ public static class LoginWire
 
                 if (channel.Type == 3)
                 {
-                    packet.WriteU8(channel.TypeThreeExtension!.Value);
+                    byte typeThreeExtension = channel.TypeThreeExtension
+                        ?? throw new InvalidOperationException(
+                            "A validated type-3 channel must have its extension byte.");
+                    packet.WriteU8(typeThreeExtension);
                 }
             }
         }

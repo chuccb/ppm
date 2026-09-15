@@ -1,5 +1,15 @@
 # PaperMan 網路協議完整分析 (根據 PaperMan.exe.c IDA 導出)
 
+> **閱讀導覽。** 這份文件保存欄位級、consumer 級與 state 級的手工證據；先由
+> [`docs/README.md`](README.md) 判斷它與 `LAYOUTS*.md`、`RESOURCES.md`、
+> `TODO_HANDLERS.md` 的不同角色。`LAYOUTS*.md` 是自動 primitive inventory，
+> 不能代替此處的 optional branch、count framing 或 service-policy boundary。
+>
+> 本檔長期以「發現／修正發生順序」追加；保留既有 section number 以維持歷史
+> commit 和文件引用可追溯。因此數字標題未必是目錄順序。新增結論應放到對應
+> protocol family，並附 native builder、reader/consumer、field/state data flow、
+> confidence 與未確認限制；不要僅因資源或 opcode 名稱存在就推導 server policy。
+
 > **廿六輪終極對賬 (兩方向自動審計)**:
 > C# ACK 寫入序列 ↔ client 讀取序列: 18/18 ✓;
 > C# REQ 讀取序列 ↔ client 寫入序列: 27/27 ✓ (5 個機械標記經人工

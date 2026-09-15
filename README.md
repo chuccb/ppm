@@ -7,6 +7,7 @@
 
 | 路徑 | 內容 |
 |------|------|
+| [`docs/README.md`](docs/README.md) | **文件與證據導覽**：先判斷該讀哪份資料、證據等級、generated boundary 與每次改動的最小交叉驗證流程 |
 | `docs/PACKETS.md` | **協議完整分析**: Packet 類佈局、wire 格式、序列化原語、checksum/壓縮/加密層、關鍵 payload 結構 (全部附反編譯函數地址) |
 | `docs/RESOURCES.md` | **客戶端資源地圖**: maplist/物品/任務/訊息表 `msgtableres.lang`、UI 圖像音效盤點、mode 枚舉正名 |
 | `docs/WIKI_MECHANICS.md` | **Wiki* 歷史機制研究帳本**: 已閱讀主題、版本風險與待由 client/resource/packet 交叉驗證的矩陣；明確不是 service/wire 權威 |

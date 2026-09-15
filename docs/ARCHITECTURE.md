@@ -115,10 +115,11 @@ uses cancellation and disposes its socket only after its receive loop exits.
   gameplay policy。各 `Handlers.*` 檔以協定子系統切分（Auth、Channel、Lobby、
   Room、Join、BattleRelay、BattleObjects、Shop、Stats、Clan、Quest、Friend、
   Voice、Warehouse、Master、GameCenter、Ai），使 opcode 的處理位置可直接搜尋。
-- `Db` 依實際 persistence domain 分成 8 個 partial：主檔（connection、
-  bootstrap、account、nickname、packet stats）以及 Player、Economy、Social、
-  Rooms、Voice、Warehouse、GameCenter。共用 connection / lock / command creation
-  只放在主檔；跨表不可分割操作在發生處以明確 transaction 包住。
+- `Db` 是一個依實際 persistence domain 拆成 **9 個 source partial** 的類別：
+  `Db.cs` 主檔（connection、bootstrap、account、nickname、packet stats）加上
+  Player、Economy、Social、Rooms、Voice、Warehouse、GameCenter、WeaponLoadout。
+  共用 connection / lock / command creation 只放在主檔；跨表不可分割操作在發生處
+  以明確 transaction 包住。
 - `ChannelAdmissionRegistry` 只保存一次性的 681→143 handoff；`RoomManager` /
   `SessionRegistry` 只持有 process-local live state。SQLite 是 account、inventory、
   quest 等可持久狀態的唯一來源。

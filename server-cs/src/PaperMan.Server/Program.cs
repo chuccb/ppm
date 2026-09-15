@@ -12,68 +12,68 @@ using System.Net.Sockets;
 using PaperMan.Protocol;
 using PaperMan.Server;
 
-var config = new ServerConfig().Validate();
-using var db = new Db(ServerDataPaths.GetDatabasePath());
-var ctx = new ServerContext(db, config);
+var serverConfig = new ServerConfig().Validate();
+using var database = new Db(ServerDataPaths.GetDatabasePath());
+var serverContext = new ServerContext(database, serverConfig);
 var router = Router.Build();
 
 Console.WriteLine(
     $"""
      [paperman] handlers : {router.Count}
-     [paperman] database : {db.DatabasePath} ({(db.Initialization.CreatedDatabaseFile ? "created" : "ready")}; {db.Initialization.ProtocolPacketDefinitionCount} protocol definitions)
-     [paperman] aes TCP  : {(config.AesKey is null ? "OFF (明文模式)" : "ON")}
+     [paperman] database : {database.DatabasePath} ({(database.Initialization.CreatedDatabaseFile ? "created" : "ready")}; {database.Initialization.ProtocolPacketDefinitionCount} protocol definitions)
+     [paperman] aes TCP  : {(serverConfig.AesKey is null ? "OFF (明文模式)" : "ON")}
      [paperman] aes UDP  : ON (native fixed key; AES-only)
-     [paperman] compress : threshold 0x{config.EffectiveCompressionThreshold:X4}{(config.EffectiveCompressionThreshold >= PacketCodec.NeverCompress ? " (停用)" : "")}
+     [paperman] compress : threshold 0x{serverConfig.EffectiveCompressionThreshold:X4}{(serverConfig.EffectiveCompressionThreshold >= PacketCodec.NeverCompress ? " (停用)" : "")}
      """);
 
 // 雙 listener 架構 (卅一輪定案): client 登入後會「另開連線」到 681
 // 指示的頻道 host:port — 單機模式用兩個 port 區分角色:
-//   config.Port     → 登入伺服器 (握手 694 GL_ACCOUNTCONNSUCC)
-//   config.Port + 1 → 頻道伺服器 (握手 693 GL_TCPCONNSUCC)
-//   config.UdpPort  → private UDP 19 → 20 control completion
+//   serverConfig.Port     → 登入伺服器 (握手 694 GL_ACCOUNTCONNSUCC)
+//   serverConfig.Port + 1 → 頻道伺服器 (握手 693 GL_TCPCONNSUCC)
+//   serverConfig.UdpPort  → private UDP 19 → 20 control completion
 //
 // Construct/bind all three before opening TCP listeners: a successful 196 must
 // never advertise a UDP endpoint this process failed to own at startup.
-using var udpControlServer = new UdpControlServer(config);
-var loginListener = new TcpListener(IPAddress.Parse(config.ListenHost), config.Port);
-var channelListener = new TcpListener(IPAddress.Parse(config.ListenHost), config.ChannelPort);
+using var udpControlServer = new UdpControlServer(serverConfig);
+var loginListener = new TcpListener(IPAddress.Parse(serverConfig.ListenHost), serverConfig.Port);
+var channelListener = new TcpListener(IPAddress.Parse(serverConfig.ListenHost), serverConfig.ChannelPort);
 loginListener.Start();
 channelListener.Start();
-Console.WriteLine($"[paperman] login   server on {config.ListenHost}:{config.Port}");
-Console.WriteLine($"[paperman] channel server on {config.ListenHost}:{config.ChannelPort}");
+Console.WriteLine($"[paperman] login   server on {serverConfig.ListenHost}:{serverConfig.Port}");
+Console.WriteLine($"[paperman] channel server on {serverConfig.ListenHost}:{serverConfig.ChannelPort}");
 Console.WriteLine($"[paperman] udp     control endpoint on {udpControlServer.LocalEndpoint}");
 
-using var cts = new CancellationTokenSource();
+using var shutdownCts = new CancellationTokenSource();
 Console.CancelKeyPress += (_, e) =>
 {
     e.Cancel = true;
-    cts.Cancel();
+    shutdownCts.Cancel();
 };
 
 long nextSessionId = 0;
 
-Task AcceptLoopAsync(TcpListener listener, ServerRole role) => Task.Run(async () =>
+async Task AcceptLoopAsync(TcpListener listener, ServerRole role)
 {
-    while (!cts.IsCancellationRequested)
+    while (!shutdownCts.IsCancellationRequested)
     {
         TcpClient client;
         try
         {
-            client = await listener.AcceptTcpClientAsync(cts.Token);
+            client = await listener.AcceptTcpClientAsync(shutdownCts.Token);
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException) when (shutdownCts.IsCancellationRequested)
         {
             break;
         }
 
-        _ = RunSessionAsync(client, Interlocked.Increment(ref nextSessionId), role, cts.Token);
+        _ = RunSessionAsync(client, Interlocked.Increment(ref nextSessionId), role, shutdownCts.Token);
     }
-});
+}
 
 await Task.WhenAll(
     AcceptLoopAsync(loginListener, ServerRole.Login),
     AcceptLoopAsync(channelListener, ServerRole.Channel),
-    udpControlServer.RunAsync(cts.Token));
+    udpControlServer.RunAsync(shutdownCts.Token));
 
 loginListener.Stop();
 channelListener.Stop();
@@ -83,13 +83,13 @@ return;
 async Task RunSessionAsync(TcpClient client, long sessionId, ServerRole role, CancellationToken cancellationToken)
 {
     // codec 為 per-session (壓縮門檻是 per-connection 協商值)
-    using var codec = new PacketCodec(config.AesKey, config.EffectiveCompressionThreshold);
+    using var codec = new PacketCodec(serverConfig.AesKey, serverConfig.EffectiveCompressionThreshold);
     using var session = new Session(client, codec, sessionId, role);
     Console.WriteLine($"[s{sessionId}] connect {session.Remote} ({role})");
 
     // 心跳: 伺服器主動發 102, client 以 101 回應 (sub_58D6F0; 方向十輪定案)
     using var pingCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-    _ = PingLoopAsync(session, pingCts.Token);
+    Task pingLoopTask = PingLoopAsync(session, pingCts.Token);
 
     try
     {
@@ -102,7 +102,7 @@ async Task RunSessionAsync(TcpClient client, long sessionId, ServerRole role, Ca
         var greeting = role switch
         {
             ServerRole.Channel => LoginWire.CreateTcpConnectionSuccess(),
-            _ => LoginWire.CreateAccountConnectionSuccess(config.EffectiveCompressionThreshold),
+            _ => LoginWire.CreateAccountConnectionSuccess(serverConfig.EffectiveCompressionThreshold),
         };
         Console.WriteLine($"[s{sessionId}] sending greeting handshake ({greeting.Opcode}) to {session.Remote}...");
         await session.SendAsync(greeting, cancellationToken);
@@ -110,10 +110,10 @@ async Task RunSessionAsync(TcpClient client, long sessionId, ServerRole role, Ca
 
         await foreach (var packet in session.ReceiveAsync(cancellationToken))
         {
-            db.LogPacket(packet.OpcodeRaw, isReceive: true, packet.Length);
+            database.LogPacket(packet.OpcodeRaw, isReceive: true, packet.Length);
             try
             {
-                if (!await router.DispatchAsync(session, packet, ctx))
+                if (!await router.DispatchAsync(session, packet, serverContext))
                 {
                     Console.WriteLine($"[s{sessionId}] ?? unhandled packet {packet}");
                 }
@@ -127,7 +127,7 @@ async Task RunSessionAsync(TcpClient client, long sessionId, ServerRole role, Ca
             // 冪等覆寫, 每包呼叫成本 O(1); 綁定前 (nick 空) 自動略過。
             if (session.Authenticated && session.Nickname.Length > 0)
             {
-                ctx.Sessions.Register(session);
+                serverContext.Sessions.Register(session);
             }
         }
     }
@@ -142,19 +142,22 @@ async Task RunSessionAsync(TcpClient client, long sessionId, ServerRole role, Ca
     finally
     {
         pingCts.Cancel();
-        ctx.Sessions.Unregister(session);
+        await pingLoopTask.ConfigureAwait(false);
+        serverContext.Sessions.Unregister(session);
 
         // 斷線清理: 還在房內 → 與主動離房相同流程
         // (124 離房廣播 + 190 房主遷移 + 空房回收) — 防殭屍成員
-        if (session.RoomNo is { } roomNo && ctx.Rooms.Find(roomNo) is { } room)
+        if (session.RoomNo is { } roomNo && serverContext.Rooms.Find(roomNo) is { } room)
         {
             try
             {
-                await ctx.Rooms.RemoveMemberAsync(room, session);
+                await serverContext.Rooms.RemoveMemberAsync(room, session);
             }
-            catch
+            catch (Exception exception)
             {
-                // 清理失敗不影響斷線流程
+                // A disconnected session must not block other cleanup, but a
+                // room-state failure remains operationally important.
+                Console.WriteLine($"[s{sessionId}] !! room cleanup failed: {exception}");
             }
         }
     }
@@ -173,8 +176,14 @@ static async Task PingLoopAsync(Session session, CancellationToken cancellationT
             await session.SendAsync(new Packet(Opcode.GT_PING_ACK), cancellationToken);
         }
     }
-    catch (Exception)
+    catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
     {
-        // 連線收攤 / 取消 — 心跳自然停止
+        // Expected when the session receive loop ends or the server shuts down.
+    }
+    catch (Exception exception)
+    {
+        // The ping task is intentionally stopped after a send failure, but the
+        // failure must remain visible instead of becoming an unobserved task.
+        Console.WriteLine($"[s{session.Id}] !! ping loop stopped: {exception}");
     }
 }

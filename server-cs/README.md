@@ -4,38 +4,31 @@
 資料層為 **SQLite**。首次啟動由 server 自動建立 schema、opcode catalog 與預設
 運維設定；開發模式預設檔是 repository 的 `db/paperman.db`。
 
-```
-server-cs/
-├── PaperMan.slnx                  # .NET 10 新式 XML solution (sln 已淘汰)
-├── tools/gen_opcodes.py            # db/packets.tsv → Opcode.cs (勿手改 Opcode.cs)
-└── src/
-    ├── PaperMan.Protocol/          # 純協定層 (無 IO 依賴)
-    │   ├── Opcode.cs               # 676 opcodes ← sub_9D2050 註冊表
-    │   ├── Packet.cs               # 讀寫原語 ← sub_592xxx 家族 (CP949/wstr/blob/內嵌)
-    │   ├── LoginWire.cs            # 682/681/693/694 嚴格 wire contract
-    │   ├── ChannelBootstrapWire.cs # 142/144/196 + packed calendar contract
-    │   ├── PaperLz.cs              # LZSS ← sub_591600 / sub_591900
-    │   ├── PaperAes.cs             # AES-128-CFB-128 (IV=0) ← sub_403430/4042A0/404470
-    │   ├── PacketCodec.cs          # TCP 送收管線 ← sub_593280 / sub_5930C0
-    │   └── UdpPacketCodec.cs       # UDP AES-only datagram framing ← sub_595980 / sub_595A60
-    ├── PaperMan.Server/            # TCP server + narrowly evidenced UDP control
-    │   ├── Program.cs              # 入口 (top-level, 每連線一 task)
-    │   ├── ServerContext.cs        # listener/681/bootstrap 組態 + LoginCode
-    │   ├── UdpControlServer.cs     # private encrypted 19→empty-20 source reply only
-    │   ├── ChannelAdmissionRegistry.cs # 681→143 IP-bound one-use handoff
-    │   ├── Session.cs              # 9600B 緩衝框架, 錯包全丟 (sub_555280 行為)
-    │   ├── Router.cs               # FrozenDictionary 路由 (≈ sub_58B010 switch)
-    │   ├── Db.cs                   # SQLite 存取 + migration + transaction models
-    │   ├── DatabaseBootstrapper.cs # embedded schema.sql/packets.tsv first-run seed
-    │   ├── ServerDataPaths.cs      # zero-argument DB path resolver
-    │   ├── Handlers.Auth.cs        # 682→681, ping (694 is Program greeting)
-    │   ├── Handlers.Channel.cs     # 143→144→195→196; 141→142 endpoint confirm
-    │   ├── Handlers.Lobby.cs       # 105/107/197/199/210/212, project-permitted empty 252→253
-    │   ├── Handlers.Shop.cs        # shop/gift/pack/capsule fail-closed + zero-record 806→807 boundary
-    │   ├── Handlers.Stats.cs       # GP_CH*C 戰績家族 (18 REQ + 882 推播)
-    │   └── Handlers.BattleObjects.cs # OCC 902–907 權威狀態 + 962 安全拒絕
-    └── PaperMan.SelfTest/          # codec / wire / SQLite bootstrap 自測
-```
+## 原始碼導覽
+
+本專案按 protocol boundary 與 persistent domain 切分，而不是套用通用 framework。
+每條主要資料流都由下表左側開始；所有 handler 都可從 `Router.Build()` 找到註冊點。
+
+| 區域 | 檔案 | 責任與 ownership |
+|---|---|---|
+| Solution 與 generated catalog | `PaperMan.slnx`, `tools/gen_opcodes.py`, `src/PaperMan.Protocol/Opcode.cs` | `db/packets.tsv` 是 opcode source；要改 opcode 名稱或值時執行 generator，不手改 `Opcode.cs`。 |
+| Packet primitives | `Packet.cs`, `PaperAes.cs`, `PaperLz.cs`, `PacketCodec.cs`, `UdpPacketCodec.cs` | 純 protocol TCP/UDP framing、CP949 字串、AES 與 LZ；不放 socket、database、account 或 gameplay policy。 |
+| 具名 wire contracts | `LoginWire.cs`, `ChannelBootstrapWire.cs`, `UdpControlWire.cs`, `NewSkillProfileWire.cs`, `ClanTunnel.cs` | 對 exact reusable grammar 使用具名欄位 contract；未確認欄位保留 raw/conservative 名稱，不虛構 business meaning。 |
+| Host 與 connection boundary | `Program.cs`, `ServerContext.cs`, `ServerDataPaths.cs`, `Session.cs`, `Router.cs` | 零參數 startup、listener configuration、TCP session lifetime、packet ordering、role/state gate 與 opcode dispatch。主路徑為 `Program → Session.ReceiveAsync → Router → handler`。 |
+| Process-local live state | `ChannelAdmissionRegistry.cs`, `SessionRegistry.cs`, `Rooms.cs` | one-use 681→143 admission、online-session lookup、rooms/seats 與 room battle state；不是 durable state，account-owned data 仍以 SQLite 為準。 |
+| Narrow UDP boundary | `UdpControlServer.cs` | AES-only private UDP 19→empty-20 source-address reply；刻意不是 generic UDP、P2P、relay 或 gameplay server。 |
+| Database root | `Db.cs`, `DatabaseBootstrapper.cs` | connection、migration/bootstrap、shared command creation 與 account identity；`schema.sql` / `packets.tsv` 是 embedded resources，這是唯一 first-run DB path。 |
+| Database domain partials | `Db.Player.cs`, `Db.WeaponLoadout.cs`, `Db.Economy.cs`, `Db.Social.cs`, `Db.Rooms.cs`, `Db.Voice.cs`, `Db.Warehouse.cs`, `Db.GameCenter.cs` | 同一個 `Db` type 依 persistent domain 切分；跨 table atomic change 放在擁有該 operation 的 partial，並讓 transaction 明確可見。 |
+| Login、channel、lobby handlers | `Handlers.Auth.cs`, `Handlers.Channel.cs`, `Handlers.Lobby.cs`, `Handlers.Join.cs` | authentication、681→143 admission、195→196 channel entry、lobby bootstrap 與 room-list entry。 |
+| Room 與 battle handlers | `Handlers.Room.cs`, `Handlers.BattleRelay.cs`, `Handlers.BattleObjects.cs`, `Handlers.Ai.cs` | room membership/settings、source-proven TCP relay、OCC/drop boundary 和 AI/PvE packet family。 |
+| Persistent feature handlers | `Handlers.Shop.cs`, `Handlers.Stats.cs`, `Handlers.Quest.cs`, `Handlers.Friend.cs`, `Handlers.Clan.cs`, `Handlers.Voice.cs`, `Handlers.Warehouse.cs`, `Handlers.GameCenter.cs` | feature-domain request parsing 與 response construction；只有 request grammar 與 persistence authority 都已證實時，handler 才可碰 DB mutation。 |
+| Operator handler | `Handlers.Master.cs` | MASTER/GM command namespace，和一般 player-facing gameplay flow 分離。 |
+| Assembly 與 executable checks | `Properties/AssemblyInfo.cs`, `src/PaperMan.SelfTest/Program.cs` | assembly metadata，以及 byte-level protocol / SQLite bootstrap / loopback tests；SelfTest 不取代 original-service capture。 |
+
+在修改 handler 或 resource-derived value 前，先讀
+[`../docs/README.md`](../docs/README.md) 的 evidence hierarchy、文件入口、generated-file
+boundary 與 reverse-engineering checklist。
+
 
 ## 建置與執行
 
@@ -111,8 +104,9 @@ dotnet run --project server-cs/src/PaperMan.SelfTest
   u8 fingerprint_source, raw[24] fingerprint`。u64 的高 32 bits 是
   `datarevision.txt ^ 0xB1A9D7C7`，低 32 bits 必為 `0xF1E1AB0E`；它不是硬體
   key。`fingerprint_source` 是 2=storage serial、1=fallback adapter MAC、0=none。
-  伺服器嚴格要求 NUL、完整 raw24、無 trailing data，保存 source/raw24/revision，
-  且不記錄密碼或 fingerprint bytes。
+  伺服器嚴格要求 NUL、完整 raw24、無 trailing data，保存 source/raw24/revision。
+  Session diagnostics 只記錄 fingerprint source 與固定 24B 長度，絕不輸出 password/token
+  或 fingerprint bytes。
 - **681 成功 tail**：一個 account/net-café extension（0 或 1 組）、固定三個
   channel groups、s16 port bit pattern、type-3 extension byte 和最後的 billing
   s32×2 都由 `LoginWire` 具名建模與驗證。`ServerConfig` 會在開 listener 前

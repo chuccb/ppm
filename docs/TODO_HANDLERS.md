@@ -5,6 +5,14 @@
 > (Auth/Lobby/Shop/Stats/Clan/Quest/Friend/Room/Channel/Voice/
 > BattleRelay/Warehouse/Join)。
 >
+> **閱讀順序。** 目前可採取的工作先讀「Current next evidence」，再讀最後的
+> 「Unimplemented request inventory」；中間的歷輪記錄保留決策 provenance，
+> 不是目前的實作清單。每列開始前仍須回到 `PACKETS.md`、`LAYOUTS_REQ.md`、
+> `LAYOUTS.md`、native caller/callee 與相關 resource 重新驗證。完整導航見
+> [`README.md`](README.md)。
+
+## Historical implementation ledger (provenance, not current work queue)
+
 > 本輪 (房間設定/聊天簇) 新增: 139 GG_EXITGAME、167/169/171/173/175
 > /177、340/364/712、728 觀戰聊天、990 GR_DAMAGEROOM (db/packets.tsv
 > 補 990/991 後命名) — 全數限房主、ACK 同值廣播, 詳 docs/PACKETS.md
@@ -233,6 +241,8 @@
 >    應仍可完整進大廳；錯誤 144 後的 195/196 形狀與重複 682/195 的實際 native
 >    error/disconnect 行為仍屬 **UNRESOLVED**，不可虛構 failure response。
 >
+## Current next evidence
+
 > 下一輪可做:
 > 1. 取得一組已知正常及一組拒絕的 681→143→144→195→196 實包，定位
 >    `String[24]` 的 writer（仍不能猜為 account/nickname）、681 extension 的兩個
@@ -255,6 +265,12 @@
 >    parser 做欄位對照，再決定使用既有 `clan_tournaments`/entries schema 的範圍。
 > 6. 以 OCC 實包驗證 `CaptureParticipantCount` 是否可由位置聚合增加到 2，以及
 >    908 的可發送條件；目前只有單一已驗證 start actor，不能硬編成 team/slot。
+
+## Unimplemented request inventory
+
+> 每一列只描述目前看得到的 C2S framing 或 safe boundary；它不是對 response、
+> mutation、ownership 或 original-service policy 的授權。新增 handler 前請先依
+> [`README.md`](README.md) 的 evidence chain 補齊所有缺口。
 
 | op | 名稱 | REQ 寫入序列 |
 |---|---|---|

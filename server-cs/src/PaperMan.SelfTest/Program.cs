@@ -368,7 +368,7 @@ bool IsNative311FailureAcknowledgement(Packet acknowledgement)
         IsNative198StarterAcknowledgement(defensiveFallback));
 }
 
-// ---- 1b. Login / channel bootstrap wire contract ---------------------------
+// ---- 1c. Login / channel bootstrap wire contract ---------------------------
 {
     const uint revision = 0x1234ABCD;
     ulong obfuscatedDataRevision = ((ulong)(revision ^ 0xB1A9D7C7u) << 32) | 0xF1E1AB0Eu;
@@ -573,6 +573,8 @@ bool IsNative311FailureAcknowledgement(Packet acknowledgement)
             0,
             0,
             0,
+            // Intentionally crosses the non-nullable public boundary to verify
+            // that the wire-contract validator rejects malformed external data.
             new NetCafeBootstrapInfo(0, 0, 0, 0, null!)));
     }
     catch (ArgumentNullException)
@@ -673,7 +675,7 @@ bool IsNative311FailureAcknowledgement(Packet acknowledgement)
     Check("682 rejects malformed NUL field", rejectedUnterminatedRequest);
 }
 
-// ---- 1c. Login-to-channel admission contract -------------------------------
+// ---- 1d. Login-to-channel admission contract -------------------------------
 {
     var admissions = new ChannelAdmissionRegistry();
     var now = new DateTimeOffset(2026, 9, 15, 12, 0, 0, TimeSpan.FromHours(8));
@@ -719,7 +721,7 @@ bool IsNative311FailureAcknowledgement(Packet acknowledgement)
         out _));
 }
 
-// ---- 1d. Zero-command SQLite bootstrap and login migration -----------------
+// ---- 1e. Zero-command SQLite bootstrap and login migration -----------------
 {
     string temporaryDirectory = Path.Combine(Path.GetTempPath(), $"paperman-selftest-{Guid.NewGuid():N}");
     string temporaryDatabasePath = Path.Combine(temporaryDirectory, "data", "paperman.db");
@@ -1385,7 +1387,9 @@ bool IsNative311FailureAcknowledgement(Packet acknowledgement)
 
         // Reproduce only the old 682 column names; Db must preserve the value
         // while giving the present code its source-verified names and raw24 guard.
-        Directory.CreateDirectory(Path.GetDirectoryName(legacyDatabasePath)!);
+        string legacyDatabaseDirectory = Path.GetDirectoryName(legacyDatabasePath)
+            ?? throw new InvalidOperationException("The self-test legacy database path must have a parent directory.");
+        Directory.CreateDirectory(legacyDatabaseDirectory);
         using (var connection = new SqliteConnection($"Data Source={legacyDatabasePath};Mode=ReadWriteCreate;Pooling=False"))
         {
             connection.Open();
@@ -1779,7 +1783,7 @@ foreach (var (_, codec) in codecs)
     Check("378 RadioMsg wire", p378.Length == 4 + 2 * 5 + 2);
 }
 
-// ---- 8. 系統 / 角色 / 商城 / 任務 / 投票新封包 wire 格式 round-trip ---------
+// ---- 10. 系統 / 角色 / 商城 / 任務 / 投票新封包 wire 格式 round-trip --------
 {
     // 143/144 PM_UDPSTART (status 1 = OK)
     var p144 = new Packet(Opcode.PM_UDPSTART_ACK)
@@ -1910,7 +1914,7 @@ foreach (var (_, codec) in codecs)
 
 }
 
-// ---- 9. GM / MASTER、GameCenter、AI 模式 wire 格式 round-trip --------------
+// ---- 11. GM / MASTER、GameCenter、AI 模式 wire 格式 round-trip -------------
 {
     // 275/276 MASTER_MEMO
     var p276 = new Packet(Opcode.MASTER_MEMO_ACK).WriteWStr("Server Notice");
@@ -1973,7 +1977,7 @@ foreach (var (_, codec) in codecs)
     Check("945 Reset Slot ACK wire", p945.ReadU8() == 1);
 }
 
-// ---- 10. OCC 與地面武器條件式 payload（五十六輪） --------------------------
+// ---- 12. OCC 與地面武器條件式 payload（五十六輪） -------------------------
 {
     // 902/904/906 的 builder 同構: u8 point, u8 self slot, s32 self uid.
     var p902 = new Packet(Opcode.GG_OCC_START_REQ).WriteU8(3).WriteU8(7).WriteS32(12345);
