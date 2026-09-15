@@ -10,6 +10,7 @@
 |---|---|---|---|
 | 修改或新增 packet handler | [`PACKETS.md`](PACKETS.md) 的對應 family | [`LAYOUTS_REQ.md`](LAYOUTS_REQ.md) 的 writer、[`LAYOUTS.md`](LAYOUTS.md) 的 reader、相關 `Handlers.*.cs` | 必須追到 sender → fields → consumer → state/cache/storage → observable behavior；只有 ACK reader 不足以產生成功 server policy。 |
 | 釐清一個欄位或條件分支 | `PACKETS.md` | `PaperMan.exe.c` 的 caller/callee/xref 與 `LAYOUTS*.md` | 自動表只列 primitive read/write sequence；它不表示 optional branch、count loop 或欄位語意。 |
+| 由 client class、vftable 或 inheritance 定位 native 起點 | [`RTTI_PYCLASSINFORMER.md`](RTTI_PYCLASSINFORMER.md) | `PaperMan.exe.c` xref、`PACKETS.md` / `RESOURCES.md` 的 data flow | RTTI 只證明 client type/vftable/base relation；不可由 class 名稱推導 wire、server policy、ownership 或 grant。 |
 | 使用角色、物品、地圖、語音、parts 或 UI 資料 | [`RESOURCES.md`](RESOURCES.md) | 原始 `main:Extracted/` 檔案、native lookup 與 packet consumer | resource / XML / asset 的存在只能證明 client content，不證明可購、持有、預設、可見或有 entitlement。 |
 | 理解 server socket、state、DB ownership | [`ARCHITECTURE.md`](ARCHITECTURE.md) | [`../server-cs/README.md`](../server-cs/README.md)、`Program` → `Router` → `Handlers.*` → `Db.*` | server state guard 是 compatibility inference 時，必須和 native fact 分開記錄。 |
 | 選擇下一個未完成 handler | [`TODO_HANDLERS.md`](TODO_HANDLERS.md) 的「Current next evidence」與 inventory | 對應 `PACKETS.md` / `LAYOUTS*.md` | inventory 是工作地圖，不是已確認的 original-server behavior。 |
@@ -51,6 +52,7 @@ request builder → every caller/state gate → exact parser/consumer
 | `ARCHITECTURE.md` | server lifecycle、runtime ownership、layer boundaries 的全景圖 | 保持高層次；欄位細節連回 `PACKETS.md`。 |
 | `TODO_HANDLERS.md` | 現在的 evidence gaps、未實作 request inventory、歷輪背景 | 新工作先更新 current section；已完成項目的關鍵 provenance 移入對應 packet/resource 文件。 |
 | `WIKI_MECHANICS.md` | 外部歷史資料的搜尋索引與反推禁止清單 | 只登錄歷史觀察與下一步驗證問題，不登錄 server policy。 |
+| `RTTI_PYCLASSINFORMER.md` | 使用者提供之 PyClassInformer RTTI 的 class / vftable / inheritance 搜尋索引 | 保留匯出值與多重繼承 offset；它是 native xref 起點，不是 packet、service policy 或 storage evidence。 |
 
 `PaperMan.exe.c` 是由 IDA/Hex-Rays 匯出的巨大 decompile，`Extracted/` 是 client
 resource snapshot；兩者都應以小範圍、可重現的 search/excerpt 研究，不能為格式化、
