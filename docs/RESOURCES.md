@@ -794,6 +794,46 @@ Wiki 所述取得方式（ペーパチCASH 1 回 30CASH、福袋ボイス袋）
 屬 §5b-17 已記的 gacha 流程，本節不提供新證據；
 誰有權播放、是否校驗持有，**無 client 證據**，維持 UNRESOLVED。
 
+### 5c-3. `ui/` 與 `ui/system/` 的**九組同名檔**：一律以 `system/` 為準（三十二輪）
+
+先前 §5e 與 §5d-13 各自記過 `map_StartIndex.xml`／`voice_customize_contents.xml`
+「有兩份且值不同」，但**沒有查這是不是普遍現象**。本輪做了完整對照。
+
+**`Extracted/ui/` 根目錄與 `ui/system/` 共有 9 組同名 XML，
+且 native 對這 9 組**全部**只載入 `system/` 那份（Fact / HIGH）。**
+載入路徑一律形如 `sub_717E50(nullptr, L"system/<NAME>.xml")`，
+exe 中**不存在**任何從 `ui/` 根目錄載入這些檔名的字串。
+
+| 同名檔 | 兩份是否相同 | 風險 |
+|---|---|---|
+| `ItemAbilityEffectColorTable.xml` | 相同 | 無 |
+| `ItemAbilityEffectNameTable.xml` | 相同 | 無 |
+| `ItemAbilityLevTable.xml` | 相同 | 無 |
+| `NewSkillColorTable.xml` | 相同 | 無 |
+| `NewSkillLevTable.xml` | 相同 | 無 |
+| `gimmickproperty.xml` | 相同 | 無 |
+| **`FontDefinition.xml`** | **不同** | `ui/` 版**缺** `verysmall_size`／`AIWave_size` 兩個屬性 |
+| **`map_StartIndex.xml`** | **不同** | `ui/` 版 `modeStartIndex` 為廢值（0→5、1→1、3→15），且**少 GunShooting／SOCCER 兩列** |
+| **`voice_customize_contents.xml`** | **不同** | `ui/` 版 386 KB vs `system/` 版 2.93 MB —— 差 7.6 倍 |
+
+**六組相同者無害，三組不同者會給出錯誤答案。**
+尤其 `map_StartIndex.xml`：讀錯版本會得到**已廢棄的預設地圖**
+並**漏掉兩個遊戲模式**；`voice_customize_contents.xml` 讀錯則少了 87% 的內容。
+
+**通則（本輪確立）：`Extracted/ui/` 根目錄下若有與 `ui/system/` 同名的 XML，
+一律是舊副本，分析與實作**只能**採用 `system/` 那份。**
+這與 §5d-27 `URLList`（`ui/URLList.xml` vs `ui/system/URLList_01.xml`）
+是同一種錯置，只是後者連檔名都改了。累計已是**第四種**
+「資源檔在檔案系統層面誤導分析者」的形態：
+死檔（§5d-26）、錯置舊副本（§5d-27／本節）、死欄位（§5d-25/26/31）、
+檔名與內容不符（§5d-4b）。
+
+> **既有檢查已符合此規則。** `verify_resource_claims.py` 讀
+> `ItemAbilityLevTable` 等皆走 `EXTRACTED/ui/system/`，本輪複查無誤；
+> 但**本 repo 追蹤的部分 `Extracted/` 樹同時含有兩份**
+> （`ui/NewSkillLevTable.xml` 與 `ui/system/NewSkillLevTable.xml` 並存），
+> 故後續新增檢查時**必須顯式寫 `system/`**，不可依賴檔名唯一。
+
 ## 5d. system XML 資料表 (二十輪全掃)
 
 | 檔案 | 內容 | 對應 opcode |

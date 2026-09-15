@@ -979,6 +979,29 @@ def main() -> None:
               sorted({int(row[character]) for row in limited}),
               list(range(1, 15)))
 
+    # RESOURCES.md 5c-3: of the nine duplicated names, exactly three diverge.
+    # Those are the ones where reading the ui/ copy gives a wrong answer.
+    DIVERGENT = {"FontDefinition", "map_StartIndex", "voice_customize_contents"}
+    duplicated = []
+    for path in sorted((EXTRACTED / "ui").glob("*.xml")):
+        twin = EXTRACTED / "ui" / "system" / path.name
+        if twin.is_file():
+            duplicated.append((path.stem,
+                               path.read_bytes() == twin.read_bytes()))
+    if not duplicated:
+        skipped.append("ui/ vs ui/system duplicate pair check")
+    else:
+        # Only the pairs actually present locally can be compared, so record
+        # which ones those are -- otherwise a missing pair silently weakens
+        # the DIVERGENT assertion.
+        check("duplicate pairs available locally",
+              sorted(stem for stem, _ in duplicated),
+              ["ItemAbilityLevTable", "NewSkillColorTable", "NewSkillLevTable"])
+        for stem, identical in duplicated:
+            expected = stem not in DIVERGENT
+            check(f"{stem}.xml ui/ copy matches system/ copy",
+                  identical, expected)
+
     # Every datarevision.txt must agree: Extracted/ is one coherent snapshot.
     revisions = {path.read_text(encoding="utf-8", errors="replace").strip()
                  for path in EXTRACTED.rglob("datarevision.txt")}

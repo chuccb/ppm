@@ -339,6 +339,21 @@ def main() -> None:
     check("non-radio voice categories randomise",
           "rand() % n6_1 + 1" in text, True)
 
+    # RESOURCES.md 5c-3: nine xml names exist in both ui/ and ui/system/, and
+    # the binary loads the system/ copy in every case. Guards against anyone
+    # "simplifying" an analysis onto the stale root-level duplicate.
+    DUPLICATED = ("FontDefinition", "ItemAbilityEffectColorTable",
+                  "ItemAbilityEffectNameTable", "ItemAbilityLevTable",
+                  "NewSkillColorTable", "NewSkillLevTable",
+                  "gimmickproperty", "map_StartIndex",
+                  "voice_customize_contents")
+    for name in DUPLICATED:
+        check(f"{name}.xml is loaded from system/",
+              f'system/{name}.xml' in text, True)
+        # No loader ever names the root-level copy.
+        check(f"{name}.xml is never loaded from ui/ root",
+              f'L"{name}.xml"' in text or f'ui/{name}.xml' in text, False)
+
     # The failure-arm texts, through the documented decode rule.
     entries = message_entries()
     if entries is None:
