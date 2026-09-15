@@ -21,6 +21,7 @@ import re
 import struct
 import sys
 from collections import Counter
+from xml.etree import ElementTree
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -438,6 +439,48 @@ def main() -> None:
               [str(index) for index in range(40001, 40009)])
         check("QuestTerm==19 is exactly the HonorMedalPosition set",
               sorted(marked), sorted(star))
+
+    # RESOURCES.md 5d-22: tutorial_contents.xml is the only tutorial file that
+    # carries level data, and its 9 missions pair 1:1 with the result sprites
+    # in tutorial_image.xml -- two independently maintained files agreeing.
+    contents = EXTRACTED / "ui" / "tutorial_contents.xml"
+    images = EXTRACTED / "ui" / "tutorial_image.xml"
+    if not contents.is_file() or not images.is_file():
+        skipped.append("ui/tutorial_contents.xml")
+    else:
+        root = ElementTree.parse(contents).getroot()
+        check("tutorial_contents root", root.tag, "TUTORIALDEFINE")
+        check("tutorial missions", [node.tag for node in root],
+              ["move_1", "move_2", "move_3", "move_4",
+               "attack_1", "attack_2", "attack_3", "attack_4", "attack_5"])
+        check("tutorial mission indices",
+              [node.get("index") for node in root],
+              ["0", "1", "2", "3", "4", "14", "24", "34", "44"])
+        # weapon runs 0..3 like the Tutorial_Data.xml segment selector, plus a
+        # fifth *lesson* (sniper) that is NOT a fifth weapon segment.
+        check("tutorial weapon values",
+              [node.find("property").get("weapon") for node in root],
+              ["0", "0", "0", "0", "0", "1", "2", "3", "4"])
+        check("tutorial time limit is uniform",
+              sorted({node.find("property").get("time") for node in root}),
+              ["180000"])
+        check("tutorial success/fail are plain constants",
+              sorted({(node.find("property").get("success"),
+                       node.find("property").get("fail")) for node in root}),
+              [("SUCCESS", "FAIL")])
+        sprites = set(re.findall(r'name="(FINISH_[A-Z_]+)"',
+                                 images.read_text("cp932", "replace")))
+        check("tutorial result sprites pair 1:1 with the 9 missions",
+              sorted(sprites & {
+                  "FINISH_DEF_MOVE", "FINISH_ONLYWAY_MOVE", "FINISH_DUCK_MOVE",
+                  "FINISH_JUMP_MOVE", "FINISH_MAIN_WEAPON", "FINISH_SUB_WEAPON",
+                  "FINISH_NEAR_WEAPON", "FINISH_BOMB_WEAPON",
+                  "FINISH_SNIPER_WEAPON"}),
+              sorted(["FINISH_DEF_MOVE", "FINISH_ONLYWAY_MOVE",
+                      "FINISH_DUCK_MOVE", "FINISH_JUMP_MOVE",
+                      "FINISH_MAIN_WEAPON", "FINISH_SUB_WEAPON",
+                      "FINISH_NEAR_WEAPON", "FINISH_BOMB_WEAPON",
+                      "FINISH_SNIPER_WEAPON"]))
 
     # Every datarevision.txt must agree: Extracted/ is one coherent snapshot.
     revisions = {path.read_text(encoding="utf-8", errors="replace").strip()

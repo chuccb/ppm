@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- edited with XMLSPY v2004 rel. 3 U (http://www.xmlspy.com) by S-->
+<TUTORIALDEFINE>
+   <move_1 comment="keyboard action." index="0">
+      <property time="180000" startpoint="-812.548,0.293966,-12.0158,64" weapon="0" numball="0" success="SUCCESS" fail="FAIL">
+         <limit_triggers type_1="A-1"/>
+         <success_triggers type_1="A-4"/>
+      </property>
+      <event>
+         <next_condition type="key" value="900"/>
+         <limit_action type="mouse" value="drag">
+            <message start="101" loop="102" success="103" fail="-1"/>
+         </limit_action>
+         <limit_action type="key" value="right">
+            <message start="104,105" loop="107" success="-1" fail="-1"/>
+         </limit_action>
+         <limit_action type="key" value="left">
+            <message start="-1" loop="106" success="-1" fail="-1"/>
+         </limit_action>
+         <limit_action type="key" value="down">
+            <message start="-1" loop="108" success="-1" fail="-1"/>
+         </limit_action>
+         <limit_action type="key" value="up">
+            <message start="-1" loop="109,110,111" success="-1" fail="-1"/>
+         </limit_action>
+      </event>
+   </move_1>
+   <move_2 comment=" unforked road action." index="1">
+      <property time="180000" startpoint="-573.155,120.336,-21.6218,64" weapon="0" numball="0" success="SUCCESS" fail="FAIL">
+         <limit_triggers type_1="B-1"/>
+         <deadzone_triggers type_1="B-3"/>
+         <success_triggers type_1="B-4"/>
+      </property>
+      <event>
+         <next_condition type="trigger_contact" value="ENT_TRIGGER_CONTACT"/>
+         <limit_action type="fire" value="all">
+            <message start="112" loop="113" success="-1" fail="114"/>
+         </limit_action>
+      </event>
+   </move_2>
+   <move_3 comment="duck action." index="2">
+      <property time="180000" startpoint="449.49,0.125,-354.811,0" weapon="0" numball="0" success="SUCCESS" fail="FAIL">
+         <limit_triggers type_1="C-1"/>
+         <deadzone_triggers type_1="C-3"/>
+         <success_triggers type_1="C-4"/>
+      </property>
+      <event>
+         <next_condition type="trigger_contact" value="ENT_TRIGGER_CONTACT"/>
+         <limit_action type="fire" value="all">
+            <message start="115,116" loop="117" success="-1" fail="-1"/>
+         </limit_action>
+      </event>
+   </move_3>
+   <move_4 comment="jump action." index="3">
+      <property time="180000" startpoint="-421,32,328,65" weapon="0" numball="0" success="SUCCESS" fail="FAIL">
+         <limit_triggers type_1="D-1"/>
+         <deadzone_triggers type_1="D-3"/>
+         <success_triggers type_1="D-4"/>
+      </property>
+      <event>
+         <next_condition type="trigger_contact" value="ENT_TRIGGER_CONTACT"/>
+         <limit_action type="fire" value="all">
+            <message start="119" loop="120" success="-1" fail="121"/>
+         </limit_action>
+      </event>
+   </move_4>
+   <attack_1 comment="defalut main gun attack action." index="4">
+      <property time="180000" startpoint="-295.498,0.125,-30.954,64" weapon="0" numball="0" success="SUCCESS" fail="FAIL">
+         <attack_triggers type_1="E-5" hp_1="45" type_2="E-6" hp_2="45" type_3="E-7" hp_3="45"/>
+         <limit_triggers type_1="E-1" type_2="E-2"/>
+      </property>
+      <event>
+         <next_condition type="trigger_kill" value="none"/>
+         <limit_action type="fire" value="all">
+            <message start="122,123,124" loop="125,126" success="-1" fail="-1"/>
+         </limit_action>
+      </event>
+   </attack_1>
+   <attack_2 comment="defalut sub gun attack action." index="14">
+      <property time="180000" startpoint="-295.498,0.125,-30.954,64" weapon="1" numball="0" success="SUCCESS" fail="FAIL">
+         <attack_triggers type_1="E-5" hp_1="45" type_2="E-6" hp_2="45" type_3="E-7" hp_3="45"/>
+         <limit_triggers type_1="E-1" type_2="E-2"/>
+      </property>
+      <event>
+         <next_condition type="trigger_kill" value="none"/>
+         <limit_action type="fire" value="all">
+            <message start="127,128,129" loop="130,131" success="-1" fail="-1"/>
+         </limit_action>
+      </event>
+   </attack_2>
+   <attack_3 comment="nife attack action." index="24">
+      <property time="180000" startpoint="84.4451,0.125,-30.5665,64" weapon="2" numball="0" success="SUCCESS" fail="FAIL">
+         <attack_triggers type_1="E-5" hp_1="15" type_2="E-6" hp_2="15" type_3="E-7" hp_3="15"/>
+         <limit_triggers type_1="F-1"/>
+      </property>
+      <event>
+         <next_condition type="trigger_kill" value="none"/>
+         <limit_action type="fire" value="all">
+            <message start="132,133" loop="134,135" success="-1" fail="-1"/>
+         </limit_action>
+      </event>
+   </attack_3>
+   <attack_4 comment="bomb attack action." index="34">
+      <property time="180000" startpoint="-295.498,0.125,-30.954,64" weapon="3" numball="0" success="SUCCESS" fail="FAIL">
+         <attack_triggers type_1="E-5" hp_1="35" type_2="E-6" hp_2="30" type_3="E-7" hp_3="25"/>
+         <limit_triggers type_1="E-1"/>
+      </property>
+      <event>
+         <next_condition type="trigger_kill" value="none"/>
+         <limit_action type="fire" value="all">
+            <message start="136,137,138" loop="139,140" success="-1" fail="-1"/>
+         </limit_action>
+      </event>
+   </attack_4>
+   <attack_5 comment="sniper attack action." index="44">
+      <property time="180000" startpoint="710.641,190.125,-7.26145,-62" weapon="4" numball="0" success="SUCCESS" fail="FAIL">
+         <attack_triggers type_1="G-8" hp_1="40"/>
+         <limit_triggers type_1="G-1"/>
+      </property>
+      <event>
+         <next_condition type="trigger_kill" value="none"/>
+         <limit_action type="fire" value="all">
+            <message start="141,142" loop="143,144,145" success="-1" fail="-1"/>
+         </limit_action>
+      </event>
+   </attack_5>
+</TUTORIALDEFINE>

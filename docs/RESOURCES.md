@@ -1588,12 +1588,97 @@ Wiki 兩張表的欄位順序不一致，不足以定序。
 這些仍**無任何 client 證據**，維持 UNRESOLVED，
 比照 §5d-16 Rocket/Plasma/Laser 的處理：**可讀出 ≠ 有權威**。
 
+## 5d-22. `ui/tutorial_contents.xml`：教學關卡的**觸發腳本**（本輪首解）
+
+`ui/` 下 15 個 `tutorial*` / `Tutorial*` 檔先前**全無 md 引用**。逐一檢視後，
+其中 14 個是純版面（`msprite`/`button`/座標），**只有 `tutorial_contents.xml`
+是真正的關卡資料**。本節只寫這一個；其餘 14 個歸類為版面檔（見 §6）。
+
+注意它與 §5d-12 的 `system/Tutorial_Data.xml` **是兩個不同的檔**：
+後者給**初始狀態**（出生點、bot、要發哪把槍），本檔給**過關判定**。
+
+### 格式（`CTUTPackage` 三個 parser，Fact / HIGH）
+
+根節點 `TUTORIALDEFINE`，9 個任務節點，各含 `<property>` 與 `<event>`。
+`CTUTPackage::sub_78B430` @ `0x78B430` 走訪任務並讀 `index`；
+`sub_78B880` @ `0x78B880` 讀 `<property>`；`sub_78BFE0` @ `0x78BFE0` 讀 `<event>`。
+欄位與**記憶體位移一一對應**：
+
+| XML | native 寫入位移 | 備註 |
+|---|---|---|
+| `time` | `+0` (f32) | 讀入後 **`*a2 = *a2 / 1000.0`** → 檔案是**毫秒**，內部存**秒** |
+| `startpoint` | `+4` | 4 個 float：`x,y,z,angle` |
+| `weapon` | `+20` (s32) | 見下 |
+| `numball` | `+24` (s32) | 全 9 筆皆 0 |
+| `success` / `fail` | `+28` / `+56` | 字串，全 9 筆為 `SUCCESS` / `FAIL` |
+| `<success_triggers>` | `+84` | 最多 `type_1..3`，逐一 `sub_413090` 附加 |
+| `<deadzone_triggers>` | `+100` | 同上 |
+| `<limit_triggers>` | `+116` | 同上 |
+| `<attack_triggers>` | `+132` | **固定讀 3 組** `type_N` + `hp_N`（無條件讀滿三次） |
+| `<next_condition>` | `+164` | `type`/`value` |
+| `<limit_action>` | `+168` + `88*(i-1)` | **每筆 88 B**，`type`/`value` |
+
+`attack_triggers` 與其他三種的**解析方式不同**：前者無條件讀滿 3 組，
+後者以回傳值判斷是否存在才附加。這是 native 層的結構事實，不是檔案內容的巧合。
+
+### 9 個任務 = 4 移動 + 5 攻擊（Fact / HIGH）
+
+`time` 全為 `180000`（＝**3 分鐘**上限），`index` 為 `0,1,2,3` 後跳 `4,14,24,34,44`。
+
+| 節點 | index | `weapon` | comment（原廠拼字） |
+|---|---:|---:|---|
+| `move_1` | 0 | 0 | `keyboard action.` |
+| `move_2` | 1 | 0 | `unforked road action.` |
+| `move_3` | 2 | 0 | `duck action.` |
+| `move_4` | 3 | 0 | `jump action.` |
+| `attack_1` | 4 | 0 | `defalut main gun attack action.` |
+| `attack_2` | 14 | 1 | `defalut sub gun attack action.` |
+| `attack_3` | 24 | 2 | `nife attack action.` |
+| `attack_4` | 34 | 3 | `bomb attack action.` |
+| `attack_5` | 44 | 4 | `sniper attack action.` |
+
+**`weapon` 0..3 與 §5d-12 的 `type` 段選擇器語義相同**
+（0=主 1=副 2=近戰 3=投擲），但**本檔多出 `weapon=4`＝狙擊**。
+這是重要差異：四武器**槽**（§5a2 的 12.1M/12.2M/12.3M/12.4M 四段）
+與教學的五個**課程**不是同一個列舉 —— 狙擊槍本身屬主武器段，
+在此被獨立成第五課。**不可把 `weapon=4` 當成第五個武器段。**
+
+### 第二個資源檔獨立證實同一組分類（Fact / HIGH）
+
+`ui/tutorial_image.xml` 的結算畫面精靈與上表**恰好 1:1**，且**無多餘、無缺漏**：
+
+```
+FINISH_DEF_MOVE / ONLYWAY_MOVE / DUCK_MOVE / JUMP_MOVE      <- move_1..4
+FINISH_MAIN / SUB / NEAR / BOMB / SNIPER _WEAPON            <- attack_1..5
+```
+
+兩個檔由不同團隊維護（一個是腳本、一個是貼圖切片），
+**9 對 9 完全吻合**，因此「4 移動 + 5 攻擊」是設計定案而非偶然。
+
+### 未解：觸發 token 與訊息 id
+
+- `limit/success/deadzone/attack_triggers` 的值形如 `A-1`、`E-5`、`G-8`
+  （字母 A–G ＝ 課程分組，數字 1–8 ＝ 用途）。實測**三個 `TU_*.pmm`
+  地圖檔中都找不到這些 token 的完整集合**（只有零星位元組巧合），
+  故它們**如何綁定到地圖實體，維持 UNRESOLVED**，不臆測。
+- `<message>` 共用到 **44 個 id，範圍 101–145、全部相異**。
+  這些**不是** `msgtableres.lang` 的 id（該表 101–145 是資料庫錯誤訊息，語義完全不符），
+  屬**教學專用的獨立字串命名空間**；本 extraction 未隨附該字串來源，維持 UNRESOLVED。
+
+### 界線
+
+全檔是**單機教學關卡的客戶端腳本**。過關與否由 client 自行判定，
+`success`/`fail` 只是字串常數。無任何伺服器欄位，
+**不得據此推斷伺服器對教學進度有驗證**。
+
 ## 6. 其他已知資源
 
 - `system/map_StartIndex.xml`, `SelectRandomMap.xml`: 地圖選擇
 - `ui/system/AI/*.xml`: AI 模式劇本 (BotWave/BotPath/Scenario)
 - `Options.cfg`, `CustomMap.cfg`, `LastConnect.ini`: 本機設定 (非資源)
 - `map/gameobject.dat`: **戰場掉落物總表** (105 筆, 明文; 見 §5d-21)
+- `ui/tutorial*.xml` / `Tutorial_*.xml`: 教學版面檔 (15 個中 14 個純 msprite/button;
+  唯一含關卡資料的是 `tutorial_contents.xml`, 見 §5d-22)
 - `TNMT_*.xml`: 錦標賽 UI 資料
 - `occupymode.xml` / `occupyrenewalmode.xml`: 佔領模式參數
 
