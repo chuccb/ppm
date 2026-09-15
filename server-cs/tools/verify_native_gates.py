@@ -354,6 +354,24 @@ def main() -> None:
         check(f"{name}.xml is never loaded from ui/ root",
               f'L"{name}.xml"' in text or f'ui/{name}.xml' in text, False)
 
+    # RESOURCES.md 5d-29: the emblem is three layers in the UI but one s32 on
+    # the wire, and the exe never names the atlas files -- which is why the
+    # wiki's 120/60/60 part counts cannot be corroborated.
+    # emblem_1..4 are icon-count layout presets (present_1..4 mirror them),
+    # NOT the wiki's three emblem layers.
+    check("emblem layout presets",
+          [name for name in ("emblem_1", "emblem_2", "emblem_3", "emblem_4",
+                             "emblem_5")
+           if f'L"{name}"' in text],
+          ["emblem_1", "emblem_2", "emblem_3", "emblem_4"])
+    check("present_1..4 mirror the same layout shape",
+          [name for name in ("present_1", "present_2", "present_3",
+                             "present_4") if f'L"{name}"' in text],
+          ["present_1", "present_2", "present_3", "present_4"])
+    check("exe never names the emblem atlases",
+          [name for name in ("emblem_mark", "emblem_frame", "emblem_base")
+           if name in text], [])
+
     # The failure-arm texts, through the documented decode rule.
     entries = message_entries()
     if entries is None:
