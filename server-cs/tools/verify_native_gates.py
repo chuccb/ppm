@@ -236,6 +236,16 @@ def main() -> None:
                      "Scenario_easy.xml"):
         check(f"exe loads {resource}", text.count(resource), 1)
 
+    # RESOURCES.md 5d-27: no endpoint is compiled in -- every outbound URL
+    # comes from URLList, which is what makes redirection a data-only change.
+    check("exe hardcodes no URL literal", text.count('L"http'), 0)
+    check("exe loads URLList by numbered path",
+          text.count('L"ui/system/URLList_%02d.xml"'), 1)
+    # name is a human label; the parser keys on index.
+    for attribute in ("index", "url", "disable"):
+        check(f"URLList parser reads {attribute}",
+              f'L"{attribute}"' in text, True)
+
     # The failure-arm texts, through the documented decode rule.
     entries = message_entries()
     if entries is None:

@@ -572,7 +572,7 @@ reader-level layout.
 | AI/gamecenter_map_info.xml | 射擊館關卡 (盾 HP/Fever/砲位) | 479 GAMECENTER |
 | AI/BotWave/BotEnemy/Scenario | AI 波次/敵人/劇本 (easy/intelligent) | AI 對戰 |
 | Total_Package_Index.xml | 角色套裝 UI 索引 (114 套) | 商店套裝頁 |
-| URLList_01.xml | 正版端點 (dl.paperman.jp, bill.paperman.jp, hangame.co.jp) | 網頁跳轉 |
+| URLList_01.xml | 正版端點 (dl.paperman.jp, bill.paperman.jp, hangame.co.jp)。**exe 內零個 URL 字面值, 全部端點由本檔驅動**; `ui/URLList.xml` 是路徑錯置的舊副本 (見 §5d-27) | 網頁跳轉 |
 | TimeLimit_NotUse_IP.xml | 防沉迷白名單 IP | — |
 | netcafe_contents.xml | 網咖特典 (UTF-16) | PopUpNetCafeShop |
 | voice_customize_contents.xml | 語音自訂 (UTF-16LE; 15 角色×92 情境×27 句) | 791–796 voice_slots |
@@ -1950,6 +1950,64 @@ AppearSound DisAppearSound`
 由誰裁決**無 client 證據**，維持 UNRESOLVED。
 尤其 `instant_pg`／`game_point`／`game_score` 看似經濟欄位，
 **不得據此推導伺服器的獎勵計算**。
+
+## 5d-27. `URLList`：**全部外部端點皆由資源驅動**，以及一個路徑錯置的舊副本
+
+§5d 檔案表雖有 `URLList_01.xml` 一行，但未記錄本節的三項事實。
+本節同時解決 `Extracted/ui/URLList.xml`（先前無 md 引用）的身分問題。
+
+### exe 內**零個** URL 字面值（Fact / HIGH）
+
+`PaperMan.exe.c` 全文 `L"http` 出現 **0 次** —— 沒有任何硬編碼的
+主機名、IP 或路徑。**所有對外連線目標都來自這張表**。
+
+對私服而言這是**可直接利用**的結論：改掉 `URLList_01.xml`
+即可把橫幅、排行榜、金流頁全部導向自架服務，**無須修改二進位**。
+（這與 §5d-25/§5d-26 的教訓互補：那兩節說「資源寫了不一定生效」，
+這節則是「生效的全在資源裡」。）
+
+### 載入路徑是 `ui/system/URLList_%02d.xml`，`ui/URLList.xml` 是**錯置的舊副本**（Fact / HIGH）
+
+`0x713918` 的格式字串為 `L"ui/system/URLList_%02d.xml"`，
+即檔名帶**兩位數序號**（本 extraction 只隨附 `_01`）。
+載入失敗時走 `L"Can't find urllist."` 的錯誤分支寫入 `LOGINLOGMESSEGE`。
+
+`Extracted/ui/URLList.xml` **不在這個路徑上，永遠不會被載入**。
+比對兩者可證它是**較舊的修訂**：
+
+| 條目 | `ui/system/URLList_01.xml`（生效） | `ui/URLList.xml`（死檔） |
+|---|---|---|
+| `banner` (1) | 同 | 同 |
+| `jpn_ranking` (2) | `157.7.172.71:5351` | **`202.213.230.237:5351`（舊 IP）** |
+| `jpn_nhn_bill` (3) | 同 | 同 |
+| `jpn_bill` (4) | 同 | 同 |
+| `jpn_eventing` (5) | `.../event/201207ranma/` | **缺** |
+| `gaccha` (6) | `.../banner/capsule.jpg` | **缺** |
+
+舊 IP ＋ 少兩筆最新條目 ⇒ 這是搬移到 `ui/system/` 之前的殘留。
+**分析時一律以 `ui/system/URLList_01.xml` 為準。**
+
+### parser 只讀三個屬性，`name` 是註解（Fact / HIGH）
+
+`0x713980` 起只讀 `index`／`url`／`disable`（`disable != 0` 轉成 bool 存入），
+**從不讀 `name`** —— 與 §5d-26 `BotEnemy_intelligent` 的 `index`、
+§5d-24 `commonProperty` 的節點名同屬一類：**人類可讀的標籤，程式不使用**。
+因此**鍵是 `index`（1..6 連續），不是 `name`**。
+
+### 兩個帶 `%s` 的端點
+
+- `jpn_ranking` = `http://157.7.172.71:5351/content/mainContent.asp?key=%s`
+- `jpn_bill` = `https://bill.paperman.jp/login.ashx?userid=%s&token=%s`
+
+後者是**帶 token 的單一登入跳轉**（userid + token 兩個佔位）。
+但**本輪未找到填入這兩個 `%s` 的呼叫點**，token 從何而來、
+是否即登入階段既有欄位，**維持 UNRESOLVED，不臆測**。
+（值得後續追：若能定位，即可補完金流頁的驗證流程。）
+
+### 界線
+
+本表只決定**客戶端開啟哪個網址**。排行榜與金流本身是**外部 Web 服務**，
+其協定、鑑權與回應格式完全不在本 extraction 範圍內，維持 UNRESOLVED。
 
 ## 6. 其他已知資源
 

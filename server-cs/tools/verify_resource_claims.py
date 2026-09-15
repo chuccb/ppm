@@ -636,6 +636,38 @@ def main() -> None:
               [key for source in (normal, easy) for key, row in source.items()
                if "scale" not in row], [])
 
+    # RESOURCES.md 5d-27: every outbound endpoint is data-driven, and
+    # ui/URLList.xml is an older copy stranded at a path nothing loads.
+    live_urls = EXTRACTED / "ui" / "system" / "URLList_01.xml"
+    stale_urls = EXTRACTED / "ui" / "URLList.xml"
+    if not live_urls.is_file():
+        skipped.append("ui/system/URLList_01.xml")
+    else:
+        def url_entries(path: Path) -> dict[str, str]:
+            root = ElementTree.fromstring(path.read_bytes().decode("utf-8-sig"))
+            return {node.get("index"): node.get("url") for node in root}
+
+        live = url_entries(live_urls)
+        check("URLList_01 index keys", sorted(live, key=int),
+              ["1", "2", "3", "4", "5", "6"])
+        check("URLList_01 entries are all enabled",
+              sorted({node.get("disable") for node
+                      in ElementTree.fromstring(
+                          live_urls.read_bytes().decode("utf-8-sig"))}), ["0"])
+        # The two templated endpoints, including the token-bearing sign-on.
+        check("URLList_01 ranking endpoint", live["2"],
+              "http://157.7.172.71:5351/content/mainContent.asp?key=%s")
+        check("URLList_01 billing endpoint", live["4"],
+              "https://bill.paperman.jp/login.ashx?userid=%s&token=%s")
+        if stale_urls.is_file():
+            stale = url_entries(stale_urls)
+            check("ui/URLList.xml is the shorter, older copy",
+                  (len(stale), sorted(stale, key=int)),
+                  (4, ["1", "2", "3", "4"]))
+            check("ui/URLList.xml still carries the superseded ranking host",
+                  stale["2"],
+                  "http://202.213.230.237:5351/content/mainContent.asp?key=%s")
+
     # Every datarevision.txt must agree: Extracted/ is one coherent snapshot.
     revisions = {path.read_text(encoding="utf-8", errors="replace").strip()
                  for path in EXTRACTED.rglob("datarevision.txt")}
