@@ -115,6 +115,9 @@ uses cancellation and disposes its socket only after its receive loop exits.
   gameplay policy。各 `Handlers.*` 檔以協定子系統切分（Auth、Channel、Lobby、
   Room、Join、BattleRelay、BattleObjects、Shop、Stats、Clan、Quest、Friend、
   Voice、Warehouse、Master、GameCenter、Ai），使 opcode 的處理位置可直接搜尋。
+  Lobby 再依真實責任拆成很小的 registry、client snapshot、interaction/scene
+  transition、player configuration 四個 partial；Room 亦按 lifecycle / settings /
+  membership 等 protocol role 拆分。這些是導覽切分，不改 wire/state semantics。
 - `Db` 是一個依實際 persistence domain 拆成 **9 個 source partial** 的類別：
   `Db.cs` 主檔（connection、bootstrap、account、nickname、packet stats）加上
   Player、Economy、Social、Rooms、Voice、Warehouse、GameCenter、WeaponLoadout。
