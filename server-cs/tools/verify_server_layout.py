@@ -18,6 +18,8 @@ ROOT = Path(__file__).resolve().parents[2]
 SERVER = ROOT / "server-cs" / "src" / "PaperMan.Server"
 HANDLERS = SERVER / "Handlers"
 GENERATOR_PROJECT = ROOT / "server-cs" / "src" / "PaperMan.HandlerGenerator"
+SHIPPED_NAME = "AnalyzerReleases.Shipped.md"
+UNSHIPPED_NAME = "AnalyzerReleases.Unshipped.md"
 OPCODE_SOURCE = ROOT / "db" / "packets.tsv"
 OPCODE_GENERATED = ROOT / "server-cs" / "src" / "PaperMan.Protocol" / "Generated" / "Opcode.cs"
 
@@ -26,6 +28,18 @@ HANDLER_ENTRY = re.compile(
     r"(?m)^    (?:private|internal|public) static (?:async )?ValueTask "
     r"(?P<entry>\w+)\(Session session, Packet packet, ServerContext context\)")
 HANDLER_CLASS = re.compile(r"(?m)^public static partial class (?P<name>\w+Handlers)\s*$")
+# DiagnosticDescriptor declarations in the generator, used to keep the analyzer
+# release-tracking rows (RS2000/RS2001) in step with the reported rules.
+DESCRIPTOR = re.compile(
+    r"""id:\s*"(?P<id>PMH\d+)",.*?"""
+    r"""category:\s*"(?P<category>[^"]+)",\s*"""
+    r"""defaultSeverity:\s*DiagnosticSeverity\.(?P<severity>\w+),\s*"""
+    r"""isEnabledByDefault:\s*(?P<enabled>true|false)\)""",
+    re.DOTALL)
+# Mirrors ReleaseTrackingHelper's parser: only ';' starts a comment, the header
+# is two fixed lines, and a New Rules row carries 3 or 4 '|'-separated columns.
+RELEASE_TABLE_HEADER = re.compile(r"^\|?\s*Rule ID\s*\|\s*Category\s*\|\s*Severity\s*\|\s*Notes\s*\|?$", re.I)
+RELEASE_TABLE_DIVIDER = re.compile(r"^\|?-{3,}\|-{3,}\|-{3,}\|-{3,}\|?$")
 RAW_206_ATTRIBUTE = re.compile(
     r"\[RawOpcodeHandler\(206\)\]\s*\n\s*"
     r"private static ValueTask RawOpcode206_REQ\(Session session, Packet packet, ServerContext context\)")
@@ -69,6 +83,94 @@ def canonical_source_for(token: str, directory: Path) -> Path:
     return directory / f"Handlers.{token.removesuffix('_REQ')}.cs"
 
 
+def read_release_rows(path: Path) -> dict[str, tuple[str, str]]:
+    """Parse a release-tracking file the way ReleaseTrackingHelper does.
+
+    Returns {rule id: (category, severity)} for 'New Rules' rows. Raises through
+    fail() on anything the real parser would report as RS2007.
+    """
+    rows: dict[str, tuple[str, str]] = {}
+    expect = "table-title"
+    for number, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        line = raw.strip()
+        # The parser only honours ';' comments; '<!-- -->' is parsed as content.
+        if not line or line.startswith(";"):
+            continue
+        if line.startswith("<!--") or line.startswith("#"):
+            if line.startswith("## Release") or line.startswith("### "):
+                pass
+            else:
+                fail(f"{path}:{number} is not a ';' comment; the release parser reads it as an entry")
+        if line.startswith("## Release"):
+            expect = "table-title"
+            continue
+        if line.startswith("### "):
+            if line != "### New Rules":
+                fail(f"{path}:{number} only 'New Rules' tables are maintained here, found {line!r}")
+            expect = "header"
+            continue
+        if expect == "header":
+            if not RELEASE_TABLE_HEADER.match(line):
+                fail(f"{path}:{number} invalid release table header {line!r}")
+            expect = "divider"
+            continue
+        if expect == "divider":
+            if not RELEASE_TABLE_DIVIDER.match(line):
+                fail(f"{path}:{number} invalid release table divider {line!r}")
+            expect = "rows"
+            continue
+        if expect != "rows":
+            fail(f"{path}:{number} unexpected content before a table header: {line!r}")
+        parts = [cell.strip() for cell in line.strip("|").split("|")]
+        if not 3 <= len(parts) <= 4:
+            fail(f"{path}:{number} a New Rules row needs 3 or 4 columns, found {len(parts)}: {line!r}")
+        rule_id = parts[0]
+        if rule_id in rows:
+            fail(f"{path}:{number} duplicate release entry for {rule_id}")
+        rows[rule_id] = (parts[1], parts[2])
+    return rows
+
+
+def verify_analyzer_release_tracking() -> int:
+    """RS1036 / RS2008: the generator must opt in and track every PMH* rule."""
+    project = (GENERATOR_PROJECT / "PaperMan.HandlerGenerator.csproj").read_text(encoding="utf-8")
+    if "<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>" not in project:
+        fail("PaperMan.HandlerGenerator must set EnforceExtendedAnalyzerRules (RS1036)")
+    for name in (SHIPPED_NAME, UNSHIPPED_NAME):
+        if f'<AdditionalFiles Include="{name}" />' not in project:
+            fail(f"PaperMan.HandlerGenerator must pass {name} as an AdditionalFiles item (RS2008)")
+        if not (GENERATOR_PROJECT / name).is_file():
+            fail(f"missing {name}; release tracking is enabled only when both files exist (RS2008)")
+
+    generator = (GENERATOR_PROJECT / "PacketHandlerRegistryGenerator.cs").read_text(encoding="utf-8")
+    declared = {
+        match["id"]: (match["category"], match["severity"], match["enabled"])
+        for match in DESCRIPTOR.finditer(generator)
+    }
+    if not declared:
+        fail("no PMH DiagnosticDescriptor found in PacketHandlerRegistryGenerator.cs")
+
+    shipped = read_release_rows(GENERATOR_PROJECT / SHIPPED_NAME)
+    unshipped = read_release_rows(GENERATOR_PROJECT / UNSHIPPED_NAME)
+    if overlap := sorted(shipped.keys() & unshipped.keys()):
+        fail(f"rules listed as both shipped and unshipped: {overlap} (RS2006)")
+
+    tracked = {**shipped, **unshipped}
+    if missing := sorted(declared.keys() - tracked.keys()):
+        fail(f"reported rules missing from the release files: {missing} (RS2000)")
+    if stale := sorted(tracked.keys() - declared.keys()):
+        fail(f"release entries for rules the generator no longer reports: {stale} (RS2001)")
+
+    for rule_id, (category, severity, enabled) in sorted(declared.items()):
+        # A disabled rule is recorded as 'Disabled' rather than its severity.
+        expected = severity if enabled == "true" else "Disabled"
+        if tracked[rule_id] != (category, expected):
+            fail(
+                f"{rule_id} release entry {tracked[rule_id]} does not match the descriptor "
+                f"{(category, expected)} (RS2001)")
+    return len(declared)
+
+
 def main() -> None:
     catalog = read_packet_catalog()
     generated = read_generated_opcode_values()
@@ -90,6 +192,7 @@ def main() -> None:
         fail("missing PacketHandlerRegistryGenerator source")
     if not (SERVER / "Host" / "RawOpcodeHandlerAttribute.cs").is_file():
         fail("missing RawOpcodeHandlerAttribute source")
+    tracked_rules = verify_analyzer_release_tracking()
 
     router = (SERVER / "Host" / "Router.cs").read_text(encoding="utf-8")
     if "GeneratedPacketHandlerRegistration.AddTo(table);" not in router:
@@ -152,7 +255,8 @@ def main() -> None:
         "server layout OK: "
         f"{len(catalog)} catalog opcodes; generated discovery finds {len(direct_entries)} direct entries "
         f"across {len(family_classes)} handler classes; {len(direct_sources)} direct + "
-        f"{len(shared_sources | explicit_non_entry_sources)} support-only = {len(all_handler_sources)} handler sources"
+        f"{len(shared_sources | explicit_non_entry_sources)} support-only = {len(all_handler_sources)} handler sources; "
+        f"{tracked_rules} analyzer rules release-tracked"
     )
 
 
