@@ -103,6 +103,56 @@ tail[714..720] padding
 sub_5359B0 (getter) 證實記憶體 1212..1224/1228..1240 = 兩檔位 4×s32
 價格組, +1248/+1252 = 檔位貨幣 id — 結構存在但日版資料未填。
 
+## 1z. 2026-09 新 IDA 導出：40 個具名 global 取代原本的 `off_` 位址
+
+`main` 分支新上傳的 `PaperMan.exe.c` 與既有版本**函數內容等價**
+（17,830 具名函數、19,835 function body，集合完全相同），
+但 Hex-Rays 為 40 個先前匿名的字串 global 產生了名稱。
+這對交叉驗證有實質幫助：原本讀起來是無語義的 `&off_AE5AE4`，現在是
+`&aSkillPresetSlo`。已確認的對照（以 `sub_40F510` 字串比較鏈的順序為準）：
+
+| 新名稱 | 舊 `.c` 的寫法 | 意義 / 已知交叉點 |
+|---|---|---|
+| `aSkillPresetSlo`, `_0`, `_1`, `_2`, `_3` | `off_AE5AE4`, `off_AE5ABC`, `off_AE5A94`, `off_AE5A6C`, `off_AE5A44` | **恰好 5 個** SkillPresetSlot 按鈕，與 255 NewSkillProfile 的 `ProfileCount = 5` 完全吻合（獨立第二證據）|
+| `aItemPlayButton_0`..`_6` | 匿名 | 7 個，與 `ITEM_PLAY_BUTTON_0%d` 格式字串同源 |
+| `aVoiceCustomize`, `_0`, `_1`, `_2` | 匿名 | voice customize UI，對應 §5d 的 791–796 |
+| `aAttack1`..`aAttack5`, `aMove1`..`aMove4`, `aReserve1` | 匿名 | radio-chat 分類按鈕（攻擊 5 / 移動 4 / 保留 1）|
+| `aPresetSlotName`, `aPresetSlotLevD` | 匿名 | preset slot 的名稱與等級顯示欄 |
+| `aPinfoWinImage`, `aPinfoLoseImage`, `aPinfoDieEmblem` | 匿名 | 戰績畫面勝/敗/陣亡徽章 |
+| `aMyinventory`, `aPaperCode` | 匿名 | 背包與 serial-code 入口（對應 461/464）|
+
+**界線。** 這些是 **UI 控制項名稱**，證明的是畫面上有哪些按鈕與其數量，
+**不是** wire 欄位、不是 server 權限、也不是持有狀態。
+`aSkillPresetSlo` 的 5 個實例可以獨立支持「5 個 profile」的既有結論，
+但 profile 的內容、切換權限與持久化仍以 255 的 native reader 為準。
+
+## 2c2. itemdata.pat record stride = 997B 自證切段 (本輪新增)
+
+§2 的 `1808B/條` 是**記憶體結構**大小 (載入器 @131262 配置的 struct)，
+不是檔案上的 record 間距。實測檔案佈局：
+
+```
++0   s32 version   (本 revision = 1)
++4   s32 count     (= 21164)
++8   record[0] ... record[count-1]      每筆固定 997 bytes
+     record +0   s32 item_id
+     record +20  UTF-16LE NUL-terminated display name
+```
+
+**自證。** `8 + 21164 × 997 = 21,100,516`，與
+`server/pmfile.py pat-decrypt` 輸出的檔案大小**完全相等**、無剩餘位元組，
+因此 stride 與起點都不是猜測。重現：
+
+```bash
+python3 server/pmfile.py pat-decrypt Extracted/ui/cfg/itemdata.pat /tmp/itemdata.bin
+# 之後以 stride=997、name @ record+20 (UTF-16LE) 逐筆解析
+```
+
+名稱欄為 UTF-16LE（非 §2 早期假設的 CP932 變長段），因此日文品名可直接讀出，
+例如 `12300051 = チョコスティック`。四武器槽段的實際筆數：
+12.1M 主武器 1339、12.2M 副武器 228、12.3M 近戰 280、12.4M 投擲 229，
+與 §5a2 的分段語義一致。
+
 ## 2d. itemdata 頭部 16B 定案 (十七輪)
 ```
 +0  s32 item_id

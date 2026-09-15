@@ -142,6 +142,126 @@ character template 和 weapon-group materialization trace 也沒有把它寫為 
 在任何一項有足夠證據前，direct Shop request-family handlers 的可驗 frame 只回已知的客戶端安全失敗臂，
 或保持 no-ACK；它**不得**扣款、發物、刪 present，或虛構 award/cache refresh。
 
+## 5b. 第二輪 Wiki 閱讀：四項可交叉驗證的新發現
+
+> 本節每一項都先有 Wiki 觀察，再獨立以 `PaperMan.exe.c` 或 `Extracted/` 驗證。
+> 凡只有 Wiki 單方敘述者一律留在 UNRESOLVED，不寫進本節。
+
+### 5b-1. Assist 事由碼：wire 值已定, 服務端計分規則仍 UNRESOLVED
+
+**Wiki 觀察。** [アシストポイント機能](https://wikiwiki.jp/paperman/アシストポイント機能)
+（2014-09-17 實裝、頁面 last-modified 2015-02-22）列出可獲得 assist 的行為，並區分
+「練習／PVE／單人模式除外」，另記 爆破解除者 2 點、隊友 1 點、占領參與者 2 點、隊友 1 點。
+
+**Native fact / HIGH。** `sub_6750B0`（`PaperMan.exe.c` 約 315689 行起）以
+`*(v123 + 110)` 作 switch，且外層以 `!= 0 && < 0x6Du` 夾住取值範圍，逐一對應到
+UI 字串。這把 Wiki 的文字類別變成**精確的數值編碼**：
+
+| 事由碼 | UI 字串 | Wiki 對應行為 |
+|---|---|---|
+| `1` | `ASSIST_DAMAGE` | 造成 ≥55% 最大 HP 傷害後由他人補刀 |
+| `2` | `ASSIST_AIRSHOT` | 投擲浮空後隊友 air-shot 擊殺 |
+| `3` | `ASSIST_HP` | 治療隊友 ≥20% 最大 HP |
+| `101` (`0x65`) | `ASSIST_BOMB_PLANT` | 設置炸彈 |
+| `102` (`0x66`) | `ASSIST_BOMB_EXPLO` | 爆破成功 |
+| `103` (`0x67`) | `ASSIST_BOMB_DESTROY` | 拆彈成功 |
+| `104` (`0x68`) | `ASSIST_DYE` | スチールモード 染料運送成功 |
+| `105` (`0x69`) | `ASSIST_PULP` | パルプ＆ロール 運送成功 |
+| `106` (`0x6A`) | `ASSIST_PULP_DESTROY` | パルプ＆ロール 解體成功 |
+| `107` (`0x6B`) | `ASSIST_OCCUPY` | 占領據點 |
+| `108` (`0x6C`) | `ASSIST_GOAL` | 足球進球 |
+
+注意編碼**不連續**：1–3 是「跨模式通用」事由，101 起才是模式專屬事由，正好對上 Wiki
+把「全モード」與各模式分節書寫的結構。上界 `< 0x6D` 表示 108 是本 revision 的最後一個
+合法值。
+
+**界線。** 這些只證明 `994 GG_ASSISTPOINT_NOTIFY` 攜帶的事由碼字彙與顯示層行為。
+Wiki 的點數值（2 點／1 點）、55%／20% 門檻、「治療 50% 以上重置 assist 狀態」等
+**是歷史服務規則，不是 client 可證事實**；本 revision 的 client 只顯示事由，不自行計分。
+在取得原服 trace 前不得實作 994 的發送或任何 PG/EXP 結算。
+
+### 5b-2. 名誉ゲージ：9 級為 native 定值
+
+**Wiki 觀察。** [名誉ゲージ](https://wikiwiki.jp/paperman/名誉ゲージ) 稱 gauge 越高、
+戰鬥不能時掉落的道具品質越好，但明言「運氣影響很大」。
+[出現アイテム一覧](https://wikiwiki.jp/paperman/出現アイテム一覧) 另記掉落物分
+Lv1–3、僅「アイテム戦」勾選時出現、且需該玩家至少 1 kill。
+
+**Native fact / HIGH。** 繪製 gauge 的函式以 `L"HonorGauge%d"` 組出貼圖名，
+並有 `if ( n9 == 9 && timeGetTime() % 0x2BC < 0x190 )` 一段：**等級上限就是 9**，
+且第 9 級每 700ms 週期中有 400ms 疊加 `HonorGaugeBlink` 閃爍。
+每一級的 y 座標為 `671 - 32 * (n9 - 1)`，即 9 格等距 32px。
+
+**界線。** 「掉落率隨 gauge 提高」是 Wiki 歷史敘述；native 這段只負責**顯示**。
+掉落表、Lv1–3 效果值（如武器強化 25 秒 200%）皆無 client-side 權威 reader，
+屬 server policy，維持 UNRESOLVED。
+
+### 5b-3. Clan rank：wire 值 → S/A/B/C 的對照已確定
+
+**Wiki 觀察。** [トーナメント](https://wikiwiki.jp/paperman/トーナメント) 描述 clan 對抗賽，
+並稱需 5 名以上成員才能參加、每隊最多 5 名出賽。
+
+**Native fact / HIGH。** clan 資訊繪製函式以 `*(this + n2 + 60)` 決定 rank 貼圖，
+分支是明確的等值比較，因此 wire 上的 rank 欄位編碼可定案：
+
+| 欄位值 | 貼圖 | 意義 |
+|---|---|---|
+| `6` | `CLAN_RANK_S` | S |
+| `5` | `CLAN_RANK_A` | A |
+| `4` | `CLAN_RANK_B` | B |
+| `3` | `CLAN_RANK_C` | C |
+| 其他 | `CLAN_RANK_HYPHEN` | 無／未評級 |
+
+**界線。** 值 0–2 落入 hyphen 分支，但**不代表**它們沒有其他服務端意義；
+評級升降條件、賽程（Wiki 記平日 19/21/23 時、假日 14/21 時）、5 人門檻都屬
+original-service policy。22 個 `*_TNMT_*` opcode 中目前只有 764 落地，
+其餘維持不註冊。
+
+### 5b-4. 試し撃ち 預設裝備 → itemdata.pat 四個確切 item ID
+
+**Wiki 觀察。** [試し撃ちシステム](https://wikiwiki.jp/paperman/試し撃ちシステム)
+（2012-08-16 實裝）記載：試射場限時 2 分、子彈不可補充，且
+**「選擇的武器以外一律回到初期裝備（MP5K・USP9・CU-BK7・HE GRENADE）」**。
+
+**Resource fact / HIGH。** 本輪重新解出 `Extracted/ui/cfg/itemdata.pat`
+（`server/pmfile.py pat-decrypt`；header `version=1, count=21164`）。
+實測 record **stride = 997 bytes**、name 為 record 內 `+20` 起的 UTF-16LE
+NUL-terminated 字串；以此解析 21,164 筆後，總長 `8 + 21164×997 = 21,100,516`
+**恰等於檔案大小**，無剩餘位元組，故切段可自證。四個名稱各自唯一命中：
+
+| Wiki 名稱 | item ID | 段 | 段內位序 |
+|---|---|---|---|
+| `MP5K` | `12100027` | 12.1M 主武器 | 第 17／1339 |
+| `USP9` | `12200026` | 12.2M 副武器 | 第 3／228 |
+| `CU-BK7` | `12300004` | 12.3M 近戰 | **第 1**／280 |
+| `HE GRENADE` | `12400007` | 12.4M 投擲 | **第 1**／229 |
+
+四者精準落在 [`RESOURCES.md` §5a2](RESOURCES.md#5a2-武器改裝件段全圖-十九輪定案)
+既有的四武器槽分段上，形成 Wiki 名稱 → item ID → 段語義的三方互證，也與
+§5c-1 既有的 `MP5K = 12100027` 結論一致。
+
+**明確的反證，必須保留。** 近戰與投擲的預設值剛好是段內最小 ID，但
+主武器段最小是 `12100001 MP5 SD6`、副武器段最小是 `12200003 DE .50 AE`，
+**都不是**預設值。因此「段內最小 ID 即預設裝備」這條看似漂亮的規則**不成立**，
+不可用來推導其他槽位的預設值或新帳號 grant。
+
+**界線。** 這四個 ID 證明的是「試射場把未選武器重設為這組」——一個
+**client-side 場景行為**。它不證明新帳號 inventory、不證明 grant、
+不證明這四件在本 revision 可購買或有價格（本 revision 價格區近乎全零，
+見 [`RESOURCES.md` §2c](RESOURCES.md#2c-itemdata-pat-尾部-721b-完整切段-十六輪21164-條統計錨點定位)）。
+§5-starter grant 的三來源分離結論不因本節改變。
+
+### 5b-5. 兩項「僅 Wiki、刻意不採用」的記錄
+
+- **房間資訊欄位。** [MAP・ルール詳細](https://wikiwiki.jp/paperman/MAP・ルール詳細)
+  列出右鍵房間可見的欄位（鎖、房號、房名、模式、地圖、勝利條件、限時、經過時間／回合數、
+  道具戰、平衡、洗牌、local rule、刀戰、crazy play、no-skill）。其中「個人/隊伍生存、
+  スチール、パルプ＆ロール、足球顯示經過時間；戰術、爆破、占領、PVE 顯示回合數」是**模式分類**線索，
+  與既有 `modeIndex` 對照相容，但房列表 wire 欄位仍以 `LAYOUTS.md` 為準，不據此增欄。
+- **経験値表。** [階級関連](https://wikiwiki.jp/paperman/階級関連) 有 Lv1→2 需 1000、
+  累計 2500/4000/5500… 的完整表與各級獎勵。**不採用**：這是 2017-03-30 的歷史頁，
+  且升級獎勵屬 present grant 政策；本 revision 無 client-side EXP 表 reader 可交叉驗證。
+
 ## 6. 本輪瀏覽頁面（來源索引）
 
 本索引記錄已閱讀的主題入口，避免日後把搜尋摘要誤當完整頁面內容；個別頁的 last-modified
@@ -151,6 +271,22 @@ character template 和 weapon-group materialization trace 也沒有把它寫為 
 - 商店與取得：[通常ショップ武器一覧](https://wikiwiki.jp/paperman/通常ショップ武器一覧)、[ペーパチ詳細](https://wikiwiki.jp/paperman/ペーパチ詳細)、[ペーパチ CASH](https://wikiwiki.jp/paperman/ペーパチCASH詳細)、[ペーパチ PG](https://wikiwiki.jp/paperman/ペーパチPG詳細)、[福袋詳細](https://wikiwiki.jp/paperman/福袋詳細)、[ペーパーガッチャン詳細](https://wikiwiki.jp/paperman/ペーパーガッチャン詳細)、[ペーパダスEX詳細](https://wikiwiki.jp/paperman/ペーパダスEX詳細)、[パッケージ詳細](https://wikiwiki.jp/paperman/パッケージ詳細)、[シリアルコード詳細](https://wikiwiki.jp/paperman/シリアルコード詳細)
 - 持久化與選擇：[ひよこ用/ゲーム起動編](https://wikiwiki.jp/paperman/ひよこ用/ゲーム起動編)、[階級関連](https://wikiwiki.jp/paperman/階級関連)、[ペーパースロット詳細](https://wikiwiki.jp/paperman/ペーパースロット詳細)、[称号一覧](https://wikiwiki.jp/paperman/称号一覧)、[ラジオチャット一覧](https://wikiwiki.jp/paperman/ラジオチャット一覧)、[ペーパズル](https://wikiwiki.jp/paperman/ペーパズル)、[スキル一覧](https://wikiwiki.jp/paperman/スキル一覧)、[ペーパズル合成](https://wikiwiki.jp/paperman/ペーパズル/合成)、[ペーパズルリスト](https://wikiwiki.jp/paperman/ペーパズル/リスト)、[キャラクター一覧](https://wikiwiki.jp/paperman/キャラクター一覧)、[リサイクルシステム](https://wikiwiki.jp/paperman/リサイクルシステム)、[武器耐久値情報](https://wikiwiki.jp/paperman/武器耐久値情報)
 - 對戰／社交：[MAP・ルール詳細](https://wikiwiki.jp/paperman/MAP・ルール詳細)、[出現アイテム一覧](https://wikiwiki.jp/paperman/出現アイテム一覧)、[名誉ゲージ](https://wikiwiki.jp/paperman/名誉ゲージ)、[クエストシステム](https://wikiwiki.jp/paperman/クエストシステム)、[クラン](https://wikiwiki.jp/paperman/クラン)、[PvEモード](https://wikiwiki.jp/paperman/PvEモード)、[アシストポイント機能](https://wikiwiki.jp/paperman/アシストポイント機能)、[戦闘中のキャラ情報](https://wikiwiki.jp/paperman/戦闘中のキャラ情報)、[武器移動速度](https://wikiwiki.jp/paperman/武器移動速度)
+
+**第二輪（本節 §5b 的來源）。** 服務已於 2016-12-26 12:00 終止（首頁公告），
+故全站均為歷史資料，日期差異必須逐頁檢查：
+
+- [トーナメント](https://wikiwiki.jp/paperman/トーナメント)（2013-10-18）— clan 對抗賽賽制、
+  5 人門檻、各曜日模式與賽程；對應 756–777 的 22 個 `*_TNMT_*` opcode。
+- [試し撃ちシステム](https://wikiwiki.jp/paperman/試し撃ちシステム)（2022-04-15 編輯，
+  描述 2012-08-16 實裝）— 2 分限時、不可補彈、預設裝備四件組。
+- [アシストポイント機能](https://wikiwiki.jp/paperman/アシストポイント機能)（2015-02-22）—
+  assist 行為分類，對應 `sub_6750B0` 的事由碼。
+- [よくある質問や答え](https://wikiwiki.jp/paperman/よくある質問や答え)（2026-09-06 仍在編輯）—
+  PG 取得規則（擊殺 12PG、拾取 8PG）、連續 kill 10 秒判定、解析度固定 1024×768、
+  無墜落傷害、友軍傷害為零但特殊效果仍作用。**全屬歷史 service/client 敘述**，
+  僅列為後續查證線索，未採用。
+- [用語集](https://wikiwiki.jp/paperman/用語集)、[MAP・ルール詳細](https://wikiwiki.jp/paperman/MAP・ルール詳細)（2015-10-23）—
+  房間資訊欄位與模式抽出／過濾器行為（見 §5b-5）。
 
 ## 7. 下一輪的精確交叉驗證順序
 

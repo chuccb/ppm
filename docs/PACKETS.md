@@ -1123,6 +1123,12 @@ handler 不在 dispatcher 也不在 CLobbyShop — 在**轉蛋動畫控制器**
 937 AI_FEVER_END: u8; 942 獎勵選擇開始: u8+s32+u8×2+s32×2
 960 DROPWEAPON_DESTROY: u8+u16 (掉落武器消失)
 994 GG_ASSISTPOINT: u8×2+s32+u8×2+s32×3 (助攻點數 → cond36 事件源!)
+    └ 事由碼字彙 (sub_6750B0, 外層 guard `!=0 && <0x6D`):
+      1=ASSIST_DAMAGE 2=ASSIST_AIRSHOT 3=ASSIST_HP (跨模式)
+      101=BOMB_PLANT 102=BOMB_EXPLO 103=BOMB_DESTROY 104=DYE
+      105=PULP 106=PULP_DESTROY 107=OCCUPY 108=GOAL (模式專屬)
+      編碼刻意不連續; 108 為本 revision 合法上界。點數值與門檻是
+      service policy (Wiki 歷史值), 非 client 事實 — 見 WIKI_MECHANICS.md §5b-1。
 155/156 Y_UDP_HOLE_INF: catalog names only. `sub_595E80`'s verified switch has no 155/156 case; their transport role is **UNRESOLVED**.
 無 payload 通知: 766/778/811/833/889/908 (純觸發)
 ```

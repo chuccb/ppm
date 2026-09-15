@@ -3,6 +3,19 @@
 從 `PaperMan.exe.c` (Hex-Rays 9.4 IDA 導出, 81 萬行) 逆向出完整封包協議，
 並據此重建伺服器端 SQLite 資料庫。
 
+> **IDA 導出物版本說明（2026-09）。** `main` 分支上傳了一份新的 `PaperMan.exe.c`。
+> 已逐函數比對過：兩份的**函數集合完全相同**（17,830 個具名函數、19,835 個
+> function body，無新增亦無遺失），差異只在 forward-declaration 區塊與
+> Hex-Rays 的變數命名；新版少了約 26,000 行純宣告，另有約 247 行是重新命名後
+> 的字串常數（如 `PINFO_EMBLEM_%d`、`ITEM_PLAY_BUTTON_0%d`）。
+> **結論：兩份在反編譯內容上等價，既有以行號/函數名為錨點的分析全部仍然成立。**
+>
+> Release 附的 `PaperMan.exe.lst`（1.92 GB，IDA 反組譯清單）在本工作環境**無法取得** —
+> GitHub release asset 會轉址到 `release-assets.githubusercontent.com`，該網域在此沙箱
+> 被封鎖（`gh api` 走 API 網域可用，但資產下載網域不可用）。因此本輪的所有交叉驗證
+> 均以 `PaperMan.exe.c` 與 `Extracted/` 為準；LST 專屬的資訊（精確指令、段位址、
+> 完整 xref 圖）**尚未納入**，待可下載時再補。
+
 ## 目錄
 
 | 路徑 | 內容 |
@@ -21,6 +34,7 @@
 | `db/smoke_test.py` | 模擬 登入→建角→購物→背包分頁→開房→結算→好友/訊息/任務/公會 全流程的 DB 讀寫測試 |
 | `db/paperman.db` | 開發模式的預設 SQLite 資料庫（不存在時由 C# server 自動建立） |
 | `server/packet.py` | wire 協議 Packet 參考實作 (Python, 逐函數對應反編譯), 含自測 |
+| `server-cs/tools/dump_itemdata.py` | 解出 `Extracted/ui/cfg/itemdata.pat` 的 21,164 筆 item id ↔ 名稱 (stride 997B 自證); 支援 `--name` / `--id` / `--band` 查詢 |
 | `server-cs/` | **C# 14 / .NET 10 伺服器** (協定層 + login/channel TCP + source-proven UDP-private 19→20 control + SQLite + 自測), 見 `server-cs/README.md` |
 
 ## 快速開始
