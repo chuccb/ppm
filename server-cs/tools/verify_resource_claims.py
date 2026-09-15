@@ -270,6 +270,90 @@ def main() -> None:
         shipped = {path.name for path in characters.rglob("Angry_*") if path.is_dir()}
         check("pendant folders that ship", sorted(shipped), ["Angry_Type13"])
 
+    # RESOURCES.md 5d-20: the three skill tables. The band count is checked
+    # because 5d-4 previously claimed five bands (-2..+2) when there are six,
+    # and the axis order is checked because sub_7DBDA0 hard-codes it.
+    levtable = decrypt(EXTRACTED / "ui" / "system" / "ItemAbilityLevTable.xml")
+    if levtable is None:
+        skipped.append("ItemAbilityLevTable.xml")
+    else:
+        text = levtable.decode("utf-8", "replace")
+        bands = re.findall(r'<Lev start="([^"]+)" end="([^"]+)" id="(\d+)" '
+                           r'lev_value="([^"]+)">', text)
+        check("ItemAbilityLevTable bands", len(bands), 6)
+        check("ItemAbilityLevTable band boundaries",
+              [(start, end, ident, lev) for start, end, ident, lev in bands],
+              [("-1000", "-10", "0", "-2"), ("-9", "-5", "1", "-1"),
+               ("-4", "+4", "2", "0"), ("+5", "+9", "3", "+1"),
+               ("+10", "+14", "4", "+2"), ("+15", "1000", "5", "+3")])
+        # The lev_value=0 band is what makes "1-4 points do nothing" true.
+        zero = re.search(r'lev_value="0">(.*?)</Lev>', text, re.S)
+        check("ItemAbilityLevTable neutral band is all-none",
+              sorted(set(re.findall(r'operation="(\w+)"', zero.group(1))))
+              if zero else None,
+              ["none"])
+        check("ItemAbilityLevTable operations are the four named functors",
+              sorted({op for op in re.findall(r'operation="(\w+)"', text)
+                      if op != "none"}),
+              ["MINUS", "PERCENT_MINUS", "PERCENT_PLUS", "PLUS"])
+
+    colortable = decrypt(EXTRACTED / "ui" / "system"
+                         / "ItemAbilityEffectColorTable.xml")
+    if colortable is None:
+        skipped.append("ItemAbilityEffectColorTable.xml")
+    else:
+        text = colortable.decode("utf-8", "replace")
+        # The colour rows carry id 3/4/5, i.e. the *positive* lev_value bands of
+        # the table above: same id space, which is why there are only three.
+        check("ItemAbilityEffectColorTable Lev ids",
+              re.findall(r'<Lev_\d+ id="(\d+)"', text), ["3", "4", "5"])
+        check("ItemAbilityEffectColorTable has a Penalty row",
+              "<Penalty" in text, True)
+
+    nametable = decrypt(EXTRACTED / "ui" / "system"
+                        / "ItemAbilityEffectNameTable.xml")
+    if nametable is None:
+        skipped.append("ItemAbilityEffectNameTable.xml")
+    else:
+        text = nametable.decode("utf-8", "replace")
+        rows = re.findall(r'<Lev ThirdPersonView="([^"]*)" '
+                          r'FirstPersonView="([^"]*)" LevValue="([^"]*)"', text)
+        check("ItemAbilityEffectNameTable rows", len(rows), 15)
+        check("ItemAbilityEffectNameTable third-person particle names",
+              [third for third, _, _ in rows],
+              [f"Ptcl_ItemEffect{index}" for index in range(1, 16)])
+        # Every first-person field is empty: the effect is third-person only.
+        check("ItemAbilityEffectNameTable first-person fields are all empty",
+              sorted({first for _, first, _ in rows}), [""])
+
+    # The 5x5 system-name matrix is symmetric and holds 15 distinct names; two
+    # of them differ from the 2015-05 wiki, which is how the snapshot is dated.
+    axes = ["speed", "agility", "hp", "defence", "hit"]
+    namematrix = decrypt(EXTRACTED / "ui" / "ItemAbilityNameTAble.xml")
+    if namematrix is None:
+        skipped.append("ItemAbilityNameTAble.xml")
+    else:
+        text = namematrix.decode("utf-8", "replace")
+        matrix: dict[str, dict[str, str]] = {}
+        for row in axes:
+            found = re.search(r"<" + row + r"\s+((?:\w+=\"[^\"]*\"\s*)+)/?>", text)
+            if found is None:
+                continue
+            matrix[row] = {
+                key: value.replace("&#xD;&#xA;", "").replace("&amp;", "&").strip()
+                for key, value in re.findall(r'(\w+)="([^"]*)"', found.group(1))}
+        check("ItemAbilityNameTAble rows", sorted(matrix), sorted(axes))
+        if len(matrix) == len(axes):
+            check("ItemAbilityNameTAble is symmetric",
+                  [(row, column) for row in axes for column in axes
+                   if matrix[row].get(column) != matrix[column].get(row)], [])
+            check("ItemAbilityNameTAble distinct names",
+                  len({matrix[row][column] for row in axes for column in axes}), 15)
+            check("ItemAbilityNameTAble speed x hit (wiki says 速戦系)",
+                  matrix["speed"]["hit"], "Hit&Run系")
+            check("ItemAbilityNameTAble hp x hit (wiki says 応射系)",
+                  matrix["hp"]["hit"], "対応射撃系")
+
     # Every datarevision.txt must agree: Extracted/ is one coherent snapshot.
     revisions = {path.read_text(encoding="utf-8", errors="replace").strip()
                  for path in EXTRACTED.rglob("datarevision.txt")}

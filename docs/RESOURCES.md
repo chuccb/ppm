@@ -565,7 +565,9 @@ reader-level layout.
 | 檔案 | 內容 | 對應 opcode |
 |---|---|---|
 | map_StartIndex.xml | **官方模式名表** (modeIndex↔modeName) | 111 rule |
-| ItemAbilityLevTable.xml | 能力 lev 效果換算 (pmFile 加密!) | 205 f32 能力值 |
+| ItemAbilityLevTable.xml | skill 門檻與效果換算，**6 段** `lev_value` −2..+3 (pmFile 加密; §5d-20) | 205 f32 能力值 |
+| ItemAbilityEffectColorTable.xml | skill 特效顏色 (`Lev_1/2/3` 的 id=3/4/5，與上表共用 id 空間) + `AlphaValue` + `Penalty`；明文 | — (純顯示) |
+| ItemAbilityEffectNameTable.xml | skill 粒子名 `Ptcl_ItemEffect1..15`，`FirstPersonView` 全空＝僅第三人稱；明文 | — (純顯示) |
 | AI/AiMultiCompensation.xml | AI 協力模式過關獎勵 (難度×等級→物品) | AI 模式結算 |
 | AI/gamecenter_map_info.xml | 射擊館關卡 (盾 HP/Fever/砲位) | 479 GAMECENTER |
 | AI/BotWave/BotEnemy/Scenario | AI 波次/敵人/劇本 (easy/intelligent) | AI 對戰 |
@@ -767,14 +769,115 @@ XML 內每個標籤都能在 native 找到對應的 reader 字串
   以及 `ValueRevision_<軸>_<等級>` 的逐軸數值修正。
 
 搭配同目錄的 `ItemAbilityLevTable.xml`（pmFile 加密，已解出）可得
-**最終效果換算**：以 `lev_value` −2…+2 分段，
-例如 `+1` 段為 speed `PERCENT_PLUS 8`、agility `PERCENT_PLUS 15`、
-hp `PLUS 8`、defence `PERCENT_MINUS 10`、hit `PERCENT_MINUS 30`，
-清楚呈現「強化速度／機動的同時犧牲防禦與命中」的設計取捨。
+**最終效果換算**。⚠ **本節先前寫「以 `lev_value` −2…+2 分段」是錯的**：
+實際檔案有**六**段 `id=0..5` / `lev_value` **−2…+3**（含 `0` 的無效果段）。
+完整分段與 native 讀取語義見 §5d-20。
 
 **界線。** 這些是 **client 端顯示與預覽**用的換算表。實際生效的
 能力值、是否由 server 覆核、以及 255 NewSkillProfile 的持久化內容，
 仍以 native reader 與封包為準；不得用本表回推 server 應發的數值。
+
+## 5d-20. Skill 三表閉環：門檻、效果、系統名與特效（本輪全解）
+
+`ItemAbilityLevTable.xml`（pmFile 加密）、`ItemAbilityEffectColorTable.xml`、
+`ItemAbilityEffectNameTable.xml`（後兩者**明文**）是同一個 skill 子系統的三張表，
+本輪三者的 native reader 全部定位，且彼此的索引空間可互相印證。
+
+### 門檻與效果（`CItemAbilityLevTable`，root `SkillAbilityTable`）
+
+載入：`CItemAbilityLevTable::possible_ctor_or_dtor` @ `0x7DC090`
+→ `sub_717E50(L"system/ItemAbilityLevTable.xml")` → `pmFile` 解密
+→ `sub_704680(..., L"SkillAbilityTable")` → parser `sub_7DC2F0` @ `0x7DC2F0`。
+
+parser 逐 `<Lev>` 讀 `start` / `end` / `id` / `lev_value`，再逐子節點讀
+`value` / `nickname` / `name` / `operation`。**六段**（Fact / HIGH）：
+
+| id | lev_value | start..end（技能點區間） |
+|---:|---:|---|
+| 0 | −2 | −1000 .. −10 |
+| 1 | −1 | −9 .. −5 |
+| 2 | 0 | −4 .. +4（五軸全為 `none`＝無效果） |
+| 3 | +1 | +5 .. +9 |
+| 4 | +2 | +10 .. +14 |
+| 5 | +3 | +15 .. 1000 |
+
+**`operation` 是具名 functor，不是字串比較。** `sub_7DC6D0` 把它映為
+`PERCENT_MINUS→1 / PERCENT_PLUS→0 / MINUS→3 / PLUS→5 / 其他→2`，
+對應 RTTI 中確實存在的 `CAbilityOperatorPersentPlus` (`sub_7DCDB0`)、
+`CAbilityOperatorPersentMinus` (`sub_7DCDE0`)、`CAbilityOperatorPlus` (`sub_7DCE10`)、
+`CAbilityOperatorMinus` (`sub_7DCE30`) 四個 `CAbilityOperator` 子類。
+
+**軸索引由 `sub_7DBDA0` 固定為 `speed=0 / agility=1 / hp=2 / defence=3 / hit=4`**
+（不認得的軸回傳 6）。parser 的 `if (i[0] <= 4u)` 只接受 0..4，
+且物件以 `eh vector constructor iterator(this+2, 0x10u, 5, ...)` 配置**恰好 5 個**
+容器 —— **五軸是 native 寫死的結構事實**，不是由資源檔筆數推得。
+
+### 顏色表與效果表共用同一個 `id` 空間（本輪關鍵交叉點）
+
+`CItemAbilityEffectColorTable::possible_ctor_or_dtor` @ `0x7D9D60` 讀
+`system/ItemAbilityEffectColorTable.xml`，root 是 **`ItemEffectColorTable`**
+（與檔名不同，native 以 root 名取節點）；parser `sub_7D9D90` 分三種節點：
+
+* `Lev_*`：讀 `id`，再以 **`this + 4*id + 8/32/56/80/104`** 寫入五軸顏色。
+  檔案的 `Lev_1/2/3` 其 `id` 分別是 **3/4/5** —— 正好是上表
+  `lev_value +1/+2/+3` 的 id。**兩張表是同一個 id 索引空間**，
+  這解釋了為何顏色只有三筆：**只有正向三段才有特效顏色**。
+* `AlphaValue`：固定迴圈 `j < 7` 讀 7 個值，但檔案只提供 `Lev1..Lev6`；
+  取值器 `sub_7DA150` 對 `n7 >= 7` 回 0、`n7 < 0` 回 `this+131`（即 Penalty alpha）。
+* `Penalty`：`color` + `alpha`，供負向段（懲罰）使用。
+
+取色器 `sub_7DA0D0` 有 `if (n5 >= 5) return false` 的軸上限，
+與五軸結構一致；並以 `r+g+b > 0.01` 判斷「這一格是否真的有顏色」。
+
+`ItemAbilityEffectNameTable.xml`（root 同名）由 `sub_7DA190` 之後的段落讀取，
+取 `ThirdPersonView` / `FirstPersonView` / `LevValue`：**15 筆
+`Ptcl_ItemEffect1..15`，`FirstPersonView` 全為空字串** ——
+即 skill 粒子特效**只有第三人稱視角會顯示**（Fact / HIGH，第一人稱欄確實空白）。
+
+### 與 Wiki [スキル一覧](https://wikiwiki.jp/paperman/スキル一覧) 的逐格比對
+
+Wiki 該頁 last-modified **2015-05-04**。比對結果**不是簡單的「相符」**，
+必須分三類陳述（這正是為何不可直接採信任一方）：
+
+| 類別 | 筆數 | 內容 |
+|---|---:|---|
+| **完全一致** | 8/19 | `speed` −1/+1/+2、`hp` −1/+1/+2、`hit` +1/+2。Wiki 的 `紙鶴(+8%)`、`糊(+8)`、`童画本(-30%)` 等括號數值與檔案逐格相同。 |
+| **同絕對值、正負號相反** | 5/19 | 整條 `defence` 軸。檔案 `+1` 段是 `PERCENT_MINUS 10`，Wiki 寫 `厚紙(+10%)`。 |
+| **數值不同** | 6/19 | 整條 `agility` 軸（檔 `+1`=15%，Wiki=10%；`+3` 檔 35% vs Wiki 22%），加 `hit` −1（檔 60% vs Wiki 50%）。 |
+
+**符號差異有一個可驗證的解釋，不是矛盾。** Wiki 明確定義「敏捷／集中
+**数値が小さいほど**早く／ブレ幅が小さい」，即這兩軸的原始參數是
+**越小越好**；檔案存的是**引擎參數的增減**，Wiki 寫的是**對玩家的利弊**。
+`defence` 同理（檔案存的是「受傷倍率」而非「防禦力」）。
+`speed`/`hp` 兩軸「越大越好」，於是兩邊符號一致 —— 這正好**只有這兩軸完全吻合**，
+自洽。剩下的**數值差（agility、hit −1）則是真正的版本差異**，不可調和。
+
+**技能點門檻是本輪第二條被二進位證實的 Wiki 敘述。** Wiki 寫
+「スキルは**5ポイント毎**に発動、1～4ポイントでは一切の効果はありません」，
+並列出 `～-10 / -9～-5 / -4～0～+4 / +5～+9 / +10～+14 / +15～` 六段。
+檔案的六段邊界 **逐格完全相同**（含 −4..+4 為無效果段）。
+這是**定性規則與全部六組邊界同時吻合**，可視為 Fact（客戶端顯示層）。
+
+### 系統名矩陣：另一個可定年的版本差
+
+`ui/ItemAbilityNameTAble.xml`（root `AbilityNameSystem_JP`，注意原廠檔名
+`TAble` 拼寫）是 5×5 複合系統名矩陣，實測**完全對稱**（25 格、15 個相異名稱）。
+與 Wiki 的「スキル系統」表比對：**13/15 相同**，兩處不同：
+
+| 座標 | 本 revision 檔案 | Wiki (2015-05-04) |
+|---|---|---|
+| speed×hit | **`Hit&Run系`** | `速戦系` |
+| hp×hit | **`対応射撃系`** | `応射系` |
+
+兩處都是「同義改名」（`Hit&Run系`→`速戦系` 是外來語改為漢語、
+`対応射撃系`→`応射系` 是縮寫），方向一致，**指向本 extraction 早於 2015-05 的 Wiki 版本**。
+這與 §5f 的版本考古互相參照，且**比對 15 個名稱比對單一檔案時間戳更可靠**。
+
+**界線（不變）。** 以上全部是 **client 端顯示／預覽／特效**用表。
+`sub_7DA0D0` / `sub_7DA150` 的消費端是顏色與 alpha，`Ptcl_*` 是粒子名。
+**實際戰鬥數值是否由 server 覆核，仍無任何 client 證據**，
+比照 §5d-16 的 Rocket/Plasma/Laser 處理：**可讀出 ≠ 有權威**，
+不得據此實作伺服器端的能力值計算或 255 profile 的效果發放。
 
 ## 5d-4b. AI/PvE 過關獎勵：itemnumber 可解析為具名獎品
 
