@@ -6,7 +6,7 @@ import {
   cfbEncrypt,
   encryptBlock,
   expandKey,
-} from "../src/codec/aes.ts";
+} from "../src/aes.ts";
 
 const hex = (bytes: Uint8Array): string => Buffer.from(bytes).toString("hex").toUpperCase();
 const unhex = (text: string): Uint8Array => Uint8Array.from(Buffer.from(text, "hex"));
@@ -68,8 +68,8 @@ describe("packet-key vectors (docs/PACKETS.md §1.4)", () => {
   test("both vectors imply the same keystream", () => {
     const p1 = unhex("000102030405060708090A0B0C0D0E0F");
     const p2 = new Uint8Array(Buffer.from("PaperMan-Packet!", "latin1"));
-    const ks1 = cfbEncrypt(PACKET_ROUND_KEYS, p1).map((v, i) => v ^ p1[i]!);
-    const ks2 = cfbEncrypt(PACKET_ROUND_KEYS, p2).map((v, i) => v ^ p2[i]!);
+    const ks1 = cfbEncrypt(PACKET_ROUND_KEYS, p1).map((v: number, i: number) => v ^ p1[i]!);
+    const ks2 = cfbEncrypt(PACKET_ROUND_KEYS, p2).map((v: number, i: number) => v ^ p2[i]!);
     expect(hex(ks1)).toBe(hex(ks2));
   });
 

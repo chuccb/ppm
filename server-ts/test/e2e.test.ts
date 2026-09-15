@@ -3,14 +3,13 @@
  * This is the exchange a real client performs on startup.
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import { FrameStream, encodeFrame } from "../src/codec/frame.ts";
-import { PacketWriter, type PacketReader } from "../src/codec/packet.ts";
-import { Op } from "../src/codec/opcodes.ts";
-import { Store } from "../src/db/schema.ts";
-import { listen } from "../src/net/listener.ts";
-import { LoginResult, type ServerEntry } from "../src/handlers/login.ts";
+import { Packet, PacketStream, type Reader } from "../src/packet.ts";
+import { Op } from "../src/opcodes.ts";
+import { Store } from "../src/store.ts";
+import { listen } from "../src/session.ts";
+import { Result, type GameServer } from "../src/login.ts";
 
-const servers: readonly ServerEntry[] = [
+const servers: readonly GameServer[] = [
   {
     id: 1,
     name: "PaperMan",
@@ -46,8 +45,8 @@ afterAll(() => {
 
 /** Minimal client: collects decoded packets, lets a test await the next one. */
 function connectClient() {
-  const stream = new FrameStream();
-  const inbox: PacketReader[] = [];
+  const stream = new PacketStream();
+  const inbox: Reader[] = [];
   let notify: (() => void) | null = null;
 
   const ready = Bun.connect({
@@ -62,7 +61,7 @@ function connectClient() {
     },
   });
 
-  const next = async (): Promise<PacketReader> => {
+  const next = async (): Promise<Reader> => {
     for (let waited = 0; waited < 2000; waited += 10) {
       const reader = inbox.shift();
       if (reader) return reader;
@@ -78,9 +77,9 @@ function connectClient() {
   return { ready, next };
 }
 
-function loginRequest(account: string, password: string): PacketWriter {
+function loginRequest(account: string, password: string): Packet {
   const high = BigInt((811034967 ^ 0xb1a9d7c7) >>> 0);
-  return new PacketWriter(Op.GL_LOGIN_REQ)
+  return new Packet(Op.GL_LOGIN_REQ)
     .str(account)
     .str(password)
     .u64((high << 32n) | 0xf1e1ab0en)
@@ -103,10 +102,10 @@ describe("live login over TCP", () => {
     const socket = await client.ready;
     await client.next(); // 694
 
-    socket.write(encodeFrame(loginRequest("alice", "hunter2")));
+    socket.write(loginRequest("alice", "hunter2").encode());
     const ack = await client.next();
     expect(ack.opcode).toBe(Op.GL_LOGIN_ACK);
-    expect(ack.s32()).toBe(LoginResult.Success);
+    expect(ack.s32()).toBe(Result.Success);
     expect(ack.s32()).toBeGreaterThan(0); // user_no
     socket.end();
   });
@@ -116,10 +115,10 @@ describe("live login over TCP", () => {
     const socket = await client.ready;
     await client.next();
 
-    socket.write(encodeFrame(loginRequest("alice", "wrong")));
+    socket.write(loginRequest("alice", "wrong").encode());
     const ack = await client.next();
     expect(ack.opcode).toBe(Op.GL_LOGIN_ACK);
-    expect(ack.s32()).toBe(LoginResult.BadCredentials);
+    expect(ack.s32()).toBe(Result.BadCredentials);
     socket.end();
   });
 
@@ -128,15 +127,15 @@ describe("live login over TCP", () => {
     const socket = await client.ready;
     await client.next();
 
-    const first = encodeFrame(loginRequest("alice", "wrong"));
-    const second = encodeFrame(loginRequest("alice", "hunter2"));
+    const first = loginRequest("alice", "wrong").encode();
+    const second = loginRequest("alice", "hunter2").encode();
     const merged = new Uint8Array(first.length + second.length);
     merged.set(first);
     merged.set(second, first.length);
     socket.write(merged);
 
-    expect((await client.next()).s32()).toBe(LoginResult.BadCredentials);
-    expect((await client.next()).s32()).toBe(LoginResult.Success);
+    expect((await client.next()).s32()).toBe(Result.BadCredentials);
+    expect((await client.next()).s32()).toBe(Result.Success);
     socket.end();
   });
 });

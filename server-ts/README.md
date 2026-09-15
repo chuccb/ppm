@@ -15,7 +15,7 @@ reverse-engineering notes in [`../docs/`](../docs/).
 
 ```bash
 bun install
-bun test          # 46 tests
+bun test          # 48 tests
 bun run typecheck # tsc --noEmit, clean
 bun start         # login server on 0.0.0.0:40200
 ```
@@ -25,16 +25,20 @@ Environment: `PM_HOST`, `PM_PORT`, `PM_DB`, `PM_ADVERTISE_HOST`,
 
 ## Layout
 
+Seven files, no subdirectories. See [STYLE.md](STYLE.md) for the conventions.
+
 ```
-src/codec/aes.ts      AES-128 + CFB-128, the client's cipher
-src/codec/packet.ts   payload reader/writer primitives
-src/codec/frame.ts    8-byte header, encryption pipeline, stream reassembly
-src/codec/opcodes.ts  676-opcode catalogue, loaded from db/packets.tsv
-src/db/schema.ts      accounts on bun:sqlite
-src/handlers/login.ts 694 -> 682 -> 681
-src/net/session.ts    per-connection dispatch
-src/net/listener.ts   Bun.listen glue
+src/packet.ts    the whole wire format: header, cipher, reader, writer, reassembly
+src/aes.ts       AES-128 + CFB-128, the client's cipher
+src/opcodes.ts   676-opcode catalogue, loaded from db/packets.tsv
+src/store.ts     accounts on bun:sqlite
+src/login.ts     GL_ACCOUNTCONNSUCC -> GL_LOGIN_REQ -> GL_LOGIN_ACK
+src/session.ts   per-connection dispatch, and Bun.listen
+src/main.ts      entry point
 ```
+
+Builders are named after the opcode they produce, so grepping an official name
+from `docs/PACKETS.md` lands on the code that implements it.
 
 ## Protocol facts this implements
 

@@ -8,7 +8,7 @@
  * what an independent reimplementation should agree on.
  */
 import { describe, expect, test } from "bun:test";
-import { PacketWriter } from "../src/codec/packet.ts";
+import { Packet } from "../src/packet.ts";
 
 const repoRoot = new URL("../../", import.meta.url).pathname;
 
@@ -42,7 +42,7 @@ p.write_raw(b'\\x00' * 24)
 print(bytes(p.buf).hex())
 `);
 
-    const packet = new PacketWriter(682)
+    const packet = new Packet(682)
       .str("alice")
       .str("token123")
       .u64(0x1122334455667788n)
@@ -63,7 +63,7 @@ a.write_s32(30); a.write_u16(100); a.write_s32(-1)
 print(bytes(a.buf).hex())
 `);
 
-    const packet = new PacketWriter(200)
+    const packet = new Packet(200)
       .s8(1)
       .s32(0)
       .s32(3)
@@ -89,7 +89,7 @@ p.write_wstr('紙片人')
 print(bytes(p.buf).hex())
 `);
 
-    const packet = new PacketWriter(1)
+    const packet = new Packet(1)
       .s8(-128)
       .s16(-32768)
       .s32(-2147483648)

@@ -1,5 +1,5 @@
 /**
- * Persistence layer on Bun's native `bun:sqlite` (SQLite 3.53.4).
+ * Accounts, on Bun's native `bun:sqlite` (SQLite 3.53.4).
  *
  * Scope note: this stores only what the server itself owns — accounts and
  * sessions. Game content (items, maps, quests) is read from the client

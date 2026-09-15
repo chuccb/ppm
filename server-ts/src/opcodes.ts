@@ -9,7 +9,7 @@
 
 import { readFileSync } from "node:fs";
 
-const TSV_PATH = new URL("../../../db/packets.tsv", import.meta.url);
+const TSV_PATH = new URL("../../db/packets.tsv", import.meta.url);
 
 function loadCatalogue(): ReadonlyMap<number, string> {
   const raw = readFileSync(TSV_PATH, "utf8");

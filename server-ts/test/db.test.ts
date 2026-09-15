@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { Store } from "../src/db/schema.ts";
+import { Store } from "../src/store.ts";
 
 describe("store", () => {
   test("runs on the pinned SQLite version", () => {
