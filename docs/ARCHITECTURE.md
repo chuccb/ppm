@@ -115,6 +115,9 @@ uses cancellation and disposes its socket only after its receive loop exits.
   gameplay policy。各 `Handlers.*` 檔以協定子系統切分（Auth、Channel、Lobby、
   Room、Join、BattleRelay、BattleObjects、Shop、Stats、Clan、Quest、Friend、
   Voice、Warehouse、Master、GameCenter、Ai），使 opcode 的處理位置可直接搜尋。
+  Shop/Stats/Friend/Clan/Quest/Voice/Warehouse/GameCenter 的已註冊 request 均已拆為
+  direct canonical family source；唯一無官方 request token 的 Shop opcode 206 保持為
+  顯式 `RawOpcode206`，而非臆造 GS 名稱。
   Auth 與 Channel 的每個已註冊 request 也各有單一 canonical opcode-family
   source file：例如 `Handlers.GL_LOGIN.cs` / `GL_LOGIN_REQ`、
   `Handlers.PM_UDPSTART.cs` / `PM_UDPSTART_REQ`，並分別由

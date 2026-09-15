@@ -139,7 +139,7 @@ character template 和 weapon-group materialization trace 也沒有把它寫為 
 | 5 | sell/destroy/recycle/durability repair | Wiki 顯示有多種不可逆經濟行為；native full service route 尚缺。 | exact request grammar、eligibility、value/currency account update、failure ACK、atomic transaction. |
 | 6 | title/boost/ability/crosshair/voice/puzzle | 多個持久化域已在 client 資源分離；部分 response 固定長度但 semantic 不足。 | item entitlement、slot exclusivity、expiry、battle application，以及 full response producer traces。 |
 
-在任何一項有足夠證據前，`Handlers.Shop.cs` 的可驗 frame 只回已知的客戶端安全失敗臂，
+在任何一項有足夠證據前，direct Shop request-family handlers 的可驗 frame 只回已知的客戶端安全失敗臂，
 或保持 no-ACK；它**不得**扣款、發物、刪 present，或虛構 award/cache refresh。
 
 ## 6. 本輪瀏覽頁面（來源索引）

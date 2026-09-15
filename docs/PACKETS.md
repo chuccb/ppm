@@ -2398,7 +2398,7 @@ reward state.
 
 **Implementation status, not a native-server fact.** For the fully recovered
 request grammars 204/468, 206, 208, 296, 310, 356, 358, 453, 470, 698, 700,
-702, 780, and 900, `Handlers.Shop` now suppresses even the failure ACK when
+702, 780, and 900, the direct Shop request-family handlers now suppress even the failure ACK when
 length, count-derived extent, NUL termination, mandatory negative variant, or
 direct opcode-routing range is wrong. These are defensive emulator boundaries;
 they do not claim that the historical server used exactly the same rejection
