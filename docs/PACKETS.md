@@ -2037,7 +2037,7 @@ wire 群組5 = [47]=multi(13), [48]=ultra(14), [49]=z(15), [50]=k(16),
       的 level 僅參考), [27]=cond1 計數, [52]=累計遊玩秒(cond20),
       [53..60]=各模式完成場次 (sub_923BF0 模式id對照), [61..63] 未引用
 ```
-→ **舊 C# 佈局把 wins 放 [34] 全體錯位 5 欄** — BuildMyInfoAck 已重排。
+→ **舊 C# 佈局把 wins 放 [34] 全體錯位 5 欄** — CreateGL_MYINFO_ACK 已重排。
 GP ACK 全域槽 (與 CClientData 分離, 只供大廳 UI):
 223→EE8D34, 225→EE8D38, 227→EE8D3C, 229 winc→EE8D40("WIN"),
 231 lossc→EE8D44("LOSE"), 233 killc→EE8D48+EE8DAC 差分,
@@ -2138,7 +2138,7 @@ the original server’s historic 311 producer is not available.
 (與 198 首段完全同構 — 21×欄位 + 48B blob) + **sub_524360 單角色外觀**
 `u8 slot(<20), u8 char_type, 12×u16 equip` (與 198 的 sub_524010 條目
 逐欄位一致, 互為交叉驗證)。n11==9 時再驅動個人資料視窗 UI。
-→ 伺服器實作 247 時可重用 BuildMyInfoAck 的首段 builder。
+→ 伺服器實作 247 時可重用 CreateGL_MYINFO_ACK 的首段 builder。
 
 ### 3.15pre-2 客戶端狀態機 + 官方模式表 (二十輪)
 **客戶端狀態 (sub_537710 set / sub_5376F0 get, byte_EE8968+24)**:

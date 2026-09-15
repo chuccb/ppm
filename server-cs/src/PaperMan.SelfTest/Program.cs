@@ -348,7 +348,7 @@ bool IsNative311FailureAcknowledgement(Packet acknowledgement)
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0);
     var starterInfo = new Db.MyInfo(7, "Starter", 1, 0, 0, 0, 0, starterStats);
-    Packet myInfo = LobbyHandlers.BuildMyInfoAck(
+    Packet myInfo = LobbyHandlers.CreateGL_MYINFO_ACK(
         starterInfo,
         [new Db.CharSlot(0, 1, [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0])],
         [],
@@ -358,7 +358,7 @@ bool IsNative311FailureAcknowledgement(Packet acknowledgement)
     Check("198 native-order starter has selected slot zero and canonical body one",
         IsNative198StarterAcknowledgement(myInfo));
 
-    Packet defensiveFallback = LobbyHandlers.BuildMyInfoAck(
+    Packet defensiveFallback = LobbyHandlers.CreateGL_MYINFO_ACK(
         starterInfo,
         [],
         [],
