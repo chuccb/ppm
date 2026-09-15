@@ -151,8 +151,46 @@ sub_5359B0 (getter) 證實記憶體 1212..1224/1228..1240 = 兩檔位 4×s32
 | `ui/system/AI/AiMultiCompensation.xml` | **完整 item id** | `itemnumber="15301005"` |
 | `ui/cfg/maplist.pat` / `gamecenter_map_info.xml` | **map id**（非 item id） | `81`、`89` |
 | `ui/lang/msgtableres.lang` | **lang id**（`entry i = lines[i+3]`） | `1085` |
+| `ui/killImgWeapon.xml` | **段內偏移，且不指定段**（見下方 §2c-3） | `<!--2381-->` → `FMG-9(Dual Gun)` |
 
 引用任何數字前，先確認它屬於哪一種 id。
+
+### 2c-3. 四個武器段共用同一個偏移空間（Fact / HIGH，本輪證明）
+
+`ui/killImgWeapon.xml` 是擊殺紀錄的武器圖示表，native 以寫死檔名
+`L"killImgWeapon.xml"` 在啟動時載入 UI sprite registry。它用
+`<!--N-->` 註解標出 **3,006 筆條目（索引 0..3005，其中 361 與 726 各出現兩次，
+相異索引 3,004 個）**，每筆一張圖示，**但完全沒有「段」欄位** —— 只有一個數字。
+
+這之所以可行，是因為**四個武器段的段內偏移互不重疊**。實測整個
+`0..3099` 偏移空間對 12.1M／12.2M／12.3M／12.4M 四段做交叉比對：
+
+```
+存在於一個段的 (offset, band) 配對：2,076
+同時存在於兩個以上段的 offset    ：0
+```
+
+**零碰撞。** 因此「偏移 → 武器」是**全域唯一**的，不需要段資訊即可還原。
+驗證抽樣（killImgWeapon 註解 ↔ itemdata 名稱）：
+
+| 索引 | XML 註解 | 落在哪一段 | itemdata 名稱 |
+|---:|---|---|---|
+| 2 | `m3` | primary | `M3 SUPER90` |
+| 3 | `deagle` | **secondary** | `DE .50 AE` |
+| 4 | `CU_BK7` | **melee** | `CU-BK7` |
+| 7 | `BOMB` | **throw** | `HE GRENADE` |
+| 27 | `mp5k` | primary | `MP5K` |
+| 2381 | `double_fmg9` | primary | `FMG-9(Dual Gun)` |
+
+3,004 個相異索引中 **2,074 個**能對到實際武器
+（primary 1,338／melee 280／secondary 228／throw 228），
+其餘 **930** 個是圖集中的預留或已移除條目。
+
+**推論。** 這條「無碰撞」性質也解釋了 §5d-8 的 `SpecialWeaponType.xml`
+為何敢只寫 `Index`、以及 §5d-10 的 `Tutorial_Data.xml` 為何其 `type` 欄
+其實是**多餘的保險**而非必要 —— 偏移本身已足以唯一定位。
+但**請勿反過來依賴這一點**：這是本 revision 資料的觀察性質，
+若日後加入新武器造成碰撞就會失效；解析時仍應優先使用明示的段資訊。
 
 ## 1z. 2026-09 新 IDA 導出：40 個具名 global 取代原本的 `off_` 位址
 
@@ -684,6 +722,33 @@ XML 內每個標籤都能在 native 找到對應的 reader 字串
 （後者的 UI 名稱 DOUBLEKILL…DIABLO 不出現在本表）。
 倍率如何換算成最終 PG／EXP 屬 server 結算政策，本表不足以推導，維持 UNRESOLVED。
 
+### 5d-3b. `UIActor.xml` 的韓文開發註解獨立印證上表（本輪）
+
+`Extracted/ui/system/UIActor.xml`（native 以寫死路徑
+`L"ui/system/UIActor.xml"` 搭配根標籤 `L"UIACTOR"` 載入）在開頭留有
+**CP949 韓文開發註解**，逐項說明 42 個 `EFF*` 特效槽的用途。
+其中四條與 `ScoreRatio.xml` 的四個 `Kill_Chain` 族**一一對應**：
+
+| UIActor 註解 | 中譯 | ScoreRatio 族 |
+|---|---|---|
+| `EFF20 배율 이펙트 래피드 킬 텍스트` | 倍率特效／**快速擊殺**文字 | `index 0 = Quick`（4 階） |
+| `EFF21 배율 이펙트 약점 킬 텍스트` | 倍率特效／**弱點擊殺**文字 | `index 1 = Weakness`（4 階） |
+| `EFF19 배율 이펙트 피버 텍스트` | 倍率特效／**Fever** 文字 | `index 2 = Fever`（3 階） |
+| `EFF22 배율 이펙트 킬 콤보 텍스트` | 倍率特效／**連段**文字 | `index 3 = Combo`（11 階） |
+
+更直接的是 `EFF23`..`EFF32` 標為 **`LV 1`..`LV 10`**，恰好對上
+`Combo1`..`Combo10` 這 10 個等級（`Combo0` 是門檻 1 的基準階，無等級特效）。
+
+註解也確認 `EFF5`/`EFF6`/`EFF7`/`EFF8` 依序是
+**헤드샷／하트샷／크리티컬샷／에어샷**（head／heart／critical／air shot）顯示，
+與 `Kill_1Time` 的四個倍率欄位
+`HeadShotRatio`／`HeartShotRatio`／`CriticalShotRatio`／`AirComboRatio`
+**同序對應**。另 `EFF14` 明確標注「실드가 데미지를 입을 때 → 사용안하는 사양으로 바뀜」
+（護盾受損時 → 已改為不使用的規格），是原廠自述的**廢棄功能**。
+
+這是**第三個獨立來源**（XML 資料＋韓文註解＋native reader）指向同一組語義，
+`ScoreRatio.xml` 的欄位解讀因此不再是單一推斷。
+
 ## 5d-4. NewSkillLevTable.xml：ペーパズル 合成公式的原廠常數
 
 `Extracted/ui/NewSkillLevTable.xml` **未加密**（UTF-8 BOM 開頭），
@@ -1098,6 +1163,31 @@ Wiki [各種ゲージ詳細](https://wikiwiki.jp/paperman/各種ゲージ詳細)
 正確判準應為**可列印位元組比例**（取前 512 B，>90% 為明文）。
 以此重跑後：明文 222 / 解密 207，**新增 20 個可讀檔、0 個回歸**。
 `map/maps/*.ini` 的出生點表（§5d-13）就是這樣才浮現的。
+
+## 5d-15. Total_Package_Index.xml：套裝包 → 成員物品的展開表
+
+`Extracted/ui/system/Total_Package_Index.xml`（已解出）是**商店套裝包的內容表**，
+結構為 `total_package[index] → type_1..type_N[index]`：父節點是「包」的 item id，
+子節點是該包展開後的成員 item id。
+
+* 檔頭 `<total_idx_count num="114" index="14"/>`；實測 `total_package` 節點
+  **恰為 114 個**，與 `num` 相符。
+* 父 id 範圍 `15306001..15307095`。以 `dump_itemdata.py` 反查，
+  **113/114 能解出名稱**（如 `15306001 アニメパッケージ`、
+  `15306003 MP7(Chess) パック`、`15307095 ボイス袋 関西/博多袋`），
+  唯一解不出的是 `15306014`。
+* 子節點共 **1,596 列**，其中 **282 列為 `0` 佔位**、實際 id **1,314 個**，
+  **1,300 個**可在 itemdata 解出（99.0%）；解不出的只有 **14 個相異 id**
+  （`15303376..15303385` 等連號一段）。
+
+這條「包 → 成員」關係同時**反向驗證**了 §5c-1 對 `15.30xM` 服務／衍生段的
+分段判讀：父 id 落在 15.306M／15.307M，成員 id 幾乎全部落在 15.3M 段內。
+
+**界線不變。** 本表證明**客戶端如何展示一個包的內容**，
+不證明價格、購買資格、發放方式或該包在任一時期是否在售
+（本 revision 的價格區近乎全零，見 §2c）。
+少數解不出的 id 也**不得**視為「不存在」——
+它們可能屬於本 revision 未隨附的資料，維持 UNRESOLVED。
 
 ## 5e. 版本考古 (廿一輪)
 - 根 datarevision.txt = 811034967 (patch 版本號)

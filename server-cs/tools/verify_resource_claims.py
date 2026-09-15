@@ -159,6 +159,29 @@ def main() -> None:
               sorted(name for name, (_, slots) in crystal_totals.items() if slots),
               ["TS_14_Stadium.ini", "TS_40_SlumTown2.ini"])
 
+    # killImgWeapon.xml indexes weapons by band offset with no band field,
+    # which only works because the four weapon bands never share an offset.
+    blob = decrypt(EXTRACTED / "ui" / "killImgWeapon.xml")
+    itemdata = decrypt(EXTRACTED / "ui" / "cfg" / "itemdata.pat")
+    if blob is None or itemdata is None:
+        skipped.append("killImgWeapon.xml")
+    else:
+        text = blob.decode("utf-8", "replace")
+        rows = re.findall(r"<!--(\d+)-->\s*<element [^>]*?/>", text)
+        indices = {int(value) for value in rows}
+        check("killImgWeapon.xml entries", len(rows), 3006)
+        check("killImgWeapon.xml distinct indices", len(indices), 3004)
+
+        count = struct.unpack_from("<i", itemdata, 4)[0]
+        item_ids = {struct.unpack_from("<i", itemdata, 8 + i * 997)[0] for i in range(count)}
+        bands = (12100000, 12200000, 12300000, 12400000)
+        collisions = [offset for offset in range(3100)
+                      if sum(1 for band in bands if band + offset in item_ids) > 1]
+        check("weapon band offset collisions", collisions, [])
+        resolved = sum(1 for offset in indices
+                       if any(band + offset in item_ids for band in bands))
+        check("killImgWeapon indices resolving to a weapon", resolved, 2074)
+
     # Every datarevision.txt must agree: Extracted/ is one coherent snapshot.
     revisions = {path.read_text(encoding="utf-8", errors="replace").strip()
                  for path in EXTRACTED.rglob("datarevision.txt")}

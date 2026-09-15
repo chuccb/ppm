@@ -345,6 +345,19 @@ weaponparts 1,108、partsability 413，以及
 | `GameInOption.ini` | 雖已可讀（內含 `SoccerMoveData = 137` 等），但**所有鍵名與檔名在 exe 中都找不到字串**，故**不能**當成生效參數，標為 UNRESOLVED。這是「可讀 ≠ 有用」的實例。 |
 | 8 個 `datarevision.txt` | 值**全部相同 = `811034967`**，證實 `Extracted/` 是同一次 patch 的一致快照。 |
 
+### 5b-11. 第八輪：武器偏移空間的「無碰撞」性質，與第三方印證計分表
+
+| 主題 | 三方比對結果 |
+|---|---|
+| [キルログアイコン一覧](https://wikiwiki.jp/paperman/キルログアイコン一覧) 列出擊殺紀錄的武器圖示 | **找到資料來源**。`ui/killImgWeapon.xml` 有 3,006 筆條目（相異索引 3,004），native 以寫死檔名在啟動時載入。它**只用一個數字索引武器、不指定段** —— 因為實測四個武器段的段內偏移**零碰撞**（0..3099 共 2,076 個 (offset,band) 配對，無一重複）。詳 [`RESOURCES.md` §2c-3](RESOURCES.md)。 |
+| [各種ゲージ詳細](https://wikiwiki.jp/paperman/各種ゲージ詳細) 之外的 PvE 連段倍率 | **取得第三個獨立證據**。`ui/system/UIActor.xml` 開頭有 **CP949 韓文開發註解**，其 `EFF19..EFF22` 分別標為 피버／래피드 킬／약점 킬／킬 콤보 文字特效，正好對上 `ScoreRatio.xml` 的 `Fever`／`Quick`／`Weakness`／`Combo` 四族；`EFF23..EFF32 = LV 1..LV 10` 對上 `Combo1..Combo10`。`EFF5..EFF8` 亦依序對應 `HeadShot`／`HeartShot`／`CriticalShot`／`AirCombo` 四個倍率欄。詳 §5d-3b。 |
+| [パッケージ詳細](https://wikiwiki.jp/paperman/パッケージ詳細) 描述套裝包內含多件物品 | **展開表已解出**。`Total_Package_Index.xml` 有 114 個包（檔頭 `num="114"` 相符），父 id `15306001..15307095` 中 **113/114** 可解出名稱；子成員 1,596 列中 282 列為 `0` 佔位、實際 1,314 個 id 有 **1,300 個**可解出。詳 §5d-15。 |
+
+**一次被自我複驗抓到的計數錯誤。** 我最初把 killImgWeapon 記為 3,005 筆，
+複驗時發現正則貪婪吃掉了索引 1 的條目，實際是 **3,006 筆**（且 361、726 各重複一次，
+相異 3,004）。已更正，並把四個數字全部寫進 `verify_resource_claims.py`
+（現 34 項檢查）以免再次漂移。
+
 ### 5b-5. 兩項「僅 Wiki、刻意不採用」的記錄
 
 - **房間資訊欄位。** [MAP・ルール詳細](https://wikiwiki.jp/paperman/MAP・ルール詳細)
