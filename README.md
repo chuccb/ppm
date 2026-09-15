@@ -9,6 +9,7 @@
 |------|------|
 | `docs/PACKETS.md` | **協議完整分析**: Packet 類佈局、wire 格式、序列化原語、checksum/壓縮/加密層、關鍵 payload 結構 (全部附反編譯函數地址) |
 | `docs/RESOURCES.md` | **客戶端資源地圖**: maplist/物品/任務/訊息表 `msgtableres.lang`、UI 圖像音效盤點、mode 枚舉正名 |
+| `docs/WIKI_MECHANICS.md` | **Wiki* 歷史機制研究帳本**: 已閱讀主題、版本風險與待由 client/resource/packet 交叉驗證的矩陣；明確不是 service/wire 權威 |
 | `docs/LAYOUTS.md` / `docs/LAYOUTS_REQ.md` | 各封包 dispatcher 讀取序 / REQ builder 寫入序 (欄位級對照) |
 | `docs/ARCHITECTURE.md` | 全景架構: 生命週期、資料層、加密、互證鏈 |
 | `docs/TODO_HANDLERS.md` | 尚未實作的 server handler 清單與下一輪建議 |
@@ -130,9 +131,9 @@ route table / 日誌 / `packet_stats` 監控。
   `PaperAes.cs` / `PacketCodec.cs` (真實 LZ+AES 管線)。
 - `PaperMan.Server` — TCP 伺服器: 9600B 框架 (`Session.cs`)、SQLite 存取層
   (`Db.cs` + embedded `DatabaseBootstrapper.cs`: 自動建庫、schema migration、opcode/
-  運維預設資料 seed；交易式購物/登入/暱稱/背包分頁)、login/channel 雙 listener、
+  運維預設資料 seed；登入/暱稱/背包分頁)、login/channel 雙 listener、
   `ChannelAdmissionRegistry` 的 681→143 單次交接，以及封包 handlers
-  (681/694、143/144、195/196、大廳、商店、送禮 296/297、戰隊隧道
+  (681/694、143/144、195/196、大廳、商店/送禮的 fail-closed wire 邊界、戰隊隧道
   583/584、GP_CH*C 戰績 18 REQ/ACK 對 + 882 推播、房間
   111–194/340–367/712–728、語音 791–796、倉庫 855–863)。AES 原生金鑰已內建。
 - `PaperMan.SelfTest` — 不需遊戲客戶端的 codec、login/channel wire layout、SQLite first-run bootstrap、credential upgrade/migration 自測。
