@@ -47,6 +47,24 @@ Wiki observation → native sender / native receiver → field layout
 | Puzzle／skills | [スキル一覧](https://wikiwiki.jp/paperman/スキル一覧) 說明 迅/敏/根/防/集五軸、5-point threshold、multiple skills、No Skill room gate；[ペーパズル/合成](https://wikiwiki.jp/paperman/ペーパズル/合成) 與 [リスト](https://wikiwiki.jp/paperman/ペーパズル/リスト) 描述素材、rarity、body slot 與歷史合成規則。 | 255 的 5 profiles × 7 IDs、選擇 profile consumer，與 198 的 12 normal appearance words 已被 native trace 分離。 | Wiki 的合成公式與數值效果不是 client/service 權威；不得把 PAV 外觀、fitting preview、推薦套裝、或 puzzle profile 當成新角的 default appearance。 |
 | 角色／avatar | [キャラクター一覧](https://wikiwiki.jp/paperman/キャラクター一覧) 將早期四角（Hayate/Tina/Guy/Tericia）標成 initial choices，並歷史性地列角色能力/售價；各角色 avatar 頁把物品按 body part 列出。 | 15 body IDs、五個 native template maps、6-word canonical normal appearance prefix，以及 12-slot record 已在 `RESOURCES.md` §5c-1 由 client+PAV 互證。 | 「initial choice」不證明該 client 只可選四人，也不證明 starter weapons、boost、voice、last-six appearance slots 或 persistent inventory。 |
 
+### Starter account grant 與 character appearance 必須分離
+
+**Wiki 觀察。** 2021-03-27 的 [ひよこ用/ゲーム起動編](https://wikiwiki.jp/paperman/ひよこ用/ゲーム起動編)
+把 MP5K 稱為「registration 時持有的 initial weapon」，且將 tutorial／level-up 的武器、
+PG、boost、Puzzle pack 描述為要從 My Character 的 Present 介面領取；同頁也只說命名後
+會進入 character selection。2017-03-30 的 [階級関連](https://wikiwiki.jp/paperman/階級関連)
+列出 level 2 以後的歷史性 award。這些資訊可作為三個不同候選來源的提醒：
+
+1. account-registration starter inventory；
+2. character creation 的 normal-appearance template；
+3. tutorial／level-up／operation present grant。
+
+它們不可合併成「每個新 character 預設裝著這些武器」。已知 native 只直接證明第二項的
+六個 appearance values；目前語料沒有 direct creator、resource ID、period、inventory row、
+loadout group 或 present ACK 的可重現證據來確認第一／三項是否存在於此 revision。因此
+MP5K、任何 Wiki award，以及同頁的初期角色圖片都仍是 **UNRESOLVED** service policy，
+不得寫入 bootstrap inventory 或 character weapon fields。
+
 ## 3. 對戰系統：歷史模型與 native mode 編號的對照
 
 下表用 Wiki 理解 gameplay，但 **mode number、地圖 bit 和建房 availability 只以 native/resource
@@ -112,7 +130,7 @@ Wiki observation → native sender / native receiver → field layout
 
 - 根導航／分類：[首頁](https://wikiwiki.jp/paperman/)、[page index](https://wikiwiki.jp/paperman/::cmd/list)
 - 商店與取得：[通常ショップ武器一覧](https://wikiwiki.jp/paperman/通常ショップ武器一覧)、[ペーパチ詳細](https://wikiwiki.jp/paperman/ペーパチ詳細)、[ペーパチ CASH](https://wikiwiki.jp/paperman/ペーパチCASH詳細)、[ペーパチ PG](https://wikiwiki.jp/paperman/ペーパチPG詳細)、[福袋詳細](https://wikiwiki.jp/paperman/福袋詳細)、[ペーパーガッチャン詳細](https://wikiwiki.jp/paperman/ペーパーガッチャン詳細)、[ペーパダスEX詳細](https://wikiwiki.jp/paperman/ペーパダスEX詳細)、[パッケージ詳細](https://wikiwiki.jp/paperman/パッケージ詳細)、[シリアルコード詳細](https://wikiwiki.jp/paperman/シリアルコード詳細)
-- 持久化與選擇：[ペーパースロット詳細](https://wikiwiki.jp/paperman/ペーパースロット詳細)、[称号一覧](https://wikiwiki.jp/paperman/称号一覧)、[ラジオチャット一覧](https://wikiwiki.jp/paperman/ラジオチャット一覧)、[ペーパズル](https://wikiwiki.jp/paperman/ペーパズル)、[スキル一覧](https://wikiwiki.jp/paperman/スキル一覧)、[ペーパズル合成](https://wikiwiki.jp/paperman/ペーパズル/合成)、[ペーパズルリスト](https://wikiwiki.jp/paperman/ペーパズル/リスト)、[キャラクター一覧](https://wikiwiki.jp/paperman/キャラクター一覧)、[リサイクルシステム](https://wikiwiki.jp/paperman/リサイクルシステム)、[武器耐久値情報](https://wikiwiki.jp/paperman/武器耐久値情報)
+- 持久化與選擇：[ひよこ用/ゲーム起動編](https://wikiwiki.jp/paperman/ひよこ用/ゲーム起動編)、[階級関連](https://wikiwiki.jp/paperman/階級関連)、[ペーパースロット詳細](https://wikiwiki.jp/paperman/ペーパースロット詳細)、[称号一覧](https://wikiwiki.jp/paperman/称号一覧)、[ラジオチャット一覧](https://wikiwiki.jp/paperman/ラジオチャット一覧)、[ペーパズル](https://wikiwiki.jp/paperman/ペーパズル)、[スキル一覧](https://wikiwiki.jp/paperman/スキル一覧)、[ペーパズル合成](https://wikiwiki.jp/paperman/ペーパズル/合成)、[ペーパズルリスト](https://wikiwiki.jp/paperman/ペーパズル/リスト)、[キャラクター一覧](https://wikiwiki.jp/paperman/キャラクター一覧)、[リサイクルシステム](https://wikiwiki.jp/paperman/リサイクルシステム)、[武器耐久値情報](https://wikiwiki.jp/paperman/武器耐久値情報)
 - 對戰／社交：[MAP・ルール詳細](https://wikiwiki.jp/paperman/MAP・ルール詳細)、[出現アイテム一覧](https://wikiwiki.jp/paperman/出現アイテム一覧)、[名誉ゲージ](https://wikiwiki.jp/paperman/名誉ゲージ)、[クエストシステム](https://wikiwiki.jp/paperman/クエストシステム)、[クラン](https://wikiwiki.jp/paperman/クラン)、[PvEモード](https://wikiwiki.jp/paperman/PvEモード)、[アシストポイント機能](https://wikiwiki.jp/paperman/アシストポイント機能)、[戦闘中のキャラ情報](https://wikiwiki.jp/paperman/戦闘中のキャラ情報)、[武器移動速度](https://wikiwiki.jp/paperman/武器移動速度)
 
 ## 7. 下一輪的精確交叉驗證順序
