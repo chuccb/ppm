@@ -12,7 +12,7 @@ point 追到 canonical source，而不是維護另一份手寫註冊表。
 
 | 區域 | 檔案 / 入口 | 責任與 ownership |
 |---|---|---|
-| Solution、generated catalog 與 static checks | `PaperMan.slnx`, `tools/gen_opcodes.py`, `tools/verify_server_layout.py`, `tools/verify_server_naming.py`, `src/PaperMan.Protocol/Generated/Opcode.cs` | `db/packets.tsv` 是 opcode source；要改 opcode 名稱或值時執行 generator，不手改 generated output。layout checker 驗證 catalog → generated discovery → canonical handler source graph；naming checker 驗證 native mode vocabulary、Extracted default maps、map bit / two-team tables、numeric clan / private-UDP opcode sets、canonical `AI` / `GT` / `Login` handler groupings，以及 room `modeIndex` persistence naming。兩者皆不取代 build。 |
+| Solution、generated catalog 與 static checks | `PaperMan.slnx`, `tools/gen_opcodes.py`, `tools/verify_server_layout.py`, `tools/verify_server_naming.py`, `tools/verify_csharp_syntax.py`, `src/PaperMan.Protocol/Generated/Opcode.cs` | `db/packets.tsv` 是 opcode source；要改 opcode 名稱或值時執行 generator，不手改 generated output。layout checker 驗證 catalog → generated discovery → canonical handler source graph；naming checker 驗證 native mode vocabulary、Extracted default maps、map bit / two-team tables、numeric clan / private-UDP opcode sets、canonical `AI` / `GT` / `Login` handler groupings，以及 room `modeIndex` persistence naming。syntax checker 以真正的 C# grammar 解析全部原始碼，攔截 CS1026/CS0029/CS0126/CS1929 與 generator 的 RS1035。三者皆不取代 build。 |
 | Protocol | [`src/PaperMan.Protocol/README.md`](src/PaperMan.Protocol/README.md) | byte-exact `Core/`、`Codecs/`、`Contracts/` 與 `Generated/` boundary；不放 socket、DB 或 gameplay policy。 |
 | Handler source generator | [`src/PaperMan.HandlerGenerator/README.md`](src/PaperMan.HandlerGenerator/README.md) | compiler-only Roslyn analyzer，從 canonical direct entries 產生 Router method-group table；不做 runtime reflection，僅此 dispatch path 可宣稱 NativeAOT-friendly。 |
 | Server source guide | [`src/PaperMan.Server/README.md`](src/PaperMan.Server/README.md) | 由 runtime flow 或 canonical opcode 直接定位 Host、State、Database、compile-time discovered Handler family。 |
@@ -102,6 +102,13 @@ ref 時退回 `main`）重新核對 C#；它同樣不取代 build、SelfTest 或
 # 在 repository root 執行；先跑不需 .NET 的 Server static checks。
 python3 server-cs/tools/verify_server_layout.py
 python3 server-cs/tools/verify_server_naming.py
+
+# 以真正的 C# grammar 解析全部原始碼, 攔截曾經真的弄壞 build 的錯誤類別
+# (CS1026 語法、CS0029 Task/ValueTask、CS0126 裸 return、CS1929 窄型別
+#  陣列的推斷陷阱、generator 的 RS1035 禁用 API)。需要 tree-sitter；
+# 未安裝時會直接跳過並回傳 0, 不會擋住只有 .NET SDK 的機器。
+python3 -m venv .venv && .venv/bin/pip install tree_sitter tree_sitter_c_sharp
+.venv/bin/python server-cs/tools/verify_csharp_syntax.py
 
 # 沒有 DB 建置命令、路徑或 port 參數。
 dotnet run --project server-cs/src/PaperMan.Server
