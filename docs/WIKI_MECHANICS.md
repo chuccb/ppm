@@ -428,6 +428,19 @@ Wiki 的威力一覧則是歷史社群量測。兩者即使相符也不構成 se
 因此**任何試衣間相關結論都不可能從現有資料完整還原**，一律停在 UNRESOLVED。
 反過來說，角色動畫資產則是**可信且完整**的 —— 這就是界定可分析範圍的實益。
 
+### 5b-16. 第十三輪：地圖縮圖／立繪對照，與 748 的真實語義
+
+| 主題 | 三方比對結果 |
+|---|---|
+| [MAP・ルール詳細](https://wikiwiki.jp/paperman/MAP・ルール詳細) 的地圖清單 | **資產面已對齊**。`map/minimaps/` 有 123 張 `Minimap_*.dds`、`map/portraits/` 有 122 張 `Port_*.dds`，與 maplist.pat 的 123 張圖同量級。忽略大小寫後仍有 10–11 張對不上，原因是**原廠命名漂移**（`TS_03_Port`↔`TS_03_Fort`、`TD_01_Cemetery`↔`Cemetry`、`TS_09_SlumTown`↔`TS_09_Slum Town`），不是缺檔。 |
+| 「今すぐプレイ」／隨機地圖 | **找到非實體地圖的縮圖**：`Port_RANDOM_MAP.dds` 與 `Port_HOTRANDOM_MAP.dds` 在 maplist 中沒有對應地圖 —— 它們是 UI 上的「隨機」選項圖示，對應 `SelectRandomMap.xml`。 |
+| — | **748 的語義定案（對私服有直接用處）**。`748 GR_SELECTRANDOMMAP_ACK` 是少數「有 ACK 無 REQ」的 opcode。逐字元比對後，它的 handler `sub_564090` 與 `122 GR_MAPCHANGE_ACK` 的 `sub_56E530` **函式本體完全相同**：讀 1 個 `u8`，交給同一個地圖設定器 `sub_42FC50`、寫進同一個房間全域物件。該設定器全檔僅這兩處被呼叫。詳 [`PACKETS.md` §3.15q](PACKETS.md)。 |
+
+**實務結論。** 實作隨機選圖**不需要新的狀態機** —— 沿用既有
+`room.MapId` 廣播路徑、改用 opcode 748 即可，客戶端處理完全一樣。
+但**選圖規則**（可選池、是否排除當前圖、誰能觸發）仍無 client 證據，
+維持 UNRESOLVED，現在不應主動發送 748。
+
 ### 5b-5. 兩項「僅 Wiki、刻意不採用」的記錄
 
 - **房間資訊欄位。** [MAP・ルール詳細](https://wikiwiki.jp/paperman/MAP・ルール詳細)

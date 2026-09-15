@@ -2358,6 +2358,33 @@ dispatcher case 102 → `sub_58D6F0` 立即 `ctor(101)` 回送
 
 ---
 
+### 3.15q 748 GR_SELECTRANDOMMAP_ACK 與 122 GR_MAPCHANGE_ACK 是**同一個 handler**
+
+748 是少數「有 ACK、catalog 卻沒有配對 REQ」的 opcode（745–752 區段中
+746/747、749/750 都成對，748 單身）。本輪把兩個 handler 的函式本體
+逐字元比對，結論是**完全相同**：
+
+```c
+// 748 -> sub_564090          // 122 -> sub_56E530
+unsigned __int8 v2;           unsigned __int8 v2;
+sub_592940(a1, &v2);          sub_592940(a1, &v2);
+return sub_42FC50(dword_EA10D0, v2);   return sub_42FC50(dword_EA10D0, v2);
+```
+
+兩者都是「讀 1 個 `u8`，交給同一個地圖設定器 `sub_42FC50`、寫進同一個
+全域房間物件 `dword_EA10D0`」。`sub_42FC50` 全檔**僅這兩處**被呼叫。
+
+**因此 748 的 `u8` 就是 mapId，語義等同 122。** 差別只在使用情境：
+122 是房主手動改圖的 ACK，748 是「隨機選圖」流程的結果廣播
+（UI 面為 `SelectRandomMap.xml`，另有 `Port_RANDOM_MAP.dds` /
+`Port_HOTRANDOM_MAP.dds` 兩張非實體地圖的縮圖）。
+
+**對私服的直接意義。** 若日後要實作隨機選圖，**不需要新的狀態機**：
+沿用 `GR_MAPCHANGE_ACK` 既有的 `room.MapId` 廣播路徑，
+只是改用 opcode 748 送出即可，客戶端的處理完全一樣。
+但**選圖規則本身**（可選池、是否排除當前圖、誰有權觸發）仍無
+client 可證事實，維持 UNRESOLVED，現在不應主動發送 748。
+
 ### 3.15p Pepachi 701 的 `reelC` = 伺服器指定的演出級別 (本輪, resource+native 互證)
 
 701 每筆獎品三元組的第三欄 `reelC` **不是外觀參數，而是抽獎結果的級別**，

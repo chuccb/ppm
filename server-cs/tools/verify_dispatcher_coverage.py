@@ -69,12 +69,34 @@ def catalog_opcodes() -> set[int]:
     return opcodes
 
 
+BODY = re.compile(r"_BYTE \*__stdcall (\w+)\(void \*a1\)\s*\r?\n\{(.*?)\r?\n\}", re.S)
+# 748 GR_SELECTRANDOMMAP_ACK and 122 GR_MAPCHANGE_ACK decompile to identical
+# bodies: read one u8, hand it to the same map setter on the same room object.
+# docs/PACKETS.md 3.15q relies on that, so assert it rather than trusting prose.
+EQUIVALENT_HANDLERS = ("sub_564090", "sub_56E530")
+
+
+def handler_body(text: str, name: str) -> str | None:
+    for found, body in BODY.findall(text):
+        if found == name:
+            return re.sub(r"\s+", " ", body).strip()
+    return None
+
+
 def main() -> None:
     if not DUMP.is_file():
         print(f"dispatcher check skipped: {DUMP} is not present")
         return
 
-    cases = dispatcher_cases(DUMP.read_text(encoding="utf-8", errors="replace"))
+    text = DUMP.read_text(encoding="utf-8", errors="replace")
+    first, second = (handler_body(text, name) for name in EQUIVALENT_HANDLERS)
+    if first is None or second is None or first != second:
+        print("dispatcher verification failed: 748/122 handlers are no longer identical")
+        print(f"  {EQUIVALENT_HANDLERS[0]}: {first}")
+        print(f"  {EQUIVALENT_HANDLERS[1]}: {second}")
+        raise SystemExit(1)
+
+    cases = dispatcher_cases(text)
     documented = table_opcodes(LAYOUTS)
     missing = sorted(cases - documented)
     if missing:
