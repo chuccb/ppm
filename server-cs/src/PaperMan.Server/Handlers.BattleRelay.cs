@@ -94,8 +94,7 @@ public static class BattleRelayHandlers
 
         // 有狀態的戰場物件不是 blind relay。各 handler 只接受房內、slot 與
         // uid 都和 session 相符的 REQ，並以 Room.BattleState 原子轉換。
-        OccupyHandlers.Register(add);
-        DropWeaponHandlers.Register(add);
+        BattleObjectHandlers.Register(add);
 
         foreach (var (req, ack) in Respawns)
         {

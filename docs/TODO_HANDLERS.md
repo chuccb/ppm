@@ -216,7 +216,7 @@
 > 五十六輪 (OCC 902–907 狀態機 + 962 安全拒絕):
 > ① 以 builder、`sub_58B010`、parser 三向驗證 902/904/906 的同構 6B
 >    REQ（`point_id, claimed_slot, claimed_user_id`）及 903/905/907 ACK。
->    新增 `Handlers.BattleObjects.cs` 和每房 `RoomBattleState`：只接受
+>    新增 BattleObjects direct opcode-family sources 和每房 `RoomBattleState`：只接受
 >    playing 的 Occupy/OccupyRenewal 房內成員，slot/uid 必須與 session 一致；
 >    start→success/fail 在 room lock 內原子轉換，GR_START/GR_END 皆清除狀態。
 > ② 962 的 request 13B 序列與 963 的條件式 1B/17B/59B ACK 已確認。
