@@ -29,6 +29,9 @@ HANDLER_CLASS = re.compile(r"public static partial class (?P<name>\w+Handlers)")
 RAW_206_ATTRIBUTE = re.compile(
     r"\[RawOpcodeHandler\(206\)\]\s*\n\s*"
     r"private static ValueTask RawOpcode206_REQ\(Session session, Packet packet, ServerContext context\)")
+# `sub_556680` sends GL_MYINFO_OPEN (270) as a one-way C2S notification.
+# All other direct entries in this client revision are catalog *_REQ tokens.
+NON_REQUEST_C2S_TOKENS = frozenset({"GL_MYINFO_OPEN"})
 
 
 def fail(message: str) -> None:
@@ -111,6 +114,8 @@ def main() -> None:
                 raw_entry_count += 1
             elif entry not in generated:
                 fail(f"{source}: receive-shape entry {entry} is not a generated Opcode token")
+            elif not (entry.endswith("_REQ") or entry in NON_REQUEST_C2S_TOKENS):
+                fail(f"{source}: {entry} is not a verified C2S handler token")
             elif source != canonical_source_for(entry, source.parent):
                 fail(f"{source}: {entry} must use canonical basename {canonical_source_for(entry, source.parent).name}")
 

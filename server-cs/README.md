@@ -7,7 +7,8 @@
 ## 原始碼導覽
 
 本專案按 protocol boundary 與 persistent domain 切分，而不是套用通用 framework。
-每條主要資料流都由下表左側開始；所有 handler 都可從 `Router.Build()` 找到註冊點。
+每條主要資料流都由下表左側開始；handler dispatch 從 `Router.Build()` 的 generated entry
+point 追到 canonical source，而不是維護另一份手寫註冊表。
 
 | 區域 | 檔案 / 入口 | 責任與 ownership |
 |---|---|---|
@@ -37,9 +38,10 @@ boundary 與 reverse-engineering checklist。
    builder/parser 的 method name 也保留完整 `*_REQ` 或 `*_ACK` token。
 3. 沒有 `*_REQ` 後綴的單向 token（目前為 `GL_MYINFO_OPEN`）同時作為檔名 family 與
    entry method。不存在以猜測業務語意命名的中介 handler 名稱。
-4. `PaperMan.HandlerGenerator` 在編譯期以 exact method signature 與 canonical token
-   產生 binding；不要加入 runtime reflection、hand-written registration list 或需要把
-   protocol token 反向映射的 service abstraction。`*.Shared.cs` 僅限已明確記錄的
+4. `PaperMan.HandlerGenerator` 在編譯期以 exact method signature 與已驗證 C2S
+   canonical token（`*_REQ` 加 `GL_MYINFO_OPEN`）產生 binding；不要加入 runtime
+   reflection、hand-written registration list 或需要把 protocol token 反向映射的 service
+   abstraction。`*.Shared.cs` 僅限已明確記錄的
    跨-family wire / authority support，不含 receive entry。
 5. 唯一沒有官方 request token 的已註冊 path 是 raw opcode 206；它保留
    `Handlers.RawOpcode206.cs` / `RawOpcode206_REQ`，以 `[RawOpcodeHandler(206)]`

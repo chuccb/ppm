@@ -10,8 +10,9 @@ and is not a runtime dependency.
 For each static partial `*Handlers` class in `PaperMan.Server`, the generator
 selects a method only when all of these are true:
 
-1. The method name exactly equals a member of generated
-   `PaperMan.Protocol.Opcode`.
+1. The method name is a verified C2S catalog token: a generated
+   `PaperMan.Protocol.Opcode` member ending in `_REQ`, or the source-proven
+   one-way `GL_MYINFO_OPEN` token.
 2. Its exact signature is `ValueTask (Session, Packet, ServerContext)`.
 3. Its containing type is a static partial class.
 
@@ -34,6 +35,7 @@ The generator emits these compile errors rather than silently omitting a path:
 | `PMH002` | a canonical-name or raw-marked method has the wrong static handler shape |
 | `PMH003` | two methods claim the same numeric opcode |
 | `PMH004` | a raw marker is malformed or incorrectly applied to a named opcode |
+| `PMH005` | a receive-shaped method uses an ACK/base catalog token rather than an admitted C2S token |
 
 This makes the **dispatch discovery path** trim- and NativeAOT-friendly:
 compiled code contains direct references, not unbounded runtime reflection.

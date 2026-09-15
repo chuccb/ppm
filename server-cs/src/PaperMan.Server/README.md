@@ -70,8 +70,8 @@ boundary into evidence of an original production-service boundary.
 **Fact/HIGH.** [`PaperMan.HandlerGenerator`](../PaperMan.HandlerGenerator/README.md)
 is a build-time Roslyn analyzer. It emits direct handler method-group
 references; `Router.Build()` contains no runtime handler scan or reflection. It
-reports a compile error for an invalid
-receive signature, a duplicate opcode, or a malformed raw-opcode declaration.
+reports a compile error for an invalid receive signature, a non-C2S catalog
+token, a duplicate opcode, or a malformed raw-opcode declaration.
 
 **Fact/HIGH.** This makes the *handler-discovery path* trim- and
 NativeAOT-compatible. **UNKNOWN.** It does not prove the full executable is
@@ -81,9 +81,10 @@ publish-time analyzers on a machine with the .NET 10 SDK.
 ## Handler family map
 
 Every static `ValueTask (Session, Packet, ServerContext)` method whose name is
-an `Opcode` token is compile-time discovered. `RawOpcodeHandler(206)` is the
-only numeric exception; it remains explicit because the native catalog has no
-206 request name.
+a verified C2S catalog token is compile-time discovered: current direct entries
+are `*_REQ`, plus source-proven one-way `GL_MYINFO_OPEN`. `RawOpcodeHandler(206)`
+is the only numeric exception; it remains explicit because the native catalog
+has no 206 request name.
 
 | Directory | Static partial class / purpose |
 |---|---|

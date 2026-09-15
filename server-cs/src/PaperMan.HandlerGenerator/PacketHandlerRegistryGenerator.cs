@@ -27,6 +27,11 @@ public sealed class PacketHandlerRegistryGenerator : IIncrementalGenerator
     private const string PacketType = "global::PaperMan.Protocol.Packet";
     private const string ServerContextType = "global::PaperMan.Server.ServerContext";
 
+    // `sub_556680` sends this one-way C2S notification. Every other direct
+    // entry in this revision is a catalog *_REQ token; ACK/base tokens are not
+    // valid receive-handler names merely because they appear in Opcode.
+    private const string MyInfoOpenToken = "GL_MYINFO_OPEN";
+
     private static readonly DiagnosticDescriptor MissingProtocolSymbols = new(
         id: "PMH001",
         title: "Packet-handler discovery requires protocol symbols",
@@ -55,6 +60,14 @@ public sealed class PacketHandlerRegistryGenerator : IIncrementalGenerator
         id: "PMH004",
         title: "Raw packet handler declaration is invalid",
         messageFormat: "Raw handler '{0}' must use [RawOpcodeHandler(ushort)] and may not duplicate a generated Opcode member",
+        category: "PaperMan.HandlerDiscovery",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    private static readonly DiagnosticDescriptor NonReceiveCatalogToken = new(
+        id: "PMH005",
+        title: "Catalog token is not a verified C2S handler token",
+        messageFormat: "Handler '{0}' must use a *_REQ token or the source-proven one-way GL_MYINFO_OPEN token, not an ACK/base catalog member",
         category: "PaperMan.HandlerDiscovery",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
@@ -103,9 +116,23 @@ public sealed class PacketHandlerRegistryGenerator : IIncrementalGenerator
             foreach (IMethodSymbol method in type.GetMembers().OfType<IMethodSymbol>())
             {
                 bool hasNamedOpcode = opcodeValues.TryGetValue(method.Name, out ushort namedOpcode);
+                bool isNamedReceiveToken = hasNamedOpcode && IsNamedReceiveToken(method.Name);
                 AttributeData? rawOpcodeAttribute = method.GetAttributes().FirstOrDefault(attribute =>
                     SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, rawOpcodeAttributeType));
-                if (!hasNamedOpcode && rawOpcodeAttribute is null)
+                if (hasNamedOpcode
+                    && !isNamedReceiveToken
+                    && rawOpcodeAttribute is null
+                    && HasPacketHandlerSignature(method)
+                    && IsPartial(type))
+                {
+                    context.ReportDiagnostic(Diagnostic.Create(
+                        NonReceiveCatalogToken,
+                        FirstLocation(method),
+                        method.ToDisplayString()));
+                    continue;
+                }
+
+                if (!isNamedReceiveToken && rawOpcodeAttribute is null)
                 {
                     continue;
                 }
@@ -128,7 +155,7 @@ public sealed class PacketHandlerRegistryGenerator : IIncrementalGenerator
                     continue;
                 }
 
-                if (hasNamedOpcode)
+                if (isNamedReceiveToken)
                 {
                     handlers.Add(new HandlerDescriptor(type, method, namedOpcode, $"global::PaperMan.Protocol.Opcode.{method.Name}"));
                     continue;
@@ -143,7 +170,11 @@ public sealed class PacketHandlerRegistryGenerator : IIncrementalGenerator
                     continue;
                 }
 
-                handlers.Add(new HandlerDescriptor(type, method, rawOpcode, rawOpcode.ToString()));
+                handlers.Add(new HandlerDescriptor(
+                    type,
+                    method,
+                    rawOpcode,
+                    rawOpcode.ToString(System.Globalization.CultureInfo.InvariantCulture)));
             }
         }
 
@@ -168,6 +199,10 @@ public sealed class PacketHandlerRegistryGenerator : IIncrementalGenerator
             }
         }
     }
+
+    private static bool IsNamedReceiveToken(string token) =>
+        token.EndsWith("_REQ", StringComparison.Ordinal)
+        || string.Equals(token, MyInfoOpenToken, StringComparison.Ordinal);
 
     private static bool HasPacketHandlerSignature(IMethodSymbol method) =>
         method.MethodKind == MethodKind.Ordinary

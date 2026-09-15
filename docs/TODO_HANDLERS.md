@@ -1,7 +1,8 @@
 # Server handler 待辦清單 (廿四輪自動盤點)
 
 > 「client 有 builder、server 尚無 handler」的 REQ 全表 — 附自動抽出
-> 的寫入序列, 按此實作 handler 即可。已實作 120+ 個 REQ handler (本輪起以 Router 實際註冊數為準)
+> 的寫入序列, 按此實作 handler 即可。已實作 120+ 個 REQ handler；direct entry
+> inventory 以 `verify_server_layout.py` 的 static discovery check 為準。
 > (Auth/Lobby/Shop/Stats/Clan/Quest/Friend/Room/Channel/Voice/
 > BattleRelay/Warehouse/Join)。
 >

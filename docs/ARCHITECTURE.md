@@ -113,9 +113,10 @@ uses cancellation and disposes its socket only after its receive loop exits.
   channel entry 之間的不同 state。
 - `Router` 是唯一的 listener/state boundary 與 frozen opcode lookup；它不承載
   gameplay policy。`PaperMan.HandlerGenerator` 在**編譯期**尋找 `PaperMan.Server`
-  中、名稱等於 generated `Opcode` member 的 static
-  `ValueTask (Session, Packet, ServerContext)` methods，並產生直接 method-group
-  registration。執行時沒有 type scan、runtime reflection 或人工 `Register` list。
+  中、名稱為已驗證 C2S catalog token（目前為 `*_REQ` 加單向
+  `GL_MYINFO_OPEN`）的 static `ValueTask (Session, Packet, ServerContext)`
+  methods，並產生直接 method-group registration。執行時沒有 type scan、runtime
+  reflection 或人工 `Register` list。
   唯一無官方 request token 的 206 以顯式 `[RawOpcodeHandler(206)]` 保留 raw boundary，
   而非臆造 GS 名稱。這只表示 dispatch discovery 是 trim / NativeAOT-friendly，**不**
   證明含 SQLite 與其他 dependencies 的整個 server 已通過 NativeAOT publish。
