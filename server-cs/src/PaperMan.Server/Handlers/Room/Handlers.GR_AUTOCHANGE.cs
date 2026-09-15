@@ -15,7 +15,7 @@ public static partial class RoomHandlers
     {
         if (packet.Remaining != 1)
         {
-            return;
+            return ValueTask.CompletedTask;
         }
 
         _ = packet.ReadS8();

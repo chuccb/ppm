@@ -42,6 +42,6 @@ public static partial class BattleObjectHandlers
     }
 
     /// <summary>963 的 fail 分支只需要首個 nonzero result byte。</summary>
-    private static Task SendRejectedAsync(Session session) =>
+    private static ValueTask SendRejectedAsync(Session session) =>
         session.SendAsync(new Packet(Opcode.GG_DROPWEAPON_GET_AND_DROP_ACK).WriteBool(true));
 }

@@ -86,7 +86,15 @@ public sealed class Session(TcpClient client, PacketCodec codec, long id, Server
     private int _rxLen;
     private readonly SemaphoreSlim _sendGate = new(1, 1);
 
-    public async Task SendAsync(Packet packet, CancellationToken cancellationToken = default)
+    /// <remarks>
+    /// Returns <see cref="ValueTask"/> so a handler can hand its single send
+    /// straight back as its own result. <see cref="PacketHandler"/> is a
+    /// ValueTask delegate, so returning Task here forced every non-async
+    /// handler into a conversion that does not exist. Each returned instance is
+    /// awaited exactly once at the call site, which is the contract ValueTask
+    /// requires; it is never stored, re-awaited, or passed to a Task combinator.
+    /// </remarks>
+    public async ValueTask SendAsync(Packet packet, CancellationToken cancellationToken = default)
     {
         var frame = codec.Encode(packet);
         Console.WriteLine($"[s{Id}] >> SEND {packet.Opcode}({packet.OpcodeRaw}) payload={packet.Length}B frame={frame.Length}B");

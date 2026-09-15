@@ -22,7 +22,7 @@ public static partial class RoomHandlers
         }
 
         byte modeIndex = packet.ReadU8();
-        if (!TryGetRoom(session, context, out var room, out var slot) || !IsMaster(room, slot)
+        if (!TryGetRoom(session, context, out var room, out var slot) || !IsMaster(room, slot))
         {
             return;
         }
