@@ -441,6 +441,93 @@ Wiki 的威力一覧則是歷史社群量測。兩者即使相符也不構成 se
 但**選圖規則**（可選池、是否排除當前圖、誰能觸發）仍無 client 證據，
 維持 UNRESOLVED，現在不應主動發送 748。
 
+### 5b-17. 第十四輪：抽獎的**前置條件**全部找到了 —— 三個 client gate 與 Wiki 的「PG 需 Lv10」完全吻合
+
+前十三輪反覆確認「抽獎**結果**（獎池、機率、扣款）無 client 證據，維持 UNRESOLVED」。
+本輪改問一個**先前沒問過**的問題：**client 在送出 700/900 之前，自己檢查了什麼？**
+這是可以完全閉合的，因為 gate 全在 client 端、而且會拿 `msgtableres.lang` 的
+訊息 id 出來顯示 —— 訊息文字本身就是這些常數的語意標籤。
+
+**兩個 caller 的結構完全同構**（各自獨立一份常數，非共用）：
+
+| | Pepachi (700) | Capsule／ペーパーガッチャン (900) |
+|---|---|---|
+| caller | `sub_8459C0` | `sub_99D0A0` |
+| sender | `sub_8458D0` | `sub_99CFA0` |
+| 等級下限 global | `dword_BDBC98` = **10** | `dword_BEAE4C` = **10** |
+| 禮物盒上限 global | `dword_BDBC9C` = **200** | `dword_BEAE50` = **200** |
+
+四個 gate，依 caller 內的求值順序：
+
+| # | 條件 | 失敗顯示 msg id | 訊息原文 |
+|---|---|---|---|
+| 1 | CASH 餘額 `*ArgList > 0` | **264** | `ＣＡＳＨが不足しています。` |
+| 2 | PG 餘額 `*dword_EE8D18 > 0`（PG-ten 另要 `≥ 10000`、CASH-ten 要 `≥ 300`）| **252** | `PGが不足しています。` |
+| 3 | 禮物盒 `i_23 < 200` | **847** | `プレゼントボックスに空きがありません。（…%d個まで保管できます。）` |
+| 4 | **僅 PG 路徑**：等級 `n10_2 >= 10` | **846** | `ペーパチはレベル「%d」以上からご利用できます。` |
+
+**三個 global 的身分，由 995 的 reader 一次全部定案（Fact / HIGH）。**
+`sub_567AE0`（dispatcher `case 995u`，`LAYOUTS.md` 記為 `s32 s32 s32`）
+就是錢包/等級推播，三個欄位依序寫進：
+
+```
+995 field[0] → *dword_EE8D18   = PG        （§3.2 已知 198 的 GP 欄同樣寫這裡，sub_5392A0）
+995 field[1] → *dword_EE8D0C   = CASH      （= 反編譯器誤命名的 `ArgList`，B0F0xx 非堆疊變數）
+995 field[2] →  n10_2          = 等級      （EE8D10）
+```
+
+`n10_2` 是等級的獨立佐證有三條：① `sub_92EF00(18, 23, n10_2, 0)`；
+② 大廳以 `n10_2 - 1` 索引 `Class` 資源表取階級圖示（`sub_44EB50`）；
+③ 它同時是 `itemdata.pat +644`「需求等級」的比較對象
+（`sub_534FE0(...) > n10_2` → 顯示 msg **922** `レベル制限のあるアイテムです。%dレベル以上、購入可能です。`），
+與 `RESOURCES.md` §2 的欄位定義自洽。
+`i_23` 是禮物盒待領數也有三條：① 198 (`sub_570550`) 尾段的 `u16` 就寫它
+（`PACKETS.md` §3.2 早已記為「禮物盒 pending 數」）；② 299 寫入時 `++i_23`；
+③ 301 收下/刪除時由 `sub_57AFE0` 遞減。
+
+**這是本專案第一次把一條 Wiki 數值敘述升級為 Fact。**
+[ペーパチ詳細](https://wikiwiki.jp/paperman/ペーパチ詳細) 寫「ペーパチCASHにレベル制限はありませんが、
+ペーパチPGはレベル10から」。native 的 gate 4 **只掛在 PG 分支上、CASH 分支沒有**，
+且常數就是 `10`。Wiki 的**定性規則與具體數值同時被 client 二進位證實** ——
+注意這仍只是 **client-side gate**：原服是否在伺服端覆核同一條件，依舊無證據。
+
+**同頁的「1回30CASH／1000PG」則仍然 UNRESOLVED。** 本輪找到的
+`>0` / `≥300` / `≥10000` 是**餘額門檻**，不是價格：`≥300` 出現在 CASH-ten、
+`≥10000` 出現在 PG-ten，若 Wiki 的 30CASH／1000PG 為真則十連正好是 300／10,000，
+**數值相容**；但 client 從未把這些常數當作扣款額，扣款一律由 995 推播覆寫本地錢包。
+因此價格不得寫入 server。
+
+**900 的 selector↔drawCount 配對本輪完全閉合（更正 §2576 的 MEDIUM 標記）。**
+`sub_99D0A0` 先依控制項把 `this+148` 設為 1/2/3，再以「控制項不是那三個單抽名」
+決定 drawCount 傳 10 還是 1，故實際只可能送出四組：
+`{1,10}` START_TEN_CASH、`{1,1}` START_CASH、`{2,1}` START_PG、`{3,1}` START_CP。
+即 **selector 1=CASH、2=PG、3=CP**，這現在是 **Fact / HIGH**（先前因
+`Source__240/241` 兩個寬字串字面值被反編譯器丟失而只能標 Inference）——
+定案依據是 gate 的掛法：`Source__240` 分支獨佔等級檢查＋`dword_BEAE4C`，
+與 Wiki「只有 PG 有 Lv10 限制」對齊，故 `Source__240` = `START_PG`(selector 2)、
+`Source__241` = `START_CASH`(selector 1)。同理 700 的 `Source__242/243` 對應
+PG-ten/CASH-ten，四個 raw selector 1/2/4/5 的 cash/PG 歸屬也隨之確定。
+
+**對 server 的可操作結論（僅此一項）。** 若日後實作 700/900 的成功路徑，
+**必須先發 995 建立客戶端的 PG/CASH/等級**，否則 client 會在本地 gate 就擋下請求、
+封包根本不會送出。這是 wire ordering 事實，不是獎池政策。獎池、機率、
+保底、扣款金額一律維持 UNRESOLVED，fail-closed 不變。
+
+### 5b-18. 第十四輪副產物：三個先前未登錄的 UI 資源檔
+
+`verify_resource_coverage.py` 的 170 檔清單是以**寬字串字面值**列舉的；
+本輪順帶核對 `Extracted/ui/*.xml` 中尚未被任何 md 引用的檔案，得到三筆：
+
+| 檔案 | native 載入點 | 結論 |
+|---|---|---|
+| `TNMT_Awardproperty.xml` | `sub_717E50(L"TNMT_Awardproperty.xml")` → `sub_701BD0(..., L"tournamentAwardTable")` | **純版面座標表**：`award_1..3` + `nomarl_award`／`abnomarl_award`（原廠拼字如此），各含 `emblem_N`／`present_N` 的 `pos_N` 與 `size`。只證明錦標賽頒獎畫面最多排 4 個 emblem／4 個 present，**不含獎品內容**；與 756–777 的 22 個 `*_TNMT_*` opcode 尚未接上。 |
+| `gameroom_teamShuffle.xml` | `sub_717E50(L"gameroom_teamShuffle.xml")` | 隊伍洗牌的**等待動畫**版面（`SHUFFLEING` msprite + `SHUFFLE_WAITING`）。佐證洗牌是一個有可見過渡狀態的流程，但時長／觸發／結果全由伺服端決定，無 client 證據。 |
+| `PopUpMedalOfHonor.xml` | **exe 中查無檔名字串** | 與 `GameInOption.ini` 同類：**可讀 ≠ 生效**。其 `QUESTDESC`／`QUESTNAME`／`QUESTDETAIL` 三欄暗示名誉ゲージ彈窗曾與任務系統共用版面，但本 revision 無載入證據，標 **UNRESOLVED**。 |
+
+`NewSkillColorTable.xml`（5 段 × 迅/敏/根/防/集 的 RGB）亦屬先前未登錄者，
+但它只是 §5d-4 `NewSkillLevTable` 的**配色伴隨表**，純顯示用途，
+不影響任何數值推導，此處僅備案。
+
 ### 5b-5. 兩項「僅 Wiki、刻意不採用」的記錄
 
 - **房間資訊欄位。** [MAP・ルール詳細](https://wikiwiki.jp/paperman/MAP・ルール詳細)

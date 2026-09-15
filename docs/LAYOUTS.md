@@ -340,7 +340,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 989 | GL_MATCHINGROOM_CANCLE_ACK | sub_588020 | `s8/bool` |
 | 991 |  | sub_56FA00 | `s8/bool` |
 | 994 | GG_ASSISTPOINT_NOTIFY | sub_5676D0 | `u8 u8 s32 u8 u8 s32 s32 s32` |
-| 995 |  | sub_567AE0 | `s32 s32 s32` |
+| 995 | (未註冊; 錢包/等級推播 → PACKETS.md §3.15r) | sub_567AE0 | `s32 pg, s32 cash, s32 level` |
 | 997 |  | sub_567F20 | `u8` |
 | 999 |  | sub_568170 | `u8 str` |
 | 1001 |  | sub_567D50 | `u16 str s32 s32 str` |

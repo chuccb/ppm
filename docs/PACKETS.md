@@ -2575,7 +2575,52 @@ pmSlotMachineMovieSequenceTable → 讀 pepachi/pe-pachi_scenario.xml
 | `RecommandItem.pat` has 1,030 set rows (plus two header rows). `808` sends `{s32 count,count×s32 recommendationId}` only for a nonempty client selection; `809` returns `{s32 count,count×{s32 itemId,u8 rawClass,u8 rawValue}}`. | **Fact / HIGH** | decoded resource, `sub_46E140`, `CLobbyShop::sub_46AD00` case 809. Client maps classes 1/4→22, 2/5→23, 3→24, but the server-side lookup/meaning is **UNRESOLVED**. No 808 handler is registered. |
 | `ui/Gaccha.xml` enables only `START_CASH` and `START_TEN_CASH`; its `START_PG` and `START_CP` blocks are commented out. `ui/pepachi.xml` enables `START_PG`, `START_CASH`, `START_PG_10`, and `START_CASH_10`. | **Fact / HIGH (UI revision only)** | exact `main:Extracted` XML. The residual code can still recognize the commented Gaccha control names, so a code path is not evidence that this resource revision exposes that purchase. |
 | 700 is a five-byte request `{u8 selector,s32 selectedCharacterId}`. Its writer derives the second value as `19,900,000 + (selectedCharacterValue mod 100,000)` and its caller supplies raw selectors 1, 2, 4, and 5. | **Fact / HIGH** | `sub_8458D0`, `sub_8459C0`, `sub_525790`; the old `{count,coin_type}` description is disproven. |
-| The Pepachi caller's local balance gates and four UI names associate selector 1/2/4/5 with cash-single / PG-single / cash-ten / PG-ten. | **Inference / MEDIUM** | `sub_8459C0` gates selectors 1/4 on the cash balance at 1/300 and 2/5 on the other balance at 1/10,000; XML has those exact four labels. The decompiler lost the four wide-string initializers, so this is not direct name-to-selector evidence. |
+| The Pepachi caller's local balance gates and four UI names associate selector 1/2/4/5 with cash-single / PG-single / cash-ten / PG-ten. | **Fact / HIGH** (upgraded from Inference; see §3.15r) | `sub_8459C0` gates selectors 1/4 on the cash balance at 1/300 and 2/5 on the other balance at 1/10,000; XML has those exact four labels. The decompiler lost the four wide-string initializers, but the **level gate is attached to only one branch**, which disambiguates them — see §3.15r. |
+
+#### 3.15r 700/900 的送出前置條件：三個 client gate 與 995 錢包推播（本輪定案）
+
+**Fact / HIGH.** `sub_8459C0`(700 caller) 與 `sub_99D0A0`(900 caller) 結構同構，
+各自持有一份常數，在**送出封包之前**做四道本地檢查，失敗則顯示
+`msgtableres.lang` 訊息並 `return 0`（封包完全不送出）：
+
+| # | 條件 | 700 常數 | 900 常數 | 失敗 msg id / 原文 |
+|---|---|---|---|---|
+| 1 | CASH `*dword_EE8D0C > 0`（ten 需 `≥300`） | — | — | **264** `ＣＡＳＨが不足しています。` |
+| 2 | PG `*dword_EE8D18 > 0`（ten 需 `≥10000`） | — | — | **252** `PGが不足しています。` |
+| 3 | 禮物盒 `i_23 < 上限` | `dword_BDBC9C`=**200** | `dword_BEAE50`=**200** | **847** `プレゼントボックスに空きがありません。…%d個まで保管できます。` |
+| 4 | **僅 PG 分支**：等級 `n10_2 >= 下限` | `dword_BDBC98`=**10** | `dword_BEAE4C`=**10** | **846** `ペーパチはレベル「%d」以上からご利用できます。` |
+
+三個 global 的身分由 **995**（`sub_567AE0`，dispatcher `case 995u`，layout `s32 s32 s32`）
+一次定案 —— 它就是錢包／等級推播：
+
+```
+995 field[0] → *dword_EE8D18  = PG    （與 198 尾段 game_point 同一 global，sub_5392A0）
+995 field[1] → *dword_EE8D0C  = CASH  （反編譯器誤命名為 `ArgList`；實為 B0F0xx 全域，非堆疊變數）
+995 field[2] →  n10_2         = level （EE8D10）
+```
+
+`n10_2` = 等級的旁證：`sub_92EF00(18, 23, n10_2, 0)`；大廳以 `n10_2 - 1` 索引
+`Class` 資源表取階級圖示；並且它是 `itemdata.pat +644`（需求等級）的比較對象
+——`sub_534FE0(id) > n10_2` 時顯示 msg **922**。
+`i_23` = 禮物盒待領數的旁證：198 (`sub_570550`) 尾段的 `u16` 寫入它（§3.2）、
+299 寫入時遞增、301 由 `sub_57AFE0` 遞減。
+
+**selector 定名（本輪由 gate 掛法消歧）。** `sub_99D0A0` 先依控制項設 `this+148`
+為 1/2/3，再依「是否為單抽控制項」決定 drawCount = 1 或 10，實際只送四組：
+`{1,10}` `START_TEN_CASH`、`{1,1}` `START_CASH`、`{2,1}` `START_PG`、`{3,1}` `START_CP`。
+由於**等級檢查只掛在 `Source__240` 分支**、且 Wiki 與 msg 846 都指明「只有 PG 有等級限制」，
+故 `Source__240`=`START_PG`(selector **2**)、`Source__241`=`START_CASH`(selector **1**)、
+selector **3**=CP。700 的 `Source__242/243` 同理為 ten 版本，其 raw selector 1/2/4/5
+的 cash/PG 歸屬隨之確定。
+
+**Server 的唯一可操作結論。** 實作 700/900 成功路徑前，**必須先以 995 建立
+client 的 PG/CASH/level**，否則請求會被本地 gate 攔下、封包不會到達伺服器。
+這是 wire ordering 事實。
+
+**仍 UNRESOLVED（不得回填）。** `>0` / `≥300` / `≥10000` 是**餘額門檻**而非價格；
+它們與 Wiki 的「30CASH／1000PG 單抽」數值相容（十連即 300／10,000），但 client
+從不用這些常數扣款——錢包一律由 995 覆寫。獎池、機率、保底、扣款額與伺服端是否
+覆核同一 gate，全部維持 UNRESOLVED，700→701 / 900→901 的 fail-closed 回覆不變。
 | 900 is a two-byte request `{u8 selector,u8 drawCount}`. Its caller directly sends `{3,1}` for `START_CP` and `{1,10}` for `START_TEN_CASH`; the two residual control paths send `{1,1}` and `{2,1}`. | **Fact / HIGH for raw body/pairs; Inference / MEDIUM for residual-control names** | `sub_99CFA0`, `sub_99D0A0`, and `ui/Gaccha.xml`. The active resource leaves only cash single/ten controls; its PG/CP XML is commented out. |
 | 461 is sent only after the PaperCode UI has exactly 16 upper-case ASCII alphanumeric characters. 464 is `{u8 duplicateChoice}` for cancel (0) or `{u8=1,str}` for its GET action. | **Fact / HIGH** | `CUILobbyStorePaperCode::sub_4C3E70`, `sub_4C4060`, `CPopupDuplicatedItem::sub_50FFC0`, `sub_510010`, `sub_57CCE0`. This establishes local syntax and choice wire—not a valid-code or grant policy. |
 | 463 is an empty C2S send. The PaperCode UI sends it only on the first `a2==1` activation while its local `+240` sentinel is zero, then sets that sentinel to one. The opcode's `NOTIFY` name does not reverse this observed direction. | **Fact / HIGH for wire/local gate; UNRESOLVED for service effect** | `sub_57CB20` and the caller at `0x4C3CF0`. There is no recovered server response/consumer relation that permits a code/session state mutation. |

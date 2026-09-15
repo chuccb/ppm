@@ -1,0 +1,215 @@
+#!/usr/bin/env python3
+"""Re-derive the 700/900 client-side send gates from the binary and resources.
+
+Run from any working directory:
+    python3 server-cs/tools/verify_gacha_gates.py
+
+`docs/WIKI_MECHANICS.md` §5b-17 and `docs/PACKETS.md` §3.15r claim that the
+Pepachi (700) and capsule (900) callers refuse to send until four *local*
+conditions hold, that the level gate exists on the PG branch only, and that
+opcode 995 is what populates the three globals those gates read.
+
+Every one of those claims is re-derivable from two files already in the repo,
+so this tool re-derives them instead of trusting the prose:
+
+  * the four gate constants (10 / 200, one pair per caller) from their
+    `// idb` initialisers in `PaperMan.exe.c`;
+  * the asymmetry itself -- the level global appears in the PG arm of each
+    caller and the level message id appears exactly once per caller;
+  * the message ids the failure arms display, resolved through
+    `msgtableres.lang` so a text drift is caught as well as a number drift;
+  * that `sub_567AE0` is dispatched from `case 995u` and writes all three
+    globals, which is the only reason we can name them.
+
+This reads the dump textually. It is a drift alarm, not a decompiler.
+"""
+from __future__ import annotations
+
+import re
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+DUMP = ROOT / "PaperMan.exe.c"
+MSGTABLE = ROOT / "Extracted" / "ui" / "lang" / "msgtableres.lang"
+
+# The two structurally identical callers, with the constants documented for each.
+CALLERS = {
+    "sub_8459C0": {
+        "opcode": 700,
+        "sender": "sub_8458D0",
+        "level_global": "dword_BDBC98",
+        "presentbox_global": "dword_BDBC9C",
+    },
+    "sub_99D0A0": {
+        "opcode": 900,
+        "sender": "sub_99CFA0",
+        "level_global": "dword_BEAE4C",
+        "presentbox_global": "dword_BEAE50",
+    },
+}
+
+LEVEL_MIN = 10
+PRESENTBOX_MAX = 200
+
+# Wallet/level globals, and the 995 field order that lets us name them.
+PG_GLOBAL = "dword_EE8D18"
+CASH_GLOBAL = "dword_EE8D0C"
+LEVEL_GLOBAL = "n10_2"
+WALLET_READER = "sub_567AE0"
+WALLET_CASE = "case 995u:"
+
+# Failure-arm message ids, as hex literals in the dump, with the exact resource
+# text each must still resolve to.
+MESSAGES = {
+    0x108: "ＣＡＳＨが不足しています。",
+    0xFC: "PGが不足しています。",
+    0x34E: "ペーパチはレベル「%d」以上からご利用できます。",
+    0x34F: "プレゼントボックスに空きがありません。",
+}
+
+# `char name[] = { '\n', '\0', '\0', '\0' };` -- a little-endian dword written
+# out as four character escapes by Hex-Rays.
+IDB_INIT = r"char {name}\[\] = \{{([^}}]*)\}}"
+
+
+def fail(failures: list[str], message: str) -> None:
+    failures.append(message)
+
+
+def dword_initialiser(text: str, name: str) -> int | None:
+    """Value of a Hex-Rays `char name[] = {...}` four-byte initialiser."""
+    match = re.search(IDB_INIT.format(name=re.escape(name)), text)
+    if match is None:
+        return None
+    literals = re.findall(r"'((?:\\.|[^'\\])*)'", match.group(1))
+    if len(literals) != 4:
+        return None
+    value = 0
+    for index, literal in enumerate(literals):
+        try:
+            byte = ord(literal.encode().decode("unicode_escape"))
+        except (UnicodeDecodeError, TypeError):
+            return None
+        value |= byte << (8 * index)
+    return value
+
+
+def function_body(text: str, name: str) -> str | None:
+    """Body of a defined function, located by brace matching from its header."""
+    head = re.search(r"\n[A-Za-z_][^\n]*\b" + re.escape(name) + r"\([^)]*\)\s*\r?\n\{",
+                     text)
+    if head is None:
+        return None
+    start = text.index("{", head.start())
+    depth = 0
+    for index in range(start, len(text)):
+        if text[index] == "{":
+            depth += 1
+        elif text[index] == "}":
+            depth -= 1
+            if depth == 0:
+                return text[start:index + 1]
+    return None
+
+
+def message_entries() -> dict[int, str] | None:
+    """`entry i = lines[i+3]`, the decode rule fixed in RESOURCES.md section 8."""
+    if not MSGTABLE.is_file():
+        return None
+    lines = MSGTABLE.read_bytes().decode("cp932").split("\n")
+    return {index: line.strip() for index, line in enumerate(lines[3:])}
+
+
+def main() -> None:
+    failures: list[str] = []
+    checked = 0
+
+    def check(label: str, actual: object, expected: object) -> None:
+        nonlocal checked
+        checked += 1
+        if actual != expected:
+            fail(failures, f"{label}: expected {expected!r}, got {actual!r}")
+
+    if not DUMP.is_file():
+        print(f"skipped: {DUMP} is absent (working branches may omit it)")
+        return
+    text = DUMP.read_text(encoding="utf-8", errors="replace")
+
+    for caller, spec in CALLERS.items():
+        body = function_body(text, caller)
+        if body is None:
+            fail(failures, f"{caller}: no function body found in the dump")
+            continue
+
+        # The gate constants themselves.
+        check(f"{caller} level floor ({spec['level_global']})",
+              dword_initialiser(text, spec["level_global"]), LEVEL_MIN)
+        check(f"{caller} present-box cap ({spec['presentbox_global']})",
+              dword_initialiser(text, spec["presentbox_global"]), PRESENTBOX_MAX)
+
+        # The caller must actually read each global, and reach its sender.
+        for role in ("level_global", "presentbox_global"):
+            if spec[role] not in body:
+                fail(failures, f"{caller} never reads {spec[role]}")
+            checked += 1
+        if spec["sender"] not in body:
+            fail(failures,
+                 f"{caller} no longer calls its sender {spec['sender']} "
+                 f"(opcode {spec['opcode']})")
+        checked += 1
+
+        # Present-box and level failures are shown once each; the level message
+        # appearing exactly once is what makes the gate PG-only rather than
+        # applying to both payment branches.
+        check(f"{caller} shows the level message (846) exactly once",
+              body.count("0x34Eu"), 1)
+        check(f"{caller} shows the present-box message (847) exactly once",
+              body.count("0x34Fu"), 1)
+
+        # Both callers gate the cash balance; only 700 also has the PG balance
+        # arm, because 900's PG control is a separate selector.
+        check(f"{caller} shows the CASH-shortfall message (264)",
+              "0x108u" in body, True)
+
+    # Opcode 995 is the only reason the three globals can be named.
+    reader = function_body(text, WALLET_READER)
+    if reader is None:
+        fail(failures, f"{WALLET_READER}: no function body found in the dump")
+    else:
+        for global_name in (PG_GLOBAL, CASH_GLOBAL, LEVEL_GLOBAL):
+            if global_name not in reader:
+                fail(failures,
+                     f"{WALLET_READER} no longer writes {global_name}; "
+                     "the 995 field-order naming in PACKETS.md 3.15r is stale")
+            checked += 1
+
+    dispatch = re.search(re.escape(WALLET_CASE) + r"\s*\r?\n\s*" + re.escape(WALLET_READER),
+                         text)
+    check(f"{WALLET_READER} is dispatched from {WALLET_CASE}", dispatch is not None, True)
+
+    # The failure-arm texts, through the documented decode rule.
+    entries = message_entries()
+    if entries is None:
+        print("note: msgtableres.lang absent; message text checks skipped")
+    else:
+        for message_id, expected in MESSAGES.items():
+            actual = entries.get(message_id, "")
+            checked += 1
+            if not actual.startswith(expected):
+                fail(failures,
+                     f"message {message_id} ({message_id:#x}): expected text to "
+                     f"start with {expected!r}, got {actual!r}")
+
+    if failures:
+        print("gacha gate verification failed:")
+        for failure in failures:
+            print(f"  {failure}")
+        raise SystemExit(1)
+
+    print(f"gacha send gates OK: {checked} checks re-derived from "
+          "PaperMan.exe.c and Extracted/")
+
+
+if __name__ == "__main__":
+    main()

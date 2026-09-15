@@ -38,6 +38,7 @@
 | `server-cs/tools/dump_maplist.py` | 解出 `Extracted/ui/cfg/maplist.pat` 的 123 張地圖 (id / mode bitmask / .pmm 路徑, stride 836B 自證); `--check` 可驗證 modeIndex→bit 表 |
 | `server-cs/tools/verify_dispatcher_coverage.py` | 直接從 `PaperMan.exe.c` 重抽主 dispatcher `sub_58B010` 的 306 個 case，比對 `docs/LAYOUTS.md` 是否全覆蓋；並報告「有 native handler 但名稱表未註冊」的 opcode 數 |
 | `server-cs/tools/verify_resource_claims.py` | 從 `Extracted/` 重算 `docs/RESOURCES.md` 的可數主張（itemdata 21,164／kind==9 10,914、maplist 123、Quest 844、weaponparts 1,108、partsability 413、msgtable 1,346、convars 14 組…），數字對不上就失敗 |
+| `server-cs/tools/verify_gacha_gates.py` | 從 `PaperMan.exe.c` + `msgtableres.lang` 重抽 700/900 的四道 client 送出前置 gate（等級下限 10／禮物盒上限 200／CASH／PG）、995 錢包推播寫入的三個 global，以及失敗訊息 264/252/846/847 的實際文字；常數或訊息漂移即失敗 |
 | `server-cs/tools/verify_resource_coverage.py` | 列舉 `PaperMan.exe.c` 中所有資源檔名（170 個），比對 `Extracted/` 是否齊備（162 個，95%）；8 個缺檔皆已分類，出現未分類者即失敗。需完整樹，工作分支會自動跳過 |
 | `server-cs/` | **C# 14 / .NET 10 伺服器** (協定層 + login/channel TCP + source-proven UDP-private 19→20 control + SQLite + 自測), 見 `server-cs/README.md` |
 
