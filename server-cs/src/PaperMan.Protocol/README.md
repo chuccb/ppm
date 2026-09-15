@@ -10,22 +10,41 @@ unqualified protocol-layout statement are **Fact/HIGH**. A field marked
 `Raw`, `Reserved`, `Opaque`, or `ClientReported` is **UNRESOLVED** as to domain
 meaning even when its position and width are Fact/HIGH.
 
+## Directory ownership
+
+**Architecture decision.** Files are grouped by the protocol responsibility a
+reader needs to investigate, not by a guessed server feature. Their public
+`PaperMan.Protocol` namespace is unchanged: relocating a file does not create
+a policy layer or alter its wire responsibility.
+
+| Directory | Owns | Does not own |
+|---|---|---|
+| [`Core/`](Core/) | the mutable `Packet` payload, read cursor, CP949 strings, and primitive encodings | framing transport, encryption, compression, or packet-family policy |
+| [`Codecs/`](Codecs/) | TCP/UDP frame transforms and their AES/LZ implementations | sockets, connection lifetime, UDP routing, or authorization |
+| [`Contracts/`](Contracts/) | small exact reusable request/response grammars and private sub-op envelopes | handler registration, state checks, persistence, grants, or response policy |
+| [`Generated/`](Generated/) | the generated TCP top-level opcode enum | any handwritten source; regenerate it from the catalog instead |
+
+The deliberately flat `Contracts/` directory keeps each narrow, named grammar
+one click away. A deeper inferred `Login/`, `Inventory/`, or `Clan/` hierarchy
+would add navigation without establishing a new protocol or server ownership
+boundary.
+
 Start from the table below instead of searching all protocol files by a guessed
 business name.
 
 | Need to change or investigate | Start here | Evidence / boundary |
 |---|---|---|
-| One packet field, CP949 string, nested packet, or length-prefixed blob | `Packet.cs` | Native `Packet` layout and `sub_5925xx` primitives. Fixed-width reads reject short fields; a contract whose native grammar proves a required NUL uses `ReadNulTerminatedAnsiString` rather than relying on the permissive `ReadStr` primitive. |
-| TCP frame header, AES stage, LZ stage, or compression threshold | `PacketCodec.cs` | Native TCP pipeline `sub_593280` / `sub_593320`; do not apply its LZ rule to UDP. |
-| Private UDP datagram framing | `UdpPacketCodec.cs` | `CUDPManager` send/receive path. AES-only framing; no TCP compression threshold. |
-| AES key or CFB-128 operation | `PaperAes.cs` | `sub_403430`, `sub_403DE0`, `sub_4042A0`, `sub_404470`. The key bytes are client evidence, not an account or authorization secret. |
-| PaperMan LZ token stream | `PaperLz.cs` | `sub_591600` / `sub_591900`; keep overlapping back-reference behavior and compression fallback. |
-| Login 682/681, greeting 693/694, data-revision guard | `LoginWire.cs` | Exact reusable login wire grammar. It does not establish original-service authentication or billing policy. |
-| Channel 142/144/196 and packed calendar | `ChannelBootstrapWire.cs` | Exact native reader / writer ordering. Unresolved values retain wire-position names such as `ReservedValueAfterChannelNameOne`. |
-| Private UDP opcode 19 / empty opcode 20 control exchange | `UdpControlWire.cs` | `sub_596670` and `sub_595E80` case 20 only. Do not generalize this to P2P, NAT traversal, gameplay UDP, or session authority. |
-| Inventory new-skill profile records | `NewSkillProfileWire.cs` | 255/467 reusable fixed record grammar. Item entitlement remains a server-domain concern. |
-| Clan protocol sub-op envelope | `ClanTunnel.cs` | 583/584 container: leading `s32` sub-op is distinct from the top-level opcode catalog. |
-| Top-level TCP opcode spelling or value | `Opcode.cs` | **Generated** from `../../../db/packets.tsv` by `../../tools/gen_opcodes.py`; never hand-edit the output. |
+| One packet field, CP949 string, nested packet, or length-prefixed blob | [`Core/Packet.cs`](Core/Packet.cs) | Native `Packet` layout and `sub_5925xx` primitives. Fixed-width reads reject short fields; a contract whose native grammar proves a required NUL uses `ReadNulTerminatedAnsiString` rather than relying on the permissive `ReadStr` primitive. |
+| TCP frame header, AES stage, LZ stage, or compression threshold | [`Codecs/PacketCodec.cs`](Codecs/PacketCodec.cs) | Native TCP pipeline `sub_593280` / `sub_593320`; do not apply its LZ rule to UDP. |
+| Private UDP datagram framing | [`Codecs/UdpPacketCodec.cs`](Codecs/UdpPacketCodec.cs) | `CUDPManager` send/receive path. AES-only framing; no TCP compression threshold. |
+| AES key or CFB-128 operation | [`Codecs/PaperAes.cs`](Codecs/PaperAes.cs) | `sub_403430`, `sub_403DE0`, `sub_4042A0`, `sub_404470`. The key bytes are client evidence, not an account or authorization secret. |
+| PaperMan LZ token stream | [`Codecs/PaperLz.cs`](Codecs/PaperLz.cs) | `sub_591600` / `sub_591900`; keep overlapping back-reference behavior and compression fallback. |
+| Login 682/681, greeting 693/694, data-revision guard | [`Contracts/LoginWire.cs`](Contracts/LoginWire.cs) | Exact reusable login wire grammar. It does not establish original-service authentication or billing policy. |
+| Channel 142/144/196 and packed calendar | [`Contracts/ChannelBootstrapWire.cs`](Contracts/ChannelBootstrapWire.cs) | Exact native reader / writer ordering. Unresolved values retain wire-position names such as `ReservedValueAfterChannelNameOne`. |
+| Private UDP opcode 19 / empty opcode 20 control exchange | [`Contracts/UdpControlWire.cs`](Contracts/UdpControlWire.cs) | `sub_596670` and `sub_595E80` case 20 only. Do not generalize this to P2P, NAT traversal, gameplay UDP, or session authority. |
+| Inventory new-skill profile records | [`Contracts/NewSkillProfileWire.cs`](Contracts/NewSkillProfileWire.cs) | 255/467 reusable fixed record grammar. Item entitlement remains a server-domain concern. |
+| Clan protocol sub-op envelope | [`Contracts/ClanTunnel.cs`](Contracts/ClanTunnel.cs) | 583/584 container: leading `s32` sub-op is distinct from the top-level opcode catalog. |
+| Top-level TCP opcode spelling or value | [`Generated/Opcode.cs`](Generated/Opcode.cs) | **Generated** from `../../../db/packets.tsv` by `../../tools/gen_opcodes.py`; never hand-edit the output. |
 
 ## Naming rules
 

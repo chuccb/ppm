@@ -11,10 +11,10 @@
 
 | 區域 | 檔案 | 責任與 ownership |
 |---|---|---|
-| Solution 與 generated catalog | `PaperMan.slnx`, `tools/gen_opcodes.py`, `src/PaperMan.Protocol/Opcode.cs` | `db/packets.tsv` 是 opcode source；要改 opcode 名稱或值時執行 generator，不手改 `Opcode.cs`。 |
+| Solution 與 generated catalog | `PaperMan.slnx`, `tools/gen_opcodes.py`, `src/PaperMan.Protocol/Generated/Opcode.cs` | `db/packets.tsv` 是 opcode source；要改 opcode 名稱或值時執行 generator，不手改 `Opcode.cs`。 |
 | Protocol source guide | [`src/PaperMan.Protocol/README.md`](src/PaperMan.Protocol/README.md) | 先按 wire concern 找到 `Packet`、TCP/UDP codec、crypto、named contract 或 generated opcode catalog；明確區隔 client evidence 與 server policy。 |
-| Packet primitives | `Packet.cs`, `PaperAes.cs`, `PaperLz.cs`, `PacketCodec.cs`, `UdpPacketCodec.cs` | 純 protocol TCP/UDP framing、CP949 字串、AES 與 LZ；不放 socket、database、account 或 gameplay policy。 |
-| 具名 wire contracts | `LoginWire.cs`, `ChannelBootstrapWire.cs`, `UdpControlWire.cs`, `NewSkillProfileWire.cs`, `ClanTunnel.cs` | 對 exact reusable grammar 使用具名欄位 contract；未確認欄位保留 raw/conservative 名稱，不虛構 business meaning。 |
+| Packet primitives | `Core/Packet.cs`; `Codecs/{PaperAes,PaperLz,PacketCodec,UdpPacketCodec}.cs` | 純 protocol TCP/UDP framing、CP949 字串、AES 與 LZ；不放 socket、database、account 或 gameplay policy。 |
+| 具名 wire contracts | `Contracts/{LoginWire,ChannelBootstrapWire,UdpControlWire,NewSkillProfileWire,ClanTunnel}.cs` | 對 exact reusable grammar 使用具名欄位 contract；未確認欄位保留 raw/conservative 名稱，不虛構 business meaning。 |
 | Host 與 connection boundary | `Program.cs`, `ServerContext.cs`, `ServerDataPaths.cs`, `Session.cs`, `Router.cs` | 零參數 startup、listener configuration、TCP session lifetime、packet ordering、role/state gate 與 opcode dispatch。主路徑為 `Program → Session.ReceiveAsync → Router → handler`。 |
 | Process-local live state | `ChannelAdmissionRegistry.cs`, `SessionRegistry.cs`, `Rooms.cs` | one-use 681→143 admission、online-session lookup、rooms/seats 與 room battle state；不是 durable state，account-owned data 仍以 SQLite 為準。 |
 | Narrow UDP boundary | `UdpControlServer.cs` | AES-only private UDP 19→empty-20 source-address reply；刻意不是 generic UDP、P2P、relay 或 gameplay server。 |

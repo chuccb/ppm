@@ -226,7 +226,7 @@ raw4 result           native 以 raw 4B 讀入，但分支只檢查 low byte；
 ```
 
 **2026-09 login cross-check / server guardrails.** `server-cs` now puts this
-wire contract in `PaperMan.Protocol/LoginWire.cs`, including a self-test that
+wire contract in `PaperMan.Protocol/Contracts/LoginWire.cs`, including a self-test that
 mimics the native read order. `GL_LOGIN_REQ(682)` is structurally exact:
 `str account, str password_or_token, u64 packed_data_revision, u8 fingerprint_source,
 raw[24]`; no optional/trailing bytes are accepted. The client builder emits a
@@ -401,7 +401,7 @@ the 500-ms scheduler and sixth-send fallback is claimed here.
 
 ### Server implementation boundary
 
-`PaperMan.Protocol/UdpPacketCodec.cs` encodes exactly the native UDP AES-only
+`PaperMan.Protocol/Codecs/UdpPacketCodec.cs` encodes exactly the native UDP AES-only
 framing. AES-CFB encryption is **not** an authentication/MAC result, and no
 native server admission token is recovered. `PaperMan.Server/UdpControlServer.cs` binds the advertised IPv4
 `UdpHost/UdpPort`, parses only the complete opcode-19 shape above, and immediately

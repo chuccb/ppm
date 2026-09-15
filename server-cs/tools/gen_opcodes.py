@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""從 db/packets.tsv 重新產生 src/PaperMan.Protocol/Opcode.cs。
+"""從 db/packets.tsv 重新產生 src/PaperMan.Protocol/Generated/Opcode.cs。
 
 用法: python3 server-cs/tools/gen_opcodes.py
 (packets.tsv 來源: PaperMan.exe.c 的 sub_9D2050 封包名稱註冊表)
@@ -8,7 +8,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 TSV = ROOT / "db" / "packets.tsv"
-OUT = ROOT / "server-cs" / "src" / "PaperMan.Protocol" / "Opcode.cs"
+OUT = ROOT / "server-cs" / "src" / "PaperMan.Protocol" / "Generated" / "Opcode.cs"
 
 rows = []
 for line in TSV.read_text(encoding="utf-8").splitlines():
