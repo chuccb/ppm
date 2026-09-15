@@ -114,7 +114,7 @@ uses cancellation and disposes its socket only after its receive loop exits.
 - `Router` 是唯一的 opcode registry 與 listener/state boundary；它不承載
   gameplay policy。各 `Handlers.*` 檔以協定子系統切分（Auth、Channel、Lobby、
   Room、Join、BattleRelay、BattleObjects、Shop、Stats、Clan、Quest、Friend、
-  Voice、Warehouse、Master、GameCenter、Ai），使 opcode 的處理位置可直接搜尋。
+  Voice、Warehouse、Master、GameCenter、Ai），使 opcode 的處理位置可直接搜尋。Master 的 22 個已註冊 request 亦採 `Handlers.Master.Registry.cs` + direct `Handlers.MASTER_*.cs`。
   Shop/Stats/Friend/Clan/Quest/Voice/Warehouse/GameCenter 的已註冊 request 均已拆為
   direct canonical family source；唯一無官方 request token 的 Shop opcode 206 保持為
   顯式 `RawOpcode206`，而非臆造 GS 名稱。

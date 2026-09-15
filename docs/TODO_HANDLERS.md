@@ -183,7 +183,7 @@
 > ⑥ **自測與驗證**: SelfTest 增測 23 項封包編解碼; smoke_test 增測 Step 14 CRUD; 全測試 100% 通過。
 >
 > 五十五輪 (GM / MASTER、GameCenter 迷你遊戲、PVE / AI 防衛戰 37 個封包全鏈落地):
-> ① **GM / MASTER 管理指令簇 (Handlers.Master.cs)**:
+> ① **GM / MASTER 管理指令簇 (Handlers.Master.Registry.cs + direct `Handlers.MASTER_*.cs`)**:
 >    - 275/276 (MEMO 私訊)、277/278 (MEMOALL 全服廣播)、279/280 (USERCUT 踢線)、
 >      281/282 (USERCUT2 依 UID 踢線)、283/284 (ROOMCUT 解散房間)、285/286 (MSET GM旗標)、
 >      287/288 (PRINTUSER 在線人數)、289/290 (USERINFO 查玩家)、291/292 (LISTCUT)、
