@@ -748,6 +748,42 @@ def main() -> None:
                       "voice_customize_contents.xml")
                      if (EXTRACTED / "ui" / "system" / name).is_file()))
 
+    # RESOURCES.md 5d-11b: move_speed belongs to the stock part group alone,
+    # and it is a flag (1 or 3), not the magnitude -- the posture deltas are.
+    parts = EXTRACTED / "ui" / "cfg" / "partsability.pat"
+    if not parts.is_file():
+        skipped.append("ui/cfg/partsability.pat")
+    else:
+        blob = decrypt(parts)
+        lines = blob.decode("cp932", "replace").split("\r\n")
+        columns = [name.strip() for name in lines[1].split(",")]
+        table = [row for row in csv.reader(lines[2:]) if len(row) == len(columns)]
+        check("partsability rows", len(table), 413)
+        speed = columns.index("move_speed")
+        posture = [columns.index(name) for name in
+                   ("miJump", "miSit", "miStand", "miWalk", "miRun")]
+
+        def group(row: list[str]) -> int:
+            return int(row[0]) // 10000 * 10000
+
+        STOCK = 15250000
+        check("move_speed is set only in the stock part group",
+              sorted({group(row) for row in table
+                      if row[speed].strip() not in ("", "0")}), [STOCK])
+        check("every stock row sets move_speed",
+              [row[0] for row in table
+               if group(row) == STOCK and row[speed].strip() in ("", "0")], [])
+        check("move_speed is a two-valued flag",
+              sorted({row[speed].strip() for row in table
+                      if group(row) == STOCK}), ["1", "3"])
+        # Posture deltas span several groups, which is why move_speed cannot
+        # be the magnitude.
+        check("posture deltas span more than the stock group",
+              sorted({group(row) for row in table
+                      if any(row[index].strip() not in ("", "0")
+                             for index in posture)}),
+              [15220000, 15240000, 15250000, 15270000, 15280000])
+
     # Every datarevision.txt must agree: Extracted/ is one coherent snapshot.
     revisions = {path.read_text(encoding="utf-8", errors="replace").strip()
                  for path in EXTRACTED.rglob("datarevision.txt")}
