@@ -1189,6 +1189,52 @@ Wiki [各種ゲージ詳細](https://wikiwiki.jp/paperman/各種ゲージ詳細)
 少數解不出的 id 也**不得**視為「不存在」——
 它們可能屬於本 revision 未隨附的資料，維持 UNRESOLVED。
 
+## 5d-16. Rocket / Plasma / Laser Property：彈道與爆風的原廠數值表
+
+三個 `ui/*Property.xml` 是**投射物物理與傷害模型**，native 各有具名類別
+（`CRocketProperty`、`CLaserProperty` 等）並以寫死檔名載入
+（`L"RocketProperty.xml"`／`L"PlasmaProperty.xml"`／`L"LaserProperty.xml"`）。
+本專案先前只在 RTTI 清單提過 `CLaserProperty`，資料內容從未解讀。
+
+### RocketProperty.xml — 26 種彈頭行為
+
+以 **26 個具名標籤**（`NONE`/`FIRE`/`WATER`/`WIND`/`GLUE`/`OODUTSU`/`TYPE01`..`TYPE20`）
+分類，**非 gunindex**。native 逐筆存成 **14 dword 的記錄**
+（`*(this + 14*a3 + N)`），欄位順序即 XML 屬性順序：
+
+| # | 欄位 | 意義 |
+|---:|---|---|
+| 0 | `commonproperty` | 特殊行為類別（實測只有 `0`×24、`1`×1(`WATER`)、`2`×1(`GLUE`)） |
+| 1–2 | `splashRatio` / `splashDist` | 爆風比率／距離 |
+| 3–4 | `splashMaxDamage` / `splashDamageRange` | **爆風最大傷害**／衰減範圍 |
+| 5–6 | `splashMaxHeight` / `splashHeightRange` | 擊飛高度／範圍 |
+| 7–8 | `MaxnuckBack` / `nuckBackRange` | 擊退量／範圍（原廠拼字 `nuck`） |
+| 9 | `bulletMoveSpeed` | 彈速 |
+| 10–11 | `TailBaseScale` / `TailTransScale` | 拖尾視覺 |
+| (+) | `LifeTime` / `ExploredMine` | 額外欄，僅部分型別有（`TYPE05` 為地雷：`LifeTime=10`、`ExploredMine=1`） |
+
+具體數值例：`NONE` 爆風 40 傷害／擊飛 250；`FIRE` 僅 10 傷害但 `splashDist=70`；
+`WIND` 擊飛高度 360 而擊退為 0；`TYPE02` 是 `splashMaxDamage=300` 且其餘全 0
+（近乎「必殺、無爆風」的特例）。
+
+### PlasmaProperty / LaserProperty — 以 gunindex 定位
+
+兩者改用 **`gunindex`＝武器段內偏移**（與 §2c-3 同一空間）。
+以 `dump_itemdata.py` 反查：
+
+* `PlasmaProperty.xml` **42 筆全部命中**，`1404..1407` 皆為 `プラズマガン`。
+* `LaserProperty.xml` **45 筆中 39 筆命中**，`1400/1401` 為 `L-1012`（雷射武器）。
+  未命中的 6 筆屬本 revision 未隨附的資料，維持 UNRESOLVED。
+
+語義完全自洽：Plasma 表對到電漿槍、Laser 表對到雷射槍。
+`LaserProperty.xml` 另有 CP949 韓文註解說明欄位
+（`gunindex`＝武器索引、`guntype` 0=基本/1=特殊、中心/中間/外側光束長度與貼圖）。
+
+**界線（重要）。** 這是本專案首次找到成套的**傷害數值**，但它們是
+**客戶端的投射物模擬參數**：命中判定、實際扣血與權威結算是否由伺服器覆核，
+**沒有任何 client 端證據**。不得據此實作伺服器傷害計算，維持 UNRESOLVED。
+`Wiki` 的威力一覧同屬歷史社群量測，兩者相符與否都不構成 service 事實。
+
 ## 5e. 版本考古 (廿一輪)
 - 根 datarevision.txt = 811034967 (patch 版本號)
 - map/maplist.dat = **舊版明文** (head f32 v1.02, 67 圖, 832B/條,

@@ -358,6 +358,19 @@ weaponparts 1,108、partsability 413，以及
 相異 3,004）。已更正，並把四個數字全部寫進 `verify_resource_claims.py`
 （現 34 項檢查）以免再次漂移。
 
+### 5b-12. 第九輪：找到成套傷害數值，但仍不採用
+
+| Wiki 敘述 | 三方比對結果 |
+|---|---|
+| [威力一覧](https://wikiwiki.jp/paperman/威力一覧) 等頁列出各武器威力（社群量測） | **首次找到原廠成套數值**，但**刻意不採用**。`ui/RocketProperty.xml` 以 26 個具名彈頭型別給出 `splashMaxDamage`／`splashRatio`／`MaxnuckBack`／`bulletMoveSpeed` 等 12 欄（部分型別另有 `LifeTime`／`ExploredMine`），native 以具名類別 `CRocketProperty` 逐筆存成 14 dword 記錄。詳 [`RESOURCES.md` §5d-16](RESOURCES.md)。 |
+| 電漿槍／雷射槍等特殊武器有獨立表現 | **確認為獨立資料表**。`PlasmaProperty.xml`（42 筆**全部**命中）與 `LaserProperty.xml`（45 筆中 39 筆命中）以 `gunindex`＝武器段內偏移索引，解出來分別是 `プラズマガン` 與 `L-1012` —— 語義完全自洽，也再次印證 §2c-3 的無碰撞偏移空間。 |
+
+**為何找到數值卻不採用。** 這些是**客戶端投射物模擬參數**。
+命中判定與實際扣血是否由伺服器覆核，**沒有任何 client 端證據**；
+Wiki 的威力一覧則是歷史社群量測。兩者即使相符也不構成 service 事實，
+因此維持 UNRESOLVED，不得據此實作伺服器傷害計算。
+這與 §5d-11 對武器儀表的處理一致：**可讀出 ≠ 有權威**。
+
 ### 5b-5. 兩項「僅 Wiki、刻意不採用」的記錄
 
 - **房間資訊欄位。** [MAP・ルール詳細](https://wikiwiki.jp/paperman/MAP・ルール詳細)

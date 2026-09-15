@@ -182,6 +182,38 @@ def main() -> None:
                        if any(band + offset in item_ids for band in bands))
         check("killImgWeapon indices resolving to a weapon", resolved, 2074)
 
+    # Projectile physics tables. Rocket entries are named types; the plasma and
+    # laser tables key on gunindex, which is a weapon-band offset.
+    blob = decrypt(EXTRACTED / "ui" / "RocketProperty.xml")
+    if blob is None:
+        skipped.append("RocketProperty.xml")
+    else:
+        text = blob.decode("utf-8", "replace")
+        check("RocketProperty.xml named types",
+              len(re.findall(r"<([A-Z][A-Z0-9_]*) commonproperty", text)), 26)
+        check("RocketProperty.xml commonproperty spread",
+              dict(Counter(re.findall(r'commonproperty="(\d+)"', text))),
+              {"0": 24, "1": 1, "2": 1})
+
+    if itemdata is None:
+        skipped.append("Plasma/LaserProperty.xml")
+    else:
+        count = struct.unpack_from("<i", itemdata, 4)[0]
+        item_ids = {struct.unpack_from("<i", itemdata, 8 + i * 997)[0] for i in range(count)}
+        bands = (12100000, 12200000, 12300000, 12400000)
+        for filename, entries, resolving in (("PlasmaProperty.xml", 42, 42),
+                                             ("LaserProperty.xml", 45, 39)):
+            blob = decrypt(EXTRACTED / "ui" / filename)
+            if blob is None:
+                skipped.append(filename)
+                continue
+            gunindexes = [int(value) for value in
+                          re.findall(r'gunindex="(\d+)"', blob.decode("utf-8", "replace"))]
+            check(f"{filename} entries", len(gunindexes), entries)
+            check(f"{filename} gunindexes resolving to a weapon",
+                  sum(1 for g in gunindexes if any(band + g in item_ids for band in bands)),
+                  resolving)
+
     # Every datarevision.txt must agree: Extracted/ is one coherent snapshot.
     revisions = {path.read_text(encoding="utf-8", errors="replace").strip()
                  for path in EXTRACTED.rglob("datarevision.txt")}
