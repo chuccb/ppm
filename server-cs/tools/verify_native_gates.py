@@ -26,6 +26,7 @@ This reads the dump textually. It is a drift alarm, not a decompiler.
 from __future__ import annotations
 
 import re
+import struct
 import sys
 from pathlib import Path
 
@@ -267,6 +268,36 @@ def main() -> None:
             check("ui/system/AI xml count", len(shipped), 19)
             check("only BotEnemy_intelligent.xml is missing from the binary",
                   unreferenced, ["BotEnemy_intelligent.xml"])
+
+    # RESOURCES.md 5d-7b: the convar registry. Types 0 and 1 are shipped in
+    # convars.pat; every type 2 is not -- including um_gr_maxspeed, which
+    # therefore always runs at its hardcoded 90.0 default.
+    convar_types: dict[str, set[str]] = {}
+    lines = text.replace("\r", "").split("\n")
+    for index, line in enumerate(lines):
+        named = re.search(r'sub_4023E0\([^,]+, "([A-Za-z_0-9]+)"', line)
+        if not named:
+            continue
+        for follow in lines[index:index + 8]:
+            typed = re.search(r"sub_715580\([^,]+, [^,]+, this, (\d+),", follow)
+            if typed:
+                convar_types.setdefault(named.group(1), set()).add(typed.group(1))
+                break
+    check("convar registrations discovered", len(convar_types), 23)
+    check("character-ability convars are type 0",
+          sorted(name for name, kinds in convar_types.items() if kinds == {"0"}),
+          ["cam_offset", "def_hp", "defence", "jumpheight", "max_hp",
+           "movespeed", "sitdownCamHeight", "standCamHeight"])
+    check("integer global convars are type 1",
+          sorted(name for name, kinds in convar_types.items() if kinds == {"1"}),
+          ["gun_caliber", "um_gr_accel", "um_gr_decel"])
+    check("um_gr_maxspeed is registered as type 2",
+          sorted(convar_types.get("um_gr_maxspeed", set())), ["2"])
+    # 1119092736 is float 90.0, the same figure as the modal movespeed.
+    check("um_gr_maxspeed defaults to 90.0",
+          struct.unpack("f", struct.pack("I", 1119092736))[0], 90.0)
+    check("um_gr_maxspeed default appears in the dump",
+          "1119092736" in text, True)
 
     # The failure-arm texts, through the documented decode rule.
     entries = message_entries()

@@ -784,6 +784,24 @@ def main() -> None:
                              for index in posture)}),
               [15220000, 15240000, 15250000, 15270000, 15280000])
 
+    # RESOURCES.md 5d-7b: convars.pat ships the tunables but no debug toggle,
+    # and notably not um_gr_maxspeed, so that one always runs at its default.
+    convars = ROOT / "Extracted" / "convars.pat"
+    if not convars.is_file():
+        skipped.append("convars.pat")
+    else:
+        settings = decrypt(convars).decode("cp932", "replace").replace("\r", "")
+        for name in ("um_gr_accel", "um_gr_decel", "gun_caliber",
+                     "movespeed", "defence", "jumpheight"):
+            check(f"convars.pat ships {name}", name in settings, True)
+        for name in ("um_gr_maxspeed", "r_showfps", "r_noui", "d_netrun"):
+            check(f"convars.pat omits {name}", name in settings, False)
+        # The per-character movespeed band whose mode equals that 90.0 default.
+        speeds = sorted({line.split()[2] for line in settings.split("\n")
+                         if "movespeed" in line and len(line.split()) > 2})
+        check("per-character movespeed values", speeds,
+              ["85", "86", "87", "88", "90"])
+
     # Every datarevision.txt must agree: Extracted/ is one coherent snapshot.
     revisions = {path.read_text(encoding="utf-8", errors="replace").strip()
                  for path in EXTRACTED.rglob("datarevision.txt")}

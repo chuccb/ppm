@@ -1009,6 +1009,8 @@ map id、item id、lang id 三類 id 各自貫穿多個檔案。
 
 `Extracted/convars.pat`（pmFile 加密，已解出；228 行）是**角色能力值的權威表**。
 除三個全域常數（`um_gr_accel 1250`、`um_gr_decel 333`、`gun_caliber 50`）外，
+（⚠ native 另註冊了第四個移動常數 `um_gr_maxspeed`，但**本檔未隨附**，
+見 §5d-7b 的 convar 全表）
 其餘全是 `m_cAvataAbility[ICT_*]` 與 `m_cDmg2MultiplyAvataAbility[ICT_*]` 兩組。
 
 | ICT type | defence | movespeed | cam_offset | sitdownCam |
@@ -1063,6 +1065,50 @@ native 對每個 key 都傳入硬編碼 fallback，`ICT_DEVILGIRL` 的 fallback 
 **界線。** 以上是 **client 端能力值與資產覆蓋**。伺服器是否也套用這些
 defence/movespeed、以及 devilgirl 的 0 防禦是有意或疏漏，
 皆無 server 證據，維持 UNRESOLVED。
+
+### 5d-7b. convar 全表：23 個註冊名、三種型別，與**未隨附的 `um_gr_maxspeed`**（廿六輪）
+
+§5d-7 寫「除三個全域常數（`um_gr_accel` / `um_gr_decel` / `gun_caliber`）外…」。
+本輪把 exe 中的 convar **註冊慣用法**整個掃出來後，這句需要補充：
+**native 註冊的移動類全域常數其實有四個，第四個 `um_gr_maxspeed` 沒有隨附。**
+
+**註冊慣用法（Fact / HIGH）。** 每個 convar 都以同一組指令序列登記：
+
+```c
+sub_4023E0(buf, "<name>", strlen("<name>"));   // 名稱
+sub_715580(this + <slot>, buf, this, <type>, 0);  // 註冊, 帶型別
+*(this + <slot+14>) = <default>;                  // 硬編碼預設值
+```
+
+掃描全檔得 **23 個 convar 名**，`<type>` 恰好分成三類，且與「是否隨附」完全對應：
+
+| type | 個數 | 語義 | 是否出現在 `convars.pat` |
+|---:|---:|---|---|
+| 0 | 8 | 角色能力值（`def_hp`/`max_hp`/`defence`/`movespeed`/`jumpheight`/`cam_offset`/`standCamHeight`/`sitdownCamHeight`） | **全部 YES** |
+| 1 | 3 | 整數全域（`um_gr_accel`/`um_gr_decel`/`gun_caliber`） | **全部 YES** |
+| 2 | 12 | 浮點／開關：11 個 `r_*`／`d_netrun` 偵錯渲染旗標 ＋ **`um_gr_maxspeed`** | **全部 NO** |
+
+規律非常乾淨：**type 0/1 的 11 個全部隨附，type 2 的 12 個全部不隨附**。
+`r_showfps`／`r_noui`／`r_drawworld` 這類顯然是**開發／偵錯開關**，
+正式資源不提供是合理的。
+
+**但 `um_gr_maxspeed` 混在 type 2 裡，值得單獨標記（Fact / HIGH）。**
+它的硬編碼預設值是 `1119092736` ＝ float **90.0**，
+而 `convars.pat` 中 14 個角色的 `movespeed` 值域是 **85..90，眾數正是 90**。
+兩者數值一致，強烈暗示它是**全域速度上限／基準**，
+與 per-character `movespeed` 是同一個量綱。
+
+**刻意不宣稱的部分。** 「90.0 是上限而角色值是其下的取值」只是**數值巧合
+＋命名（`maxspeed`）的推測**，本輪**沒有找到**同時讀取兩者的計算點，
+故其**相互關係維持 UNRESOLVED**。可確定的只有三件事：
+(1) 它被註冊為 convar；(2) 預設 90.0；(3) **本 revision 未隨附覆寫值，
+因此實際執行時必定使用 90.0**。
+
+**對 §5d-11b 兩個缺口的推進。** 上輪記下「四路合流的計算點未定位」。
+本輪縮小了範圍：移動相關的引擎常數**只有這四個**
+（`um_gr_accel` 1250、`um_gr_decel` 333、`um_gr_maxspeed` 90.0、外加 per-character
+`movespeed`），不存在第五個未發現的全域旋鈕。
+**但「每把武器的基礎速度」仍未找到**，且不在 convar 空間裡 —— 這一點現在是確定的。
 
 ## 5d-8. SpecialWeaponType.xml：weapon index = item id − 12100000
 
