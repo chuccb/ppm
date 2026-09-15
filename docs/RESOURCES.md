@@ -12,7 +12,7 @@
 | **cfg\weaponparts.pat** | @619191 | 武器改裝件 — **1,108 列 × 81 欄**（第一欄為**完整 item id**） | ★★ 220/221 編組 parts 驗證 |
 | **cfg\maplist.pat** | (sub_717E50) | 地圖清單 — **123 張**（stride 836B，見 §5d-5） | ★★ 111 建房 map id 驗證 |
 | **cfg\partsability.pat** | `CPartsAbilityListParamCtrl::Load` | 改裝件**效果差分** — **413 列 × 31 欄**彈道模型（**依欄位順序**解析，見 §5d-11） | ★★ |
-| **cfg\RecommandItem.pat** | @686031 | 推薦商品 (**1,030 列**；本輪實測，舊記「809」已更正) | ★ GS_GET_RECOMMENDSET_INFO 內容 |
+| **cfg\RecommandItem.pat** | @686031 | 推薦商品 — **1,030 列 × 12 欄**（Concept 1=男性向 531／2=女性向 485／20=特殊 14） | ★ `808`→`809` GS_GET_RECOMMENDSET_INFO 內容 |
 | **data.pat** | @225227 | 主資料容器 | ★★ (見 §3 已破解格式) |
 | **Data\pmClient.dat** | @415210 | pmFile 打包主檔 | ★★★ 上面所有 cfg\*.pat 都從這打包檔讀出 |
 | FilterWord.dat / ExceptionWord.dat | | 聊天過濾詞 | ○ (伺服器可自備) |
