@@ -25,7 +25,7 @@ ENUM_VALUE = re.compile(r"^    (?P<token>\w+) = (?P<value>\d+),$", re.MULTILINE)
 HANDLER_ENTRY = re.compile(
     r"(?m)^    (?:private|internal|public) static (?:async )?ValueTask "
     r"(?P<entry>\w+)\(Session session, Packet packet, ServerContext context\)")
-HANDLER_CLASS = re.compile(r"public static partial class (?P<name>\w+Handlers)")
+HANDLER_CLASS = re.compile(r"(?m)^public static partial class (?P<name>\w+Handlers)\s*$")
 RAW_206_ATTRIBUTE = re.compile(
     r"\[RawOpcodeHandler\(206\)\]\s*\n\s*"
     r"private static ValueTask RawOpcode206_REQ\(Session session, Packet packet, ServerContext context\)")
@@ -105,7 +105,10 @@ def main() -> None:
 
     for source in sorted(all_handler_sources):
         text = source.read_text(encoding="utf-8")
-        family_classes.update(match["name"] for match in HANDLER_CLASS.finditer(text))
+        declared_classes = [match["name"] for match in HANDLER_CLASS.finditer(text)]
+        if len(declared_classes) != 1:
+            fail(f"{source}: every handler source must declare exactly one top-level public static partial *Handlers class")
+        family_classes.add(declared_classes[0])
         for match in HANDLER_ENTRY.finditer(text):
             entry = match["entry"]
             if entry == "RawOpcode206_REQ":

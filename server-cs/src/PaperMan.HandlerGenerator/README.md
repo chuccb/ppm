@@ -14,7 +14,7 @@ selects a method only when all of these are true:
    `PaperMan.Protocol.Opcode` member ending in `_REQ`, or the source-proven
    one-way `GL_MYINFO_OPEN` token.
 2. Its exact signature is `ValueTask (Session, Packet, ServerContext)`.
-3. Its containing type is a static partial class.
+3. Its containing type is a top-level public static partial class.
 
 It then generates direct method-group `Dictionary<ushort, PacketHandler>.Add`
 calls and `Router.Build()` calls only the generated entry point. There is no

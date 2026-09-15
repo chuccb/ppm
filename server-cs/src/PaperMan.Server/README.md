@@ -80,9 +80,10 @@ publish-time analyzers on a machine with the .NET 10 SDK.
 
 ## Handler family map
 
-Every static `ValueTask (Session, Packet, ServerContext)` method whose name is
-a verified C2S catalog token is compile-time discovered: current direct entries
-are `*_REQ`, plus source-proven one-way `GL_MYINFO_OPEN`. `RawOpcodeHandler(206)`
+Every method on a top-level public static partial `*Handlers` class whose name
+is a verified C2S catalog token and whose signature is
+`ValueTask (Session, Packet, ServerContext)` is compile-time discovered: current
+direct entries are `*_REQ`, plus source-proven one-way `GL_MYINFO_OPEN`. `RawOpcodeHandler(206)`
 is the only numeric exception; it remains explicit because the native catalog
 has no 206 request name.
 

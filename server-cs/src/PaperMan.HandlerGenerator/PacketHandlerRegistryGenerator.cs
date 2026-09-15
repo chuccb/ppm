@@ -1,10 +1,11 @@
 // =============================================================================
 // Compile-time packet-handler discovery for PaperMan.Server.
 //
-// No runtime reflection is used. The generator binds a static handler whose
-// method name is a generated Opcode member, then emits direct method-group
-// references into the Router registration table. This registration path is
-// trim- and NativeAOT-friendly; it does not claim the whole server is AOT-ready.
+// No runtime reflection is used. The generator binds a verified C2S static
+// handler whose method name is admitted from the generated Opcode catalog, then
+// emits direct method-group references into the Router registration table. The
+// resulting registration path is trim- and NativeAOT-friendly; it does not
+// claim the whole server is AOT-ready.
 // =============================================================================
 using System;
 using System.Collections.Generic;
@@ -43,7 +44,7 @@ public sealed class PacketHandlerRegistryGenerator : IIncrementalGenerator
     private static readonly DiagnosticDescriptor InvalidHandler = new(
         id: "PMH002",
         title: "Packet handler has an invalid shape",
-        messageFormat: "Handler '{0}' must be a static method with signature ValueTask (Session, Packet, ServerContext) in a static partial *Handlers class",
+        messageFormat: "Handler '{0}' must be a static method with signature ValueTask (Session, Packet, ServerContext) in a top-level public static partial *Handlers class",
         category: "PaperMan.HandlerDiscovery",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
@@ -123,7 +124,7 @@ public sealed class PacketHandlerRegistryGenerator : IIncrementalGenerator
                     && !isNamedReceiveToken
                     && rawOpcodeAttribute is null
                     && HasPacketHandlerSignature(method)
-                    && IsPartial(type))
+                    && IsGeneratedHandlerContainer(type))
                 {
                     context.ReportDiagnostic(Diagnostic.Create(
                         NonReceiveCatalogToken,
@@ -137,7 +138,7 @@ public sealed class PacketHandlerRegistryGenerator : IIncrementalGenerator
                     continue;
                 }
 
-                if (!HasPacketHandlerSignature(method) || !IsPartial(type))
+                if (!HasPacketHandlerSignature(method) || !IsGeneratedHandlerContainer(type))
                 {
                     context.ReportDiagnostic(Diagnostic.Create(
                         InvalidHandler,
@@ -212,6 +213,11 @@ public sealed class PacketHandlerRegistryGenerator : IIncrementalGenerator
         && string.Equals(method.Parameters[0].Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), SessionType, StringComparison.Ordinal)
         && string.Equals(method.Parameters[1].Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), PacketType, StringComparison.Ordinal)
         && string.Equals(method.Parameters[2].Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), ServerContextType, StringComparison.Ordinal);
+
+    private static bool IsGeneratedHandlerContainer(INamedTypeSymbol type) =>
+        type.ContainingType is null
+        && type.DeclaredAccessibility == Accessibility.Public
+        && IsPartial(type);
 
     private static bool IsPartial(INamedTypeSymbol type) => type.DeclaringSyntaxReferences.All(static declaration =>
         declaration.GetSyntax() is TypeDeclarationSyntax syntax

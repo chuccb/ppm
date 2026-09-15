@@ -38,8 +38,9 @@ boundary 與 reverse-engineering checklist。
    builder/parser 的 method name 也保留完整 `*_REQ` 或 `*_ACK` token。
 3. 沒有 `*_REQ` 後綴的單向 token（目前為 `GL_MYINFO_OPEN`）同時作為檔名 family 與
    entry method。不存在以猜測業務語意命名的中介 handler 名稱。
-4. `PaperMan.HandlerGenerator` 在編譯期以 exact method signature 與已驗證 C2S
-   canonical token（`*_REQ` 加 `GL_MYINFO_OPEN`）產生 binding；不要加入 runtime
+4. `PaperMan.HandlerGenerator` 在編譯期以 top-level public static partial
+   `*Handlers` container、exact method signature 與已驗證 C2S canonical token
+   （`*_REQ` 加 `GL_MYINFO_OPEN`）產生 binding；不要加入 runtime
    reflection、hand-written registration list 或需要把 protocol token 反向映射的 service
    abstraction。`*.Shared.cs` 僅限已明確記錄的
    跨-family wire / authority support，不含 receive entry。
