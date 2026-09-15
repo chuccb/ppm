@@ -117,10 +117,17 @@ has no 206 request name.
    signature, its role/session guard, exact length/count branches, and
    fail-closed unresolved boundary visible near its mutation. Do not replace an
    unknown response with zero padding or nominal success.
-4. Treat `Extracted/` names as client lookup/UI evidence only. They do not
+4. Preserve the source that owns a name: catalog token for a handler path/entry,
+   native `Cy*ModeLobbyUI` suffix for `GameMode`, and `Extracted` spelling only
+   as client lookup/UI evidence. When native and resource names differ, keep
+   both provenance comments; do not normalize either into an invented alias.
+5. Treat `Extracted/` names as client lookup/UI evidence only. They do not
    prove server grants, pricing, ownership, routing, or persistence.
-5. After a catalog/handler-path/direct-entry change, run
+6. After a catalog/handler-path/direct-entry change, run
    `python3 server-cs/tools/verify_server_layout.py`; it checks only the static
-   catalog-to-generator-to-handler topology. This Arena environment has no .NET
-   SDK, so a .NET build and `PaperMan.SelfTest` must be run elsewhere before
-   claiming compiler-backed verification.
+   catalog-to-generator-to-handler topology. After a room `modeIndex`, map, or
+   native/resource name change, also run
+   `python3 server-cs/tools/verify_server_naming.py`; it checks the specifically
+   documented native/resource tables. This Arena environment has no .NET SDK,
+   so a .NET build and `PaperMan.SelfTest` must be run elsewhere before claiming
+   compiler-backed verification.

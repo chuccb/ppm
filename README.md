@@ -128,9 +128,10 @@ route table / 日誌 / `packet_stats` 監控。
 
 - `PaperMan.Protocol` — 純協定層: `Opcode.cs` (676 opcodes, 由
   `tools/gen_opcodes.py` 從 `db/packets.tsv` 產生)、`Packet.cs` (讀寫原語)、
-  `LoginWire.cs` (682/681/693/694) 與 `ChannelBootstrapWire.cs`
-  (142/144/196 + packed calendar) 的具名 wire contract、`PaperLz.cs` /
-  `PaperAes.cs` / `PacketCodec.cs` (真實 LZ+AES 管線)。
+  `Contracts/Login/LoginWire.*.cs` (682/681/693/694) 與
+  `Contracts/Channel/ChannelBootstrapWire.*.cs` (142/144/196 + packed calendar)
+  的 opcode-family split、具名 wire contract、`PaperLz.cs` / `PaperAes.cs` /
+  `PacketCodec.cs` (真實 LZ+AES 管線)。
 - `PaperMan.Server` — TCP 伺服器: 9600B 框架 (`Session.cs`)、SQLite 存取層
   (`Db.cs` + embedded `DatabaseBootstrapper.cs`: 自動建庫、schema migration、opcode/
   運維預設資料 seed；登入/暱稱/背包分頁)、login/channel 雙 listener、

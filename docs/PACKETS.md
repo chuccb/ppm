@@ -1531,14 +1531,14 @@ Room，`Handlers.GL_JOINPLAY.cs` 的 flag 0 先加入空 slot 再回 269 code 6 
     因尚未實作該 tail 而拒絕 type-3 設定。
 ```
 
-**C# bootstrap guardrails（source-verified）。** `LoginWire.cs` 管 681/682/
-693/694；`ChannelBootstrapWire.cs` 管 142/144/196 的完整可表示形狀與 142
-日期位元編碼。`ServerConfig` 在開 listener 前拒絕 694 的 `>0x2580`，把
-142 的 channel byte 綁定已廣告的唯一 `ChannelIndex`，並以可注入時鐘與
-明確 `ProtocolTimeZone` 建立即時 calendar field。144 不再把 per-connection
-session id 偽裝成 daily PG；可選網咖尾段在完整 4×u8+8×raw4 model 有值時才
-送出。SelfTest 對 142 bit layout、144 optional shape、196 success-tail 及
-694 ceiling 做 source-level byte-order assertions。
+**Fact/HIGH — current C# bootstrap guardrails.** `Contracts/Login/LoginWire.*.cs`
+管 681/682/693/694；`Contracts/Channel/ChannelBootstrapWire.*.cs` 管 142/144/196
+的完整可表示形狀與 142 日期位元編碼。`ServerConfig` 在開 listener 前拒絕
+694 的 `>0x2580`，把 142 的 channel byte 綁定已廣告的唯一 `ChannelIndex`，
+並以可注入時鐘與明確 `ProtocolTimeZone` 建立即時 calendar field。144 不再把
+per-connection session id 偽裝成 daily PG；可選網咖尾段在完整 4×u8+8×raw4
+model 有值時才送出。SelfTest 對 142 bit layout、144 optional shape、196
+success-tail 及 694 ceiling 做 source-level byte-order assertions。
 
 ### 3.15b2 房間管理/戰場雜項 (廿二輪掃畢; 卅八輪補 REQ 端+設定簇)
 ```
