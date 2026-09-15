@@ -120,7 +120,7 @@ uses cancellation and disposes its socket only after its receive loop exits.
   唯一無官方 request token 的 206 以顯式 `[RawOpcodeHandler(206)]` 保留 raw boundary，
   而非臆造 GS 名稱。這只表示 dispatch discovery 是 trim / NativeAOT-friendly，**不**
   證明含 SQLite 與其他 dependencies 的整個 server 已通過 NativeAOT publish。
-- 各 `Handlers.<TOKEN>.cs` direct source 仍以協定子系統目錄切分（Login、Channel、
+- 各 `Handlers.<TOKEN>.cs` direct source 仍以協定子系統目錄切分（GT、Login、Channel、
   Lobby、Room、Join、Battle relay/object、Shop、Stats、Clan、Quest、Friend、Voice、
   Warehouse、Master、GameCenter、AI），因此檔名、entry method 與 packet catalog token
   可直接對齊。例如 `Handlers.GL_LOGIN.cs` / `GL_LOGIN_REQ`、

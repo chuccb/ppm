@@ -3,7 +3,7 @@
 > 「client 有 builder、server 尚無 handler」的 REQ 全表 — 附自動抽出
 > 的寫入序列, 按此實作 handler 即可。已實作 120+ 個 REQ handler；direct entry
 > inventory 以 `verify_server_layout.py` 的 static discovery check 為準。
-> (Login/Lobby/Shop/Stats/Clan/Quest/Friend/Room/Channel/Voice/
+> (GT/Login/Lobby/Shop/Stats/Clan/Quest/Friend/Room/Channel/Voice/
 > BattleRelay/Warehouse/Join)。
 >
 > **閱讀順序。** 目前可採取的工作先讀「Current next evidence」，再讀最後的

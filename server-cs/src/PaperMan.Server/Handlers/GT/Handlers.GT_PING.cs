@@ -7,7 +7,7 @@ using PaperMan.Protocol;
 
 namespace PaperMan.Server;
 
-public static partial class LoginHandlers
+public static partial class GTHandlers
 {
     // 101 = client response to server-originated 102 (sub_58D6F0). It is not a
     // request/reply pair: replying with 102 here would create a ping loop.

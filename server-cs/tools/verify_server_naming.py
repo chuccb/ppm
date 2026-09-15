@@ -25,6 +25,7 @@ ROOM_SHARED_SOURCE = ROOT / "server-cs" / "src" / "PaperMan.Server" / "Handlers"
 LOBBY_ROOM_LIST_SOURCE = ROOT / "server-cs" / "src" / "PaperMan.Server" / "Handlers" / "Lobby" / "Handlers.GL_GAMEROOMINFO.cs"
 AI_HANDLERS = ROOT / "server-cs" / "src" / "PaperMan.Server" / "Handlers" / "AI"
 LOGIN_HANDLERS = ROOT / "server-cs" / "src" / "PaperMan.Server" / "Handlers" / "Login"
+GT_HANDLERS = ROOT / "server-cs" / "src" / "PaperMan.Server" / "Handlers" / "GT"
 SCHEMA_SOURCE = ROOT / "db" / "schema.sql"
 SMOKE_TEST_SOURCE = ROOT / "db" / "smoke_test.py"
 SELF_TEST_SOURCE = ROOT / "server-cs" / "src" / "PaperMan.SelfTest" / "Program.cs"
@@ -259,11 +260,21 @@ def source_login_handler_group() -> int:
     if legacy_directory.exists():
         fail("legacy Handlers/Auth directory remains; native/resource spelling is Login")
     sources = sorted(LOGIN_HANDLERS.glob("Handlers.*.cs"))
-    if {source.name for source in sources} != {"Handlers.GL_LOGIN.cs", "Handlers.GT_PING.cs"}:
-        fail("Handlers/Login must contain only the native login/ping handler family")
+    if {source.name for source in sources} != {"Handlers.GL_LOGIN.cs"}:
+        fail("Handlers/Login must contain only the native login handler")
     for source in sources:
         if "public static partial class LoginHandlers" not in source.read_text(encoding="utf-8"):
             fail(f"{source}: Login family must use the canonical LoginHandlers spelling")
+    return len(sources)
+
+
+def source_gt_handler_group() -> int:
+    sources = sorted(GT_HANDLERS.glob("Handlers.*.cs"))
+    if {source.name for source in sources} != {"Handlers.GT_PING.cs"}:
+        fail("Handlers/GT must contain only the canonical GT_PING handler")
+    source = sources[0]
+    if "public static partial class GTHandlers" not in source.read_text(encoding="utf-8"):
+        fail(f"{source}: GT family must use the canonical GTHandlers spelling")
     return len(sources)
 
 
@@ -358,6 +369,7 @@ def main() -> None:
     git_show_main("Extracted/ui/system/AI/AiMultiLevel.xml")
 
     login_handler_count = source_login_handler_group()
+    gt_handler_count = source_gt_handler_group()
     if "CLobbyLogin" not in NATIVE_SOURCE.read_text(encoding="utf-8", errors="replace"):
         fail("native CLobbyLogin evidence is missing")
     git_show_main("Extracted/ui/login.xml")
@@ -413,6 +425,7 @@ def main() -> None:
         "2 numeric private UDP opcodes; "
         f"{ai_handler_count} canonical AI handler sources; "
         f"{login_handler_count} canonical Login handler sources; "
+        f"{gt_handler_count} canonical GT handler source; "
         "modeIndex persistence names"
     )
 

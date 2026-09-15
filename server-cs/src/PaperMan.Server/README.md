@@ -89,7 +89,8 @@ has no 206 request name.
 
 | Directory | Static partial class / purpose |
 |---|---|
-| [`Handlers/Login/`](Handlers/Login/) | `LoginHandlers`: `Login` spelling from native `CLobbyLogin` / `ui/login.xml`; canonical `GL_LOGIN` and `GT_PING` entries |
+| [`Handlers/GT/`](Handlers/GT/) | `GTHandlers`: canonical `GT_PING` entry; Router admits it on both TCP roles |
+| [`Handlers/Login/`](Handlers/Login/) | `LoginHandlers`: `Login` spelling from native `CLobbyLogin` / `ui/login.xml`; canonical `GL_LOGIN` entry |
 | [`Handlers/Channel/`](Handlers/Channel/) | `ChannelHandlers`: 143, 195, 196, 141 channel bootstrap flow |
 | [`Handlers/Join/`](Handlers/Join/) | `JoinHandlers`: lobby-to-room join flow |
 | [`Handlers/Lobby/`](Handlers/Lobby/) | `LobbyHandlers`: lobby/user/item/client settings families |
@@ -129,7 +130,7 @@ has no 206 request name.
    native/resource name change, also run
    `python3 server-cs/tools/verify_server_naming.py`; it checks the specifically
    documented native/resource room tables, numeric clan/private-UDP opcode
-   boundaries, canonical `AI` / `Login` groupings, and room `modeIndex`
+   boundaries, canonical `AI` / `GT` / `Login` groupings, and room `modeIndex`
    persistence naming. This Arena environment has no .NET SDK,
    so a .NET build and `PaperMan.SelfTest` must be run elsewhere before claiming
    compiler-backed verification.

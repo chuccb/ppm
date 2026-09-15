@@ -131,8 +131,8 @@ def main() -> None:
         fail(f"expected exactly one raw opcode 206 handler, found {raw_entry_count}")
     if len(direct_entries) != 194:
         fail(f"expected 194 direct handler entries, found {len(direct_entries)}")
-    if len(family_classes) != 17:
-        fail(f"expected 17 static partial handler classes, found {len(family_classes)}")
+    if len(family_classes) != 18:
+        fail(f"expected 18 static partial handler classes, found {len(family_classes)}")
 
     shared_sources = set(HANDLERS.glob("*/Handlers.*.Shared.cs"))
     explicit_non_entry_sources = {HANDLERS / "Stats" / "Handlers.GP_CHPLAYTIMEC_ACK.cs"}
