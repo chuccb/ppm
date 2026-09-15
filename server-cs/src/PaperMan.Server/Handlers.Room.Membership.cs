@@ -9,28 +9,47 @@ namespace PaperMan.Server;
 
 public static partial class RoomHandlers
 {
-    // 111 → 112 (sub_56A7B0 卌二輪補完 — 前 6 欄恆送, err==0 另加 9 欄):
-    //   u8 err(0=OK), u8 room_no(<210), u16 slot_mask, s32 room_uid,
-    //   u8 +185 no_skill_bg, u8 mode+13 隊打散, [成功:] u8 team_mode
-    //   (2=隊伍房), 2×{u32 team_uid, u32 team_crc, str team_name,
-    //   u8 team_flag}
-    //   — 後 9 欄 client 在 err==0 時無條件讀取 (sub_592730 一路讀到
-    //   NUL), 故 server 必送 (空隊伍 = uid/crc 0 + 空字串 + flag 0)。
+    // 111 normal title form (sub_449320 → sub_56A5A0):
+    //   u8 0xFF title-form marker, s8 has_password, str title,
+    //   [has_password: str password], u8 max_players, u8 rule,
+    //   u8 requested_map, u8 no_skill_background.
+    //
+    // sub_449320 is the only reachable caller and passes -1 for the first
+    // argument, which sub_56A5A0 serializes as 0xFF. The alternative native
+    // no-title form has no reachable caller, so it is not a valid server
+    // create-room request. This marker is not a map ID.
+    //
+    // 112 (sub_56A7B0) always begins with its six-field room result; err==0
+    // adds team-mode plus two team blocks. The client unconditionally reads
+    // both blocks for a successful response, including empty teams.
+    private readonly record struct CreateRoomRequest(
+        string Title,
+        string? Password,
+        byte MaxPlayers,
+        byte Rule,
+        byte RequestedMapId,
+        bool NoSkillBackground);
+
     private static async ValueTask MakeRoom(Session session, Packet packet, ServerContext context)
     {
-        byte mapId = packet.ReadU8();
-        sbyte hasPass = packet.ReadS8();
-        var title = packet.ReadStr();
-        var pass = hasPass != 0 ? packet.ReadStr() : null;
-        byte rule = packet.Remaining > 0 ? packet.ReadU8() : (byte)0;
-        byte max = packet.Remaining > 0 ? packet.ReadU8() : (byte)16;
-        mapId = ResolveMap(mapId, rule, context.Db);        // 111 依 mode→bit 過濾可選地圖
+        if (!TryReadCreateRoomRequest(packet, out CreateRoomRequest request))
+        {
+            return;
+        }
 
-        var room = session.UserId != 0
-            ? context.Rooms.Create(session, mapId, title, pass, rule, max)
+        byte mapId = ResolveMap(request.RequestedMapId, request.Rule, context.Db);
+        Room? room = session.UserId != 0
+            ? context.Rooms.Create(
+                session,
+                mapId,
+                request.Title,
+                request.Password,
+                request.Rule,
+                request.MaxPlayers,
+                request.NoSkillBackground)
             : null;
 
-        var err = room is null ? MakeRoomError.Full : MakeRoomError.Ok;
+        MakeRoomError err = room is null ? MakeRoomError.Full : MakeRoomError.Ok;
         var ack = new Packet(Opcode.GL_MAKEROOM_ACK)
             .WriteU8((byte)err)
             .WriteU8(room?.RoomNo ?? 0)                     // room_no (失敗時為 0)
@@ -42,7 +61,7 @@ public static partial class RoomHandlers
         if (room is not null)
         {
             session.RoomNo = room.RoomNo;
-            ack.WriteU8(IsTeamMode(rule) ? (byte)2 : (byte)0) // n2_1 team_mode (2=隊伍房 → CCustomTexture)
+            ack.WriteU8(IsTeamMode(request.Rule) ? (byte)2 : (byte)0) // n2_1 team_mode (2=隊伍房 → CCustomTexture)
                .WriteU32(0)                                 // team A uid (新房間尚無分隊)
                .WriteU32(0)                                 // team A crc
                .WriteStr("")                                // team A name
@@ -54,6 +73,76 @@ public static partial class RoomHandlers
         }
 
         await session.SendAsync(ack);
+    }
+
+    private static bool TryReadCreateRoomRequest(Packet packet, out CreateRoomRequest request)
+    {
+        request = default;
+
+        if (packet.Remaining < 2)
+        {
+            return false;
+        }
+
+        if (packet.ReadU8() != byte.MaxValue)
+        {
+            return false;
+        }
+
+        // After the marker: flag + empty title NUL + four final bytes.
+        if (packet.Remaining < 6)
+        {
+            return false;
+        }
+
+        sbyte hasPassword = packet.ReadS8();
+        if (!TryReadNulTerminatedAnsiString(packet, maxContentBytes: 50, out string title)
+            || title.Length == 0)
+        {
+            return false;
+        }
+
+        string? password = null;
+        if (hasPassword != 0
+            && !TryReadNulTerminatedAnsiString(packet, Packet.MaxPayload, out password))
+        {
+            return false;
+        }
+
+        if (packet.Remaining != 4)
+        {
+            return false;
+        }
+
+        request = new CreateRoomRequest(
+            title,
+            password,
+            packet.ReadU8(),
+            packet.ReadU8(),
+            packet.ReadU8(),
+            packet.ReadU8() != 0);
+        return true;
+    }
+
+    // Scan before advancing so a malformed variable field is a silent no-op,
+    // rather than a partial parse followed by a room mutation.
+    private static bool TryReadNulTerminatedAnsiString(Packet packet, int maxContentBytes, out string value)
+    {
+        value = string.Empty;
+        if (packet.Remaining <= 0)
+        {
+            return false;
+        }
+
+        ReadOnlySpan<byte> remaining = packet.Payload[packet.ReadPos..];
+        int bytesToScan = Math.Min(remaining.Length, checked(maxContentBytes + 1));
+        if (remaining[..bytesToScan].IndexOf((byte)0) < 0)
+        {
+            return false;
+        }
+
+        value = packet.ReadStr();
+        return true;
     }
 
     // 113 → 114 (sub_56B360 完整佈局, 卅七輪逐欄定案, 本輪補齊 sub_885D00 語音塊):

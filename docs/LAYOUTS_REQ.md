@@ -6,6 +6,13 @@
 > 型別: u8=592920, s8=5928E0, u16=5929A0, s16=5929E0, s32=592A20/AA0,
 > u32=592A60, u64=592AE0, f32=592B20, str=5926F0, wstr=592770, rawN=592580。
 >
+> **111 exception (Fact/HIGH):** this inventory mechanically flattens mutually
+> exclusive branches in `sub_56A5A0`; its row is **not** a linear 111 layout.
+> The sole reachable caller, `sub_449320`, emits
+> `u8 0xFF, s8 has_password, str title, [str password], u8 max_players,
+> u8 rule, u8 requested_map, u8 no_skill_bg`. See `PACKETS.md` §3.15 before
+> implementing or changing 111.
+>
 > **登入轉接欄位限制（2026-09 重新交叉確認）**：682 是嚴格的
 > `str account, str password_or_token, u64 packed_data_revision, u8 fingerprint_source,
 > raw24 fingerprint`，沒有 optional tail。143 的 `str` 源自 native

@@ -2,8 +2,8 @@
 // 房間 handlers — 111/112 建房, 113/114 進房, 123/124 離房, 房設定簇。
 //
 // 佈局出自反編譯 (docs/PACKETS.md §3.15 + §3.15b2, 多輪逐欄定案):
-//   111 REQ: u8 map, s8 has_pass, str title, [str pass],
-//            u8 rule(modeIndex), u8 max, u8 x, u8 y
+//   111 REQ: u8 0xFF title-form marker, s8 has_pass, str title, [str pass],
+//            u8 max, u8 rule(modeIndex), u8 requested_map, u8 no_skill_bg
 //   112 ACK (sub_56A7B0): u8 err, u8 room_no(<210), u16 max_slot_mask,
 //            s32 room_uid, u8 no_skill_bg(+185), u8 mode+13 — err==0 →
 //            client 自任房主 (sub_53F920: +105=1 自身), 狀態切 10

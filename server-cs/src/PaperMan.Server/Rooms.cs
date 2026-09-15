@@ -1,9 +1,11 @@
 // =============================================================================
 // 房間管理 — 對應反編譯 (docs/PACKETS.md §3.15):
 //
-//   111 GL_MAKEROOM_REQ (sub_56A5A0, 廿八輪逐欄定案):
-//       u8 map, s8 has_pass, str title, [has_pass: str pass],
-//       u8 rule(=modeIndex), u8 max_player, u8 x, u8 y
+//   111 GL_MAKEROOM_REQ (sub_449320 → sub_56A5A0):
+//       u8 0xFF title-form marker, s8 has_pass, str title, [has_pass: str pass],
+//       u8 max_player, u8 rule(=modeIndex), u8 requested_map, u8 no_skill_bg.
+//       The sole reachable client caller emits the 0xFF title form; it is not
+//       a map id. See Handlers.Room.Membership.cs for the strict C2S parser.
 //   112 GL_MAKEROOM_ACK (sub_56A7B0):
 //       u8 err(0=OK), u8 room_no(<210), u16, s32 room_uid, u8, s8 obs
 //       — err==0 時 client 以自己為房主初始化房間物件並切狀態 10
@@ -446,9 +448,22 @@ public sealed class RoomManager
 
     public const byte MaxRooms = 210;                       // 0xD2 client 硬上限
 
-    public Room? Create(Session master, byte mapId, string title, string? pass,
-                        byte rule, byte maxPlayers)
+    public Room? Create(
+        Session master,
+        byte mapId,
+        string title,
+        string? password,
+        byte rule,
+        byte maxPlayers,
+        bool noSkillBackground)
     {
+        // Replacing an in-room session's RoomNo would leave it in the first
+        // room's Members map. A session owns at most one room membership.
+        if (master.RoomNo is not null)
+        {
+            return null;
+        }
+
         for (byte no = 0; no < MaxRooms; no++)
         {
             var room = new Room
@@ -456,9 +471,10 @@ public sealed class RoomManager
                 RoomNo = no,
                 RoomUid = Interlocked.Increment(ref _nextUid),
                 Title = title,
-                Password = pass,
+                Password = password,
                 MapId = mapId,
                 Rule = rule,
+                NoSkillBg = noSkillBackground,
                 SlotMask = (ushort)((1 << Math.Clamp((int)maxPlayers, 2, 16)) - 1),
             };
 

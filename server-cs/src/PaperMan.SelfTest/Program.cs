@@ -852,6 +852,123 @@ bool IsNative311FailureAcknowledgement(Packet acknowledgement)
                 && channelSession.ChannelEntryCompleted
                 && unsupportedRoomWorkflowsAreUnmapped);
 
+            // The native UI creates only the title form: 0xFF, password flag,
+            // title/[password], USERS, GAMEMODE, selected map, no-skill flag.
+            // Send malformed variants first. They must neither create a room
+            // nor leave an ACK ahead of the valid request below.
+            bool alternateMakeRoomFormWasHandled = await router.DispatchAsync(
+                channelSession,
+                new Packet(Opcode.GL_MAKEROOM_REQ)
+                    .WriteU8(0)                              // native no-title form, unreachable
+                    .WriteS8(0)
+                    .WriteU8(8).WriteU8(2).WriteU8(14).WriteU8(1),
+                channelContext);
+            bool unterminatedMakeRoomWasHandled = await router.DispatchAsync(
+                channelSession,
+                new Packet(Opcode.GL_MAKEROOM_REQ)
+                    .WriteU8(byte.MaxValue)
+                    .WriteS8(0)
+                    .WriteRaw(Packet.Ansi.GetBytes("broken"))
+                    .WriteU8(8).WriteU8(2).WriteU8(14).WriteU8(1),
+                channelContext);
+            bool trailingMakeRoomWasHandled = await router.DispatchAsync(
+                channelSession,
+                new Packet(Opcode.GL_MAKEROOM_REQ)
+                    .WriteU8(byte.MaxValue)
+                    .WriteS8(0)
+                    .WriteStr("broken")
+                    .WriteU8(8).WriteU8(2).WriteU8(14).WriteU8(1)
+                    .WriteU8(0),
+                channelContext);
+            bool malformedMakeRoomDidNotMutate = channelSession.RoomNo is null
+                && !channelContext.Rooms.All.Any();
+
+            bool makeRoomWasProcessed = await router.DispatchAsync(
+                channelSession,
+                new Packet(Opcode.GL_MAKEROOM_REQ)
+                    .WriteU8(byte.MaxValue)
+                    .WriteS8(1)
+                    .WriteStr("source-shaped room")
+                    .WriteStr("room-password")
+                    .WriteU8(8)                             // USERS
+                    .WriteU8(2)                             // GAMEMODE: TeamHacking
+                    .WriteU8(14)                            // selected map for mode 2
+                    .WriteU8(1),                            // CHKBTN_NOSKILL
+                channelContext);
+            Packet makeRoomAcknowledgement = await ReadServerPacketAsync(clientPeer.GetStream(), channelCodec);
+            Room? createdRoom = channelSession.RoomNo is { } createdRoomNo
+                ? channelContext.Rooms.Find(createdRoomNo)
+                : null;
+            bool makeRoomLayout = false;
+            if (makeRoomAcknowledgement.Opcode == Opcode.GL_MAKEROOM_ACK
+                && createdRoom is { } expectedRoom)
+            {
+                var makeRoomReader = Packet.FromPayload(
+                    makeRoomAcknowledgement.Opcode,
+                    makeRoomAcknowledgement.Payload);
+                makeRoomLayout = makeRoomReader.ReadU8() == 0
+                    && makeRoomReader.ReadU8() == expectedRoom.RoomNo
+                    && makeRoomReader.ReadU16() == 0x00FF   // USERS = eight slots
+                    && makeRoomReader.ReadS32() == expectedRoom.RoomUid
+                    && makeRoomReader.ReadBool()            // no-skill background
+                    && !makeRoomReader.ReadBool()           // team shuffle default
+                    && makeRoomReader.ReadU8() == 2;        // team mode
+                for (int team = 0; makeRoomLayout && team < 2; team++)
+                {
+                    makeRoomLayout &= makeRoomReader.ReadU32() == 0
+                        && makeRoomReader.ReadU32() == 0
+                        && makeRoomReader.ReadStr() == string.Empty
+                        && makeRoomReader.ReadU8() == 0;
+                }
+
+                makeRoomLayout &= makeRoomReader.Remaining == 0;
+            }
+            bool secondMakeRoomWasProcessed = await router.DispatchAsync(
+                channelSession,
+                new Packet(Opcode.GL_MAKEROOM_REQ)
+                    .WriteU8(byte.MaxValue)
+                    .WriteS8(0)
+                    .WriteStr("second room must not be created")
+                    .WriteU8(8).WriteU8(2).WriteU8(14).WriteU8(1),
+                channelContext);
+            Packet secondMakeRoomAcknowledgement = await ReadServerPacketAsync(clientPeer.GetStream(), channelCodec);
+            var secondMakeRoomReader = Packet.FromPayload(
+                secondMakeRoomAcknowledgement.Opcode,
+                secondMakeRoomAcknowledgement.Payload);
+            bool secondMakeRoomWasRejected = secondMakeRoomAcknowledgement.Opcode == Opcode.GL_MAKEROOM_ACK
+                && secondMakeRoomReader.ReadU8() == 1        // existing Full result
+                && secondMakeRoomReader.ReadU8() == 0
+                && secondMakeRoomReader.ReadU16() == 0
+                && secondMakeRoomReader.ReadS32() == 0
+                && !secondMakeRoomReader.ReadBool()
+                && !secondMakeRoomReader.ReadBool()
+                && secondMakeRoomReader.Remaining == 0;
+            List<Room> roomsAfterSecondRequest = [.. channelContext.Rooms.All];
+            bool secondMakeRoomDidNotMutate = createdRoom is not null
+                && channelSession.RoomNo == createdRoom.RoomNo
+                && roomsAfterSecondRequest.Count == 1
+                && ReferenceEquals(roomsAfterSecondRequest[0], createdRoom);
+
+            Check("111 accepts only the source-shaped title form and preserves room semantics",
+                alternateMakeRoomFormWasHandled
+                && unterminatedMakeRoomWasHandled
+                && trailingMakeRoomWasHandled
+                && malformedMakeRoomDidNotMutate
+                && makeRoomWasProcessed
+                && makeRoomLayout
+                && createdRoom is
+                {
+                    Title: "source-shaped room",
+                    Password: "room-password",
+                    Rule: 2,
+                    MapId: 14,
+                    NoSkillBg: true,
+                    SlotMask: 0x00FF,
+                }
+                && secondMakeRoomWasProcessed
+                && secondMakeRoomWasRejected
+                && secondMakeRoomDidNotMutate);
+
             bool shopEnterWasProcessed = await router.DispatchAsync(
                 channelSession,
                 new Packet(Opcode.GL_SHOPIN_REQ),

@@ -13,6 +13,16 @@
 
 ## Historical implementation ledger (provenance, not current work queue)
 
+> **2026-09 — 111 create-room grammar correction (Fact/HIGH):** the sole
+> reachable native UI caller (`sub_449320`) passes `-1` to `sub_56A5A0`, so
+> normal C2S is `0xFF, has_password, title, [password], USERS, GAMEMODE,
+> selected_map, no_skill_bg`. The server now parses that exact title form,
+> rejects alternate/truncated/unterminated/trailing forms before mutation, retains
+> the one-room-per-session invariant, and carries `USERS` → slot mask,
+> `GAMEMODE` → rule, selected map → `ResolveMap`, and no-skill → room state.
+> `LAYOUTS_REQ.md` now explicitly marks its flattened
+> generated row for 111 as non-authoritative; see `PACKETS.md` §3.15.
+>
 > 本輪 (房間設定/聊天簇) 新增: 139 GG_EXITGAME、167/169/171/173/175
 > /177、340/364/712、728 觀戰聊天、990 GR_DAMAGEROOM (db/packets.tsv
 > 補 990/991 後命名) — 全數限房主、ACK 同值廣播, 詳 docs/PACKETS.md

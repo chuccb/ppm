@@ -2181,9 +2181,13 @@ dispatcher case 102 → `sub_58D6F0` 立即 `ctor(101)` 回送
 - **118 GL_DELETEUSER_ACK** (sub_56A550): `str nick` (大廳減人)
 
 ### 3.15 房間系統 (七輪讀畢)
-- **111 GL_MAKEROOM_REQ** (builder @0x569xxx): `u8 map(a1<0 時 0xFF), u8 pass_flag,
-  [str title 無密碼版/密碼版], str pass, u8 rule, u8 max_player, u8 x, u8 y`
-  (兩個分支: a3!=0 帶密碼, 否則 title 版)
+- **111 GL_MAKEROOM_REQ** (**Fact/HIGH**, `sub_449320 → sub_56A5A0`): 唯一可達 UI caller
+  固定傳 `a1=-1`，故 wire 是 `u8 0xFF title_form_marker, s8 has_password, str title,
+  [has_password: str password], u8 max_player, u8 rule, u8 requested_map, u8 no_skill_bg`。
+  `USERS` control → max、`GAMEMODE` → rule、`sub_44C140(..., rule)` → requested map、
+  `CHKBTN_NOSKILL` → no-skill flag；`0xFF` 是 title-form discriminator，**不是 map id**。
+  `sub_56A5A0` 仍有 no-title serialization branch，但沒有可達 caller，故 server 僅接受這個
+  title form，並拒絕 truncated、unterminated 或 trailing C2S payload。
 - **112 GL_MAKEROOM_ACK** (sub_56A7B0): `u8 err, u8 room_no(<210),
   u16 max_slot_mask(+110), s32 room_uid, u8 no_skill_bg(+185),
   u8 mode+13` + err==0 時: `u8 n2, {s32 team_id, s32 tex_crc, str,
