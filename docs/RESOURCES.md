@@ -1491,11 +1491,109 @@ native 以 **13 個** `.PAD` 字面值指名它要載入的動畫：
 - ItemAbilityNameTAble_JP: 能力顯示名 (速度系/機動系/鎮壓系...)
 - 全資料最終計數: **7 表 37,044 條**, 全部測試綠
 
+## 5d-21. `map/gameobject.dat`：戰場掉落物總表（本輪首解，零殘餘）
+
+此檔**先前完全沒有任何 md 引用過**，但它是 §5b-2「名誉ゲージ」一節裡
+「掉落表無 client-side reader」這句話的直接反例 —— **掉落物的目錄確實隨附**
+（效果數值與機率仍然沒有，見文末界線）。
+
+### 格式（native `pmFile::possible_ctor_or_dtor_49` @ `0x7FBC40` 逐欄對應）
+
+載入者 `sub_7FBB90` 以 `L"map\\gameobject.dat"` 讀入，**明文、非 pmFile 加密**：
+
+```
+[f32 version = 1.0][u32 count = 105]
+count × 520B:
+  +0    u32  objectId          （小端四位元組 = 下列四個分類位元組，見下）
+  +8    128B wchar  modelPath  （`models\item\*.NAO`）
+  +136  128B wchar  texturePath（`models/item/*` → 實際檔案為 `.dds`）
+  +264  128B wchar  (全 105 筆皆空字串)
+  +392  128B wchar  codeName   （`D_Item1111` 等）
+```
+
+`8 + 105 × 520 = 54,608` **＝檔案大小，零殘餘**（自證切段）。
+native 另以 `hash = hash*33 + ch`（**djb2**，種子 5381）對 modelPath 算雜湊存入
+`+16`，並在載入後 `sub_7FD000` 對整份表排序 —— 即這是個**可依 id 查詢的目錄**。
+
+### objectId 的四個位元組就是分類鍵（Fact / HIGH）
+
+實測 `struct.pack('<I', objectId)[::-1]` **完全等於**反編譯中逐一寫入的四個位元組，
+即 id 是 `(category, subtype, param2, param3)` 打包而成。105 筆分為五類：
+
+| category | 筆數 | codeName 前綴 | 內容 |
+|---:|---:|---|---|
+| 1 | 2 | `M_Item` | 金錢／彈藥掉落（`DropItem_02` 貼圖） |
+| 2 | 97 | `D_Item`(90) / `Q_Item`(5) / `KNIFE_`(2) | **名誉ゲージ掉落物**＋任務道具＋刀 |
+| 3 | 2 | `P_Item` | Pulp'n'Roll 的搬運物 A/B |
+| 4 | 2 | `NewTuto` | 教學箭頭指示物 |
+| 5 | 2 | `W_Item` | 彈匣（`magazineplus`） |
+
+### 88 個 `D_Item` 構成完整的 7 族 × Lv1–3 矩陣（Fact / HIGH）
+
+`D_ItemABCD` 四位數字與 id 位元組**完全同構**（實測 88/88 無例外）：
+`param2 = C×10`、`param3 = A×10 + B`、`D` 恆為 1。
+其中 **A = 道具族 1..7、B = 等級 1..3、C = 1..4**（另有 A=0 的四筆，`param3=0`）。
+
+7 族 × 3 級 × 4 個 C 值 = 84，加上 A=0 的 4 筆 = **88**，數量完全閉合。
+貼圖亦分三階：族 1–3 用 `DropItem_001`、4–6 用 `DropItem_002`、7 用 `DropItem_003`。
+
+**與 Wiki 的對照結果。** [出現アイテム一覧](https://wikiwiki.jp/paperman/出現アイテム一覧)
+與 [名誉ゲージ](https://wikiwiki.jp/paperman/名誉ゲージ) 都列出**恰好 7 種**掉落物
+（武器強化／命中強化／體力回復／投擲武器／迅速移動／無限發射／無敵），
+**每種 Lv1–3** —— 與檔案的 7 族 × 3 級**結構完全吻合**。這是繼 skill 三表之後
+第三個「Wiki 的分類結構被資源檔證實」的案例。
+
+**但族序號 A 對應哪一種道具，本輪無法確定，維持 UNRESOLVED。**
+codeName 與 mesh 名都是純編號（`D_Item1111` / `DropItem_001`），
+沒有任何語意字串；exe 全文搜尋也找不到 `D_Item` 字面值（表是以 id 查詢的）。
+Wiki 兩張表的欄位順序不一致，不足以定序。
+`C`（1..4）的語義同樣**未知** —— 它不是等級（等級是 B），
+也不是 Wiki 任何一張表的維度。**不得臆測**。
+
+### 資產覆蓋率：105/105，並再次出現「命名漂移而非缺檔」
+
+宣告的 105 個 `.NAO` **全部存在於 `main` 樹中**（0 缺）。
+17 個相異 texture 路徑中有 3 個查無同名 `.dds`
+（`star`／`PulpItem_A`／`PulpItem_B`），但 `star` 實際隨附
+`Star_1.dds` —— 與 §5b-16 的地圖縮圖同一種**原廠命名漂移**，
+不是缺檔。這也再次印證 §5d-18 的方法論：先查是否真的缺席。
+
+### 5 個 `Q_Item` ↔ 8 個 `QuestTerm==19` 任務（Inference / MEDIUM）
+
+`Q_Item0001..0005` 的 mesh 依序是 `Star1`／`Star2`／`goldcard`／`mochi_bomb`／`ghost`。
+`Quest.pat` 中 `QuestTerm==19`（§3.12b 已定為「星星事件型」）**恰好 8 條**，
+且**只有這 8 條**的 `HonorMedalPosition` 非 0：
+
+| quest idx | TermData | HonorMedalPosition | 任務名 |
+|---|---:|---:|---|
+| 40001–40006 | 5/6/8/10/15/20 | **1** | 星集める者たち ほか |
+| 40007 | 10 | **3** | マネーカード回収 |
+| 40008 | 10 | **4** | Happy New Year! |
+
+**語義自洽的部分：** `pos=3` ↔ `Q_Item0003 goldcard`（「マネーカード回収」＝回收金卡）、
+`pos=4` ↔ `Q_Item0004 mochi_bomb`（麻糬＝新年，對上「Happy New Year!」）。
+
+**但不能升級為 Fact：** 40001–40006 六條**共用 `pos=1`**，
+所以 `HonorMedalPosition` 不可能是 `Q_Item` 序號的一對一映射。
+較保守的讀法是它是**勳章圖示槽位**，恰好在兩個節慶任務上與 Q_Item 序號重合。
+在找到 native 消費者之前維持 **Inference / MEDIUM**。
+（`ui/PopUpMedalOfHonor.xml` 有 `QUESTDESC`/`QUESTNAME`/`QUESTDETAIL` 三欄，
+與此相容；但 §5b-18 已確認該檔**在 exe 中查無檔名字串**，故不能用它佐證。）
+
+### 界線
+
+本表是**模型／貼圖目錄**。它證實了「有哪些掉落物、分幾族幾級」，
+**但完全不含**：掉落機率、名誉 Lv → 掉落權重、效果數值（如 Wiki 的
+「武器強化 Lv3 = 25 秒 200%」）、持續時間、或誰有權生成掉落。
+這些仍**無任何 client 證據**，維持 UNRESOLVED，
+比照 §5d-16 Rocket/Plasma/Laser 的處理：**可讀出 ≠ 有權威**。
+
 ## 6. 其他已知資源
 
 - `system/map_StartIndex.xml`, `SelectRandomMap.xml`: 地圖選擇
 - `ui/system/AI/*.xml`: AI 模式劇本 (BotWave/BotPath/Scenario)
 - `Options.cfg`, `CustomMap.cfg`, `LastConnect.ini`: 本機設定 (非資源)
+- `map/gameobject.dat`: **戰場掉落物總表** (105 筆, 明文; 見 §5d-21)
 - `TNMT_*.xml`: 錦標賽 UI 資料
 - `occupymode.xml` / `occupyrenewalmode.xml`: 佔領模式參數
 

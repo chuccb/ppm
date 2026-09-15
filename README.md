@@ -116,6 +116,7 @@ route table / 日誌 / `packet_stats` 監控。
 | `ui/system/voice_customize_contents.xml` / `voice_customize_path.xml` | **語音自訂 791–796 資料源**: 15 角色 × 92 情境 (缺 87) × 27 句 (command/tactics/infomation × 9) + 語音檔路徑 `sound\soundsNN\<codename>` |
 | `ui/slanderfilter/filterword.txt` + `exceptionword.txt` | 聊天/暱稱過濾詞 (GM/GS 變體 + 髒話) |
 | `ui/system/Total_Package_Index.xml` / `SpecialWeaponType.xml` / `map_BGMSoundNames.xml` | 套裝索引 / 特殊武器型態 / 地圖 BGM |
+| `map/gameobject.dat` | **戰場掉落物總表** (105 筆, 明文自證切段): 88 個 `D_Item` = 名誉ゲージ掉落物的 7 族 × Lv1–3 矩陣, 與 Wiki 的 7 種道具結構吻合; 另含任務道具 `Q_Item`、Pulp 搬運物、彈匣 |
 | `ui/{bot,game,lobby,loadscreen}/` + `ui/sounds/` | DDS/TGA 圖集與音效 — 檔名可佐證各模式 UI (見下) |
 | `data.pat` / `convars.pat` / `0.xml` / `ClientDataList.xml` | 資料容器/控制台變數/打包清單 |
 

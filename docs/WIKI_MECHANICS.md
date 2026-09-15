@@ -193,8 +193,14 @@ Lv1–3、僅「アイテム戦」勾選時出現、且需該玩家至少 1 kill
 每一級的 y 座標為 `671 - 32 * (n9 - 1)`，即 9 格等距 32px。
 
 **界線。** 「掉落率隨 gauge 提高」是 Wiki 歷史敘述；native 這段只負責**顯示**。
-掉落表、Lv1–3 效果值（如武器強化 25 秒 200%）皆無 client-side 權威 reader，
+掉落**率**與 Lv1–3 **效果值**（如武器強化 25 秒 200%）皆無 client-side 權威 reader，
 屬 server policy，維持 UNRESOLVED。
+
+> ⚠ **第十六輪更正。** 本節原寫「掉落**表**…無 client-side 權威 reader」，
+> 這句過寬。`map/gameobject.dat` 就是掉落物**目錄**，且 native 有完整 reader
+> （`sub_7FBB90` → `pmFile::possible_ctor_or_dtor_49`），88 個 `D_Item` 恰好構成
+> Wiki 所述的 **7 族 × Lv1–3** 矩陣。已改為只對「率」與「效果值」宣告 UNRESOLVED。
+> 詳 [`RESOURCES.md` §5d-21](RESOURCES.md)。
 
 ### 5b-3. Clan rank：wire 值 → S/A/B/C 的對照已確定
 
@@ -559,6 +565,33 @@ PG-ten/CASH-ten，四個 raw selector 1/2/4/5 的 cash/PG 歸屬也隨之確定�
 （且 `FirstPersonView` 全空＝特效只在第三人稱顯示）。**戰鬥數值是否由 server
 覆核仍無任何 client 證據**，比照 §5b-12 對 Rocket/Plasma/Laser 的處理：
 **可讀出 ≠ 有權威**，不得據此實作伺服器端能力值計算。
+
+### 5b-20. 第十六輪：掉落物總表浮現，推翻自己上一輪寫過的一句話
+
+本輪繼續用完備性作法，但把範圍從 `ui/` 換到**先前完全沒人碰過的 `map/`**。
+`map/gameobject.dat`（54,608 B）**沒有任何 md 引用過**，解出後直接推翻了
+§5b-2 我自己寫的「掉落**表**無 client-side reader」。詳
+[`RESOURCES.md` §5d-21](RESOURCES.md)。
+
+| Wiki 敘述 | 三方比對結果 |
+|---|---|
+| [出現アイテム一覧](https://wikiwiki.jp/paperman/出現アイテム一覧)（2015-10-14）與 [名誉ゲージ](https://wikiwiki.jp/paperman/名誉ゲージ)（2013-04-17）都列出**恰好 7 種**掉落物、**每種 Lv1–3** | **結構被資源檔證實**。`gameobject.dat` 的 88 個 `D_Item` 記錄構成 **7 族 × 3 級**矩陣（另 4 筆 A=0），`D_ItemABCD` 的四位數字與 objectId 的四個位元組**完全同構**（88/88 無例外）。貼圖亦分三階（族 1–3／4–6／7）。繼 skill 三表之後，第三個「Wiki 分類結構被資源證實」的案例。 |
+| 同頁「☆付きのアイテムは、クエストシステムの一部のクエストクリア条件に設定されている物」 | **找到兩端**。`Q_Item0001..0005` 五個模型（Star1／Star2／goldcard／mochi_bomb／ghost）對上 `Quest.pat` 中 `QuestTerm==19` 的**恰好 8 條**任務，且**只有這 8 條**的 `HonorMedalPosition` 非 0。`pos=3`↔goldcard（「マネーカード回収」）、`pos=4`↔mochi_bomb（麻糬＝新年↔「Happy New Year!」）語義自洽。 |
+| — | **但刻意停在 Inference / MEDIUM。** 40001–40006 六條**共用 `pos=1`**，所以 `HonorMedalPosition` **不可能**是 Q_Item 序號的一對一映射；較保守的讀法是「勳章圖示槽位」恰在兩個節慶任務上與序號重合。在找到 native 消費者前不升級。這是「兩格對得上就想宣告映射成立」的典型陷阱。 |
+
+**一句自己寫錯的話，已更正。** §5b-2 原文把「掉落表」「效果值」「掉落率」
+一起宣告為無 client reader。實際上**目錄有**（且有完整 native reader 與
+105/105 齊備的模型資產），**沒有的是率與效果值**。已把該句收窄。
+這說明 UNRESOLVED 也要寫得精確 —— **宣告範圍過寬，本身就是一種錯誤**，
+而且它會讓人不再去找那個其實存在的檔案。
+
+**再次出現「命名漂移而非缺檔」。** 17 個貼圖路徑有 3 個查無同名 `.dds`，
+但 `star` 實際隨附 `Star_1.dds` —— 與 §5b-16 地圖縮圖同一種原廠命名漂移。
+宣告的 **105 個 `.NAO` 模型則 0 缺**。
+
+**界線。** 族序號 A（1..7）對應哪一種道具**無法確定**：codeName 與 mesh 都是
+純編號，exe 全文也搜不到 `D_Item` 字面值（表以 id 查詢）。`C`（1..4）語義同樣未知。
+掉落率、名誉 Lv→權重、效果數值全部維持 UNRESOLVED。
 
 ### 5b-5. 兩項「僅 Wiki、刻意不採用」的記錄
 

@@ -16,6 +16,7 @@ runs. Needs no .NET SDK.
 """
 from __future__ import annotations
 
+import csv
 import re
 import struct
 import sys
@@ -353,6 +354,90 @@ def main() -> None:
                   matrix["speed"]["hit"], "Hit&Run系")
             check("ItemAbilityNameTAble hp x hit (wiki says 応射系)",
                   matrix["hp"]["hit"], "対応射撃系")
+
+    # RESOURCES.md 5d-21: map/gameobject.dat, the battlefield drop catalogue.
+    # Parsed with the exact record layout of pmFile::possible_ctor_or_dtor_49,
+    # so a stride or count drift shows up as a non-zero remainder.
+    gameobject = EXTRACTED / "map" / "gameobject.dat"
+    if not gameobject.is_file():
+        skipped.append("gameobject.dat")
+    else:
+        blob = gameobject.read_bytes()
+        version, count = struct.unpack_from("<fI", blob, 0)
+        check("gameobject.dat version", version, 1.0)
+        check("gameobject.dat count", count, 105)
+        check("gameobject.dat consumes the file exactly",
+              8 + count * 520, len(blob))
+
+        def wide(offset: int) -> str:
+            return blob[offset:offset + 128].decode("utf-16le", "replace").split("\0")[0]
+
+        records = []
+        for index in range(count):
+            base = 8 + 520 * index
+            ident, = struct.unpack_from("<I", blob, base)
+            records.append((ident, tuple(blob[base + 4:base + 8]),
+                            [wide(base + 8 + 128 * part) for part in range(4)]))
+
+        # The id really is the four classification bytes packed together.
+        check("gameobject id equals its classification bytes",
+              [ident for ident, tag, _ in records
+               if tuple(struct.pack("<I", ident))[::-1] != tag], [])
+        check("gameobject third string is always empty",
+              sorted({strings[2] for _, _, strings in records}), [""])
+        check("gameobject categories",
+              sorted(Counter(tag[0] for _, tag, _ in records).items()),
+              [(1, 2), (2, 97), (3, 2), (4, 2), (5, 2)])
+
+        # The 7 families x 3 levels matrix the wiki also describes.
+        drops = [(tag, strings) for _, tag, strings in records
+                 if strings[3].startswith("D_Item") and len(strings[3]) == 10]
+        check("D_Item four-digit records", len(drops), 88)
+        check("D_Item suffix digits agree with the id bytes",
+              [strings[3] for tag, strings in drops
+               if not (tag[2] == int(strings[3][8]) * 10
+                       and tag[3] == (int(strings[3][6]) * 10 + int(strings[3][7])
+                                      if int(strings[3][6]) else 0)
+                       and strings[3][9] == "1")], [])
+        check("D_Item families", sorted({int(s[3][6]) for _, s in drops}),
+              [0, 1, 2, 3, 4, 5, 6, 7])
+        check("D_Item levels (families 1-7)",
+              sorted({int(s[3][7]) for _, s in drops if int(s[3][6])}), [1, 2, 3])
+        textures: dict[str, list[int]] = {}
+        for _, strings in drops:
+            textures.setdefault(strings[1], [])
+            if int(strings[3][6]) not in textures[strings[1]]:
+                textures[strings[1]].append(int(strings[3][6]))
+        textures = {key: sorted(value) for key, value in textures.items()}
+        check("D_Item texture tiers", textures,
+              {"models/item/DropItem_001": [0, 1, 2, 3],
+               "models/item/DropItem_002": [4, 5, 6],
+               "models/item/DropItem_003": [7]})
+        check("Q_Item records",
+              sorted(s[3] for _, s in
+                     [(tag, strings) for _, tag, strings in records
+                      if strings[3].startswith("Q_Item")]),
+              [f"Q_Item000{index}" for index in range(1, 6)])
+
+    # RESOURCES.md 5d-21: the eight QuestTerm==19 quests are exactly the ones
+    # carrying a non-zero HonorMedalPosition.
+    quests = decrypt(EXTRACTED / "ui" / "cfg" / "Quest.pat")
+    if quests is None:
+        skipped.append("Quest.pat")
+    else:
+        lines = quests.decode("cp932").split("\r\n")
+        header = [name.strip() for name in lines[1].split(",")]
+        rows = [row for row in csv.reader(lines[2:]) if len(row) == len(header)]
+        check("Quest.pat rows", len(rows), 844)
+        check("Quest.pat declared total", lines[0].split(",")[0], "844")
+        term = header.index("QuestTerm")
+        medal = header.index("HonorMedalPosition")
+        star = {row[0].strip() for row in rows if row[term].strip() == "19"}
+        marked = {row[0].strip() for row in rows if row[medal].strip() != "0"}
+        check("QuestTerm==19 quests", sorted(star),
+              [str(index) for index in range(40001, 40009)])
+        check("QuestTerm==19 is exactly the HonorMedalPosition set",
+              sorted(marked), sorted(star))
 
     # Every datarevision.txt must agree: Extracted/ is one coherent snapshot.
     revisions = {path.read_text(encoding="utf-8", errors="replace").strip()
