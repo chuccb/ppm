@@ -380,7 +380,7 @@ public sealed partial class Db
         {
             using var cmd = Cmd("""
                 DELETE FROM gifts
-                WHERE gift_id=@g AND to_user_id=@u AND (item_id=@i OR @i=0)
+                WHERE gift_id=@g AND to_user_id=@u AND item_id=@i
                 """, ("@g", giftId), ("@u", userId), ("@i", itemId));
             return cmd.ExecuteNonQuery() == 1;
         }
@@ -393,7 +393,7 @@ public sealed partial class Db
         {
             using var cmd = Cmd("""
                 DELETE FROM inventory
-                WHERE user_id=@u AND slot=@s AND (item_id=@i OR @i=0)
+                WHERE user_id=@u AND slot=@s AND item_id=@i
                 """, ("@u", userId), ("@s", invSlot), ("@i", itemId));
             return cmd.ExecuteNonQuery() == 1;
         }

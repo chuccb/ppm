@@ -49,8 +49,8 @@
 | 195 | GC_ENTERCHANNEL_REQ | 1處 | `u8 u8 u8` |
 | 197 | GL_MYINFO_REQ | 1處 | `(空)` |
 | 199 | GL_MYITEM_REQ | 1處 | `(空)` |
-| 204 | GS_BUYITEM_REQ | 1處 | `u8 s32 u8 s16 s16` |
-| 206 |  | 1處 | `s32 s32 u8 s32` |
+| 204 | GS_BUYITEM_REQ | sub_571100 | `u8 count, count×{s32 itemId,u8 kind,s16 period,[s16 variant only kind 12/13/17]}`; packet opcode changes to 468 when any item is in a Hukubukuro range |
+| 206 | *(unnamed native request; paired with 207)* | sub_571620 | `s32 itemId,s32 rawContext,u8 itemKind,s32 rawPeriod` |
 | 208 | GS_SELLITEM_REQ | 1處 | `s32` |
 | 210 | GM_CHECKNICK_REQ | 1處 | `str` |
 | 212 | GM_CREATENICK_REQ | 1處 | `str` |
@@ -104,7 +104,7 @@
 | 348 | GG_DEADCHAT_REQ | 2處 | `s32 u8 str` |
 | 350 | GG_TEAMDEADCHAT_REQ | 2處 | `s32 u8 str` |
 | 356 | GS_CASH_REQ | 1處 | `(空)` |
-| 358 | GS_BUYCASHITEM_REQ | 1處 | `u8 s32 s32` |
+| 358 | GS_BUYCASHITEM_REQ | sub_572450 | `u8 count, count×{s32 itemId,s32 clientCalculatedPrice}` |
 | 360 | GG_TSURRESPON_REQ | 1處 | `s32` |
 | 364 | GR_BALANCECHANGE_REQ | 1處 | `s8` |
 | 366 |  | 1處 | `s8` |
@@ -142,7 +142,7 @@
 | 457 | GI_CHANGEITEMSLOT_REQ | 1處 | `9×s32` (exact 36B UI-item IDs; sub_5275A0) |
 | 461 | GS_USE_PAPERCODEGIFT_REQ | 1處 | `str` |
 | 463 | GS_ENTERPAPERCODEGIFT_NOTIFY | 1處 | `(空)` |
-| 464 | GS_USE_PAPERCODEGIFT_IGNORE_DUPLICATED_ITEM_REQ | 1處 | `u8 str` |
+| 464 | GS_USE_PAPERCODEGIFT_IGNORE_DUPLICATED_ITEM_REQ | sub_57CCE0 / sub_4C4000 | `u8 duplicateChoice; duplicateChoice==1 → str`; direct UI callbacks send 1 for GET and 0 for CANCEL, so CANCEL is exactly one byte |
 | 466 | GI_CHANGE_SKILLITEMSLOT_REQ | 1處 | `u8 target_profile, u8 previous_update_raw, [u8 previous_profile, 7×s32]` (raw==0 → 2B; raw!=0 → 31B; sub_5738A0) |
 | 472 | GL_GAMECENTER_REC_REQ | 1處 | `s16` |
 | 474 | GG_GAMECENTER_GAME_START_REQ | 1處 | `s16 u8` |
@@ -161,10 +161,10 @@
 | 687 | GL_TUTORIAL_START | 1處 | `(空)` |
 | 688 | GL_TUTORIAL_END | 1處 | `(空)` |
 | 689 | GL_TUTORIAL_INDEX_SET_REQ | 1處 | `s32` |
-| 695 | GS_BUY_ONCEITEM_REQ | 3處 | `s32 u8 u8 u16 \|\| (空)` |
+| 695 | GS_BUY_ONCEITEM_REQ | sub_570B00 | multiple item-family forms; do not collapse to one fixed layout (`s32 itemId,u8 kind,u8 period` is one observed form) |
 | 697 | GG_CHEATER_REPORT_REQ | 1處 | `s16` |
 | 698 | GP_ENTER_PEPACHI_REQ | 1處 | `(空)` |
-| 700 | GP_START_GAME_REQ | 1處 | `u8 s32` |
+| 700 | GP_START_GAME_REQ | sub_8458D0 / sub_8459C0 | `u8 paymentDrawSelector, s32 selectedCharacterId` (exact 5B; raw selectors 1/2/4/5; second value derives from selected character as `19900000 + value%100000`) |
 | 702 | GP_PEPACHI_LIST_REQ | 1處 | `(空)` |
 | 704 | GL_LEVEL_KILL_LIMIT_REQ | 1處 | `(空)` |
 | 706 | GL_BILLTOKEN_REQ | 1處 | `(空)` |
@@ -205,7 +205,7 @@
 | 802 | GS_DESTROYITEM_REQ | UNRESOLVED | The old five-field row did not come from an evidenced request constructor; it must not be used as a server parser. |
 | 804 | MASTER_RELOAD_HIDDEN_ITEM_LIST_REQ | 1處 | `(空)` |
 | 806 | GS_HIDDEN_ITEM_LIST_REQ | 2處 | `s16` |
-| 808 | GS_GET_RECOMMENDSET_INFO_REQ | 1處 | `s32 s32 s32 s32 s32 s32 s32 s32 s32 s32` |
+| 808 | GS_GET_RECOMMENDSET_INFO_REQ | sub_46E140 | `s32 count, count×s32 recommendationId`; sender only emits it when count>0 |
 | 812 | MASTER_SPECIAL_ABILITY_ITEMSLOT_PROBABILITY_APPLY_REQ | 1處 | `s8` |
 | 814 | MASTER_CHECK_BOMB_CHEATER_APPLY_REQ | 1處 | `s8` |
 | 819 | MASTER_CHECK_NPGAMEGUARD_QUERY_REQ | 1處 | `(空)` |
@@ -243,7 +243,7 @@
 | 894 | GR_TEAMSHUFFLE_REQ | 1處 | `u8 u8` |
 | 896 |  | 1處 | `s32` |
 | 898 |  | 1處 | `s32` |
-| 900 | GS_CAPSULEMACHINE_START_REQ | 1處 | `u8 s32` |
+| 900 | GS_CAPSULEMACHINE_START_REQ | sub_99CFA0 / sub_99D0A0 | `u8 paymentSelector, u8 drawCount` (exact 2B; direct raw pairs include `{3,1}` and `{1,10}`) |
 | 902 | GG_OCC_START_REQ | 1處 | `u8 u8 s32` |
 | 904 | GG_OCC_SUCC_REQ | 1處 | `u8 u8 s32` |
 | 906 | GG_OCC_FAIL_REQ | 1處 | `u8 u8 s32` |

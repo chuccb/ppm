@@ -195,22 +195,6 @@ bool IsNative198StarterAcknowledgement(Packet acknowledgement)
         && reader.Remaining == 0;
 }
 
-bool IsNative311StarterAcknowledgement(Packet acknowledgement, int bodyItemId)
-{
-    var reader = Packet.FromPayload(acknowledgement.Opcode, acknowledgement.Payload);
-    return acknowledgement.Opcode == Opcode.GS_BUYCHAR_ACK
-        && reader.ReadBool()
-        && reader.ReadS32() == bodyItemId
-        && reader.ReadS32() == 10_100_010  // face: wire comes before head
-        && reader.ReadS32() == 10_000_015
-        && reader.ReadS32() == 10_200_022
-        && reader.ReadS32() == 10_300_012
-        && reader.ReadS32() == 10_400_012
-        && reader.ReadU8() == 0            // account_update_target: no update
-        && reader.ReadS32() == 0
-        && reader.Remaining == 0;
-}
-
 bool IsNative311FailureAcknowledgement(Packet acknowledgement)
 {
     var reader = Packet.FromPayload(acknowledgement.Opcode, acknowledgement.Payload);
@@ -852,6 +836,11 @@ bool IsNative311FailureAcknowledgement(Packet acknowledgement)
             Packet truncatedCharacterPurchaseAcknowledgement = await ReadServerPacketAsync(clientPeer.GetStream(), channelCodec);
             List<Db.CharSlot> charactersAfterPurchase = secondOpen.GetCharacters(newAccount.UserId);
 
+            // The handler must not use the purchase request as an entitlement
+            // grant. This direct DB fixture keeps the unrelated weapon-loadout
+            // test deterministic without claiming a native purchase policy.
+            bool fixtureSecondCharacterCreated = secondOpen.CreateChar(newAccount.UserId, 2, 1);
+
             bool inventoryEnterWasProcessed = await router.DispatchAsync(
                 channelSession,
                 new Packet(Opcode.GL_INVENIN_REQ).WriteU8(0xD2),
@@ -1067,15 +1056,13 @@ bool IsNative311FailureAcknowledgement(Packet acknowledgement)
                 && selectionWasProcessed
                 && enterChannelAcknowledgement.Opcode == Opcode.GC_ENTERCHANNEL_ACK
                 && channelSession.ChannelEntryCompleted);
-            Check("310 → 311 returns the complete native type-2 starter vector",
+            Check("310 → 311 valid and truncated requests fail closed without granting a character",
                 characterPurchaseWasProcessed
-                && IsNative311StarterAcknowledgement(characterPurchaseAcknowledgement, 19_900_002)
-                && charactersAfterPurchase is [_, { SlotNo: 1, CharType: 2 }]
-                && charactersAfterPurchase[1].Equip.SequenceEqual([2, 15, 10, 22, 12, 12, 0, 0, 0, 0, 0, 0]));
-            Check("310 rejects a truncated request with the complete native failure shape",
-                truncatedCharacterPurchaseWasProcessed
+                && truncatedCharacterPurchaseWasProcessed
+                && IsNative311FailureAcknowledgement(characterPurchaseAcknowledgement)
                 && IsNative311FailureAcknowledgement(truncatedCharacterPurchaseAcknowledgement)
-                && charactersAfterPurchase.Count == 2);
+                && charactersAfterPurchase is [{ SlotNo: 0, CharType: 1 }]
+                && fixtureSecondCharacterCreated);
             Check("254 → 255 returns five authoritative NewSkill profile records",
                 inventoryEnterWasProcessed
                 && inventoryEnterLayout
@@ -1808,11 +1795,64 @@ foreach (var (_, codec) in codecs)
     var p424 = new Packet(Opcode.GL_MSG_READ_ACK).WriteU8(1).WriteStr("101");
     Check("424 Msg Read ACK", p424.ReadU8() == 1 && p424.ReadStr() == "101");
 
-    // 453/454 Delete Gift
-    var p454 = new Packet(Opcode.GS_DELETEGIFT_ACK).WriteU8(1).WriteS32(10).WriteS32(20);
-    Check("454 Delete Gift ACK", p454.ReadU8() == 1 && p454.ReadS32() == 10);
+    // 453/454 Delete Gift: the fail-closed arm preserves the cached gift.
+    var p454 = new Packet(Opcode.GS_DELETEGIFT_ACK).WriteU8(0).WriteS32(10).WriteS32(20);
+    Check("454 Delete Gift failure ACK", p454.ReadU8() == 0 && p454.ReadS32() == 10 && p454.ReadS32() == 20);
 
-    // 802's request layout is unresolved.  The only safe 803 response is the
+    // Shop fail-closed ACKs: these shapes are read by the native consumers
+    // before every branch. They intentionally contain no reward, wallet, or
+    // inventory success payload.
+    var p205 = new Packet(Opcode.GS_BUYITEM_ACK).WriteU8(0).WriteU8(0).WriteU8(0)
+        .WriteS32(0).WriteS32(0).WriteS32(0).WriteS32(0).WriteS32(0).WriteS32(0).WriteS32(0);
+    Check("205 bulk purchase failure includes error pair and seven-word trailer",
+        p205.Length == 31 && p205.ReadU8() == 0 && p205.ReadU8() == 0 && p205.ReadU8() == 0
+        && Enumerable.Range(0, 7).All(_ => p205.ReadS32() == 0) && p205.Remaining == 0);
+
+    var p207 = new Packet(Opcode.GS_BUY_WEAPONPARTS_ACK).WriteU8(1);
+    var p209 = new Packet(Opcode.GS_SELLITEM_ACK).WriteU8(0);
+    var p297 = new Packet(Opcode.GS_GIVEGIFT_ACK).WriteU8(1);
+    Check("207 weapon-parts, 209 sale, and 297 gift failures have no success tail",
+        p207.Length == 1 && p207.ReadU8() != 0 && p207.Remaining == 0
+        && p209.Length == 1 && p209.ReadU8() == 0 && p209.Remaining == 0
+        && p297.Length == 1 && p297.ReadU8() != 0 && p297.Remaining == 0);
+
+    var p357 = new Packet(Opcode.GS_CASH_ACK).WriteU8(0).WriteS32(0);
+    var p359 = new Packet(Opcode.GS_BUYCASHITEM_ACK).WriteU8(0).WriteS32(0);
+    Check("357 and 359 do not assert a cash balance or an item purchase",
+        p357.Length == 5 && p357.ReadU8() == 0 && p357.ReadS32() == 0 && p357.Remaining == 0
+        && p359.Length == 5 && p359.ReadU8() == 0 && p359.ReadS32() == 0 && p359.Remaining == 0);
+
+    var p469 = new Packet(Opcode.GS_BUY_HUKUBUKURO_ACK).WriteU8(1);
+    var p471 = new Packet(Opcode.GS_GET_HUKUBUKURO_ACK).WriteU8(1);
+    var p781 = new Packet(Opcode.GS_GET_PRESENTPACKAGE_ACK).WriteU8(1);
+    Check("469, 471, and 781 use their nonzero no-list failure arms",
+        p469.Length == 1 && p469.ReadU8() != 0 && p469.Remaining == 0
+        && p471.Length == 1 && p471.ReadU8() != 0 && p471.Remaining == 0
+        && p781.Length == 1 && p781.ReadU8() != 0 && p781.Remaining == 0);
+
+    var p696 = new Packet(Opcode.GS_BUY_ONCEITEM_ACK).WriteU8(0).WriteS32(0).WriteS32(0);
+    Check("696 once-item failure consumes its zero-result raw s32", p696.Length == 9
+        && p696.ReadU8() == 0 && p696.ReadS32() == 0 && p696.ReadS32() == 0 && p696.Remaining == 0);
+
+    var p699 = new Packet(Opcode.GP_ENTER_PEPACHI_ACK).WriteU8(0).WriteS32(0).WriteS32(0);
+    var p700 = new Packet(Opcode.GP_START_GAME_REQ).WriteU8(1).WriteS32(19_900_001);
+    var p701 = new Packet(Opcode.GP_START_GAME_ACK).WriteU8(0).WriteU8(0);
+    var p703 = new Packet(Opcode.GP_PEPACHI_LIST_ACK).WriteS32(0).WriteS32(0);
+    Check("Pepachi request is selector plus selected character id; failures do not award",
+        p700.Length == 5 && p700.ReadU8() == 1 && p700.ReadS32() == 19_900_001 && p700.Remaining == 0
+        && p699.Length == 9 && p699.ReadU8() == 0 && p699.ReadS32() == 0 && p699.ReadS32() == 0
+        && p701.Length == 2 && p701.ReadU8() == 0 && p701.ReadU8() == 0
+        && p703.Length == 8 && p703.ReadS32() == 0 && p703.ReadS32() == 0);
+
+    var p900 = new Packet(Opcode.GS_CAPSULEMACHINE_START_REQ).WriteU8(1).WriteU8(10);
+    var p901 = new Packet(Opcode.GS_CAPSULEMACHINE_START_ACK)
+        .WriteU8(1).WriteS32(0).WriteS32(0).WriteS32(0).WriteS32(0);
+    Check("900 is selector plus draw count; 901 failure includes its complete zero-award tail",
+        p900.Length == 2 && p900.ReadU8() == 1 && p900.ReadU8() == 10 && p900.Remaining == 0
+        && p901.Length == 17 && p901.ReadU8() != 0 && p901.ReadS32() == 0
+        && p901.ReadS32() == 0 && p901.ReadS32() == 0 && p901.ReadS32() == 0 && p901.Remaining == 0);
+
+    // 802's request layout is unresolved. The only safe 803 response is the
     // consumer's fully evidenced no-mutation failure arm.
     var p803 = new Packet(Opcode.GS_DESTROYITEM_ACK).WriteU8(1).WriteU8(0).WriteU8(0);
     Check("803 Destroy Item failure ACK", p803.ReadU8() != 0 && p803.ReadU8() == 0
@@ -1822,13 +1862,6 @@ foreach (var (_, codec) in codecs)
     var p877 = new Packet(Opcode.GQ_QUEST_ACCEPT_DAILY_ACK).WriteU8(0).WriteS32(0);
     Check("877 Daily Quest ACK", p877.ReadU8() == 0 && p877.ReadS32() == 0);
 
-    // 698/699 Pepachi Enter
-    var p699 = new Packet(Opcode.GP_ENTER_PEPACHI_ACK).WriteU8(1).WriteS32(100).WriteS32(50);
-    Check("699 Pepachi Enter ACK", p699.ReadU8() == 1 && p699.ReadS32() == 100);
-
-    // 900/901 Capsule Machine Start
-    var p901 = new Packet(Opcode.GS_CAPSULEMACHINE_START_ACK).WriteU8(1).WriteS32(1001).WriteS32(99);
-    Check("901 Capsule Machine ACK", p901.ReadU8() == 1 && p901.ReadS32() == 1001);
 }
 
 // ---- 9. GM / MASTER、GameCenter、AI 模式 wire 格式 round-trip --------------

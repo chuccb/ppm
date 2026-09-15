@@ -86,8 +86,11 @@ tail[99,100] b1208,b1209 (ver==1 讀 2B)
 tail[101..114] 價格承載區 (→ 記憶體 1212..1224 檔位0 组) —
     ⚠ 日版資料全 0 (21,141/21,164)! 僅 23 條武器 (INGRAM Silencer 等)
     的 [107] 有 5/25/30 (參數非價格)
-    → **價格由伺服器下發** — 這解釋了 358 GS_PRICE_REQ 的存在:
-    client 把商店價格快取上報驗證, 實價一律以 205/209 ACK 為準!
+    → **UNRESOLVED:** this Japanese resource revision does not provide a usable
+    price sheet. The client does send 358's locally calculated item-price
+    pairs, but that alone cannot prove whether the retired service used,
+    ignored, or cross-checked them, nor can any 205/209 response establish a
+    catalog price policy.
 tail[105]   u8 =1 (幾乎恆定, 有效旗標)
 tail[112]   u8 =1 (恆定)
 tail[115..626] 第二個 UTF-16 字串 (256×2B): 顯示名/說明

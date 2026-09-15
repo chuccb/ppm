@@ -140,16 +140,17 @@
 >    - 912/913: **尚未實作**。已確認 op 0 remove / 1 install / 2 replace 和 913 `errorRaw` gate；原服 error values、授權及到期/持久化效果仍需確認，不可回假成功。
 >    - 310/311: 購買新角色 (characters 插入, users.game_point 扣款)。
 > ③ **商城/背包/信件/任務 (453/454, 802/803, 423/424, 876/877, 878/879)**:
->    - 453/454: 刪除禮物 (gifts 刪除);
+>    - 453/454: REQ/ACK wire and client cache key are recovered, but original gift-state/authority policy is not. Server validates exact `{s32 giftId,s32 itemId}` then returns a non-mutating `result=0` echo; it must not delete SQLite gifts before 298/300/315 are reconciled.
 >    - 802/803: request layout remains **UNRESOLVED**. The server deliberately emits only the fully evidenced no-mutation failure `{u8 nonzero_result,u8 raw_code,u8 affected_count=0}`; it does not delete or decrement inventory.
 >    - 423/424: 信件標記已讀 (messages.is_read = 1);
 >    - 876/877: 每日任務接取 (回傳 13B 任務結構);
 >    - 878/879: 榮譽任務完成確認 (榮譽標題與稱號)。
-> ④ **轉蛋機與膠囊機 (698-703, 900/901)**:
->    - 698/699: 進入轉蛋機 (coins, cash 查詢);
->    - 702/703: 轉蛋機道具清單 (normal, rare items);
->    - 700/701: 開始轉蛋 (扣幣, 抽取道具);
->    - 900/901: 膠囊機啟動 (扣代幣, 抽取道具)。
+> ④ **轉蛋機與膠囊機 (698-703, 900/901) — 後續證據已推翻當時的成功實作敘述**:
+>    - 698/699 僅確認 entry response 的 `u8,s32,s32` consumer；兩個 s32 不是已證實的 coins/cash。
+>    - 702/703 的 exact wire 是 `{s32 start,s32 count,(start+count)×s16}`，不是 normal/rare item lists。
+>    - 700/701 的 exact request is `{u8 selector,s32 selectedCharacterId}`; success contains a variable reel/prize sequence. No debit/reward policy is recovered.
+>    - 900/901 的 exact request is `{u8 paymentSelector,u8 drawCount}`; ACK carries a count-driven variable result plus three trailing state words. No token debit/reward policy is recovered.
+>    - Current server only emits client-safe failure arms with no mutation; see `PACKETS.md` §3.98a.
 > ⑤ **房間管理與投票 (131/132, 718-722)**:
 >    - 131/132: 房主強制踢人 (廣播 132 ACK 並移除 slot 成員);
 >    - 718-722: 踢人投票流程 (718 REQ → 719 ACK → 720 全房倒數廣播 → 721 表決 → 722 結算)。
@@ -265,7 +266,7 @@
 | 300 | GS_MOVEGIFT_REQ | `(空)` |
 | 306 | GG_JJGET_REQ | `u8` |
 | 324 | GG_BOMBEND_REQ | `u8` |
-| 358 | GS_BUYCASHITEM_REQ | `u8 s32 s32` |
+| 358 | GS_BUYCASHITEM_REQ | `u8 count, count×{s32 itemId,s32 clientCalculatedPrice}` |
 | 374 | GR_GETCRYSTAL_REQ | `u8` |
 | 398 | MASTER_SVRCLASS_REQ | `u8` |
 | 400 | MASTER_CONNTYPE_REQ | `u8` |
@@ -276,8 +277,8 @@
 | 443 | GG_STEALSUCK_REQ | `u8 s16` — ACK 444=u8,u8,u16×3 分數組, 需計分狀態機 (勿轉發) |
 | 445 | GG_STEALPUSH_REQ | `u8 s16` — ACK 446=u8,u8,u16×3 分數組, 需計分狀態機 (勿轉發) |
 | 457 | GI_CHANGEITEMSLOT_REQ | `9×s32` (36B); ACK needs exact 63B tail producer semantics before implementation |
-| 461 | GS_USE_PAPERCODEGIFT_REQ | `str` |
-| 464 | GS_USE_PAPERCODEGIFT_IGNORE_DUPLICATED_ITEM_REQ | `u8 str` |
+| 461 | GS_USE_PAPERCODEGIFT_REQ | `str` (native UI sends only a 16-character upper-case ASCII alphanumeric code; validity, lockout, entitlement, and grant policy remain server-side unresolved) |
+| 464 | GS_USE_PAPERCODEGIFT_IGNORE_DUPLICATED_ITEM_REQ | `u8 duplicateChoice; choice==1 → str` (GET=1, CANCEL=0; cancel is one byte) |
 | 571 | GV_TEST_REQ | `str str` |
 | 581 | GC_CLAN_START_REQ | `(空)` |
 | 697 | GG_CHEATER_REPORT_REQ | `s16` |
@@ -302,8 +303,8 @@
 | 776 | GL_CLAN_TNMT_CLANREC_REQ | `(空)` |
 | 785 | GL_FRIEND_ADD_PROCESS_REQ | `str` |
 | 804 | MASTER_RELOAD_HIDDEN_ITEM_LIST_REQ | `(空)` |
-| 806 | GS_HIDDEN_ITEM_LIST_REQ | `s16` |
-| 808 | GS_GET_RECOMMENDSET_INFO_REQ | `s32 s32 s32 s32 s32 s32 s32 s32 s32 s32` |
+| 806 | GS_HIDDEN_ITEM_LIST_REQ | `s16 category` (native shop callers use 1–24; parts-room initialization uses 25; response production/filter policy unresolved) |
+| 808 | GS_GET_RECOMMENDSET_INFO_REQ | `s32 count, count×s32 recommendationId`; native sender emits only when `count>0` |
 | 812 | MASTER_SPECIAL_ABILITY_ITEMSLOT_PROBABILITY_APPLY_REQ | `s8` |
 | 814 | MASTER_CHECK_BOMB_CHEATER_APPLY_REQ | `s8` |
 | 819 | MASTER_CHECK_NPGAMEGUARD_QUERY_REQ | `(空)` |

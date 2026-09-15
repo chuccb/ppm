@@ -70,7 +70,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 202 | GL_EXPIRE_PARTSUP_ACK | sub_95AE40 | `s32 f32/s32 f32/s32 s8/bool f32/s32 f32/s32` |
 | 203 |  | sub_571D50 | `(無直接讀取/轉發)` |
 | 205 | GS_BUYITEM_ACK | sub_571910 | `u8 s8/bool s32 f32/s32 f32/s32 s32 u8 u16 s8/bool u8 s32 s32 s32 s32 s32 s32 s32` |
-| 207 | GS_BUY_WEAPONPARTS_ACK | sub_571B60 | `u8 s32 s32 s8/bool f32/s32 f32/s32 s32 s32 s32 s32 s32 s32` |
+| 207 | GS_BUY_WEAPONPARTS_ACK | sub_571B60 | `u8 rawResult; rawResult==0 → 21B part record + 6×s32 wallet tail; nonzero → no tail` |
 | 209 | GS_SELLITEM_ACK | sub_572B80 | `s8/bool s32 s32 s32` |
 | 211 | GM_CHECKNICK_ACK | sub_572D80 | `u8` |
 | 213 | GM_CREATENICK_ACK | sub_572E70 | `u8` |
@@ -133,8 +133,8 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 349 | GG_DEADCHAT_ACK | sub_58D8D0 | `(無直接讀取/轉發)` |
 | 351 | GG_TEAMDEADCHAT_ACK | sub_58D900 | `(無直接讀取/轉發)` |
 | 353 | GG_LEVELJJ_ACK | sub_562310 | `u8 s32` |
-| 357 | GS_CASH_ACK | sub_572420 | `s8/bool f32/s32` |
-| 359 | GS_BUYCASHITEM_ACK | sub_5725D0 | `u8 s32 s8/bool s32 f32/s32 f32/s32 s32` |
+| 357 | GS_CASH_ACK | sub_572420 | `u8 rawStatus s32 rawCash` |
+| 359 | GS_BUYCASHITEM_ACK | sub_5725D0 | `u8 resultCount s32 rawHeader; resultCount×{u8 itemResult,[itemResult!=0:s32 itemId,s32 rawA,s32 rawB,s32 rawC]}` |
 | 361 | GG_TSURRESPON_ACK | sub_558DD0 | `u8 u8 s16 s16 s16` |
 | 363 | GP_CHCRITICALC_ACK | sub_556AB0 | `(無直接讀取/轉發)` |
 | 365 | GR_BALANCECHANGE_ACK | sub_56FAE0 | `s8/bool` |
@@ -170,11 +170,11 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 454 | GS_DELETEGIFT_ACK | sub_57BCF0 | `u8 s32 s32` |
 | 456 | GG_EXERCISERESPON_ACK | sub_55C340 | `u8 u8 s16 s16 s16` |
 | 458 | GI_CHANGEITEMSLOT_ACK | sub_573860 | `9×s32 UI ids + 3×{u8 rawFlag,s32 itemId,s32 itemStateRaw}` (exact 63B) |
-| 462 | GS_USE_PAPERCODEGIFT_ACK | sub_57CC90 | `(無直接讀取/轉發)` |
-| 465 | GS_USE_PAPERCODEGIFT_IGNORE_DUPLICATED_ITEM_ACK | sub_57CDD0 | `u8` |
+| 462 | GS_USE_PAPERCODEGIFT_ACK | sub_57CC90 → sub_4C4270 | `u8 outcome`; outcome 1 additionally reads `u8 failedAttemptCount`; outcome 4 delegates a duplicate-item popup which consumes a request/context-dependent tail; other outcomes have no direct tail in this consumer |
+| 465 | GS_USE_PAPERCODEGIFT_IGNORE_DUPLICATED_ITEM_ACK | sub_57CDD0 → sub_4C44C0 | `u8 outcome` (0=receive success UI, 13=cancel UI, all other values=generic failure UI) |
 | 467 | GI_CHANGE_SKILLITEMSLOT_ACK | sub_573A70 | `u8 resultRaw, u8 unknown, u8 count, count×{u8 profile, raw32}` |
-| 469 | GS_BUY_HUKUBUKURO_ACK | sub_57CE30 | `u8 s32 s32 s32 s32 s32 s32` |
-| 471 | GS_GET_HUKUBUKURO_ACK | sub_57D210 | `u8 s32 s32 u8` |
+| 469 | GS_BUY_HUKUBUKURO_ACK | sub_57CE30 | `u8 status; status==0 → 6×s32; nonzero → no tail` |
+| 471 | GS_GET_HUKUBUKURO_ACK | sub_57D210 | `u8 status; status==0 → s32 count, count×{s32 itemId,u8 rawValue}; nonzero → no tail` |
 | 473 | GL_GAMECENTER_REC_ACK | sub_584910 | `u16 s32 u8 u8 u8 u8 u16 s32 u8 u8 u16 u16` |
 | 475 | GG_GAMECENTER_GAME_START_ACK | sub_584E80 | `(無直接讀取/轉發)` |
 | 477 | GG_GAMECENTER_GAME_END_ACK | sub_564A00 | `(無直接讀取/轉發)` |
@@ -192,7 +192,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 691 | GL_ITEM_MODIFY_NOTIFIER | sub_55C880 | `s32 f32/s32 s32 s32 s32 s32` |
 | 692 | GG_CP_TERMINATE_APP | sub_55C960 | `s32` |
 | 693 | GL_TCPCONNSUCC | sub_57CAE0 | `(無直接讀取/轉發)` |
-| 696 | GS_BUY_ONCEITEM_ACK | sub_571D70 | `u8 s32 u32 s32 s32 s32 str s32 s32 s32 f32/s32 s32 s32 s32 s32 s32 s32 s32 s32` |
+| 696 | GS_BUY_ONCEITEM_ACK | sub_571D70 | `u8 rawResult s32 rawItemOrClass; rawResult==0 → raw s32; later fields are item-family conditional` |
 | 705 | GL_LEVEL_KILL_LIMIT_ACK | sub_55C9B0 | `s32 f32 s32` |
 | 709 | GL_CHECKCASHPG_ACK | sub_57C0B0 | `u8 s32 s32 s32` |
 | 713 | GR_NOSKILL_ACK | sub_56FBC0 | `s8/bool` |
@@ -232,7 +232,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 777 | GL_CLAN_TNMT_CLANREC_ACK | sub_581D00 | `(無直接讀取/轉發)` |
 | 778 | GR_CLAN_TNMT_PREVENT_ENTER_ROOM_NOTIFY | sub_581D20 | `(無直接讀取/轉發)` |
 | 779 | GL_CLAN_TNMT_CHANGE_CLAN_INFO_NOTIFY | sub_581D60 | `u8 s32 s32 u8 str` |
-| 781 | GS_GET_PRESENTPACKAGE_ACK | sub_57D6B0 | `u8 s32 s32 s32` |
+| 781 | GS_GET_PRESENTPACKAGE_ACK | sub_57D6B0 | `u8 status; status==0 → s32 count, count×{s32 itemId,s32 rawValue}; nonzero → no tail` |
 | 782 | GL_RECEIVE_NEW_MSG | sub_5643C0 | `(無直接讀取/轉發)` |
 | 784 | GL_NEW_MSG_COUNT_ACK | sub_564480 | `s32` |
 | 786 | GL_FRIEND_ADD_PROCESS_ACK | sub_5645B0 | `u8 str u8` |

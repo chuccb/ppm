@@ -132,7 +132,7 @@ uses cancellation and disposes its socket only after its receive loop exits.
 ## 5. Server 現況
 
 - handlers: 42 個獨立 opcode (19 個經通用轉發器)
-- 覆蓋: 登入/大廳/商店(買賣禮)/好友/信箱/任務/戰隊/戰績/
+- 覆蓋: 登入/大廳/商店與禮物的 fail-closed wire boundary/好友/信箱/任務/戰隊/戰績/
   房間全流程/開戰鏈/戰鬥 TCP relay/查人/場景，以及 UDP-private 19→空 20 control
 - UDP 範圍: 只實作 source-proven AES-only 19→20；其餘 private UDP opcode、P2P/
   NAT/relay 語意均未實作且不宣稱已定性

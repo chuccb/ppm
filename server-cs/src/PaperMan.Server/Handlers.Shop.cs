@@ -1,323 +1,424 @@
 // =============================================================================
-// 商店 handlers — 佈局出自反編譯:
-//   356 GS_CASH_REQ         → 357 (sub_572420: bool ok, s32 cash)
-//   204 GS_BUYITEM_REQ      → 205 (sub_571910: u8 count, repeat{bool, s32 item,
-//                                  f32, f32, s32 period, u8 kind, u16 dura})
-//   695 GS_BUY_ONCEITEM_REQ (s32 item, str opt, u8 kind, u8 period)
-// period 白名單 (sub_570B00): 1/7/15/30/60/90 天 或 0=永久型。
+// Shop request boundary
+//
+// The client wire shapes below are direct consumer/builder evidence.  The
+// original service's catalog, price, entitlement, reward, and probability
+// policies are not present in the client or Extracted resources.  Therefore
+// all purchase, sale, gift, bag/package, Pepachi, and capsule paths fail
+// closed: a structurally valid failure ACK, no request-dependent decoding, and
+// no wallet/inventory/gift mutation.  Do not turn any of these into success
+// paths without evidence for both the server policy and its success payload.
 // =============================================================================
+using System.Buffers.Binary;
 using PaperMan.Protocol;
 
 namespace PaperMan.Server;
 
 public static class ShopHandlers
 {
+    // `206` has no name in the native opcode-name registry. `sub_571620`
+    // constructs it immediately before the 207 consumer, so this local name
+    // is an implementation label rather than a recovered native symbol.
+    private const Opcode BuyWeaponPartsRequestOpcode = (Opcode)206;
+
     public static void Register(Registrar add)
     {
         add(Opcode.GS_CASH_REQ, Cash);
         add(Opcode.GS_BUYITEM_REQ, BuyItems);
-        add(Opcode.GS_BUY_ONCEITEM_REQ, BuyOnceItem);
-        add(Opcode.GS_GIVEGIFT_REQ, GiveGift);
+        add(BuyWeaponPartsRequestOpcode, BuyWeaponParts);
         add(Opcode.GS_SELLITEM_REQ, SellItem);
+        add(Opcode.GS_GIVEGIFT_REQ, GiveGift);
         add(Opcode.GS_BUYCHAR_REQ, BuyCharacter);
+        add(Opcode.GS_BUYCASHITEM_REQ, BuyCashItems);
         add(Opcode.GS_DELETEGIFT_REQ, DeleteGift);
+        add(Opcode.GS_BUY_HUKUBUKURO_REQ, BuyHukubukuro);
+        add(Opcode.GS_GET_HUKUBUKURO_REQ, GetHukubukuro);
+        add(Opcode.GS_BUY_ONCEITEM_REQ, BuyOnceItem);
+        add(Opcode.GS_GET_PRESENTPACKAGE_REQ, GetPresentPackage);
         add(Opcode.GS_DESTROYITEM_REQ, DestroyItem);
         add(Opcode.GP_ENTER_PEPACHI_REQ, EnterPepachi);
-        add(Opcode.GP_PEPACHI_LIST_REQ, PepachiList);
         add(Opcode.GP_START_GAME_REQ, StartPepachi);
+        add(Opcode.GP_PEPACHI_LIST_REQ, PepachiList);
         add(Opcode.GS_CAPSULEMACHINE_START_REQ, StartCapsuleMachine);
     }
 
-    // REQ(208) sub_572AD0: s32 slot_idx — 賣出單件
-    // ACK(209) sub_572B80 (廿三輪自動審計重修): bool ok;
-    //   ok → s32 v11, s32 gp_after(→PG 顯示), s32 item_id
-    //   (client 以 item_id 掃背包快取移除該件; 單件交易無迴圈 —
-    //    四/六輪的 count+repeat 版為誤讀, dispatcher 直查定案)
-    private static async ValueTask SellItem(Session session, Packet packet, ServerContext context)
+    // 356 → 357. `sub_572380` sends an empty request; `sub_572420` always
+    // reads {u8 status, s32 rawCash}. A success status/balance would assert
+    // unverified billing state.
+    private static ValueTask Cash(Session session, Packet packet, ServerContext context)
     {
-        int slot = packet.ReadS32();
-        var r = session.UserId != 0
-            ? context.Db.SellItem(session.UserId, slot)
-            : ((bool Ok, int ItemId, long GpAfter))(false, 0, 0);
-
-        var ack = new Packet(Opcode.GS_SELLITEM_ACK).WriteBool(r.Ok);
-        if (r.Ok)
+        if (packet.Remaining != 0)
         {
-            ack.WriteS32(0)                                 // v11 (保留)
-               .WriteS32((int)r.GpAfter)                    // → *EE8D18 PG 顯示
-               .WriteS32(r.ItemId);                         // 背包快取移除鍵
+            return ValueTask.CompletedTask;
         }
 
-        await session.SendAsync(ack);
+        return session.SendAsync(new Packet(Opcode.GS_CASH_ACK)
+            .WriteU8(0)
+            .WriteS32(0));
     }
 
-    private static async ValueTask Cash(Session session, Packet packet, ServerContext context)
+    // 204 → 205. `sub_571910` reads this full count==0 failure arm before its
+    // unconditional seven-s32 trailer. Its two error bytes are raw; zero is
+    // only a structurally neutral value, not an asserted original error code.
+    private static ValueTask BuyItems(Session session, Packet packet, ServerContext context)
     {
-        int cash = session.UserId != 0 ? context.Db.GetCash(session.UserId) : 0;
-        await session.SendAsync(new Packet(Opcode.GS_CASH_ACK).WriteBool(true).WriteS32(cash));
-    }
-
-    // ACK(205) sub_571910 — ⚠ 交叉驗證修正的完整結構:
-    //   u8 count
-    //   repeat count: bool ok; ok 時 {s32 item, f32, f32, s32 period, u8 kind, u16 dura}
-    //   若 count==0: 額外 bool + u8 (錯誤碼對)
-    //   尾端固定 7×s32: pair(?,cash) pair(?,gp) pair(?,x) + s32 last
-    //   (count!=0 時 v16→EE8D18=cash 顯示, v20→GP, v27→EE8D1C)
-    // REQ(204) builder @0x570A2C (六輪逐行驗證):
-    //   u8 count; repeat count {s32 item_id, u8 kind, s16 period,
-    //   [s16 -(idx+1) 只在 kind 12/13/17 = 顏色/貼圖類]}
-    private static async ValueTask BuyItems(Session session, Packet packet, ServerContext context)
-    {
-        byte count = packet.ReadU8();
-        var ack = new Packet(Opcode.GS_BUYITEM_ACK).WriteU8(count);
-        for (int i = 0; i < count && packet.Remaining > 0; i++)
+        if (!IsBulkPurchaseRequest(packet, requireHukubukuroItem: false))
         {
-            int itemId = packet.ReadS32();
-            byte kind = packet.ReadU8();
-            short period = packet.ReadS16();
-            if (kind is 12 or 13 or 17 && packet.Remaining >= 2)
-            {
-                _ = packet.ReadS16();                            // 變體索引 (負編碼)
-            }
-
-            WriteResult(ack, Buy(session, context, itemId, (byte)period, useCash: true));
+            return ValueTask.CompletedTask;
         }
 
-        await session.SendAsync(WriteTail(ack, session, context));
+        return session.SendAsync(NewBulkPurchaseFailure());
     }
 
-    // REQ(695) builder sub_570B00 (廿四輪自動抽取定案):
-    //   s32 item_id, u8 kind, u8 period, u16 variant
-    //   (七輪的 str(64) 版是誤讀 String 緩衝宣告 — 三個 builder 呼叫點
-    //    序列一致: 592A20+592920+592920+5929A0, 無字串寫入)
-    private static async ValueTask BuyOnceItem(Session session, Packet packet, ServerContext context)
+    // 206 is exactly {s32 itemId,s32 rawContext,u8 itemKind,s32 rawPeriod}.
+    // In `sub_571B60`, raw result zero enters the success decoder and mutates
+    // the local parts/wallet cache. Any nonzero result has no tail.
+    private static ValueTask BuyWeaponParts(Session session, Packet packet, ServerContext context)
     {
-        int itemId = packet.ReadS32();
-        _ = packet.ReadU8();                                    // kind (server 以 catalog 為準)
-        byte period = packet.Remaining > 0 ? packet.ReadU8() : (byte)0;
-
-        if (packet.Remaining >= 2)
+        if (packet.Remaining != 13)
         {
-            _ = packet.ReadU16();                               // 顏色/貼圖變體 (負編碼)
+            return ValueTask.CompletedTask;
         }
 
-        var ack = new Packet(Opcode.GS_BUYITEM_ACK).WriteU8(1);
-        WriteResult(ack, Buy(session, context, itemId, period, useCash: true));
-        await session.SendAsync(WriteTail(ack, session, context));
+        return session.SendAsync(new Packet(Opcode.GS_BUY_WEAPONPARTS_ACK).WriteU8(1));
     }
 
-    private static Db.BuyResult Buy(Session session, ServerContext context, int itemId, byte period, bool useCash) =>
-        session.UserId != 0
-            ? context.Db.BuyItem(session.UserId, itemId, period, useCash)
-            : Db.BuyResult.Fail(itemId);
-
-    // REQ(296) 完整版 builder @0x57A6xx (七輪讀畢):
-    //   str to_nick, u8 has_msg, [str message], s32 item_id, u8 kind,
-    //   u8 period, [u16 變體 只在 kind 12/13/17]
-    // ACK(297) sub_57AA50: u8 result (0=成功 → 另 5×s32; 1..11 = 錯誤碼)
-    private static async ValueTask GiveGift(Session session, Packet packet, ServerContext context)
+    // 208 is exactly one s32. `sub_572B80` reads a byte and only a nonzero
+    // value consumes the item/wallet tail and removes a local inventory record.
+    private static ValueTask SellItem(Session session, Packet packet, ServerContext context)
     {
-        var toNick = packet.ReadStr();
-        var message = packet.ReadBool() ? packet.ReadStr() : null;
-        int itemId = packet.ReadS32();
-        byte kind = packet.ReadU8();
-        byte period = packet.Remaining > 0 ? packet.ReadU8() : (byte)0;
-
-        if (kind is 12 or 13 or 17 && packet.Remaining >= 2)
+        if (packet.Remaining != 4)
         {
-            _ = packet.ReadU16();                                // 顏色/貼圖變體 (負編碼)
+            return ValueTask.CompletedTask;
         }
 
-        byte result = session.UserId != 0
-            ? context.Db.GiveGift(session.UserId, toNick, itemId, period, message)
-            : (byte)1;
-
-        var ack = new Packet(Opcode.GS_GIVEGIFT_ACK).WriteU8(result);
-        if (result == 0)
-        {
-            int cash = context.Db.GetCash(session.UserId);
-            ack.WriteS32(cash)                              // 扣款後餘額顯示組
-               .WriteS32(0)
-               .WriteS32(0)
-               .WriteS32(0)
-               .WriteS32(0);
-        }
-
-        await session.SendAsync(ack);
+        return session.SendAsync(new Packet(Opcode.GS_SELLITEM_ACK).WriteU8(0));
     }
 
-    // 310 GS_BUYCHAR_REQ (sub_572790): s32 body_item_id followed by five
-    // scalar s32 values. The native builder widens its five char arguments;
-    // their server-domain meaning is UNRESOLVED, so the canonical body is the
-    // only evidence-backed creation input. Require all six words rather than
-    // accepting a truncated request.
-    //
-    // 311 GS_BUYCHAR_ACK (sub_5728A0): u8 ok; if ok, six full IDs in wire order
-    // body, face, head, top, bottom, shoes; then always u8 account_update_target
-    // and s32 account_update_value. Target 0 is the native no-update branch.
-    private static async ValueTask BuyCharacter(Session session, Packet packet, ServerContext context)
+    // 296 has a six-byte compact form and a NUL-terminated-string form. Result
+    // zero has a five-s32 success-only balance tail; result one is a no-tail
+    // client error arm.
+    private static ValueTask GiveGift(Session session, Packet packet, ServerContext context)
+    {
+        if (!IsGiftRequest(packet))
+        {
+            return ValueTask.CompletedTask;
+        }
+
+        return session.SendAsync(new Packet(Opcode.GS_GIVEGIFT_ACK).WriteU8(1));
+    }
+
+    // 310 is exactly six s32 values. Although the client accepts a success
+    // appearance vector, the source resources do not establish original
+    // slot/payment entitlement. A failure has an always-read account-update pair.
+    private static ValueTask BuyCharacter(Session session, Packet packet, ServerContext context)
     {
         if (packet.Remaining != 24)
         {
-            await session.SendAsync(BuildBuyCharacterAcknowledgement(false, default));
-            return;
+            return ValueTask.CompletedTask;
         }
 
-        int bodyItemId = packet.ReadS32();
-        for (int i = 0; i < 5; i++)
+        return session.SendAsync(new Packet(Opcode.GS_BUYCHAR_ACK)
+            .WriteU8(0)
+            .WriteU8(0)
+            .WriteS32(0));
+    }
+
+    // 358 is {u8 count, count×{s32 itemId,s32 clientCalculatedPrice}}.
+    // `sub_5725D0` always reads {u8 resultCount, s32 rawHeader}; zero result
+    // count has no item records and does not mutate client state.
+    private static ValueTask BuyCashItems(Session session, Packet packet, ServerContext context)
+    {
+        if (!IsCashPurchaseRequest(packet))
         {
-            _ = packet.ReadS32();                            // five widened native char arguments
+            return ValueTask.CompletedTask;
         }
 
-        bool hasCanonicalBody = Db.TryGetCanonicalCharacterType(bodyItemId, out byte charType);
-        List<Db.CharSlot> existing = session.UserId != 0
-            ? context.Db.GetCharacters(session.UserId)
-            : [];
-        byte slotNo = (byte)existing.Count;
-        bool ok = hasCanonicalBody
-            && session.UserId != 0
-            && slotNo < 20
-            && context.Db.BuyCharacter(session.UserId, slotNo, charType);
-
-        Db.CanonicalStarterAppearance starter = ok
-            ? Db.GetCanonicalStarterAppearance(charType)
-            : default;
-        await session.SendAsync(BuildBuyCharacterAcknowledgement(ok, starter));
+        return session.SendAsync(new Packet(Opcode.GS_BUYCASHITEM_ACK)
+            .WriteU8(0)
+            .WriteS32(0));
     }
 
-    private static Packet BuildBuyCharacterAcknowledgement(
-        bool ok, Db.CanonicalStarterAppearance starter)
+    // 453 is exactly {s32 giftId, s32 itemId}; `sub_57BCF0` always reads the
+    // same identifiers from 454. A status other than one preserves the native
+    // client's cached gifts. The original selection/deletion policy is not
+    // recovered, so this handler echoes only its non-mutating failure arm.
+    private static ValueTask DeleteGift(Session session, Packet packet, ServerContext context)
     {
-        var ack = new Packet(Opcode.GS_BUYCHAR_ACK).WriteBool(ok);
-        if (ok)
+        if (packet.Remaining != 8)
         {
-            ack.WriteS32(starter.BodyItemId)
-               .WriteS32(starter.FaceItemId)
-               .WriteS32(starter.HeadItemId)
-               .WriteS32(starter.TopItemId)
-               .WriteS32(starter.BottomItemId)
-               .WriteS32(starter.ShoesItemId);
+            return ValueTask.CompletedTask;
         }
 
-        return ack.WriteU8(0)                                // account_update_target: no update
-                  .WriteS32(0);                              // ignored for target 0
+        int giftId = packet.ReadS32();
+        int itemId = packet.ReadS32();
+        return session.SendAsync(new Packet(Opcode.GS_DELETEGIFT_ACK)
+            .WriteU8(0)
+            .WriteS32(giftId)
+            .WriteS32(itemId));
     }
 
-    // 453 GS_DELETEGIFT_REQ (sub_57BC40): s32 gift_uid, s32 item_id
-    // → 454 GS_DELETEGIFT_ACK (sub_57BCF0): u8 ok(1=成功), s32 gift_uid, s32 item_id
-    private static async ValueTask DeleteGift(Session session, Packet packet, ServerContext context)
+    // `sub_571100` starts from the normal 204 bulk-purchase body and switches
+    // its opcode to 468 only when it contains a Hukubukuro-range item. The 469
+    // consumer reads just this status when it is nonzero; its success tail is
+    // wallet/item state and is deliberately not fabricated.
+    private static ValueTask BuyHukubukuro(Session session, Packet packet, ServerContext context)
     {
-        int giftUid = packet.ReadS32();
-        int itemId = packet.Remaining >= 4 ? packet.ReadS32() : 0;
-        bool ok = session.UserId != 0 && context.Db.DeleteGift(session.UserId, giftUid, itemId);
+        if (!IsBulkPurchaseRequest(packet, requireHukubukuroItem: true))
+        {
+            return ValueTask.CompletedTask;
+        }
 
-        var ack = new Packet(Opcode.GS_DELETEGIFT_ACK)
-            .WriteU8(ok ? (byte)1 : (byte)0)
-            .WriteS32(giftUid)
-            .WriteS32(itemId);
-
-        await session.SendAsync(ack);
+        return session.SendAsync(new Packet(Opcode.GS_BUY_HUKUBUKURO_ACK).WriteU8(1));
     }
 
-    // 803 is safe to reject without decoding 802: sub_895EE0 requires this
-    // exact failure arm {u8 nonzero_result, u8 raw_code, u8 affected_count}.
-    // The native 802 request builder has not been reconciled with the old
-    // parser, so consuming request-dependent fields here could destroy a
-    // different item.  Do not mutate inventory until that wire contract is
-    // established.
-    private static async ValueTask DestroyItem(Session session, Packet packet, ServerContext context)
+    // `sub_57B2E0` sends 470 for Hukubukuro-range item IDs. 471's nonzero
+    // status consumes no list and only displays the client's error.
+    private static ValueTask GetHukubukuro(Session session, Packet packet, ServerContext context)
     {
-        await session.SendAsync(new Packet(Opcode.GS_DESTROYITEM_ACK)
-            .WriteU8(1)                                     // nonzero: failure arm
-            .WriteU8(0)                                     // raw_code: semantic unresolved
-            .WriteU8(0));                                   // no affected records
+        if (!IsPackageDetailRequest(packet, IsHukubukuroItemId))
+        {
+            return ValueTask.CompletedTask;
+        }
+
+        return session.SendAsync(new Packet(Opcode.GS_GET_HUKUBUKURO_ACK).WriteU8(1));
     }
 
-    // 698 GP_ENTER_PEPACHI_REQ (sub_580640, 空)
-    // → 699 GP_ENTER_PEPACHI_ACK (sub_46AD00 case 699): u8 status(1), s32 coins, s32 cash
-    private static async ValueTask EnterPepachi(Session session, Packet packet, ServerContext context)
+    // 695 has multiple native request forms. Do not parse a presumed common
+    // request shape. `sub_571D70` reads {u8 rawResult,s32 rawItemOrClass}; a
+    // zero rawResult then unconditionally consumes one additional raw s32.
+    private static ValueTask BuyOnceItem(Session session, Packet packet, ServerContext context) =>
+        session.SendAsync(new Packet(Opcode.GS_BUY_ONCEITEM_ACK)
+            .WriteU8(0)
+            .WriteS32(0)
+            .WriteS32(0));
+
+    // `sub_57B2E0` routes the two PresentPackage ranges to 780. 781's
+    // nonzero status has no list tail, unlike its successful item list.
+    private static ValueTask GetPresentPackage(Session session, Packet packet, ServerContext context)
     {
-        int cash = session.UserId != 0 ? context.Db.GetCash(session.UserId) : 0;
-        var ack = new Packet(Opcode.GP_ENTER_PEPACHI_ACK)
+        if (!IsPackageDetailRequest(packet, IsPresentPackageItemId))
+        {
+            return ValueTask.CompletedTask;
+        }
+
+        return session.SendAsync(new Packet(Opcode.GS_GET_PRESENTPACKAGE_ACK).WriteU8(1));
+    }
+
+    // 802's request layout remains unresolved. `sub_895EE0` proves this exact
+    // no-mutation 803 failure arm; no request bytes are consumed.
+    private static ValueTask DestroyItem(Session session, Packet packet, ServerContext context) =>
+        session.SendAsync(new Packet(Opcode.GS_DESTROYITEM_ACK)
             .WriteU8(1)
-            .WriteS32(100)                                  // coins
-            .WriteS32(cash);
+            .WriteU8(0)
+            .WriteU8(0));
 
-        await session.SendAsync(ack);
-    }
-
-    // 702 GP_PEPACHI_LIST_REQ (sub_580970, 空)
-    // → 703 GP_PEPACHI_LIST_ACK (sub_46AD00 case 703): s32 normal_count, s32 rare_count, repeat s32 item_id
-    private static async ValueTask PepachiList(Session session, Packet packet, ServerContext context)
+    // 698 is empty. In CLobbyShop::sub_46AD00, only status==1 is the entry
+    // success branch; all three fields are read before that branch.
+    private static ValueTask EnterPepachi(Session session, Packet packet, ServerContext context)
     {
-        var ack = new Packet(Opcode.GP_PEPACHI_LIST_ACK)
-            .WriteS32(0)                                    // normal_count
-            .WriteS32(0);                                   // rare_count
-
-        await session.SendAsync(ack);
-    }
-
-    // 700 GP_START_GAME_REQ (sub_580790): u8 count, s32 coin_type
-    // → 701 GP_START_GAME_ACK (sub_84A000): u8 status(1), s32 win_item_id, s32 win_count, s32 remain_coins
-    private static async ValueTask StartPepachi(Session session, Packet packet, ServerContext context)
-    {
-        var ack = new Packet(Opcode.GP_START_GAME_ACK)
-            .WriteU8(1)                                     // status 1 = 成功
-            .WriteS32(0)                                    // win item
-            .WriteS32(1)
-            .WriteS32(99);                                  // remain coins
-
-        await session.SendAsync(ack);
-    }
-
-    // 900 GS_CAPSULEMACHINE_START_REQ (sub_58D5D0): u8 count, s32 machine_id
-    // → 901 GS_CAPSULEMACHINE_START_ACK (sub_9A1A30): u8 status(1), s32 win_item_id, s32 remain_tokens
-    private static async ValueTask StartCapsuleMachine(Session session, Packet packet, ServerContext context)
-    {
-        var ack = new Packet(Opcode.GS_CAPSULEMACHINE_START_ACK)
-            .WriteU8(1)                                     // status 1 = 成功
-            .WriteS32(0)                                    // win item
-            .WriteS32(99);                                  // remain tokens
-
-        await session.SendAsync(ack);
-    }
-
-    private static void WriteResult(Packet ack, Db.BuyResult r)
-    {
-        ack.WriteBool(r.Ok);
-
-        if (r.Ok)
+        if (packet.Remaining != 0)
         {
-            ack.WriteS32(r.ItemId)
-               .WriteF32(r.F1)
-               .WriteF32(r.F2)
-               .WriteS32(r.Period)
-               .WriteU8(r.Kind)
-               .WriteU16(r.Dura);
+            return ValueTask.CompletedTask;
         }
+
+        return session.SendAsync(new Packet(Opcode.GP_ENTER_PEPACHI_ACK)
+            .WriteU8(0)
+            .WriteS32(0)
+            .WriteS32(0));
     }
 
-    /// <summary>
-    /// 205 尾端 7×s32 (client 無條件讀取; 順序 sub_571910
-    /// v22/v16/v26/v20/v15/v27/v18)。
-    /// ⚠ 十一輪以 UI 標籤逐槽定案 (先前 CASH/GP 對映相反):
-    ///   v16 → *EE8D18 → 商店 "PG" 欄位 (GP 點數)
-    ///   v20 → ArgList → 商店 "CASH" 欄位 (現金)
-    ///   v27 → *EE8D1C → 商店 "CP" 欄位 (第三貨幣)
-    /// </summary>
-    private static Packet WriteTail(Packet ack, Session session, ServerContext context)
+    // 700 is exactly {u8 selector,s32 selectedCharacterId}. The four selector
+    // values below are direct caller values; the item-id range is the native
+    // character-body family from which that writer derives its second field.
+    // `sub_84A490` uses this complete two-byte failure arm for 701. Only a
+    // first byte of exactly one opens the award/reel decoder; do not forge it.
+    private static ValueTask StartPepachi(Session session, Packet packet, ServerContext context)
     {
-        int cash = session.UserId != 0 ? context.Db.GetCash(session.UserId) : 0;
-        var info = session.UserId != 0 ? context.Db.GetMyInfo(session.UserId) : null;
-        int gp = (int)(info?.Gp ?? 0);
+        if (packet.Remaining != 5)
+        {
+            return ValueTask.CompletedTask;
+        }
 
-        return ack
-            .WriteS32(0)                    // v22 (保留)
-            .WriteS32(gp)                   // v16 → EE8D18 = "PG" (GP)
-            .WriteS32(0)                    // v26 (保留)
-            .WriteS32(cash)                 // v20 → "CASH"
-            .WriteS32(0)                    // v15 (保留)
-            .WriteS32(0)                    // v27 → EE8D1C = "CP"
-            .WriteS32(0);                   // v18 (旗標, 進 UI callback)
+        byte selector = packet.ReadU8();
+        int selectedCharacterId = packet.ReadS32();
+        if (selector is not (1 or 2 or 4 or 5)
+            || selectedCharacterId is < 19_900_001 or > 19_900_015)
+        {
+            return ValueTask.CompletedTask;
+        }
+
+        return session.SendAsync(new Packet(Opcode.GP_START_GAME_ACK)
+            .WriteU8(0)
+            .WriteU8(0));
     }
+
+    // 702 is empty. 703 is {s32 start,s32 count,(start+count)×s16}; `{0,0}`
+    // is its structurally empty list and never a reward grant.
+    private static ValueTask PepachiList(Session session, Packet packet, ServerContext context)
+    {
+        if (packet.Remaining != 0)
+        {
+            return ValueTask.CompletedTask;
+        }
+
+        return session.SendAsync(new Packet(Opcode.GP_PEPACHI_LIST_ACK)
+            .WriteS32(0)
+            .WriteS32(0));
+    }
+
+    // 900 is exactly {u8 paymentSelector,u8 drawCount}. The listed pairs are
+    // the direct caller combinations, including code paths whose XML buttons
+    // are commented out in this resource revision. `sub_9A1A30` always reads
+    // count and three trailing s32s even for failure. Count zero prevents
+    // per-award reads and nonzero status avoids wallet/reward updates.
+    private static ValueTask StartCapsuleMachine(Session session, Packet packet, ServerContext context)
+    {
+        if (packet.Remaining != 2)
+        {
+            return ValueTask.CompletedTask;
+        }
+
+        byte paymentSelector = packet.ReadU8();
+        byte drawCount = packet.ReadU8();
+        bool isNativeCallerPair = (paymentSelector, drawCount) is (1, 1) or (1, 10) or (2, 1) or (3, 1);
+        if (!isNativeCallerPair)
+        {
+            return ValueTask.CompletedTask;
+        }
+
+        return session.SendAsync(new Packet(Opcode.GS_CAPSULEMACHINE_START_ACK)
+            .WriteU8(1)
+            .WriteS32(0)
+            .WriteS32(0)
+            .WriteS32(0)
+            .WriteS32(0));
+    }
+
+    private static Packet NewBulkPurchaseFailure() =>
+        new Packet(Opcode.GS_BUYITEM_ACK)
+            .WriteU8(0)
+            .WriteU8(0)
+            .WriteU8(0)
+            .WriteS32(0).WriteS32(0).WriteS32(0).WriteS32(0)
+            .WriteS32(0).WriteS32(0).WriteS32(0);
+
+    // 204 and 468 have one body grammar. `sub_571100` changes the opcode to
+    // 468 iff at least one selected ID is in a Hukubukuro range. This checks
+    // only native framing/routing, not purchase authority or resource price.
+    private static bool IsBulkPurchaseRequest(Packet packet, bool requireHukubukuroItem)
+    {
+        ReadOnlySpan<byte> payload = packet.Payload;
+        if (payload.Length < 1 || payload[0] == 0)
+        {
+            return false;
+        }
+
+        int offset = 1;
+        bool hasHukubukuroItem = false;
+        for (int i = 0; i < payload[0]; i++)
+        {
+            if (payload.Length - offset < 7)
+            {
+                return false;
+            }
+
+            int itemId = BinaryPrimitives.ReadInt32LittleEndian(payload.Slice(offset, 4));
+            byte itemKind = payload[offset + 4];
+            offset += 7;
+            hasHukubukuroItem |= IsHukubukuroItemId(itemId);
+
+            if (itemKind is 12 or 13 or 17)
+            {
+                if (payload.Length - offset < 2
+                    || BinaryPrimitives.ReadInt16LittleEndian(payload.Slice(offset, 2)) >= 0)
+                {
+                    return false;
+                }
+
+                offset += 2;
+            }
+        }
+
+        return offset == payload.Length && hasHukubukuroItem == requireHukubukuroItem;
+    }
+
+    private static bool IsCashPurchaseRequest(Packet packet)
+    {
+        ReadOnlySpan<byte> payload = packet.Payload;
+        return payload.Length >= 1 && payload.Length == 1 + payload[0] * 8;
+    }
+
+    private static bool IsGiftRequest(Packet packet)
+    {
+        ReadOnlySpan<byte> payload = packet.Payload;
+        if (payload.Length == 6)
+        {
+            return true;
+        }
+
+        int recipientLength = payload.IndexOf((byte)0);
+        if (recipientLength <= 0)
+        {
+            return false;
+        }
+
+        int offset = recipientLength + 1;
+        if (offset >= payload.Length)
+        {
+            return false;
+        }
+
+        byte messageLengthRaw = payload[offset++];
+        if (messageLengthRaw != 0)
+        {
+            int messageLength = payload[offset..].IndexOf((byte)0);
+            if (messageLength <= 0)
+            {
+                return false;
+            }
+
+            offset += messageLength + 1;
+        }
+
+        if (payload.Length - offset < 6)
+        {
+            return false;
+        }
+
+        byte itemKind = payload[offset + 4];
+        offset += 6;
+        if (itemKind is 12 or 13 or 17)
+        {
+            if (payload.Length - offset != 2
+                || BinaryPrimitives.ReadInt16LittleEndian(payload.Slice(offset, 2)) >= 0)
+            {
+                return false;
+            }
+
+            offset += 2;
+        }
+
+        return offset == payload.Length;
+    }
+
+    private static bool IsPackageDetailRequest(Packet packet, Func<int, bool> hasExpectedItemRange)
+    {
+        if (packet.Remaining != 10)
+        {
+            return false;
+        }
+
+        int itemId = BinaryPrimitives.ReadInt32LittleEndian(packet.Payload.Slice(4, 4));
+        short encodedVariant = BinaryPrimitives.ReadInt16LittleEndian(packet.Payload.Slice(8, 2));
+        return encodedVariant < 0 && hasExpectedItemRange(itemId);
+    }
+
+    private static bool IsHukubukuroItemId(int itemId) =>
+        itemId is >= 15_301_001 and <= 15_302_000
+            or >= 15_310_001 and <= 15_320_000;
+
+    private static bool IsPresentPackageItemId(int itemId) =>
+        itemId is >= 15_302_001 and <= 15_304_000
+            or >= 15_320_001 and <= 15_330_000;
 }

@@ -712,21 +712,45 @@ count==0 失敗路徑的 `u8 err` (→ sub_468470 a3, 十一輪逐 case):
 1=餘額不足(0xCD), 4=格式訊息(0x39A), 5/7=期限/重複(0x63),
 8=背包滿(0x327), 9=其他 — 只有這 7 個值有訊息, 其他值靜默。
 ```
-GS_BUY_ONCEITEM_REQ (695): u8/s32 item_id, string opt, u8 kind, u8 period。
-### 3.6d GS_BUYCASHITEM_ACK (359) — sub_5725D0 (廿三輪正位!):
-`u8 result, s32, bool, s32 item_id, f32 f1, f32 f2, s32 period` —
-四/六輪曾誤把此函數當 209 賣出; 自動審計正位: 它是 **CASH 購買 ACK**
-(單件 + 技能 roll 值)。
-### 3.6e GS_BUY_ONCEITEM_ACK (696) — sub_571D70 (廿三輪首錄):
-`u8 mode, s32 item_id` +
-- mode==0 → u32 (n100 直購)
-- mode==1 且 item==E975BE(15,300,030 コイン充填) → s32 gp → GP 更新
-- item 為 MAC 特殊 id (sub_9A8660) → s32×2 (目錄調整)
-- item==E975A1 (sub_9A8620) → str + 完整 19 欄 (名稱+能力+餘額組)
-即 695 的回包 — 依購買物種類多型!
-period 合法值: 1/7/15/30/60/90 天 (kind 0,1,3,14)、0 = 永久型 (kind 2,4,9,15,10,11,16)。
+### 3.4a 204/468 bulk purchase routing, 206 part purchase, and 358 cash purchase
 
-### 3.5 GS_CASH_ACK (357) — sub_572420: `bool ok, s32 cash`。
+`sub_571100` validates the selected item families/periods, builds the normal
+`204` body `{u8 count, count×{s32 itemId,u8 kind,s16 period,[s16 variant for
+kind 12/13/17]}}`, and changes only the header to `468` when *any* selected ID
+is in either Hukubukuro range. Thus 468 is not a distinct literal constructor.
+
+`sub_571620` constructs **unnamed opcode 206** as
+`{s32 itemId,s32 rawContext,u8 itemKind,s32 rawPeriod}`. The native name table
+contains 207 but no label for 206; its “weapon-part purchase” association is an
+**Inference / HIGH** from this immediate 206 sender and 207 consumer, not an
+original symbol. `207` first reads `u8 rawResult`; **zero** enters the
+success-only part/wallet decoder, while any nonzero value has no tail.
+
+`358` is `{u8 count,count×{s32 itemId,s32 clientCalculatedPrice}}`. The client
+calculates that price with `sub_534070` and a catalog discount getter before
+sending it. This proves it is client cache/input, not a source for an
+authoritative emulator price. `359` always begins `{u8 resultCount,s32
+rawHeader}`; only a nonzero count reads entries `{u8 itemResult,[itemResult !=
+0: s32 itemId,s32 rawA,s32 rawB,s32 rawC]}`.
+
+### 3.4b GS_BUY_ONCEITEM_ACK (696) — corrected conditional prefix
+
+`sub_571D70` first reads `{u8 rawResult,s32 rawItemOrClass}`. When
+`rawResult==0`, it **unconditionally reads one raw `s32`**. Further reads vary
+by the received item family/value; this is not one fixed “once purchase” tail.
+The former fixed `u16`/universal structure was wrong. The `695` sender has
+multiple item-family forms, so a server must not parse it as one common
+`item/kind/period/variant` record.
+
+The period allowlists in `sub_570B00`/`sub_571100` are client validation facts:
+1/7/15/30/60/90 for several timed kinds; other families use zero or a
+family-specific choice. They do **not** establish server price, ownership,
+stock, currency, duplicate, or grant rules.
+
+### 3.5 GS_CASH_ACK (357) — sub_572420: `u8 rawStatus, s32 rawCash`。
+The consumer merely reads both fields; no original status polarity/billing
+policy follows from this client code. A server must not claim a successful
+external-cash balance without that policy.
 ### 3.6 GS_SELLITEM (208/209) — ⚠ 廿三輪自動審計重修!
 **REQ 208** (sub_572AD0): `s32 slot_idx` — 賣出單件 (背包槽序)。
 ### GS_SELLITEM_ACK (209) — sub_572B80:
@@ -738,9 +762,17 @@ dispatcher case 209 → sub_572B80 直查定案)。
 ### 3.6b GS_BUYITEM_REQ (204) — builder @0x570A2C (六輪逐行驗證):
 `u8 count; repeat{s32 item_id, u8 kind, s16 period, [s16 -(idx+1) 只在
 kind 12/13/17 = 顏色/貼圖變體]}`
-### 3.6c GS_BUY_ONCEITEM_REQ (695) — sub_570B00 (廿四輪定案):
-`s32 item_id, u8 kind, u8 period, u16 variant` — 三個呼叫點序列
-一致; 七輪的「str(64) 版」是誤讀 String 緩衝宣告, 已更正。
+### 3.6c GS_BUY_ONCEITEM_REQ (695) — multiple direct forms (reopened)
+
+`sub_570B00` alone conditionally emits more than one layout: one item-family
+branch writes `s32 itemId, str, u8 kind, u8 period`; other branches write a
+short `s32` pair or `s32 itemId, u8 kind, u8 period`. Separate callers
+`sub_5115E0` and `sub_8DE9C0` write an eight-byte
+`{s32 itemId,u8 kind,u8 rawPeriod,s16 negativeVariant}` form. Therefore the
+old universal fixed form and the old claim that the apparent string was merely
+a stack-buffer artefact are both disproven. The request remains deliberately
+unparsed by the server until every accepted item family, its selector source,
+and the matching 696 response tail have been reconciled.
 ### 3.7 GM_CHECKNICK (210/211) / GM_CREATENICK (212/213)
 REQ (builder @0x572D30 / sub_572DC0): **只有 `str nick`** (⚠ 四輪修正:
 u8+str 是 216/262 的格式 sub_56B180/56B230, 先前誤植)。
@@ -1048,7 +1080,9 @@ GM 權限: 這些 REQ 無等級檢查 — server 端必須以帳號 GM flag gate
     OK → s32×2 (jackpot/餘幣), u8, u8 count(≤11),
     count×{s32 reel_a, s32 reel_b, s32 reel_c} — 11 組轉輪結果!
     count>=11 → 大獎模式 (全轉輪顯示, 15.0 秒動畫)
-702 PEPACHI_LIST_REQ: 無; 703 ACK: s32, s32 n, n×f32 (機率表)
+702 PEPACHI_LIST_REQ: 無; 703 ACK: `{s32 normalCount,s32 rareCount,
+(normalCount+rareCount)×s32 itemId}`. Negative counts trigger the client’s
+“Invalid DB Pepachi Data” diagnostic; this is a catalog list, not a probability table.
 ```
 對應資源: Extracted/pepachi/*.swf (轉輪動畫 Flash!) —
 id 格式 機台_轉輪_變體.swf; 賠率由 server 的 703 機率表控制。
@@ -1678,17 +1712,29 @@ client 實際載入的 `system/map_StartIndex.xml` — ⚠ ui/ 根目錄另有�
 (303-309 GG_JJ* 為 JJ 寵物系統 create/change/get/gameend — 同構
 u8+slot 系列)
 
-### 3.15c2 禮物操作 299/301/315 (廿二輪)
+### 3.15c2 禮物操作 299/301/315（後續逐 consumer 修正）
 ```
-299 GS_TAKEGIFT_ACK  (sub_57AEF0 → sub_524DB0): 禮物箱分頁:
-    s32 start; ≤50 條 × {s32 gift_id(-1=結束; <1024 槽上限),
-    str from_nick(21B), str message(52B), s32 item_id, s32 period,
-    f32} — 進 CClientData +36119 禮物陣列
-301 GS_MOVEGIFT_ACK  (sub_57AFE0): u8 n2(1=收下/2=刪除), u8 n5,
-    s32 gift_id(段檢 E7EF01..E7EF64), s32 count; n2==1 → count×條目
-    搬進背包; n2==2 → 從清單移除
-315 GS_MOVEONEGIFT_ACK (sub_57B500): u8, u8, s32, s32 item_id
-    (==E975A1 特殊分支: str + f32×2 + s32 + u8 — 單件轉移含技能值)
+299 GS_TAKEGIFT_ACK (sub_57AEF0 → sub_524DB0):
+    s32 start; then at most 50 records, each beginning `s32 giftId`.
+    `giftId == -1` terminates early; every nonterminal record is
+    `{str sender, str message, s32 itemId, s32 rawPeriod, raw4}`.
+    The client accepts records only while `start + ordinal < 1024`. The two
+    strings are protocol strings, not fixed 21-/52-byte fields, and raw4 is
+    not proven to be a float or an expiry policy.
+301 GS_MOVEGIFT_ACK (sub_57AFE0): `{u8 outcome,u8 rawDetail,s32 itemId,
+    s32 count}`. It contains no gift ID and no embedded entries. On outcome 1
+    the client removes its first `count` cached pending records; outcome 2
+    queues a fresh empty 298 request; outcome 0 shows special UI for rawDetail
+    1 or 5. This proves a server/session-correlated batch action, not the old
+    claim that the request identifies a particular gift. Exact server
+    selection, duplicate, expiry, capacity, and wallet policy remain
+    UNRESOLVED.
+315 GS_MOVEONEGIFT_ACK (sub_57B500): initially
+    `{u8 result,u8 rawDetail,s32 rawGiftKey,s32 itemId}`. If the item hits
+    one decompiler-address-dependent special comparison it then consumes `str`;
+    otherwise it consumes `{raw4,raw4,s32,u8,u16}`. A separate native
+    item-family predicate can consume a following `str`. Thus it has no
+    universal short failure/success arm suitable for fabrication.
 311 GS_BUYCHAR_ACK   (sub_5728A0): u8 ok; ok → 6×s32 (角色解鎖
     +餘額組), u8 char_type, s32×2 — 買角色
 313 GI_CHANGESLOT_ACK(sub_573320): 空 handler (只刷 UI) — 換槽免驗證
@@ -1774,7 +1820,7 @@ u8+slot 系列)
 | 310 | `GS_BUYCHAR_REQ` | `sub_529680` | C2S | `s32 char_type, 5×s32 items` |
 | 311 | `GS_BUYCHAR_ACK` | `sub_5728A0` | S2C | `u8 status(1), s32 slot, s32 char_type, s32 exp, s32 cash, s32 gp, s32 dura` |
 | 453 | `GS_DELETEGIFT_REQ` | `sub_57BC40` | C2S | `s32 gift_uid, s32 item_id` |
-| 454 | `GS_DELETEGIFT_ACK` | `sub_57BCF0` | S2C | `u8 status(1), s32 gift_uid, s32 item_id` |
+| 454 | `GS_DELETEGIFT_ACK` | `sub_57BCF0` | S2C | `u8 status` (only exactly 1 mutates the local cached list), `s32 gift_uid, s32 item_id` |
 | 802 | `GS_DESTROYITEM_REQ` | **UNRESOLVED** | C2S | The earlier five-field claim was not an evidenced packet constructor (`sub_894E70` is not one). Do not consume request-dependent fields or mutate inventory until the actual builder and its caller are reconciled. |
 | 803 | `GS_DESTROYITEM_ACK` | `sub_895EE0` | S2C | `u8 result, u8 raw_code`; if `result!=0`, then `u8 affected_count` + `affected_count×{s32 raw_id,u8 raw_value}`. The success arm instead consumes `s32 raw_value_a, s32 coupon_after, u8 affected_count` + `affected_count×{s32 item_id,s32 remaining_raw}`. Only the failure arm is currently safe to emit. |
 | 423 | `GL_MSG_READ_REQ` | `sub_55A3C0` | C2S | `str msg_id` |
@@ -1784,13 +1830,13 @@ u8+slot 系列)
 | 878 | `GQ_QUEST_USER_COMPLETE_HONOR_REQ` | `sub_91C9D0` | C2S | `s8 flag` |
 | 879 | `GQ_QUEST_USER_COMPLETE_HONOR_ACK` | `sub_91CAA0` | S2C | `u8 err(0), str title, raw blob` |
 | 698 | `GP_ENTER_PEPACHI_REQ` | `sub_580640` | C2S | `(空)` |
-| 699 | `GP_ENTER_PEPACHI_ACK` | `sub_46AD00` | S2C | `u8 status(1), s32 coins, s32 cash` |
-| 700 | `GP_START_GAME_REQ` | `sub_580790` | C2S | `u8 count, s32 coin_type` |
-| 701 | `GP_START_GAME_ACK` | `sub_84A000` | S2C | `u8 status(1), s32 win_item_id, s32 win_count, s32 remain_coins` |
+| 699 | `GP_ENTER_PEPACHI_ACK` | `CLobbyShop::sub_46AD00` case 699 | S2C | `u8 status, s32 rawA, s32 rawB`; only status 1 enters the Pepachi scene. The two words are not proven currency fields. |
+| 700 | `GP_START_GAME_REQ` | `sub_8458D0`, called by `sub_8459C0` | C2S | `u8 paymentDrawSelector, s32 selectedCharacterId`; exact 5-byte body. The second field is `19,900,000 + (sub_525790(activeCharacter) % 100000)`, not a coin type or draw count. |
+| 701 | `GP_START_GAME_ACK` | `sub_84A000` → `sub_84A490` | S2C | `u8 result, u8 rawCode`; only `result==1` continues with `s32 rawA,s32 rawB,u8 rawMode,u8 prizeCount, prizeCount×{s32 reelA,s32 reelB,s32 reelC}` (client processes at most 11 prize triples). |
 | 702 | `GP_PEPACHI_LIST_REQ` | `sub_580970` | C2S | `(空)` |
-| 703 | `GP_PEPACHI_LIST_ACK` | `sub_46AD00` | S2C | `s32 count_normal, s32 count_rare, repeat s32 item_id` |
-| 900 | `GS_CAPSULEMACHINE_START_REQ` | `sub_58D5D0` | C2S | `u8 count, s32 machine_id` |
-| 901 | `GS_CAPSULEMACHINE_START_ACK` | `sub_9A1A30` | S2C | `u8 status(1), s32 win_item_id, s32 remain_tokens` |
+| 703 | `GP_PEPACHI_LIST_ACK` | `CLobbyShop::sub_46AD00` case 703 | S2C | `s32 start, s32 count, (start+count)×s16 signedEntry`; `{0,0}` is a structural empty list only—not a probability-table assertion. |
+| 900 | `GS_CAPSULEMACHINE_START_REQ` | `sub_99CFA0`, called by `sub_99D0A0` | C2S | `u8 paymentSelector, u8 drawCount`; exact two-byte body, not an `s32 machine_id`. |
+| 901 | `GS_CAPSULEMACHINE_START_ACK` | `sub_9A1A30` | S2C | `u8 result, s32 prizeCount, prizeCount×{u8 rawClass,s32 rawA,s32 rawB}, s32 rawTailA,s32 rawTailB,s32 rawTailC`; `result==0` performs local state/reward processing, nonzero shows failure UI. |
 
 
 
@@ -2247,11 +2293,102 @@ dispatcher case 102 → `sub_58D6F0` 立即 `ctor(101)` 回送
    PM_MASTER/ID/LOGOUT/CH_SERVER (145-152 舊版中控殘留),
    GR_STARTTIME/AUTOCHANGE/CRYSTAL 系 (棄用模式),
    GV_VIEWER 組 560-570 (外部觀戰工具協定, client 不實作),
-   GS_STOREOK/NEWGIFT/HUKUBUKURO/PRESENTPACKAGE (棄用商店流程),
+   GS_STOREOK/NEWGIFT (still no native sender/ACK consumer recovered),
+   while HUKUBUKURO/PRESENTPACKAGE have now been recovered separately below,
    SECURITY_AHNLAB/NPGAMEGUARD (韓版安全模組, 日版不用),
    MASTER_TEST/UPITEM 等 GM 殘留, *_BASE 佔位 (100/560/580/680)
 → 私服無需理會死協定; the 622 TCP-catalog live entries have their recorded layout/sequence scope. The separate private UDP dispatcher is excluded from that catalog count and remains only partially evidenced as stated above.
 ```
+
+## 3.98a 商店流程再驗證與 fail-closed 邊界（2026-09）
+
+> **Scope warning.** This section replaces older shop prose that treated UI
+> labels, zero-filled ItemData price fields, or a locally convenient database
+> mutation as original-server economic evidence. The client proves its wire
+> reader, local state gates, and resource lookup; it does not contain the
+> retired service’s price sheet, entitlement checks, gift delivery rules,
+> Hukubukuro contents, or random reward server state.
+
+### Evidence ledger
+
+| Conclusion | Classification | Provenance / limit |
+|---|---|---|
+| `GL_SHOPIN_REQ` (252) is an empty client request. Immediately after its send, `sub_574120` locally transitions the lobby scene to state 3; the native S2C dispatcher has no case 253. | **Fact / HIGH** | `sub_574120`, `sub_537710(byte_EE8968, 3)`, dispatcher cases 174–315, and complete-file case search. The server must accept exact-empty 252 without fabricating a 253 ACK. `179/180 GS_STOREOK` semantics remain **UNRESOLVED**. |
+| 468 is the 204 bulk body routed for Hukubukuro IDs. | **Fact / HIGH** | `sub_571100` plus `sub_591EC0` header setter. |
+| 470 and 780 share `{s32 rawContext,s32 itemId,s16 -(variantIndex+1)}` from `sub_57B2E0`; their messages are null in `sub_4D7790`. | **Fact / HIGH for wire; UNRESOLVED for rawContext/entitlement** | Generic sender, both callers, and packet primitives. |
+| `15301001..15302000` and `15310001..15320000` route 468/470; `15302001..15304000` and `15320001..15330000` route 780. Decoded ItemData names corroborate bag versus package catalog families. | **Fact / HIGH for ranges/routing; Inference / MEDIUM for product labels** | `sub_571100`, `sub_4D7790`, and same-hash `main:Extracted/ui/cfg/itemdata.pat`. No price or contents policy follows. |
+| ItemData has 21,164 records, but its relevant shop price slots are effectively zero-filled in this Japanese resource revision. | **Fact / HIGH** | Native record loader and exact decoded `itemdata.pat`. The resource cannot authorize the former local zero-price success implementation. |
+| `Total_Package_Index.xml` has 114 `total_package` entries, each mapping a package index to fourteen `type_N` item IDs. | **Fact / HIGH** | `sub_A03E90`–`sub_A041D0` and exact main resource. It is a client selection/display map, not a grant list. |
+| `RecommandItem.pat` has 1,030 set rows (plus two header rows). `808` sends `{s32 count,count×s32 recommendationId}` only for a nonempty client selection; `809` returns `{s32 count,count×{s32 itemId,u8 rawClass,u8 rawValue}}`. | **Fact / HIGH** | decoded resource, `sub_46E140`, `CLobbyShop::sub_46AD00` case 809. Client maps classes 1/4→22, 2/5→23, 3→24, but the server-side lookup/meaning is **UNRESOLVED**. No 808 handler is registered. |
+| `ui/Gaccha.xml` enables only `START_CASH` and `START_TEN_CASH`; its `START_PG` and `START_CP` blocks are commented out. `ui/pepachi.xml` enables `START_PG`, `START_CASH`, `START_PG_10`, and `START_CASH_10`. | **Fact / HIGH (UI revision only)** | exact `main:Extracted` XML. The residual code can still recognize the commented Gaccha control names, so a code path is not evidence that this resource revision exposes that purchase. |
+| 700 is a five-byte request `{u8 selector,s32 selectedCharacterId}`. Its writer derives the second value as `19,900,000 + (selectedCharacterValue mod 100,000)` and its caller supplies raw selectors 1, 2, 4, and 5. | **Fact / HIGH** | `sub_8458D0`, `sub_8459C0`, `sub_525790`; the old `{count,coin_type}` description is disproven. |
+| The Pepachi caller's local balance gates and four UI names associate selector 1/2/4/5 with cash-single / PG-single / cash-ten / PG-ten. | **Inference / MEDIUM** | `sub_8459C0` gates selectors 1/4 on the cash balance at 1/300 and 2/5 on the other balance at 1/10,000; XML has those exact four labels. The decompiler lost the four wide-string initializers, so this is not direct name-to-selector evidence. |
+| 900 is a two-byte request `{u8 selector,u8 drawCount}`. Its caller directly sends `{3,1}` for `START_CP` and `{1,10}` for `START_TEN_CASH`; the two residual control paths send `{1,1}` and `{2,1}`. | **Fact / HIGH for raw body/pairs; Inference / MEDIUM for residual-control names** | `sub_99CFA0`, `sub_99D0A0`, and `ui/Gaccha.xml`. The active resource leaves only cash single/ten controls; its PG/CP XML is commented out. |
+| 461 is sent only after the PaperCode UI has exactly 16 upper-case ASCII alphanumeric characters. 464 is `{u8 duplicateChoice}` for cancel (0) or `{u8=1,str}` for its GET action. | **Fact / HIGH** | `CUILobbyStorePaperCode::sub_4C3E70`, `sub_4C4060`, `CPopupDuplicatedItem::sub_50FFC0`, `sub_510010`, `sub_57CCE0`. This establishes local syntax and choice wire—not a valid-code or grant policy. |
+| 463 is an empty C2S send. The PaperCode UI sends it only on the first `a2==1` activation while its local `+240` sentinel is zero, then sets that sentinel to one. The opcode's `NOTIFY` name does not reverse this observed direction. | **Fact / HIGH for wire/local gate; UNRESOLVED for service effect** | `sub_57CB20` and the caller at `0x4C3CF0`. There is no recovered server response/consumer relation that permits a code/session state mutation. |
+| 804 is an empty C2S request constructed by `sub_581F80`; 805 is registered by name but has no recovered native consumer. 179/180 StoreOK and 451/452 NewGift are likewise registry name pairs with no recovered native sender (for their REQs) or ACK consumer. | **Fact / HIGH for observed absences in this binary; UNRESOLVED for original-service use** | Complete constructor and S2C-dispatch searches, plus opcode-name registration. Do not manufacture status/notification packets from their paired numbers. |
+| 806 takes a signed-16 category selector. Main callers use 1–24 while driving shop/parts views, and the parts-room initialization separately sends 25. 807 consumes `{u8 rawHeader,u16 recordCount,u16 category,recordCount×{s32 itemId,u16 rawVariant,u8 rawPeriod,u8 blobLength,blobLength raw bytes}}`. | **Fact / HIGH** | `sub_46C760`, `CLobbyPartsUpRoom::sub_9C1DD0`, `CLobbyPartsUpRoom::sub_9C22F0`. The receiver does not use `rawHeader`; it caches only catalog items that lack the native hidden-item flag. Category meaning, source authority, and server filtering remain unresolved. |
+
+### Exact consumer-safe arms and current server behavior
+
+The following entries are intentionally **fail closed**. “Raw zero” means a
+field whose original error meaning is unproven; it does not mean success.
+Handlers do not decode request-dependent records where the request has multiple
+native forms, and do not mutate wallet, inventory, characters, gifts, bags, or
+reward state.
+
+**Implementation status, not a native-server fact.** For the fully recovered
+request grammars 204/468, 206, 208, 296, 310, 356, 358, 453, 470, 698, 700,
+702, 780, and 900, `Handlers.Shop` now suppresses even the failure ACK when
+length, count-derived extent, NUL termination, mandatory negative variant, or
+direct opcode-routing range is wrong. These are defensive emulator boundaries;
+they do not claim that the historical server used exactly the same rejection
+transport or error code.
+
+| flow | Client-consumed safe ACK | direct consumer/state gate |
+|---|---|---|
+| 204→205 normal bulk purchase | `{u8 count=0,u8 rawResult=0,u8 rawError=0,7×s32=0}` | `sub_571910` consumes its count-zero error pair and mandatory seven-word trailer; no item/cache update. |
+| 206→207 unnamed part purchase | `{u8 rawResult=1}` | `sub_571B60`: nonzero has no tail; zero opens the part/cache/wallet decoder. |
+| 208→209 sell | `{u8=0}` | `sub_572B80`: only nonzero reads item/GP and removes local inventory. |
+| 296→297 gift send | `{u8=1}` | `sub_57AA50`: zero alone has the five-s32 success balance tail. |
+| 310→311 character purchase | `{u8=0,u8 accountUpdateTarget=0,s32 accountUpdateValue=0}` | `sub_5728A0`: false skips all six appearance IDs but always reads the final pair. Canonical visual defaults are not payment entitlement. |
+| 356→357 cash query | `{u8=0,s32=0}` | `sub_572420` reads exactly five bytes; billing status semantics are unresolved. |
+| 358→359 cash purchase | `{u8 count=0,s32 rawHeader=0}` | `sub_5725D0`: zero count does not consume item records. |
+| 468→469 Hukubukuro purchase | `{u8=1}` | `sub_57CE30`: any nonzero status has no six-s32 success/state tail. |
+| 470→471 Hukubukuro detail | `{u8=1}` | `sub_57D210`: nonzero status has no item list. |
+| 695→696 once item | `{u8=0,s32=0,s32=0}` | `sub_571D70` consumes the conditional zero-result s32; no success-only tail is reached for item ID zero. |
+| 780→781 PresentPackage detail | `{u8=1}` | `sub_57D6B0`: nonzero status has no item list. |
+| 802→803 destroy | `{u8 nonzero,u8 rawCode=0,u8 affectedCount=0}` | `sub_895EE0`; the 802 request is still **UNRESOLVED**, so no item is read/deleted. |
+| 698→699 Pepachi entry | `{u8 status=0,s32=0,s32=0}` | case 699 reads all fields; only status 1 enters its success UI path. |
+| 700→701 Pepachi spin | `{u8=0,u8 rawError=0}` | `sub_84A490`: only first byte 1 opens award/reel decoding. |
+| 702→703 Pepachi list | `{s32 start=0,s32 count=0}` | case 703 builds an empty local signed-16 list, never grants a reward. |
+| 900→901 capsule | `{u8 nonzero,s32 count=0,s32=0,s32=0,s32=0}` | `sub_9A1A30` always consumes count plus three tails; count zero prevents award records and nonzero avoids local wallet/reward updates. |
+| 453→454 delete gift | `{u8 result=0,s32 echoedGiftId,s32 echoedItemId}` | `sub_57BCF0` always consumes the two IDs and only result exactly 1 removes a cached gift. The server validates the exact eight-byte request and returns this non-mutating arm. |
+
+453's wire and client cache key are known, but the original service's pending
+versus claimed state, deletion authority, and interaction with 298/300/315 are
+not. It therefore no longer deletes persisted data merely because its local
+SQLite row happens to match. Truncated or trailing requests receive no synthetic
+echo because the protocol has no safe correlation value to invent.
+
+### Still unresolved—not approximated
+
+* 179/180 StoreOK, 451/452 NewGift direction/producer, 461/462 and 464/465
+  PaperCode server policy, 806/807 hidden-item record production, and 808/809
+  recommendation resolution remain unimplemented where a response would imply
+  a server policy or no unambiguous failure discriminator exists. 298/299,
+  300/301, and 314/315 gift listing/claim/move semantics are likewise not
+  approximated: their correlated selection, pending/claimed state, and exact
+  mutation rules are still incomplete.
+* Successful 205/207/209/297/311/359/469/471/696/701/781/901 paths need an
+  original-service data source or captures covering authorization, currency,
+  price/discount, duplicate/period/variant checks, atomic mutation, and the
+  exact success response payload. Resource/UI names alone are insufficient.
+* 701 success is `{u8=1,u8 rawCode,s32 rawA,s32 rawB,u8 rawMode,u8 count,
+  count×{s32 reelA,s32 reelB,s32 reelC}}` (count capped at 11 by the client),
+  not the former fabricated `{itemId,quantity,coins}` record. 901 success is
+  likewise a count-driven list plus three state values, not a fixed one-item
+  packet.
 
 ## 3.98 CClientData 記憶體總圖 (廿七輪彙整 — 歷輪碎片權威版)
 byte 偏移 (this 為物件基址):

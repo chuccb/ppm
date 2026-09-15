@@ -31,7 +31,7 @@ server-cs/
     │   ├── Handlers.Auth.cs        # 682→681, ping (694 is Program greeting)
     │   ├── Handlers.Channel.cs     # 143→144→195→196; 141→142 endpoint confirm
     │   ├── Handlers.Lobby.cs       # 105/107/197/199/210/212
-    │   ├── Handlers.Shop.cs        # 356/204/695
+    │   ├── Handlers.Shop.cs        # shop/gift/pack/capsule fail-closed wire boundaries
     │   ├── Handlers.Stats.cs       # GP_CH*C 戰績家族 (18 REQ + 882 推播)
     │   └── Handlers.BattleObjects.cs # OCC 902–907 權威狀態 + 962 安全拒絕
     └── PaperMan.SelfTest/          # codec / wire / SQLite bootstrap 自測
@@ -164,9 +164,11 @@ dotnet run --project server-cs/src/PaperMan.SelfTest
 1. **單寫者工作負載**: 私服是單行程、低併發 (千人以下) 遊戲大廳。
    SQLite WAL 模式單機可承受每秒數萬次寫入, 遠超此遊戲的封包頻率;
    client/server DB (PostgreSQL 等) 的網路 round-trip 反而更慢。
-2. **交易完整性**: 買道具 = 扣款+入包+記帳一個 transaction (`Db.BuyItem`),
-   SQLite 的 ACID 與 `STRICT` 表 + `CHECK` 約束把反編譯得出的
-   合法值域 (period 白名單、slot 0..5119、角色槽 0..19) 直接壓進 schema。
+2. **交易完整性（未來成功路徑的必要條件）**: 若有原始服務或實包證據能實作
+   購買，扣款、入包和記帳必須是同一 transaction。現行 `Db.BuyItem` 不是對
+   原始經濟政策的證據，也沒有由 `Handlers.Shop` 成功路徑呼叫；商店、送禮、
+   福袋和抽獎一律回已驗證的無 mutation failure arm。SQLite 的 ACID 與
+   `STRICT`/`CHECK` 可作為未來已證實 policy 的實作工具，不可反過來產生 policy。
 3. **零運維**: 一個檔案即全部狀態, 備份 = 複製檔案 (或 `VACUUM INTO`),
    對私服/保存性專案是決定性優勢。
 4. **生態現況 (2026)**: SQLite 3.4x+ 系列持續演進 (WAL2、更強的
