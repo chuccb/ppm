@@ -63,7 +63,7 @@ resource snapshot；兩者都應以小範圍、可重現的 search/excerpt 研�
 | 區域 | 入口 | Ownership / generated boundary |
 |---|---|---|
 | `server-cs/src/PaperMan.Protocol/` | [`Protocol source guide`](../server-cs/src/PaperMan.Protocol/README.md) → `Core/`, `Codecs/`, `Contracts/`, `Generated/` | wire primitives、named protocol contracts、TCP/UDP codecs 與 generated catalog；不含 socket、DB 或 gameplay policy。 |
-| `server-cs/src/PaperMan.Server/` | `Program` → `Router` → `Handlers.*` | TCP/UDP ownership、session state、per-domain handlers 與 SQLite access；詳細導航見 [`server-cs/README.md`](../server-cs/README.md)。 |
+| `server-cs/src/PaperMan.Server/` | [`Server source guide`](../server-cs/src/PaperMan.Server/README.md) → `Host/Program` → `Host/Session` → `Host/Router` → `Handlers/<family>/` | TCP/UDP ownership、session state、registry-backed canonical handlers 與 SQLite access；詳細導航見 [`server-cs/README.md`](../server-cs/README.md)。 |
 | `server-cs/src/PaperMan.SelfTest/Program.cs` | executable, dependency-free wire/bootstrap integration checks | 強化改動過的 wire/state boundary；它不是 original-service capture。 |
 | `db/schema.sql` / `db/packets.tsv` | schema 與 opcode catalog | Server assembly 的 embedded bootstrap inputs；schema 改動需兼顧 `DatabaseBootstrapper` migration。 |
 | `server/packet.py` / `server/pmfile.py` | Python protocol/resource reference tooling | 可用於 codec / pmFile cross-check；C# server 啟動不依賴 Python。 |

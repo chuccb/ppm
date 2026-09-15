@@ -9,25 +9,16 @@
 本專案按 protocol boundary 與 persistent domain 切分，而不是套用通用 framework。
 每條主要資料流都由下表左側開始；所有 handler 都可從 `Router.Build()` 找到註冊點。
 
-| 區域 | 檔案 | 責任與 ownership |
+| 區域 | 檔案 / 入口 | 責任與 ownership |
 |---|---|---|
-| Solution 與 generated catalog | `PaperMan.slnx`, `tools/gen_opcodes.py`, `src/PaperMan.Protocol/Generated/Opcode.cs` | `db/packets.tsv` 是 opcode source；要改 opcode 名稱或值時執行 generator，不手改 `Opcode.cs`。 |
-| Protocol source guide | [`src/PaperMan.Protocol/README.md`](src/PaperMan.Protocol/README.md) | 先按 wire concern 找到 `Packet`、TCP/UDP codec、crypto、named contract 或 generated opcode catalog；明確區隔 client evidence 與 server policy。 |
-| Packet primitives | `Core/Packet.cs`; `Codecs/{PaperAes,PaperLz,PacketCodec,UdpPacketCodec}.cs` | 純 protocol TCP/UDP framing、CP949 字串、AES 與 LZ；不放 socket、database、account 或 gameplay policy。 |
-| 具名 wire contracts | `Contracts/Login/LoginWire.GL_*.cs`, `Contracts/Channel/ChannelBootstrapWire.{PM,GC}_*.cs`, `Contracts/{UdpControlWire,NewSkillProfileWire,ClanTunnel}.cs` | Login/channel 的每個獨立 top-level packet shape 依 canonical opcode 分檔；其他單一 grammar 維持一檔。未確認欄位保留 raw/conservative 名稱，不虛構 business meaning。 |
-| Host 與 connection boundary | `Program.cs`, `ServerContext.cs`, `ServerDataPaths.cs`, `Session.cs`, `Router.cs` | 零參數 startup、listener configuration、TCP session lifetime、packet ordering、role/state gate 與 opcode dispatch。主路徑為 `Program → Session.ReceiveAsync → Router → handler`。 |
-| Process-local live state | `ChannelAdmissionRegistry.cs`, `SessionRegistry.cs`, `Rooms.cs` | one-use 681→143 admission、online-session lookup、rooms/seats 與 room battle state；不是 durable state，account-owned data 仍以 SQLite 為準。 |
-| Narrow UDP boundary | `UdpControlServer.cs` | AES-only private UDP 19→empty-20 source-address reply；刻意不是 generic UDP、P2P、relay 或 gameplay server。 |
-| Database root | `Db.cs`, `DatabaseBootstrapper.cs` | connection、migration/bootstrap、shared command creation 與 account identity；`schema.sql` / `packets.tsv` 是 embedded resources，這是唯一 first-run DB path。 |
-| Database domain partials | `Db.Player.cs`, `Db.WeaponLoadout.cs`, `Db.Economy.cs`, `Db.Social.cs`, `Db.Rooms.cs`, `Db.Voice.cs`, `Db.Warehouse.cs`, `Db.GameCenter.cs` | 同一個 `Db` type 依 persistent domain 切分；跨 table atomic change 放在擁有該 operation 的 partial，並讓 transaction 明確可見。 |
-| Login / channel / join handlers | `Handlers.Auth.Registry.cs`, `Handlers.GT_PING.cs`, `Handlers.GL_LOGIN.cs`, `Handlers.Channel.Registry.cs`, `Handlers.PM_UDPSTART.cs`, `Handlers.PM_CONNECT.cs`, `Handlers.GC_{ENTERCHANNEL,CHANNEL}.cs`, `Handlers.Join.Registry.cs`, `Handlers.GL_JOIN*.cs` | authentication、681→143 admission、195→196 channel entry，以及 room-list join flow；每個 registered request/ACK family 的 source path 與 entry method 都是 canonical token；各 Registry 只做 binding。 |
-| Lobby opcode-family handlers | `Handlers.Lobby.Registry.cs`, `Handlers.GL_*.cs`, `Handlers.GI_*.cs`, `Handlers.GM_*.cs` | 每個 Lobby request/ACK family 都以 `db/packets.tsv` / `Opcode.cs` 的原始 token 命名檔案與 entry method（如 `Handlers.GL_MYINFO.cs` / `GL_MYINFO_REQ`）；Lobby registry 不含 packet 實作，只做 binding。保留既有 wire order、state guard 與 fail-closed boundary。 |
-| Room handlers | `Handlers.Room.{Registry,Shared}.cs` + direct `Handlers.{GL,GR,GG}_*.cs` | 每個 receive entry 以 canonical opcode token 命名；Shared 僅保留 map compatibility / member-authority support。 |
-| Battle handlers | `Handlers.Battle.Registry.cs` + direct `Handlers.{Y_TCP_INF,PM_TSPOSUPDATE,GG_*}.cs` + support-only `Handlers.BattleRelay.Shared.cs`; `Handlers.BattleObjects.Registry.cs` + direct `Handlers.GG_OCC_*.cs` / `Handlers.GG_DROPWEAPON_GET_AND_DROP.cs` + support-only `Handlers.BattleObjects.Shared.cs` | 所有 25 個 receive paths 都可由 token 定位。relay 保留 source-proven TCP framing；OCC/drop 保留 state-authoritative / fail-closed boundary。 |
-| AI handlers | `Handlers.Ai.Registry.cs` + direct `Handlers.GR_AI_*.cs` / `Handlers.GR_RESET_GAMEROOMSLOT.cs` | canonical request/ACK family source，沒有 callback 的 Registry / Shared 只放明確支持碼。 |
-| Persistent feature handlers | `Handlers.{Shop,Stats,Friend,Clan,Quest,Voice,Warehouse,GameCenter}.Registry.cs` + matching direct family sources | `Handlers.{Shop,Stats,Voice,Warehouse}.Shared.cs` 只放無 receive entry 的 wire support；raw opcode 206 是 Shop Registry/direct source 中明確標示的唯一例外。 |
-| Operator handlers | `Handlers.Master.Registry.cs` + direct `Handlers.MASTER_*.cs` | MASTER/GM command namespace，和一般 player-facing gameplay flow 分離。 |
-| Assembly 與 executable checks | `Properties/AssemblyInfo.cs`, `src/PaperMan.SelfTest/Program.cs` | assembly metadata，以及 byte-level protocol / SQLite bootstrap / loopback tests；SelfTest 不取代 original-service capture。 |
+| Solution 與 generated catalog | `PaperMan.slnx`, `tools/gen_opcodes.py`, `src/PaperMan.Protocol/Generated/Opcode.cs` | `db/packets.tsv` 是 opcode source；要改 opcode 名稱或值時執行 generator，不手改 generated output。 |
+| Protocol | [`src/PaperMan.Protocol/README.md`](src/PaperMan.Protocol/README.md) | byte-exact `Core/`、`Codecs/`、`Contracts/` 與 `Generated/` boundary；不放 socket、DB 或 gameplay policy。 |
+| Server source guide | [`src/PaperMan.Server/README.md`](src/PaperMan.Server/README.md) | 由 runtime flow 或 canonical opcode 直接定位 Host、State、Database、registry-backed Handler family。 |
+| Executable host | `src/PaperMan.Server/Host/` | 零參數 startup、listener configuration、TCP session lifetime、role/state gate、dispatch 與 narrow UDP endpoint。主路徑為 `Program → Session.ReceiveAsync → Router → handler`。 |
+| Process-local state | `src/PaperMan.Server/State/` | rooms/seats、room battle state、online-session lookup、one-use 681→143 admission；不是 durable account state。 |
+| SQLite ownership | `src/PaperMan.Server/Database/` | bootstrap/connection 與 `Db.*` persisted-domain partials。跨 table atomic change 放在擁有該 operation 的 partial，transaction 必須明確可見。 |
+| Canonical handlers | `src/PaperMan.Server/Handlers/<registry-family>/` | registry 只做 binding；direct source basename 與 receive entry 保留 `db/packets.tsv` / `Opcode.cs` canonical token。詳見 Server source guide 的完整 family map。 |
+| Assembly 與 executable checks | `Properties/AssemblyInfo.cs`, `src/PaperMan.SelfTest/Program.cs` | assembly metadata，以及 byte-level protocol / SQLite bootstrap / loopback checks；SelfTest 不取代 original-service capture。 |
 
 在修改 handler 或 resource-derived value 前，先讀
 [`../docs/README.md`](../docs/README.md) 的 evidence hierarchy、文件入口、generated-file

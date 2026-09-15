@@ -403,7 +403,7 @@ the 500-ms scheduler and sixth-send fallback is claimed here.
 
 `PaperMan.Protocol/Codecs/UdpPacketCodec.cs` encodes exactly the native UDP AES-only
 framing. AES-CFB encryption is **not** an authentication/MAC result, and no
-native server admission token is recovered. `PaperMan.Server/UdpControlServer.cs` binds the advertised IPv4
+native server admission token is recovered. `PaperMan.Server/Host/UdpControlServer.cs` binds the advertised IPv4
 `UdpHost/UdpPort`, parses only the complete opcode-19 shape above, and immediately
 returns an **empty, encrypted private opcode 20** to the datagram source. Empty is
 intentional: `sub_5968C0` does not consume a packet field. The endpoint is
