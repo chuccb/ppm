@@ -140,6 +140,33 @@ def main() -> None:
         check("convars.pat ability blocks", len(blocks), 14)
         check("convars.pat has ICT_DEVILGIRL", "ICT_DEVILGIRL" in blocks, False)
 
+    # map/maps/*.ini are plaintext spawn tables; crystal slots pair 1:1 with
+    # team spawns on the two maps that still carry crystal data.
+    maps = EXTRACTED / "map" / "maps"
+    if not maps.is_dir():
+        skipped.append("map/maps/*.ini")
+    else:
+        crystal_totals = {}
+        for path in sorted(maps.glob("*.ini")):
+            text = path.read_text(encoding="utf-8", errors="replace")
+            spawns = len(re.findall(r"^\s*team ", text, re.M))
+            block = re.search(r"\[CrystalSpawnPoint\](.*?)\n\}", text, re.S)
+            slots = re.findall(r"^\s*(none|small|large)\s*$", block.group(1), re.M) if block else []
+            crystal_totals[path.name] = (spawns, len(slots))
+            if slots:
+                check(f"{path.name} crystal slots pair with spawns", len(slots), spawns)
+        check("maps carrying crystal data",
+              sorted(name for name, (_, slots) in crystal_totals.items() if slots),
+              ["TS_14_Stadium.ini", "TS_40_SlumTown2.ini"])
+
+    # Every datarevision.txt must agree: Extracted/ is one coherent snapshot.
+    revisions = {path.read_text(encoding="utf-8", errors="replace").strip()
+                 for path in EXTRACTED.rglob("datarevision.txt")}
+    if not revisions:
+        skipped.append("datarevision.txt")
+    else:
+        check("datarevision.txt values agree", sorted(revisions), ["811034967"])
+
     if failures:
         print("resource claim verification failed:")
         for failure in failures:

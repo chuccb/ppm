@@ -329,6 +329,22 @@ weaponparts 1,108、partsability 413，以及
 中獎率、獎池內容、保底與扣款**仍無任何 client 可證事實**，維持 UNRESOLVED，
 現行 fail-closed 的 700→701 回覆不得改為成功。
 
+### 5b-10. 第七輪：出生點表浮現，與一個自己造成的方法論缺陷
+
+**先講缺陷。** 前幾輪的批次解密用「BOM 或 `<` 開頭」判斷明文，
+導致 **21 個本來就是明文**的檔案被錯誤地「解密」成亂碼而長期被略過。
+改用「前 512 B 可列印位元組 > 90%」後重跑：明文 222 / 解密 207，
+**新增 20 個可讀檔、0 個回歸**。這說明**工具的判準本身也要交叉驗證** ——
+先前「這些檔看不懂」的結論其實是我自己造成的。
+
+| 新讀出的內容 | 三方比對結果 |
+|---|---|
+| `map/maps/*.ini`（7 個） | **每張地圖的出生點表**。native 以 `_stricmp` 比對 6 個模式區段（`[FreeForAll]`…`[Practice]`，**等距 1072 B**）加 `[CrystalSpawnPoint]`；每筆出生點為 `angle`／`team a\|b`／`origin x y z`。詳 [`RESOURCES.md` §5d-13](RESOURCES.md)。 |
+| 水晶槽 token | native 寫死 `none=0 / small=1 / large=2`。**槽數與出生點數 1:1**（`TS_14_Stadium` 16:16、`TS_40_SlumTown2` 16:16），其餘 5 張圖為空 —— 與 `PACKETS.md` 把 372–377 `GR_*CRYSTAL_*` 標為「棄用模式」相容。 |
+| `slanderfilter` | 實際隨附 **`filterword.txt` 1,227 行**與 **`exceptionword.txt` 1,686 行**、**UTF-8**（非 CP932）。native 先組 `.txt` 再組 `.dat`，兩種副檔名皆支援；`RESOURCES.md` 舊記只寫 `.dat`，已補齊。 |
+| `GameInOption.ini` | 雖已可讀（內含 `SoccerMoveData = 137` 等），但**所有鍵名與檔名在 exe 中都找不到字串**，故**不能**當成生效參數，標為 UNRESOLVED。這是「可讀 ≠ 有用」的實例。 |
+| 8 個 `datarevision.txt` | 值**全部相同 = `811034967`**，證實 `Extracted/` 是同一次 patch 的一致快照。 |
+
 ### 5b-5. 兩項「僅 Wiki、刻意不採用」的記錄
 
 - **房間資訊欄位。** [MAP・ルール詳細](https://wikiwiki.jp/paperman/MAP・ルール詳細)

@@ -15,7 +15,7 @@
 | **cfg\RecommandItem.pat** | @686031 | 推薦商品 — **1,030 列 × 12 欄**（Concept 1=男性向 531／2=女性向 485／20=特殊 14） | ★ `808`→`809` GS_GET_RECOMMENDSET_INFO 內容 |
 | **data.pat** | @225227 | 主資料容器 | ★★ (見 §3 已破解格式) |
 | **Data\pmClient.dat** | @415210 | pmFile 打包主檔 | ★★★ 上面所有 cfg\*.pat 都從這打包檔讀出 |
-| FilterWord.dat / ExceptionWord.dat | | 聊天過濾詞 | ○ (伺服器可自備) |
+| slanderfilter\FilterWord.{txt,dat} / ExceptionWord.{txt,dat} | `sub_717E50(L"slanderfilter\\", …)` | 聊天過濾詞 — 本 revision 實際隨附的是 **`filterword.txt` (1,227 行)** 與 **`exceptionword.txt` (1,686 行)**，**UTF-8 明文**（非 CP932）。native 先組 `.txt` 再組 `.dat` 路徑，兩種副檔名皆支援 | ○ (伺服器可自備；過濾為客戶端行為) |
 | Map.dat / map\game*.dat | | 地圖幾何/材質 | ○ (僅戰鬥模擬需要) |
 | ui/*.xml (CLAN.xml, SHOP.xml...) | | UI 佈局 | ○ (純客戶端) |
 
@@ -1024,6 +1024,80 @@ Wiki [各種ゲージ詳細](https://wikiwiki.jp/paperman/各種ゲージ詳細)
 
 **界線。** 這完全是 client 端行為，伺服器**不需要也不應該**參與；
 聊天封包照原樣轉發即可，不得因表情而改寫內容。
+
+## 5d-13. map\maps\*.ini：出生點與水晶槽（本輪新解，先前誤判為加密檔）
+
+`Extracted/map/maps/*.ini`（7 個）**本來就是明文**，先前被誤當加密檔而解成亂碼。
+它們是**每張地圖的出生點表**，由具名解析流程以 `_stricmp` 比對中括號區段：
+
+| 區段 | 結構位移 | 說明 |
+|---|---:|---|
+| `[FreeForAll]` | `this+2424` | 個人生存出生點 |
+| `[TeamSurvival]` | `this+3496` | |
+| `[TeamDeath]` | `this+4568` | |
+| `[TeamHacking]` | `this+5640` | 爆破 |
+| `[TeamSteal]` | `this+6712` | |
+| `[Practice]` | `this+7784` | |
+| `[CrystalSpawnPoint]` | `this+8856` | **水晶槽**（見下） |
+
+六個模式區段**等距 1072 bytes**，由 `sub_541520` 解析；每筆出生點是
+`{ angle <deg>, team <a|b>, origin <x> <y> <z> }` 三元組。
+
+**水晶槽是獨立的列舉表（Fact / HIGH）。** `[CrystalSpawnPoint]` 改由
+`sub_541720(this+8856, this+8857, …)` 解析 —— 第一參數是**計數**、
+第二參數是**位元組陣列**，內容為每槽一個 token，對照表在 native 中寫死：
+
+| token | 存入值 |
+|---|---:|
+| `none` | 0 |
+| `small` | 1 |
+| `large` | 2 |
+
+**槽數與出生點數 1:1 對應。** `TS_14_Stadium` 有 16 個出生點、
+`[CrystalSpawnPoint]` 恰有 16 個 token（9 `large` + 7 `small`）；
+`TS_40_SlumTown2` 同為 16 對 16（全 `small`）。
+其餘 5 張圖（含兩張 `OCC_*`、`TD_33`、`TS_41`、`TS_42`）的
+`[CrystalSpawnPoint]` **為空**，與 `PACKETS.md` 把
+372–377 `GR_*CRYSTAL_*` 標為「棄用模式」相容 —— 本 revision 只有
+兩張圖仍帶水晶資料。
+
+**界線。** 這確立了 372/374/376 所指槽位的**資料來源與型別字彙**，
+但水晶的分數、重生時間與擁有權判定仍無 client 可證事實，維持 UNRESOLVED。
+
+## 5d-14. 其餘小型設定檔（本輪補完，含一個方法論教訓）
+
+**`ui/system/GameInOption.ini`**（明文 INI）：
+
+```ini
+[TipOption]        ChangeSecond = 5 · CurrentTipCount = 10 · ShowCount = 10
+[TimeLimitOption]  GenerateElapsedTime = 10
+[SoccerMove]       SoccerMoveData = 137 · SoccerFallSpeedData = 1.7f
+```
+
+⚠ 這些鍵名在 `PaperMan.exe.c` 中**完全找不到字串**（`L""` 與 ANSI 皆 0 筆），
+`GameInOption.ini` 這個檔名也找不到。因此**無法證明本 revision 會載入它**，
+更不能把 `SoccerMoveData = 137` 當成生效中的足球物理參數。
+歸類為 **UNRESOLVED / 可能為殘留或由外部工具讀取**。
+
+**`ui/cfg/pm_lobbydata.dat`**（明文 TSV，23,606 B）：首行 `LOBBYMAIN`、
+次行貼圖 `L_MR.DDS`，其後為大量 `l t r b` 四元組 —— 是**大廳 UI 的矩形座標表**，
+無 native 檔名引用，純版面資料，對伺服器無價值。
+
+**`datarevision.txt`**：根目錄與 `item/`、`character/`、`map/`、`pepachi/`、
+`sound/sounds{,01,80}/` 共 **8 個檔案值全部相同 = `811034967`**，
+證實整個 `Extracted/` 是**同一次 patch 的一致快照**（§5e 既有記載已複驗）。
+
+### ⚠ 方法論教訓：不要用「開頭位元組」判斷是否加密
+
+本輪發現先前幾輪的批次解密有瑕疵：我用「BOM 或 `<` 開頭」判斷明文，
+導致 **21 個本來就是明文**的檔案（7 個 `map/maps/*.ini`、8 個
+`datarevision.txt`、`pm_lobbydata.dat`、`GameInOption.ini`、
+`ui/cfg/Map.dat`、`QuestAnimation.xml`、`tutorial.xml` 等）被錯誤地
+「解密」成亂碼，因而長期被當成無法解讀。
+
+正確判準應為**可列印位元組比例**（取前 512 B，>90% 為明文）。
+以此重跑後：明文 222 / 解密 207，**新增 20 個可讀檔、0 個回歸**。
+`map/maps/*.ini` 的出生點表（§5d-13）就是這樣才浮現的。
 
 ## 5e. 版本考古 (廿一輪)
 - 根 datarevision.txt = 811034967 (patch 版本號)
