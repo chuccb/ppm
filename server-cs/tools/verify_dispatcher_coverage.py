@@ -148,6 +148,13 @@ UDP_RECEIVE_CASES = [2, 4, 5, 6, 8, 10, 12, 13, 14, 15, 18, 20, 22, 24, 26, 28,
                      29, 31, 33, 34, 154, 158]
 UDP_SEND_OPCODES = [1, 5, 6, 9, 13, 14, 15, 17, 19, 21, 23, 27, 30, 32, 35]
 UDP_MAX_OPCODE = 40  # separates the UDP band from TCP's 100+
+UDP_SHARED_HEADER_BUILDERS = {1: "sub_593830", 9: "sub_594300", 19: "sub_596670",
+                              21: "sub_596330", 23: "sub_744450", 27: "sub_6013E0",
+                              30: "sub_6065E0", 32: "sub_96BF70", 35: "sub_7463E0"}
+UDP_IDENTITY_SOURCES = ("sub_417D00", "byte_EE896D", "dword_EE8CB4")
+WRITE_PRIMITIVE = {"sub_592920": "u8", "sub_5929E0": "s16", "sub_592A20": "s32",
+                   "sub_592960": "s8", "sub_592AE0": "str", "sub_592A60": "u32",
+                   "sub_592B60": "f32", "sub_592AC0": "raw4", "sub_592B20": "u64"}
 
 
 def check_udp_opcode_space(text: str) -> None:
@@ -181,6 +188,33 @@ def check_udp_opcode_space(text: str) -> None:
     if len(paired) != 12:
         print(f"dispatcher verification failed: UDP n->n+1 pairs = {len(paired)}, expected 12")
         raise SystemExit(1)
+
+    # Nine UDP senders share a u8/u8/u8/s32 identity header taken from the same
+    # three globals. docs/PACKETS.md documents the layout on that basis.
+    for opcode, builder in UDP_SHARED_HEADER_BUILDERS.items():
+        head = re.search(r"\n[A-Za-z_][^\n]*\b" + builder + r"\([^)]*\)\s*\r?\n\{", text)
+        if head is None:
+            print(f"dispatcher verification failed: UDP builder {builder} not found")
+            raise SystemExit(1)
+        start = head.end()
+        depth = 1
+        index = start
+        while index < len(text) and depth:
+            if text[index] == "{":
+                depth += 1
+            elif text[index] == "}":
+                depth -= 1
+            index += 1
+        body = text[start:index - 1]
+        after = body[body.find(f", {opcode})"):]
+        written = [WRITE_PRIMITIVE[name] for name
+                   in re.findall(r"(sub_592[0-9A-F]{3})\(", after)
+                   if name in WRITE_PRIMITIVE]
+        missing = [source for source in UDP_IDENTITY_SOURCES if source not in body]
+        if written[:4] != ["u8", "u8", "u8", "s32"] or missing:
+            print(f"dispatcher verification failed: UDP {opcode} ({builder}) header changed")
+            print(f"  prefix {written[:4]}, missing identity sources {missing}")
+            raise SystemExit(1)
 
 
 def main() -> None:
