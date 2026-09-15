@@ -20,10 +20,12 @@
 | Database root | `Db.cs`, `DatabaseBootstrapper.cs` | connection、migration/bootstrap、shared command creation 與 account identity；`schema.sql` / `packets.tsv` 是 embedded resources，這是唯一 first-run DB path。 |
 | Database domain partials | `Db.Player.cs`, `Db.WeaponLoadout.cs`, `Db.Economy.cs`, `Db.Social.cs`, `Db.Rooms.cs`, `Db.Voice.cs`, `Db.Warehouse.cs`, `Db.GameCenter.cs` | 同一個 `Db` type 依 persistent domain 切分；跨 table atomic change 放在擁有該 operation 的 partial，並讓 transaction 明確可見。 |
 | Login / channel / join handlers | `Handlers.Auth.Registry.cs`, `Handlers.GT_PING.cs`, `Handlers.GL_LOGIN.cs`, `Handlers.Channel.Registry.cs`, `Handlers.PM_UDPSTART.cs`, `Handlers.PM_CONNECT.cs`, `Handlers.GC_{ENTERCHANNEL,CHANNEL}.cs`, `Handlers.Join.Registry.cs`, `Handlers.GL_JOIN*.cs` | authentication、681→143 admission、195→196 channel entry，以及 room-list join flow；每個 registered request/ACK family 的 source path 與 entry method 都是 canonical token；各 Registry 只做 binding。 |
-| Lobby opcode-family handlers | `Handlers.Lobby.Registry.cs`, `Handlers.GL_*.cs`, `Handlers.GI_*.cs`, `Handlers.GM_*.cs` | 每個 Lobby request/ACK family 都以 `db/packets.tsv` / `Opcode.cs` 的原始 token 命名檔案與 entry method（如 `Handlers.GL_MYINFO.cs` / `GL_MYINFO_REQ`）；Lobby registry 是唯一無 packet 實作的明確例外。保留既有 wire order、state guard 與 fail-closed boundary。 |
-| Room / battle / AI handlers | `Handlers.Room.{Registry,Shared}.cs` + direct `Handlers.{GL,GR,GG}_*.cs`；尚待切分的 `Handlers.Battle.Registry.cs` + direct `Handlers.{Y_TCP_INF,PM_TSPOSUPDATE,GG_*}.cs` + support-only `Handlers.BattleRelay.Shared.cs`; BattleObjects registry/direct `Handlers.GG_OCC_*.cs` / `Handlers.GG_DROPWEAPON_GET_AND_DROP.cs` + support-only `Handlers.BattleObjects.Shared.cs`；`Handlers.Ai.Registry.cs` + direct `Handlers.GR_AI_*.cs` / `Handlers.GR_RESET_GAMEROOMSLOT.cs` | 已註冊 Room 與 AI request/ACK family 都以 canonical opcode token 命名（如 `Handlers.GR_MAPCHANGE.cs` / `GR_MAPCHANGE_REQ`、`Handlers.GR_AI_DAMAGE_SHIELD.cs` / `GR_AI_DAMAGE_SHIELD_REQ`）；Registry 與 Shared 僅保留無 callback 的 binding、map compatibility、member/authority support。Battle relay/OCC/drop 保持 source-proven TCP relay 或 fail-closed boundary。 |
-| Persistent feature handlers | 所有已註冊 persistent families 皆為 direct family files：`Handlers.{Shop,Stats,Friend,Clan,Quest,Voice,Warehouse,GameCenter}.Registry.cs` + matching `Handlers.<opcode-family>.cs`。`Handlers.{Shop,Stats,Voice,Warehouse}.Shared.cs` 只放無 receive entry 的 wire support；未命名的 raw 206 是 Shop Registry/direct source 中明確標示的唯一例外。 | feature-domain request parsing 與 response construction；只有 request grammar 與 persistence authority 都已證實時，handler 才可碰 DB mutation。 |
-| Operator handler | `Handlers.Master.Registry.cs + direct `Handlers.MASTER_*.cs`` | MASTER/GM command namespace，和一般 player-facing gameplay flow 分離。 |
+| Lobby opcode-family handlers | `Handlers.Lobby.Registry.cs`, `Handlers.GL_*.cs`, `Handlers.GI_*.cs`, `Handlers.GM_*.cs` | 每個 Lobby request/ACK family 都以 `db/packets.tsv` / `Opcode.cs` 的原始 token 命名檔案與 entry method（如 `Handlers.GL_MYINFO.cs` / `GL_MYINFO_REQ`）；Lobby registry 不含 packet 實作，只做 binding。保留既有 wire order、state guard 與 fail-closed boundary。 |
+| Room handlers | `Handlers.Room.{Registry,Shared}.cs` + direct `Handlers.{GL,GR,GG}_*.cs` | 每個 receive entry 以 canonical opcode token 命名；Shared 僅保留 map compatibility / member-authority support。 |
+| Battle handlers | `Handlers.Battle.Registry.cs` + direct `Handlers.{Y_TCP_INF,PM_TSPOSUPDATE,GG_*}.cs` + support-only `Handlers.BattleRelay.Shared.cs`; `Handlers.BattleObjects.Registry.cs` + direct `Handlers.GG_OCC_*.cs` / `Handlers.GG_DROPWEAPON_GET_AND_DROP.cs` + support-only `Handlers.BattleObjects.Shared.cs` | 所有 25 個 receive paths 都可由 token 定位。relay 保留 source-proven TCP framing；OCC/drop 保留 state-authoritative / fail-closed boundary。 |
+| AI handlers | `Handlers.Ai.Registry.cs` + direct `Handlers.GR_AI_*.cs` / `Handlers.GR_RESET_GAMEROOMSLOT.cs` | canonical request/ACK family source，沒有 callback 的 Registry / Shared 只放明確支持碼。 |
+| Persistent feature handlers | `Handlers.{Shop,Stats,Friend,Clan,Quest,Voice,Warehouse,GameCenter}.Registry.cs` + matching direct family sources | `Handlers.{Shop,Stats,Voice,Warehouse}.Shared.cs` 只放無 receive entry 的 wire support；raw opcode 206 是 Shop Registry/direct source 中明確標示的唯一例外。 |
+| Operator handlers | `Handlers.Master.Registry.cs` + direct `Handlers.MASTER_*.cs` | MASTER/GM command namespace，和一般 player-facing gameplay flow 分離。 |
 | Assembly 與 executable checks | `Properties/AssemblyInfo.cs`, `src/PaperMan.SelfTest/Program.cs` | assembly metadata，以及 byte-level protocol / SQLite bootstrap / loopback tests；SelfTest 不取代 original-service capture。 |
 
 在修改 handler 或 resource-derived value 前，先讀
@@ -32,8 +34,7 @@ boundary 與 reverse-engineering checklist。
 
 ### Handler 檔名與 entry 命名
 
-Lobby 與 Room 已採用下列可由 opcode 反向直接定位的規則；處理其他 handler family 時也應沿用，
-而不是另造泛化的業務名稱：
+所有 handler family 均採用下列可由 opcode 反向直接定位的規則；不得另造需要反向映射的泛化業務名稱：
 
 1. 以 `db/packets.tsv` 為 canonical spelling；`tools/gen_opcodes.py` 產生的
    `Opcode.cs` 是 C# 端同一 token 的檢查點。native string/comment 可補充該 family 的
@@ -43,11 +44,12 @@ Lobby 與 Room 已採用下列可由 opcode 反向直接定位的規則；處理
    builder/parser 的 method name 也保留完整 `*_REQ` 或 `*_ACK` token。
 3. 沒有 `*_REQ` 後綴的單向 token（目前為 `GL_MYINFO_OPEN`）同時作為檔名 family 與
    entry method。不存在以猜測業務語意命名的中介 handler 名稱。
-4. `*.Registry.cs` 是每個 handler subsystem 可用的窄例外：它沒有 packet body、DB
-   mutation 或 state transition，只將 `Opcode.<TOKEN>` 綁定到同名 entry method。Room 的
-   `Handlers.Room.Shared.cs` 是另一個已記錄的窄例外，只放跨多個 opcode 的 map
-   compatibility / room-member authority support；它沒有 callback、packet parse/write 或
-   mutation entry。兩者都不能成為把多個 packet flow 收回 generic source file 的先例。
+4. `*.Registry.cs` 只做 binding，不含 packet body、DB mutation 或 state transition。
+   `*.Shared.cs` 僅限已明確記錄的跨-family wire / authority support，不含 receive entry。
+   兩者都不能成為把多個 packet flow 收回 generic source file 的先例。
+5. 唯一沒有官方 request token 的已註冊 path 是 raw opcode 206；它保留
+   `Handlers.RawOpcode206.cs` / `RawOpcode206_REQ` 與 canonical paired ACK 名稱，
+   明示為 raw evidence boundary，絕不補造 GS request token。
 
 這是導覽規則，不改變 packet header、field order、length gate、state guard、SQLite
 ownership 或未知邊界的 fail-closed 行為。
