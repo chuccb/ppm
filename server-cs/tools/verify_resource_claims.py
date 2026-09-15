@@ -936,6 +936,49 @@ def main() -> None:
         check("every pack is a complete 3x9 grid",
               sorted(key for key, cats in grid.items() if cats != expected), [])
 
+    # RESOURCES.md 2b2: quest_id prefix is the quest class, and each row's
+    # own description text says which class it is. Re-parsed locally because
+    # `rows`/`header` are rebound by later blocks.
+    if quests is not None:
+        quest_lines = quests.decode("cp932", "replace").split("\r\n")
+        quest_header = [name.strip() for name in quest_lines[1].split(",")]
+        quest_rows = [row for row in csv.reader(quest_lines[2:])
+                      if len(row) == len(quest_header)]
+
+        def prefix(row: list[str]) -> int:
+            return int(row[0]) // 10000
+
+        def kind(row: list[str]) -> str:
+            raw = row[quest_header.index("QuestTermDescription")]
+            return re.sub(r"<[^>]*>", "", raw).strip().split("^")[0]
+
+        buckets: dict[int, list[list[str]]] = {}
+        for row in quest_rows:
+            buckets.setdefault(prefix(row), []).append(row)
+        check("quest id prefixes",
+              sorted((key, len(value)) for key, value in buckets.items()),
+              [(2, 578), (3, 246), (4, 20)])
+        check("every 3xxxx quest self-labels as デイリークエスト",
+              sorted({kind(row) for row in buckets[3]}), ["デイリークエスト"])
+        check("4xxxx quests self-label as event quests",
+              sorted({kind(row) for row in buckets[4]}),
+              ["イベントクエスト", "イベントクエスト(一回)"])
+        limit = quest_header.index("LimitDate")
+        repeat = quest_header.index("QuestRepeat")
+        character = quest_header.index("CharacterType")
+        for name, index in (("LimitDate", limit), ("QuestRepeat", repeat),
+                            ("CharacterType", character)):
+            check(f"daily quests leave {name} at zero",
+                  sorted({row[index].strip() for row in buckets[3]}), ["0"])
+        check("free quests carry varied per-row limits",
+              len({row[limit].strip() for row in buckets[2]}) > 5, True)
+        limited = [row for row in quest_rows if row[character].strip() != "0"]
+        check("character-limited quests are all free quests",
+              sorted({prefix(row) for row in limited}), [2])
+        check("character-limited ordinals stop at 14",
+              sorted({int(row[character]) for row in limited}),
+              list(range(1, 15)))
+
     # Every datarevision.txt must agree: Extracted/ is one coherent snapshot.
     revisions = {path.read_text(encoding="utf-8", errors="replace").strip()
                  for path in EXTRACTED.rglob("datarevision.txt")}
