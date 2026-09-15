@@ -102,7 +102,7 @@ route table / 日誌 / `packet_stats` 監控。
 
 ### 模式枚舉 (權威, `sub_53FBB0` mode factory)
 
-房 rule 的 mode 值 0..15, 對應 `CyGameModes::Cy*ModeLobbyUI` 類:
+房 `modeIndex` 值 0..15, 對應 `CyGameModes::Cy*ModeLobbyUI` 類:
 
 ```
 0 TeamMatch(TeamDeath)   1 IndividualSurvival(FreeForAll)

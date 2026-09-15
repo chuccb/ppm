@@ -66,9 +66,9 @@ resource snapshot；兩者都應以小範圍、可重現的 search/excerpt 研�
 | `server-cs/src/PaperMan.Server/` | [`Server source guide`](../server-cs/src/PaperMan.Server/README.md) → `Host/Program` → `Host/Session` → `Host/Router` → compile-time discovery → `Handlers/<family>/` | TCP/UDP ownership、session state、compile-time discovered canonical handlers 與 SQLite access；詳細導航見 [`server-cs/README.md`](../server-cs/README.md)。 |
 | [`server-cs/src/PaperMan.HandlerGenerator/`](../server-cs/src/PaperMan.HandlerGenerator/README.md) | compiler-only Roslyn generator | canonical static receive entries → direct Router method-group table；沒有 runtime handler reflection。僅此 dispatch path 的 NativeAOT compatibility 可由 source generator 得出，非整個 server publish claim。 |
 | `server-cs/src/PaperMan.SelfTest/Program.cs` | executable, dependency-free wire/bootstrap integration checks | 強化改動過的 wire/state boundary；它不是 original-service capture。 |
-| `db/schema.sql` / `db/packets.tsv` | schema 與 opcode catalog | Server assembly 的 embedded bootstrap inputs；schema 改動需兼顧 `DatabaseBootstrapper` migration。 |
+| `db/schema.sql` / `db/packets.tsv` | schema 與 opcode catalog | Server assembly 的 embedded bootstrap inputs；schema 改動需兼顧 `DatabaseBootstrapper` 和 `db/build_db.py` migration。 |
 | `server/packet.py` / `server/pmfile.py` | Python protocol/resource reference tooling | 可用於 codec / pmFile cross-check；C# server 啟動不依賴 Python。 |
-| `server-cs/tools/gen_opcodes.py` / `server-cs/tools/verify_server_layout.py` / `server-cs/tools/verify_server_naming.py` | 前者：`db/packets.tsv` → `PaperMan.Protocol/Generated/Opcode.cs`；中者：catalog → generated discovery → canonical handler static topology；後者：native `GameMode` → resource default map / documented map-bit and two-team tables，並保留 numeric `GC_CLAN_PROTOCOL` sub-op set | `Opcode.cs` 是 generated output；修改 opcode 名稱或值時由 source TSV / generator 處理，不手改 output。layout / naming checks 不取代 C# build、SelfTest 或 client capture。 |
+| `server-cs/tools/gen_opcodes.py` / `server-cs/tools/verify_server_layout.py` / `server-cs/tools/verify_server_naming.py` | 前者：`db/packets.tsv` → `PaperMan.Protocol/Generated/Opcode.cs`；中者：catalog → generated discovery → canonical handler static topology；後者：native `GameMode` → resource default map / documented map-bit and two-team tables，並保留 numeric `GC_CLAN_PROTOCOL` sub-op / private-UDP opcode sets、canonical `AI` / `Login` handler groupings 和 room `modeIndex` persistence naming | `Opcode.cs` 是 generated output；修改 opcode 名稱或值時由 source TSV / generator 處理，不手改 output。layout / naming checks 不取代 C# build、SelfTest 或 client capture。 |
 
 ## 每次改動前後的最小檢查
 
@@ -81,8 +81,9 @@ resource snapshot；兩者都應以小範圍、可重現的 search/excerpt 研�
 4. 更新最常被使用且真正承載新結論的 Markdown；避免重複貼相同證據到每份文件。
 5. 修改 Server catalog、handler path 或 direct receive entry 時，先執行
    `python3 server-cs/tools/verify_server_layout.py`；修改 room `modeIndex`、native mode
-   name、resource default map、maplist bit、two-team predicate 或 `GC_CLAN_PROTOCOL` sub-op
-   name/value 時，另執行 `python3 server-cs/tools/verify_server_naming.py`。再執行可用的
+   name、resource default map、maplist bit、two-team predicate、`GC_CLAN_PROTOCOL` sub-op、
+   private-UDP opcode 或 `AI` / `Login` handler grouping name/value 時，另執行
+   `python3 server-cs/tools/verify_server_naming.py`。再執行可用的
    format/whitespace、Python 或 .NET tests。兩者皆只做 static evidence/topology check；若當前
    環境沒有 .NET SDK，明確記錄 build / `PaperMan.SelfTest` 尚未執行，不能宣稱 compiler-backed
    success。

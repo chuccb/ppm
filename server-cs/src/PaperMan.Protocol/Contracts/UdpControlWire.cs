@@ -15,11 +15,11 @@ namespace PaperMan.Protocol;
 /// <summary>Directly evidenced values in the private UDP dispatcher namespace.</summary>
 public enum UdpPrivateOpcode : ushort
 {
-    /// <summary>sub_596670's retried client-to-endpoint control request.</summary>
-    ControlRequest = 19,
+    /// <summary>sub_596670 constructs this numeric request literal.</summary>
+    Opcode19 = 19,
 
-    /// <summary>sub_595E80 case 20 completes the client control wait.</summary>
-    ControlCompletion = 20,
+    /// <summary>sub_595E80 case 20 dispatches this numeric response literal.</summary>
+    Opcode20 = 20,
 }
 
 /// <summary>
@@ -39,10 +39,10 @@ public sealed record UdpControlRequest(
     public static UdpControlRequest Read(Packet packet)
     {
         ArgumentNullException.ThrowIfNull(packet);
-        if (packet.OpcodeRaw != (ushort)UdpPrivateOpcode.ControlRequest)
+        if (packet.OpcodeRaw != (ushort)UdpPrivateOpcode.Opcode19)
         {
             throw new ArgumentException(
-                $"Expected UDP-private opcode {(ushort)UdpPrivateOpcode.ControlRequest}, got {packet.OpcodeRaw}.",
+                $"Expected UDP-private opcode {(ushort)UdpPrivateOpcode.Opcode19}, got {packet.OpcodeRaw}.",
                 nameof(packet));
         }
 

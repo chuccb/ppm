@@ -396,7 +396,7 @@ CREATE TABLE IF NOT EXISTS rooms (
     title       TEXT    NOT NULL,
     state       INTEGER NOT NULL DEFAULT 0,   -- s8: 0=waiting 1=playing ...
     map_id      INTEGER NOT NULL DEFAULT 0,
-    rule        INTEGER NOT NULL DEFAULT 0,   -- GR_RULECHANGE(169)
+    mode_index  INTEGER NOT NULL DEFAULT 0,   -- client `modeIndex`; GR_RULECHANGE(169)
     win_count   INTEGER NOT NULL DEFAULT 0,   -- GR_WINCHANGE(171)
     time_limit  INTEGER NOT NULL DEFAULT 0,   -- GR_TIMECHANGE(173)
     max_players INTEGER NOT NULL DEFAULT 8 CHECK (max_players BETWEEN 1 AND 10),
@@ -429,7 +429,7 @@ CREATE TABLE IF NOT EXISTS match_results (
     match_id    INTEGER PRIMARY KEY,
     room_no     INTEGER NOT NULL,
     map_id      INTEGER NOT NULL DEFAULT 0,
-    rule        INTEGER NOT NULL DEFAULT 0,
+    mode_index  INTEGER NOT NULL DEFAULT 0,   -- client `modeIndex`
     started_at  INTEGER NOT NULL,
     ended_at    INTEGER NOT NULL DEFAULT (unixepoch()),
     winner_team INTEGER

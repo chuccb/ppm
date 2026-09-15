@@ -472,8 +472,9 @@ UDP opcode 32 and the original server's routing/admission behavior remains
 **UNRESOLVED**; a relay implementation must not rely on the withdrawn
 TCP-fallback interpretation.
 
-**戰隊隧道協定 (五輪發現)**: `GC_CLAN_PROTOCOL_REQ(583)/_ACK(584)` 是
-**容器封包** — payload 第一個欄位是 `s32 sub_opcode`, 之後才是子協定
+**GC_CLAN_PROTOCOL container grammar (五輪發現)**:
+`GC_CLAN_PROTOCOL_REQ(583)/_ACK(584)` 是**容器封包** — payload 第一個欄位是
+`s32 sub_opcode`，之後才是子協定
 內容。ACK 端 `sub_54D040` (case 584) 依 sub_opcode 分發:
 182/184/185/186/189/192/193/194/198–201/203–207/210–215/218/219/381–383
 (這些數字與頂層 opcode 空間**無關**, 是戰隊系統私有編號)。
@@ -1314,7 +1315,7 @@ festival: 681 的 3 頻道組 ↔ 195 的 group 序號互證; 頻道類型 n2==3
 - 7 (fall-through 主體): **觀戰加入 (完整房間+全成員快照)** — 對應
   268 REQ flag==1 (OBSERVE):
   房間頭: `s32 room_uid, s32 elapsed_ms (同 130 的時間基準), u8 map, u8 count(jj_1),
-  u8 room_no, u8 rule, u16 win, u8 max, u8, u16, u8 flags(bit0/1 拆),
+  u8 room_no, u8 modeIndex, u16 win, u8 max, u8, u16, u8 flags(bit0/1 拆),
   u8 has_pass, u16, u8, u8, u8 obs` + `u8×4 (模式旗標)`
   然後 count× 成員條目:
   `s32 uid, u8 slot, str nick, u8 team, u8 ready(1&1→0 特例),
@@ -1570,8 +1571,8 @@ success-tail 及 694 ceiling 做 source-level byte-order assertions。
 168 GR_CHANGEUSER_ACK  (sub_56F410→sub_4325D0): s16 slot_mask —
                        寫 room+110=上限槽位點陣 與 room mgr +214,
                        sub_53FB10 重算 +129=popcount(最大人數)
-169 GR_RULECHANGE_REQ  (sub_56F440, UI sub_42FE20): u8 mode
-170 GR_RULECHANGE_ACK  (sub_56F4F0→sub_42FE50): u8 mode (modeIndex) —
+169 GR_RULECHANGE_REQ  (sub_56F440, UI sub_42FE20): u8 modeIndex
+170 GR_RULECHANGE_ACK  (sub_56F4F0→sub_42FE50): u8 modeIndex —
                        sub_53FBB0 重建 mode UI(+132), 再由 mode 設定表
                        (sub_426930) 回推 map 寫 +130, 並重繪 USERSLOTS
 171 GR_WINCHANGE_REQ   (sub_56F520, UI sub_4306E0): s16 win_count
@@ -2162,7 +2163,7 @@ the original server’s historic 311 producer is not available.
 
 **官方遊戲模式表 (map_StartIndex.xml — 二十輪, 正名十七輪的猜測)**:
 ```
-modeIndex 0 = TeamDeath     (TD_, bit2)   ← 建房 111 的 u8 rule 用這套
+modeIndex 0 = TeamDeath     (TD_, bit2)   ← 建房 111 的 u8 modeIndex 用這套
 modeIndex 1 = FreeForAll    (PS_, bit0)
 modeIndex 2 = TeamHacking   (TH_, bit3)   ← 「爆破」正名: 駭入模式
 modeIndex 3 = TeamSurvival  (TS_, bit1)
@@ -2195,8 +2196,8 @@ dispatcher case 102 → `sub_58D6F0` 立即 `ctor(101)` 回送
 ### 3.15 房間系統 (七輪讀畢)
 - **111 GL_MAKEROOM_REQ** (**Fact/HIGH**, `sub_449320 → sub_56A5A0`): 唯一可達 UI caller
   固定傳 `a1=-1`，故 wire 是 `u8 0xFF title_form_marker, s8 has_password, str title,
-  [has_password: str password], u8 max_player, u8 rule, u8 requested_map, u8 no_skill_bg`。
-  `USERS` control → max、`GAMEMODE` → rule、`sub_44C140(..., rule)` → requested map、
+  [has_password: str password], u8 max_player, u8 modeIndex, u8 requested_map, u8 no_skill_bg`。
+  `USERS` control → max、`GAMEMODE` → modeIndex、`sub_44C140(..., modeIndex)` → requested map、
   `CHKBTN_NOSKILL` → no-skill flag；`0xFF` 是 title-form discriminator，**不是 map id**。
   `sub_56A5A0` 仍有 no-title serialization branch，但沒有可達 caller，故 server 僅接受這個
   title form，並拒絕 truncated、unterminated 或 trailing C2S payload。
@@ -2205,7 +2206,7 @@ dispatcher case 102 → `sub_58D6F0` 立即 `ctor(101)` 回送
   u8 mode+13` + err==0 時: `u8 n2, {s32 team_id, s32 tex_crc, str,
   u8}×2 (mode==2)` — 建房成功即以自己為房主初始化房間物件
   (sub_53F920: +105=1 自身、+106=0 無密碼、+110 上限槽位點陣、
-  +136=3、+144=7/10, 其餘取自 client 建房時自存的 rule/mode 全域)
+  +136=3、+144=7/10, 其餘取自 client 建房時自存的 modeIndex/mode 全域)
 - **113 GL_ENTERROOM_REQ**: `u8 room_no` (單欄位)
 - **114 GL_ENTERROOM_ACK** (sub_56B360, 卅七輪逐欄):
   `u8 sub_type` + 0=失敗回大廳;
@@ -2515,7 +2516,7 @@ byte 偏移 (this 為物件基址):
 4. **9-slot UI-item block** (sub_522480) 與 **NewSkill 5×7 profile**（selected record 由 sub_527AF0 讀 0x1C=7*4）分離儲存；466 操作後者。
 5. **戰績 19 個計數器** (GP_CH*C 家族)。
 6. **道具屬性**: item_id(s32), 兩個 float(耐久/強化), period(天), kind(u8), durability(u16)。
-7. **房間**: no(≤210), title, map, rule, win_count, time_limit, max_player(≤10 slots),
+7. **房間**: no(≤210), title, map, modeIndex, win_count, time_limit, max_player(≤10 slots),
    password, item_mode, balance, skill_off, observer。
 8. **好友/訊息/倉庫/任務/公會/禮物** 都有對應 packet 家族 → 各自建表。
 9. period 天數 & 商店 kind 白名單直接寫進 CHECK constraint。

@@ -960,7 +960,7 @@ bool IsNative311FailureAcknowledgement(Packet acknowledgement)
                 {
                     Title: "source-shaped room",
                     Password: "room-password",
-                    Rule: 2,
+                    ModeIndex: 2,
                     MapId: 14,
                     NoSkillBg: true,
                     SlotMask: 0x00FF,
@@ -1766,7 +1766,7 @@ foreach (var (_, codec) in codecs)
 // completion is a 16-byte ciphertext with w2=w3=0.
 {
     using var udpCodec = new UdpPacketCodec();
-    var requestPacket = new Packet((Opcode)UdpPrivateOpcode.ControlRequest)
+    var requestPacket = new Packet((Opcode)UdpPrivateOpcode.Opcode19)
         .WriteU8(3)
         .WriteU8(7)
         .WriteS8(0)
@@ -1790,7 +1790,7 @@ foreach (var (_, codec) in codecs)
         && request.ClientReportedPlayerId == 42
         && request.LocalNickname == "테스트닉");
 
-    byte[] completionFrame = udpCodec.Encode(new Packet((Opcode)UdpPrivateOpcode.ControlCompletion));
+    byte[] completionFrame = udpCodec.Encode(new Packet((Opcode)UdpPrivateOpcode.Opcode20));
     ushort completionW0 = BinaryPrimitives.ReadUInt16LittleEndian(completionFrame);
     ushort completionW2 = BinaryPrimitives.ReadUInt16LittleEndian(completionFrame.AsSpan(4));
     ushort completionW3 = BinaryPrimitives.ReadUInt16LittleEndian(completionFrame.AsSpan(6));
@@ -1798,7 +1798,7 @@ foreach (var (_, codec) in codecs)
     Check("udp empty 20 remains AES-encrypted", completionW0 == 16 && completionW2 == 0 && completionW3 == 0);
     Check("udp empty 20 decodes to no payload", completion.OpcodeRaw == 20 && completion.Length == 0);
 
-    var payloadWithNoUdpLz = new Packet((Opcode)UdpPrivateOpcode.ControlRequest)
+    var payloadWithNoUdpLz = new Packet((Opcode)UdpPrivateOpcode.Opcode19)
         .WriteRaw(new byte[64]);
     byte[] noLzFrame = udpCodec.Encode(payloadWithNoUdpLz);
     Check("udp codec never applies TCP LZ",
@@ -1827,7 +1827,7 @@ foreach (var (_, codec) in codecs)
     using var client = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
     using var clientCodec = new UdpPacketCodec();
     using var receiveStop = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-    var request = new Packet((Opcode)UdpPrivateOpcode.ControlRequest)
+    var request = new Packet((Opcode)UdpPrivateOpcode.Opcode19)
         .WriteU8(1).WriteU8(2).WriteS8(1).WriteS8(3).WriteS32(4).WriteStr("udp-test");
 
     try
@@ -1843,7 +1843,7 @@ foreach (var (_, codec) in codecs)
             receiveStop.Token);
         Packet completion = clientCodec.DecodeDatagram(responseBuffer.AsSpan(0, response.ReceivedBytes));
         Check("udp endpoint replies 20 to request source",
-            completion.OpcodeRaw == (ushort)UdpPrivateOpcode.ControlCompletion && completion.Length == 0);
+            completion.OpcodeRaw == (ushort)UdpPrivateOpcode.Opcode20 && completion.Length == 0);
     }
     catch (OperationCanceledException)
     {

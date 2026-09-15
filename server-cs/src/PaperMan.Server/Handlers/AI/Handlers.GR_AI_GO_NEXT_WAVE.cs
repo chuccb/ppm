@@ -7,7 +7,7 @@ using PaperMan.Protocol;
 
 namespace PaperMan.Server;
 
-public static partial class AiHandlers
+public static partial class AIHandlers
 {
     // 939 GR_AI_GO_NEXT_WAVE_REQ (sub_75CE40: 空)
     // → 940 ACK (sub_7613D0): u8 next_wave, s32 wave_time

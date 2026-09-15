@@ -10,7 +10,7 @@
 > exclusive branches in `sub_56A5A0`; its row is **not** a linear 111 layout.
 > The sole reachable caller, `sub_449320`, emits
 > `u8 0xFF, s8 has_password, str title, [str password], u8 max_players,
-> u8 rule, u8 requested_map, u8 no_skill_bg`. See `PACKETS.md` §3.15 before
+> u8 modeIndex, u8 requested_map, u8 no_skill_bg`. See `PACKETS.md` §3.15 before
 > implementing or changing 111.
 >
 > **登入轉接欄位限制（2026-09 重新交叉確認）**：682 是嚴格的

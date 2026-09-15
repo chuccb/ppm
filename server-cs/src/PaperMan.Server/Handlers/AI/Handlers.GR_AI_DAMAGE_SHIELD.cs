@@ -7,7 +7,7 @@ using PaperMan.Protocol;
 
 namespace PaperMan.Server;
 
-public static partial class AiHandlers
+public static partial class AIHandlers
 {
     // 922 GR_AI_DAMAGE_SHIELD_REQ (sub_7616B0: s16 shield_id, s16 damage, s16 remain, f32 unk)
     // → 923 ACK (sub_761710): 同步給房間內所有玩家

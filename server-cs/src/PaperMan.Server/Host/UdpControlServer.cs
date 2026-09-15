@@ -109,7 +109,7 @@ public sealed class UdpControlServer : IDisposable
         CancellationToken cancellationToken)
     {
         Packet packet = _codec.DecodeDatagram(datagram.Span);
-        if (packet.OpcodeRaw != (ushort)UdpPrivateOpcode.ControlRequest)
+        if (packet.OpcodeRaw != (ushort)UdpPrivateOpcode.Opcode19)
         {
             Console.WriteLine($"[udp] ignored unsupported private opcode {packet.OpcodeRaw} from {remote}");
             return;
@@ -126,7 +126,7 @@ public sealed class UdpControlServer : IDisposable
 
         // sub_5968C0 does not read its Packet argument. An empty encrypted
         // payload is therefore the only completion body directly justified.
-        var completion = new Packet((Opcode)UdpPrivateOpcode.ControlCompletion);
+        var completion = new Packet((Opcode)UdpPrivateOpcode.Opcode20);
         byte[] response = _codec.Encode(completion);
         _ = await _socket.SendToAsync(response, SocketFlags.None, remote, cancellationToken).ConfigureAwait(false);
     }

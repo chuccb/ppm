@@ -135,7 +135,11 @@ def main() -> None:
         fail(f"expected 17 static partial handler classes, found {len(family_classes)}")
 
     shared_sources = set(HANDLERS.glob("*/Handlers.*.Shared.cs"))
-    explicit_non_entry_sources = {HANDLERS / "Stats" / "Handlers.GP_CHPLAYTIMEC.cs"}
+    explicit_non_entry_sources = {HANDLERS / "Stats" / "Handlers.GP_CHPLAYTIMEC_ACK.cs"}
+    for source in explicit_non_entry_sources:
+        token = source.stem.removeprefix("Handlers.")
+        if token not in generated:
+            fail(f"{source}: non-entry helper basename must retain its exact catalog token")
     accounted_sources = direct_sources | shared_sources | explicit_non_entry_sources
     if accounted_sources != all_handler_sources:
         missing = sorted(str(path.relative_to(HANDLERS)) for path in all_handler_sources - accounted_sources)

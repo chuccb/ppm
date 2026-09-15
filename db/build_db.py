@@ -35,6 +35,17 @@ def direction(name: str) -> str:
     return 'BOTH'
 
 
+def migrate_legacy_room_mode_columns(con: sqlite3.Connection) -> None:
+    """Preserve the local `rule` values under the source-proven mode_index name."""
+    for table in ('rooms', 'match_results'):
+        columns = {row[1] for row in con.execute(f'PRAGMA table_info({table})')}
+        if 'rule' not in columns:
+            continue
+        if 'mode_index' in columns:
+            raise RuntimeError(f'cannot rename {table}.rule: {table}.mode_index already exists')
+        con.execute(f'ALTER TABLE {table} RENAME COLUMN rule TO mode_index')
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument('--db', default=os.path.join(HERE, 'paperman.db'))
@@ -46,6 +57,7 @@ def main() -> int:
 
     con = sqlite3.connect(args.db)
     con.executescript(open(os.path.join(HERE, 'schema.sql'), encoding='utf-8').read())
+    migrate_legacy_room_mode_columns(con)
 
     # --- opcode 註冊表 (sub_9D2050) ---
     rows = []

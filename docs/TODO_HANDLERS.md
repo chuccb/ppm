@@ -3,7 +3,7 @@
 > 「client 有 builder、server 尚無 handler」的 REQ 全表 — 附自動抽出
 > 的寫入序列, 按此實作 handler 即可。已實作 120+ 個 REQ handler；direct entry
 > inventory 以 `verify_server_layout.py` 的 static discovery check 為準。
-> (Auth/Lobby/Shop/Stats/Clan/Quest/Friend/Room/Channel/Voice/
+> (Login/Lobby/Shop/Stats/Clan/Quest/Friend/Room/Channel/Voice/
 > BattleRelay/Warehouse/Join)。
 >
 > **閱讀順序。** 目前可採取的工作先讀「Current next evidence」，再讀最後的
@@ -20,7 +20,7 @@
 > selected_map, no_skill_bg`. The server now parses that exact title form,
 > rejects alternate/truncated/unterminated/trailing forms before mutation, retains
 > the one-room-per-session invariant, and carries `USERS` → slot mask,
-> `GAMEMODE` → rule, selected map → `ResolveMap`, and no-skill → room state.
+> `GAMEMODE` → `modeIndex`, selected map → `ResolveMap`, and no-skill → room state.
 > `LAYOUTS_REQ.md` now explicitly marks its flattened
 > generated row for 111 as non-authoritative; see `PACKETS.md` §3.15.
 >

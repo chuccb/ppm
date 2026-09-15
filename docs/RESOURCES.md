@@ -547,7 +547,7 @@ sound\soundsNN\<codename>\Voice\<codename>_cry|die|drop|jump|kill|...>_NN.wav
 | 控制項 | 語意 | 協定 |
 |---|---|---|
 | GAMEROOM_SCROLL_MAP | 地圖選擇 | 121/122 (u8 map_id → room+130) |
-| GAMEROOM_SCROLL_RULE | 模式選擇 | 169/170 (u8 mode) |
+| GAMEROOM_SCROLL_RULE | 模式選擇 | 169/170 (u8 modeIndex) |
 | GAMEROOM_SCROLL_TIME | 遊戲時間 | 173/174 (u8 → room+136) |
 | GAMEROOM_SCROLL_OBJECT | 擊殺/目標數 | 340/341 (u16 → room+148) |
 | GAMEROOM_ITEM (checkbox) | 道具開關 | 175/176 (bit0/bit1 → mode+4/+8) |

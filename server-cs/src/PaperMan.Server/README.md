@@ -89,13 +89,13 @@ has no 206 request name.
 
 | Directory | Static partial class / purpose |
 |---|---|
-| [`Handlers/Auth/`](Handlers/Auth/) | `AuthHandlers`: `GT_PING`, `GL_LOGIN` |
+| [`Handlers/Login/`](Handlers/Login/) | `LoginHandlers`: `Login` spelling from native `CLobbyLogin` / `ui/login.xml`; canonical `GL_LOGIN` and `GT_PING` entries |
 | [`Handlers/Channel/`](Handlers/Channel/) | `ChannelHandlers`: 143, 195, 196, 141 channel bootstrap flow |
 | [`Handlers/Join/`](Handlers/Join/) | `JoinHandlers`: lobby-to-room join flow |
 | [`Handlers/Lobby/`](Handlers/Lobby/) | `LobbyHandlers`: lobby/user/item/client settings families |
 | [`Handlers/Room/`](Handlers/Room/) | `RoomHandlers`: room membership, settings, lifecycle, and in-room relay |
 | [`Handlers/Battle/`](Handlers/Battle/) | `BattleRelayHandlers` and `BattleObjectHandlers`; named Shared sources have no receive entry |
-| [`Handlers/Ai/`](Handlers/Ai/) | `AiHandlers`: AI/PvE request families |
+| [`Handlers/AI/`](Handlers/AI/) | `AIHandlers`: canonical `GR_AI_*` request families plus colocated `GR_RESET_GAMEROOMSLOT` |
 | [`Handlers/Shop/`](Handlers/Shop/) | `ShopHandlers`: shop/Pepachi/capsule paths and documented raw-206 exception |
 | [`Handlers/Stats/`](Handlers/Stats/) | `StatHandlers`: `GP_CH*C` totals and server-push support |
 | [`Handlers/Friend/`](Handlers/Friend/) | `FriendHandlers`: friend and mailbox families |
@@ -128,7 +128,8 @@ has no 206 request name.
    catalog-to-generator-to-handler topology. After a room `modeIndex`, map, or
    native/resource name change, also run
    `python3 server-cs/tools/verify_server_naming.py`; it checks the specifically
-   documented native/resource room tables and numeric clan sub-op boundary. This
-   Arena environment has no .NET SDK,
+   documented native/resource room tables, numeric clan/private-UDP opcode
+   boundaries, canonical `AI` / `Login` groupings, and room `modeIndex`
+   persistence naming. This Arena environment has no .NET SDK,
    so a .NET build and `PaperMan.SelfTest` must be run elsewhere before claiming
    compiler-backed verification.

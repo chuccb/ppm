@@ -120,15 +120,15 @@ uses cancellation and disposes its socket only after its receive loop exits.
   唯一無官方 request token 的 206 以顯式 `[RawOpcodeHandler(206)]` 保留 raw boundary，
   而非臆造 GS 名稱。這只表示 dispatch discovery 是 trim / NativeAOT-friendly，**不**
   證明含 SQLite 與其他 dependencies 的整個 server 已通過 NativeAOT publish。
-- 各 `Handlers.<TOKEN>.cs` direct source 仍以協定子系統目錄切分（Auth、Channel、
+- 各 `Handlers.<TOKEN>.cs` direct source 仍以協定子系統目錄切分（Login、Channel、
   Lobby、Room、Join、Battle relay/object、Shop、Stats、Clan、Quest、Friend、Voice、
-  Warehouse、Master、GameCenter、Ai），因此檔名、entry method 與 packet catalog token
+  Warehouse、Master、GameCenter、AI），因此檔名、entry method 與 packet catalog token
   可直接對齊。例如 `Handlers.GL_LOGIN.cs` / `GL_LOGIN_REQ`、
   `Handlers.PM_UDPSTART.cs` / `PM_UDPSTART_REQ`、`Handlers.GL_MYINFO.cs` /
   `GL_MYINFO_REQ`、`Handlers.GR_MAPCHANGE.cs` / `GR_MAPCHANGE_REQ`、
   `Handlers.GQ_QUEST_ACCEPT.cs` / `GQ_QUEST_ACCEPT_REQ`。`Handlers.*.Shared.cs` 僅保留
   明確跨 request 的 wire / authority support，沒有 receive entry；Stats 的
-  `Handlers.GP_CHPLAYTIMEC.cs` 則是 source-proven server push，不是 C2S handler。
+  `Handlers.GP_CHPLAYTIMEC_ACK.cs` 則是 source-proven server push，不是 C2S handler。
   分組只是一項本地導航決定，不改 wire/state semantics 或聲稱原服務有相同 subsystem。
 - `Db` 的 connection/bootstrap 與每個 persisted-domain partial 都在 `Database/`；
   `Db.Connection.cs` 持有共用 connection / lock / command creation，跨表不可分割操作

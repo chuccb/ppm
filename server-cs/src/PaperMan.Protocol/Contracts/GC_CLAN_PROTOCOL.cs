@@ -7,7 +7,7 @@
 //
 // GC_CLAN_CREATE_REQ/ACK (585/586) is an independent pair, not a sub-op.
 // Field layouts, direction, and native consumers are in docs/PACKETS.md §2,
-// "戰隊隧道協定".
+// "GC_CLAN_PROTOCOL container grammar".
 // =============================================================================
 namespace PaperMan.Protocol;
 

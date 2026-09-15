@@ -62,8 +62,9 @@ business name.
   inferred backend service. A catalog-backed family retains its exact token.
 - A field without a verified domain meaning keeps a wire-oriented name
   (`Raw`, `Reserved`, `Opaque`, `ClientReported`, or a positional suffix).
-  Likewise, native numeric-only clan sub-ops stay `SubNNN`, with semantics only
-  in provenance comments rather than invented symbolic identifiers.
+  Likewise, native numeric-only clan sub-ops stay `SubNNN` and private UDP
+  literals stay `OpcodeNN`; semantics belong only in provenance comments, not
+  invented symbolic identifiers.
 - `Opcode.cs` preserves the exact catalog spelling, including historic typos;
   canonical spelling is more useful than cosmetically corrected identifiers.
 - `main:Extracted` can corroborate client lookup inputs and resource names, but

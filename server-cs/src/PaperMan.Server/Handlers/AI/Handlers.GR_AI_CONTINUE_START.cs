@@ -7,7 +7,7 @@ using PaperMan.Protocol;
 
 namespace PaperMan.Server;
 
-public static partial class AiHandlers
+public static partial class AIHandlers
 {
     // 928 GR_AI_CONTINUE_START_REQ (sub_761DB0: s32 continue_count)
     // → 929 ACK (sub_761E90): u8 status(1=成功), s32 continue_count

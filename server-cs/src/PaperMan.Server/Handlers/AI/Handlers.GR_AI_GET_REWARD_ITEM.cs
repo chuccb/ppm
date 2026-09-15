@@ -7,7 +7,7 @@ using PaperMan.Protocol;
 
 namespace PaperMan.Server;
 
-public static partial class AiHandlers
+public static partial class AIHandlers
 {
     // 918 GR_AI_GET_REWARD_ITEM_REQ (sub_761AC0: u8 reward_idx)
     // → 919 ACK (sub_761B20): u8 idx, u8 status(0=成功), s32 item_id, u8 slot, s32 count, u8 flag

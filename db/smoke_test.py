@@ -116,7 +116,7 @@ except sqlite3.IntegrityError:
 
 # --- 5. 房間 (GL_MAKEROOM 111 / GR_CHANGESLOT 135) ---
 step('rooms / room_slots')
-c.execute("""INSERT INTO rooms(room_no,title,map_id,rule,win_count,max_players,master_id)
+c.execute("""INSERT INTO rooms(room_no,title,map_id,mode_index,win_count,max_players,master_id)
              VALUES (7,'来玩吧',3,1,5,8,?)""", (uid,))
 c.execute('INSERT INTO room_slots(room_no,slot_no,user_id,team,is_ready) VALUES (7,0,?,0,1)', (uid,))
 c.execute('INSERT INTO room_slots(room_no,slot_no,user_id,team) VALUES (7,1,?,1)', (uid2,))
@@ -128,7 +128,7 @@ except sqlite3.IntegrityError:
 
 # --- 6. 對戰結算 (GR_END 133) -> trigger 累計 user_stats ---
 step('match_results -> trg_match_rollup -> user_stats/users')
-c.execute("""INSERT INTO match_results(room_no,map_id,rule,started_at,winner_team)
+c.execute("""INSERT INTO match_results(room_no,map_id,mode_index,started_at,winner_team)
              VALUES (7,3,1,unixepoch()-600,0)""")
 mid = c.lastrowid
 c.execute("""INSERT INTO match_players(match_id,user_id,team,kills,deaths,headshots,exp_gain,gp_gain,result)

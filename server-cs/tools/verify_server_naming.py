@@ -23,7 +23,13 @@ NATIVE_SOURCE = ROOT / "PaperMan.exe.c"
 ROOM_SOURCE = ROOT / "server-cs" / "src" / "PaperMan.Server" / "State" / "Room.cs"
 ROOM_SHARED_SOURCE = ROOT / "server-cs" / "src" / "PaperMan.Server" / "Handlers" / "Room" / "Handlers.Room.Shared.cs"
 LOBBY_ROOM_LIST_SOURCE = ROOT / "server-cs" / "src" / "PaperMan.Server" / "Handlers" / "Lobby" / "Handlers.GL_GAMEROOMINFO.cs"
+AI_HANDLERS = ROOT / "server-cs" / "src" / "PaperMan.Server" / "Handlers" / "AI"
+LOGIN_HANDLERS = ROOT / "server-cs" / "src" / "PaperMan.Server" / "Handlers" / "Login"
+SCHEMA_SOURCE = ROOT / "db" / "schema.sql"
+SMOKE_TEST_SOURCE = ROOT / "db" / "smoke_test.py"
+SELF_TEST_SOURCE = ROOT / "server-cs" / "src" / "PaperMan.SelfTest" / "Program.cs"
 CLAN_CONTRACT_SOURCE = ROOT / "server-cs" / "src" / "PaperMan.Protocol" / "Contracts" / "GC_CLAN_PROTOCOL.cs"
+UDP_CONTROL_CONTRACT_SOURCE = ROOT / "server-cs" / "src" / "PaperMan.Protocol" / "Contracts" / "UdpControlWire.cs"
 
 # These are the suffixes selected by sub_53FBB0's switch. They deliberately
 # follow the native Cy*ModeLobbyUI classes, rather than map_StartIndex.xml's
@@ -188,6 +194,99 @@ def source_clan_sub_opcodes() -> frozenset[int]:
     return frozenset(values)
 
 
+def native_udp_private_opcodes() -> frozenset[int]:
+    source = NATIVE_SOURCE.read_text(encoding="utf-8", errors="replace")
+    request_marker = "//----- (00596670)"
+    completion_marker = "//----- (00595E80)"
+    try:
+        request_start = source.index(request_marker)
+        request_end = source.index("//-----", request_start + len(request_marker))
+        completion_start = source.index(completion_marker)
+        completion_end = source.index("//-----", completion_start + len(completion_marker))
+    except ValueError:
+        fail("could not locate native UDP opcode 19/20 paths")
+
+    request_path = source[request_start:request_end]
+    completion_path = source[completion_start:completion_end]
+    if not re.search(r"Packet::possible_ctor_or_dtor_0\(\w+, 19\);", request_path):
+        fail("sub_596670 does not construct private UDP opcode 19")
+    if not re.search(r"case 20:\s*\n\s*sub_5968C0\(this, a2\);", completion_path):
+        fail("sub_595E80 case 20 no longer dispatches sub_5968C0")
+    return frozenset({19, 20})
+
+
+def source_udp_private_opcodes() -> frozenset[int]:
+    text = UDP_CONTROL_CONTRACT_SOURCE.read_text(encoding="utf-8")
+    enum_match = re.search(
+        r"public enum UdpPrivateOpcode : ushort\n\{(?P<body>.*?)\n\}",
+        text,
+        re.DOTALL,
+    )
+    if enum_match is None:
+        fail("UdpPrivateOpcode enum is missing")
+
+    values: set[int] = set()
+    for match in re.finditer(
+        r"^    Opcode(?P<name>\d+) = (?P<value>\d+),",
+        enum_match["body"],
+        re.MULTILINE,
+    ):
+        name_value = int(match["name"])
+        wire_value = int(match["value"])
+        if name_value != wire_value:
+            fail(f"UDP private opcode name/value mismatch: Opcode{name_value} = {wire_value}")
+        values.add(wire_value)
+    if not values:
+        fail("UdpPrivateOpcode contains no OpcodeNN values")
+    return frozenset(values)
+
+
+def source_ai_handler_group() -> int:
+    legacy_directory = AI_HANDLERS.with_name("Ai")
+    if legacy_directory.exists():
+        fail("legacy Handlers/Ai directory remains; canonical native/resource spelling is AI")
+    sources = sorted(AI_HANDLERS.glob("Handlers.*.cs"))
+    if not sources:
+        fail("Handlers/AI contains no canonical AI handler sources")
+    for source in sources:
+        if "public static partial class AIHandlers" not in source.read_text(encoding="utf-8"):
+            fail(f"{source}: AI family must use the canonical AIHandlers spelling")
+    return len(sources)
+
+
+def source_login_handler_group() -> int:
+    legacy_directory = LOGIN_HANDLERS.with_name("Auth")
+    if legacy_directory.exists():
+        fail("legacy Handlers/Auth directory remains; native/resource spelling is Login")
+    sources = sorted(LOGIN_HANDLERS.glob("Handlers.*.cs"))
+    if {source.name for source in sources} != {"Handlers.GL_LOGIN.cs", "Handlers.GT_PING.cs"}:
+        fail("Handlers/Login must contain only the native login/ping handler family")
+    for source in sources:
+        if "public static partial class LoginHandlers" not in source.read_text(encoding="utf-8"):
+            fail(f"{source}: Login family must use the canonical LoginHandlers spelling")
+    return len(sources)
+
+
+def source_room_mode_index_persistence() -> None:
+    schema = SCHEMA_SOURCE.read_text(encoding="utf-8")
+    for table in ("rooms", "match_results"):
+        table_match = re.search(
+            rf"CREATE TABLE IF NOT EXISTS {table} \((?P<body>.*?)\n\) STRICT",
+            schema,
+            re.DOTALL,
+        )
+        if table_match is None or not re.search(r"^    mode_index\s+INTEGER", table_match["body"], re.MULTILINE):
+            fail(f"{table} must persist the client modeIndex as local mode_index")
+        if re.search(r"^    rule\s+INTEGER", table_match["body"], re.MULTILINE):
+            fail(f"{table}.rule remains as a current schema column")
+
+    if "Rule:" in SELF_TEST_SOURCE.read_text(encoding="utf-8"):
+        fail("SelfTest still asserts the obsolete Room.Rule property")
+    smoke_test = SMOKE_TEST_SOURCE.read_text(encoding="utf-8")
+    if "map_id,rule," in smoke_test:
+        fail("DB smoke test still writes the obsolete rule column")
+
+
 def source_enum_modes() -> dict[str, int]:
     text = ROOM_SOURCE.read_text(encoding="utf-8")
     values = {
@@ -249,6 +348,22 @@ def main() -> None:
             "native 584 switch values and native 583 builder values"
         )
 
+    if source_udp_private_opcodes() != native_udp_private_opcodes():
+        fail("UdpPrivateOpcode must preserve the native numeric-only 19/20 values")
+
+    ai_handler_count = source_ai_handler_group()
+    # Both native CyAIMultiModeLobbyUI and this revision's resource directory
+    # spell the initialism AI. Read a concrete resource to make path/case drift
+    # fail without checking out main.
+    git_show_main("Extracted/ui/system/AI/AiMultiLevel.xml")
+
+    login_handler_count = source_login_handler_group()
+    if "CLobbyLogin" not in NATIVE_SOURCE.read_text(encoding="utf-8", errors="replace"):
+        fail("native CLobbyLogin evidence is missing")
+    git_show_main("Extracted/ui/login.xml")
+
+    source_room_mode_index_persistence()
+
     extracted_xml = ET.fromstring(git_show_main("Extracted/ui/system/map_StartIndex.xml"))
     resource_default_maps = {
         int(node.attrib["modeIndex"]): int(node.attrib["modeStartIndex"])
@@ -278,17 +393,27 @@ def main() -> None:
         if any(token in path.read_text(encoding="utf-8") for path in server_source.rglob("*.cs")):
             fail(f"stale native/resource naming alias remains: {token}")
 
-    protocol_source = ROOT / "server-cs" / "src" / "PaperMan.Protocol"
-    for token in ("ClanTunnel", "ClanSubOp"):
-        if any(token in path.read_text(encoding="utf-8") for path in protocol_source.rglob("*.cs")):
-            fail(f"stale GC_CLAN_PROTOCOL semantic alias remains: {token}")
+    source_root = ROOT / "server-cs" / "src"
+    for token in (
+        "ClanTunnel",
+        "ClanSubOp",
+        "UdpPrivateOpcode.ControlRequest",
+        "UdpPrivateOpcode.ControlCompletion",
+        "AuthHandlers",
+    ):
+        if any(token in path.read_text(encoding="utf-8") for path in source_root.rglob("*.cs")):
+            fail(f"stale numeric-only protocol alias remains: {token}")
 
     print(
         "server naming OK: "
         f"{len(enum_values)} native GameMode values; "
         f"{len(resource_default_maps)} Extracted default maps; "
         f"{len(MODE_INDEX_MAP_BITS)} modeIndex→maplist-bit entries; "
-        f"{len(expected_clan_values)} numeric GC_CLAN_PROTOCOL sub-ops"
+        f"{len(expected_clan_values)} numeric GC_CLAN_PROTOCOL sub-ops; "
+        "2 numeric private UDP opcodes; "
+        f"{ai_handler_count} canonical AI handler sources; "
+        f"{login_handler_count} canonical Login handler sources; "
+        "modeIndex persistence names"
     )
 
 

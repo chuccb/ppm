@@ -7,7 +7,7 @@ using PaperMan.Protocol;
 
 namespace PaperMan.Server;
 
-public static partial class AiHandlers
+public static partial class AIHandlers
 {
     // 944 GR_RESET_GAMEROOMSLOT_REQ (sub_585E90: 空) → 945 ACK (sub_585F30): u8 status(1)
     private static async ValueTask GR_RESET_GAMEROOMSLOT_REQ(Session session, Packet packet, ServerContext context)

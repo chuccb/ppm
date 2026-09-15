@@ -8,7 +8,7 @@ using PaperMan.Protocol;
 
 namespace PaperMan.Server;
 
-public static partial class AuthHandlers
+public static partial class LoginHandlers
 {
     // =============================================================================
     // Account-listener handlers.

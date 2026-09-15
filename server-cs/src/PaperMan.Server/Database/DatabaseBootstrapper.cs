@@ -53,6 +53,7 @@ internal static class DatabaseBootstrapper
         // synchronous mode inside a transaction, so apply that script first,
         // then make its static reference data one atomic seed transaction.
         ExecuteSchema(connection);
+        MigrateLegacyRoomModeIndexColumns(connection);
         var packetDefinitions = ReadPacketDefinitions();
         SeedReferenceData(connection, packetDefinitions);
         return packetDefinitions.Count;
@@ -63,6 +64,53 @@ internal static class DatabaseBootstrapper
         using var command = connection.CreateCommand();
         command.CommandText = ReadEmbeddedText(SchemaResourceSuffix);
         command.ExecuteNonQuery();
+    }
+
+    // `rule` was a local shorthand for the client u8 modeIndex. Preserve values
+    // in existing standalone databases while aligning the schema with the wire
+    // field; no original-service persistence policy is implied.
+    private static void MigrateLegacyRoomModeIndexColumns(SqliteConnection connection)
+    {
+        RenameColumnIfPresent(connection, "rooms", "rule", "mode_index");
+        RenameColumnIfPresent(connection, "match_results", "rule", "mode_index");
+    }
+
+    private static void RenameColumnIfPresent(
+        SqliteConnection connection,
+        string table,
+        string oldColumn,
+        string newColumn)
+    {
+        if (!HasColumn(connection, table, oldColumn))
+        {
+            return;
+        }
+
+        if (HasColumn(connection, table, newColumn))
+        {
+            throw new InvalidOperationException(
+                $"Cannot rename {table}.{oldColumn}: {table}.{newColumn} already exists.");
+        }
+
+        using var command = connection.CreateCommand();
+        command.CommandText = $"ALTER TABLE {table} RENAME COLUMN {oldColumn} TO {newColumn};";
+        command.ExecuteNonQuery();
+    }
+
+    private static bool HasColumn(SqliteConnection connection, string table, string column)
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = $"PRAGMA table_info({table});";
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            if (string.Equals(reader.GetString(1), column, StringComparison.Ordinal))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static void SeedReferenceData(

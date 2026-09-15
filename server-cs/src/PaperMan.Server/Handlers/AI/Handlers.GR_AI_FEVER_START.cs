@@ -7,7 +7,7 @@ using PaperMan.Protocol;
 
 namespace PaperMan.Server;
 
-public static partial class AiHandlers
+public static partial class AIHandlers
 {
     // 935 GR_AI_FEVER_START_REQ (sub_7622C0: 空)
     // → 936 ACK (sub_7623A0): u8 status(1), u8 unk(0), s32 time(10000), u8 fever_type(1)
