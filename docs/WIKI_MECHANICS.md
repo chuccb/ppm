@@ -920,6 +920,39 @@ type 2 全數不隨附很合理 —— `r_showfps`／`r_noui`／`r_drawworld` �
 因此從「不知道在哪」收窄為「已排除 convar、itemdata 尾段、
 partsability、weaponparts 四處」。
 
+### 5b-31. 第廿七輪：位移表 —— 非線性的欄序契約，與第五類死欄位
+
+追 §5d-11b 剩下的缺口時，順手把 `CPartsAbilityListParamCtrl::Load`
+的 26 個寫入點逐句抽出來，結果比原本的目標更有價值。
+詳 [`RESOURCES.md` §5d-11c](RESOURCES.md)。
+
+§5d-11 早已寫明這個檔「依位置、不依欄名」解析，但**沒有給出實際位移**，
+於是留下一個看似安全的假設：位移應該隨欄序等距遞增。**它不成立。**
+
+**四個欄位是交換的：** `bullet_hole`→+60 / `ballCaseSize`→+52、
+`miJump`→+80 / `miSit`→+56。若按「位移 = 4×(欄號+1)」回推，
+會把**彈匣容量與彈孔**、**跳躍與蹲下修正**兩兩對調 ——
+而且**不會有任何錯誤訊息**，數值型別相同、範圍相近，測試很難察覺。
+這正是「依位置解析」最危險的地方：它同時要求**位置正確**與**位移表正確**，
+前者文件寫了，後者原本沒寫。
+
+**第五類死欄位。** 31 欄中 native 只消費 **26 欄**。
+最後一欄 `first_shot_angle` 以「掃描到 CRLF」結束整列，
+其後的 `tanpi_pap_type`／`tanpi_mot_type`／`sniperbackimgidx`／`sniperviewimgidx`
+**從未被寫入**，四個名稱在 exe 中出現 **0 次**。
+原文把 `sniper*imgidx` 與其他活欄位並列敘述，已就地更正。
+
+累計五類（`siege_dmg_rate`／`scale`／`name`／`periodType`／本輪四欄），
+可以把先前的觀察再收緊一句：**這套引擎的資源檔普遍留有 parser 不讀的尾欄，
+而「位於檔案末尾」是它們共同的特徵** —— 欄位是往後加的，程式沒跟上。
+
+**另一個細節：型別不一致。** 前 24 欄走 `atof`，
+最後兩欄 `first_shot_wide`／`first_shot_angle` 走 **`atol`**（整數）。
+重新實作時若一律當浮點讀，會在這兩欄產生偏差。
+
+（本輪無 Wiki 對照項 —— 這層是實作契約，Wiki 不可能記載。
+但它直接影響「能否正確重建 Wiki 那些武器數值」，所以仍屬同一條線。）
+
 ### 5b-5. 兩項「僅 Wiki、刻意不採用」的記錄
 
 - **房間資訊欄位。** [MAP・ルール詳細](https://wikiwiki.jp/paperman/MAP・ルール詳細)

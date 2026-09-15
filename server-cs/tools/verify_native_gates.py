@@ -299,6 +299,35 @@ def main() -> None:
     check("um_gr_maxspeed default appears in the dump",
           "1119092736" in text, True)
 
+    # RESOURCES.md 5d-11c: the partsability column -> offset contract. The
+    # offsets are NOT linear in column order, so this table is re-derived from
+    # the loader rather than assumed.
+    writes: list[tuple[int, str]] = []
+    for index in range(len(lines)):
+        stored = re.search(r"4204 \* j \+ (\d+)\) = ", lines[index])
+        if not stored:
+            continue
+        context = " ".join(lines[max(0, index - 2):index])
+        writes.append((int(stored.group(1)),
+                       "atol" if "atol" in context else "atof"))
+    check("partsability writes 26 of its 31 columns", len(writes), 26)
+    check("partsability column offsets",
+          [offset for offset, _ in writes],
+          [4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48,
+           60, 52, 64, 68, 72, 76, 80, 56, 84, 88, 92, 96, 100, 104])
+    # The two transposed pairs, called out explicitly so a "fix" to a linear
+    # layout cannot pass silently.
+    offsets = [offset for offset, _ in writes]
+    check("bullet_hole/ballCaseSize are transposed",
+          (offsets[12], offsets[13]), (60, 52))
+    check("miJump/miSit are transposed", (offsets[18], offsets[19]), (80, 56))
+    check("only the last two columns are integers",
+          [kind for _, kind in writes][-3:], ["atof", "atol", "atol"])
+    check("the discarded tail columns are absent from the binary",
+          [name for name in ("tanpi_pap_type", "tanpi_mot_type",
+                             "sniperbackimgidx", "sniperviewimgidx")
+           if name in text], [])
+
     # The failure-arm texts, through the documented decode rule.
     entries = message_entries()
     if entries is None:

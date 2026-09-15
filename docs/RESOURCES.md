@@ -1231,7 +1231,14 @@ Wiki [各種ゲージ詳細](https://wikiwiki.jp/paperman/各種ゲージ詳細)
 
 `partsability.pat` 另含 Wiki 未提及的欄位：`shots_per_fire`（霰彈一次發數）、
 `ballCaseSize`（彈匣）、`damage_repeat`、`fov_level_min/max`（瞄準鏡倍率級距）、
-`sniperbackimgidx`/`sniperviewimgidx`（狙擊鏡圖）、`Dot IG`/`Dot TG`（紅點照門）。
+`Dot IG`/`Dot TG`（紅點照門）。
+
+> ⚠ **廿七輪更正。** 原句把 `sniperbackimgidx`/`sniperviewimgidx` 與上列並舉，
+> 但實測 **native 只消費 31 欄中的 26 欄**，最後四欄
+> （`tanpi_pap_type`／`tanpi_mot_type`／`sniperbackimgidx`／`sniperviewimgidx`）
+> **完全沒有被寫入記錄**，且四個欄名在 exe 中出現 **0 次**。
+> 它們是**死欄位**，與 §5d-25/26/27 的 `siege_dmg_rate`／`scale`／`periodType`
+> 同類（本專案第五類）。詳下方位移表。
 
 **解析方式（Fact / HIGH）。** native 以具名類別
 `CPartsAbilityListParamCtrl::Load` 載入 `cfg\partsability.pat`：
@@ -1241,6 +1248,59 @@ Wiki [各種ゲージ詳細](https://wikiwiki.jp/paperman/各種ゲージ詳細)
 在 exe 中以字串出現（那是別處的 XML 屬性查詢），
 其餘欄名在二進位中完全不存在卻仍被正確讀取。
 **因此欄位順序本身就是契約，改動 CSV 欄序會直接錯位。**
+
+### 5d-11c. `partsability.pat` 欄序 → 記憶體位移**完整對照**（廿七輪）
+
+§5d-11 已指出「依位置、不依欄名」，但沒有給出實際位移。
+本輪從 `CPartsAbilityListParamCtrl::Load`（`0x9558xx`–`0x9560xx`）逐句抽出
+26 個 `*(base + 4204*j + <off>) = <conv>(field)` 寫入點，得到完整契約。
+**記錄長度 4,204 B**；欄 0（`Item Index`）是鍵，不寫入下列位移。
+
+| CSV # | 欄名 | 記憶體位移 | 轉換 |
+|---:|---|---:|---|
+| 1 | `Dot IG` | +4 | atof |
+| 2 | `Dot TG` | +8 | atof |
+| 3 | `gun_model_frame` | +12 | atof |
+| 4 | `gun3_model_frame` | +16 | atof |
+| 5 | `recoil` | +20 | atof |
+| 6 | `effective_range` | +24 | atof |
+| 7 | `limit_range` | +28 | atof |
+| 8 | `effective_damage` | +32 | atof |
+| 9 | `limit_damage` | +36 | atof |
+| 10 | `shot_delay` | +40 | atof |
+| 11 | `fov_level_min` | +44 | atof |
+| 12 | `fov_level_max` | +48 | atof |
+| 13 | `bullet_hole` | **+60** | atof |
+| 14 | `ballCaseSize` | **+52** | atof |
+| 15 | `add_damage` | +64 | atof |
+| 16 | `damage_repeat` | +68 | atof |
+| 17 | `move_speed` | +72 | atof |
+| 18 | `shoot_Wide` | +76 | atof |
+| 19 | `miJump` | **+80** | atof |
+| 20 | `miSit` | **+56** | atof |
+| 21 | `miStand` | +84 | atof |
+| 22 | `miWalk` | +88 | atof |
+| 23 | `miRun` | +92 | atof |
+| 24 | `shots_per_fire` | +96 | atof |
+| 25 | `first_shot_wide` | +100 | **atol** |
+| 26 | `first_shot_angle` | +104 | **atol** |
+| 27–30 | `tanpi_pap_type` `tanpi_mot_type` `sniperbackimgidx` `sniperviewimgidx` | **（未寫入）** | — |
+
+**三個只有讀 native 才會知道的事實（Fact / HIGH）：**
+
+1. **位移不與欄序單調對應。** 四個欄位被交換：
+   `bullet_hole`→+60 / `ballCaseSize`→+52、`miJump`→+80 / `miSit`→+56。
+   若按「位移 = 4×(欄號+1)」回推，會**靜默地**把這兩對值對調 ——
+   彈匣容量與彈孔、跳躍與蹲下修正互換，且不會有任何錯誤訊息。
+2. **只消費 26 欄，末四欄丟棄。** 最後一欄 `first_shot_angle` 以
+   「掃描到 CRLF」結束該列，其後的 `tanpi_*`／`sniper*imgidx`
+   **從未被讀取**，且四個名稱在 exe 中出現 **0 次** ⇒ **死欄位**。
+3. **前 24 欄用 `atof`、最後兩欄用 `atol`。** `first_shot_wide` 與
+   `first_shot_angle` 是**整數**，其餘皆浮點。混用型別會造成細微偏差。
+
+**實務含意。** 這張表是**重新實作時的唯一權威**：欄序即契約，
+且位移非線性。私服若按欄名或按等距位移解析 `partsability.pat`，
+會在上述兩對欄位上得到錯誤結果，而測試不易察覺。
 
 ### 5d-11b. `move_speed` 只由**槍托**一組改裝件設定（廿五輪）
 
