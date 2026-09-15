@@ -93,6 +93,8 @@ boundary into evidence of an original production-service boundary.
    unknown response with zero padding or nominal success.
 4. Treat `Extracted/` names as client lookup/UI evidence only. They do not
    prove server grants, pricing, ownership, routing, or persistence.
-5. Run available static/Python checks. This Arena environment has no .NET SDK,
-   so a .NET build and `PaperMan.SelfTest` must be run elsewhere before claiming
+5. After a catalog/registry/handler-path change, run
+   `python3 server-cs/tools/verify_server_layout.py`; it checks only the static
+   catalog-to-handler topology. This Arena environment has no .NET SDK, so a
+   .NET build and `PaperMan.SelfTest` must be run elsewhere before claiming
    compiler-backed verification.

@@ -11,7 +11,7 @@
 
 | 區域 | 檔案 / 入口 | 責任與 ownership |
 |---|---|---|
-| Solution 與 generated catalog | `PaperMan.slnx`, `tools/gen_opcodes.py`, `src/PaperMan.Protocol/Generated/Opcode.cs` | `db/packets.tsv` 是 opcode source；要改 opcode 名稱或值時執行 generator，不手改 generated output。 |
+| Solution、generated catalog 與 topology check | `PaperMan.slnx`, `tools/gen_opcodes.py`, `tools/verify_server_layout.py`, `src/PaperMan.Protocol/Generated/Opcode.cs` | `db/packets.tsv` 是 opcode source；要改 opcode 名稱或值時執行 generator，不手改 generated output。layout checker 靜態驗證 catalog → Registry → canonical handler source graph，不取代 build。 |
 | Protocol | [`src/PaperMan.Protocol/README.md`](src/PaperMan.Protocol/README.md) | byte-exact `Core/`、`Codecs/`、`Contracts/` 與 `Generated/` boundary；不放 socket、DB 或 gameplay policy。 |
 | Server source guide | [`src/PaperMan.Server/README.md`](src/PaperMan.Server/README.md) | 由 runtime flow 或 canonical opcode 直接定位 Host、State、Database、registry-backed Handler family。 |
 | Executable host | `src/PaperMan.Server/Host/` | 零參數 startup、listener configuration、TCP session lifetime、role/state gate、dispatch 與 narrow UDP endpoint。主路徑為 `Program → Session.ReceiveAsync → Router → handler`。 |
@@ -42,6 +42,10 @@ boundary 與 reverse-engineering checklist。
 5. 唯一沒有官方 request token 的已註冊 path 是 raw opcode 206；它保留
    `Handlers.RawOpcode206.cs` / `RawOpcode206_REQ` 與 canonical paired ACK 名稱，
    明示為 raw evidence boundary，絕不補造 GS request token。
+6. 修改 catalog、Registry、handler path 或 direct receive entry 後，執行
+   `python3 server-cs/tools/verify_server_layout.py`。它會靜態驗證
+   `packets.tsv → Opcode.cs → Router/Registry → canonical source/entry`，但不取代
+   C# 編譯、SelfTest 或 real-client capture。
 
 這是導覽規則，不改變 packet header、field order、length gate、state guard、SQLite
 ownership 或未知邊界的 fail-closed 行為。
@@ -53,7 +57,10 @@ ownership 或未知邊界的 fail-closed 行為。
 .NET 10 SDK 的機器上:
 
 ```bash
-# 在 repository root 執行；沒有 DB 建置命令、路徑或 port 參數。
+# 在 repository root 執行；先跑不需 .NET 的 Server topology 靜態檢查。
+python3 server-cs/tools/verify_server_layout.py
+
+# 沒有 DB 建置命令、路徑或 port 參數。
 dotnet run --project server-cs/src/PaperMan.Server
 # 第一次執行：自動建立 db/paperman.db、所有 schema、676 筆 packet catalog、
 #              預設 server_config。
