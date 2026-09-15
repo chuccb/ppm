@@ -1,16 +1,21 @@
 # PaperMan.Protocol source guide
 
-This project is deliberately a **wire-only** boundary. It owns byte layout,
-framing, codecs, and small reusable packet contracts. It does **not** own
-sockets, sessions, authentication, SQLite, room state, item ownership, or
-server policy.
+**Boundary — Fact/HIGH.** This project is deliberately a **wire-only**
+boundary. It owns byte layout, framing, codecs, and small reusable packet
+contracts. It does **not** own sockets, sessions, authentication, SQLite, room
+state, item ownership, or server policy.
+
+**Evidence convention.** The table's native function references and every
+unqualified protocol-layout statement are **Fact/HIGH**. A field marked
+`Raw`, `Reserved`, `Opaque`, or `ClientReported` is **UNRESOLVED** as to domain
+meaning even when its position and width are Fact/HIGH.
 
 Start from the table below instead of searching all protocol files by a guessed
 business name.
 
 | Need to change or investigate | Start here | Evidence / boundary |
 |---|---|---|
-| One packet field, CP949 string, nested packet, or length-prefixed blob | `Packet.cs` | Native `Packet` layout and `sub_5925xx` primitives. Server reads are intentionally strict: a short field throws instead of imitating the native client's zero-return fallback. |
+| One packet field, CP949 string, nested packet, or length-prefixed blob | `Packet.cs` | Native `Packet` layout and `sub_5925xx` primitives. Fixed-width reads reject short fields; a contract whose native grammar proves a required NUL uses `ReadNulTerminatedAnsiString` rather than relying on the permissive `ReadStr` primitive. |
 | TCP frame header, AES stage, LZ stage, or compression threshold | `PacketCodec.cs` | Native TCP pipeline `sub_593280` / `sub_593320`; do not apply its LZ rule to UDP. |
 | Private UDP datagram framing | `UdpPacketCodec.cs` | `CUDPManager` send/receive path. AES-only framing; no TCP compression threshold. |
 | AES key or CFB-128 operation | `PaperAes.cs` | `sub_403430`, `sub_403DE0`, `sub_4042A0`, `sub_404470`. The key bytes are client evidence, not an account or authorization secret. |
