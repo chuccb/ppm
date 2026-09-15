@@ -1221,7 +1221,7 @@ bool IsNative311FailureAcknowledgement(Packet acknowledgement)
                 && newAccount is { Result: LoginCode.Ok, AccountId: > 0, UserId: > 0, Nickname: "BootstrapAccount" }
                 && provisionedIdentity is { UserId: > 0, Nickname: "BootstrapAccount", CurrentChar: 0 }
                 && freshCharacters is [{ SlotNo: 0, CharType: 1 }]
-                && freshCharacters[0].Equip.SequenceEqual([1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0])
+                && freshCharacters[0].Equip.SequenceEqual<ushort>([1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0])
                 && duplicateUserId == 0
                 && acceptedPassword is { Result: LoginCode.Ok, UserId: > 0, Nickname: "BootstrapAccount" }
                 && rejectedPassword.Result == LoginCode.BadCredentials);
@@ -1365,9 +1365,9 @@ bool IsNative311FailureAcknowledgement(Packet acknowledgement)
                 repairedLogin is { Result: LoginCode.Ok, UserId: > 0 }
                 && repairedCharacters.Count == 2
                 && repairedCharacters[0] is { SlotNo: 0, CharType: 1 }
-                && repairedCharacters[0].Equip.SequenceEqual([1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0])
+                && repairedCharacters[0].Equip.SequenceEqual<ushort>([1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0])
                 && repairedCharacters[1] is { SlotNo: 1, CharType: 2 }
-                && repairedCharacters[1].Equip.SequenceEqual([2, 99, 10, 22, 12, 12, 0, 0, 0, 0, 0, 0])
+                && repairedCharacters[1].Equip.SequenceEqual<ushort>([2, 99, 10, 22, 12, 12, 0, 0, 0, 0, 0, 0])
                 && thirdOpen.GetMyInfo(bootstrapUserId) is { CurrentChar: 0 });
             Check("GM and purchase creation persist all 15 native starter vectors and reject invalid types",
                 createsCanonicalBodies
@@ -1498,7 +1498,7 @@ bool IsNative311FailureAcknowledgement(Packet acknowledgement)
             Check("legacy orphan account receives a player identity and PBKDF2 upgrade",
                 legacyLogin is { Result: LoginCode.Ok, AccountId: > 0, UserId: > 0, Nickname: "LegacyAccount" }
                 && legacyCharacters is [{ SlotNo: 0, CharType: 1 }]
-                && legacyCharacters[0].Equip.SequenceEqual([1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0]));
+                && legacyCharacters[0].Equip.SequenceEqual<ushort>([1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0]));
         }
 
         using (var connection = OpenExistingSqlite(temporaryDatabasePath))
