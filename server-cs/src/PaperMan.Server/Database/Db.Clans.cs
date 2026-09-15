@@ -1,8 +1,8 @@
 // =============================================================================
 // Clan-creation persistence for GC_CLAN_CREATE 585 / 586.
 //
-// Other clan behavior remains in its top-level 583/584 handler tunnel until an
-// evidence-backed durable operation is available.
+// Other clan behavior remains in the top-level GC_CLAN_PROTOCOL 583/584 handler
+// until an evidence-backed durable operation is available.
 // =============================================================================
 using Microsoft.Data.Sqlite;
 
@@ -12,8 +12,8 @@ public sealed partial class Db
 {
     // ------------------------------------------------------------- clans
     /// <summary>
-    /// 建戰隊 — 走獨立對 GC_CLAN_CREATE_REQ(585)/_ACK(586), 非隧道
-    /// (八輪更正)。回 clan_id; 名稱重複或已入隊 → 0。
+    /// 建戰隊 — 走獨立對 GC_CLAN_CREATE_REQ(585)/_ACK(586), 不經
+    /// GC_CLAN_PROTOCOL 583/584 container (八輪更正)。回 clan_id; 名稱重複或已入隊 → 0。
     /// </summary>
     public long CreateClan(long leaderUserId, string name, byte emblem = 0)
     {

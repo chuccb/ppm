@@ -99,7 +99,7 @@ has no 206 request name.
 | [`Handlers/Shop/`](Handlers/Shop/) | `ShopHandlers`: shop/Pepachi/capsule paths and documented raw-206 exception |
 | [`Handlers/Stats/`](Handlers/Stats/) | `StatHandlers`: `GP_CH*C` totals and server-push support |
 | [`Handlers/Friend/`](Handlers/Friend/) | `FriendHandlers`: friend and mailbox families |
-| [`Handlers/Clan/`](Handlers/Clan/) | `ClanHandlers`: clan create/tunnel/tournament entry |
+| [`Handlers/Clan/`](Handlers/Clan/) | `ClanHandlers`: `GC_CLAN_CREATE`, `GC_CLAN_PROTOCOL` container, and tournament entries |
 | [`Handlers/Quest/`](Handlers/Quest/) | `QuestHandlers`: quest/date families |
 | [`Handlers/Voice/`](Handlers/Voice/) | `VoiceHandlers`: voice-slot families |
 | [`Handlers/Warehouse/`](Handlers/Warehouse/) | `WarehouseHandlers`: warehouse list/push/pop families |

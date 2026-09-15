@@ -137,7 +137,7 @@ route table / 日誌 / `packet_stats` 監控。
   運維預設資料 seed；登入/暱稱/背包分頁)、login/channel 雙 listener、
   `ChannelAdmissionRegistry` 的 681→143 單次交接，以及封包 handlers
   (681/694、143/144、195/196、大廳（含使用者許可的空 252→253）、商店/送禮的
-  fail-closed wire 邊界與 zero-record 806→807、戰隊隧道 583/584、GP_CH*C 戰績
+  fail-closed wire 邊界與 zero-record 806→807、`GC_CLAN_PROTOCOL` 583/584 container、GP_CH*C 戰績
   18 REQ/ACK 對 + 882 推播、房間
   111–194/340–367/712–728、語音 791–796、倉庫 855–863)。AES 原生金鑰已內建。
 - `PaperMan.SelfTest` — 不需遊戲客戶端的 codec、login/channel wire layout、SQLite first-run bootstrap、credential upgrade/migration 自測。
