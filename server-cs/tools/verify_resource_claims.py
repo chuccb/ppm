@@ -668,6 +668,32 @@ def main() -> None:
                   stale["2"],
                   "http://202.213.230.237:5351/content/mainContent.asp?key=%s")
 
+    # RESOURCES.md 5d-4b: the reward table's mode_index values are MAP ids for
+    # Tutorial and IndividualSurvival -- not the PvE map 95, despite the
+    # AiMulti filename. periodType ships on every row but is never read.
+    payouts = EXTRACTED / "ui" / "system" / "AI" / "AiMultiCompensation.xml"
+    if not payouts.is_file():
+        skipped.append("ui/system/AI/AiMultiCompensation.xml")
+    else:
+        comp = ElementTree.fromstring(payouts.read_bytes().decode("utf-8-sig"))
+        check("AiMultiCompensation modes",
+              sorted(node.get("mode_index") for node in comp), ["102", "104"])
+        check("AiMultiCompensation does not cover the PvE map",
+              "95" in {node.get("mode_index") for node in comp}, False)
+        check("AiMultiCompensation difficulty tiers",
+              sorted({tuple(tier.tag for tier in mode) for mode in comp}),
+              [("MODE_LEVEL_EASY", "MODE_LEVEL_NORMAL", "MODE_LEVEL_HARD")])
+        # Every tier awards the same four items, ranked 1..4 by score.
+        check("AiMultiCompensation payouts are identical across tiers",
+              sorted({tuple((row.get("itemnumber"), row.get("level"))
+                            for row in tier)
+                      for mode in comp for tier in mode}),
+              [(("15301005", "1"), ("15301004", "2"),
+                ("15200044", "3"), ("15200045", "4"))])
+        check("AiMultiCompensation still ships the dead periodType",
+              [row.get("level") for mode in comp for tier in mode
+               for row in tier if "periodType" not in row.attrib], [])
+
     # Every datarevision.txt must agree: Extracted/ is one coherent snapshot.
     revisions = {path.read_text(encoding="utf-8", errors="replace").strip()
                  for path in EXTRACTED.rglob("datarevision.txt")}

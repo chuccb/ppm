@@ -246,6 +246,28 @@ def main() -> None:
         check(f"URLList parser reads {attribute}",
               f'L"{attribute}"' in text, True)
 
+    # RESOURCES.md 5d-4b: periodType is shipped but never parsed, and exactly
+    # one of the 19 ui/system/AI xml files is absent from the binary.
+    check("exe never reads periodType", 'L"periodType"' in text, False)
+    check("exe reads the reward table's itemnumber and level",
+          all(f'L"{name}"' in text for name in ("itemnumber", "level")), True)
+    # 19 AI xml files ship; exactly one (the dead BotEnemy_intelligent) is
+    # absent from the binary. Guards the "18 of 19, not 18 of 18" correction.
+    ai_dir = ROOT / "Extracted" / "ui" / "system" / "AI"
+    if ai_dir.is_dir():
+        unreferenced = sorted(path.name for path in ai_dir.glob("*.xml")
+                              if path.name not in text)
+        # Only assert once the full AI set is present locally, but then
+        # assert it exactly -- 19 files, of which precisely one is dead.
+        shipped = sorted(path.name for path in ai_dir.glob("*.xml"))
+        if len(shipped) < 19:
+            print(f"note: only {len(shipped)} of 19 ui/system/AI xml present; "
+                  "the 18-of-19 reference check is skipped")
+        else:
+            check("ui/system/AI xml count", len(shipped), 19)
+            check("only BotEnemy_intelligent.xml is missing from the binary",
+                  unreferenced, ["BotEnemy_intelligent.xml"])
+
     # The failure-arm texts, through the documented decode rule.
     entries = message_entries()
     if entries is None:

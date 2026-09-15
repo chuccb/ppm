@@ -568,7 +568,7 @@ reader-level layout.
 | ItemAbilityLevTable.xml | skill 門檻與效果換算，**6 段** `lev_value` −2..+3 (pmFile 加密; §5d-20) | 205 f32 能力值 |
 | ItemAbilityEffectColorTable.xml | skill 特效顏色 (`Lev_1/2/3` 的 id=3/4/5，與上表共用 id 空間) + `AlphaValue` + `Penalty`；明文 | — (純顯示) |
 | ItemAbilityEffectNameTable.xml | skill 粒子名 `Ptcl_ItemEffect1..15`，`FirstPersonView` 全空＝僅第三人稱；明文 | — (純顯示) |
-| AI/AiMultiCompensation.xml | AI 協力模式過關獎勵 (難度×等級→物品) | AI 模式結算 |
+| AI/AiMultiCompensation.xml | 過關獎勵 (難度×名次→物品)。**`mode_index` 102/104 = Tutorial/IndividualSurvival 地圖, 非 PvE(95)**; `periodType` 為死欄位 (見 §5d-4b) | 模式結算 |
 | AI/gamecenter_map_info.xml | 射擊館關卡 (盾 HP/Fever/砲位) | 479 GAMECENTER |
 | AI/BotWave/BotEnemy/Scenario | AI 波次/敵人/劇本 (easy/intelligent) | AI 對戰 |
 | Total_Package_Index.xml | 角色套裝 UI 索引 (114 套) | 商店套裝頁 |
@@ -900,11 +900,24 @@ AI 協力模式的過關獎勵表，結構為
 這同時**反向驗證**了 `dump_itemdata.py` 的切段正確（若 stride 錯，
 這四個 ID 不可能同時解出語義自洽的名稱）與 15.2M／15.301M 的段定義。
 
+**`mode_index` 102/104 不是 PvE（廿三輪更正）。** 本檔位於 `ui/system/AI/`
+且檔名冠以 `AiMulti`，容易誤讀為「AI 協力（PvE）」獎勵。但 `mode_index`
+經 `dump_maplist.py` 解出為**地圖 id**：**102 = `TU_03_new_tutorial_mode.pmm`
+（Tutorial）、104 = `PS_12_castle_horror.pmm`（IndividualSurvival）**，
+而 PvE 的 AIMulti 地圖是 **95**（§5d-25），**並未出現在本檔**。
+故本表實際覆蓋的是**教學與個人生存**兩張圖，不是 PvE。
+（§5d file 表原記「AI 協力模式過關獎勵」就模式而言不精確，已於該列補註。）
+
+**`periodType` 是死欄位（廿三輪，Fact / HIGH）。** parser 只讀
+`itemnumber` 與 `level`（`0x581991` 起），**exe 全文 `L"periodType"` 出現 0 次**。
+故其時效語義**不是「未證實」而是「根本不生效」** ——
+這是繼 §5d-25 `siege_dmg_rate`、§5d-26 `scale`、§5d-27 之後**第四個同類案例**。
+
 **界線。** 這是 client 端的**獎勵顯示表**。實際發放由 server 決定，
-名次判定、是否可重複領取、periodType 的時效語義均未證實，維持 UNRESOLVED。
-`AiMultiCompensation.xml` 等 **18 個 `ui/system/AI/*.xml` 全部**都能在
-`PaperMan.exe.c` 找到寫死的路徑字串，故都是本 revision 實際會載入的檔案，
-不是殘留資產。
+名次判定與是否可重複領取均未證實，維持 UNRESOLVED。
+`ui/system/AI/` 共 **19 個 xml，其中 18 個**能在 `PaperMan.exe.c` 找到寫死路徑；
+**唯一的例外是 `BotEnemy_intelligent.xml`（0 次引用，§5d-26 已判定為死檔）**。
+（原文誤記為「18 個全部」，實際是 19 取 18。）
 
 ## 5d-5. maplist.pat 全解：123 圖 × mode bitmask，與既有 bit 表 100% 相符
 

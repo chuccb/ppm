@@ -788,6 +788,35 @@ exe 全文從未出現後者。兩名不符 ⇒ **該欄永遠讀不到，96 列
 （Wiki 方面：金流與排行榜屬外部 Web 服務，Wiki 只有操作說明、
 無協定層資訊，本輪無可比對項。）
 
+### 5b-27. 第廿三輪：兩處舊記述更正，與「檔名會騙人」
+
+本輪沒有解出新檔，而是回頭複查 `ui/system/AI/`，結果修掉**自己文件裡的兩個錯誤**。
+這類結果不如新發現漂亮，但更該記 —— 錯誤的既有記述會**主動誤導**後續分析。
+詳 [`RESOURCES.md` §5d-4b](RESOURCES.md)。
+
+**更正一：`AiMultiCompensation.xml` 不是 PvE 獎勵表。**
+檔案放在 `ui/system/AI/`、檔名冠 `AiMulti`，§5d file 表因此記作
+「AI 協力模式過關獎勵」。但把 `mode_index` 拿去 `dump_maplist.py` 一查，
+**102 = `TU_03_new_tutorial_mode.pmm`（Tutorial）、
+104 = `PS_12_castle_horror.pmm`（IndividualSurvival）**，
+而 PvE 的 AIMulti 地圖是 **95**（§5d-25 剛確立），**根本不在本檔裡**。
+
+所以它覆蓋的是**教學與個人生存**。這也順帶說明上輪那條
+「Wiki 的 PvE 報酬＝称号と福袋」**無法**用本檔佐證 —— 兩者根本不是同一個模式。
+**教訓：檔名與目錄是作者的分類，不是證據；鍵值查表才是。**
+
+**更正二：「18 個 AI xml 全部有寫死路徑」的說法不準確。**
+實際是 **19 個 xml 中的 18 個**；唯一例外正是上輪判定為死檔的
+`BotEnemy_intelligent.xml`（0 次引用）。原句寫成「18 個全部」，
+剛好把分母寫成了分子，於是**掩蓋了那個例外**。
+
+**第四個死欄位。** `AiMultiCompensation.xml` 每列都有 `periodType`，
+但 parser 只讀 `itemnumber` 與 `level`，**exe 全文 `L"periodType"` 出現 0 次**。
+原文把它列為「時效語義未證實」，語氣過弱 ——
+正確說法是**根本不生效**。累計到本輪，同類案例已有四個
+（`siege_dmg_rate` / `scale` / `name` / `periodType`），
+足以當成這套引擎的常態：**資源檔普遍帶有 parser 不讀的欄位**。
+
 ### 5b-5. 兩項「僅 Wiki、刻意不採用」的記錄
 
 - **房間資訊欄位。** [MAP・ルール詳細](https://wikiwiki.jp/paperman/MAP・ルール詳細)
