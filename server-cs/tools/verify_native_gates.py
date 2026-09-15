@@ -226,6 +226,16 @@ def main() -> None:
     check("exe reads shilddamage_rate", text.count('L"shilddamage_rate"'), 1)
     check("exe never mentions siege_dmg_rate", 'siege_dmg_rate' in text, False)
 
+    # RESOURCES.md 5d-26: scale is shipped on every BotEnemy row but the exe
+    # never reads it, and BotEnemy_intelligent.xml is never loaded at all.
+    check("exe never reads the bot scale attribute", 'L"scale"' in text, False)
+    check("exe never references BotEnemy_intelligent",
+          "BotEnemy_intelligent" in text, False)
+    # One easy flag (n3 == 3) switches bots, waves and scenario together.
+    for resource in ("BotEnemy_easy.xml", "BotWave_easy.xml",
+                     "Scenario_easy.xml"):
+        check(f"exe loads {resource}", text.count(resource), 1)
+
     # The failure-arm texts, through the documented decode rule.
     entries = message_entries()
     if entries is None:

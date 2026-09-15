@@ -716,6 +716,41 @@ exe 全文從未出現後者。兩名不符 ⇒ **該欄永遠讀不到，96 列
 （同場加映：`number` 屬性 native 也不讀，列序才是鍵，與 §5d-24
 `commonProperty` 同一模式；本檔還是 **UTF-8 with BOM**，與 `ui/` 多數 CP932 檔不同。）
 
+### 5b-25. 第廿一輪：又一個死欄位、一個死檔，與「Wiki 缺頁」第三例
+
+延續上輪清點 `ui/system/AI/`，本輪處理四個 `BotEnemy*` 檔。
+[`ガンシューティング`](https://wikiwiki.jp/paperman/ガンシューティング) **頁面不存在** ——
+這是本 session 第三個 Wiki 缺頁（另見 §5b-22 チュートリアル、§5b-24 AIマルチ）。
+**三個遊戲模式的 Wiki 條目全缺**，而它們的共同點是**單人／PvE 內容**：
+攻略 Wiki 的編者顯然只替「對戰」寫條目。這個偏差本身值得記下來 ——
+**用 Wiki 當覆蓋率指標會系統性低估單人系統**。
+詳 [`RESOURCES.md` §5d-26](RESOURCES.md)。
+
+**本輪唯一能與 Wiki 對上的，是上輪已確立的 modeIndex。**
+載入器用 `modeIndex==11`(AIMulti) / `==9`(GunShooting) 分流三個檔，
+其中 `n3 == 3` 是 easy 旗標 —— 而**同一個 `n3 == 3` 也控制
+`BotWave_easy.xml` 與 `Scenario_easy.xml`**，所以 GunShooting 的難度切換是
+「怪物表＋波次表＋劇本」三者同時換。`ui/gs_popup_start_easy.xml` 與
+`gs_popup_start.xml` 成對存在，是第二條獨立證據。
+
+**受控比較的價值。** `BotEnemy.xml` 與 `BotEnemy_easy.xml` 是**同形狀的 35 列
+對照組**，可以精確回答「easy 到底改了什麼」：24 個屬性中**只有 8 個**有差異，
+且兩條**零反例**的單調性 —— `bot_hp` 與 `move_speed` 在 easy 中**從不高於** normal。
+反直覺的是 `siege_dmg`／`first_delay`／`shot_delay`（攻擊力與反應速度）
+**35 列完全未動**：難度調校只碰血量與移速，不碰攻擊。
+
+**又抓到一個死欄位，而且這次有旁證。** `scale` 出現在每一列，
+但 parser 的 30 個屬性名裡沒有它，**exe 全文 `L"scale"` 出現 0 次**。
+有趣的是 normal 與 easy 之間**有 7 列的 `scale` 不同**（1.8 vs 2）——
+有人**刻意調過這個值**，想讓 easy 的怪看起來更大，**但它從未生效**。
+這是繼上輪 `siege_dmg_rate` 之後第二例，愈發說明
+**「資源檔寫了什麼」與「引擎讀了什麼」必須分開查證**。
+
+**外加一個死檔。** `BotEnemy_intelligent.xml` 在 exe 中**零引用**，
+且其主鍵屬性叫 `index` 而 parser 讀的是 `bot_type_index` ——
+**即使被載入也解析不出主鍵**。它獨有 `bot_type=8`（其餘三檔只有 1..7）。
+判定為開發殘留，**不可據以推測 AI 行為**。
+
 ### 5b-5. 兩項「僅 Wiki、刻意不採用」的記錄
 
 - **房間資訊欄位。** [MAP・ルール詳細](https://wikiwiki.jp/paperman/MAP・ルール詳細)

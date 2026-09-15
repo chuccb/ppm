@@ -1865,6 +1865,92 @@ exe 全文**只出現 `shilddamage_rate`、從未出現 `siege_dmg_rate`**。
 波次推進與 boss 判定、報酬（Wiki 述「称号と福袋、スコア順に選べる」）
 **全無 client 證據**，維持 UNRESOLVED。
 
+## 5d-26. `ui/system/AI/BotEnemy*.xml`：單人模式的怪物表，含**一個死檔**與**一個死欄位**
+
+延續 §5d-25 對 `ui/system/AI/` 的清點。`BotEnemy.xml` / `BotEnemy_easy.xml` /
+`BotEnemy_intelligent.xml` / `AiMultiBotEnemy.xml` 四個檔**先前無 md 引用**，
+其中前兩者是**同形狀的 35 列對照組**，可做受控比較。
+（四檔皆 **UTF-8 with BOM**，同 §5d-25。）
+
+### 一個載入器，三個檔，一條 `modeIndex` 分流（Fact / HIGH）
+
+`0x5876xx` 的載入器依序判斷：
+
+```
+if      (sub_67EB70())  → AiMultiBotEnemy.xml   // modeIndex == 11 (AIMulti/PvE)
+else if (sub_67F120())  {                       // modeIndex ==  9 (GunShooting)
+          n3 == 3       → BotEnemy_easy.xml
+          else          → BotEnemy.xml   }
+```
+
+`sub_67EB70`／`sub_67F120` 分別檢查 `(*(v2+132))` 的虛擬呼叫回傳 **11**／**9**，
+即 §7 的 `modeIndex`（11=AIMulti、9=GunShooting）。
+**`n3 == 3` 是 easy 旗標**，且同一個 `n3 == 3` 也出現在
+`BotWave_easy.xml`（`0x596101`）與 `Scenario_easy.xml`（`0x611775`）的分流 ——
+**三個子系統共用同一個 easy 判定**，故 GunShooting 的 easy/normal 是
+「怪物表＋波次表＋劇本」三者同時切換。
+資源側另有 `ui/gs_popup_start_easy.xml` 與 `gs_popup_start.xml` 成對存在，
+是**第二條獨立證據**。
+
+### `BotEnemy_intelligent.xml` 是**死檔**（Fact / HIGH）
+
+exe 全文**完全找不到** `BotEnemy_intelligent` 字串（0 次），
+上述載入器只會開三個檔。更強的佐證：該檔的主鍵屬性叫 **`index`**，
+而 parser 讀的是 **`bot_type_index`**（exe 中 `L"index"` 在此區段 0 次），
+所以**即使被載入，主鍵也解析不出來**。它還獨有 `bot_type=8`
+（其餘三檔只有 1..7）。**結論：未使用的開發殘留，不可據以推測 AI 行為。**
+
+### `scale` 是**死欄位**（Fact / HIGH）
+
+`BotEnemy.xml` 與 `AiMultiBotEnemy.xml` 的每列都有 `scale`，
+但 parser 讀取的 30 個屬性名中**沒有 `scale`**，且 **exe 全文 `L"scale"` 出現 0 次**。
+⇒ 該欄**永遠讀不到**。這是繼 §5d-25 `siege_dmg_rate` 之後
+**第二個同類的資料／程式不一致**，且有一個有趣的旁證：
+normal 與 easy 之間有 **7 列的 `scale` 不同**（1.8 vs 2）——
+美術意圖上想讓 easy 的怪更大，但**實際上沒有任何效果**。
+
+parser 實際讀取的 30 個屬性為：
+`bot_type_index bot_type isBullethole isDamageEffect bot_hp siege_dmg
+first_delay shot_delay move_speed instant_pg game_point game_score bot_face
+bot_avatar bot_mot_ch1 bot_mot_ch2 bonus_char bonus_value abnor_state
+bot_weapon camera_action delay_time respawnWaitTime feverpoint
+sound_delaytime sound_name minimap_live_name minimap_dead_name
+AppearSound DisAppearSound`
+（後六個只有 `AiMultiBotEnemy.xml` 提供，其餘檔缺 ⇒ 取預設值。）
+
+### 受控比較：easy 到底改了什麼（Fact / HIGH）
+
+兩檔 35 列、`bot_type_index` 0..34 連續且集合相同。逐欄比對，
+**只有 8 個屬性有差異**，其餘 16 個完全相同：
+
+| 屬性 | 差異列數 | 方向（全表零反例） |
+|---|---:|---|
+| `bot_hp` | 34/35 | **easy 一律較低**（34 低 1 同，0 高）；HP 全距 normal `5..5000` → easy `2..4000` |
+| `game_score` | 34/35 | 混合（15 低 / 19 高）——**非難度軸** |
+| `move_speed` | 15/35 | **easy 一律較慢**（15 低 20 同，0 快） |
+| `game_point` | 10/35 | 9 低 1 高 |
+| `scale` | 7/35 | **死欄位，無效果**（見上） |
+| `instant_pg` | 4/35 | 4 低 0 高 |
+| `bonus_value` / `bot_type` | 1/35 | 個別調整 |
+
+**兩條零反例的單調性**：`bot_hp` 與 `move_speed` 在 easy 中**從不高於** normal。
+即難度調校的主軸就是「血量」與「移動速度」兩項，
+而 `siege_dmg`／`first_delay`／`shot_delay`（攻擊力與反應速度）
+**35 列完全未動** —— 這點與直覺相反，值得記錄。
+
+### 與 Wiki 的關係
+
+[`ガンシューティング`](https://wikiwiki.jp/paperman/ガンシューティング) **頁面不存在**
+（本 session 第三個此類情形，另見 §5b-22 チュートリアル、§5b-24 AIマルチ）。
+本節結論**全部由 native + 資源互證**，無 Wiki 佐證亦無 Wiki 矛盾。
+
+### 界線
+
+這些是**客戶端持有的怪物參數**。實際生怪、HP 扣減、給分與 PG 發放
+由誰裁決**無 client 證據**，維持 UNRESOLVED。
+尤其 `instant_pg`／`game_point`／`game_score` 看似經濟欄位，
+**不得據此推導伺服器的獎勵計算**。
+
 ## 6. 其他已知資源
 
 - `system/map_StartIndex.xml`, `SelectRandomMap.xml`: 地圖選擇

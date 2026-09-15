@@ -597,6 +597,45 @@ def main() -> None:
                       if name.endswith("dmg_rate") or name.endswith("damage_rate")}),
               ["siege_dmg_rate"])
 
+    # RESOURCES.md 5d-26: BotEnemy.xml vs BotEnemy_easy.xml is a same-shape
+    # controlled pair, so "what does easy actually change" is checkable.
+    bots = EXTRACTED / "ui" / "system" / "AI" / "BotEnemy.xml"
+    bots_easy = EXTRACTED / "ui" / "system" / "AI" / "BotEnemy_easy.xml"
+    if not bots.is_file() or not bots_easy.is_file():
+        skipped.append("ui/system/AI/BotEnemy.xml")
+    else:
+        def bot_rows(path: Path) -> dict[str, dict[str, str]]:
+            root = ElementTree.fromstring(path.read_bytes().decode("utf-8-sig"))
+            return {node.get("bot_type_index"): node.attrib
+                    for node in root if node.tag == "TYPE"}
+
+        normal, easy = bot_rows(bots), bot_rows(bots_easy)
+        check("BotEnemy rows", len(normal), 35)
+        check("BotEnemy indices are contiguous",
+              sorted(int(key) for key in normal), list(range(35)))
+        check("BotEnemy_easy covers the same indices",
+              sorted(easy) == sorted(normal), True)
+
+        # Only these attributes differ; the rest are identical in all 35 rows.
+        differing = sorted({name for key, row in normal.items()
+                            for name in row if row[name] != easy[key].get(name)})
+        check("BotEnemy easy/normal differing attributes", differing,
+              ["bonus_value", "bot_hp", "bot_type", "game_point", "game_score",
+               "instant_pg", "move_speed", "scale"])
+        # Attack stats are deliberately untouched by the difficulty split.
+        check("BotEnemy difficulty leaves attack stats alone",
+              [name for name in ("siege_dmg", "first_delay", "shot_delay")
+               if name in differing], [])
+        # Easy bots are never tougher or faster: zero counter-examples.
+        for name in ("bot_hp", "move_speed"):
+            check(f"BotEnemy_easy never raises {name}",
+                  [key for key, row in normal.items()
+                   if int(easy[key][name]) > int(row[name])], [])
+        # scale is present in the file but never read by the engine.
+        check("BotEnemy still ships the dead scale attribute",
+              [key for source in (normal, easy) for key, row in source.items()
+               if "scale" not in row], [])
+
     # Every datarevision.txt must agree: Extracted/ is one coherent snapshot.
     revisions = {path.read_text(encoding="utf-8", errors="replace").strip()
                  for path in EXTRACTED.rglob("datarevision.txt")}
