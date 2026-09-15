@@ -1,7 +1,18 @@
-# Dispatcher 全 300 case 自動佈局表 (廿三輪)
+# Dispatcher 全 306 case 自動佈局表 (廿三輪；本輪補齊為全覆蓋)
 
 > 由自動抽取器產生: 對每個 handler 抽出 sub_592xxx 讀取原語序列。
 > 已與 5 個歷輪手工佈局抽查比對全部吻合 (106/118/120/122/142)。
+>
+> **覆蓋率 (本輪機器複驗)。** 主 dispatcher `sub_58B010` 實際有 **306** 個
+> `case`（標題原寫 300，已更正）。本輪逐一比對後補進先前遺漏的三筆 ——
+> **417**（`MASTER_KILLALL_ACK`，dispatcher inline 無獨立 handler）、
+> **803**（`GS_DESTROYITEM_ACK`）、**882**（`GP_CHPLAYTIMEC_ACK`，inline 差分）
+> —— 現為 **306/306 全覆蓋**。可用
+> `python3 server-cs/tools/verify_dispatcher_coverage.py` 重驗。
+>
+> 本表另含 dispatcher 以外的 S2C（例如走 vtable 前置轉發器者），
+> 故列數多於 306。名稱欄留空者為**名稱表未註冊**的 opcode，
+> 屬正確標示而非缺漏，詳 `PACKETS.md` 的 676-catalog 說明。
 >
 > 型別對照: u8=sub_592940, s8/bool=592900, s8=592980, u16=592A00,
 > s16=5929C0, s32=592A40/592AA0, u32=592A80, raw4=592AC0 (caller determines
@@ -153,6 +164,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 397 | PM_KICKUSER_ACK | sub_58E410 | `u8` |
 | 403 | MASTER_EVENTPAGE_ACK | sub_579500 | `f32` |
 | 405 | MASTER_EVENTEXP_ACK | sub_579650 | `f32` |
+| 417 | MASTER_KILLALL_ACK | *(dispatcher inline)* | `(空)` — 不讀 payload; 顯示 msg 0xA5 後斷線提示 |
 | 420 | GL_MSG_ADD_ACK | sub_559810 | `str u8 u8` |
 | 422 | GL_MSG_DEL_ACK | sub_55A310 | `s8/bool str` |
 | 424 | GL_MSG_READ_ACK | sub_55A4F0 | `s8/bool str` |
@@ -239,6 +251,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 792 | GL_VOICEITEMSLOT_ACK | sub_885D00 (vtbl+12 sub_876B00) | `u8 s16 s16 27×(s16 u8)` |
 | 794 | GI_VOICEITEMSLOT_ALL_ACK | sub_885DA0 (vtbl+16 sub_876C90) | `u8 count×(u8 s16 s16 27×(s16 u8))` |
 | 796 | GI_CHANGE_VOICEITEMSLOT_ACK | sub_885E40 | `u8 u8` |
+| 803 | GS_DESTROYITEM_ACK | sub_895EE0 | *(dispatcher 呼叫 `sub_895EE0(v7, a4)`，成功時再 `sub_893DB0`；欄位分歧見 PACKETS.md §3.15 803 列)* |
 | 810 | GS_HIDDENMAP_LIST_ACK | sub_582250 | `s32 s32` |
 | 811 | GR_PROBABILITY_APPLY_NOTIFY | sub_58EE30 | `(無直接讀取/轉發)` |
 | 813 | MASTER_SPECIAL_ABILITY_ITEMSLOT_PROBABILITY_APPLY_ACK | sub_58EE60 | `s8/bool` |
@@ -275,6 +288,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 879 | GQ_QUEST_USER_COMPLETE_HONOR_ACK | sub_91CAA0 | `u8 str` |
 | 880 |  | sub_407E00 | `(無直接讀取/轉發)` |
 | 881 | GQ_QUEST_CURRENTITEMQUEST_ACK | sub_407E00 | `(無直接讀取/轉發)` |
+| 882 | GP_CHPLAYTIMEC_ACK | *(dispatcher inline)* | `s32` 總秒數 — 直接 `sub_592A40(a4,&v)`，以差分 `v - dword_EE8D7C` 推進 `sub_92EF00(20, 23, Δ, 0)` 後覆寫累計值 |
 | 884 | MASTER_FIND_USER_ACK | sub_579BC0 | `s8/bool s32 str str s32 u8 u8 u8 u8` |
 | 888 | GX_XIGNCODE_DATA_ACK | sub_88DB50 | `(無直接讀取/轉發)` |
 | 889 | GX_XIGNCODE_DATA_BAN_NOTIFY | sub_88DB90 | `(無直接讀取/轉發)` |

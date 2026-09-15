@@ -264,6 +264,40 @@ stay explicitly wire-oriented, not guessed as account or endpoint identities.
 字串補名、未在該名稱表註冊的兩筆。此處刻意分開「source registration count」
 與「本地 catalog row count」，避免將補名誤當成反編譯的直接事實。
 
+> **⚠ 676 是「具名 opcode」數，不是 wire 上全部的 opcode 數（本輪實測）。**
+> 交叉比對 `LAYOUTS.md` / `LAYOUTS_REQ.md` 中有 native reader/writer 實證的
+> opcode 後，另有 **46 個 opcode 有真實的 native handler 但不在名稱表內**
+> （45 個在兩份 layout 文件中名稱欄為空或標注 *unnamed*，屬正確標示；
+> 第 46 個是本輪補進的 417，已在下方 MASTER 表具名）。可用
+> `python3 server-cs/tools/verify_dispatcher_coverage.py` 隨時複驗這些數字：
+>
+> * **29 個落在 100..994 的名稱表空隙**：203, 206, 295, 487, 488, 489, 828,
+>   851, 852, 853, 880, 896, 898, 914, 930, 931, 932, 933, 946, 947, 949,
+>   953, 954, 957, 958, 973, 975, 976, 992。
+>   （206 已實作為 `RawOpcode206_REQ`，正是此類的代表。）
+> * **16 個超出名稱表尾端 994**：995–1010（連號），handler 如
+>   `sub_567AE0`(995)、`sub_567D50`(1001)、`sub_5884C0`(1005)，
+>   其中 1007/1009 非 `sub_` 直呼。
+>
+> 這 45 個依方向乾淨二分，與兩份 layout 文件的分工一致：
+> **23 個是 S2C**，實測**確實存在於主 dispatcher `sub_58B010` 的 case 表**
+> （203, 488, 489, 852, 880, 914, 931, 933, 946, 947, 949, 954, 958, 976,
+> 995, 997, 999, 1001, 1003, 1005, 1007, 1009, 1010）；
+> **22 個是 C2S**，只有 request builder、不在 dispatcher
+> （206, 295, 487, 828, 851, 853, 896, 898, 930, 932, 953, 957, 973, 975,
+> 992, 996, 998, 1000, 1002, 1004, 1006, 1008）。
+> dispatcher 共 **306** 個 case，其中 **24** 個不在名稱表內：
+> 即上列 23 個 S2C，再加 **417**。417 已於下方 MASTER 表以
+> `MASTER_KILLALL_ACK` 立項（416 的配對 ACK），但**未收進 `db/packets.tsv`**，
+> 也未列入兩份 layout 文件 —— 它是 dispatcher 有 case、三處文件卻都漏掉的
+> 唯一一個 opcode。其 case 不讀 payload，直接顯示 msg `0xA5`
+> 「サーバーとの接続が終了しました。」，與 416「全服強制踢線」語義吻合。
+>
+> 也就是說 `sub_9D2050` 的名稱表**不是 opcode 空間的上界**。
+> 任何「opcode 一定 ≤ 994」或「不在 packets.tsv 就不存在」的推論都是錯的；
+> 新增 handler 前應同時查 layout 兩表。這些 opcode 的**名稱**仍 UNRESOLVED，
+> 依專案慣例不得臆造協定名（206 用中性標籤 `RawOpcode206` 即為正解）。
+
 命名規約:
 | 前綴 | 子系統 | 數量 |
 |------|--------|------|
@@ -1944,7 +1978,7 @@ u8+slot 系列)
 | 404 | `MASTER_EVENTEXP_REQ` | `sub_5795A0` | C2S | `f32 rate` (設定活動 EXP 倍率) |
 | 405 | `MASTER_EVENTEXP_ACK` | `sub_579650` | S2C | `f32 rate` |
 | 416 | `MASTER_KILLALL_REQ` | `sub_579DB0` | C2S | `(空)` (全服強制踢線維護) |
-| 417 | `MASTER_KILLALL_ACK` | — | S2C | `(空)` |
+| 417 | `MASTER_KILLALL_ACK` | *(inline, 無獨立 handler)* | S2C | `(空)` — dispatcher `case 417u` 直接顯示 msg `0xA5`「サーバーとの接続が終了しました。」再走 `sub_9A7DE0(msg, 1, 1)`；**不讀任何 payload** |
 | 822 | `MASTER_CHAT_BAN_REQ` | `sub_582770` | C2S | `u8 mode, u8 duration_min, str nick` (禁言) |
 | 823 | `MASTER_CHAT_BAN_ACK` | `sub_5827C0` | S2C | `u8 status` |
 | 824 | `MASTER_USERLIST_REQ` | `sub_582840` | C2S | `u8 mode, s32 page` (分頁玩家清單) |

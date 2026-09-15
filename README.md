@@ -36,6 +36,7 @@
 | `server/packet.py` | wire 協議 Packet 參考實作 (Python, 逐函數對應反編譯), 含自測 |
 | `server-cs/tools/dump_itemdata.py` | 解出 `Extracted/ui/cfg/itemdata.pat` 的 21,164 筆 item id ↔ 名稱 (stride 997B 自證); 支援 `--name` / `--id` / `--band` 查詢 |
 | `server-cs/tools/dump_maplist.py` | 解出 `Extracted/ui/cfg/maplist.pat` 的 123 張地圖 (id / mode bitmask / .pmm 路徑, stride 836B 自證); `--check` 可驗證 modeIndex→bit 表 |
+| `server-cs/tools/verify_dispatcher_coverage.py` | 直接從 `PaperMan.exe.c` 重抽主 dispatcher `sub_58B010` 的 306 個 case，比對 `docs/LAYOUTS.md` 是否全覆蓋；並報告「有 native handler 但名稱表未註冊」的 opcode 數 |
 | `server-cs/` | **C# 14 / .NET 10 伺服器** (協定層 + login/channel TCP + source-proven UDP-private 19→20 control + SQLite + 自測), 見 `server-cs/README.md` |
 
 ## 快速開始
