@@ -63,11 +63,12 @@ resource snapshot；兩者都應以小範圍、可重現的 search/excerpt 研�
 | 區域 | 入口 | Ownership / generated boundary |
 |---|---|---|
 | `server-cs/src/PaperMan.Protocol/` | [`Protocol source guide`](../server-cs/src/PaperMan.Protocol/README.md) → `Core/`, `Codecs/`, `Contracts/`, `Generated/` | wire primitives、named protocol contracts、TCP/UDP codecs 與 generated catalog；不含 socket、DB 或 gameplay policy。 |
-| `server-cs/src/PaperMan.Server/` | [`Server source guide`](../server-cs/src/PaperMan.Server/README.md) → `Host/Program` → `Host/Session` → `Host/Router` → `Handlers/<family>/` | TCP/UDP ownership、session state、registry-backed canonical handlers 與 SQLite access；詳細導航見 [`server-cs/README.md`](../server-cs/README.md)。 |
+| `server-cs/src/PaperMan.Server/` | [`Server source guide`](../server-cs/src/PaperMan.Server/README.md) → `Host/Program` → `Host/Session` → `Host/Router` → compile-time discovery → `Handlers/<family>/` | TCP/UDP ownership、session state、compile-time discovered canonical handlers 與 SQLite access；詳細導航見 [`server-cs/README.md`](../server-cs/README.md)。 |
+| [`server-cs/src/PaperMan.HandlerGenerator/`](../server-cs/src/PaperMan.HandlerGenerator/README.md) | compiler-only Roslyn generator | canonical static receive entries → direct Router method-group table；沒有 runtime handler reflection。僅此 dispatch path 的 NativeAOT compatibility 可由 source generator 得出，非整個 server publish claim。 |
 | `server-cs/src/PaperMan.SelfTest/Program.cs` | executable, dependency-free wire/bootstrap integration checks | 強化改動過的 wire/state boundary；它不是 original-service capture。 |
 | `db/schema.sql` / `db/packets.tsv` | schema 與 opcode catalog | Server assembly 的 embedded bootstrap inputs；schema 改動需兼顧 `DatabaseBootstrapper` migration。 |
 | `server/packet.py` / `server/pmfile.py` | Python protocol/resource reference tooling | 可用於 codec / pmFile cross-check；C# server 啟動不依賴 Python。 |
-| `server-cs/tools/gen_opcodes.py` / `server-cs/tools/verify_server_layout.py` | 前者：`db/packets.tsv` → `PaperMan.Protocol/Generated/Opcode.cs`；後者：catalog → Router/Registry → canonical handler static topology | `Opcode.cs` 是 generated output；修改 opcode 名稱或值時由 source TSV / generator 處理，不手改 output。layout check 不取代 C# build、SelfTest 或 client capture。 |
+| `server-cs/tools/gen_opcodes.py` / `server-cs/tools/verify_server_layout.py` | 前者：`db/packets.tsv` → `PaperMan.Protocol/Generated/Opcode.cs`；後者：catalog → generated discovery → canonical handler static topology | `Opcode.cs` 是 generated output；修改 opcode 名稱或值時由 source TSV / generator 處理，不手改 output。layout check 不取代 C# build、SelfTest 或 client capture。 |
 
 ## 每次改動前後的最小檢查
 
@@ -78,10 +79,10 @@ resource snapshot；兩者都應以小範圍、可重現的 search/excerpt 研�
 3. 對 C# 變更保留直接的 control flow、具 domain 意義的名稱、nullable invariant、async
    cancellation/resource ownership 與可診斷的錯誤路徑；不要為了抽象或新語法改寫無關區域。
 4. 更新最常被使用且真正承載新結論的 Markdown；避免重複貼相同證據到每份文件。
-5. 修改 Server catalog、Registry、handler path 或 direct receive entry 時，先執行
+5. 修改 Server catalog、handler path 或 direct receive entry 時，先執行
    `python3 server-cs/tools/verify_server_layout.py`，再執行可用的 format/whitespace、Python
-   或 .NET tests。前者只驗證 static topology；若當前環境沒有 .NET SDK，明確記錄 build /
-   `PaperMan.SelfTest` 尚未執行，不能宣稱 compiler-backed success。
+   或 .NET tests。前者只驗證 static generator topology；若當前環境沒有 .NET SDK，明確記錄
+   build / `PaperMan.SelfTest` 尚未執行，不能宣稱 compiler-backed success。
 
 目前 Arena sandbox 沒有 `dotnet`、`csc` 或 `mcs`；C# runtime verification 必須在具
 .NET 10 SDK 的環境補做。

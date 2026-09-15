@@ -17,16 +17,19 @@ same subsystem boundary.
 ```text
 Host/Program.cs
   -> Host/Session.cs          one TCP connection's frame receive/send lifetime
-  -> Host/Router.cs           role/state gate and registered opcode lookup
+  -> Host/Router.cs           role/state gate and generated opcode lookup
+  -> compile-time discovery   exact canonical handler method → direct method group
   -> Handlers/<family>/       canonical request-token entry
   -> Database/ or State/      explicit mutation owner
   -> Protocol contract/codec  exact payload and wire representation
 ```
 
 For a known packet, begin with `db/packets.tsv` and generated
-`PaperMan.Protocol/Generated/Opcode.cs`, then use `Host/Router.cs` to find the
-family registry and finally the exact `Handlers.<TOKEN-without-_REQ>.cs` file.
-A source path never changes the canonical filename or receive-entry token.
+`PaperMan.Protocol/Generated/Opcode.cs`, then find the exact
+`Handlers.<TOKEN-without-_REQ>.cs` file and same-token receive method. The
+compile-time `PaperMan.HandlerGenerator` discovers that method and emits the
+Router table; the running server does not reflect over handler types. A source
+path never changes the canonical filename or receive-entry token.
 
 ## Directory ownership
 
@@ -35,12 +38,13 @@ A source path never changes the canonical filename or receive-entry token.
 | [`Host/`](Host/) | `Program.cs` | zero-argument startup, listener/session lifetime, role/state router, server configuration, and the narrow UDP endpoint | packet codec internals, room policy, or SQLite domain operations |
 | [`State/`](State/) | `Room.cs`, `RoomManager.cs` / registries | process-local room, battle, session, and one-use channel-admission state | durable account/item data or unproven client service policy |
 | [`Database/`](Database/) | `Db.Connection.cs`, `DatabaseBootstrapper.cs` | SQLite connection/bootstrap and each persisted-domain `Db.*` partial | socket/session ownership or Packet serialization |
-| [`Handlers/`](Handlers/) | family `Handlers.<Family>.Registry.cs` | direct canonical receive entries and source-proven response/state behavior | generic service frameworks or renamed business aliases |
+| [`Handlers/`](Handlers/) | canonical `Handlers.<TOKEN>.cs` direct source | source-proven direct receive entries and response/state behavior; compile-time discovery binds them by canonical method name | runtime reflection, generic service frameworks, or renamed business aliases |
 
 `Host/`, `State/`, and `Database/` keep ordinary server infrastructure separate
-from packet behavior. `Handlers/` is subdivided only by the existing
-binding-only registries, so a directory is backed by an explicit Router path
-rather than a guessed gameplay taxonomy.
+from packet behavior. `Handlers/` is subdivided by the existing static partial
+`*Handlers` families. The source generator emits their direct bindings at
+compile time; a directory remains a local navigation decision, not a guessed
+original-service taxonomy.
 
 ## Host, state, and database file map
 
@@ -48,6 +52,7 @@ rather than a guessed gameplay taxonomy.
 |---|---|---|
 | Listener role and shared context | `Host/ServerRole.cs`, `Host/ServerContext.cs` | listener-selected handshake role, Db plus explicitly process-local registries |
 | Listener configuration / bootstrap metadata | `Host/ServerConfig.cs`, `Host/ChannelBootstrapMetadata.cs`, `Host/LoginCode.cs` | startup validation, 681/144/196 wire-facing configuration, and native login result values |
+| Raw dispatch marker | `Host/RawOpcodeHandlerAttribute.cs` | the one catalog-tokenless C2S opcode remains an explicit compile-time numeric exception |
 | Room model / live lifecycle | `State/Room.cs`, `State/RoomBattleState.cs`, `State/RoomManager.cs` | room configuration/seats, mode-specific battle state, then manager lookup/broadcast lifecycle |
 | Other process-local state | `State/SessionRegistry.cs`, `State/ChannelAdmissionRegistry.cs` | connected-session lookup and single-use 681→143 admission only |
 | SQLite foundation | `Database/Db.Connection.cs`, `Database/DatabaseBootstrapper.cs` | connection, migrations, shared SQL helpers, schema/catalog/config bootstrap |
@@ -60,41 +65,60 @@ rather than a guessed gameplay taxonomy.
 The filename map is a reading aid. It does not elevate a local persistence
 boundary into evidence of an original production-service boundary.
 
+## Generated dispatch and NativeAOT boundary
+
+**Fact/HIGH.** [`PaperMan.HandlerGenerator`](../PaperMan.HandlerGenerator/README.md)
+is a build-time Roslyn analyzer. It emits direct handler method-group
+references; `Router.Build()` contains no runtime handler scan or reflection. It
+reports a compile error for an invalid
+receive signature, a duplicate opcode, or a malformed raw-opcode declaration.
+
+**Fact/HIGH.** This makes the *handler-discovery path* trim- and
+NativeAOT-compatible. **UNKNOWN.** It does not prove the full executable is
+NativeAOT-ready: that still depends on SQLite/native dependencies and the
+publish-time analyzers on a machine with the .NET 10 SDK.
+
 ## Handler family map
 
-| Directory | Binding-only registry / purpose |
+Every static `ValueTask (Session, Packet, ServerContext)` method whose name is
+an `Opcode` token is compile-time discovered. `RawOpcodeHandler(206)` is the
+only numeric exception; it remains explicit because the native catalog has no
+206 request name.
+
+| Directory | Static partial class / purpose |
 |---|---|
-| [`Handlers/Auth/`](Handlers/Auth/) | `Handlers.Auth.Registry.cs`: `GT_PING`, `GL_LOGIN` |
-| [`Handlers/Channel/`](Handlers/Channel/) | `Handlers.Channel.Registry.cs`: 143, 195, 196, 141 channel bootstrap flow |
-| [`Handlers/Join/`](Handlers/Join/) | `Handlers.Join.Registry.cs`: lobby-to-room join flow |
-| [`Handlers/Lobby/`](Handlers/Lobby/) | `Handlers.Lobby.Registry.cs`: lobby/user/item/client settings families |
-| [`Handlers/Room/`](Handlers/Room/) | `Handlers.Room.Registry.cs`: room membership, settings, lifecycle, and in-room relay |
-| [`Handlers/Battle/`](Handlers/Battle/) | battle + battle-object registries; the two explicitly named support files have no receive entry |
-| [`Handlers/Ai/`](Handlers/Ai/) | `Handlers.Ai.Registry.cs`: AI/PvE request families |
-| [`Handlers/Shop/`](Handlers/Shop/) | `Handlers.Shop.Registry.cs`: shop/Pepachi/capsule paths and the documented raw-206 exception |
-| [`Handlers/Stats/`](Handlers/Stats/) | `Handlers.Stats.Registry.cs`: `GP_CH*C` totals and server-push support |
-| [`Handlers/Friend/`](Handlers/Friend/) | `Handlers.Friend.Registry.cs`: friend and mailbox families |
-| [`Handlers/Clan/`](Handlers/Clan/) | `Handlers.Clan.Registry.cs`: clan create/tunnel/tournament entry |
-| [`Handlers/Quest/`](Handlers/Quest/) | `Handlers.Quest.Registry.cs`: quest/date families |
-| [`Handlers/Voice/`](Handlers/Voice/) | `Handlers.Voice.Registry.cs`: voice-slot families |
-| [`Handlers/Warehouse/`](Handlers/Warehouse/) | `Handlers.Warehouse.Registry.cs`: warehouse list/push/pop families |
-| [`Handlers/GameCenter/`](Handlers/GameCenter/) | `Handlers.GameCenter.Registry.cs`: game-center families |
-| [`Handlers/Master/`](Handlers/Master/) | `Handlers.Master.Registry.cs`: operator command namespace |
+| [`Handlers/Auth/`](Handlers/Auth/) | `AuthHandlers`: `GT_PING`, `GL_LOGIN` |
+| [`Handlers/Channel/`](Handlers/Channel/) | `ChannelHandlers`: 143, 195, 196, 141 channel bootstrap flow |
+| [`Handlers/Join/`](Handlers/Join/) | `JoinHandlers`: lobby-to-room join flow |
+| [`Handlers/Lobby/`](Handlers/Lobby/) | `LobbyHandlers`: lobby/user/item/client settings families |
+| [`Handlers/Room/`](Handlers/Room/) | `RoomHandlers`: room membership, settings, lifecycle, and in-room relay |
+| [`Handlers/Battle/`](Handlers/Battle/) | `BattleRelayHandlers` and `BattleObjectHandlers`; named Shared sources have no receive entry |
+| [`Handlers/Ai/`](Handlers/Ai/) | `AiHandlers`: AI/PvE request families |
+| [`Handlers/Shop/`](Handlers/Shop/) | `ShopHandlers`: shop/Pepachi/capsule paths and documented raw-206 exception |
+| [`Handlers/Stats/`](Handlers/Stats/) | `StatHandlers`: `GP_CH*C` totals and server-push support |
+| [`Handlers/Friend/`](Handlers/Friend/) | `FriendHandlers`: friend and mailbox families |
+| [`Handlers/Clan/`](Handlers/Clan/) | `ClanHandlers`: clan create/tunnel/tournament entry |
+| [`Handlers/Quest/`](Handlers/Quest/) | `QuestHandlers`: quest/date families |
+| [`Handlers/Voice/`](Handlers/Voice/) | `VoiceHandlers`: voice-slot families |
+| [`Handlers/Warehouse/`](Handlers/Warehouse/) | `WarehouseHandlers`: warehouse list/push/pop families |
+| [`Handlers/GameCenter/`](Handlers/GameCenter/) | `GameCenterHandlers`: game-center families |
+| [`Handlers/Master/`](Handlers/Master/) | `MasterHandlers`: operator command namespace |
 
 ## Change checklist
 
-1. Trace `catalog token → Router gate → registry binding → direct handler →
-   packet consumer → state/SQLite mutation → response → next legal state`.
+1. Trace `catalog token → Router gate → compile-time discovery → direct handler
+   → packet consumer → state/SQLite mutation → response → next legal state`.
 2. Preserve canonical opcode spelling in basename and method name. In
    particular, do not normalize catalog typos such as `WAREHOSUE`, invent a
    request name for raw opcode 206, or trim the non-`_REQ` `GL_MYINFO_OPEN`.
-3. Keep a handler's role/session guard, exact length/count branches, and
+3. Keep a direct handler's static `ValueTask (Session, Packet, ServerContext)`
+   signature, its role/session guard, exact length/count branches, and
    fail-closed unresolved boundary visible near its mutation. Do not replace an
    unknown response with zero padding or nominal success.
 4. Treat `Extracted/` names as client lookup/UI evidence only. They do not
    prove server grants, pricing, ownership, routing, or persistence.
-5. After a catalog/registry/handler-path change, run
+5. After a catalog/handler-path/direct-entry change, run
    `python3 server-cs/tools/verify_server_layout.py`; it checks only the static
-   catalog-to-handler topology. This Arena environment has no .NET SDK, so a
-   .NET build and `PaperMan.SelfTest` must be run elsewhere before claiming
-   compiler-backed verification.
+   catalog-to-generator-to-handler topology. This Arena environment has no .NET
+   SDK, so a .NET build and `PaperMan.SelfTest` must be run elsewhere before
+   claiming compiler-backed verification.

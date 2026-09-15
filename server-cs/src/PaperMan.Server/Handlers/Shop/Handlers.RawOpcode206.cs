@@ -12,6 +12,7 @@ public static partial class ShopHandlers
     // 206 is exactly {s32 itemId,s32 rawContext,u8 itemKind,s32 rawPeriod}.
     // In `sub_571B60`, raw result zero enters the success decoder and mutates
     // the local parts/wallet cache. Any nonzero result has no tail.
+    [RawOpcodeHandler(206)]
     private static ValueTask RawOpcode206_REQ(Session session, Packet packet, ServerContext context)
     {
         if (packet.Remaining != 13)

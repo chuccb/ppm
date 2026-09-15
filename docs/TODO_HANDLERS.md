@@ -74,7 +74,7 @@
 >    地圖回退 mode 預設圖 (ModeDefaultMap); map_catalog 查無/mode 無
 >    規則時原樣放行 (不硬編)。Db.GetMapModes 讀 map_catalog。
 > ② 語音 791–796 wire 佈局全定案並更正 docs (792=整塊覆寫、794=u8
->    count 前綴, 非先前誤判的 795 變體鏡像); `Handlers.Voice.Registry.cs` 與
+>    count 前綴, 非先前誤判的 795 變體鏡像); compile-time handler discovery 與
 >    `Handlers.{GL_VOICEITEMSLOT,GI_VOICEITEMSLOT_ALL,GI_CHANGE_VOICEITEMSLOT}.cs`
 >    改為真解析 795 兩變體 (依長度 1780B 判別) 並落地 voice_customize/
 >    voice_slots (char_idx 0..14 + 2×base_voice + 27×(item,flag))。
@@ -85,8 +85,8 @@
 > pad}; 到期欄非秒數而是 (年-2000)<<24|月<<19|日<<13|時<<7|分。
 > 859/861 REQ = u8 tab + s32 slot (5B); 860/862 ACK 6B header (u8 err,
 > u8 tab, s32 slot) + 28B 物品 + s32 tab_count。862 err 5 = 背包滿
-> (0x49E), 1/2/3/4/6/7 = 0x49A。落地 Db.Warehouse.cs (warehouse_items
-> /warehouse_lockers, 頁籤預設全持有) + `Handlers.Warehouse.Registry.cs` 與
+> (0x49E), 1/2/3/4/6/7 = 0x49A。落地 `Database/Db.Warehouse.cs` (warehouse_items
+> /warehouse_lockers, 頁籤預設全持有) + compile-time handler discovery / direct
 > `Handlers.{GL_MYWAREHOUSEINFO,GL_MYWAREHOUSEITEMLIST,GL_PUSH_TO_WAREHOUSE,GL_POP_TO_WAREHOSUE}.cs`。
 > 855 的 s32 = dword_EE8CB4 自己 uid (驗證用, 私服以 session 為準)。
 >
@@ -183,7 +183,7 @@
 > ⑥ **自測與驗證**: SelfTest 增測 23 項封包編解碼; smoke_test 增測 Step 14 CRUD; 全測試 100% 通過。
 >
 > 五十五輪 (GM / MASTER、GameCenter 迷你遊戲、PVE / AI 防衛戰 37 個封包全鏈落地):
-> ① **GM / MASTER 管理指令簇 (Handlers.Master.Registry.cs + direct `Handlers.MASTER_*.cs`)**:
+> ① **GM / MASTER 管理指令簇 (compile-time discovery + direct `Handlers.MASTER_*.cs`)**:
 >    - 275/276 (MEMO 私訊)、277/278 (MEMOALL 全服廣播)、279/280 (USERCUT 踢線)、
 >      281/282 (USERCUT2 依 UID 踢線)、283/284 (ROOMCUT 解散房間)、285/286 (MSET GM旗標)、
 >      287/288 (PRINTUSER 在線人數)、289/290 (USERINFO 查玩家)、291/292 (LISTCUT)、
@@ -192,16 +192,16 @@
 >      824/825 (USERLIST 玩家清單)、830/831 (CHAT_FORCE_BAN)、841/842 (SETALL_EXP)、
 >      843/844 (SETALL_PAGE)、845/846 (VIEWALL_EVENTSTATE)、883/884 (FIND_USER 查房號)、
 >      885/886 (PLAY_WITH 瞬移進房)。
-> ② **遊戲中心 GameCenter 迷你遊戲協定** (`Handlers.GameCenter.Registry.cs` +
+> ② **遊戲中心 GameCenter 迷你遊戲協定** (compile-time discovery +
 >    direct `Handlers.{GL,GG}_GAMECENTER_*.cs` / `Handlers.GL_GET_GAMEROOM_PROGRESSTIME.cs`
->    + `Db.GameCenter.cs`):
+>    + `Database/Db.GameCenter.cs`):
 >    - 472/473: 紀錄查詢 (高分/排名/遊玩次數);
 >    - 474/475 & 483/484: 迷你遊戲開始與確認;
 >    - 476/477: 遊戲結算與高分落庫、PG/EXP 獎勵派發 (32B/44B 結構體對齊);
 >    - 478/479: 防作弊心跳檢查;
 >    - 480/481: 迷你遊戲 TOP 10 / TOP 3 排行榜查詢 (0x38 條目結構);
 >    - 485/486: 戰局進行時間查詢 (sub_56AE30 動態時鐘同步)。
-> ③ **AI / PVE 防衛戰模式協定** (`Handlers.Ai.Registry.cs` + direct
+> ③ **AI / PVE 防衛戰模式協定** (compile-time discovery + direct
 >    `Handlers.GR_AI_*.cs` / `Handlers.GR_RESET_GAMEROOMSLOT.cs`):
 >    - 918/919: PVE 結算道具抽取 (8B 抽獎結果同步);
 >    - 922/923: 核心防護罩受損廣播 (shield_id, damage, remain);
@@ -211,7 +211,7 @@
 >    - 935/936: Fever 狂暴狀態觸發廣播;
 >    - 939/940: 波次推進 (Wave 切換與計時);
 >    - 944/945: 房間槽位重置。
-> ④ **自測與 DB 測試**: `Db.GameCenter.cs` 擴充個人紀錄與排行榜查詢; `smoke_test.py` 增測 Step 15-16; 測試全數通過。
+> ④ **自測與 DB 測試**: `Database/Db.GameCenter.cs` 擴充個人紀錄與排行榜查詢; `smoke_test.py` 增測 Step 15-16; 測試全數通過。
 >
 > 五十六輪 (OCC 902–907 狀態機 + 962 安全拒絕):
 > ① 以 builder、`sub_58B010`、parser 三向驗證 902/904/906 的同構 6B

@@ -11,13 +11,14 @@
 
 | 區域 | 檔案 / 入口 | 責任與 ownership |
 |---|---|---|
-| Solution、generated catalog 與 topology check | `PaperMan.slnx`, `tools/gen_opcodes.py`, `tools/verify_server_layout.py`, `src/PaperMan.Protocol/Generated/Opcode.cs` | `db/packets.tsv` 是 opcode source；要改 opcode 名稱或值時執行 generator，不手改 generated output。layout checker 靜態驗證 catalog → Registry → canonical handler source graph，不取代 build。 |
+| Solution、generated catalog 與 topology check | `PaperMan.slnx`, `tools/gen_opcodes.py`, `tools/verify_server_layout.py`, `src/PaperMan.Protocol/Generated/Opcode.cs` | `db/packets.tsv` 是 opcode source；要改 opcode 名稱或值時執行 generator，不手改 generated output。layout checker 靜態驗證 catalog → generated discovery → canonical handler source graph，不取代 build。 |
 | Protocol | [`src/PaperMan.Protocol/README.md`](src/PaperMan.Protocol/README.md) | byte-exact `Core/`、`Codecs/`、`Contracts/` 與 `Generated/` boundary；不放 socket、DB 或 gameplay policy。 |
-| Server source guide | [`src/PaperMan.Server/README.md`](src/PaperMan.Server/README.md) | 由 runtime flow 或 canonical opcode 直接定位 Host、State、Database、registry-backed Handler family。 |
+| Handler source generator | [`src/PaperMan.HandlerGenerator/README.md`](src/PaperMan.HandlerGenerator/README.md) | compiler-only Roslyn analyzer，從 canonical direct entries 產生 Router method-group table；不做 runtime reflection，僅此 dispatch path 可宣稱 NativeAOT-friendly。 |
+| Server source guide | [`src/PaperMan.Server/README.md`](src/PaperMan.Server/README.md) | 由 runtime flow 或 canonical opcode 直接定位 Host、State、Database、compile-time discovered Handler family。 |
 | Executable host | `src/PaperMan.Server/Host/` | 零參數 startup、listener configuration、TCP session lifetime、role/state gate、dispatch 與 narrow UDP endpoint。主路徑為 `Program → Session.ReceiveAsync → Router → handler`。 |
 | Process-local state | `src/PaperMan.Server/State/` | rooms/seats、room battle state、online-session lookup、one-use 681→143 admission；不是 durable account state。 |
 | SQLite ownership | `src/PaperMan.Server/Database/` | bootstrap/connection 與 `Db.*` persisted-domain partials。跨 table atomic change 放在擁有該 operation 的 partial，transaction 必須明確可見。 |
-| Canonical handlers | `src/PaperMan.Server/Handlers/<registry-family>/` | registry 只做 binding；direct source basename 與 receive entry 保留 `db/packets.tsv` / `Opcode.cs` canonical token。詳見 Server source guide 的完整 family map。 |
+| Canonical handlers | `src/PaperMan.Server/Handlers/<family>/` | direct source basename 與 receive entry 保留 `db/packets.tsv` / `Opcode.cs` canonical token；source generator 於編譯期自動發現並產生 binding。詳見 Server source guide 的完整 family map。 |
 | Assembly 與 executable checks | `Properties/AssemblyInfo.cs`, `src/PaperMan.SelfTest/Program.cs` | assembly metadata，以及 byte-level protocol / SQLite bootstrap / loopback checks；SelfTest 不取代 original-service capture。 |
 
 在修改 handler 或 resource-derived value 前，先讀
@@ -36,15 +37,16 @@ boundary 與 reverse-engineering checklist。
    builder/parser 的 method name 也保留完整 `*_REQ` 或 `*_ACK` token。
 3. 沒有 `*_REQ` 後綴的單向 token（目前為 `GL_MYINFO_OPEN`）同時作為檔名 family 與
    entry method。不存在以猜測業務語意命名的中介 handler 名稱。
-4. `*.Registry.cs` 只做 binding，不含 packet body、DB mutation 或 state transition。
-   `*.Shared.cs` 僅限已明確記錄的跨-family wire / authority support，不含 receive entry。
-   兩者都不能成為把多個 packet flow 收回 generic source file 的先例。
+4. `PaperMan.HandlerGenerator` 在編譯期以 exact method signature 與 canonical token
+   產生 binding；不要加入 runtime reflection、hand-written registration list 或需要把
+   protocol token 反向映射的 service abstraction。`*.Shared.cs` 僅限已明確記錄的
+   跨-family wire / authority support，不含 receive entry。
 5. 唯一沒有官方 request token 的已註冊 path 是 raw opcode 206；它保留
-   `Handlers.RawOpcode206.cs` / `RawOpcode206_REQ` 與 canonical paired ACK 名稱，
+   `Handlers.RawOpcode206.cs` / `RawOpcode206_REQ`，以 `[RawOpcodeHandler(206)]`
    明示為 raw evidence boundary，絕不補造 GS request token。
-6. 修改 catalog、Registry、handler path 或 direct receive entry 後，執行
+6. 修改 catalog、handler path 或 direct receive entry 後，執行
    `python3 server-cs/tools/verify_server_layout.py`。它會靜態驗證
-   `packets.tsv → Opcode.cs → Router/Registry → canonical source/entry`，但不取代
+   `packets.tsv → Opcode.cs → compile-time discovery → canonical source/entry`，但不取代
    C# 編譯、SelfTest 或 real-client capture。
 
 這是導覽規則，不改變 packet header、field order、length gate、state guard、SQLite

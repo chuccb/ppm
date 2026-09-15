@@ -1,7 +1,8 @@
 // =============================================================================
 // 封包路由 — 對應客戶端 dispatcher sub_58B010 (365 case 的巨型 switch)。
-// 伺服端改為註冊表 + frozen lookup; 未知 opcode 記錄後靜默忽略
-// (原版 default: return 同樣行為)。
+// Compile-time generator emits the direct handler table; runtime keeps only a
+// frozen lookup, with no reflection/type scan. Unknown opcodes are logged then
+// ignored (matching the original client's default: return).
 // =============================================================================
 using System.Collections.Frozen;
 using PaperMan.Protocol;
@@ -22,24 +23,7 @@ public sealed class Router
     public static Router Build()
     {
         var table = new Dictionary<ushort, PacketHandler>();
-        void Add(Opcode op, PacketHandler h) => table.Add((ushort)op, h);
-
-        AuthHandlers.Register(Add);
-        LobbyHandlers.Register(Add);
-        ShopHandlers.Register(Add);
-        StatHandlers.Register(Add);
-        ClanHandlers.Register(Add);
-        QuestHandlers.Register(Add);
-        FriendHandlers.Register(Add);
-        RoomHandlers.Register(Add);
-        BattleRelayHandlers.Register(Add);
-        JoinHandlers.Register(Add);
-        ChannelHandlers.Register(Add);
-        VoiceHandlers.Register(Add);
-        WarehouseHandlers.Register(Add);
-        MasterHandlers.Register(Add);
-        GameCenterHandlers.Register(Add);
-        AiHandlers.Register(Add);
+        GeneratedPacketHandlerRegistration.AddTo(table);
         return new(table);
     }
 
@@ -113,5 +97,3 @@ public sealed class Router
         return true;
     }
 }
-
-public delegate void Registrar(Opcode opcode, PacketHandler handler);

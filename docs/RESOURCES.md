@@ -263,7 +263,7 @@ any observed packet producer establishes a character-specific starter primary,
 secondary, melee, throw weapon, or part. Empty bootstrap loadout containers are
 not evidence of an equipment grant.
 
-**Implementation status (not native evidence).** `Db.WeaponLoadout.cs` applies
+**Implementation status (not native evidence).** `Database/Db.WeaponLoadout.cs` applies
 only the submitted delta in one SQLite transaction, validates the merged
 four-row state, and returns it in order for 221. `PaperMan.SelfTest` contains a
 routed 220→221 63-byte full-snapshot case plus no-mutation negative cases for a

@@ -111,47 +111,29 @@ uses cancellation and disposes its socket only after its receive loop exits.
 - `Session` 持有單一 TCP socket 的 connection state、account identity、room
   seat、send gate；`ChannelEntryCompleted` 明確表示 143 handoff 與 195→196
   channel entry 之間的不同 state。
-- `Router` 是唯一的 opcode registry 與 listener/state boundary；它不承載
-  gameplay policy。各 `Handlers.*` 檔以協定子系統切分（Auth、Channel、Lobby、
-  Room、Join、Battle direct relay/object families、Shop、Stats、Clan、Quest、Friend、
-  Voice、Warehouse、Master、GameCenter、Ai），使 opcode 的處理位置可直接搜尋。Master 的 22 個已註冊 request 亦採 `Handlers.Master.Registry.cs` + direct `Handlers.MASTER_*.cs`。Battle 的 25 個 receive paths 亦採 `Handlers.Battle.Registry.cs` / `Handlers.BattleObjects.Registry.cs` + direct canonical sources；兩個 Shared 檔只保留無 receive entry 的 relay 與 authority support。
-  Shop/Stats/Friend/Clan/Quest/Voice/Warehouse/GameCenter 的已註冊 request 均已拆為
-  direct canonical family source；唯一無官方 request token 的 Shop opcode 206 保持為
-  顯式 `RawOpcode206`，而非臆造 GS 名稱。
-  Auth 與 Channel 的每個已註冊 request 也各有單一 canonical opcode-family
-  source file：例如 `Handlers.GL_LOGIN.cs` / `GL_LOGIN_REQ`、
-  `Handlers.PM_UDPSTART.cs` / `PM_UDPSTART_REQ`，並分別由
-  `Handlers.Auth.Registry.cs`、`Handlers.Channel.Registry.cs` 做無 body 的 binding。
-  Lobby 的每個已註冊 request 同樣是單一 canonical opcode-family source file：例如
-  `Handlers.GL_MYINFO.cs` / `GL_MYINFO_REQ`、`Handlers.GI_CHANGEWP.cs` /
-  `GI_CHANGEWP_REQ`，以及其同名 `*_ACK` builder。檔名、entry method 和 packet
-  catalog token 可直接對齊；`Handlers.Lobby.Registry.cs` 是 Lobby 的描述性例外，因為它
-  只有 `Opcode.<TOKEN> → <TOKEN>` 綁定，沒有 packet body、state transition 或 DB
-  side effect。Room 同樣讓每個已註冊 request 使用 canonical opcode-family source file，
-  例如 `Handlers.GR_MAPCHANGE.cs` / `GR_MAPCHANGE_REQ`、`Handlers.GL_ENTERROOM.cs` /
-  `GL_ENTERROOM_REQ`；`Handlers.Room.Registry.cs` 只做 bindings，
-  `Handlers.Room.Shared.cs` 則只承載多 family 共用的 map compatibility 與
-  room/member authority guard，兩者均沒有 handler entry。Join 的五個房單流程也以
-  `Handlers.GL_JOIN*.cs` / 同名 `GL_JOIN*_REQ` entry 直接對應，
-  `Handlers.Join.Registry.cs` 只有 bindings。Quest、Voice、Warehouse、GameCenter 也採用
-  同一個 registry/direct-family 形狀；例如 `Handlers.GQ_QUEST_ACCEPT.cs` /
-  `GQ_QUEST_ACCEPT_REQ`、`Handlers.GI_CHANGE_VOICEITEMSLOT.cs` /
-  `GI_CHANGE_VOICEITEMSLOT_REQ`、`Handlers.GL_MYWAREHOUSEINFO.cs` /
-  `GL_MYWAREHOUSEINFO_REQ`、`Handlers.GG_GAMECENTER_GAME_END.cs` /
-  `GG_GAMECENTER_GAME_END_REQ`。Clan 與 AI 也採相同形狀，例如
-  `Handlers.GC_CLAN_PROTOCOL.cs` / `GC_CLAN_PROTOCOL_REQ` 與
-  `Handlers.GR_AI_DAMAGE_SHIELD.cs` / `GR_AI_DAMAGE_SHIELD_REQ`；各自的 Registry 沒有
-  packet body。Friend 亦採同一形狀，例如 `Handlers.GL_FRIEND_CHAT.cs` /
-  `GL_FRIEND_CHAT_REQ`；其 440 status/ACK builder 僅屬於該 direct family source。
-  只有跨 request 的 voice block 與 warehouse item/tab codec 留在明確標示、無 receive
-  entry 的 `Handlers.{Voice,Warehouse}.Shared.cs`。Stats 的 18 個 `GP_CH*_REQ`
-  也各有 direct file；統一的 ACK-shape / column-whitelist update 僅在無 receive entry 的
-  `Handlers.Stats.Shared.cs`。這些是導覽切分，不改 wire/state semantics。
-- `Db` 是一個依實際 persistence domain 拆成 **9 個 source partial** 的類別：
-  `Db.cs` 主檔（connection、bootstrap、account、nickname、packet stats）加上
-  Player、Economy、Social、Rooms、Voice、Warehouse、GameCenter、WeaponLoadout。
-  共用 connection / lock / command creation 只放在主檔；跨表不可分割操作在發生處
-  以明確 transaction 包住。
+- `Router` 是唯一的 listener/state boundary 與 frozen opcode lookup；它不承載
+  gameplay policy。`PaperMan.HandlerGenerator` 在**編譯期**尋找 `PaperMan.Server`
+  中、名稱等於 generated `Opcode` member 的 static
+  `ValueTask (Session, Packet, ServerContext)` methods，並產生直接 method-group
+  registration。執行時沒有 type scan、runtime reflection 或人工 `Register` list。
+  唯一無官方 request token 的 206 以顯式 `[RawOpcodeHandler(206)]` 保留 raw boundary，
+  而非臆造 GS 名稱。這只表示 dispatch discovery 是 trim / NativeAOT-friendly，**不**
+  證明含 SQLite 與其他 dependencies 的整個 server 已通過 NativeAOT publish。
+- 各 `Handlers.<TOKEN>.cs` direct source 仍以協定子系統目錄切分（Auth、Channel、
+  Lobby、Room、Join、Battle relay/object、Shop、Stats、Clan、Quest、Friend、Voice、
+  Warehouse、Master、GameCenter、Ai），因此檔名、entry method 與 packet catalog token
+  可直接對齊。例如 `Handlers.GL_LOGIN.cs` / `GL_LOGIN_REQ`、
+  `Handlers.PM_UDPSTART.cs` / `PM_UDPSTART_REQ`、`Handlers.GL_MYINFO.cs` /
+  `GL_MYINFO_REQ`、`Handlers.GR_MAPCHANGE.cs` / `GR_MAPCHANGE_REQ`、
+  `Handlers.GQ_QUEST_ACCEPT.cs` / `GQ_QUEST_ACCEPT_REQ`。`Handlers.*.Shared.cs` 僅保留
+  明確跨 request 的 wire / authority support，沒有 receive entry；Stats 的
+  `Handlers.GP_CHPLAYTIMEC.cs` 則是 source-proven server push，不是 C2S handler。
+  分組只是一項本地導航決定，不改 wire/state semantics 或聲稱原服務有相同 subsystem。
+- `Db` 的 connection/bootstrap 與每個 persisted-domain partial 都在 `Database/`；
+  `Db.Connection.cs` 持有共用 connection / lock / command creation，跨表不可分割操作
+  仍在擁有 operation 的 partial 以明確 transaction 包住。完整的 file-to-boundary map
+  維持在 `PaperMan.Server/README.md`，避免將 local partial 分界誤寫成 native-service
+  evidence。
 - `ChannelAdmissionRegistry` 只保存一次性的 681→143 handoff；`RoomManager` /
   `SessionRegistry` 只持有 process-local live state。SQLite 是 account、inventory、
   quest 等可持久狀態的唯一來源。

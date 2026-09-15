@@ -12,6 +12,11 @@
 
   <ItemGroup>
     <ProjectReference Include="../PaperMan.Protocol/PaperMan.Protocol.csproj" />
+    <!-- Compile-time-only dispatch discovery. It emits direct method-group
+         registrations and is not part of the server's runtime/AOT closure. -->
+    <ProjectReference Include="../PaperMan.HandlerGenerator/PaperMan.HandlerGenerator.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
     <!-- 10.0.12 = 2026-09-08 最新穩定; 其 transitive 依賴
          SQLitePCLRaw.bundle_e_sqlite3 >= 2.1.12 已修復
          CVE-2025-6965 / GHSA-2m69-gcr7-jv3q (舊版 NU1903)。 -->

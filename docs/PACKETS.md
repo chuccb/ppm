@@ -1119,7 +1119,7 @@ handler 不在 dispatcher 也不在 CLobbyShop — 在**轉蛋動畫控制器**
 
 ### 3.15d3 GG 戰鬥中繼 — 逐函數定案 (本輪更正廿五輪「三模式」簡化)
 ⚠ 廿五輪把 GG 全族簡化為「slot 前綴轉發」是**錯的** — 逐函數重讀後
-各族佈局不同, 已按下列真值重寫 server (`Handlers.Battle.Registry.cs` plus direct Battle request-family sources):
+各族佈局不同, 已按下列真值重寫 server (compile-time handler discovery plus direct Battle request-family sources):
 
 1. **TH 駭入/炸彈簇 316-331 — REQ 首欄是「team」(0/1) 不是 slot**:
    ```
