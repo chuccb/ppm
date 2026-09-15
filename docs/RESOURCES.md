@@ -660,7 +660,7 @@ sound\soundsNN\<codename>\Voice\<codename>_cry|die|drop|jump|kill|...>_NN.wav
 `z_kill` / `k_kill` / `dd_kill`，只知道對應 384/386/388，不知道語義。
 本輪由 **UI XML + 反編譯 + opcode 順序** 三方獨立對上，可以定案。
 
-**來源 1（resource）**：`Extracted/ui/information.xml`（pmFile 加密，已解出）
+**來源 1（resource）**：`Extracted/ui/information.xml`（**明文** `<UIDEFINE>`，廿四輪更正）
 的戰績面板依文件順序有 11 個具名欄位。
 **來源 2（native）**：`PaperMan.exe.c` 有**三處**互不相同的面板繪製碼
 （約 67930 / 156900 / 157296 行），各自以 `sub_6A8D80(..., L"<名稱>", ...)`
@@ -699,7 +699,7 @@ KILLINGMACHINE→DIABLO），若自 2 kill 起算，第 7 階正好落在 7 kill
 
 ## 5d-3. PvE 計分表 ScoreRatio.xml：native 明確指名兩個檔案路徑
 
-`Extracted/ui/system/AI/ScoreRatio.xml`（pmFile 加密，已解出）是
+`Extracted/ui/system/AI/ScoreRatio.xml`（**明文**，非 pmFile 加密 —— 廿四輪更正）是
 **倍率表**，且 native 解析器把檔案路徑寫死在程式碼裡：
 
 ```c
@@ -707,7 +707,16 @@ if ( sub_67EB70() )  thisa = sub_701BD0(&v41, L"ui/system/AI/AiMultiScoreRatio.x
 else                 thisa_1 = sub_701BD0(&v40, L"ui/system/AI/ScoreRatio.xml",      L"SCORERATIO");
 ```
 
-即 **AI 多人協力模式與一般 PvE 用兩張不同的倍率表**，由 `sub_67EB70()` 切換。
+即 native 依 `sub_67EB70()`（＝`modeIndex == 11`，AIMulti；見 §5d-25）
+切換**兩個檔案路徑**。
+
+> ⚠ **廿四輪更正：兩張表的內容目前完全相同。**
+> `ScoreRatio.xml` 與 `AiMultiScoreRatio.xml` 在本 extraction 中
+> **位元組完全一致**（各 2,603 B，SHA-256 相同）。
+> 原文「用兩張不同的倍率表」就**機制**而言正確（native 確實分流），
+> 但就**本 revision 的資料**而言會誤導 —— 此刻 AIMulti 與一般模式
+> 實際套用的倍率**無任何差異**。分流是為了保留調校空間，尚未被使用。
+> 私服若假設兩者不同而各自填值，會產生原版沒有的行為差異。
 XML 內每個標籤都能在 native 找到對應的 reader 字串
 （`SCORERATIO`／`Kill_1Time`／`Kill_Chain`／`HeadShotRatio`／`HeartShotRatio`／
 `CriticalShotRatio`／`AirComboRatio`／`active_value`／`spend_time`／`miss_shot`），
@@ -2021,6 +2030,37 @@ AppearSound DisAppearSound`
 
 本表只決定**客戶端開啟哪個網址**。排行榜與金流本身是**外部 Web 服務**，
 其協定、鑑權與回應格式完全不在本 extraction 範圍內，維持 UNRESOLVED。
+
+## 5d-28. 加密普查：哪些檔真的是 pmFile 加密（廿四輪）
+
+前面幾節多次把明文檔誤記為「pmFile 加密」（§5d-3 `ScoreRatio.xml`、
+§5d-13 `information.xml` 已就地更正）。為根絕此類錯誤，本輪對
+`Extracted/ui/system/` 與 `Extracted/ui/cfg/` 全部檔案做了**機械式判定**：
+讀首位元組，`<`(0x3C) 或 BOM(0xEF) ⇒ 明文，否則 ⇒ 加密。
+
+**加密者僅 9 個**（其餘 30+ 個全為明文）：
+
+| 檔案 | 備註 |
+|---|---|
+| `cfg/itemdata.pat` | 物品總表 (§2c) |
+| `cfg/maplist.pat` | 地圖表 (§5d-5) |
+| `cfg/Quest.pat` | 任務表 (§2b) |
+| `cfg/RecommandItem.pat` | 推薦商品 |
+| `cfg/partsability.pat` | 部件能力 |
+| `cfg/weaponparts.pat` | 武器部件 |
+| `system/ItemAbilityLevTable.xml` | skill 門檻 (§5d-20) |
+| `system/netcafe_contents.xml` | 網咖特典 |
+| `system/voice_customize_contents.xml` | 語音自訂 |
+
+**可據此推斷的規則（Inference / MEDIUM）**：`.pat` **一律加密**（6/6），
+而 `.xml` **絕大多數為明文**，僅 3 個例外。三個例外的共通點是
+**都涉及可換取價值的內容**（能力數值、網咖特典、付費語音），
+與 `.pat` 的商業資料同性質 —— 但樣本僅 3，**不足以定為規則**，
+遇到新檔仍應實測首位元組，勿依副檔名假設。
+
+**同名不同義的提醒**：`system/` 下的 `ItemAbilityLevTable.xml` 是加密的，
+但同目錄的 `ItemAbilityEffectColorTable.xml`／`ItemAbilityEffectNameTable.xml`
+是明文（§5d-20 已記）。**同一子系統的三張表加密狀態並不一致。**
 
 ## 6. 其他已知資源
 

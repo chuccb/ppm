@@ -694,6 +694,60 @@ def main() -> None:
               [row.get("level") for mode in comp for tier in mode
                for row in tier if "periodType" not in row.attrib], [])
 
+    # RESOURCES.md 5d-3 + 5d-28: native branches to two score tables, but in
+    # this revision they are byte-identical, and both are plaintext.
+    score = EXTRACTED / "ui" / "system" / "AI" / "ScoreRatio.xml"
+    score_ai = EXTRACTED / "ui" / "system" / "AI" / "AiMultiScoreRatio.xml"
+    if not score.is_file() or not score_ai.is_file():
+        skipped.append("ui/system/AI/ScoreRatio.xml")
+    else:
+        plain, multi = score.read_bytes(), score_ai.read_bytes()
+        check("ScoreRatio tables are byte-identical", plain == multi, True)
+        check("ScoreRatio is plaintext, not pmFile-encrypted",
+              plain[:12], b"<SCORERATIO>")
+        ratios = ElementTree.fromstring(plain.decode("utf-8-sig"))
+        chains: dict[str, list[str]] = {}
+        for node in ratios:
+            if node.tag == "Kill_Chain":
+                chains.setdefault(node.get("index"), []).append(node.get("ratio"))
+        check("ScoreRatio chain families", sorted(chains), ["0", "1", "2", "3"])
+        check("ScoreRatio tiers per family",
+              [len(chains[key]) for key in sorted(chains)], [4, 4, 3, 11])
+        single = next(node for node in ratios if node.tag == "Kill_1Time")
+        check("ScoreRatio single-kill multipliers",
+              [single.get(name) for name in
+               ("HeadShotRatio", "HeartShotRatio",
+                "CriticalShotRatio", "AirComboRatio")],
+              ["2", "1.5", "1.8", "2"])
+
+    # 5d-28: the encryption census. .pat is always encrypted; only three xml
+    # files are. First byte '<' or a BOM means plaintext.
+    encrypted = []
+    for folder in ("system", "cfg"):
+        base = EXTRACTED / "ui" / folder
+        if not base.is_dir():
+            continue
+        for path in sorted(base.rglob("*")):
+            if path.is_file() and path.suffix.lower() in (".xml", ".pat"):
+                if path.read_bytes()[:1] not in (b"<", b"\xef"):
+                    encrypted.append(path.name)
+    if not encrypted:
+        skipped.append("ui/{system,cfg} encryption census")
+    else:
+        # Every .pat present must be encrypted: none may be missing from the
+        # encrypted set. Comparing against the on-disk listing, not itself.
+        all_pat = sorted(path.name for folder in ("system", "cfg")
+                         for path in (EXTRACTED / "ui" / folder).rglob("*.pat")
+                         if (EXTRACTED / "ui" / folder).is_dir())
+        check("no .pat ships in plaintext",
+              [name for name in all_pat if name not in encrypted], [])
+        check("encrypted xml files are the known three",
+              sorted(name for name in encrypted if name.endswith(".xml")),
+              sorted(name for name in
+                     ("ItemAbilityLevTable.xml", "netcafe_contents.xml",
+                      "voice_customize_contents.xml")
+                     if (EXTRACTED / "ui" / "system" / name).is_file()))
+
     # Every datarevision.txt must agree: Extracted/ is one coherent snapshot.
     revisions = {path.read_text(encoding="utf-8", errors="replace").strip()
                  for path in EXTRACTED.rglob("datarevision.txt")}
