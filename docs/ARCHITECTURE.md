@@ -138,9 +138,11 @@ uses cancellation and disposes its socket only after its receive loop exits.
   `GG_GAMECENTER_GAME_END_REQ`。Clan 與 AI 也採相同形狀，例如
   `Handlers.GC_CLAN_PROTOCOL.cs` / `GC_CLAN_PROTOCOL_REQ` 與
   `Handlers.GR_AI_DAMAGE_SHIELD.cs` / `GR_AI_DAMAGE_SHIELD_REQ`；各自的 Registry 沒有
-  packet body。只有跨 request 的 voice block 與 warehouse item/tab codec 留在明確標示、
-  無 receive entry 的 `Handlers.{Voice,Warehouse}.Shared.cs`。這些是導覽切分，不改
-  wire/state semantics。
+  packet body。Friend 亦採同一形狀，例如 `Handlers.GL_FRIEND_CHAT.cs` /
+  `GL_FRIEND_CHAT_REQ`；其 440 status/ACK builder 僅屬於該 direct family source。
+  只有跨 request 的 voice block 與 warehouse item/tab codec 留在明確標示、無 receive
+  entry 的 `Handlers.{Voice,Warehouse}.Shared.cs`。這些是導覽切分，不改 wire/state
+  semantics。
 - `Db` 是一個依實際 persistence domain 拆成 **9 個 source partial** 的類別：
   `Db.cs` 主檔（connection、bootstrap、account、nickname、packet stats）加上
   Player、Economy、Social、Rooms、Voice、Warehouse、GameCenter、WeaponLoadout。
