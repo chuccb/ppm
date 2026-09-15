@@ -536,6 +536,67 @@ def main() -> None:
         check("commonProperty index 4 is faster than baseline, not slower",
               int(effects[4].get("speed")) > baseline, True)
 
+    # RESOURCES.md 5d-25: the PvE difficulty table. The wiki's "1 to 4 players,
+    # three difficulties, one map, four waves" is all checkable here, and the
+    # shield column is a live data/code mismatch worth pinning.
+    ai_level = EXTRACTED / "ui" / "system" / "AI" / "AiMultiLevel.xml"
+    if not ai_level.is_file():
+        skipped.append("ui/system/AI/AiMultiLevel.xml")
+    else:
+        levels = ElementTree.fromstring(
+            ai_level.read_bytes().decode("utf-8-sig"))
+        check("AiMultiLevel root", levels.tag, "AI_LEVEL")
+        # One map only, and it is the AIMulti map 95 from maplist.
+        check("AiMultiLevel modes", [node.get("index") for node in levels], ["95"])
+        mode = levels[0]
+        check("AiMultiLevel waves",
+              [node.get("wave_index") for node in mode], ["1", "2", "3", "4"])
+        check("AiMultiLevel difficulties per wave",
+              sorted({tuple(tier.tag for tier in wave) for wave in mode}),
+              [("WAVE_LEVEL_EASY", "WAVE_LEVEL_NORMAL", "WAVE_LEVEL_HARD")])
+        check("AiMultiLevel rows per difficulty",
+              sorted({len(tier) for wave in mode for tier in wave}), [8])
+
+        axes = ["subtraction_rate", "bothp_rate", "siege_dmg_rate",
+                "firstdelay_rate", "shotdelay_rate", "movespeed_rate"]
+
+        def row(tier, number: int) -> list[int]:
+            # Missing attributes must surface as a failed check, not a crash.
+            return [int(entry.get(name) or -1) for name in axes
+                    for entry in tier if entry.get("number") == str(number)]
+
+        # Rows 5..8 are a uniform sentinel: the mode really is 1..4 players.
+        check("AiMultiLevel rows 5-8 are a uniform sentinel",
+              sorted({tuple(row(tier, number)) for wave in mode
+                      for tier in wave for number in range(5, 9)}),
+              [(0, 0, 0, 1, 1, 1)])
+
+        # Enemies get weaker as the party grows, in every wave and tier.
+        check("AiMultiLevel subtraction_rate falls as players are added",
+              [(wave.get("wave_index"), tier.tag)
+               for wave in mode for tier in wave
+               if not all(
+                   row(tier, number)[0] >= row(tier, number + 1)[0]
+                   for number in range(1, 4))], [])
+
+        # EASY is never harder than NORMAL, which is never harder than HARD.
+        ordered = [name for name in axes if name != "siege_dmg_rate"]
+        check("AiMultiLevel difficulty ordering holds on every axis",
+              [(wave.get("wave_index"), number, name)
+               for wave in mode for number in range(1, 5)
+               for index, name in enumerate(axes) if name in ordered
+               and not (row(wave[0], number)[index]
+                        >= row(wave[1], number)[index]
+                        >= row(wave[2], number)[index])], [])
+
+        # The live mismatch: the file says siege_dmg_rate, the exe reads
+        # shilddamage_rate, so this column never reaches the engine.
+        check("AiMultiLevel ships siege_dmg_rate on every row",
+              sorted({name for wave in mode for tier in wave
+                      for entry in tier for name in entry.attrib
+                      if name.endswith("dmg_rate") or name.endswith("damage_rate")}),
+              ["siege_dmg_rate"])
+
     # Every datarevision.txt must agree: Extracted/ is one coherent snapshot.
     revisions = {path.read_text(encoding="utf-8", errors="replace").strip()
                  for path in EXTRACTED.rglob("datarevision.txt")}

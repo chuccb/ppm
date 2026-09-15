@@ -1782,10 +1782,94 @@ Wiki 所述的「修理費 50PG / 3CASH」「武器種別基準耐久 C–SS」
 本檔僅供客戶端套用狀態效果的移動／視角／護甲參數。
 哪個 opcode 指派哪個 index、效果由誰裁決，**無 client 證據**，維持 UNRESOLVED。
 
+## 5d-25. `ui/system/AI/AiMultiLevel.xml`：PvE 難度縮放表（本輪首解，含一個**死欄位**）
+
+`ui/system/AI/` 下 16 個檔先前僅被 §6 以一行「AI 模式劇本」帶過。
+本檔是其中**唯一的數值平衡表**，且其三個維度與 Wiki 的 PvE 敘述完全對得上。
+
+**編碼注意：本檔是 UTF-8 with BOM**（`EF BB BF`），
+與 `ui/` 下多數 CP932 檔不同，誤用 CP932 解會得到亂碼。
+
+### 結構
+
+```
+<AI_LEVEL>
+  <MODE index="95">                          ← 地圖 id，非 modeIndex（見下）
+    <WAVELEVEL wave_index="1..4">            ← 4 波
+      <WAVE_LEVEL_EASY|NORMAL|HARD>          ← 3 難度
+        <waveabilityplayer number="1..8"     ← 8 列（僅 1..4 有效）
+          subtraction_rate bothp_rate siege_dmg_rate
+          firstdelay_rate shotdelay_rate movespeed_rate />
+```
+
+共 **4 波 × 3 難度 × 8 列 = 96 列**，實測無缺。
+
+**`index="95"` 是地圖編號而非模式編號（Fact / HIGH）。**
+`dump_maplist.py` 第 95 筆為 `95 8192 AIMulti maps\PVE_01_ruins.pmm`，
+與 `AiMultiWave.xml` 用同一個 `index="95"`。
+與 §7 的 `modeIndex`（AIMulti = 11）**是不同的編號空間，切勿混用**。
+
+### native 讀法揭露一個**死欄位**（Fact / HIGH）
+
+`0x593208` 的迴圈對每列先把六個參數預設為 `1065353216`
+（＝IEEE-754 float **1.0**，中性值），再以下列名稱覆寫：
+
+```
+subtraction_rate  bothp_rate  shilddamage_rate
+firstdelay_rate   shotdelay_rate  movespeed_rate
+```
+
+**但檔案裡的欄位叫 `siege_dmg_rate`**（96/96 列皆然），
+exe 全文**只出現 `shilddamage_rate`、從未出現 `siege_dmg_rate`**。
+兩者不相符，因此該欄**永遠讀不到，96 列全部退回預設 1.0** ——
+這是一個**實際生效中的資料／程式不一致**（欄位改名後資源未同步，或反之）。
+**私服若照抄此欄的數值，行為會與原版不同。** 原版等效於「無護盾傷害縮放」。
+
+另外 `number` 屬性**native 完全不讀**（迴圈以 `n` 當索引），
+故**列的順序才是鍵**，`number` 僅為註解 —— 與 §5d-24 `commonProperty` 同一模式。
+
+### 列 5..8 是統一哨兵值（Fact / HIGH）
+
+96 列中，`number>=5` 的 **48 列數值完全相同**：
+`subtraction/bothp/siege = 0`、`firstdelay/shotdelay/movespeed = 1`。
+12 個區塊（4 波 × 3 難度）**無一例外**。
+即**實際只支援 1..4 人**，5..8 為佔位 —— 與 Wiki「最大 4 人」一致（見下）。
+
+### 兩條單調性，全表零例外（Fact / HIGH）
+
+1. **人數越多、敵人越弱**：`subtraction_rate` 對人數 1→4
+   在 **12/12 個（波×難度）區塊中全部單調遞減**。
+2. **難度排序正確**：對 5 個有效軸 × 4 波 × 4 種人數共 **80 組比較**，
+   `EASY >= NORMAL >= HARD` **零違反**。
+
+兩者合起來說明這張表是**經過實際調校**的，不是佔位資料。
+
+### 與 Wiki 的比對
+
+[PvEモード](https://wikiwiki.jp/paperman/PvEモード)（2024-04-22，實裝 2013-11-27）：
+
+| Wiki 敘述 | 檔案 |
+|---|---|
+| 「**1人からスタート可能。最大4人**でプレイできる」 | **吻合**。1..4 列有值、5..8 為哨兵。 |
+| 「難易度を**イージー、ノーマル，ハード**より決定する」 | **吻合**。恰好三個 `WAVE_LEVEL_*` 節點，且數值排序正確。 |
+| 「マップは実装時現在は**ロボットセンターのみ**」 | **吻合**。全檔只有 `MODE index="95"` 一張圖（`PVE_01_ruins.pmm`）。 |
+| 「各ステージのボスを倒すと次のステージに進める」→ 攻略分 **1WAVE–4WAVE** | **吻合**。恰好 `wave_index` 1..4。 |
+| 「**シールドHP**が0になるとゲームオーバー」 | ⚠ 檔案有 `siege_dmg_rate` 疑似對應，但如上所述**該欄在 native 中是死的**。護盾機制本身存在（Wiki 另述左側 gauge 可展開 3 秒護盾），但**此表並未實際調整它**。 |
+| 「2013-12-11 と 12-25 に**難易度の下方調整**」 | **無法驗證**，本 extraction 只有單一版本快照，無從比對調整前後。維持 UNRESOLVED。 |
+
+四項結構性敘述全部吻合，是本專案第**五**次 Wiki 結構被資源證實。
+
+### 界線
+
+本表只是**客戶端持有的一份平衡參數**。敵人實際 HP／傷害由誰計算、
+波次推進與 boss 判定、報酬（Wiki 述「称号と福袋、スコア順に選べる」）
+**全無 client 證據**，維持 UNRESOLVED。
+
 ## 6. 其他已知資源
 
 - `system/map_StartIndex.xml`, `SelectRandomMap.xml`: 地圖選擇
-- `ui/system/AI/*.xml`: AI 模式劇本 (BotWave/BotPath/Scenario)
+- `ui/system/AI/*.xml`: AI 模式劇本 (BotWave/BotPath/Scenario);
+  其中 `AiMultiLevel.xml` 是**唯一的數值平衡表** (PvE 難度縮放, 見 §5d-25)
 - `Options.cfg`, `CustomMap.cfg`, `LastConnect.ini`: 本機設定 (非資源)
 - `map/gameobject.dat`: **戰場掉落物總表** (105 筆, 明文; 見 §5d-21)
 - `ui/durable_ability.xml`: **武器耐久衰減曲線** (6 軸 × per100..per10; 見 §5d-23)

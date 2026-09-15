@@ -220,6 +220,12 @@ def main() -> None:
         check(f"{TOURNAMENT_READER} reads a single conditional s32",
               tournament.count("sub_592A40("), 1)
 
+    # RESOURCES.md 5d-25: the exe reads shilddamage_rate; AiMultiLevel.xml
+    # ships siege_dmg_rate. Pin BOTH halves so the mismatch cannot silently
+    # be "fixed" in the notes while the binary still disagrees.
+    check("exe reads shilddamage_rate", text.count('L"shilddamage_rate"'), 1)
+    check("exe never mentions siege_dmg_rate", 'siege_dmg_rate' in text, False)
+
     # The failure-arm texts, through the documented decode rule.
     entries = message_entries()
     if entries is None:
