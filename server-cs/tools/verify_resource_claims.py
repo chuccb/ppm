@@ -802,6 +802,56 @@ def main() -> None:
         check("per-character movespeed values", speeds,
               ["85", "86", "87", "88", "90"])
 
+    # RESOURCES.md 5c-2b: the 153051xx band is voice merchandise, encoded as
+    # set-in-the-tens and character-ordinal-in-the-units, and the paper-slot
+    # ranges from 5c-2 are checked semantically against the item names.
+    itemdata = EXTRACTED / "ui" / "cfg" / "itemdata.pat"
+    if not itemdata.is_file():
+        skipped.append("ui/cfg/itemdata.pat")
+    else:
+        blob = decrypt(itemdata)
+        total = struct.unpack_from("<I", blob, 4)[0]
+        catalog: dict[int, str] = {}
+        for index in range(total):
+            base = 8 + 997 * index
+            ident = struct.unpack_from("<I", blob, base)[0]
+            catalog[ident] = blob[base + 20:base + 140].decode(
+                "utf-16le", "replace").split("\0")[0]
+        check("itemdata self-check", 8 + total * 997, len(blob))
+
+        voices = {ident: name for ident, name in catalog.items()
+                  if 15305101 <= ident <= 15305300}
+        check("voice merchandise records", len(voices), 85)
+        check("every record in the band is a named voice item",
+              [ident for ident, name in voices.items()
+               if not re.search(r"\(Voice [^)]+\)", name)], [])
+        # Units digit is the character ordinal: one name per digit, no clashes.
+        by_digit: dict[int, set[str]] = {}
+        for ident, name in voices.items():
+            by_digit.setdefault(ident % 10, set()).add(name.split("(")[0])
+        check("units digit maps to exactly one character each",
+              sorted(digit for digit, names in by_digit.items()
+                     if len(names) != 1), [])
+        check("voice character ordinals",
+              [sorted(by_digit[digit])[0] for digit in sorted(by_digit)],
+              ["ハヤテ", "ティナ", "ミリィ", "サイラス", "ドッドン",
+               "ガイ", "テリシア", "アルル", "ヴァン"])
+
+        def band(low: int, high: int) -> list[int]:
+            return sorted(i for i in catalog if low <= i <= high)
+
+        check("CROSSHAIR slot population", len(band(15305001, 15305100)), 43)
+        check("NAME slot population", len(band(15304001, 15305000)), 421)
+        check("MASTER and ABILITY slots are empty in this revision",
+              [len(band(15305301, 15305400)), len(band(15305401, 15305600))],
+              [0, 0])
+        check("BOOST_EXP items", [catalog[i] for i in band(15305601, 15305700)],
+              ["EXP +10%UP", "EXP +30%UP", "EXP +50%UP"])
+        check("BOOST_PG items", [catalog[i] for i in band(15305701, 15305800)],
+              ["PG +10%UP", "PG +30%UP", "PG +50%UP"])
+        check("extra-ability slot population",
+              len(band(15305801, 15306000)), 13)
+
     # Every datarevision.txt must agree: Extracted/ is one coherent snapshot.
     revisions = {path.read_text(encoding="utf-8", errors="replace").strip()
                  for path in EXTRACTED.rglob("datarevision.txt")}
