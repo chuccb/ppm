@@ -19,10 +19,11 @@ from __future__ import annotations
 import csv
 import re
 import struct
+import subprocess
 import sys
 from collections import Counter
 from xml.etree import ElementTree
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parents[2]
 EXTRACTED = ROOT / "Extracted"
@@ -899,6 +900,41 @@ def main() -> None:
         check("Cyrus chain surrounds it normally",
               [plain(titles[i]) for i in (15304615, 15304617, 15304621)],
               ["ストレンジャー", "ストレンジャーII", "サイラスラバー"])
+
+    # RESOURCES.md 5c-2d: every character voice pack is a complete 3x9 radio
+    # grid, matching the wiki's Z/X/V key table with no gaps.
+    # The wav payloads are far too large to vendor, so the grid is re-derived
+    # from the main-branch tree listing rather than from local files.
+    sound_root = ROOT / "Extracted" / "sound"
+    radio_names: list[str] = []
+    if sound_root.is_dir():
+        radio_names = [str(path) for path in sound_root.rglob("Radio_Message/*/*.wav")]
+    if not radio_names:
+        listing = subprocess.run(
+            ["git", "ls-tree", "-r", "main", "--name-only"],
+            cwd=ROOT, capture_output=True, text=True)
+        radio_names = [line for line in listing.stdout.split("\n")
+                       if "Radio_Message/" in line and line.endswith(".wav")]
+    if not radio_names:
+        skipped.append("sound/*/Radio_Message")
+    else:
+        radio_files = [PurePosixPath(name.replace("\\", "/"))
+                       for name in radio_names]
+        grid: dict[tuple[str, str], dict[str, set[int]]] = {}
+        for path in radio_files:
+            pack = path.parents[2].parent.name
+            character = path.parents[2].name.lower()
+            matched = re.match(r"(.+)_(\d+)\.wav$", path.name, re.I)
+            category = matched.group(1).lower().rsplit("_", 1)[-1]
+            grid.setdefault((pack, character), {}).setdefault(
+                category, set()).add(int(matched.group(2)))
+        check("radio wav files", len(radio_files), 1044)
+        check("character voice packs", len(grid), 38)
+        expected = {"command": set(range(1, 10)),
+                    "tactics": set(range(1, 10)),
+                    "information": set(range(1, 10))}
+        check("every pack is a complete 3x9 grid",
+              sorted(key for key, cats in grid.items() if cats != expected), [])
 
     # Every datarevision.txt must agree: Extracted/ is one coherent snapshot.
     revisions = {path.read_text(encoding="utf-8", errors="replace").strip()

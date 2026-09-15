@@ -328,6 +328,17 @@ def main() -> None:
                              "sniperbackimgidx", "sniperviewimgidx")
            if name in text], [])
 
+    # RESOURCES.md 5c-2d: radio lines use the caller's exact index while the
+    # other voice categories randomise, and a missing file falls back to the
+    # default voice pack.
+    check("radio uses the Radio_Message folder",
+          'L"Radio_Message"' in text, True)
+    check("voice path template",
+          text.count('L"%s\\\\%s\\\\%s\\\\%s_%s\\\\%s_%s_%02d.wav"') >= 1, True)
+    # The randomising arm exists for non-radio categories only.
+    check("non-radio voice categories randomise",
+          "rand() % n6_1 + 1" in text, True)
+
     # The failure-arm texts, through the documented decode rule.
     entries = message_entries()
     if entries is None:
