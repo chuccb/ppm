@@ -1671,12 +1671,126 @@ FINISH_MAIN / SUB / NEAR / BOMB / SNIPER _WEAPON            <- attack_1..5
 `success`/`fail` 只是字串常數。無任何伺服器欄位，
 **不得據此推斷伺服器對教學進度有驗證**。
 
+## 5d-23. `ui/durable_ability.xml`：武器耐久度的**性能衰減曲線**（本輪首解）
+
+這是目前為止**與 Wiki 吻合度最高**的一張表：不只結構，連**啟動門檻的數值**都對得上。
+
+### 格式（`CDurableAbility`，Fact / HIGH）
+
+載入者 `sub_9999E0` @ `0x9999E0` 以 `L"durable_ability.xml"` 讀入（明文）。
+`CDurableAbility::sub_999A70` @ `0x999A70` **白名單**六個節點名
+（`aiming`／`recoil`／`shotvelocity`／`reload`／`power`／`distance`），
+其餘一律忽略；`sub_999EB0` @ `0x999EB0` 逐一讀 `per100..per10` **十欄**
+存入 `this + 10*axis + 2..11`，並以 `if (n6 >= 6) return 0` 硬限**六軸**。
+
+**軸索引由呼叫端固定（Fact / HIGH）**：`0x320264` 起的 `switch` 依序以
+`0=aiming 1=recoil 2=shotvelocity 3=reload 4=power 5=distance` 呼叫，
+與檔案節點順序**一致**。
+
+### 存取函式揭露了真正的語義（Fact / HIGH）
+
+```c
+double sub_999A30(float *this, int axis, int n10) {
+  if (this == nullptr) return 1.0;      // 表缺失 → 中性值 1.0
+  if (n10 < 10) return tbl[axis][n10];  // per100=slot0 … per10=slot9
+  return tbl[axis][9];                  // n10>=10 一律夾到 per10
+}
+```
+
+呼叫端一律傳 `n10 = (1.0f - ratio) * 10.0f`，`ratio` = **剩餘耐久比例**。
+因此屬性名 `per<N>` 就是**剩餘耐久百分比**，而回傳值是**衰減量**（非乘數）：
+
+| 耐久 | `(1-r)*10` | 索引 | 取用欄 |
+|---:|---:|---:|---|
+| 100% | 0.0 | 0 | `per100` |
+| 30% | 7.0 | 7 | `per30` |
+| **21%** | 7.9 | **7** | **`per30`（＝0，無衰減）** |
+| **20%** | 8.0 | **8** | **`per20`（首次非 0）** |
+| 19% | 8.1 | 8 | `per20` |
+| 10% | 9.0 | 9 | `per10` |
+| 0% | 10.0 | 10 | 夾到 `per10` |
+
+### 表值：前八欄全 0，衰減只在最後兩檔
+
+| 軸 | per100…per30 | per20 | per10 |
+|---|---|---:|---:|
+| `aiming` | 全 **0** | 0.15 | 0.90 |
+| `recoil` | 全 **0** | 0.1 | 0.12 |
+| `shotvelocity` | 全 **0** | 0.15 | 0.5 |
+| `reload` | 全 **0** | **0** | **0** |
+| `power` | 全 **0** | 0.3 | 0.9 |
+| `distance` | 全 **0** | 0.3 | 0.5 |
+
+### 與 Wiki 的比對：**數值級的吻合**
+
+[武器耐久値情報](https://wikiwiki.jp/paperman/武器耐久値情報)（2016-03-19）寫：
+「**耐久値が19％の時点から性能低下（威力、精度、連射速度）が始まります**」
+「**ただし20％までなら武器の性能は変わりません**」。
+
+- **門檻吻合。** 檔案 `per100..per30` **六軸全為 0**，首個非 0 是 `per20` ——
+  即「約 20% 以上無任何衰減」。這是本專案第四次、也是**第一次在「數值門檻」
+  層級**證實 Wiki（前三次為 skill 門檻、掉落物分類、錦標賽階段，皆為結構性）。
+- **衰減項目吻合。** Wiki 點名「威力、精度、連射速度」三項，
+  檔案的 `power`／`aiming`／`shotvelocity` 恰為**非 0 且數值最大**的三軸
+  （per10 = 0.9／0.9／0.5），而 `recoil` 僅 0.12、`reload` **恆為 0**。
+  換言之 Wiki 只列了「玩家感受得到」的三項，與檔案的權重排序一致。
+- **一處 off-by-one，Wiki 略有出入。** Wiki 同時寫「19% 開始」與
+  「20% までなら変わらない」，兩句本身互相矛盾。native 的截斷計算給出
+  **精確答案：21% 仍取 `per30`（無衰減），20% 起取 `per20`（開始衰減）**。
+  所以正確說法是「**20% 起**衰減」，Wiki 的「19%」偏低 1 個百分點，
+  「20%までなら変わらない」若解為「>20% 才不變」則正確。
+  這類 off-by-one 只有靠 native 的整數截斷才能定案。
+
+### 界線
+
+`sub_999A30` 回傳值只在**客戶端的彈道／傷害顯示計算**中使用。
+Wiki 所述的「修理費 50PG / 3CASH」「武器種別基準耐久 C–SS」
+「中途退出扣主武器 ~1%／副武器 ~0.5%」**全部無 client 證據**
+（耐久值本身由伺服器下發，見 §3.12c 庫存條目的 `u16 dura/dura_max`），
+維持 UNRESOLVED。**不得據本表推導伺服器的耐久扣減或修理定價。**
+
+## 5d-24. `ui/commonProperty.xml`：狀態效果參數表（結構已解，**對應關係刻意未定案**）
+
+載入者 `sub_995500` @ `0x995500`；`CCommonProperty::sub_995640` @ `0x995640`
+以 `if (n0x1E >= 0x1E) return 0` 限制**最多 30 筆**，每筆 **44 B**
+（`this + 11*i + 4..14`），欄位依序
+`speed`／`mouse`／`armor`／`time`／`keyboard_reverse`／`mouse_reverse`／
+`jump`／`GunFacilityLimit`／`duplicate`(u8)／`senser`／`senser_shadow`。
+**容量 30，檔案只給 17 筆** —— 與 §5d-20 的 alpha 迴圈（讀 7 給 6）同一種
+「預留容量大於實際資料」的模式，不代表缺檔。
+
+節點名是**序數英文字**（`NONE`/`ONE`/…/`SIXTEEN`），parser **不比對名稱**，
+純以出現順序當索引（`sub_995560` 傳 `i`）。因此**節點名只是註解，順序才是鍵**。
+
+**一個看似成立、實測不成立的對應（刻意標為 UNRESOLVED）。**
+`ui/UIWeaponEffectIcon.xml` 的 `key='0..21'` 帶有註解名
+（`NONE`/`NORMAL_DAMAGE`/`HEAL`/`SPEED_UP`/`SPEED_DOWN`/`FREEZE`/…），
+索引 0..16 與本檔筆數對得上，且有兩處強力吻合：
+
+- `index 5` 是**唯一**設 `keyboard_reverse`/`mouse_reverse`(1700) 的一筆 ↔ `FREEZE`
+- `index 8` 是**唯一**設 `jump=1000` 且 `speed=mouse=0` 的一筆 ↔ `FIRE`
+
+**但它通不過自己的檢驗**：`index 3` ↔ `SPEED_UP` 的 `speed=400`
+**低於** `NONE` 基準 1000（＝變慢），而 `index 4` ↔ `SPEED_DOWN`
+的 `speed=2500` **高於**基準（＝變快）—— 兩者**恰好相反**。
+若兩檔共用同一列舉，這兩格不可能反向。故**對應關係不成立或 `speed`
+並非所設想的方向**，兩種可能都未被排除，**維持 UNRESOLVED，不寫入對照表**。
+（記錄此否證，是為了讓後人不必重做這條死路。）
+
+### 界線
+
+本檔僅供客戶端套用狀態效果的移動／視角／護甲參數。
+哪個 opcode 指派哪個 index、效果由誰裁決，**無 client 證據**，維持 UNRESOLVED。
+
 ## 6. 其他已知資源
 
 - `system/map_StartIndex.xml`, `SelectRandomMap.xml`: 地圖選擇
 - `ui/system/AI/*.xml`: AI 模式劇本 (BotWave/BotPath/Scenario)
 - `Options.cfg`, `CustomMap.cfg`, `LastConnect.ini`: 本機設定 (非資源)
 - `map/gameobject.dat`: **戰場掉落物總表** (105 筆, 明文; 見 §5d-21)
+- `ui/durable_ability.xml`: **武器耐久衰減曲線** (6 軸 × per100..per10; 見 §5d-23)
+- `ui/commonProperty.xml`: **狀態效果參數表** (17 筆 × 44B, native 容量 30; 見 §5d-24)
+- `ui/UIWeaponEffectIcon.xml`: 狀態效果圖示切片 (key 0..21 附註解名)
 - `ui/tutorial*.xml` / `Tutorial_*.xml`: 教學版面檔 (15 個中 14 個純 msprite/button;
   唯一含關卡資料的是 `tutorial_contents.xml`, 見 §5d-22)
 - `TNMT_*.xml`: 錦標賽 UI 資料

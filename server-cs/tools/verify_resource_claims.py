@@ -482,6 +482,60 @@ def main() -> None:
                       "FINISH_NEAR_WEAPON", "FINISH_BOMB_WEAPON",
                       "FINISH_SNIPER_WEAPON"]))
 
+    # RESOURCES.md 5d-23: the durability falloff curve. The wiki's "performance
+    # drops from 19%" is really "from 20%", because the accessor index is a
+    # truncated (1 - ratio) * 10 -- so the all-zero prefix is the real claim.
+    durable = EXTRACTED / "ui" / "durable_ability.xml"
+    if not durable.is_file():
+        skipped.append("ui/durable_ability.xml")
+    else:
+        curve = ElementTree.parse(durable).getroot()
+        check("durable_ability axis order", [node.tag for node in curve],
+              ["aiming", "recoil", "shotvelocity", "reload", "power", "distance"])
+        columns = [f"per{step}" for step in range(100, 0, -10)]
+        rows = {node.tag: [float(node.get(name)) for name in columns]
+                for node in curve}
+        check("durable_ability columns per axis",
+              sorted({len(values) for values in rows.values()}), [10])
+        # No penalty at all above 20% remaining. Pin the zero prefix by its
+        # LENGTH too, so shortening the window cannot silently pass.
+        check("durable_ability zero-penalty prefix length",
+              sorted({next((index for index, value in enumerate(values) if value),
+                           len(values)) for values in rows.values()
+                      if any(values)}), [8])
+        check("durable_ability has no penalty above 20% durability",
+              {axis: values[:8] for axis, values in rows.items()
+               if any(values[:8])}, {})
+        check("durable_ability per20 column",
+              {axis: values[8] for axis, values in rows.items()},
+              {"aiming": 0.15, "recoil": 0.1, "shotvelocity": 0.15,
+               "reload": 0.0, "power": 0.3, "distance": 0.3})
+        check("durable_ability per10 column",
+              {axis: values[9] for axis, values in rows.items()},
+              {"aiming": 0.9, "recoil": 0.12, "shotvelocity": 0.5,
+               "reload": 0.0, "power": 0.9, "distance": 0.5})
+        # reload is the one axis that never degrades.
+        check("durable_ability reload never degrades",
+              [axis for axis, values in rows.items() if not any(values)],
+              ["reload"])
+
+    # RESOURCES.md 5d-24: commonProperty rows are keyed by position, and the
+    # tempting UIWeaponEffectIcon mapping is recorded as disproved -- index 3
+    # and 4 would make SPEED_UP slower and SPEED_DOWN faster than the baseline.
+    common = EXTRACTED / "ui" / "commonProperty.xml"
+    if not common.is_file():
+        skipped.append("ui/commonProperty.xml")
+    else:
+        effects = ElementTree.fromstring(common.read_text("cp932", "replace"))
+        check("commonProperty rows", len(effects), 17)
+        check("commonProperty baseline row", effects[0].tag, "NONE")
+        baseline = int(effects[0].get("speed"))
+        check("commonProperty baseline speed", baseline, 1000)
+        check("commonProperty index 3 is slower than baseline, not faster",
+              int(effects[3].get("speed")) < baseline, True)
+        check("commonProperty index 4 is faster than baseline, not slower",
+              int(effects[4].get("speed")) > baseline, True)
+
     # Every datarevision.txt must agree: Extracted/ is one coherent snapshot.
     revisions = {path.read_text(encoding="utf-8", errors="replace").strip()
                  for path in EXTRACTED.rglob("datarevision.txt")}
