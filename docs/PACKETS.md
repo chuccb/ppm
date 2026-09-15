@@ -1391,9 +1391,12 @@ sub_44DA70), +110 u16 slot_mask (sub_53FB10 展開 +112..+127 逐槽
 Cy*ModeLobbyUI), +136 time, +144 u16 win, +146 (存而不讀),
 +148 u16 kill, +150 (存而不讀), +185 (bool)。
 
-私服落地 (Handlers.Join.cs): 260/262/264 → 261/263/265 完整;
-266 → 267 依 flag 回 code; 268 → 269 回 code 0 (無進行中遊戲狀態機,
-code 6/7 成功態留待後續, 不硬編未確認欄位)。
+**目前 server compatibility 實作（不是 original-service battle policy）**：
+`Handlers.GL_JOIN.cs` / `GL_JOINPASS.cs` / `GL_JOININFO.cs` 完成 260/262/264
+→ 261/263/265；`Handlers.GL_JOINGAME.cs` 依 flag 回 267 code；對找到的 process-local
+Room，`Handlers.GL_JOINPLAY.cs` 的 flag 0 先加入空 slot 再回 269 code 6 自身快照，flag 1
+回 code 7 全房快照。這只實作 native reader 已定案的 payload shape，**不**證明原始服務的
+進行中戰局 authority、計分、存檔或其他未觀察到的成功 policy。
 
 ### 3.15c3 倉庫五連 855-863 (廿二輪 + 卌八輪補完 — n11==19 倉庫場景)
 ```

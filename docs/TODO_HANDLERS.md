@@ -93,10 +93,11 @@
 > 其中 +408/+410/+416 全程無讀者 (送 0 安全), +409 map/+411 time/
 > +412 round/+414 item 由 sub_515DE0 顯示; 267 = u8 code u8 flag
 > (code 0=玩家/1=觀戰); 268 = u8 room_no u8 flag (0=PLAY/1=OBSERVE);
-> 269 code 6=玩家自身快照 / 7=觀戰全房快照。落地 Handlers.Join.cs:
-> 260/262/264 → 261/263/265 完整 (房單進房 + 密碼關卡 + 房資訊);
-> 266 → 267 依 flag 回 code; 268 → 269 回 code 0 (無遊戲狀態機,
-> code 6/7 成功態留待後續, 不硬編未確認欄位)。詳 PACKETS.md §3.15f。
+> 269 code 6=玩家自身快照 / 7=觀戰全房快照。當時落地（現 source 為
+> Handlers.GL_JOIN*.cs）: 260/262/264 → 261/263/265 完整 (房單進房 + 密碼關卡 +
+> 房資訊); 266 → 267 依 flag 回 code; 268 → 269 初始僅回 code 0。後者已在五十二輪以
+> reader-proven code 6/7 snapshot 實作取代；沒有因此宣稱 original-service battle
+> authority。詳 PACKETS.md §3.15f。
 >
 > 五十輪 (comm 簇落地 — 437/438、378/379、726/727、836/837、439-442):
 > 逐函數定案並實作 — 378/379 radio (u8 team, u8 face 頁*9+項目, u8 slot,
