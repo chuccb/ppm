@@ -128,9 +128,11 @@
 > ④ **269 GL_JOINPLAY_ACK 成功態全落地**: 268 PLAY(flag=0) → code 6
 >    (自身完整快照, 含 85B 語音塊); 268 OBSERVE(flag=1) → code 7
 >    (全房+全成員快照, 含 85B 語音塊)。
-> ⑤ **錦標賽 764/765 與配對房 983/984/988/989 落地**:
->    764 → 765 (與 114 同構, 錦標賽進房); 983 → 984 (配對建立);
->    988 → 989 (配對取消)。
+> ⑤ **錦標賽 764/765 與配對房 983/984/988/989**:
+>    764 → 765 (與 114 同構, 錦標賽進房)。當時也曾把 983 → 984、
+>    988 → 989 記為已落地；後續 source review 確認這兩項只有 client
+>    grammar／reader，沒有 matching queue、membership 或 result ownership。現行 server
+>    已撤銷 983/988 註冊，改列 current evidence，不能以成功 ACK 偽造配對狀態。
 > ⑥ **自測與 DB 測試**: SelfTest 增測 791-796 / 378 / 114 / 269 語音塊;
 >    smoke_test.py 增測 voice_customize 與 voice_slots CRUD 及約束。
 >
@@ -161,7 +163,10 @@
 >    - Current server only emits client-safe failure arms with no mutation; see `PACKETS.md` §3.98a.
 > ⑤ **房間管理與投票 (131/132, 718-722)**:
 >    - 131/132: 房主強制踢人 (廣播 132 ACK 並移除 slot 成員);
->    - 718-722: 踢人投票流程 (718 REQ → 719 ACK → 720 全房倒數廣播 → 721 表決 → 722 結算)。
+>    - 當時曾將 718-722 寫成踢人投票成功流程；後續 source review 確認只有
+>      client writer／reader，沒有 original-service vote ownership、累計、timer 或
+>      result evidence。現行 server 已撤銷 718/721 註冊，改列 current evidence，
+>      不再以固定 30 秒或預設結果偽造功能。
 > ⑥ **自測與驗證**: SelfTest 增測 23 項封包編解碼; smoke_test 增測 Step 14 CRUD; 全測試 100% 通過。
 >
 > 五十五輪 (GM / MASTER、GameCenter 迷你遊戲、PVE / AI 防衛戰 37 個封包全鏈落地):
@@ -265,6 +270,13 @@
 >    parser 做欄位對照，再決定使用既有 `clan_tournaments`/entries schema 的範圍。
 > 6. 以 OCC 實包驗證 `CaptureParticipantCount` 是否可由位置聚合增加到 2，以及
 >    908 的可發送條件；目前只有單一已驗證 start actor，不能硬編成 team/slot。
+> 7. 重建配對房與投票的 service state，才可恢復 718/721 與 983/988：目前只知道
+>    718 的三個 `s32`、721 的 `s8`、983 的 client builder 與 988 的空 request，以及
+>    719/720/722/984/989 的 client reader。還缺 request target/initiator 與實際 session 的
+>    server-side binding、eligible voters、duplicate/timeout/cancel、matching queue/membership
+>    ownership、每個 status/result 值在 original service 的觸發條件與成功後的 next state；
+>    取得同 revision capture 或原服 caller/state evidence 前，不得送 success ACK、固定
+>    timer 或預設 outcome。
 
 ## Unimplemented request inventory
 
@@ -301,6 +313,8 @@
 | 708 | GL_CHECKCASHPG_REQ | `s32` |
 | 714 | GG_INVALIDWPDATA_REQ | `u8 u8 u8 str s32` |
 | 716 | GG_CHANGEWPQUICKSLOT_REQ | `s16 s16 s16 s16` |
+| 718 | GR_START_VOTING_REQ | `s32 s32 s32` — client grammar/reader only; vote ownership、timer、result state unresolved, deliberately unregistered |
+| 721 | GR_DO_VOTING | `s8` — client grammar/reader only; requires an evidenced active-vote state before implementation |
 | 724 | GL_COMBISKILLITEM_REQ | `s32 s32 s32 s32` |
 | 730 | GG_GETPULP_REQ | `u8` |
 | 733 | GG_SPAWNPULP_REQ | `(空)` |
@@ -333,4 +347,6 @@
 | 887 | GX_XIGNCODE_DATA_REQ | `rawN` |
 | 890 | GC_QUERY_CLANRANKING_REQ | `(空)` |
 | 892 | MASTER_RELOAD_CLANRANKING_REQ | `(空)` |
+| 983 | GL_MATCHINGROOM_MAKE_REQ | `u8 str s32 u8×9` — client success reader exists, but queue/membership/state ownership is unresolved; deliberately unregistered |
+| 988 | GL_MATCHINGROOM_CANCLE_REQ | `(空)` — cancellation result/state ownership unresolved; deliberately unregistered |
 

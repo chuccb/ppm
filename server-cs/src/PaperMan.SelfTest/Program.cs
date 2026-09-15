@@ -824,6 +824,34 @@ bool IsNative311FailureAcknowledgement(Packet acknowledgement)
             Packet udpStartAcknowledgement = await ReadServerPacketAsync(clientPeer.GetStream(), channelCodec);
             Packet enterChannelAcknowledgement = await ReadServerPacketAsync(clientPeer.GetStream(), channelCodec);
 
+            // The client grammar for vote/matching requests is known, but the
+            // original service state is not. Keep those operations unmapped
+            // rather than sending a fabricated success response.
+            bool unsupportedRoomWorkflowsAreUnmapped =
+                !await router.DispatchAsync(
+                    channelSession,
+                    new Packet(Opcode.GR_START_VOTING_REQ).WriteS32(0).WriteS32(0).WriteS32(0),
+                    channelContext)
+                && !await router.DispatchAsync(
+                    channelSession,
+                    new Packet(Opcode.GR_DO_VOTING).WriteS8(0),
+                    channelContext)
+                && !await router.DispatchAsync(
+                    channelSession,
+                    new Packet(Opcode.GL_MATCHINGROOM_MAKE_REQ)
+                        .WriteU8(0).WriteStr("").WriteS32(0)
+                        .WriteU8(0).WriteU8(0).WriteU8(0).WriteU8(0).WriteU8(0)
+                        .WriteU8(0).WriteU8(0).WriteU8(0).WriteU8(0),
+                    channelContext)
+                && !await router.DispatchAsync(
+                    channelSession,
+                    new Packet(Opcode.GL_MATCHINGROOM_CANCLE_REQ),
+                    channelContext);
+            Check("unresolved voting and matching workflows remain unregistered",
+                selectionWasProcessed
+                && channelSession.ChannelEntryCompleted
+                && unsupportedRoomWorkflowsAreUnmapped);
+
             bool shopEnterWasProcessed = await router.DispatchAsync(
                 channelSession,
                 new Packet(Opcode.GL_SHOPIN_REQ),
@@ -1830,9 +1858,10 @@ foreach (var (_, codec) in codecs)
     var p132 = new Packet(Opcode.GR_FORCEOUT_ACK).WriteU8(1).WriteU8(3);
     Check("132 Forceout ACK", p132.ReadU8() == 1 && p132.ReadU8() == 3);
 
-    // 718-722 Voting
+    // 720 voting notification wire grammar. Server-side vote ownership, timer,
+    // and result policy remain unimplemented; this is not a handler success test.
     var p720 = new Packet(Opcode.GR_START_VOTING).WriteS32(2).WriteS32(1).WriteS32(0).WriteS32(30).WriteU8(0);
-    Check("720 Start Voting broadcast", p720.Length == 17 && p720.ReadS32() == 2);
+    Check("720 Start Voting broadcast wire", p720.Length == 17 && p720.ReadS32() == 2);
 
     // 423/424 Msg Read
     var p424 = new Packet(Opcode.GL_MSG_READ_ACK).WriteU8(1).WriteStr("101");
