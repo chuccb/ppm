@@ -988,6 +988,37 @@ slot 2(MASTER)/3(ABILITY) 在本 revision **無任何商品**，
 與 §5d-7 `ICT_DEVILGIRL` 缺 convars 同屬「後期角色周邊資源逐步缺席」，
 但依 §5d-7 自己的告誡，這是**逐檔案**觀察，**不推廣成通則**。
 
+### 5b-33. 第廿九輪：稱號鏈 —— Wiki 的一處「疑似筆誤」被資源檔逐字證實
+
+接上輪的 NAME 段（421 筆），本輪以
+[称号一覧](https://wikiwiki.jp/paperman/称号一覧)（2018-08-29）逐項對照。
+這是本專案目前**雙向印證最密**的一次：Wiki 補足了資源檔沒有的取得條件，
+資源檔則證實了 Wiki 一處看起來像錯字的記載。
+詳 [`RESOURCES.md` §5c-2c](RESOURCES.md)。
+
+| Wiki 敘述 | 比對結果 |
+|---|---|
+| 「キャラクター限定」鏈式解鎖：`base →(持有前者) I→II→III→IV→V → ○○ラバー`，各階 1日/7日/30日 | **結構完全吻合**。資源側有 **14 條鏈、每條恰好 7 個連續 id**，且順序與 §5d-6 角色表**逐項相同**；前 12 條更是等距區塊 `15304594..15304677` 無間斷。 |
+| サイラス 鏈第 2 階寫作 **`包帯I`**（而非 `ストレンジャーI`） | **逐字印證**。`15304616` 的品名正是 `包帯I`。若只看命名規律會判定 Wiki 筆誤 —— 但檔案同樣破格。⇒ **鏈以 id 位置定義，名稱可破格**，不可用名稱樣式反推結構。 |
+| イベント称号 13 個 | **12/13 命中**（`1周年記念` 檔案作全形 `１周年記念`）。唯一差異 `アイ・カフェ特務賞` 檔案作 `アイカフェ特務章`（無中點、賞→章），屬 §5b-19 同類的原廠用字差異。 |
+| 取得條件（戰鬥 1000 回、排名前 10/100、來場特典）與各階天數 | **client 無任何證據**，全屬 server policy，維持 UNRESOLVED。 |
+
+**Wiki 沒有、資源檔獨有的一項：顯示色。**
+413/421 筆品名格式為 `<標題>’#RRGGBB’`，共 **141 種顏色**。
+Wiki 只貼稱號圖片、**完全未記色碼** —— 這是資源側單方面的補充。
+
+**兩筆原廠瑕疵，但我沒有宣稱後果。**
+`15304114` 與 `15304166` 的色彩標記**開頭誤用 ASCII `'` 而非 U+2019**
+（結尾仍正確），全段僅此 2 筆不對稱。
+本輪**未能在 exe 中定位該標記的 parser**，所以
+**「是否會顯示成字面字元」維持 UNRESOLVED** —— 只記錄資源側事實。
+（對照 §5b-24：找不到消費端時，就不要替它猜行為。）
+
+**第三次指向同一個角色。** ルーシー(devilgirl，序號 15) **沒有稱號鏈**，
+加上 §5d-7 缺 convars、§5c-2b 缺語音商品 —— **三個互不相干的檔案一致缺席**，
+比單一檔案缺漏有力得多。但仍依 §5d-7 的告誡**不推廣成通則**：
+エリス／ルコット 實裝更晚，卻都有完整的 7-id 鏈。
+
 ### 5b-5. 兩項「僅 Wiki、刻意不採用」的記錄
 
 - **房間資訊欄位。** [MAP・ルール詳細](https://wikiwiki.jp/paperman/MAP・ルール詳細)
@@ -1007,6 +1038,9 @@ slot 2(MASTER)/3(ABILITY) 在本 revision **無任何商品**，
 - 根導航／分類：[首頁](https://wikiwiki.jp/paperman/)、[page index](https://wikiwiki.jp/paperman/::cmd/list)
 - 商店與取得：[通常ショップ武器一覧](https://wikiwiki.jp/paperman/通常ショップ武器一覧)、[ペーパチ詳細](https://wikiwiki.jp/paperman/ペーパチ詳細)、[ペーパチ CASH](https://wikiwiki.jp/paperman/ペーパチCASH詳細)、[ペーパチ PG](https://wikiwiki.jp/paperman/ペーパチPG詳細)、[福袋詳細](https://wikiwiki.jp/paperman/福袋詳細)、[ペーパーガッチャン詳細](https://wikiwiki.jp/paperman/ペーパーガッチャン詳細)、[ペーパダスEX詳細](https://wikiwiki.jp/paperman/ペーパダスEX詳細)、[パッケージ詳細](https://wikiwiki.jp/paperman/パッケージ詳細)、[シリアルコード詳細](https://wikiwiki.jp/paperman/シリアルコード詳細)
 - 持久化與選擇：[ひよこ用/ゲーム起動編](https://wikiwiki.jp/paperman/ひよこ用/ゲーム起動編)、[階級関連](https://wikiwiki.jp/paperman/階級関連)、[ペーパースロット詳細](https://wikiwiki.jp/paperman/ペーパースロット詳細)、[称号一覧](https://wikiwiki.jp/paperman/称号一覧)、[ラジオチャット一覧](https://wikiwiki.jp/paperman/ラジオチャット一覧)、[ペーパズル](https://wikiwiki.jp/paperman/ペーパズル)、[スキル一覧](https://wikiwiki.jp/paperman/スキル一覧)、[ペーパズル合成](https://wikiwiki.jp/paperman/ペーパズル/合成)、[ペーパズルリスト](https://wikiwiki.jp/paperman/ペーパズル/リスト)、[キャラクター一覧](https://wikiwiki.jp/paperman/キャラクター一覧)、[リサイクルシステム](https://wikiwiki.jp/paperman/リサイクルシステム)、[武器耐久値情報](https://wikiwiki.jp/paperman/武器耐久値情報)
+- **第廿九輪新增**：[称号一覧](https://wikiwiki.jp/paperman/称号一覧)（2018-08-29）—
+  活動／購入／クエスト／キャラクター限定 四類稱號，含鏈式解鎖與各階天數；
+  對應 `itemdata.pat` NAME 段 `15304001..15305000`（見 §5b-33）。
 - 對戰／社交：[MAP・ルール詳細](https://wikiwiki.jp/paperman/MAP・ルール詳細)、[出現アイテム一覧](https://wikiwiki.jp/paperman/出現アイテム一覧)、[名誉ゲージ](https://wikiwiki.jp/paperman/名誉ゲージ)、[クエストシステム](https://wikiwiki.jp/paperman/クエストシステム)、[クラン](https://wikiwiki.jp/paperman/クラン)、[PvEモード](https://wikiwiki.jp/paperman/PvEモード)、[アシストポイント機能](https://wikiwiki.jp/paperman/アシストポイント機能)、[戦闘中のキャラ情報](https://wikiwiki.jp/paperman/戦闘中のキャラ情報)、[武器移動速度](https://wikiwiki.jp/paperman/武器移動速度)
 
 **第二輪（本節 §5b 的來源）。** 服務已於 2016-12-26 12:00 終止（首頁公告），

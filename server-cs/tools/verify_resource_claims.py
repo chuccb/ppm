@@ -852,6 +852,54 @@ def main() -> None:
         check("extra-ability slot population",
               len(band(15305801, 15306000)), 13)
 
+    # RESOURCES.md 5c-2c: the title band. Fourteen character chains of seven
+    # contiguous ids each, matching the wiki's unlock ladder, plus the colour
+    # markup and its two malformed records.
+    if itemdata.is_file():
+        titles = {ident: name for ident, name in catalog.items()
+                  if 15304001 <= ident <= 15305000}
+        check("title band records", len(titles), 421)
+
+        def plain(name: str) -> str:
+            return re.sub(r"[\u2019']#[0-9A-Fa-f]{6}\u2019", "", name).strip()
+
+        # Colour markup: well-formed records carry two U+2019 delimiters.
+        malformed = sorted(ident for ident, name in titles.items()
+                           if "'#" in name)
+        check("titles with an ASCII apostrophe delimiter", malformed,
+              [15304114, 15304166])
+        check("well-formed colour-tagged titles",
+              sum(1 for name in titles.values() if name.count("\u2019") == 2),
+              413)
+
+        # The fourteen chains, each head..head+6 ending in <character>ラバー.
+        lovers = sorted(ident for ident, name in titles.items()
+                        if plain(name).endswith("ラバー"))
+        # 15 names end in ラバー, but ミクラバー (15304225) is a standalone
+        # collaboration title with no chain behind it; 14 are chain tails.
+        check("titles ending in ラバー", len(lovers), 15)
+        check("the non-chain ラバー is the Miku collaboration",
+              [ident for ident in lovers if ident < 15304594], [15304225])
+        roster = ["ハヤテ", "ティナ", "ミリィ", "サイラス", "ドッドン", "ガイ",
+                  "テリシア", "アルル", "ヴァン", "フッド", "リカ", "レム",
+                  "エリス", "ルコット"]
+        chains = [ident for ident in lovers if ident >= 15304594]
+        check("chain ラバー names follow the character roster",
+              [plain(titles[ident])[:-3] for ident in chains], roster)
+        check("the first twelve chains are contiguous seven-id blocks",
+              [ident for index, ident in enumerate(chains[:12])
+               if ident != 15304600 + 7 * index], [])
+        # Lucy, character 15, has no chain -- the third file to omit her.
+        check("no title chain for ルーシー",
+              [ident for ident in lovers
+               if plain(titles[ident]).startswith("ルーシー")], [])
+        # The wiki's odd second step in the Cyrus chain is real.
+        check("Cyrus chain step two breaks the naming pattern",
+              plain(titles[15304616]), "包帯I")
+        check("Cyrus chain surrounds it normally",
+              [plain(titles[i]) for i in (15304615, 15304617, 15304621)],
+              ["ストレンジャー", "ストレンジャーII", "サイラスラバー"])
+
     # Every datarevision.txt must agree: Extracted/ is one coherent snapshot.
     revisions = {path.read_text(encoding="utf-8", errors="replace").strip()
                  for path in EXTRACTED.rglob("datarevision.txt")}
