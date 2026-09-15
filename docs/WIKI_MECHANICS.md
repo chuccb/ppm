@@ -251,6 +251,26 @@ NUL-terminated 字串；以此解析 21,164 筆後，總長 `8 + 21164×997 = 21
 見 [`RESOURCES.md` §2c](RESOURCES.md#2c-itemdata-pat-尾部-721b-完整切段-十六輪21164-條統計錨點定位)）。
 §5-starter grant 的三來源分離結論不因本節改變。
 
+### 5b-6. 第三輪：Wiki × 反編譯 × Extracted 三方對照的結果
+
+本輪把 `main:Extracted/` 的 **429 個文字型資源**全部取出並解密
+（201 個原本就是明文、228 個經 `pmFile` 解密後可讀），與 Wiki 敘述、
+`PaperMan.exe.c` 三方比對。完整技術結論寫在 `RESOURCES.md`，此處只記
+**與 Wiki 敘述直接相關**的部分。
+
+| Wiki 敘述 | 三方比對結果 |
+|---|---|
+| 連續 kill「7 kill=キリングマシーン、8 kill 以後全算ディアブロ」 | **部分修正**。native 與 `ui/information.xml` 一致給出 **7 階**連段（DOUBLE→TRIPLE→MULTI→ULTRA→**GENOCIDE**→KILLINGMACHINE→DIABLO）。自 2 kill 起算則第 7 階正好是 7 kill，與 Wiki 自洽；但 **Wiki 漏列 `GENOCIDE` 這一階**。詳 [`RESOURCES.md` §5d-2](RESOURCES.md#5d-2-戰績面板-11-欄三來源一致解開-zkdd-三個縮寫-本輪)。 |
+| 掉落道具「アイテム戦」限定、Lv1–3、名誉ゲージ越高品質越好 | 掉落**倍率表**在 `ui/system/AI/ScoreRatio.xml`（PvE）中有精確數值，但那是 **PvE 專用**表；PvP 掉落率無 client-side 表可證，仍 UNRESOLVED。 |
+| ペーパズル 合成有素材、稀有度、body slot 規則 | **大幅補強**。`ui/NewSkillLevTable.xml` 未加密且保留韓文開發註解，含 `COMBILIMIT=3`、五軸稀有度倍率 `15/9/12/10/11`、六部位（Hair/Jacket/Pants/Shoes/Set/Accessory）的 `COMBI`＋`STRENGTH` 修正與 `Lev_1..9` 區間。詳 §5d-4。 |
+| PvE 過關有獎勵 | **可解析**。`AiMultiCompensation.xml` 的 `itemnumber` 解出為 `福袋(☆☆)`／`福袋(☆)`／`報奨金 5,000PG`／`報奨金 3,000PG`，名次 1–4。詳 §5d-4b。 |
+| MAP・ルール詳細 的模式與地圖清單 | **可機器驗證**。`maplist.pat` 解出 123 張圖與 mode bitmask，全部符合既有 `MODE_INDEX_MAP_BITS`。GunShooting 恰為 map 81/89，與 `gamecenter_map_info.xml` 閉環。詳 §5d-5。 |
+
+**一個必須記住的反面教訓。** 地圖檔名前綴**不能**用來推導模式：
+`PVE_01_ruins.pmm` 實際是 AIMulti、`TS_31/32_worldcup.pmm` 實際是 TeamSoccer。
+我最初以前綴做交叉驗證時得到「3 個不符」，追查後發現**錯的是我的啟發式、
+不是資料**。任何模式歸屬一律以 bitmask 為準。
+
 ### 5b-5. 兩項「僅 Wiki、刻意不採用」的記錄
 
 - **房間資訊欄位。** [MAP・ルール詳細](https://wikiwiki.jp/paperman/MAP・ルール詳細)

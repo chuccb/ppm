@@ -35,6 +35,7 @@
 | `db/paperman.db` | 開發模式的預設 SQLite 資料庫（不存在時由 C# server 自動建立） |
 | `server/packet.py` | wire 協議 Packet 參考實作 (Python, 逐函數對應反編譯), 含自測 |
 | `server-cs/tools/dump_itemdata.py` | 解出 `Extracted/ui/cfg/itemdata.pat` 的 21,164 筆 item id ↔ 名稱 (stride 997B 自證); 支援 `--name` / `--id` / `--band` 查詢 |
+| `server-cs/tools/dump_maplist.py` | 解出 `Extracted/ui/cfg/maplist.pat` 的 123 張地圖 (id / mode bitmask / .pmm 路徑, stride 836B 自證); `--check` 可驗證 modeIndex→bit 表 |
 | `server-cs/` | **C# 14 / .NET 10 伺服器** (協定層 + login/channel TCP + source-proven UDP-private 19→20 control + SQLite + 自測), 見 `server-cs/README.md` |
 
 ## 快速開始

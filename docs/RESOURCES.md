@@ -563,6 +563,173 @@ sound\soundsNN\<codename>\Voice\<codename>_cry|die|drop|jump|kill|...>_NN.wav
   `VoiceCustomize_zxv.xml`(COMMAND/STRATEGY/STATEMENT 共用, 9 列),
   `VoiceCustomize_zxvPopup.xml`(改選彈窗)。
 
+## 5d-2. 戰績面板 11 欄：三來源一致，解開 z/k/dd 三個縮寫 (本輪)
+
+`db/schema.sql` 的 `player_stats` 有三個長期無法解釋的欄位 —
+`z_kill` / `k_kill` / `dd_kill`，只知道對應 384/386/388，不知道語義。
+本輪由 **UI XML + 反編譯 + opcode 順序** 三方獨立對上，可以定案。
+
+**來源 1（resource）**：`Extracted/ui/information.xml`（pmFile 加密，已解出）
+的戰績面板依文件順序有 11 個具名欄位。
+**來源 2（native）**：`PaperMan.exe.c` 有**三處**互不相同的面板繪製碼
+（約 67930 / 156900 / 157296 行），各自以 `sub_6A8D80(..., L"<名稱>", ...)`
+依序填格，三處順序**完全相同**，且與 information.xml 逐格吻合。
+第一處另帶 UI ordinal `n2 = 2..12`。
+**來源 3（protocol）**：`db/packets.tsv` 的 GP_CH* 計數器 opcode。
+
+| # | 面板名稱 | opcode | schema 欄位 |
+|---|---|---|---|
+| 1 | `HEADSHOT` | 236 `GP_CHHEADSC` | `headshots` |
+| 2 | `HEARTBREAK` | 240 `GP_CHHEARTC` | `hearts` |
+| 3 | `CRITCALSHOT`（原廠拼字如此） | 362 `GP_CHCRITICALC` | `criticals` |
+| 4 | `AIRCOMBO` | 238 `GP_CHACOMBOC` | `combos` |
+| 5 | `DOUBLEKILL` | 242 `GP_CHDKILLC` | `double_kill` |
+| 6 | `TRIPLEKILL` | 244 `GP_CHTKILLC` | `triple_kill` |
+| 7 | `MULTIKILL` | 380 `GP_CHMKILLC` | `multi_kill` |
+| 8 | `ULTRAKILL` | 382 `GP_CHUKILLC` | `ultra_kill` |
+| 9 | **`GENOCIDE`** | 384 `GP_CHZKILLC` | **`z_kill`** |
+| 10 | **`KILLINGMACHINE`** | 386 `GP_CHKKILLC` | **`k_kill`** |
+| 11 | **`DIABLO`** | 388 `GP_CHDDKILLC` | **`dd_kill`** |
+
+**決定性的對齊。** 380→382→384→386→388 這**連號五個** opcode，
+其升冪順序與面板第 7–11 格順序**完全一致**；因此
+`Z`=Ge**n**ocide（Z 為原廠對該階的代號，全檔僅 `L"GENOCIDE"` 一處拼法）、
+`K`=**K**illingMachine、`DD`=**D**ia**b**lo 可以定案。
+schema 註解已補上對應名稱。
+
+**與 Wiki 的交叉點（含一項修正）。**
+[よくある質問や答え](https://wikiwiki.jp/paperman/よくある質問や答え) 說
+「7 kill 目 キリングマシーン +1；8 kill 目以後全部算ディアブロ」。
+native 的連段共 **7 階**（DOUBLE→TRIPLE→MULTI→ULTRA→GENOCIDE→
+KILLINGMACHINE→DIABLO），若自 2 kill 起算，第 7 階正好落在 7 kill，
+與 Wiki 敘述自洽。**但 Wiki 未提及 `GENOCIDE` 這一階**（該頁只列舉兩端），
+本表以 resource + native 為準。上限行為（8 kill 以後是否全記 DIABLO）
+是計分規則，屬 server policy，維持 UNRESOLVED。
+
+## 5d-3. PvE 計分表 ScoreRatio.xml：native 明確指名兩個檔案路徑
+
+`Extracted/ui/system/AI/ScoreRatio.xml`（pmFile 加密，已解出）是
+**倍率表**，且 native 解析器把檔案路徑寫死在程式碼裡：
+
+```c
+if ( sub_67EB70() )  thisa = sub_701BD0(&v41, L"ui/system/AI/AiMultiScoreRatio.xml", L"SCORERATIO");
+else                 thisa_1 = sub_701BD0(&v40, L"ui/system/AI/ScoreRatio.xml",      L"SCORERATIO");
+```
+
+即 **AI 多人協力模式與一般 PvE 用兩張不同的倍率表**，由 `sub_67EB70()` 切換。
+XML 內每個標籤都能在 native 找到對應的 reader 字串
+（`SCORERATIO`／`Kill_1Time`／`Kill_Chain`／`HeadShotRatio`／`HeartShotRatio`／
+`CriticalShotRatio`／`AirComboRatio`／`active_value`／`spend_time`／`miss_shot`），
+因此欄位語義不是猜測。
+
+* 單次擊殺倍率 `Kill_1Time`：HeadShot ×2、HeartShot ×1.5、CriticalShot ×1.8、AirCombo ×2。
+* 連段族 `Kill_Chain` 以 `index` 分四族：`0=Quick`（4 階）、`1=Weakness`(4 階)、
+  `2=Fever`（3 階）、`3=Combo`（0..10 共 11 階）。每階有
+  `active_value`（門檻）、`spend_time`（毫秒時窗）、`ratio`（倍率）。
+* `Combo` 族的時窗自 12000ms 逐階收緊到 6000ms，倍率 1.1→2.2；
+  `Combo0` 的 `spend_time=480000`（8 分鐘）明顯是「不設限」的哨兵值。
+
+**界線。** 這是 **PvE／AI 模式**的倍率表，和 §5d-2 的 PvP 連段面板是**兩套不同系統**
+（後者的 UI 名稱 DOUBLEKILL…DIABLO 不出現在本表）。
+倍率如何換算成最終 PG／EXP 屬 server 結算政策，本表不足以推導，維持 UNRESOLVED。
+
+## 5d-4. NewSkillLevTable.xml：ペーパズル 合成公式的原廠常數
+
+`Extracted/ui/NewSkillLevTable.xml` **未加密**（UTF-8 BOM 開頭），
+且保留了開發期的韓文註解，可直接讀出合成系統的參數：
+
+* `<COMBILIMIT DATA="3">`（기본조합한계치＝基本組合上限）。
+* `<SKILLPOINT ONE=15 TWO=9 THREE=12 FOUR=10 FIVE=11>`
+  （능력치별레어도배율＝五條能力軸各自的稀有度倍率）。五個值對應
+  迅速／敏捷／根性／防禦／集中五軸，與 `ItemAbilityNameTAble.xml`
+  的 5×5 複合名稱矩陣（迅速系／乱戦系／鎮圧系／運搬系／Hit&Run系…）同軸。
+* 六個部位段 `Hair` / `Jacket` / `Pants` / `Shoes` / `Set` / `Accessory`，
+  各有 `COMBI`（파츠보정값＝部位修正）與 `STRENGTH data_1..3`（강화보정값＝強化修正）。
+  `Set` 的 COMBI=23、STRENGTH=3/6/9 明顯高於單件（COMBI=8），
+  `Accessory` 全為 0。
+* 每部位有 `Lev_1..Lev_9` 的 min/max 區間（레어도등급표），
+  以及 `ValueRevision_<軸>_<等級>` 的逐軸數值修正。
+
+搭配同目錄的 `ItemAbilityLevTable.xml`（pmFile 加密，已解出）可得
+**最終效果換算**：以 `lev_value` −2…+2 分段，
+例如 `+1` 段為 speed `PERCENT_PLUS 8`、agility `PERCENT_PLUS 15`、
+hp `PLUS 8`、defence `PERCENT_MINUS 10`、hit `PERCENT_MINUS 30`，
+清楚呈現「強化速度／機動的同時犧牲防禦與命中」的設計取捨。
+
+**界線。** 這些是 **client 端顯示與預覽**用的換算表。實際生效的
+能力值、是否由 server 覆核、以及 255 NewSkillProfile 的持久化內容，
+仍以 native reader 與封包為準；不得用本表回推 server 應發的數值。
+
+## 5d-4b. AI/PvE 過關獎勵：itemnumber 可解析為具名獎品
+
+`Extracted/ui/system/AI/AiMultiCompensation.xml`（已解出）給出
+AI 協力模式的過關獎勵表，結構為
+`MODE_PRESENT[mode_index] → MODE_LEVEL_{EASY,NORMAL,HARD}[index] → DATA[]`，
+每筆 `DATA` 有 `itemnumber` / `level`（名次）/ `periodType`。
+本 revision 只出現 `mode_index` 102 與 104 兩組，且三個難度的獎品**完全相同**。
+
+以 `dump_itemdata.py` 解出 `itemnumber` 後，四個獎品都是可讀名稱，
+並精準落在 §5a2 既有的 15.xM 分段語義上：
+
+| itemnumber | 名稱 | 段語義 | 名次 |
+|---|---|---|---|
+| `15301005` | `福袋(☆☆)` | 15.301M 福袋 | 1 |
+| `15301004` | `福袋(☆)` | 15.301M 福袋 | 2 |
+| `15200044` | `報奨金 5,000PG` | 15.2M PG 點數包 | 3 |
+| `15200045` | `報奨金 3,000PG` | 15.2M PG 點數包 | 4 |
+
+這同時**反向驗證**了 `dump_itemdata.py` 的切段正確（若 stride 錯，
+這四個 ID 不可能同時解出語義自洽的名稱）與 15.2M／15.301M 的段定義。
+
+**界線。** 這是 client 端的**獎勵顯示表**。實際發放由 server 決定，
+名次判定、是否可重複領取、periodType 的時效語義均未證實，維持 UNRESOLVED。
+`AiMultiCompensation.xml` 等 **18 個 `ui/system/AI/*.xml` 全部**都能在
+`PaperMan.exe.c` 找到寫死的路徑字串，故都是本 revision 實際會載入的檔案，
+不是殘留資產。
+
+## 5d-5. maplist.pat 全解：123 圖 × mode bitmask，與既有 bit 表 100% 相符
+
+`Extracted/ui/cfg/maplist.pat`（pmFile 加密，已解出）佈局同樣**自證**：
+
+```
++0  f32 version      (本 revision = 1.03)
++4  s32 count        (= 123)
++8  count × 836B record
+    record +0  s32 mode bitmask
+    record +4  s32 map id
+    record +8  UTF-16LE NUL-terminated "maps\<NAME>.pmm"
+```
+
+`8 + 123 × 836 = 102,836` 恰等於解密後檔案大小，零剩餘位元組。
+工具：`python3 server-cs/tools/dump_maplist.py [--mode N|--id N|--check]`。
+
+**獨立驗證既有的 modeIndex→bit 表。** 用
+`verify_server_naming.py` 的 `MODE_INDEX_MAP_BITS` 去解這 123 張圖的 bitmask，
+**123 張全部至少帶一個已知 mode bit，無一例外**。各模式可用圖數：
+
+| mode | 圖數 | | mode | 圖數 |
+|---|---|---|---|---|
+| TeamSurvival | 37 | | Tutorial | 6 |
+| TeamMatch | 29 | | GunShooting | 2 |
+| DefuseBomb | 14 | | Occupy | 2 |
+| Steal | 13 | | TeamSoccer | 2 |
+| IndividualSurvival | 12 | | WeaponTest | 1 |
+| PulpnRoll | 7 | | AIMulti | 1 |
+| （bit5＝Practice，僅 3 張 TU_* 與 Tutorial 並存） | 3 | | OccupyRenewal | 1 |
+
+**閉環交叉點。** GunShooting（modeIndex 9）在 maplist 中**恰好**是
+map id 81 `AI_01_Monster.pmm` 與 89 `AI_02_Monster.pmm`，
+而 `ui/system/AI/gamecenter_map_info.xml` 的兩筆
+`GUNSHOOTING_MAP_INFO index="81"` / `index="89"` 完全對上 ——
+**兩個獨立資源檔互為印證**，同時證明 `gamecenter_map_info.xml` 的
+`index` 就是 maplist 的 map id（不是 modeIndex）。
+
+**必須避開的陷阱。** bitmask 是**集合**而非純量，且
+**檔名前綴不能用來推導模式**：`PVE_01_ruins.pmm` 實際是 AIMulti(11)，
+`TS_31/32_worldcup.pmm` 實際是 TeamSoccer(12)，
+三張 `TU_*` 同時帶 Practice 與 Tutorial 兩個 bit。
+一律讀 bitmask，不要讀檔名。
+
 ## 5e. 版本考古 (廿一輪)
 - 根 datarevision.txt = 811034967 (patch 版本號)
 - map/maplist.dat = **舊版明文** (head f32 v1.02, 67 圖, 832B/條,
