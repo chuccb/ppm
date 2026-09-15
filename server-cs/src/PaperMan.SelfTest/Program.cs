@@ -822,6 +822,36 @@ bool IsNative311FailureAcknowledgement(Packet acknowledgement)
             Packet udpStartAcknowledgement = await ReadServerPacketAsync(clientPeer.GetStream(), channelCodec);
             Packet enterChannelAcknowledgement = await ReadServerPacketAsync(clientPeer.GetStream(), channelCodec);
 
+            bool shopEnterWasProcessed = await router.DispatchAsync(
+                channelSession,
+                new Packet(Opcode.GL_SHOPIN_REQ),
+                channelContext);
+            Packet shopEnterAcknowledgement = await ReadServerPacketAsync(clientPeer.GetStream(), channelCodec);
+            bool hiddenItemListWasProcessed = await router.DispatchAsync(
+                channelSession,
+                new Packet(Opcode.GS_HIDDEN_ITEM_LIST_REQ).WriteS16(10),
+                channelContext);
+            Packet hiddenItemListAcknowledgement = await ReadServerPacketAsync(clientPeer.GetStream(), channelCodec);
+            var hiddenItemListReader = Packet.FromPayload(
+                hiddenItemListAcknowledgement.Opcode, hiddenItemListAcknowledgement.Payload);
+            bool hiddenItemListLayout = hiddenItemListAcknowledgement.Opcode == Opcode.GS_HIDDEN_ITEM_LIST_ACK
+                && hiddenItemListReader.ReadU8() == 0
+                && hiddenItemListReader.ReadU16() == 0
+                && hiddenItemListReader.ReadU16() == 10
+                && hiddenItemListReader.Remaining == 0;
+            bool partsHiddenItemListWasProcessed = await router.DispatchAsync(
+                channelSession,
+                new Packet(Opcode.GS_HIDDEN_ITEM_LIST_REQ).WriteS16(25),
+                channelContext);
+            Packet partsHiddenItemListAcknowledgement = await ReadServerPacketAsync(clientPeer.GetStream(), channelCodec);
+            var partsHiddenItemListReader = Packet.FromPayload(
+                partsHiddenItemListAcknowledgement.Opcode, partsHiddenItemListAcknowledgement.Payload);
+            bool partsHiddenItemListLayout = partsHiddenItemListAcknowledgement.Opcode == Opcode.GS_HIDDEN_ITEM_LIST_ACK
+                && partsHiddenItemListReader.ReadU8() == 0
+                && partsHiddenItemListReader.ReadU16() == 0
+                && partsHiddenItemListReader.ReadU16() == 25
+                && partsHiddenItemListReader.Remaining == 0;
+
             bool characterPurchaseWasProcessed = await router.DispatchAsync(
                 channelSession,
                 new Packet(Opcode.GS_BUYCHAR_REQ)
@@ -1056,6 +1086,15 @@ bool IsNative311FailureAcknowledgement(Packet acknowledgement)
                 && selectionWasProcessed
                 && enterChannelAcknowledgement.Opcode == Opcode.GC_ENTERCHANNEL_ACK
                 && channelSession.ChannelEntryCompleted);
+            Check("252 → 253 uses the project-permitted empty interoperability ACK",
+                shopEnterWasProcessed
+                && shopEnterAcknowledgement.Opcode == Opcode.GL_SHOPIN_ACK
+                && shopEnterAcknowledgement.Length == 0);
+            Check("806 → 807 returns exact zero-record shop and parts arms without mutation",
+                hiddenItemListWasProcessed
+                && hiddenItemListLayout
+                && partsHiddenItemListWasProcessed
+                && partsHiddenItemListLayout);
             Check("310 → 311 valid and truncated requests fail closed without granting a character",
                 characterPurchaseWasProcessed
                 && truncatedCharacterPurchaseWasProcessed
@@ -1851,6 +1890,13 @@ foreach (var (_, codec) in codecs)
         p900.Length == 2 && p900.ReadU8() == 1 && p900.ReadU8() == 10 && p900.Remaining == 0
         && p901.Length == 17 && p901.ReadU8() != 0 && p901.ReadS32() == 0
         && p901.ReadS32() == 0 && p901.ReadS32() == 0 && p901.ReadS32() == 0 && p901.Remaining == 0);
+
+    // 807's two fixed words are read before its record loop. A zero record
+    // count makes this a structural empty server-controlled item set, not a
+    // purchase, grant, or entitlement response.
+    var p807 = new Packet(Opcode.GS_HIDDEN_ITEM_LIST_ACK).WriteU8(0).WriteU16(0).WriteU16(10);
+    Check("807 zero-record hidden-item response preserves the requested category", p807.Length == 5
+        && p807.ReadU8() == 0 && p807.ReadU16() == 0 && p807.ReadU16() == 10 && p807.Remaining == 0);
 
     // 802's request layout is unresolved. The only safe 803 response is the
     // consumer's fully evidenced no-mutation failure arm.

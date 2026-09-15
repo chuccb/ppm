@@ -21,8 +21,8 @@ public static class LobbyHandlers
         add(Opcode.GM_CHECKNICK_REQ, CheckNick);
         add(Opcode.GM_CREATENICK_REQ, CreateNick);
         add(Opcode.GL_CHATTING_REQ, Chat);
-        add(Opcode.GL_LOBBYIN_REQ, SceneEnter);
-        add(Opcode.GL_SHOPIN_REQ, SceneEnter);
+        add(Opcode.GL_LOBBYIN_REQ, LobbyEnter);
+        add(Opcode.GL_SHOPIN_REQ, ShopEnter);
         add(Opcode.GL_INVENIN_REQ, InventoryEnter);
         add(Opcode.GL_CLIENTINFO_REQ, ClientInfo);
         add(Opcode.GL_MYINFO_OPEN, MyInfoOpen);
@@ -107,12 +107,25 @@ public static class LobbyHandlers
     /// <summary>837 的 timer — CHAT_SHOUT 動作表 cooldown (非0=可再喊)。</summary>
     private const int ShoutCooldown = 1;
 
-    // 250 GL_LOBBYIN / 252 GL_SHOPIN — client state transition notices.
-    // Their nominal ACK opcodes have no direct dispatcher consumer.
-    private static ValueTask SceneEnter(Session session, Packet packet, ServerContext context)
+    // 250 is an exact-empty local transition notice. `sub_574080` advances
+    // the client state itself; no 251 consumer was recovered.
+    private static ValueTask LobbyEnter(Session session, Packet packet, ServerContext context)
     {
-        // client 狀態機自行推進 (sub_537710); server 只需記錄場景
         return ValueTask.CompletedTask;
+    }
+
+    // 252 is also exactly empty. `sub_574120` sends it and immediately puts
+    // the client in shop state 3. There is no recovered native 253 consumer,
+    // but the project explicitly permits the empty 253 interoperability ACK.
+    // Do not attach catalog, account, or entitlement data to this ack.
+    private static ValueTask ShopEnter(Session session, Packet packet, ServerContext context)
+    {
+        if (packet.Remaining != 0)
+        {
+            return ValueTask.CompletedTask;
+        }
+
+        return session.SendAsync(new Packet(Opcode.GL_SHOPIN_ACK));
     }
 
     // 254 → 255 (sub_5741C0 / sub_574270). This is not an empty scene ACK:

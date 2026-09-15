@@ -2313,7 +2313,7 @@ dispatcher case 102 → `sub_58D6F0` 立即 `ctor(101)` 回送
 
 | Conclusion | Classification | Provenance / limit |
 |---|---|---|
-| `GL_SHOPIN_REQ` (252) is an empty client request. Immediately after its send, `sub_574120` locally transitions the lobby scene to state 3; the native S2C dispatcher has no case 253. | **Fact / HIGH** | `sub_574120`, `sub_537710(byte_EE8968, 3)`, dispatcher cases 174–315, and complete-file case search. The server must accept exact-empty 252 without fabricating a 253 ACK. `179/180 GS_STOREOK` semantics remain **UNRESOLVED**. |
+| `GL_SHOPIN_REQ` (252) is an empty client request. Immediately after its send, `sub_574120` locally transitions the lobby scene to state 3; no recovered primary or secondary consumer compares opcode 253. | **Fact / HIGH** for request/state/absence; **implementation choice / user-directed** for response | `sub_574120`, `sub_537710(byte_EE8968, 3)`, dispatcher cases 174–315, and an inventory of all 19 non-prototype `sub_591EE0` opcode-getter uses. This server accepts only exact-empty 252 and, by explicit project direction, emits the empty 253 interoperability ACK. It carries no catalog, account, entitlement, or scene-success claim. `179/180 GS_STOREOK` semantics remain **UNRESOLVED**. |
 | 468 is the 204 bulk body routed for Hukubukuro IDs. | **Fact / HIGH** | `sub_571100` plus `sub_591EC0` header setter. |
 | 470 and 780 share `{s32 rawContext,s32 itemId,s16 -(variantIndex+1)}` from `sub_57B2E0`; their messages are null in `sub_4D7790`. | **Fact / HIGH for wire; UNRESOLVED for rawContext/entitlement** | Generic sender, both callers, and packet primitives. |
 | `15301001..15302000` and `15310001..15320000` route 468/470; `15302001..15304000` and `15320001..15330000` route 780. Decoded ItemData names corroborate bag versus package catalog families. | **Fact / HIGH for ranges/routing; Inference / MEDIUM for product labels** | `sub_571100`, `sub_4D7790`, and same-hash `main:Extracted/ui/cfg/itemdata.pat`. No price or contents policy follows. |
@@ -2327,7 +2327,49 @@ dispatcher case 102 → `sub_58D6F0` 立即 `ctor(101)` 回送
 | 461 is sent only after the PaperCode UI has exactly 16 upper-case ASCII alphanumeric characters. 464 is `{u8 duplicateChoice}` for cancel (0) or `{u8=1,str}` for its GET action. | **Fact / HIGH** | `CUILobbyStorePaperCode::sub_4C3E70`, `sub_4C4060`, `CPopupDuplicatedItem::sub_50FFC0`, `sub_510010`, `sub_57CCE0`. This establishes local syntax and choice wire—not a valid-code or grant policy. |
 | 463 is an empty C2S send. The PaperCode UI sends it only on the first `a2==1` activation while its local `+240` sentinel is zero, then sets that sentinel to one. The opcode's `NOTIFY` name does not reverse this observed direction. | **Fact / HIGH for wire/local gate; UNRESOLVED for service effect** | `sub_57CB20` and the caller at `0x4C3CF0`. There is no recovered server response/consumer relation that permits a code/session state mutation. |
 | 804 is an empty C2S request constructed by `sub_581F80`; 805 is registered by name but has no recovered native consumer. 179/180 StoreOK and 451/452 NewGift are likewise registry name pairs with no recovered native sender (for their REQs) or ACK consumer. | **Fact / HIGH for observed absences in this binary; UNRESOLVED for original-service use** | Complete constructor and S2C-dispatch searches, plus opcode-name registration. Do not manufacture status/notification packets from their paired numbers. |
-| 806 takes a signed-16 category selector. Main callers use 1–24 while driving shop/parts views, and the parts-room initialization separately sends 25. 807 consumes `{u8 rawHeader,u16 recordCount,u16 category,recordCount×{s32 itemId,u16 rawVariant,u8 rawPeriod,u8 blobLength,blobLength raw bytes}}`. | **Fact / HIGH** | `sub_46C760`, `CLobbyPartsUpRoom::sub_9C1DD0`, `CLobbyPartsUpRoom::sub_9C22F0`. The receiver does not use `rawHeader`; it caches only catalog items that lack the native hidden-item flag. Category meaning, source authority, and server filtering remain unresolved. |
+| 806 takes a signed-16 category selector. Direct shop UI emitters use `1..13` and `15..24` (there is no recovered `14` sender); parts-room initialization separately sends `25`. 807 consumes `{u8 rawHeader,u16 recordCount,u16 category,recordCount×{s32 itemId,u16 rawVariant,u8 rawPeriod,u8 blobLength,blobLength raw bytes}}`. | **Fact / HIGH** for wire and known selector emitters; **UNRESOLVED** for server record policy | `sub_46C760`, direct UI control names in `shop.xml`, `CLobbyPartsUpRoom::sub_9C1DD0`, `CLobbyPartsUpRoom::sub_9C22F0`, and `CLobbyShop::sub_46AD00` case 807. Both consumers read but do not use `rawHeader`; `recordCount=0` skips their entire record loops. Shop sets its per-category cache byte, then re-enters `sub_46C760`; category 21 clears/rebuilds its recommendation UI path, while 22–24 update their category list. Item records reach category-specific UI/map calls only after parsing and are selectively suppressed from the shared local mapping by `sub_535AD0`. The original source, visibility/filter, variant/period/blob semantics, and response population remain unresolved. |
+
+#### 806/807 selector, field, and state-flow audit
+
+The recovered direct shop sender, `sub_46C760`, sends 806 only while its byte
+at `this+521720+selector` is not already one; a received 807 writes that cache
+byte before re-entering the same routine. The separately constructed
+`CLobbyPartsUpRoom::sub_9C1DD0` packet is `{s16=25}` during parts-scene setup.
+The recovered shop selector/control relation is:
+
+| selector | direct UI source | post-807 route observed in `sub_46C760` / `sub_46AD00` |
+|---:|---|---|
+| 1–4 | `CAT_PAPER_CHARACTER_PACKAGE`, `CAT_PAPER_CHARACTER`, `CAT_PAPER_FACE`, `CAT_PAPER_HAIR` | paper-character subcategories |
+| 5–9 | `CAT_DRESS_SET`, `CAT_DRESS_UPPER`, `CAT_DRESS_PANTS`, `CAT_DRESS_SHOES`, `CAT_DRESS_ACCESSORY` | dress subcategories |
+| 10–13 | `CAT_WEAPON_PRIMARY`, `CAT_WEAPON_SECONDARY`, `CAT_WEAPON_MELEE`, `CAT_DRESS_THROWING` | four loadout weapon classes; the XML spelling `CAT_DRESS_THROWING` is retained verbatim |
+| 14 | no recovered source | rejected by this server; `sub_46C760` has no case 14 |
+| 15–20 | `SETITEM`, `SHOP_HUKUBUKURO`, `SUPPORT`, `SHOP_CROSSHAIR`, `SHOP_SPECIALABILITY`, `SHOP_NEWSKILL` | corresponding Paper Center / special category |
+| 21 | `CAT_PAPER_RECOMMAND` / `RECOMMAND_AVATAR` path | clears the recommender item-id set, inserts each received `itemId`, then calls `sub_45B5A0` |
+| 22–24 | `RECOMMAND_NEW_SORT`, `RECOMMAND_HOT_SORT`, `RECOMMAND_SALE_SORT` | clear then populate the matching recommender collection through `sub_9F64F0` |
+| 25 | no shop control; parts constructor only | `CLobbyPartsUpRoom::sub_9C22F0` consumes the same records for its parts-side mapping |
+
+This mapping is **Fact / HIGH** for the local controls/routes, based on
+`main:Extracted/ui/shop.xml`, `main:Extracted/ui/parts.xml`, the direct callers,
+and the two 807 consumers. It is not an original service category authority,
+and it does not make any local resource item purchasable.
+
+| 807 field | native consumer/data flow | evidence-bound server treatment |
+|---|---|---|
+| `u8 rawHeader` | read first by both consumers but has no recovered branch, store, or call use | `0` is a structural, receiver-unused value only; it has no asserted status meaning. |
+| `u16 recordCount` | exact loop bound in both consumers | `0` is the only emitted count. It prevents every record parser, UI insert, and shared mapping update. |
+| `u16 category` | shop directly writes its cache at `this+521720+category` and re-enters `sub_46C760`; parts reads it but has no separate category branch | server echoes only the validated direct-client selector, never a client-provided out-of-range value. |
+| `s32 itemId` | consulted by `sub_535AD0`; category 21 inserts it into the recommender set; 22–24 pass it to `sub_9F64F0`; other shop/parts paths may add an item-to-variant/period entry to `unk_EE3F28` | never emitted: an ID's asset or ItemData presence is not service visibility/ownership proof. |
+| `u16 rawVariant`, `u8 rawPeriod` | category 22–24 forward both into `sub_9F64F0`; local map allocations retain both for other paths | semantics, ranges, expiry, and ownership effects remain **UNRESOLVED**; never invented. |
+| `u8 blobLength, raw[blobLength]` | category 21/ordinary/parts readers copy it to temporary storage without a recovered semantic consumer. In 22–24, any nonzero length is subsequently treated as fifteen raw `{s32,s32}` pairs for extra mapping candidates, without a local length validation. | never emitted. A fabricated nonzero blob could make the native reader use uninitialized temporary bytes or overrun its fixed workspace; zero-record framing avoids the path entirely. |
+
+`RecommandItem.pat` is a local recommendation **presentation** input, not an
+807 response source: its pmFile-decoded CSV has 1,030 set rows and a maximum
+concept id of 20, and `sub_9F5C80` loads it before recommendation selection.
+When a nonempty local recommendation selection exists, `sub_46E140` separately
+sends 808; 809 has its own record consumer. Neither resource existence nor that
+secondary request proves the original server's 807 contents. This is **Fact /
+HIGH** for the resource/load/request separation; record-production policy is
+**UNRESOLVED**.
 
 ### Exact consumer-safe arms and current server behavior
 
@@ -2345,8 +2387,10 @@ direct opcode-routing range is wrong. These are defensive emulator boundaries;
 they do not claim that the historical server used exactly the same rejection
 transport or error code.
 
-| flow | Client-consumed safe ACK | direct consumer/state gate |
+| flow | current server output / boundary | direct consumer/state gate |
 |---|---|---|
+| 252→253 shop entry | `(empty)` | User-directed interoperability response only. `sub_574120` already changed the native client to state 3 before any response; no 253 consumer was recovered after checking primary and secondary opcode paths. |
+| 806→807 hidden-item list | `{u8 rawHeader=0,u16 recordCount=0,u16 echoedCategory}` for exact direct-client selectors `1..13`, `15..25` only | `CLobbyShop::sub_46AD00` and `CLobbyPartsUpRoom::sub_9C22F0` read all three fixed fields before their record loops. Zero count prevents record-derived UI/map insertion, item mutation, currency data, or fabricated overrides; shop then re-runs its cached category transition. |
 | 204→205 normal bulk purchase | `{u8 count=0,u8 rawResult=0,u8 rawError=0,7×s32=0}` | `sub_571910` consumes its count-zero error pair and mandatory seven-word trailer; no item/cache update. |
 | 206→207 unnamed part purchase | `{u8 rawResult=1}` | `sub_571B60`: nonzero has no tail; zero opens the part/cache/wallet decoder. |
 | 208→209 sell | `{u8=0}` | `sub_572B80`: only nonzero reads item/GP and removes local inventory. |
@@ -2374,9 +2418,11 @@ echo because the protocol has no safe correlation value to invent.
 ### Still unresolved—not approximated
 
 * 179/180 StoreOK, 451/452 NewGift direction/producer, 461/462 and 464/465
-  PaperCode server policy, 806/807 hidden-item record production, and 808/809
-  recommendation resolution remain unimplemented where a response would imply
-  a server policy or no unambiguous failure discriminator exists. 298/299,
+  PaperCode server policy, **806/807 hidden-item record production/filtering**,
+  and 808/809 recommendation resolution remain unresolved. The implemented
+  806 zero-record arm is only an exact consumer-safe “no server-controlled
+  records” response; it is not an approximation of the historical hidden-item
+  catalog or a source of ownership. 298/299,
   300/301, and 314/315 gift listing/claim/move semantics are likewise not
   approximated: their correlated selection, pending/claimed state, and exact
   mutation rules are still incomplete.

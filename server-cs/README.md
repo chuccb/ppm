@@ -30,8 +30,8 @@ server-cs/
     │   ├── ServerDataPaths.cs      # zero-argument DB path resolver
     │   ├── Handlers.Auth.cs        # 682→681, ping (694 is Program greeting)
     │   ├── Handlers.Channel.cs     # 143→144→195→196; 141→142 endpoint confirm
-    │   ├── Handlers.Lobby.cs       # 105/107/197/199/210/212
-    │   ├── Handlers.Shop.cs        # shop/gift/pack/capsule fail-closed wire boundaries
+    │   ├── Handlers.Lobby.cs       # 105/107/197/199/210/212, project-permitted empty 252→253
+    │   ├── Handlers.Shop.cs        # shop/gift/pack/capsule fail-closed + zero-record 806→807 boundary
     │   ├── Handlers.Stats.cs       # GP_CH*C 戰績家族 (18 REQ + 882 推播)
     │   └── Handlers.BattleObjects.cs # OCC 902–907 權威狀態 + 962 安全拒絕
     └── PaperMan.SelfTest/          # codec / wire / SQLite bootstrap 自測

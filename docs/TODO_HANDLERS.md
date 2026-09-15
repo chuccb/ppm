@@ -303,7 +303,7 @@
 | 776 | GL_CLAN_TNMT_CLANREC_REQ | `(空)` |
 | 785 | GL_FRIEND_ADD_PROCESS_REQ | `str` |
 | 804 | MASTER_RELOAD_HIDDEN_ITEM_LIST_REQ | `(空)` |
-| 806 | GS_HIDDEN_ITEM_LIST_REQ | `s16 category` (native shop callers use 1–24; parts-room initialization uses 25; response production/filter policy unresolved) |
+| 806 | GS_HIDDEN_ITEM_LIST_REQ | exact `s16 category`; direct shop emitters use `1..13`, `15..24` (not 14), parts initialization uses 25. Server returns only the fully parsed zero-record 807 arm `{u8 rawHeader=0,u16 count=0,u16 echoedCategory}` for those selectors. Historical record source/filter/variant/period/blob policy remains UNRESOLVED; nonzero records are deliberately withheld because 22–24's nonzero blob path blindly interprets fifteen raw pairs after copying into fixed client workspace. |
 | 808 | GS_GET_RECOMMENDSET_INFO_REQ | `s32 count, count×s32 recommendationId`; native sender emits only when `count>0` |
 | 812 | MASTER_SPECIAL_ABILITY_ITEMSLOT_PROBABILITY_APPLY_REQ | `s8` |
 | 814 | MASTER_CHECK_BOMB_CHEATER_APPLY_REQ | `s8` |
