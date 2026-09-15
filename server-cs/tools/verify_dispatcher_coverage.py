@@ -118,10 +118,11 @@ def check_equivalent_handlers(text: str) -> None:
 
 
 SYMBOL = re.compile(r"\b(sub_[0-9A-Fa-f]{4,8})\b")
-# PACKETS.md still cites 33 sub_ symbols that exist in no dump we have; they are
-# address drift from an older IDA session. LAYOUTS.md and LAYOUTS_REQ.md are
+# PACKETS.md mentions 8 sub_ symbols absent from every dump: 6 genuinely
+# unresolved, plus two kept as before/after examples in the header note. 28 more
+# were resolved by following Packet(opcode) builders. LAYOUTS.md and LAYOUTS_REQ.md are
 # machine-extracted and must stay at zero. See the note at the top of PACKETS.md.
-EXPECTED_STALE = {"docs/PACKETS.md": 33, "docs/LAYOUTS.md": 0, "docs/LAYOUTS_REQ.md": 0}
+EXPECTED_STALE = {"docs/PACKETS.md": 8, "docs/LAYOUTS.md": 0, "docs/LAYOUTS_REQ.md": 0}
 
 
 def check_cited_symbols(text: str) -> None:
