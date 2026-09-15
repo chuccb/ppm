@@ -74,8 +74,9 @@
 >    地圖回退 mode 預設圖 (ModeDefaultMap); map_catalog 查無/mode 無
 >    規則時原樣放行 (不硬編)。Db.GetMapModes 讀 map_catalog。
 > ② 語音 791–796 wire 佈局全定案並更正 docs (792=整塊覆寫、794=u8
->    count 前綴, 非先前誤判的 795 變體鏡像); Handlers.Voice.cs 改為
->    真解析 795 兩變體 (依長度 1780B 判別) 並落地 voice_customize/
+>    count 前綴, 非先前誤判的 795 變體鏡像); `Handlers.Voice.Registry.cs` 與
+>    `Handlers.{GL_VOICEITEMSLOT,GI_VOICEITEMSLOT_ALL,GI_CHANGE_VOICEITEMSLOT}.cs`
+>    改為真解析 795 兩變體 (依長度 1780B 判別) 並落地 voice_customize/
 >    voice_slots (char_idx 0..14 + 2×base_voice + 27×(item,flag))。
 >    792 的 char_idx 由 users.current_char 的 char_type 推出。
 >
@@ -85,7 +86,8 @@
 > 859/861 REQ = u8 tab + s32 slot (5B); 860/862 ACK 6B header (u8 err,
 > u8 tab, s32 slot) + 28B 物品 + s32 tab_count。862 err 5 = 背包滿
 > (0x49E), 1/2/3/4/6/7 = 0x49A。落地 Db.Warehouse.cs (warehouse_items
-> /warehouse_lockers, 頁籤預設全持有) + Handlers.Warehouse.cs。
+> /warehouse_lockers, 頁籤預設全持有) + `Handlers.Warehouse.Registry.cs` 與
+> `Handlers.{GL_MYWAREHOUSEINFO,GL_MYWAREHOUSEITEMLIST,GL_PUSH_TO_WAREHOUSE,GL_POP_TO_WAREHOSUE}.cs`。
 > 855 的 s32 = dword_EE8CB4 自己 uid (驗證用, 私服以 session 為準)。
 >
 > 卌九輪 (GL_JOIN 簇 260-269 落地): 房單進房流程逐函數定案 — 260/262
@@ -190,7 +192,9 @@
 >      824/825 (USERLIST 玩家清單)、830/831 (CHAT_FORCE_BAN)、841/842 (SETALL_EXP)、
 >      843/844 (SETALL_PAGE)、845/846 (VIEWALL_EVENTSTATE)、883/884 (FIND_USER 查房號)、
 >      885/886 (PLAY_WITH 瞬移進房)。
-> ② **遊戲中心 GameCenter 迷你遊戲協定 (Handlers.GameCenter.cs + Db.GameCenter.cs)**:
+> ② **遊戲中心 GameCenter 迷你遊戲協定** (`Handlers.GameCenter.Registry.cs` +
+>    direct `Handlers.{GL,GG}_GAMECENTER_*.cs` / `Handlers.GL_GET_GAMEROOM_PROGRESSTIME.cs`
+>    + `Db.GameCenter.cs`):
 >    - 472/473: 紀錄查詢 (高分/排名/遊玩次數);
 >    - 474/475 & 483/484: 迷你遊戲開始與確認;
 >    - 476/477: 遊戲結算與高分落庫、PG/EXP 獎勵派發 (32B/44B 結構體對齊);

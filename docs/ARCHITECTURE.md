@@ -130,7 +130,14 @@ uses cancellation and disposes its socket only after its receive loop exits.
   `Handlers.Room.Shared.cs` 則只承載多 family 共用的 map compatibility 與
   room/member authority guard，兩者均沒有 handler entry。Join 的五個房單流程也以
   `Handlers.GL_JOIN*.cs` / 同名 `GL_JOIN*_REQ` entry 直接對應，
-  `Handlers.Join.Registry.cs` 只有 bindings。這些是導覽切分，不改 wire/state semantics。
+  `Handlers.Join.Registry.cs` 只有 bindings。Quest、Voice、Warehouse、GameCenter 也採用
+  同一個 registry/direct-family 形狀；例如 `Handlers.GQ_QUEST_ACCEPT.cs` /
+  `GQ_QUEST_ACCEPT_REQ`、`Handlers.GI_CHANGE_VOICEITEMSLOT.cs` /
+  `GI_CHANGE_VOICEITEMSLOT_REQ`、`Handlers.GL_MYWAREHOUSEINFO.cs` /
+  `GL_MYWAREHOUSEINFO_REQ`、`Handlers.GG_GAMECENTER_GAME_END.cs` /
+  `GG_GAMECENTER_GAME_END_REQ`。只有跨 request 的 voice block 與 warehouse item/tab codec
+  留在明確標示、無 receive entry 的 `Handlers.{Voice,Warehouse}.Shared.cs`。這些是導覽
+  切分，不改 wire/state semantics。
 - `Db` 是一個依實際 persistence domain 拆成 **9 個 source partial** 的類別：
   `Db.cs` 主檔（connection、bootstrap、account、nickname、packet stats）加上
   Player、Economy、Social、Rooms、Voice、Warehouse、GameCenter、WeaponLoadout。
