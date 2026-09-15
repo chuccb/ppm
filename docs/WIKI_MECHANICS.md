@@ -289,6 +289,34 @@ NUL-terminated 字串；以此解析 21,164 筆後，總長 `8 + 21164×997 = 21
 解出來正是同樣那四件。兩個獨立 client 子系統選用同一組基礎裝備，
 該結論不再依賴單一 Wiki 頁面。詳 [`RESOURCES.md` §5d-10](RESOURCES.md#5d-10-tutorial_dataxmltype-欄即武器段選擇器並二度印證基礎四件組)。
 
+### 5b-8. 第五輪：文件自我稽核（以三來源為權威反查 md）
+
+本輪把 md **當成待驗物**而非依據，逐條回推。多數數字完全站得住：
+itemdata 21,164、maplist 123、msgtable 1,346、quest 844、
+weaponparts 1,108、partsability 413，以及
+「851 個傳給 `sub_408080` 的字面訊息 id」**全部逐位重現**。
+但也找到兩處真正的錯誤，已修正：
+
+1. **座標系混淆**（`RESOURCES.md` §2c）。該節的 `tail[N]`／`bNNN` 是
+   **1808B 記憶體結構**的位移，不是檔案位移；照著它去讀 997B 的檔案
+   record 會取到雜訊。實際 tail 起點是 `record+276`，
+   而 `997−276 = 721` 正好等於該節標題自稱的「尾部 721B」。
+   以 base=276 重跑後，該節每一個錨點都完全命中。
+2. **dispatcher 覆蓋缺三筆**（`LAYOUTS.md`）。標題寫「300 case」，
+   實際 `sub_58B010` 有 **306** 個。補上 417／803／882 後為全覆蓋，
+   並新增 `verify_dispatcher_coverage.py` 防止再次悄悄漂移。
+
+**額外釐清一個會誤導後續工作的觀念**：676 是**具名** opcode 數，
+**不是 opcode 空間的上界**。有 46 個 opcode 具備 native reader/writer
+卻未在名稱表註冊，其中 16 個甚至超過目錄末端 994（995–1010）。
+「不在 `packets.tsv` 就不存在」是錯的。
+
+另外，[各種ゲージ詳細](https://wikiwiki.jp/paperman/各種ゲージ詳細) 自陳
+「非官方說明、為推測」的武器儀表，已能對到 `partsability.pat` 的實際欄位；
+連該頁明講「無圖表的隱藏屬性、詳細不明」的**初弾命中**，
+都對應到確實存在的 `first_shot_wide`／`first_shot_angle`。詳
+[`RESOURCES.md` §5d-11](RESOURCES.md#5d-11-武器-ui-儀表--partsabilitypat-引擎欄位對照)。
+
 ### 5b-5. 兩項「僅 Wiki、刻意不採用」的記錄
 
 - **房間資訊欄位。** [MAP・ルール詳細](https://wikiwiki.jp/paperman/MAP・ルール詳細)

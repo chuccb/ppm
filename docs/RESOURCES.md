@@ -964,6 +964,40 @@ native 有具名類別 `GimmickProperties`，其 `sub_9A6810` 以寫死的
 不證明 grant、也不證明這四件的擁有權由 server 發放（§5-starter grant
 的三來源分離結論維持不變）。
 
+## 5d-11. 武器 UI 儀表 ↔ partsability.pat 引擎欄位對照
+
+Wiki [各種ゲージ詳細](https://wikiwiki.jp/paperman/各種ゲージ詳細)（2013-08-03）
+說明武器頁上 6 條可見儀表與 1 個「隱藏屬性」，並自陳是**社群推測、非官方說明**。
+把它對到 `cfg/partsability.pat` 的 31 個實際欄位後，推測可以落地：
+
+| Wiki 儀表 | 對應引擎欄位 |
+|---|---|
+| 攻撃 / DMG | `effective_damage`（另有 `limit_damage` 作遠距衰減） |
+| 精度 / A.C | `shoot_Wide`（散佈角） |
+| 連射 / C.R | `shot_delay`（射擊間隔，**數值越小越快**，與儀表方向相反） |
+| 射程 / O.L | `effective_range` / `limit_range` |
+| 反動 / R.C | `recoil` |
+| 移動 / M.S | `move_speed`（另有 `miJump`/`miSit`/`miStand`/`miWalk`/`miRun` 姿勢別修正） |
+| **初弾命中（無儀表的隱藏屬性）** | `first_shot_wide` / `first_shot_angle` |
+
+最後一列特別有價值：Wiki 明說「グラフ表示のない隠し属性…詳細は不明」，
+而資源檔裡確實存在**專屬的首發彈參數**，正好解釋該欄位的存在。
+留言區長年爭論的 `R.C` 究竟是 Recoil control 還是 charge，
+資源檔給出的名稱就是單純的 **`recoil`**。
+
+`partsability.pat` 另含 Wiki 未提及的欄位：`shots_per_fire`（霰彈一次發數）、
+`ballCaseSize`（彈匣）、`damage_repeat`、`fov_level_min/max`（瞄準鏡倍率級距）、
+`sniperbackimgidx`/`sniperviewimgidx`（狙擊鏡圖）、`Dot IG`/`Dot TG`（紅點照門）。
+
+**解析方式（Fact / HIGH）。** native 以具名類別
+`CPartsAbilityListParamCtrl::Load` 載入 `cfg\partsability.pat`：
+先逐字元讀到第一個 CRLF 取得**筆數**（`j__atol`），**接著整行跳過標頭**，
+之後按固定欄序解析 —— 也就是**依位置、不依欄名**。
+這解釋了為何 31 個欄名中只有 `shot_delay`／`move_speed`／`recoil`
+在 exe 中以字串出現（那是別處的 XML 屬性查詢），
+其餘欄名在二進位中完全不存在卻仍被正確讀取。
+**因此欄位順序本身就是契約，改動 CSV 欄序會直接錯位。**
+
 ## 5e. 版本考古 (廿一輪)
 - 根 datarevision.txt = 811034967 (patch 版本號)
 - map/maplist.dat = **舊版明文** (head f32 v1.02, 67 圖, 832B/條,
