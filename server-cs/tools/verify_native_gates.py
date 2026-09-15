@@ -372,6 +372,19 @@ def main() -> None:
           [name for name in ("emblem_mark", "emblem_frame", "emblem_base")
            if name in text], [])
 
+    # RESOURCES.md 5d-29: the emblem packing and the three sub-tab scans.
+    check("emblem packs mark | frame<<16 | base<<24",
+          "*(this + 246) | (*(this + 248) << 16) | (*(this + 249) << 24)"
+          in text, True)
+    for bound in ("21845", "43691"):
+        check(f"EM_MARK scan boundary {bound}",
+              f'sub_40A590(this, {bound}' in text
+              or f", {bound}, L\"EM_MARK\"" in text, True)
+    check("EM_FRAME and EM_BASE scan the 8-bit space in thirds",
+          all(f', {bound}, L"{name}"' in text
+              for name in ("EM_FRAME", "EM_BASE")
+              for bound in ("85", "171", "255")), True)
+
     # The failure-arm texts, through the documented decode rule.
     entries = message_entries()
     if entries is None:

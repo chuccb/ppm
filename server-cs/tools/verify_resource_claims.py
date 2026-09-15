@@ -1002,6 +1002,59 @@ def main() -> None:
             check(f"{stem}.xml ui/ copy matches system/ copy",
                   identical, expected)
 
+    # RESOURCES.md 5d-29: the emblem part registries. ui.xml is UTF-8 BOM --
+    # decoding it as CP932 silently yields nothing, which is how an earlier
+    # round wrongly concluded the grid was undefined.
+    ui_xml = EXTRACTED / "ui" / "ui.xml"
+    if not ui_xml.is_file():
+        skipped.append("ui/ui.xml")
+    else:
+        markup = ui_xml.read_bytes().decode("utf-8-sig")
+        closer = re.compile(r"</customsprites\s*>")
+        registries = {}
+        for name in ("EM_MARK", "EM_FRAME", "EM_BASE"):
+            start = markup.index(f'<customsprites name="{name}"')
+            block = markup[start:closer.search(markup, start).end()]
+            registries[name] = [
+                (int(key), texture) for key, texture in
+                re.findall(r"<element[^>]*key='(\d+)'[^>]*texture=\"([^\"]+)\"",
+                           block)]
+        check("emblem part counts",
+              {name: len(items) for name, items in registries.items()},
+              {"EM_MARK": 223, "EM_FRAME": 105, "EM_BASE": 105})
+        check("emblem keys are unique within each registry",
+              [name for name, items in registries.items()
+               if len({key for key, _ in items}) != len(items)], [])
+        # Key blocks start exactly on the native scan boundaries, which is
+        # what ties the registries to sub_40A630's three sub-tabs.
+        marks = sorted(key for key, _ in registries["EM_MARK"])
+        check("EM_MARK sub-tab sizes",
+              [sum(1 for key in marks if key < 21845),
+               sum(1 for key in marks if 21845 <= key < 43691),
+               sum(1 for key in marks if key >= 43691)], [75, 73, 75])
+        check("EM_MARK sub-tab start keys",
+              [min(key for key in marks if lo <= key < hi)
+               for lo, hi in ((0, 21845), (21845, 43691), (43691, 0x10000))],
+              [10, 21845, 43691])
+        for name in ("EM_FRAME", "EM_BASE"):
+            keys = sorted(key for key, _ in registries[name])
+            check(f"{name} sub-tab sizes",
+                  [sum(1 for key in keys if key < 85),
+                   sum(1 for key in keys if 85 <= key < 171),
+                   sum(1 for key in keys if 171 <= key < 255)], [45, 30, 30])
+        # Field widths: mark is 16-bit, frame and base 8-bit.
+        check("emblem keys fit their packed field widths",
+              [name for name, items in registries.items()
+               if max(key for key, _ in items)
+               > (0xFFFF if name == "EM_MARK" else 0xFF)], [])
+        # Three base atlases are declared but absent from the tree.
+        declared = dict(re.findall(
+            r'<image name="(C_EM_[A-Z0-9]+)" filename="([^"]+)"', markup))
+        check("declared emblem atlases", len(declared), 24)
+        check("elements pointing at the missing base atlas",
+              sum(1 for key, texture in registries["EM_BASE"]
+                  if texture == "C_EM_BASE103"), 13)
+
     # Every datarevision.txt must agree: Extracted/ is one coherent snapshot.
     revisions = {path.read_text(encoding="utf-8", errors="replace").strip()
                  for path in EXTRACTED.rglob("datarevision.txt")}
