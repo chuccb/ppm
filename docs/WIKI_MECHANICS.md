@@ -281,6 +281,14 @@ NUL-terminated 字串；以此解析 21,164 筆後，總長 `8 + 21164×997 = 21
 | 「Winchester(CP)」等變體另立條目 | itemdata 的 `t12` 在武器段的實際語義是**變體→基底武器**（`WINCHESTER [CP]` → `WINCHESTER`）。1,291 筆非零 t12 **全部**落在武器段，其中 97 筆為具名變體。 |
 | [MAP・ルール詳細](https://wikiwiki.jp/paperman/MAP・ルール詳細) 提到油桶等場景機關會造成傷害 | **確認為共用武器模型**。`gimmickproperty.xml` 的 7 個機關各自指定一個 `ReferenceWeapon`（油桶→`FIRE_BOMB`、瓦斯桶→`HE_BOMB`…），且與一般武器查詢**共用同一個名稱登錄表** `dword_1CC95A0`。ordinal 0..6 由讀取順序決定，已由 `GimmickProperties` 類的解析迴圈證實。詳 §5d-9。 |
 
+**§5b-4 的基礎四件組已升級為交叉印證。** 當時只有 Wiki
+[試し撃ちシステム](https://wikiwiki.jp/paperman/試し撃ちシステム) 一方說
+「未選武器回到 MP5K・USP9・CU-BK7・HE GRENADE」。本輪在
+`ui/system/Tutorial_Data.xml` 這個**完全無關的子系統**中，發現教學關卡
+以 `type0=27 / type1=26 / type2=4 / type3=7` 配置玩家，
+解出來正是同樣那四件。兩個獨立 client 子系統選用同一組基礎裝備，
+該結論不再依賴單一 Wiki 頁面。詳 [`RESOURCES.md` §5d-10](RESOURCES.md#5d-10-tutorial_dataxmltype-欄即武器段選擇器並二度印證基礎四件組)。
+
 ### 5b-5. 兩項「僅 Wiki、刻意不採用」的記錄
 
 - **房間資訊欄位。** [MAP・ルール詳細](https://wikiwiki.jp/paperman/MAP・ルール詳細)

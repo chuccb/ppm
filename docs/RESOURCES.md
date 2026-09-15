@@ -876,6 +876,43 @@ native 有具名類別 `GimmickProperties`，其 `sub_9A6810` 以寫死的
 傷害來源。實際傷害值、誰有權宣告機關損毀、以及 750 的
 `s32 s32 u8` 三欄語義，仍需 server／封包證據，維持 UNRESOLVED。
 
+## 5d-10. Tutorial_Data.xml：`type` 欄即武器段選擇器，並二度印證基礎四件組
+
+`Extracted/ui/system/Tutorial_Data.xml`（已解出；native 以
+`L"system\\Tutorial_Data.xml"` 寫死路徑載入，且 `TutorialDataPath`／
+`TUTO_TECH`／`maxmagazine`／`clearArrow`／`botangle` 都有對應 reader 字串）
+描述教學關卡：每個 `<mission>` 有 `delaytime`、玩家 `angle`／`position`、
+`<weapon slot type weapon magazine maxmagazine>`，以及 bot 的
+`position`／`weapon`／`avata body hair face set hp`。
+
+**`type` 是武器段選擇器（Fact / HIGH）。** 檔內出現的 9 組
+`slot`/`type`/`weapon` 三元組，以 `type` 決定要加哪個段基底，**9/9 全部命中**：
+
+| type | 段基底 | 範例 |
+|---:|---|---|
+| 0 | `12100000` 主武器 | `27`→MP5K、`28`→PSG-1、`24`→P90、`501`→クッションガトリング |
+| 1 | `12200000` 副武器 | `26`→USP9、`79`→M202 |
+| 2 | `12300000` 近戰 | `4`→CU-BK7 |
+| 3 | `12400000` 投擲 | `7`→HE GRENADE、`12`→AIR BOMB |
+
+這是繼 `SpecialWeaponType.xml`（§5d-8）之後**第二個**使用「段內偏移」而非
+完整 item id 的資源檔，且此處還多一個 `type` 欄明示要用哪個段 ——
+等於資源檔自己把 §5a2 的四武器槽分段**寫了出來**。
+（唯一未命中的 `weapon='3001'` 不在四個武器段內，屬另一類 id，維持 UNRESOLVED。）
+
+**基礎四件組的第二條獨立證據。** §5b-4 由 Wiki
+[試し撃ちシステム](https://wikiwiki.jp/paperman/試し撃ちシステム) 得知
+「未選武器一律回到 MP5K・USP9・CU-BK7・HE GRENADE」，當時只有 itemdata 佐證。
+本檔的教學關卡在**完全無關的子系統**中，用同一組
+`type0=27 / type1=26 / type2=4 / type3=7` 配置玩家 ——
+解出來正是 **MP5K / USP9 / CU-BK7 / HE GRENADE**。
+兩個互不相干的 client 子系統選擇同一組基礎裝備，
+把「這四件是本 revision 的 base kit」從單一來源提升為**交叉印證的事實**。
+
+**界線不變。** 這仍只證明 **client 端場景配置**。它不證明新帳號 inventory、
+不證明 grant、也不證明這四件的擁有權由 server 發放（§5-starter grant
+的三來源分離結論維持不變）。
+
 ## 5e. 版本考古 (廿一輪)
 - 根 datarevision.txt = 811034967 (patch 版本號)
 - map/maplist.dat = **舊版明文** (head f32 v1.02, 67 圖, 832B/條,
