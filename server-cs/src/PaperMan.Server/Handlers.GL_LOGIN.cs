@@ -1,35 +1,26 @@
 // =============================================================================
-// Account-listener handlers.
-//
-// 694 is emitted once by Program when a Login-role TCP session opens; native
-// CLobbyLogin::sub_43E500 receives it and immediately calls sub_43DF00 to emit
-// 682.  Therefore this file must never send 694 after 682/681.
+// GL_LOGIN_REQ (682) → GL_LOGIN_ACK (681)
+// File and handler entry use the canonical opcode token verbatim. Packet-specific
+// helpers retain the request or paired ACK token that defines their wire family.
 // =============================================================================
 using System.Diagnostics.CodeAnalysis;
 using PaperMan.Protocol;
 
 namespace PaperMan.Server;
 
-public static class AuthHandlers
+public static partial class AuthHandlers
 {
-    public static void Register(Registrar add)
-    {
-        add(Opcode.GT_PING_REQ, PingReply);
-        add(Opcode.GL_LOGIN_REQ, Login);
-    }
-
-    // 101 = client response to server-originated 102 (sub_58D6F0). It is not a
-    // request/reply pair: replying with 102 here would create a ping loop.
-    private static ValueTask PingReply(Session session, Packet packet, ServerContext context)
-    {
-        session.LastPongAt = DateTimeOffset.UtcNow;
-        return ValueTask.CompletedTask;
-    }
-
+    // =============================================================================
+    // Account-listener handlers.
+    //
+    // 694 is emitted once by Program when a Login-role TCP session opens; native
+    // CLobbyLogin::sub_43E500 receives it and immediately calls sub_43DF00 to emit
+    // 682.  Therefore this file must never send 694 after 682/681.
+    // =============================================================================
     /// <summary>Validates and handles the fixed-size tail of GL_LOGIN_REQ(682).</summary>
-    private static async ValueTask Login(Session session, Packet packet, ServerContext context)
+    private static async ValueTask GL_LOGIN_REQ(Session session, Packet packet, ServerContext context)
     {
-        if (!TryReadValidLoginRequest(packet, out var request, out var dataRevision))
+        if (!TryReadGL_LOGIN_REQ(packet, out var request, out var dataRevision))
         {
             // A native client consumes result 2 as the account/password failure
             // message and reads no success-only tail.
@@ -90,7 +81,7 @@ public static class AuthHandlers
         }
     }
 
-    private static bool TryReadValidLoginRequest(
+    private static bool TryReadGL_LOGIN_REQ(
         Packet packet,
         [NotNullWhen(true)] out LoginRequest? request,
         out uint dataRevision)
@@ -103,9 +94,9 @@ public static class AuthHandlers
             request = LoginWire.ReadRequest(packet);
             if (string.IsNullOrEmpty(request.AccountName)
                 || string.IsNullOrEmpty(request.PasswordOrToken)
-                || !IsNativeLoginName(request.AccountName)
+                || !IsNativeGL_LOGIN_REQ_AccountName(request.AccountName)
                 || (byte)request.FingerprintSource > (byte)LoginFingerprintSource.StorageSerial
-                || !HasNativeFingerprintShape(request)
+                || !HasNativeGL_LOGIN_REQ_FingerprintShape(request)
                 || !LoginWire.TryDecodeDataRevision(request.ObfuscatedDataRevision, out dataRevision))
             {
                 return false;
@@ -124,7 +115,7 @@ public static class AuthHandlers
     }
 
     /// <summary>Mirrors sub_43DD60's account-edit validation before the native client builds 682.</summary>
-    private static bool IsNativeLoginName(string accountName) =>
+    private static bool IsNativeGL_LOGIN_REQ_AccountName(string accountName) =>
         accountName.All(static character =>
             character is >= '0' and <= '9'
             or >= 'A' and <= 'Z'
@@ -133,7 +124,7 @@ public static class AuthHandlers
             or '＠');
 
     /// <summary>Checks the exact zero-filled raw24 shapes emitted by sub_43DF00.</summary>
-    private static bool HasNativeFingerprintShape(LoginRequest request)
+    private static bool HasNativeGL_LOGIN_REQ_FingerprintShape(LoginRequest request)
     {
         ReadOnlySpan<byte> fingerprint = request.Fingerprint;
         if (fingerprint.Length != 24)

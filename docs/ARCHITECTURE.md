@@ -115,7 +115,11 @@ uses cancellation and disposes its socket only after its receive loop exits.
   gameplay policy。各 `Handlers.*` 檔以協定子系統切分（Auth、Channel、Lobby、
   Room、Join、BattleRelay、BattleObjects、Shop、Stats、Clan、Quest、Friend、
   Voice、Warehouse、Master、GameCenter、Ai），使 opcode 的處理位置可直接搜尋。
-  Lobby 的每個已註冊 request 則是單一 canonical opcode-family source file：例如
+  Auth 與 Channel 的每個已註冊 request 也各有單一 canonical opcode-family
+  source file：例如 `Handlers.GL_LOGIN.cs` / `GL_LOGIN_REQ`、
+  `Handlers.PM_UDPSTART.cs` / `PM_UDPSTART_REQ`，並分別由
+  `Handlers.Auth.Registry.cs`、`Handlers.Channel.Registry.cs` 做無 body 的 binding。
+  Lobby 的每個已註冊 request 同樣是單一 canonical opcode-family source file：例如
   `Handlers.GL_MYINFO.cs` / `GL_MYINFO_REQ`、`Handlers.GI_CHANGEWP.cs` /
   `GI_CHANGEWP_REQ`，以及其同名 `*_ACK` builder。檔名、entry method 和 packet
   catalog token 可直接對齊；`Handlers.Lobby.Registry.cs` 是 Lobby 的描述性例外，因為它
