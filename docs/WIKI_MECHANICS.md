@@ -317,6 +317,18 @@ weaponparts 1,108、partsability 413，以及
 都對應到確實存在的 `first_shot_wide`／`first_shot_angle`。詳
 [`RESOURCES.md` §5d-11](RESOURCES.md#5d-11-武器-ui-儀表--partsabilitypat-引擎欄位對照)。
 
+### 5b-9. 第六輪：Pepachi 演出級別，以及兩處 md 更正
+
+| Wiki 敘述 | 三方比對結果 |
+|---|---|
+| [ペーパチ詳細](https://wikiwiki.jp/paperman/ペーパチ詳細) 描述抽獎有「大當／小當／槓龜」的演出差異，並有 11 連抽 | **機制已完整定位，且證明結果由伺服器決定**。701 每筆獎品三元組的第三欄 `reelC` 就是演出級別，經 `sub_84A320 → sub_842A30 → sub_8433E0` 三段重映射後選中 `pe-pachi_scenario.xml` 的四個區段之一：`Rare`(3 種演出)／`Atari`(11)／`Zannen`(8)／`Suka`(44)。客戶端唯一的 `rand()` 只在**同級別內**挑第幾種演出。`p_n11 >= 11` 分支即 11 連抽。詳 [`PACKETS.md` §3.15p](PACKETS.md)。 |
+| — | **`face_contents.xml` 舊記有誤**。它不是「臉型清單／角色創建」，而是**聊天表情觸發詞表**：5 種表情共 122 個關鍵字，載入類別名為 `CFaceChatScriptProperty`，以 `wcsstr` 對聊天字串做子字串比對。純客戶端行為，伺服器不參與。詳 `RESOURCES.md` §5d-12。 |
+| — | **`RecommandItem.pat` 舊記「809」有誤**，實測 **1,030 列**（§5f 早已記為 1030，是 §1 摘要表與之不一致）。已更正並補上其餘檔案的實測列數。 |
+
+**抽獎的界線仍未鬆動。** 上述只證明「級別由 701 指定、客戶端照演」。
+中獎率、獎池內容、保底與扣款**仍無任何 client 可證事實**，維持 UNRESOLVED，
+現行 fail-closed 的 700→701 回覆不得改為成功。
+
 ### 5b-5. 兩項「僅 Wiki、刻意不採用」的記錄
 
 - **房間資訊欄位。** [MAP・ルール詳細](https://wikiwiki.jp/paperman/MAP・ルール詳細)

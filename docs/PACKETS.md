@@ -1906,7 +1906,7 @@ u8+slot 系列)
 | 698 | `GP_ENTER_PEPACHI_REQ` | `sub_580640` | C2S | `(空)` |
 | 699 | `GP_ENTER_PEPACHI_ACK` | `CLobbyShop::sub_46AD00` case 699 | S2C | `u8 status, s32 rawA, s32 rawB`; only status 1 enters the Pepachi scene. The two words are not proven currency fields. |
 | 700 | `GP_START_GAME_REQ` | `sub_8458D0`, called by `sub_8459C0` | C2S | `u8 paymentDrawSelector, s32 selectedCharacterId`; exact 5-byte body. The second field is `19,900,000 + (sub_525790(activeCharacter) % 100000)`, not a coin type or draw count. |
-| 701 | `GP_START_GAME_ACK` | `sub_84A000` → `sub_84A490` | S2C | `u8 result, u8 rawCode`; only `result==1` continues with `s32 rawA,s32 rawB,u8 rawMode,u8 prizeCount, prizeCount×{s32 reelA,s32 reelB,s32 reelC}` (client processes at most 11 prize triples). |
+| 701 | `GP_START_GAME_ACK` | `sub_84A000` → `sub_84A490` | S2C | `u8 result, u8 rawCode`; only `result==1` continues with `s32 rawA,s32 rawB,u8 rawMode,u8 prizeCount, prizeCount×{s32 reelA,s32 reelB,s32 reelC}` (client processes at most 11 prize triples). **`reelC` 是伺服器指定的「演出級別」**，不是外觀參數 — 見下方 §3.15p。 |
 | 702 | `GP_PEPACHI_LIST_REQ` | `sub_580970` | C2S | `(空)` |
 | 703 | `GP_PEPACHI_LIST_ACK` | `CLobbyShop::sub_46AD00` case 703 | S2C | `s32 start, s32 count, (start+count)×s16 signedEntry`; `{0,0}` is a structural empty list only—not a probability-table assertion. |
 | 900 | `GS_CAPSULEMACHINE_START_REQ` | `sub_99CFA0`, called by `sub_99D0A0` | C2S | `u8 paymentSelector, u8 drawCount`; exact two-byte body, not an `s32 machine_id`. |
@@ -2357,6 +2357,43 @@ dispatcher case 102 → `sub_58D6F0` 立即 `ctor(101)` 回送
   later reads and 466 never overwrite expiry or re-import that legacy source.
 
 ---
+
+### 3.15p Pepachi 701 的 `reelC` = 伺服器指定的演出級別 (本輪, resource+native 互證)
+
+701 每筆獎品三元組的第三欄 `reelC` **不是外觀參數，而是抽獎結果的級別**，
+由伺服器決定、客戶端只負責照演。完整鏈路（全部可在 `PaperMan.exe.c` 追到）：
+
+```
+sub_84A490 解出 701           → v13[] 獎品陣列 (11 格 stride: reelA=v13[i], reelB=v13[i+11], reelC=v13[i+22])
+sub_84A320(this, …, a5=reelC) → switch(a5) 寫 this+8 級別
+sub_842A30(…, a2=this+8)      → sub_8433E0(table, a2)
+sub_8433E0                    → v8[]={2,0,1,0,3} 重映射，再 rand() % 該組演出數
+pmSlotMachineMovieSequenceTable → 讀 pepachi/pe-pachi_scenario.xml
+```
+
+`pe-pachi_scenario.xml` 恰有 **4 個區段**，與重映射值域 0..3 完全對上：
+
+| reelC | `this+8` | 重映射 | 區段 | 演出變體數 |
+|---:|---:|---:|---|---:|
+| 3 | 3 | 0 | `Rare`（大獎） | 3 |
+| 2 | 2 | 1 | `Atari`（中獎） | 11 |
+| 1 | 0 | 2 | `Zannen`（可惜） | 8 |
+| 0 | 4 | 3 | `Suka`（槓龜） | 44 |
+
+**區段是依「出現順序」讀取，不是依名稱（Fact / HIGH）。**
+`sub_843600` 以 `for(i…)` 走訪並存進 `this + 16*i + 4`，
+建構子 `'eh vector constructor iterator'(this+1, 0x10u, 4, …)` 也正好配置
+**4 個 16B 槽**。exe 裡的 `off_BDBBC0[2] = {L"Rare", L"Atari"}` 只是除錯標籤，
+**不參與選擇邏輯**（陣列只有 2 個元素卻要走 4 圈，正說明它非邏輯所需）。
+因此**調換 XML 區段順序會直接改變抽獎演出的對應**。
+
+**唯一的 `rand()` 在客戶端，但它只挑「同級別內的第幾種演出」**
+（例如 `Suka` 的 44 種變體），級別本身完全來自 701。
+`p_n11 >= 11` 分支即 Wiki 所述的「11 連抽」模式。
+
+**界線。** 這證明 **701 的 `reelC` 具有結果權威**，因此私服若要實作 701，
+必須自行決定級別並保持與獎品內容一致 —— 但**中獎率、獎池、保底、扣款**
+仍無任何 client 可證事實，維持 UNRESOLVED，現有 fail-closed 回覆不得改動。
 
 ## 3.99 廿六輪終極盤點 — 676-entry catalog 全分類收官
 ```

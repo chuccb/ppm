@@ -7,12 +7,12 @@
 
 | 檔案 | 讀取器 | 內容 | 對私服的價值 |
 |---|---|---|---|
-| **cfg\ItemData.pat** | @131262 | 物品目錄 (1808B/條) | ★★★ 填 item_catalog 的真實資料: id/名稱/kind/價格/期限/能力值/需求等級 |
-| **cfg\Quest.pat** | @602219 | 任務目錄 | ★★★ 填 quest_catalog: 條件類型/目標值/獎勵 |
-| **cfg\weaponparts.pat** | @619191 | 武器改裝件 | ★★ 220/221 編組 parts 驗證 |
-| **cfg\maplist.pat** | (sub_717E50) | 地圖清單 | ★★ 111 建房 map id 驗證 |
-| **cfg\partsability.pat** | | 改裝件**效果差分** (31 欄彈道模型) | ★★ |
-| **cfg\RecommandItem.pat** | @686031 | 推薦商品 (809) | ★ GS_GET_RECOMMENDSET_INFO 內容 |
+| **cfg\ItemData.pat** | @131262 | 物品目錄 — **21,164 條**（檔案 stride **997B**；`1808B/條` 是記憶體結構，見 §2c2） | ★★★ 填 item_catalog 的真實資料: id/名稱/kind/價格/期限/能力值/需求等級 |
+| **cfg\Quest.pat** | @602219 | 任務目錄 — **844 條 × 47 欄** CSV | ★★★ 填 quest_catalog: 條件類型/目標值/獎勵 |
+| **cfg\weaponparts.pat** | @619191 | 武器改裝件 — **1,108 列 × 81 欄**（第一欄為**完整 item id**） | ★★ 220/221 編組 parts 驗證 |
+| **cfg\maplist.pat** | (sub_717E50) | 地圖清單 — **123 張**（stride 836B，見 §5d-5） | ★★ 111 建房 map id 驗證 |
+| **cfg\partsability.pat** | `CPartsAbilityListParamCtrl::Load` | 改裝件**效果差分** — **413 列 × 31 欄**彈道模型（**依欄位順序**解析，見 §5d-11） | ★★ |
+| **cfg\RecommandItem.pat** | @686031 | 推薦商品 (**1,030 列**；本輪實測，舊記「809」已更正) | ★ GS_GET_RECOMMENDSET_INFO 內容 |
 | **data.pat** | @225227 | 主資料容器 | ★★ (見 §3 已破解格式) |
 | **Data\pmClient.dat** | @415210 | pmFile 打包主檔 | ★★★ 上面所有 cfg\*.pat 都從這打包檔讀出 |
 | FilterWord.dat / ExceptionWord.dat | | 聊天過濾詞 | ○ (伺服器可自備) |
@@ -537,7 +537,7 @@ reader-level layout.
 | netcafe_contents.xml | 網咖特典 (UTF-16) | PopUpNetCafeShop |
 | voice_customize_contents.xml | 語音自訂 (UTF-16LE; 15 角色×92 情境×27 句) | 791–796 voice_slots |
 | CharacterFitting.xml | 試衣間 temporary fitting/preview state (hand*.tga ← data.pat 快取；非 persistent default) | — |
-| face_contents.xml | 臉型清單 | 角色創建 |
+| face_contents.xml | **聊天表情觸發詞表**（**非**臉型清單 — 舊記「角色創建」有誤，本輪更正）：5 種表情 × 共 122 個關鍵字，載入類別為 `CFaceChatScriptProperty` | 聊天／表情，與角色創建無關（創角用 `CharMakeProcess.xml`） |
 
 (CharacterFitting 引用 hand12.tga — 與 data.pat 快取表的 15 個
 hand*.tga 互證: 那是「試衣間手部貼圖」快取)
@@ -997,6 +997,33 @@ Wiki [各種ゲージ詳細](https://wikiwiki.jp/paperman/各種ゲージ詳細)
 在 exe 中以字串出現（那是別處的 XML 屬性查詢），
 其餘欄名在二進位中完全不存在卻仍被正確讀取。
 **因此欄位順序本身就是契約，改動 CSV 欄序會直接錯位。**
+
+## 5d-12. face_contents.xml：聊天表情觸發詞（更正舊記「臉型清單」）
+
+舊版 §5d 表把 `Extracted/ui/system/face_contents.xml` 記為
+「臉型清單 / 角色創建」——**這是錯的**，本輪已更正。它實際是
+**依聊天內容自動切換表情**的關鍵字表：
+
+| 表情 index | 觸發詞數 | 範例 |
+|---:|---:|---|
+| 1 | 2 | `basic`, `基本`（預設／重置） |
+| 2 | 30 | `ｗｗｗ`, `(笑)`, `あはは`, `楽しい`（笑） |
+| 3 | 30 | `いやだ`, `怒った`, `(怒)`, `きれた`（怒） |
+| 4 | 30 | `悲しい`, `憂鬱`, `凹む`, `ため息`（鬱） |
+| 5 | 30 | `泣く`, `(泣)`, `涙`, `；∀；`（泣） |
+
+合計 **122** 個關鍵字。
+
+**證據（Fact / HIGH）。** native 以寫死路徑
+`L"system\\face_contents.xml"` 搭配根標籤 `L"facemakelistTable"` 載入，
+而**載入類別的名字就是 `CFaceChatScriptProperty`**（face *chat*，非 face make）。
+比對函式以 `wcsstr(聊天字串, 關鍵字)` 做**子字串比對**，
+命中即切換表情 —— 是**純客戶端的本地呈現**，不經任何封包。
+角色創建走的是另一條路徑（`CharMakeProcess.xml`／`charmakebackground.xml`），
+與本檔無關。
+
+**界線。** 這完全是 client 端行為，伺服器**不需要也不應該**參與；
+聊天封包照原樣轉發即可，不得因表情而改寫內容。
 
 ## 5e. 版本考古 (廿一輪)
 - 根 datarevision.txt = 811034967 (patch 版本號)
