@@ -42,14 +42,16 @@ from packet behavior. `Handlers/` is subdivided only by the existing
 binding-only registries, so a directory is backed by an explicit Router path
 rather than a guessed gameplay taxonomy.
 
-## State and database file map
+## Host, state, and database file map
 
 | Concern | File(s) | Boundary |
 |---|---|---|
+| Listener role and shared context | `Host/ServerRole.cs`, `Host/ServerContext.cs` | listener-selected handshake role, Db plus explicitly process-local registries |
+| Listener configuration / bootstrap metadata | `Host/ServerConfig.cs`, `Host/ChannelBootstrapMetadata.cs`, `Host/LoginCode.cs` | startup validation, 681/144/196 wire-facing configuration, and native login result values |
 | Room model / live lifecycle | `State/Room.cs`, `State/RoomBattleState.cs`, `State/RoomManager.cs` | room configuration/seats, mode-specific battle state, then manager lookup/broadcast lifecycle |
 | Other process-local state | `State/SessionRegistry.cs`, `State/ChannelAdmissionRegistry.cs` | connected-session lookup and single-use 681→143 admission only |
 | SQLite foundation | `Database/Db.Connection.cs`, `Database/DatabaseBootstrapper.cs` | connection, migrations, shared SQL helpers, schema/catalog/config bootstrap |
-| Account and first-player bootstrap | `Database/Db.Accounts.cs`, `Database/Db.PlayerBootstrap.cs` | credential/account lookup, canonical starter identity/nickname/appearance rows |
+| Account and first-player bootstrap | `Database/Db.Accounts.cs`, `Database/Db.CanonicalCharacterTemplates.cs`, `Database/Db.PlayerBootstrap.cs` | credential/account lookup, source-proven template offsets, and private starter identity/nickname rows |
 | Player read/mutation projections | `Database/Db.PlayerInfo.cs`, `Database/Db.Characters.cs`, `Database/Db.PlayerProgress.cs` | my-info counters, character rows, selected character/tutorial/monotonic totals |
 | Loadout and NewSkill state | `Database/Db.Loadouts.cs`, `Database/Db.WeaponLoadout.cs`, `Database/Db.NewSkillProfiles.cs` | read projection, source-bounded weapon update, five-record NewSkill state |
 | Items and player inbox | `Database/Db.Inventory.cs`, `Database/Db.Warehouse.cs`, `Database/Db.Gifts.cs`, `Database/Db.Mailbox.cs` | each named durable item/inbox store; no inferred cross-store policy |
