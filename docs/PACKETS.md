@@ -17,6 +17,26 @@
 > 附帶確認: 199 GL_MYITEM_REQ client 端**不送 start 欄位** —
 > server 恆從 0 開始送背包 (C# Remaining 守門已天然正確)。
 
+> **⚠ 本文件引用的 33 個 `sub_` 符號在 dump 中不存在（本輪機器掃描）。**
+> 全文引用 673 個 `sub_` 符號，其中 **33 個在新舊兩份 `PaperMan.exe.c` 中
+> 皆查無此函式**，屬更早期 IDA session 遺留的符號漂移。
+> 這些位址多半只差一點就命中真實函式（`0x532AA0` 的最近鄰是 `0x532AB0`、
+> `0x579040` 的是 `0x5790B0`），顯示當時的函式邊界判定與現在不同；
+> **但不可據此臆測對應關係** —— 214 的正解 `sub_572EB0` 與舊記
+> `sub_532AA0` 相距 0x40410，是靠追 `Packet(214)` builder 找到的，
+> 不是靠位址接近。
+> `LAYOUTS.md`（311 個）與 `LAYOUTS_REQ.md`（17 個）則**全部可對應**，
+> 因為它們是自動抽取的。
+>
+> 完整清單：`sub_523A00 523FB0 529680 532AA0 554E00 56AD90 579040 5790A0
+> 579100 579450 5795A0 579B10 579C70 579DB0 579E70 57A490 580640 580970
+> 582530 582770 582840 582B90 584280 584340 5848B0 584E20 584EE0 584F10
+> 585020 593260 7616B0 761AC0 ADC240`。
+> 這**不影響欄位結論**（那些是從 layout 表與實測得出的），
+> 但引用這些符號去 dump 裡查證時會落空 —— 請改以鄰近位址或 opcode 反查。
+> 目前只更正了已追出對應關係的 214；其餘保留原樣並在此列管，
+> 避免無根據地猜測對應函式。
+
 本文件是重建伺服器端的協議基礎。所有結論都直接取自反編譯代碼，
 每一節都附上來源函數 (sub_XXXXXX) 供覆核。
 
@@ -1879,7 +1899,7 @@ u8+slot 系列)
 | 720 | `GR_START_VOTING` | `sub_9BF430` | S2C | `s32 target, s32 reason, s32 initiator, s32 duration, u8 team` (廣播) |
 | 721 | `GR_DO_VOTING` | `sub_A192B0` | C2S | `u8 vote` (1=同意, 2=反對) |
 | 722 | `GR_VOTING_RESULT` | `sub_9BF430` | S2C | `s32 target, u8 result` (1=通過踢出, 0=否決) |
-| 214 | `GM_CREATECHAR_REQ` | `sub_532AA0` | C2S | `u8 char_type, s16 hair, s16 face, s16 coat` |
+| 214 | `GM_CREATECHAR_REQ` | `sub_572EB0`（舊記 `sub_532AA0` 在任一份 dump 皆不存在，本輪更正） | C2S | `u8 char_type, s16 hair, s16 face, s16 coat`（builder 依序 `sub_592920` + 3×`sub_5929E0`，共 7 B）|
 | 215 | `GM_CREATECHAR_ACK` | `sub_572F80` | S2C | `u8 status(0=成功)` |
 | 218 | `GI_CHANGEDATA_REQ` | `sub_523A00` | C2S | `u8 char_slot` |
 | 219 | `GI_CHANGEDATA_ACK` | `sub_573230` | S2C | `u8 status(1=成功)` |

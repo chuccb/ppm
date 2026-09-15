@@ -117,6 +117,28 @@ def check_equivalent_handlers(text: str) -> None:
         raise SystemExit(1)
 
 
+SYMBOL = re.compile(r"\b(sub_[0-9A-Fa-f]{4,8})\b")
+# PACKETS.md still cites 33 sub_ symbols that exist in no dump we have; they are
+# address drift from an older IDA session. LAYOUTS.md and LAYOUTS_REQ.md are
+# machine-extracted and must stay at zero. See the note at the top of PACKETS.md.
+EXPECTED_STALE = {"docs/PACKETS.md": 33, "docs/LAYOUTS.md": 0, "docs/LAYOUTS_REQ.md": 0}
+
+
+def check_cited_symbols(text: str) -> None:
+    present = set(SYMBOL.findall(text))
+    for relative, expected in EXPECTED_STALE.items():
+        path = ROOT / relative
+        if not path.is_file():
+            continue
+        cited = set(SYMBOL.findall(path.read_text(encoding="utf-8")))
+        stale = sorted(cited - present)
+        if len(stale) != expected:
+            print(f"dispatcher verification failed: {relative} cites {len(stale)} "
+                  f"symbol(s) absent from the dump, expected {expected}")
+            print(f"  {stale[:20]}")
+            raise SystemExit(1)
+
+
 def main() -> None:
     if not DUMP.is_file():
         print(f"dispatcher check skipped: {DUMP} is not present")
@@ -124,6 +146,7 @@ def main() -> None:
 
     text = DUMP.read_text(encoding="utf-8", errors="replace")
     check_equivalent_handlers(text)
+    check_cited_symbols(text)
     cases = dispatcher_cases(text)
     documented = table_opcodes(LAYOUTS)
     missing = sorted(cases - documented)
