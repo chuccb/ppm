@@ -1333,6 +1333,44 @@ extraction 中，因此**試衣間動畫子系統無法從現有資料完整還�
 第七輪那次把 21 個明文檔誤判為加密就是典型。
 日後若再遇到「這個檔好像沒有」，應先跑本工具確認它是否真的缺席。
 
+## 5d-19. 角色 UI 動畫：15 個 type 全備，但試衣間 pendant 幾乎全缺
+
+`Extracted/character/animations/ui/` 下有 **`type1`..`type15` 共 15 個目錄**
+（另有一個 `Angry_Type13`），每個裝 `.pad` 動畫檔。這是繼
+`hand1..hand15.tga`、`CharacterToCooki` 的 handTexture 之後，
+**第四條獨立證明「角色型別恰為 15 種」**的資源側證據。
+
+### 15 個 type 全部完整（Fact / HIGH）
+
+native 以 **13 個** `.PAD` 字面值指名它要載入的動畫：
+`base_29` / `base_69` / `base_full` / `crazy` / `damege1`（原廠拼字）/
+`dead` / `defeat` / `escape` / `loop` / `shot` / `uiNormalF` / `uiResultLF` / `win`。
+
+實測 **15 個 type 目錄全部備齊這 13 個檔，無一缺漏**。
+其中 13 個目錄另多出 `uibreath.pad` 與 `uiresultrf.pad` 兩個
+**native 從未指名**的檔案 —— 只有 `type12`、`type13` 沒有這兩個「多餘」檔，
+所以先前看到的「type12/13 只有 13 個檔」**不是缺漏，反而它們才是剛好**。
+這兩個額外檔屬未使用的殘留資產。
+
+### 試衣間 pendant：13 個引用，只有 1 個隨附
+
+`CharacterFitting.xml` 的每個角色段都指定
+`PendantFolderName`（`Angry_Type1`..`Angry_Type13`，共 **13 個**）與
+`SoundFolderName`（`Angry_Voice` / `Voice_angry`）。實測：
+
+* `character/` 下**只有 `Angry_Type13` 這一個目錄**，
+  其餘 **12 個 pendant 目錄全部不存在**；
+* `sound/` 下 **`Angry_Voice` 與 `Voice_angry` 兩個都不存在**。
+
+這與 §5d-18 找到的唯一真缺檔 `ui/CharFittingAnimation.xml`、
+以及 §5d-17 的「`CharacterFitting.xml` 只有 13 段且僅 `hayate` 的
+`bEnable=1`」構成**三條互相獨立、方向一致的證據**：
+**試衣間（CharacterFitting）子系統在本 extraction 中是殘缺的**，
+不可能從現有資料完整還原。相關結論一律維持 UNRESOLVED。
+
+**界線。** 動畫檔本身是客戶端播放資產，與伺服器無關。
+本節的價值在於**界定可分析範圍**：角色動畫齊全可信，試衣間則否。
+
 ## 5e. 版本考古 (廿一輪)
 - 根 datarevision.txt = 811034967 (patch 版本號)
 - map/maplist.dat = **舊版明文** (head f32 v1.02, 67 圖, 832B/條,

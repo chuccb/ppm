@@ -412,6 +412,22 @@ Wiki 的威力一覧則是歷史社群量測。兩者即使相符也不構成 se
 誤判為加密就是典型）。日後再遇到類似情形，應先跑
 `verify_resource_coverage.py` 確認它是否真的缺席，而不是直接下結論。
 
+### 5b-15. 第十二輪：角色動畫全備、試衣間確認殘缺
+
+| 主題 | 三方比對結果 |
+|---|---|
+| 角色共 15 種 | **第四條獨立證據**。`character/animations/ui/` 有 `type1`..`type15` 共 15 個目錄（繼 `hand1..15.tga`、`CharacterToCooki` 的 handTexture、`convars`+native 的 15 次查詢之後）。 |
+| 角色動畫完整度 | **15/15 全備**。native 以 13 個 `.PAD` 字面值指名它要的動畫（`base_29`/`base_69`/`base_full`/`crazy`/`damege1`/`dead`/`defeat`/`escape`/`loop`/`shot`/`uiNormalF`/`uiResultLF`/`win`），**每個 type 目錄都齊備、無一缺漏**。 |
+| 先前疑似的「type12/13 少檔」 | **不是缺漏**。13 個目錄多出 `uibreath.pad`、`uiresultrf.pad` 兩個 **native 從未指名**的殘留檔；type12/13 沒有這兩個，反而才是剛好 13 個。 |
+| 試衣間（CharacterFitting） | **確認殘缺**。`CharacterFitting.xml` 引用 13 個 `PendantFolderName`（`Angry_Type1..13`），實測**只有 `Angry_Type13` 一個目錄存在**；它引用的兩個 `SoundFolderName`（`Angry_Voice`／`Voice_angry`）**也都不存在**。 |
+
+**三條獨立證據指向同一結論。** 試衣間子系統在本 extraction 中殘缺：
+① §5d-18 的唯一真缺檔正是 `ui/CharFittingAnimation.xml`；
+② 本輪 13 個 pendant 目錄只有 1 個、2 個 sound 目錄全無；
+③ §5d-17 的 `CharacterFitting.xml` 只有 13 段且僅 `hayate` 啟用。
+因此**任何試衣間相關結論都不可能從現有資料完整還原**，一律停在 UNRESOLVED。
+反過來說，角色動畫資產則是**可信且完整**的 —— 這就是界定可分析範圍的實益。
+
 ### 5b-5. 兩項「僅 Wiki、刻意不採用」的記錄
 
 - **房間資訊欄位。** [MAP・ルール詳細](https://wikiwiki.jp/paperman/MAP・ルール詳細)

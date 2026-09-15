@@ -24,6 +24,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 EXTRACTED = ROOT / "Extracted"
+DUMP = ROOT / "PaperMan.exe.c"
 
 failures: list[str] = []
 skipped: list[str] = []
@@ -237,6 +238,37 @@ def main() -> None:
             check("CharacterToPushChar.xml damage_aim spread",
                   dict(Counter(re.findall(r'damage_aim="([^"]*)"', text))),
                   {"1f": 8, "0.6f": 1, "0.4f": 1, "0.3f": 1, "0.25f": 2, "0.2f": 2})
+
+    # character/animations/ui: 15 type directories, each carrying every .PAD
+    # animation the dump names. Two further files ship but are never named.
+    animations = EXTRACTED / "character" / "animations" / "ui"
+    if not animations.is_dir() or not DUMP.is_file():
+        skipped.append("character/animations/ui")
+    else:
+        named = {match.lower() for match in
+                 re.findall(r'L"([A-Za-z0-9_]+\.PAD)"',
+                            DUMP.read_text(encoding="utf-8", errors="replace"))}
+        check("native-named .PAD animations", len(named), 13)
+        types = [f"type{index}" for index in range(1, 16)]
+        present = [name for name in types if (animations / name).is_dir()]
+        check("character animation type directories", len(present), 15)
+        incomplete = sorted(name for name in present
+                            if named - {path.name.lower()
+                                        for path in (animations / name).iterdir()})
+        check("type directories missing a named animation", incomplete, [])
+
+    # CharacterFitting references 13 pendant folders; only one of them ships,
+    # which is why the fitting-room subsystem stays UNRESOLVED.
+    fitting = decrypt(EXTRACTED / "ui" / "system" / "CharacterFitting.xml")
+    characters = EXTRACTED / "character"
+    if fitting is None or not characters.is_dir():
+        skipped.append("CharacterFitting pendant folders")
+    else:
+        wanted = set(re.findall(r'PendantFolderName="([^"]*)"',
+                                fitting.decode("utf-8", "replace")))
+        check("CharacterFitting pendant folders referenced", len(wanted), 13)
+        shipped = {path.name for path in characters.rglob("Angry_*") if path.is_dir()}
+        check("pendant folders that ship", sorted(shipped), ["Angry_Type13"])
 
     # Every datarevision.txt must agree: Extracted/ is one coherent snapshot.
     revisions = {path.read_text(encoding="utf-8", errors="replace").strip()
