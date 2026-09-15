@@ -60,10 +60,29 @@ PG、boost、Puzzle pack 描述為要從 My Character 的 Present 介面領取�
 3. tutorial／level-up／operation present grant。
 
 它們不可合併成「每個新 character 預設裝著這些武器」。已知 native 只直接證明第二項的
-六個 appearance values；目前語料沒有 direct creator、resource ID、period、inventory row、
-loadout group 或 present ACK 的可重現證據來確認第一／三項是否存在於此 revision。因此
-MP5K、任何 Wiki award，以及同頁的初期角色圖片都仍是 **UNRESOLVED** service policy，
-不得寫入 bootstrap inventory 或 character weapon fields。
+六個 appearance values；目前語料沒有 direct creator、period、inventory row、loadout group
+或 present ACK 的可重現證據來確認第一／三項是否存在於此 revision。因此 MP5K、任何 Wiki
+award，以及同頁的初期角色圖片都仍是 **UNRESOLVED** service policy，不能直接寫入 bootstrap
+inventory 或 character weapon fields。
+
+#### MP5K：已找到的 resource candidate，仍非 grant 證明
+
+對 `main:Extracted/ui/cfg/itemdata.pat` 以 native `pmFile` 解密法完整解析（header
+`version=1,count=21164`，stream 無剩餘）後，ID `12100027` 的 display name 是 `MP5K`。
+它的三個頭部 reference words 都是零，`req_level=0`，其原始 `kind` byte 是 `6`；同一 ID
+family 中可一般購買的 MP5 SD6、M3、G36 等 sample 都是 raw kind `9`，且第一個 raw
+parameter word 會有像 17,000 或 32,000 的數值，MP5K 該位置為零。這些是 **resource facts /
+HIGH**，不是對 raw kind、零值、可購性或初期授與語意的命名。
+
+`main` 也含有 `mp5k` 的 FPV model/sound/animation，及 type `1..15` 全部的 TPV mp5k
+animations。這是 **resource fact / HIGH**：本 revision 有可播放的 MP5K content，且資產並
+不只附屬於某一個 character。完整 `PaperMan.exe.c` 文字搜尋沒有 `12100027` literal；已知
+character template 和 weapon-group materialization trace 也沒有把它寫為 default。這個負面結果
+僅限現有 decompile/搜尋方法，不能排除 retired server 在 registration 或 present 畫面授與它。
+
+結論：Wiki 的「MP5K 是 initial weapon」和此 item/resource candidate 相容，但未形成
+`registration → inventory → loadout → response` 證據鏈；其 ID、無期限或任何 ownership policy
+都不可寫進 server。這也是 resource existence 與 persistent default 必須分離的反例。
 
 ## 3. 對戰系統：歷史模型與 native mode 編號的對照
 
