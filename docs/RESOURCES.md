@@ -1301,6 +1301,38 @@ Wiki [各種ゲージ詳細](https://wikiwiki.jp/paperman/各種ゲージ詳細)
 誰有權讓角色進入 Cooki 狀態、以及是否經由封包同步，
 皆無 client 可證事實，維持 UNRESOLVED。
 
+## 5d-18. 資源覆蓋率：client 要求的 170 個檔，Extracted 提供了 162 個 (95%)
+
+前面各節都是「挑一個檔來讀」。本節反過來問一個**完備性**問題：
+**client 到底會載入哪些資源檔？其中有多少是我們手上沒有的？**
+
+`PaperMan.exe.c` 把資料檔名寫成寬字串字面值，因此可以全部列舉。
+掃出 **170 個**相異資源檔名（`.xml`/`.pat`/`.dat`/`.ini`/`.txt`/`.lang`），
+與 `main` 分支的 71,464 檔完整樹比對後：**162 個有、8 個沒有**。
+這 8 個**全部可以解釋**，沒有一個是「不明遺失」：
+
+| 類別 | 檔案 | 說明 |
+|---|---|---|
+| 執行期產生（3） | `LastChatFilter.ini`、`LastConnect.ini`、`User\lastconnectuserid.txt` | client 自己寫出的本機狀態，本就不會隨安裝檔附帶 |
+| 打包容器本身（2） | `Data\pmClient.dat` | **就是裝著上述資源的 pack**，不是它的成員。另一筆 `ata\pmClient.dat` 是反編譯產物（指標遞增比對的副本字串），非真實檔案 |
+| 副檔名 fallback（2） | `FilterWord.dat`、`ExceptionWord.dat` | 載入器先組 `.txt` 再組 `.dat`；本 revision 隨附的是 `.txt`（見 §1 表） |
+| **真正缺少（1）** | **`ui/CharFittingAnimation.xml`** | 以根標籤 `UICHARFITTINGANIMATION` 載入的試衣間動畫表 |
+
+**唯一真正的缺口具有分析意義。** `CharFittingAnimation.xml` 不在提供的
+extraction 中，因此**試衣間動畫子系統無法從現有資料完整還原** ——
+這正好與 §5d-17 觀察到的「`CharacterFitting.xml` 只有 13 段、且僅
+`hayate` 的 `bEnable=1`」互相呼應：試衣間相關資料本就不完整。
+任何關於試衣間的結論都應停在 UNRESOLVED。
+
+**可重跑。** `python3 server-cs/tools/verify_resource_coverage.py`
+（需完整 `Extracted/`；工作分支上會自動跳過並說明原因）。
+出現未分類的缺檔即失敗，代表 extraction 或 dump 換版，需要重新確認。
+
+**這個數字的用途。** 95% 覆蓋率意味著先前各節「查不到某檔」時，
+**九成五的情況是我沒找對地方，而不是檔案不存在** ——
+第七輪那次把 21 個明文檔誤判為加密就是典型。
+日後若再遇到「這個檔好像沒有」，應先跑本工具確認它是否真的缺席。
+
 ## 5e. 版本考古 (廿一輪)
 - 根 datarevision.txt = 811034967 (patch 版本號)
 - map/maplist.dat = **舊版明文** (head f32 v1.02, 67 圖, 832B/條,
