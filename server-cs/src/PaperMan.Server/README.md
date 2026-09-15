@@ -53,7 +53,7 @@ original-service taxonomy.
 | Listener role and shared context | `Host/ServerRole.cs`, `Host/ServerContext.cs` | listener-selected handshake role, Db plus explicitly process-local registries |
 | Listener configuration / bootstrap metadata | `Host/ServerConfig.cs`, `Host/ChannelBootstrapMetadata.cs`, `Host/LoginCode.cs` | startup validation, 681/144/196 wire-facing configuration, and native login result values |
 | Raw dispatch marker | `Host/RawOpcodeHandlerAttribute.cs` | the one catalog-tokenless C2S opcode remains an explicit compile-time numeric exception |
-| Room model / live lifecycle | `State/Room.cs`, `State/RoomBattleState.cs`, `State/RoomManager.cs` | room configuration/seats, mode-specific battle state, then manager lookup/broadcast lifecycle |
+| Room model / live lifecycle | `State/Room.cs`, `State/RoomBattleState.cs`, `State/RoomManager.cs` | room configuration/seats, mode-specific battle state, then manager lookup/broadcast lifecycle. `GameMode` uses native `Cy*ModeLobbyUI` suffixes; comments retain differing `map_StartIndex.xml` UI names. |
 | Other process-local state | `State/SessionRegistry.cs`, `State/ChannelAdmissionRegistry.cs` | connected-session lookup and single-use 681→143 admission only |
 | SQLite foundation | `Database/Db.Connection.cs`, `Database/DatabaseBootstrapper.cs` | connection, migrations, shared SQL helpers, schema/catalog/config bootstrap |
 | Account and first-player bootstrap | `Database/Db.Accounts.cs`, `Database/Db.CanonicalCharacterTemplates.cs`, `Database/Db.PlayerBootstrap.cs` | credential/account lookup, source-proven template offsets, and private starter identity/nickname rows |

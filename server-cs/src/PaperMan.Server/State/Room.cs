@@ -10,7 +10,7 @@ using System.Collections.Concurrent;
 namespace PaperMan.Server;
 
 /// <summary>
-/// 官方 modeIndex — sub_53FBB0 (PaperMan.exe.c 139113) 依此值 new 出對應
+/// 官方 modeIndex — `PaperMan.exe.c` 的 sub_53FBB0 依此值 new 出對應
 /// CyGameModes::Cy*ModeLobbyUI (各 0x10 位元組) 存入 room+33, 並以
 /// room+132 指向 16 位元組的 mode rule 物件 (vtable + 規則旗標)。
 /// 14 在 switch 中無分支 (落 default → +33=null, 等同無效值);
@@ -18,21 +18,24 @@ namespace PaperMan.Server;
 /// </summary>
 public enum GameMode : byte
 {
-    TeamDeath = 0,      // CyTeamMatchModeLobbyUI         (TD_ 地圖前綴)
-    FreeForAll = 1,     // CyIndividualSurvivalModeLobbyUI (PS_)
-    DefuseBomb = 2,     // CyDefuseBombModeLobbyUI        (資源稱 TeamHacking, TH_)
-    TeamSurvival = 3,   // CyTeamSurvivalModeLobbyUI      (TS_)
-    Steal = 4,          // CyStealModeLobbyUI             (資源稱 TeamSteal, TW_)
-    Practice = 5,       // CyPracticeModeLobbyUI
-    Tutorial = 6,       // CyTutorialModeLobbyUI
-    Chatting = 7,       // CyChattingRoomModeLobbyUI
-    PulpNRoll = 8,      // CyPulpnRollModeLobbyUI         (PNR)
-    GunShooting = 9,    // CyGunShootingModeLobbyUI
-    Occupy = 10,        // CyOccupyModeLobbyUI
-    AiMulti = 11,       // CyAIMultiModeLobbyUI
-    Soccer = 12,        // CyTeamSoccerModeLobbyUI        (SOCCER)
-    OccupyRenewal = 13, // CyOccupyRenewalModeLobbyUI
-    WeaponTest = 15,    // CyWeaponTestModeLobbyUI
+    // Members deliberately match the Cy*ModeLobbyUI suffix selected by
+    // sub_53FBB0. map_StartIndex.xml's UI-facing modeName is retained in
+    // comments where it uses a different official spelling.
+    TeamMatch = 0,          // CyTeamMatchModeLobbyUI; map_StartIndex: TeamDeath (TD_)
+    IndividualSurvival = 1, // CyIndividualSurvivalModeLobbyUI; map_StartIndex: FreeForAll (PS_)
+    DefuseBomb = 2,         // CyDefuseBombModeLobbyUI; map_StartIndex: TeamHacking (TH_)
+    TeamSurvival = 3,       // CyTeamSurvivalModeLobbyUI; map_StartIndex: TeamSurvival (TS_)
+    Steal = 4,              // CyStealModeLobbyUI; map_StartIndex: TeamSteal (TW_)
+    Practice = 5,           // CyPracticeModeLobbyUI
+    Tutorial = 6,           // CyTutorialModeLobbyUI
+    ChattingRoom = 7,       // CyChattingRoomModeLobbyUI
+    PulpnRoll = 8,          // CyPulpnRollModeLobbyUI; map_StartIndex: PNR
+    GunShooting = 9,        // CyGunShootingModeLobbyUI; map_StartIndex: GunShooting
+    Occupy = 10,            // CyOccupyModeLobbyUI
+    AIMulti = 11,           // CyAIMultiModeLobbyUI
+    TeamSoccer = 12,        // CyTeamSoccerModeLobbyUI; map_StartIndex: SOCCER
+    OccupyRenewal = 13,     // CyOccupyRenewalModeLobbyUI
+    WeaponTest = 15,        // CyWeaponTestModeLobbyUI
 }
 
 public sealed class Room
@@ -42,7 +45,8 @@ public sealed class Room
     public required string Title { get; set; }
     public string? Password { get; set; }
     public byte MapId { get; set; }
-    public byte Rule { get; set; }                          // modeIndex (GameMode, 0..16)
+    /// <summary>Client/resource `modeIndex` consumed by sub_53FBB0 (GameMode, 0..16).</summary>
+    public byte ModeIndex { get; set; }
 
     /// <summary>
     /// 房物件 +110: 開放槽位點陣 (bit 0..15 為 1 = 可入座)。

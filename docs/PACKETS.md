@@ -1693,7 +1693,7 @@ u8 +185 no_skill_bg, u8 mode+13 隊打散            ← 6 欄恆送 (err!=0 亦
 NUL), 故 server 必送 — 新房間 = team_mode(2 若 mode∈{0,2,3,4,8,10,
 11,12,13}, 否則 0) + 兩組空隊伍 (uid/crc 0, 空字串, flag 0)。
 模式變更 (169/170) 後 client 以 mode 設定表 `sub_426930(mode)` 回推
-預設地圖寫 +130 (sub_540280)。server 現已鏡像 (RoomHandlers.ModeDefaultMap,
+預設地圖寫 +130 (sub_540280)。server 現已鏡像 (RoomHandlers.ModeIndexDefaultMap,
 client 實際載入的 `system/map_StartIndex.xml` — ⚠ ui/ 根目錄另有一份
 舊版 modeStartIndex 不同, 以 system/ 為準): 0→106 1→104 2→14 3→107
 4→23 8→51 9→89 12→98; 其餘 mode (5/6/7/10/11/13/15/16) 無條目 → 保留原圖。

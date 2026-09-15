@@ -24,7 +24,7 @@ public static partial class RoomHandlers
             return;
         }
 
-        room.MapId = ResolveMap(mapId, room.Rule, context.Db);  // 121 依 mode→bit 過濾
+        room.MapId = ResolveMap(mapId, room.ModeIndex, context.Db);  // 121 依 mode→bit 過濾
 
         await RoomManager.BroadcastAsync(room,
             new Packet(Opcode.GR_MAPCHANGE_ACK).WriteU8(room.MapId));

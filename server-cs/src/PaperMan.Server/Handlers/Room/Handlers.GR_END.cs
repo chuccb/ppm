@@ -35,14 +35,14 @@ public static partial class RoomHandlers
             .WriteU8(roomNo)                                // room_no (client 定址房物件)
             .WriteU8(room.OpenSlotCount)                    // +129 max_players (client 以 +110 重算)
             .WriteU16(room.MaxSlotMask)                     // +110 上限槽位點陣 (回房恢復)
-            .WriteU8(room.Rule)                             // mode → sub_53FBB0
+            .WriteU8(room.ModeIndex)                             // mode → sub_53FBB0
             .WriteU8(room.TimeLimit)                        // +136 時間 (173/174)
             .WriteU16(room.WinCount)                        // +144 勝場目標 (171/172)
             .WriteU8(room.ItemMode)                         // flags bit0→mode+4, bit1→mode+8
             .WriteU8(0)                                     // +146 (mode param, client 存而不讀)
             .WriteU16(room.KillCount)                       // +148 擊殺目標 (340/341)
             .WriteU8(0)                                     // +150 (mode param, client 存而不讀)
-            .WriteBool(IsNativeTwoTeamMode(room.Rule))               // mode+12 是否隊伍房 (sub_56A7B0: sub_438990?1:0)
+            .WriteBool(IsNativeTwoTeamMode(room.ModeIndex))               // mode+12 是否隊伍房 (sub_56A7B0: sub_438990?1:0)
             .WriteU8(0)                                     // +109 room_type_B (client 僅鏡像)
             .WriteBool(room.TeamShuffle);                   // mode+13 隊打散開關 (368/369)
         room.Playing = false;

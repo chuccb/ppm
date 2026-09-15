@@ -36,9 +36,9 @@ public static partial class LobbyHandlers
                .WriteBool(room.Password is not null)        // +106 has_pass
                .WriteU8(room.OpenSlotCount)                    // +129 max_players (client 以 +110 重算)
                .WriteU16(room.MaxSlotMask)                  // +110 上限槽位點陣 (popcount = 最大人數)
-               .WriteU8(room.Rule)                          // game_mode → sub_53FBB0 (0..15)
+               .WriteU8(room.ModeIndex)                          // game_mode → sub_53FBB0 (0..15)
                .WriteBool(false)                            // +108 room_type bit A (server 側未定)
-               .WriteBool(IsNativeTwoTeamRule(room.Rule))            // mode+12 是否隊伍房 (sub_56A7B0: sub_438990?1:0)
+               .WriteBool(IsNativeTwoTeamMode(room.ModeIndex))            // mode+12 是否隊伍房 (sub_56A7B0: sub_438990?1:0)
                .WriteBool(false)                            // +109 room_type bit B (server 側未定)
                .WriteBool(room.DoubleDamage)                // +128 double_damage (990/991)
                .WriteU8(room.MapId)                         // +130 map (sub_540280/540260; 122 亦寫此欄)
@@ -50,5 +50,14 @@ public static partial class LobbyHandlers
     }
 
     /// <summary>sub_438990 的 server 側對照: 兩隊制模式 (0/2/3/4/8/10/11/12/13)。</summary>
-    private static bool IsNativeTwoTeamRule(byte mode) => mode is 0 or 2 or 3 or 4 or 8 or 10 or 11 or 12 or 13;
+    private static bool IsNativeTwoTeamMode(byte modeIndex) => modeIndex is
+        (byte)GameMode.TeamMatch
+        or (byte)GameMode.DefuseBomb
+        or (byte)GameMode.TeamSurvival
+        or (byte)GameMode.Steal
+        or (byte)GameMode.PulpnRoll
+        or (byte)GameMode.Occupy
+        or (byte)GameMode.AIMulti
+        or (byte)GameMode.TeamSoccer
+        or (byte)GameMode.OccupyRenewal;
 }

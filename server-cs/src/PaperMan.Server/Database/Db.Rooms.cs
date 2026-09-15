@@ -3,7 +3,7 @@
 //
 //   maplist.pat 條目 836B (sub_723B10 載入器): +0 s32 mode bitmask,
 //   +4 s32 map_id, +8 128B 檔名 UTF-16, +136 128B 顯示名 UTF-16。
-//   模式→bit 對照見 Handlers.Room.Shared.cs 的 ModeMapBit (docs/RESOURCES.md §4b)。
+//   modeIndex→bit 對照見 Handlers.Room.Shared.cs 的 ModeIndexMapBit (docs/RESOURCES.md §4b)。
 // =============================================================================
 using System.Collections.Frozen;
 using Microsoft.Data.Sqlite;

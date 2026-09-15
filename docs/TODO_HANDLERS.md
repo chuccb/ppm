@@ -70,10 +70,11 @@
 > (bitmask) 做「該模式可選地圖」驗證, server 尚未做 — 列下一輪。
 >
 > 卌七輪 (111/169 地圖過濾 + 語音簇定案):
-> ① 111/121 依 mode→bit 過濾可選地圖落地 — ModeMapBit (mode→bit,
->    見 RESOURCES.md §4b) + ResolveMap: 建房/換圖時該 mode 不支援的
->    地圖回退 mode 預設圖 (ModeDefaultMap); map_catalog 查無/mode 無
->    規則時原樣放行 (不硬編)。Db.GetMapModes 讀 map_catalog。
+> ① 111/121 依 modeIndex→bit 過濾可選地圖落地 — ModeIndexMapBit
+>    (modeIndex→bit，見 RESOURCES.md §4b) + ResolveMap：建房/換圖時該
+>    modeIndex 不支援的地圖回退 modeIndex 預設圖 (ModeIndexDefaultMap)；
+>    map_catalog 查無/modeIndex 無規則時原樣放行（不硬編）。Db.GetMapModes
+>    讀 map_catalog。
 > ② 語音 791–796 wire 佈局全定案並更正 docs (792=整塊覆寫、794=u8
 >    count 前綴, 非先前誤判的 795 變體鏡像); compile-time handler discovery 與
 >    `Handlers.{GL_VOICEITEMSLOT,GI_VOICEITEMSLOT_ALL,GI_CHANGE_VOICEITEMSLOT}.cs`

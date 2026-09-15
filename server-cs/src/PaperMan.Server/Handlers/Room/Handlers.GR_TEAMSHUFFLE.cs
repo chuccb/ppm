@@ -37,7 +37,7 @@ public static partial class RoomHandlers
         {
             status = 7;                                          // 權限がないため…
         }
-        else if (!IsNativeTwoTeamMode(room.Rule))
+        else if (!IsNativeTwoTeamMode(room.ModeIndex))
         {
             status = 8;                                          // 支援しないモードです
         }

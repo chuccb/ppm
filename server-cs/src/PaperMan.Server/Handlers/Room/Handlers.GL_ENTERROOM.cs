@@ -199,14 +199,14 @@ public static partial class RoomHandlers
            .WriteU8(room.RoomNo)                           // v191[2] room_no (sub_537690 我的房號)
            .WriteU8(room.OpenSlotCount)                    // v170 → +129 最大人數 (client 以 +110 重算)
            .WriteU16(room.MaxSlotMask)                     // v181 → +110 上限槽位點陣 (popcount = 最大人數)
-           .WriteU8(room.Rule)                             // thisa_1 → sub_53FBB0 遊戲模式 (0..15)
+           .WriteU8(room.ModeIndex)                             // thisa_1 → sub_53FBB0 遊戲模式 (0..15)
            .WriteU8(room.TimeLimit)                        // v167 → +136 時間
            .WriteU16(room.WinCount)                        // v178 → +144 勝場目標
            .WriteU8(room.ItemMode)                         // v187 flags (bit0→mode+4, bit1→mode+8)
            .WriteU8(0)                                     // v193 → +146 (server 側語意未定, client 僅鏡像)
            .WriteU16(room.KillCount)                       // v191[3] → +148 擊殺目標
            .WriteU8(0)                                     // v169 → +150 (server 側語意未定, client 僅鏡像)
-           .WriteBool(IsNativeTwoTeamMode(room.Rule))               // v173 → mode+12 是否隊伍房 (sub_56A7B0: sub_438990?1:0)
+           .WriteBool(IsNativeTwoTeamMode(room.ModeIndex))               // v173 → mode+12 是否隊伍房 (sub_56A7B0: sub_438990?1:0)
            .WriteU8(0)                                     // v185 → +109 room_type_B (client 僅鏡像)
            .WriteBool(room.TeamShuffle)                    // v141[0] → mode+13 隊打散開關 (368/369)
            .WriteBool(room.NoSkillBg)                      // v177 → +185 no_skill_bg

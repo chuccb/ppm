@@ -115,7 +115,7 @@ public static partial class JoinHandlers
                 .WriteU8(room.MapId)
                 .WriteU8((byte)room.Members.Count)
                 .WriteU8(room.RoomNo)
-                .WriteU8(room.Rule)
+                .WriteU8(room.ModeIndex)
                 .WriteU16(room.WinCount)
                 .WriteU8(room.OpenSlotCount)
                 .WriteU8(room.TimeLimit)
@@ -176,11 +176,11 @@ public static partial class JoinHandlers
 
                 ack.WriteU8(0);                                 // extra_flag
 
-                if (room.Rule == 12)                            // soccer
+                if (room.ModeIndex == (byte)GameMode.TeamSoccer)     // TeamSoccer=12
                 {
                     ack.WriteU8(0);
                 }
-                else if (room.Rule == 13)                       // occupy renewal
+                else if (room.ModeIndex == (byte)GameMode.OccupyRenewal)
                 {
                     ack.WriteS32(0);
                 }

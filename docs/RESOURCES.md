@@ -180,10 +180,11 @@ modeName + maplist 檔名前綴三方互證; 舊表 bit1/2/3/4 的語意已更�
 ⚠ bit 5 (0x20) 只出現在 3 張純 TU 圖 (map 0/101/102 = TU_01..03);
 bit 6 (0x40) 則出現在全部 6 張教學可用圖 — 另 3 張為複用圖:
 77=TW_13 池袋X-mas、78=PS_11 冬の街、86=ECT_01 WeaponPreview。
-故「教學可選」過濾位取 **bit 6** (server ModeMapBit[6]=6)。)
-建房時 client 以 `(map.modes >> bit) & 1` 過濾該模式可選地圖;
-`mode` 是 room 的模式值 (0..13/15, 見 §7), `bit` 是上表對應的
-maplist `modes` 位 — 兩者**不是同一編號** (如 mode 0=TeamDeath↔bit2)。
+故「教學可選」過濾位取 **bit 6** (server ModeIndexMapBit[GameMode.Tutorial]=6)。)
+建房時 client 以 `(map.modes >> bit) & 1` 過濾該模式可選地圖；
+`modeIndex` 是 room 的 native mode 值 (0..13/15，見 §7)，`bit` 是上表對應的
+maplist `modes` 位，兩者**不是同一編號**（如 TeamMatch=0、XML 顯示名
+TeamDeath ↔ bit 2）。
 
 ## 5. .pat 文字/二進位雙軌 (convars)
 
@@ -585,8 +586,8 @@ client 實際載入的是 `system/map_StartIndex.xml` (sub_717E50 路徑),
 `modeIndex→modeStartIndex` = 0→106(TeamDeath) 1→104(FreeForAll)
 2→14(TeamHacking) 3→107(TeamSurvival) 4→23(TeamSteal) 8→51(PNR)
 9→89(GunShooting) 12→98(SOCCER)。modeStartIndex 即該模式預設 map_id
-(maplist 0..122) — 169/170 改模式時 client `sub_426930(mode)` 回推
-此值寫 room+130, server 已鏡像 (RoomHandlers.ModeDefaultMap)。
+(maplist 0..122) — 169/170 改 modeIndex 時 client `sub_426930(modeIndex)` 回推
+此值寫 room+130，server 已鏡像 (RoomHandlers.ModeIndexDefaultMap)。
 
 **mode 枚舉正名 (sub_53FBB0 factory)**: 0=TeamMatch 1=IndividualSurvival
 2=DefuseBomb(駭入) 3=TeamSurvival 4=Steal 5=Practice 6=Tutorial

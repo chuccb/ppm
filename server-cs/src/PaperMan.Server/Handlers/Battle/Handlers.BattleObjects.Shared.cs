@@ -67,7 +67,7 @@ public static partial class BattleObjectHandlers
     }
 
     private static bool IsOccupyMode(Room room) =>
-        room.Rule is (byte)GameMode.Occupy or (byte)GameMode.OccupyRenewal;
+        room.ModeIndex is (byte)GameMode.Occupy or (byte)GameMode.OccupyRenewal;
 
     private static bool MatchesSessionUserId(Session session, int wireUserId) =>
         session.UserId is >= int.MinValue and <= int.MaxValue

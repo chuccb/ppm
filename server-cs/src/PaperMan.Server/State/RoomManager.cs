@@ -22,7 +22,7 @@ public sealed class RoomManager
         byte mapId,
         string title,
         string? password,
-        byte rule,
+        byte modeIndex,
         byte maxPlayers,
         bool noSkillBackground)
     {
@@ -42,7 +42,7 @@ public sealed class RoomManager
                 Title = title,
                 Password = password,
                 MapId = mapId,
-                Rule = rule,
+                ModeIndex = modeIndex,
                 NoSkillBg = noSkillBackground,
                 SlotMask = (ushort)((1 << Math.Clamp((int)maxPlayers, 2, 16)) - 1),
             };

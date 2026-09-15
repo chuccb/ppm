@@ -19,7 +19,7 @@ public static partial class RoomHandlers
 
     // 111 normal title form (sub_449320 → sub_56A5A0):
     //   u8 0xFF title-form marker, s8 has_password, str title,
-    //   [has_password: str password], u8 max_players, u8 rule,
+    //   [has_password: str password], u8 max_players, u8 modeIndex,
     //   u8 requested_map, u8 no_skill_background.
     //
     // sub_449320 is the only reachable caller and passes -1 for the first
@@ -34,7 +34,7 @@ public static partial class RoomHandlers
         string Title,
         string? Password,
         byte MaxPlayers,
-        byte Rule,
+        byte ModeIndex,
         byte RequestedMapId,
         bool NoSkillBackground);
 
@@ -45,14 +45,14 @@ public static partial class RoomHandlers
             return;
         }
 
-        byte mapId = ResolveMap(request.RequestedMapId, request.Rule, context.Db);
+        byte mapId = ResolveMap(request.RequestedMapId, request.ModeIndex, context.Db);
         Room? room = session.UserId != 0
             ? context.Rooms.Create(
                 session,
                 mapId,
                 request.Title,
                 request.Password,
-                request.Rule,
+                request.ModeIndex,
                 request.MaxPlayers,
                 request.NoSkillBackground)
             : null;
@@ -69,7 +69,7 @@ public static partial class RoomHandlers
         if (room is not null)
         {
             session.RoomNo = room.RoomNo;
-            ack.WriteU8(IsNativeTwoTeamMode(request.Rule) ? (byte)2 : (byte)0) // n2_1 team_mode (2=隊伍房 → CCustomTexture)
+            ack.WriteU8(IsNativeTwoTeamMode(request.ModeIndex) ? (byte)2 : (byte)0) // n2_1 team_mode (2=隊伍房 → CCustomTexture)
                .WriteU32(0)                                 // team A uid (新房間尚無分隊)
                .WriteU32(0)                                 // team A crc
                .WriteStr("")                                // team A name

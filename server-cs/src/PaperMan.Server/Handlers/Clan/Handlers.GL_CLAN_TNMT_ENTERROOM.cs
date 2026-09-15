@@ -44,7 +44,7 @@ public static partial class ClanHandlers
                  .WriteU8(room.RoomNo)
                  .WriteU8(room.OpenSlotCount)
                  .WriteU16(room.MaxSlotMask)
-                 .WriteU8(room.Rule)
+                 .WriteU8(room.ModeIndex)
                  .WriteU8(room.TimeLimit)
                  .WriteU16(room.WinCount)
                  .WriteU8(room.ItemMode)
