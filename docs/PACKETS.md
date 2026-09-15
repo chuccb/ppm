@@ -509,8 +509,11 @@ sub  REQ (client→server)          ACK (server→client, sub_54D040 分發)
 200  s32 clan_id    成員清單       s32 count, count×{s32 rank(0..4),
                                    s32 uid, s32 level, str nick,
                                    str, s32 status} (sub_54EE70)
-202  (無)           次數查詢       s32, s32 (sub_54F0F0)
-203  str message    戰隊聊天       (sub_54F2D0; 需 rank>1 才可送)
+202  (無)           次數查詢       — (sub_54D040 沒有 case 202；配對 ACK
+                                    sub-op / body 是 UNRESOLVED，不可把 201 的
+                                    sub_54F0F0 讀取形狀套過來)
+203  str message    戰隊聊天       str nick, str message (sub_54F2D0;
+                                    client sender 的 rank>1 gate)
 205  str×3          戰隊訊息       str from, str title, str body
                                    (sub_54F3D0)
 208  (無)           捐獻           — (sub 208 只有 REQ)
@@ -524,6 +527,12 @@ sub  REQ (client→server)          ACK (server→client, sub_54D040 分發)
 201  —              排名           s32, [s32] (sub_54F0F0 同構)
 381..383  —         戰隊戰績       s32 ×2 (sub_54FF00/54FFC0, 帶 sub 參數)
 ```
+
+**Fact/HIGH — 202 direction correction.** `sub_550CF0` 確實建 `583 / sub=202`
+且不寫子欄位，但 `sub_54D040` 的完整 584 switch 沒有 `case 202`；不能把唯一
+`case 201 → sub_54F0F0` 的兩個 s32 讀取形狀誤標成 202 ACK。202 的對應 response
+sub-op/body 仍是 **UNRESOLVED**。
+
 **獨立對: 585 GC_CLAN_CREATE_REQ / 586 _ACK (不走隧道!)**:
 REQ (sub_5505F0) = `str name, str slogan, str intro, s32 emblem`
 (廿四輪修正: sub_592A20 = s32 非 u8);

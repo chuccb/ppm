@@ -128,6 +128,7 @@ has no 206 request name.
    catalog-to-generator-to-handler topology. After a room `modeIndex`, map, or
    native/resource name change, also run
    `python3 server-cs/tools/verify_server_naming.py`; it checks the specifically
-   documented native/resource tables. This Arena environment has no .NET SDK,
+   documented native/resource room tables and numeric clan sub-op boundary. This
+   Arena environment has no .NET SDK,
    so a .NET build and `PaperMan.SelfTest` must be run elsewhere before claiming
    compiler-backed verification.

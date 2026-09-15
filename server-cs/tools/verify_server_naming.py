@@ -23,6 +23,7 @@ NATIVE_SOURCE = ROOT / "PaperMan.exe.c"
 ROOM_SOURCE = ROOT / "server-cs" / "src" / "PaperMan.Server" / "State" / "Room.cs"
 ROOM_SHARED_SOURCE = ROOT / "server-cs" / "src" / "PaperMan.Server" / "Handlers" / "Room" / "Handlers.Room.Shared.cs"
 LOBBY_ROOM_LIST_SOURCE = ROOT / "server-cs" / "src" / "PaperMan.Server" / "Handlers" / "Lobby" / "Handlers.GL_GAMEROOMINFO.cs"
+CLAN_CONTRACT_SOURCE = ROOT / "server-cs" / "src" / "PaperMan.Protocol" / "Contracts" / "GC_CLAN_PROTOCOL.cs"
 
 # These are the suffixes selected by sub_53FBB0's switch. They deliberately
 # follow the native Cy*ModeLobbyUI classes, rather than map_StartIndex.xml's
@@ -76,7 +77,6 @@ NATIVE_TWO_TEAM_MODE_NAMES = frozenset({
     "OccupyRenewal",
 })
 
-
 def fail(message: str) -> None:
     raise SystemExit(f"naming verification failed: {message}")
 
@@ -119,6 +119,73 @@ def native_factory_modes() -> dict[str, int]:
         if name_match is not None:
             result[name_match["name"]] = int(match["label"], 0)
     return result
+
+
+def native_clan_ack_sub_opcodes() -> frozenset[int]:
+    source = NATIVE_SOURCE.read_text(encoding="utf-8", errors="replace")
+    marker = "//----- (0054D040)"
+    try:
+        start = source.index(marker)
+        end = source.index("//-----", start + len(marker))
+    except ValueError:
+        fail("could not locate the native sub_54D040 clan ACK dispatcher")
+
+    return frozenset(
+        int(match["value"])
+        for match in re.finditer(r"^    case (?P<value>\d+):$", source[start:end], re.MULTILINE)
+    )
+
+
+def native_clan_request_sub_opcodes() -> frozenset[int]:
+    source = NATIVE_SOURCE.read_text(encoding="utf-8", errors="replace")
+    builders = list(
+        re.finditer(
+            r"Packet::possible_ctor_or_dtor_0\((?P<packet>\w+), 583\);",
+            source,
+        )
+    )
+    if len(builders) != 24:
+        fail(f"expected 24 native 583 builders, found {len(builders)}")
+
+    values: set[int] = set()
+    for builder in builders:
+        packet = re.escape(builder["packet"])
+        sub_op_match = re.search(
+            rf"sub_592A20\({packet}, (?P<value>\d+)\);",
+            source[builder.end():builder.end() + 800],
+        )
+        if sub_op_match is None:
+            fail("a native 583 builder has no literal leading sub_opcode write")
+        values.add(int(sub_op_match["value"]))
+    return frozenset(values)
+
+
+def source_clan_sub_opcodes() -> frozenset[int]:
+    text = CLAN_CONTRACT_SOURCE.read_text(encoding="utf-8")
+    enum_match = re.search(
+        r"public enum GC_CLAN_PROTOCOL_SubOpcode\n\{(?P<body>.*?)\n\}",
+        text,
+        re.DOTALL,
+    )
+    if enum_match is None:
+        fail("GC_CLAN_PROTOCOL_SubOpcode enum is missing")
+    if "public static class GC_CLAN_PROTOCOL_Wire" not in text:
+        fail("GC_CLAN_PROTOCOL_Wire contract is missing")
+
+    values: set[int] = set()
+    for match in re.finditer(
+        r"^    Sub(?P<name>\d+) = (?P<value>\d+),",
+        enum_match["body"],
+        re.MULTILINE,
+    ):
+        name_value = int(match["name"])
+        wire_value = int(match["value"])
+        if name_value != wire_value:
+            fail(f"GC_CLAN_PROTOCOL sub-op name/value mismatch: Sub{name_value} = {wire_value}")
+        values.add(wire_value)
+    if not values:
+        fail("GC_CLAN_PROTOCOL_SubOpcode contains no SubNNN values")
+    return frozenset(values)
 
 
 def source_enum_modes() -> dict[str, int]:
@@ -173,6 +240,15 @@ def main() -> None:
     if native_modes != NATIVE_GAME_MODES:
         fail(f"sub_53FBB0 mode factory differs: {native_modes}")
 
+    native_clan_ack_values = native_clan_ack_sub_opcodes()
+    native_clan_request_values = native_clan_request_sub_opcodes()
+    expected_clan_values = native_clan_ack_values | native_clan_request_values
+    if source_clan_sub_opcodes() != expected_clan_values:
+        fail(
+            "GC_CLAN_PROTOCOL_SubOpcode must be the exact union of "
+            "native 584 switch values and native 583 builder values"
+        )
+
     extracted_xml = ET.fromstring(git_show_main("Extracted/ui/system/map_StartIndex.xml"))
     resource_default_maps = {
         int(node.attrib["modeIndex"]): int(node.attrib["modeStartIndex"])
@@ -202,11 +278,17 @@ def main() -> None:
         if any(token in path.read_text(encoding="utf-8") for path in server_source.rglob("*.cs")):
             fail(f"stale native/resource naming alias remains: {token}")
 
+    protocol_source = ROOT / "server-cs" / "src" / "PaperMan.Protocol"
+    for token in ("ClanTunnel", "ClanSubOp"):
+        if any(token in path.read_text(encoding="utf-8") for path in protocol_source.rglob("*.cs")):
+            fail(f"stale GC_CLAN_PROTOCOL semantic alias remains: {token}")
+
     print(
         "server naming OK: "
         f"{len(enum_values)} native GameMode values; "
         f"{len(resource_default_maps)} Extracted default maps; "
-        f"{len(MODE_INDEX_MAP_BITS)} modeIndex→maplist-bit entries"
+        f"{len(MODE_INDEX_MAP_BITS)} modeIndex→maplist-bit entries; "
+        f"{len(expected_clan_values)} numeric GC_CLAN_PROTOCOL sub-ops"
     )
 
 

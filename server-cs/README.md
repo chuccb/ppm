@@ -12,7 +12,7 @@ point 追到 canonical source，而不是維護另一份手寫註冊表。
 
 | 區域 | 檔案 / 入口 | 責任與 ownership |
 |---|---|---|
-| Solution、generated catalog 與 static checks | `PaperMan.slnx`, `tools/gen_opcodes.py`, `tools/verify_server_layout.py`, `tools/verify_server_naming.py`, `src/PaperMan.Protocol/Generated/Opcode.cs` | `db/packets.tsv` 是 opcode source；要改 opcode 名稱或值時執行 generator，不手改 generated output。layout checker 驗證 catalog → generated discovery → canonical handler source graph；naming checker 驗證 native mode vocabulary、Extracted default maps 與 map bit / two-team tables。兩者皆不取代 build。 |
+| Solution、generated catalog 與 static checks | `PaperMan.slnx`, `tools/gen_opcodes.py`, `tools/verify_server_layout.py`, `tools/verify_server_naming.py`, `src/PaperMan.Protocol/Generated/Opcode.cs` | `db/packets.tsv` 是 opcode source；要改 opcode 名稱或值時執行 generator，不手改 generated output。layout checker 驗證 catalog → generated discovery → canonical handler source graph；naming checker 驗證 native mode vocabulary、Extracted default maps、map bit / two-team tables 與 numeric clan sub-op set。兩者皆不取代 build。 |
 | Protocol | [`src/PaperMan.Protocol/README.md`](src/PaperMan.Protocol/README.md) | byte-exact `Core/`、`Codecs/`、`Contracts/` 與 `Generated/` boundary；不放 socket、DB 或 gameplay policy。 |
 | Handler source generator | [`src/PaperMan.HandlerGenerator/README.md`](src/PaperMan.HandlerGenerator/README.md) | compiler-only Roslyn analyzer，從 canonical direct entries 產生 Router method-group table；不做 runtime reflection，僅此 dispatch path 可宣稱 NativeAOT-friendly。 |
 | Server source guide | [`src/PaperMan.Server/README.md`](src/PaperMan.Server/README.md) | 由 runtime flow 或 canonical opcode 直接定位 Host、State、Database、compile-time discovered Handler family。 |
@@ -71,13 +71,15 @@ ownership 或未知邊界的 fail-closed 行為。
 4. `Extracted/` 只證明 client lookup/display input，不證明 original-service policy。
    local directory/type/SQLite names 只可描述 Server ownership，不能佯稱原服務採用該名。
 5. 缺少 catalog、native class/string 或 verified resource 名稱時，保留 `Raw`、`Reserved`、
-   `Opaque` 或 `UNRESOLVED` boundary 與 provenance；不可為求好讀而捏造「官方」名。
+   `Opaque` 或 `UNRESOLVED` boundary 與 provenance；不可為求好讀而捏造「官方」名。native
+   只給 numeric sub-op literal 的 `GC_CLAN_PROTOCOL` 則以 `SubNNN` 保留數值，不賦予
+   未證實的 symbolic identifier。
 
-修改 room `modeIndex`、native mode name、default map、maplist bit 或兩隊模式 predicate
-後，執行 `python3 server-cs/tools/verify_server_naming.py`。它會從本 checkout 的
-`PaperMan.exe.c` 和不 checkout 的 `origin/main:Extracted/ui/system/map_StartIndex.xml`
-（沒有 remote-tracking ref 時退回 `main`）重新核對 C#；它同樣不取代 build、SelfTest
-或 real-client capture。
+修改 room `modeIndex`、native mode name、default map、maplist bit、兩隊模式 predicate
+或 `GC_CLAN_PROTOCOL` sub-op 名稱/集合後，執行
+`python3 server-cs/tools/verify_server_naming.py`。它會從本 checkout 的 `PaperMan.exe.c`
+和不 checkout 的 `origin/main:Extracted/ui/system/map_StartIndex.xml`（沒有 remote-tracking
+ref 時退回 `main`）重新核對 C#；它同樣不取代 build、SelfTest 或 real-client capture。
 
 ## 建置與執行
 

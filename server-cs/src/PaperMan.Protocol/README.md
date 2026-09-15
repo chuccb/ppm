@@ -52,15 +52,18 @@ business name.
 | Channel-entry acknowledgement 196 | [`Contracts/Channel/ChannelBootstrapWire.GC_ENTERCHANNEL_ACK.cs`](Contracts/Channel/ChannelBootstrapWire.GC_ENTERCHANNEL_ACK.cs) | Exact success-only endpoint tail; it does not establish admission policy. |
 | Private UDP opcode 19 / empty opcode 20 control exchange | [`Contracts/UdpControlWire.cs`](Contracts/UdpControlWire.cs) | `sub_596670` and `sub_595E80` case 20 only. Do not generalize this to P2P, NAT traversal, gameplay UDP, or session authority. |
 | Inventory new-skill profile records | [`Contracts/NewSkillProfileWire.cs`](Contracts/NewSkillProfileWire.cs) | 255/467 reusable fixed record grammar. Item entitlement remains a server-domain concern. |
-| Clan protocol sub-op envelope | [`Contracts/ClanTunnel.cs`](Contracts/ClanTunnel.cs) | 583/584 container: leading `s32` sub-op is distinct from the top-level opcode catalog. |
+| Clan protocol sub-op envelope | [`Contracts/GC_CLAN_PROTOCOL.cs`](Contracts/GC_CLAN_PROTOCOL.cs) | 583/584 container: leading `s32` sub-op is distinct from the top-level opcode catalog; native exposes numeric sub-op literals, not their symbolic names. |
 | Top-level TCP opcode spelling or value | [`Generated/Opcode.cs`](Generated/Opcode.cs) | **Generated** from `../../../db/packets.tsv` by `../../tools/gen_opcodes.py`; never hand-edit the output. |
 
 ## Naming rules
 
 - Public contract types use the narrow packet family they model (`LoginWire`,
-  `ChannelBootstrapWire`, `UdpControlWire`), not an inferred backend service.
+  `ChannelBootstrapWire`, `UdpControlWire`, `GC_CLAN_PROTOCOL_Wire`), not an
+  inferred backend service. A catalog-backed family retains its exact token.
 - A field without a verified domain meaning keeps a wire-oriented name
   (`Raw`, `Reserved`, `Opaque`, `ClientReported`, or a positional suffix).
+  Likewise, native numeric-only clan sub-ops stay `SubNNN`, with semantics only
+  in provenance comments rather than invented symbolic identifiers.
 - `Opcode.cs` preserves the exact catalog spelling, including historic typos;
   canonical spelling is more useful than cosmetically corrected identifiers.
 - `main:Extracted` can corroborate client lookup inputs and resource names, but
