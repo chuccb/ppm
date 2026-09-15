@@ -140,6 +140,49 @@ def check_cited_symbols(text: str) -> None:
             raise SystemExit(1)
 
 
+UDP_DISPATCHER = "sub_595E80"
+# The UDP private opcode space is separate from TCP's 100..1010 and is small
+# enough to pin exactly. docs/PACKETS.md "UDP private opcode 空間全圖" depends
+# on these three facts, so re-derive them instead of trusting the prose.
+UDP_RECEIVE_CASES = [2, 4, 5, 6, 8, 10, 12, 13, 14, 15, 18, 20, 22, 24, 26, 28,
+                     29, 31, 33, 34, 154, 158]
+UDP_SEND_OPCODES = [1, 5, 6, 9, 13, 14, 15, 17, 19, 21, 23, 27, 30, 32, 35]
+UDP_MAX_OPCODE = 40  # separates the UDP band from TCP's 100+
+
+
+def check_udp_opcode_space(text: str) -> None:
+    head = re.search(r"\n[A-Za-z_][^\n]*\b" + UDP_DISPATCHER + r"\([^)]*\)\s*\r?\n\{", text)
+    if head is None:
+        print(f"dispatcher verification failed: cannot locate {UDP_DISPATCHER}")
+        raise SystemExit(1)
+    start = head.end()
+    depth = 1
+    index = start
+    while index < len(text) and depth:
+        if text[index] == "{":
+            depth += 1
+        elif text[index] == "}":
+            depth -= 1
+        index += 1
+
+    received = sorted({int(value) for value in CASE.findall(text[start:index])})
+    sent = sorted({int(value) for value in
+                   re.findall(r"Packet::possible_ctor_or_dtor_0\([^,]+, (\d+)\)", text)
+                   if int(value) <= UDP_MAX_OPCODE})
+    for label, actual, expected in (("receive cases", received, UDP_RECEIVE_CASES),
+                                    ("send opcodes", sent, UDP_SEND_OPCODES)):
+        if actual != expected:
+            print(f"dispatcher verification failed: UDP {label} changed")
+            print(f"  expected {expected}")
+            print(f"  found    {actual}")
+            raise SystemExit(1)
+
+    paired = [opcode for opcode in sent if opcode + 1 in received]
+    if len(paired) != 12:
+        print(f"dispatcher verification failed: UDP n->n+1 pairs = {len(paired)}, expected 12")
+        raise SystemExit(1)
+
+
 def main() -> None:
     if not DUMP.is_file():
         print(f"dispatcher check skipped: {DUMP} is not present")
@@ -148,6 +191,7 @@ def main() -> None:
     text = DUMP.read_text(encoding="utf-8", errors="replace")
     check_equivalent_handlers(text)
     check_cited_symbols(text)
+    check_udp_opcode_space(text)
     cases = dispatcher_cases(text)
     documented = table_opcodes(LAYOUTS)
     missing = sorted(cases - documented)

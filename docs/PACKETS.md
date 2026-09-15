@@ -401,6 +401,40 @@ observed UDP sends. This is **not** permission to infer that every possible UDP
 packet has no additional history or application state; it only records that the
 native UDP send path omits the TCP compression stage.
 
+### UDP private opcode 空間全圖（本輪機器掃描）
+
+先前各節只談 19→20，因為那是**唯一已實作**的路徑。本輪把整個 UDP 面掃完，
+確立它是一個**與 TCP 完全分離、自成一格的小 opcode 空間**（值域 1..~158，
+與 TCP 的 100..1010 不重疊，故不會混淆）。
+
+**接收端是 `sub_595E80`，可證為 UDP**：呼叫鏈為
+`sub_595A60` → `sub_596F90` → **`recvfrom()`**（9600 B 緩衝，
+同 TCP 的 frame 檢查 `sub_591D50` 後才分派）。該 dispatcher 有 **22 個 case**：
+
+```
+2 4 5 6 8 10 12 13 14 15 18 20 22 24 26 28 29 31 33 34 154 158
+```
+（`8` 與 `24` 共用 `sub_596940`；`26` 走 `unknown_libname_107`。）
+
+**送出端**由 `Packet::possible_ctor_or_dtor_0(v, <op>)` 反查，客戶端會建構
+**15 個** UDP opcode：`1 5 6 9 13 14 15 17 19 21 23 27 30 32 35`。
+
+**REQ→ACK 以 `n → n+1` 成對（Fact / HIGH）。** 15 個送出中 **12 個**
+的 `n+1` 確實存在於接收 case 表：
+`1→2 · 5→6 · 9→10 · 13→14 · 14→15 · 17→18 · 19→20 · 21→22 · 23→24 ·
+27→28 · 30→31 · 32→33`。
+這與 TCP 面的奇偶配對慣例一致，可作為推斷未知 UDP opcode 方向的依據。
+
+剩下三個不是缺口：**`5`／`6`／`13`／`14`／`15` 同時出現在送出與接收兩側**，
+屬 peer 之間雙向互送的訊息；`35`（`sub_7463E0`，13 個寫入原語）只送不收。
+
+**關鍵界線（不變）。** 以上只證明**客戶端的 UDP 字彙與方向**。
+`sub_596670` 的 19→20 仍是唯一有完整欄位證據、且已實作的路徑；
+其餘 opcode 的欄位、語義、以及伺服器是否該參與，
+全部維持 **UNRESOLVED** —— 既有的 UDP scope gate 不因本節放寬。
+本節的用途是**界定搜尋範圍**：日後分析 UDP 時知道總共有哪些 opcode、
+哪些成對、哪些是雙向。
+
 ### Private opcode 19 → 20
 
 `sub_596670(CUDPNetworkManager)` is the source of the only currently implemented
