@@ -141,8 +141,9 @@ uses cancellation and disposes its socket only after its receive loop exits.
   packet body。Friend 亦採同一形狀，例如 `Handlers.GL_FRIEND_CHAT.cs` /
   `GL_FRIEND_CHAT_REQ`；其 440 status/ACK builder 僅屬於該 direct family source。
   只有跨 request 的 voice block 與 warehouse item/tab codec 留在明確標示、無 receive
-  entry 的 `Handlers.{Voice,Warehouse}.Shared.cs`。這些是導覽切分，不改 wire/state
-  semantics。
+  entry 的 `Handlers.{Voice,Warehouse}.Shared.cs`。Stats 的 18 個 `GP_CH*_REQ`
+  也各有 direct file；統一的 ACK-shape / column-whitelist update 僅在無 receive entry 的
+  `Handlers.Stats.Shared.cs`。這些是導覽切分，不改 wire/state semantics。
 - `Db` 是一個依實際 persistence domain 拆成 **9 個 source partial** 的類別：
   `Db.cs` 主檔（connection、bootstrap、account、nickname、packet stats）加上
   Player、Economy、Social、Rooms、Voice、Warehouse、GameCenter、WeaponLoadout。

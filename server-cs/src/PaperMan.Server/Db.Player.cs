@@ -683,7 +683,8 @@ public sealed partial class Db
     /// <summary>
     /// GP_CH*C: client REQ 帶「新的絕對累計值」(sub_5567F0 等) — 只允許
     /// 單調遞增 (MAX), 防倒退/重播; 回傳確認後的 total。
-    /// column 由 StatHandlers 白名單提供, 不接受外部字串。
+    /// column 僅由 `Handlers.Stats.Shared.cs` 的 direct GP_CH request entries 提供,
+    /// 不接受外部字串。
     /// </summary>
     public long SetStatMax(long userId, string column, long newTotal)
     {
