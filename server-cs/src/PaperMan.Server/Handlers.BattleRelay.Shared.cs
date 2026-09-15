@@ -8,7 +8,13 @@ using PaperMan.Protocol;
 namespace PaperMan.Server;
 public static partial class BattleRelayHandlers
 {
-    private static async ValueTask RelayHackAsync(Session session, Packet packet, ServerContext context, Opcode acknowledgementOpcode, bool appendSlot, bool armsBomb)
+    private static async ValueTask RelayHackAsync(
+        Session session,
+        Packet packet,
+        ServerContext context,
+        Opcode acknowledgementOpcode,
+        bool appendSlot,
+        bool armsBomb)
     {
         if (!TryFindRoomSlot(session, context, out var room, out var slot) || packet.Remaining < 1)
         {
@@ -36,7 +42,11 @@ public static partial class BattleRelayHandlers
         await RoomManager.BroadcastAsync(room, notice);
     }
 
-    private static async ValueTask RelaySoccerEventAsync(Session session, Packet packet, ServerContext context, Opcode acknowledgementOpcode)
+    private static async ValueTask RelaySoccerEventAsync(
+        Session session,
+        Packet packet,
+        ServerContext context,
+        Opcode acknowledgementOpcode)
     {
         if (!TryFindRoomSlot(session, context, out var room, out var slot))
         {
@@ -47,7 +57,11 @@ public static partial class BattleRelayHandlers
             new Packet(acknowledgementOpcode).WriteU8(0).WriteU8(slot));
     }
 
-    private static async ValueTask RelayRespawnAsync(Session session, Packet packet, ServerContext context, Opcode acknowledgementOpcode)
+    private static async ValueTask RelayRespawnAsync(
+        Session session,
+        Packet packet,
+        ServerContext context,
+        Opcode acknowledgementOpcode)
     {
         if (!TryFindRoomSlot(session, context, out var room, out var slot))
         {
@@ -64,7 +78,11 @@ public static partial class BattleRelayHandlers
         await RoomManager.BroadcastAsync(room, notice);
     }
 
-    private static async ValueTask RelayBattleChatAsync(Session session, Packet packet, ServerContext context, Opcode acknowledgementOpcode)
+    private static async ValueTask RelayBattleChatAsync(
+        Session session,
+        Packet packet,
+        ServerContext context,
+        Opcode acknowledgementOpcode)
     {
         if (!TryFindRoomSlot(session, context, out var room, out _))
         {
@@ -75,7 +93,11 @@ public static partial class BattleRelayHandlers
         await RoomManager.BroadcastAsync(room, notice, except: session);
     }
 
-    private static async ValueTask RelayWithSlotAsync(Session session, Packet packet, ServerContext context, Opcode acknowledgementOpcode)
+    private static async ValueTask RelayWithSlotAsync(
+        Session session,
+        Packet packet,
+        ServerContext context,
+        Opcode acknowledgementOpcode)
     {
         if (!TryFindRoomSlot(session, context, out var room, out var slot))
         {
