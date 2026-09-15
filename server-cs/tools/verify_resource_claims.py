@@ -1055,6 +1055,47 @@ def main() -> None:
               sum(1 for key, texture in registries["EM_BASE"]
                   if texture == "C_EM_BASE103"), 13)
 
+    # RESOURCES.md 5d-21 (34th round): C is a geometry-detail ladder -- the
+    # four variants differ only in model, with a fixed size/vertex step.
+    if gameobject.is_file():
+        drops = [(tag, strings) for _, tag, strings in records
+                 if strings[3].startswith("D_Item") and len(strings[3]) == 10]
+        families: dict[tuple[int, int], dict[int, list[str]]] = {}
+        for _, strings in drops:
+            code = strings[3][6:]
+            families.setdefault((int(code[0]), int(code[1])), {})[
+                int(code[2])] = strings
+        # Within a family+level, only the code name and model path vary.
+        varying = set()
+        for group in families.values():
+            first = group[min(group)]
+            for strings in group.values():
+                for field in range(4):
+                    if strings[field] != first[field]:
+                        varying.add(field)
+        check("C variants differ only in model path and code name",
+              sorted(varying), [0, 3])
+        check("every family+level has four C variants",
+              sorted({len(group) for group in families.values()}), [4])
+
+    # RESOURCES.md 5d-11b (34th round): no field anywhere in the 997-byte
+    # weapon record can be a per-weapon base movement speed.
+    if itemdata.is_file():
+        weapons = []
+        for index in range(total):
+            base = 8 + 997 * index
+            ident = struct.unpack_from("<I", blob, base)[0]
+            if 12100000 <= ident < 12500000:
+                weapons.append(blob[base:base + 997])
+        check("weapon records", len(weapons), 2076)
+        speedish = []
+        for offset in range(997 - 4):
+            ints = [struct.unpack_from("<i", row, offset)[0] for row in weapons]
+            if (sum(1 for value in ints if 90 <= value <= 170)
+                    > len(ints) * 0.6 and len({v for v in ints}) > 4):
+                speedish.append(offset)
+        check("no weapon field looks like a base movement speed", speedish, [])
+
     # Every datarevision.txt must agree: Extracted/ is one coherent snapshot.
     revisions = {path.read_text(encoding="utf-8", errors="replace").strip()
                  for path in EXTRACTED.rglob("datarevision.txt")}

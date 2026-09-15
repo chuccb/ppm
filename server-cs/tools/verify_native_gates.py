@@ -385,6 +385,34 @@ def main() -> None:
               for name in ("EM_FRAME", "EM_BASE")
               for bound in ("85", "171", "255")), True)
 
+    # RESOURCES.md 5d-21 (34th round): the client never names any drop item,
+    # by id or by code-name prefix, which is why family A is unknowable here.
+    for prefix in ("D_Item", "Q_Item", "P_Item", "W_Item", "M_Item",
+                   "DropItem_00"):
+        check(f"exe never names {prefix}", prefix in text, False)
+    check("exe contains no D_Item object id literal",
+          re.search(r"\b3368[0-9]{4}\b", text) is None, True)
+
+    # RESOURCES.md 5d-11b (34th round): partsability records are looked up
+    # through exactly one entry point, and move_speed is never read back.
+    lookups = [index for index, line in enumerate(lines)
+               if "sub_958320(" in line and "= sub_958320" in line]
+    check("partsability lookup sites", len(lookups) >= 20, True)
+    consumed = set()
+    for index in lookups:
+        holder = re.search(r"(\w+) = sub_958320", lines[index])
+        if not holder:
+            continue
+        for follow in lines[index + 1:index + 40]:
+            for field in re.finditer(rf"\*\({holder.group(1)} \+ (\d+)\)",
+                                     follow):
+                consumed.add(int(field.group(1)))
+    check("partsability offsets actually read back",
+          sorted(consumed), [36, 92, 96, 100, 104])
+    check("move_speed (+72) is never read back", 72 in consumed, False)
+    check("miRun (+92) is the only posture field read back",
+          [off for off in (56, 80, 84, 88, 92) if off in consumed], [92])
+
     # The failure-arm texts, through the documented decode rule.
     entries = message_entries()
     if entries is None:
