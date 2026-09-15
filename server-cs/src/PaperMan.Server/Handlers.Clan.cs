@@ -123,9 +123,9 @@ public static class ClanHandlers
         session.RoomNo = roomNo;
 
         // 1. 廣播給既有成員: sub_type==1
-        var newMember = RoomHandlers.LoadMemberData(context.Db, session);
+        var newMember = RoomHandlers.LoadGL_ENTERROOM_ACK_MemberData(context.Db, session);
         var joinNotice = new Packet(Opcode.GL_CLAN_TNMT_ENTERROOM_ACK).WriteU8(1);
-        RoomHandlers.WriteMemberNotice(joinNotice, session, slot.Value, newMember);
+        RoomHandlers.WriteGL_ENTERROOM_ACK_MemberNotice(joinNotice, session, slot.Value, newMember);
         await RoomManager.BroadcastAsync(room, joinNotice, except: session);
 
         // 2. 給進房者: sub_type==2
@@ -151,8 +151,8 @@ public static class ClanHandlers
 
         foreach (var (memberSlot, member) in room.Members.OrderBy(kv => kv.Key))
         {
-            RoomHandlers.WriteMemberEntry(fullState, member, memberSlot, memberSlot == room.MasterSlot,
-                RoomHandlers.LoadMemberData(context.Db, member));
+            RoomHandlers.WriteGL_ENTERROOM_ACK_MemberEntry(fullState, member, memberSlot, memberSlot == room.MasterSlot,
+                RoomHandlers.LoadGL_ENTERROOM_ACK_MemberData(context.Db, member));
         }
 
         await session.SendAsync(fullState);

@@ -102,9 +102,9 @@ public static class JoinHandlers
         room.Members[slot.Value] = session;
         session.RoomNo = roomNo;
 
-        var newMember = RoomHandlers.LoadMemberData(context.Db, session);
+        var newMember = RoomHandlers.LoadGL_ENTERROOM_ACK_MemberData(context.Db, session);
         var notice = new Packet(Opcode.GL_ENTERROOM_ACK).WriteU8(1);
-        RoomHandlers.WriteMemberNotice(notice, session, slot.Value, newMember);
+        RoomHandlers.WriteGL_ENTERROOM_ACK_MemberNotice(notice, session, slot.Value, newMember);
         await RoomManager.BroadcastAsync(room, notice, except: session);
 
         await session.SendAsync(new Packet(Opcode.GL_JOIN_ACK).WriteU8((byte)JoinAck.Ok));
@@ -221,11 +221,11 @@ public static class JoinHandlers
             room.Members[slot.Value] = session;
             session.RoomNo = roomNo;
 
-            var data = RoomHandlers.LoadMemberData(context.Db, session);
+            var data = RoomHandlers.LoadGL_ENTERROOM_ACK_MemberData(context.Db, session);
 
             // 廣播給既有成員 (114 sub_type==1)
             var notice = new Packet(Opcode.GL_ENTERROOM_ACK).WriteU8(1);
-            RoomHandlers.WriteMemberNotice(notice, session, slot.Value, data);
+            RoomHandlers.WriteGL_ENTERROOM_ACK_MemberNotice(notice, session, slot.Value, data);
             await RoomManager.BroadcastAsync(room, notice, except: session);
 
             // 回給加入者: 269 code 6
@@ -307,7 +307,7 @@ public static class JoinHandlers
 
             foreach (var (memberSlot, member) in room.Members.OrderBy(kv => kv.Key))
             {
-                var data = RoomHandlers.LoadMemberData(context.Db, member);
+                var data = RoomHandlers.LoadGL_ENTERROOM_ACK_MemberData(context.Db, member);
                 bool isMaster = memberSlot == room.MasterSlot;
 
                 ack.WriteS32((int)member.UserId)

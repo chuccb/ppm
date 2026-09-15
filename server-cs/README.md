@@ -20,8 +20,8 @@
 | Database root | `Db.cs`, `DatabaseBootstrapper.cs` | connection、migration/bootstrap、shared command creation 與 account identity；`schema.sql` / `packets.tsv` 是 embedded resources，這是唯一 first-run DB path。 |
 | Database domain partials | `Db.Player.cs`, `Db.WeaponLoadout.cs`, `Db.Economy.cs`, `Db.Social.cs`, `Db.Rooms.cs`, `Db.Voice.cs`, `Db.Warehouse.cs`, `Db.GameCenter.cs` | 同一個 `Db` type 依 persistent domain 切分；跨 table atomic change 放在擁有該 operation 的 partial，並讓 transaction 明確可見。 |
 | Login / channel handlers | `Handlers.Auth.cs`, `Handlers.Channel.cs`, `Handlers.Join.cs` | authentication、681→143 admission、195→196 channel entry 與 room-entry flow。 |
-| Lobby opcode-family handlers | `Handlers.Lobby.Registry.cs`, `Handlers.GL_*.cs`, `Handlers.GI_*.cs`, `Handlers.GM_*.cs` | 每個 Lobby request/ACK family 都以 `db/packets.tsv` / `Opcode.cs` 的原始 token 命名檔案與 entry method（如 `Handlers.GL_MYINFO.cs` / `GL_MYINFO_REQ`）；registry 是唯一無 packet 實作的明確例外。保留既有 wire order、state guard 與 fail-closed boundary。 |
-| Room 與 battle handlers | `Handlers.Room.cs` + `Handlers.Room.{Match,Lobby,Settings,Messages,Membership}.cs`, `Handlers.BattleRelay.cs`, `Handlers.BattleObjects.cs`, `Handlers.Ai.cs` | room registry/authority guard、對戰生命週期、房內互動、設定、訊息 relay、membership snapshot、source-proven TCP relay、OCC/drop boundary 和 AI/PvE packet family。 |
+| Lobby opcode-family handlers | `Handlers.Lobby.Registry.cs`, `Handlers.GL_*.cs`, `Handlers.GI_*.cs`, `Handlers.GM_*.cs` | 每個 Lobby request/ACK family 都以 `db/packets.tsv` / `Opcode.cs` 的原始 token 命名檔案與 entry method（如 `Handlers.GL_MYINFO.cs` / `GL_MYINFO_REQ`）；Lobby registry 是唯一無 packet 實作的明確例外。保留既有 wire order、state guard 與 fail-closed boundary。 |
+| Room 與 battle handlers | `Handlers.Room.{Registry,Shared}.cs` + `Handlers.{GL,GR,GG}_*.cs`, `Handlers.BattleRelay.cs`, `Handlers.BattleObjects.cs`, `Handlers.Ai.cs` | 每個已註冊 Room request/ACK family 都以 canonical opcode token 命名（如 `Handlers.GR_MAPCHANGE.cs` / `GR_MAPCHANGE_REQ`）；Registry 與 Shared 僅保留無 callback 的 binding、map compatibility、member/authority support。其餘為 source-proven TCP relay、OCC/drop boundary 和 AI/PvE packet family。 |
 | Persistent feature handlers | `Handlers.Shop.cs`, `Handlers.Stats.cs`, `Handlers.Quest.cs`, `Handlers.Friend.cs`, `Handlers.Clan.cs`, `Handlers.Voice.cs`, `Handlers.Warehouse.cs`, `Handlers.GameCenter.cs` | feature-domain request parsing 與 response construction；只有 request grammar 與 persistence authority 都已證實時，handler 才可碰 DB mutation。 |
 | Operator handler | `Handlers.Master.cs` | MASTER/GM command namespace，和一般 player-facing gameplay flow 分離。 |
 | Assembly 與 executable checks | `Properties/AssemblyInfo.cs`, `src/PaperMan.SelfTest/Program.cs` | assembly metadata，以及 byte-level protocol / SQLite bootstrap / loopback tests；SelfTest 不取代 original-service capture。 |
@@ -32,7 +32,7 @@ boundary 與 reverse-engineering checklist。
 
 ### Handler 檔名與 entry 命名
 
-Lobby 已採用下列可由 opcode 反向直接定位的規則；處理其他 handler family 時也應沿用，
+Lobby 與 Room 已採用下列可由 opcode 反向直接定位的規則；處理其他 handler family 時也應沿用，
 而不是另造泛化的業務名稱：
 
 1. 以 `db/packets.tsv` 為 canonical spelling；`tools/gen_opcodes.py` 產生的
@@ -43,9 +43,11 @@ Lobby 已採用下列可由 opcode 反向直接定位的規則；處理其他 ha
    builder/parser 的 method name 也保留完整 `*_REQ` 或 `*_ACK` token。
 3. 沒有 `*_REQ` 後綴的單向 token（目前為 `GL_MYINFO_OPEN`）同時作為檔名 family 與
    entry method。不存在以猜測業務語意命名的中介 handler 名稱。
-4. `Handlers.Lobby.Registry.cs` 是刻意的唯一例外：它沒有 packet body、DB mutation 或
-   state transition，只將 `Opcode.<TOKEN>` 綁定到同名 entry method。它不能成為把多個
-   packet flow 收回 generic source file 的先例。
+4. `*.Registry.cs` 是每個 handler subsystem 可用的窄例外：它沒有 packet body、DB
+   mutation 或 state transition，只將 `Opcode.<TOKEN>` 綁定到同名 entry method。Room 的
+   `Handlers.Room.Shared.cs` 是另一個已記錄的窄例外，只放跨多個 opcode 的 map
+   compatibility / room-member authority support；它沒有 callback、packet parse/write 或
+   mutation entry。兩者都不能成為把多個 packet flow 收回 generic source file 的先例。
 
 這是導覽規則，不改變 packet header、field order、length gate、state guard、SQLite
 ownership 或未知邊界的 fail-closed 行為。

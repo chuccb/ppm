@@ -132,8 +132,8 @@
 > ② **語音塊 wire 佈局**: mode 2 (房間成員) 讀 85B (`s16 base1, s16 base2,
 >    27×{s16 voice_item, u8 flag}`); mode 1 (792 ACK) 讀 86B (`u8 char_idx`
 >    + 85B 塊); 794 ACK 讀 `u8 count` + count×86B (1291B)。
-> ③ **補齊 114 / 269 / 765 / 985 負載尾塊**: Handlers.Room.cs 的
->    WriteMemberLoadout 末尾補上 WriteVoiceBlock (85B); 修正 114 進房
+> ③ **補齊 114 / 269 / 765 / 985 負載尾塊**: Handlers.GL_ENTERROOM.cs 的
+>    WriteGL_ENTERROOM_ACK_MemberLoadout 末尾補上 WriteVoiceBlock (85B); 修正 114 進房
 >    解析偏移。
 > ④ **269 GL_JOINPLAY_ACK 成功態全落地**: 268 PLAY(flag=0) → code 6
 >    (自身完整快照, 含 85B 語音塊); 268 OBSERVE(flag=1) → code 7

@@ -1,7 +1,7 @@
 // =============================================================================
-// 房間 membership handlers — 建房、進房、成員 snapshot、離房、強制離房
-//
-// membership mutation 與 112/114 writer 刻意同檔，讓 state 和 client-visible snapshot 可一起 review。
+// GL_ENTERROOM_REQ (113) → GL_ENTERROOM_ACK (114)
+// File and handler entry use the canonical opcode token verbatim. Packet-specific
+// helpers retain the request or paired ACK token that defines their wire family.
 // =============================================================================
 using PaperMan.Protocol;
 
@@ -9,142 +9,6 @@ namespace PaperMan.Server;
 
 public static partial class RoomHandlers
 {
-    // 111 normal title form (sub_449320 → sub_56A5A0):
-    //   u8 0xFF title-form marker, s8 has_password, str title,
-    //   [has_password: str password], u8 max_players, u8 rule,
-    //   u8 requested_map, u8 no_skill_background.
-    //
-    // sub_449320 is the only reachable caller and passes -1 for the first
-    // argument, which sub_56A5A0 serializes as 0xFF. The alternative native
-    // no-title form has no reachable caller, so it is not a valid server
-    // create-room request. This marker is not a map ID.
-    //
-    // 112 (sub_56A7B0) always begins with its six-field room result; err==0
-    // adds team-mode plus two team blocks. The client unconditionally reads
-    // both blocks for a successful response, including empty teams.
-    private readonly record struct CreateRoomRequest(
-        string Title,
-        string? Password,
-        byte MaxPlayers,
-        byte Rule,
-        byte RequestedMapId,
-        bool NoSkillBackground);
-
-    private static async ValueTask MakeRoom(Session session, Packet packet, ServerContext context)
-    {
-        if (!TryReadCreateRoomRequest(packet, out CreateRoomRequest request))
-        {
-            return;
-        }
-
-        byte mapId = ResolveMap(request.RequestedMapId, request.Rule, context.Db);
-        Room? room = session.UserId != 0
-            ? context.Rooms.Create(
-                session,
-                mapId,
-                request.Title,
-                request.Password,
-                request.Rule,
-                request.MaxPlayers,
-                request.NoSkillBackground)
-            : null;
-
-        MakeRoomError err = room is null ? MakeRoomError.Full : MakeRoomError.Ok;
-        var ack = new Packet(Opcode.GL_MAKEROOM_ACK)
-            .WriteU8((byte)err)
-            .WriteU8(room?.RoomNo ?? 0)                     // room_no (失敗時為 0)
-            .WriteU16(room?.MaxSlotMask ?? 0)               // v52 → +110 上限槽位點陣
-            .WriteS32(room?.RoomUid ?? 0)                   // v57 → dword_F2A65C
-            .WriteBool(room?.NoSkillBg ?? false)            // v50 → +185 no_skill_bg
-            .WriteBool(room?.TeamShuffle ?? false);         // v53 → mode+13 隊打散
-
-        if (room is not null)
-        {
-            session.RoomNo = room.RoomNo;
-            ack.WriteU8(IsTeamMode(request.Rule) ? (byte)2 : (byte)0) // n2_1 team_mode (2=隊伍房 → CCustomTexture)
-               .WriteU32(0)                                 // team A uid (新房間尚無分隊)
-               .WriteU32(0)                                 // team A crc
-               .WriteStr("")                                // team A name
-               .WriteU8(0)                                  // team A flag
-               .WriteU32(0)                                 // team B uid
-               .WriteU32(0)                                 // team B crc
-               .WriteStr("")                                // team B name
-               .WriteU8(0);                                 // team B flag
-        }
-
-        await session.SendAsync(ack);
-    }
-
-    private static bool TryReadCreateRoomRequest(Packet packet, out CreateRoomRequest request)
-    {
-        request = default;
-
-        if (packet.Remaining < 2)
-        {
-            return false;
-        }
-
-        if (packet.ReadU8() != byte.MaxValue)
-        {
-            return false;
-        }
-
-        // After the marker: flag + empty title NUL + four final bytes.
-        if (packet.Remaining < 6)
-        {
-            return false;
-        }
-
-        sbyte hasPassword = packet.ReadS8();
-        if (!TryReadNulTerminatedAnsiString(packet, maxContentBytes: 50, out string title)
-            || title.Length == 0)
-        {
-            return false;
-        }
-
-        string? password = null;
-        if (hasPassword != 0
-            && !TryReadNulTerminatedAnsiString(packet, Packet.MaxPayload, out password))
-        {
-            return false;
-        }
-
-        if (packet.Remaining != 4)
-        {
-            return false;
-        }
-
-        request = new CreateRoomRequest(
-            title,
-            password,
-            packet.ReadU8(),
-            packet.ReadU8(),
-            packet.ReadU8(),
-            packet.ReadU8() != 0);
-        return true;
-    }
-
-    // Scan before advancing so a malformed variable field is a silent no-op,
-    // rather than a partial parse followed by a room mutation.
-    private static bool TryReadNulTerminatedAnsiString(Packet packet, int maxContentBytes, out string value)
-    {
-        value = string.Empty;
-        if (packet.Remaining <= 0)
-        {
-            return false;
-        }
-
-        ReadOnlySpan<byte> remaining = packet.Payload[packet.ReadPos..];
-        int bytesToScan = Math.Min(remaining.Length, checked(maxContentBytes + 1));
-        if (remaining[..bytesToScan].IndexOf((byte)0) < 0)
-        {
-            return false;
-        }
-
-        value = packet.ReadStr();
-        return true;
-    }
-
     // 113 → 114 (sub_56B360 完整佈局, 卅七輪逐欄定案, 本輪補齊 sub_885D00 語音塊):
     //   u8 sub_type; 0=失敗回大廳; 1=單人進房通知 (給既有成員);
     //   2=完整房間狀態 (給進房者, 房物件欄位 + count×成員條目)。
@@ -153,7 +17,7 @@ public static partial class RoomHandlers
     //   武器組×4, extra_flag, sub_527550 9 UI-item, sub_527D00 selected NewSkill puzzles,
     //   sub_885D00 語音自訂 85B 塊);
     //   sub_type==2 的條目另含 crown/status/observer 三枚 u8。
-    private static async ValueTask EnterRoom(Session session, Packet packet, ServerContext context)
+    private static async ValueTask GL_ENTERROOM_REQ(Session session, Packet packet, ServerContext context)
     {
         if (packet.Remaining != 1)
         {
@@ -174,18 +38,18 @@ public static partial class RoomHandlers
         session.RoomNo = roomNo;
 
         // 1. 通知既有成員: sub_type==1 單人加入 (含完整負載)
-        var newMember = LoadMemberData(context.Db, session);
+        var newMember = LoadGL_ENTERROOM_ACK_MemberData(context.Db, session);
         var joinNotice = new Packet(Opcode.GL_ENTERROOM_ACK).WriteU8(1);
-        WriteMemberNotice(joinNotice, session, slot.Value, newMember);
+        WriteGL_ENTERROOM_ACK_MemberNotice(joinNotice, session, slot.Value, newMember);
         await RoomManager.BroadcastAsync(room, joinNotice, except: session);
 
         // 2. 給進房者: sub_type==2 完整房間狀態 (房物件欄位 + 全員條目)
         var fullState = new Packet(Opcode.GL_ENTERROOM_ACK).WriteU8(2);
-        WriteRoomState(fullState, room);
+        WriteGL_ENTERROOM_ACK_RoomState(fullState, room);
         foreach (var (memberSlot, member) in room.Members.OrderBy(kv => kv.Key))
         {
-            WriteMemberEntry(fullState, member, memberSlot, memberSlot == room.MasterSlot,
-                LoadMemberData(context.Db, member));
+            WriteGL_ENTERROOM_ACK_MemberEntry(fullState, member, memberSlot, memberSlot == room.MasterSlot,
+                LoadGL_ENTERROOM_ACK_MemberData(context.Db, member));
         }
 
         await session.SendAsync(fullState);
@@ -194,10 +58,10 @@ public static partial class RoomHandlers
     // ---- 114 序列化助手 (sub_56B360 佈局) --------------------------------
 
     /// <summary>成員的完整負載資料 (與 198 MyInfo 同源, 含語音自訂)。</summary>
-    internal readonly record struct MemberData(
+    internal readonly record struct GL_ENTERROOM_ACK_MemberData(
         Db.MyInfo? Info, Db.CharSlot? CurChar, List<Db.WeaponGroup> Groups, Db.Slots Slots, Db.Voice? Voice);
 
-    internal static MemberData LoadMemberData(Db db, Session member)
+    internal static GL_ENTERROOM_ACK_MemberData LoadGL_ENTERROOM_ACK_MemberData(Db db, Session member)
     {
         var info = db.GetMyInfo(member.UserId);
         var chars = db.GetCharacters(member.UserId);
@@ -251,7 +115,7 @@ public static partial class RoomHandlers
     /// sub_527D00 raw n5 + 已選 NewSkill profile 7×s32 puzzle IDs + sub_885D00 語音自訂 85B 塊
     /// (s16 base1, s16 base2, 27×{s16 item, u8 flag})。首欄為「角色槽」(CurrentChar) 而非房槽。
     /// </summary>
-    internal static void WriteMemberLoadout(
+    internal static void WriteGL_ENTERROOM_ACK_MemberLoadout(
         Packet ack, Db.CharSlot? curChar, List<Db.WeaponGroup> groups, Db.Slots slots, Db.Voice? voice)
     {
         ack.WriteU8(curChar?.SlotNo ?? (byte)0)             // sub_524360 n0x14: 角色槽 0..0x13
@@ -301,18 +165,18 @@ public static partial class RoomHandlers
     }
 
     /// <summary>sub_type==1 單人進房通知 (給既有成員)。</summary>
-    internal static void WriteMemberNotice(Packet ack, Session member, byte slot, MemberData data)
+    internal static void WriteGL_ENTERROOM_ACK_MemberNotice(Packet ack, Session member, byte slot, GL_ENTERROOM_ACK_MemberData data)
     {
         ack.WriteS32((int)member.UserId)
            .WriteU8(slot)
            .WriteStr(member.Nickname)
            .WriteS32((int)(data.Info?.Exp ?? 0))            // v194 → member+25 exp
            .WriteU8(data.CurChar?.CharType ?? (byte)0);     // v179 → byte_F6DD61 (現役角色型別)
-        WriteMemberLoadout(ack, data.CurChar, data.Groups, data.Slots, data.Voice);
+        WriteGL_ENTERROOM_ACK_MemberLoadout(ack, data.CurChar, data.Groups, data.Slots, data.Voice);
     }
 
     /// <summary>sub_type==2 成員條目 (比 sub_type==1 多 crown/status/observer)。</summary>
-    internal static void WriteMemberEntry(Packet ack, Session member, byte slot, bool isMaster, MemberData data)
+    internal static void WriteGL_ENTERROOM_ACK_MemberEntry(Packet ack, Session member, byte slot, bool isMaster, GL_ENTERROOM_ACK_MemberData data)
     {
         ack.WriteS32((int)member.UserId)
            .WriteU8(slot)
@@ -322,12 +186,12 @@ public static partial class RoomHandlers
            .WriteS32((int)(data.Info?.Exp ?? 0))            // v143 exp
            .WriteU8(data.CurChar?.CharType ?? (byte)0)      // v179 char_type
            .WriteU8(0);                                     // v140 observer (0 = 完整資料)
-        WriteMemberLoadout(ack, data.CurChar, data.Groups, data.Slots, data.Voice);
+        WriteGL_ENTERROOM_ACK_MemberLoadout(ack, data.CurChar, data.Groups, data.Slots, data.Voice);
     }
 
     /// <summary>sub_type==2 房間狀態首段 (sub_56B360 case 2 的 19 欄
     /// — 134 的 16 欄 + room_uid 前綴 + +185/+128/mode+14 三尾欄)。</summary>
-    private static void WriteRoomState(Packet ack, Room room)
+    private static void WriteGL_ENTERROOM_ACK_RoomState(Packet ack, Room room)
     {
         ack.WriteS32(room.RoomUid)                         // v192 → dword_F2A65C
            .WriteU8(room.MapId)                            // v176 → +130 map (sub_540280)
@@ -342,7 +206,7 @@ public static partial class RoomHandlers
            .WriteU8(0)                                     // v193 → +146 (server 側語意未定, client 僅鏡像)
            .WriteU16(room.KillCount)                       // v191[3] → +148 擊殺目標
            .WriteU8(0)                                     // v169 → +150 (server 側語意未定, client 僅鏡像)
-           .WriteBool(IsTeamMode(room.Rule))               // v173 → mode+12 是否隊伍房 (sub_56A7B0: sub_438990?1:0)
+           .WriteBool(IsNativeTwoTeamMode(room.Rule))               // v173 → mode+12 是否隊伍房 (sub_56A7B0: sub_438990?1:0)
            .WriteU8(0)                                     // v185 → +109 room_type_B (client 僅鏡像)
            .WriteBool(room.TeamShuffle)                    // v141[0] → mode+13 隊打散開關 (368/369)
            .WriteBool(room.NoSkillBg)                      // v177 → +185 no_skill_bg
@@ -350,59 +214,4 @@ public static partial class RoomHandlers
            .WriteBool(room.Soccer);                        // v142 → mode+14 (sub_74F4D0; 969/970)
     }
 
-    // 123 GR_LEAVE_REQ → 124 ACK (u8 result; ≠0 → u8 slot 離房廣播)。
-    // 與斷線清理共用 RemoveMemberAsync — 房主離房時一併廣播 190 新房主
-    // (否則新房主不會戴皇冠, UI 卡在無房主狀態)。
-    private static async ValueTask LeaveRoom(Session session, Packet packet, ServerContext context)
-    {
-        if (packet.Remaining != 0)
-        {
-            return;
-        }
-
-        if (session.RoomNo is not { } roomNo || context.Rooms.Find(roomNo) is not { } room)
-        {
-            await session.SendAsync(new Packet(Opcode.GR_LEAVE_ACK).WriteU8(0));
-            return;
-        }
-
-        await context.Rooms.RemoveMemberAsync(room, session);
-        await session.SendAsync(new Packet(Opcode.GR_LEAVE_ACK).WriteU8(0));
-    }
-
-    // 131 GR_FORCEOUT_REQ (sub_56EC10: u8 target_slot)
-    // → 132 GR_FORCEOUT_ACK (sub_56ECC0: u8 status==1, u8 target_slot)
-    private static async ValueTask ForceOut(Session session, Packet packet, ServerContext context)
-    {
-        if (packet.Remaining != 1)
-        {
-            return;
-        }
-
-        if (session.RoomNo is not { } roomNo)
-        {
-            return;
-        }
-
-        var room = context.Rooms.Find(roomNo);
-        if (room is null || !room.IsMaster(session))
-        {
-            return;
-        }
-
-        byte targetSlot = packet.ReadU8();
-        if (!room.Members.TryGetValue(targetSlot, out var targetSession) || targetSession is null)
-        {
-            return;
-        }
-
-        // 廣播踢人 ACK
-        var ack = new Packet(Opcode.GR_FORCEOUT_ACK)
-            .WriteU8(1)                                     // status 1 = 成功踢出
-            .WriteU8(targetSlot);
-        await RoomManager.BroadcastAsync(room, ack);
-
-        // 移除成員
-        await context.Rooms.RemoveMemberAsync(room, targetSession);
-    }
 }

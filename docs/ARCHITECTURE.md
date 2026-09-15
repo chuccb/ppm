@@ -118,10 +118,14 @@ uses cancellation and disposes its socket only after its receive loop exits.
   Lobby 的每個已註冊 request 則是單一 canonical opcode-family source file：例如
   `Handlers.GL_MYINFO.cs` / `GL_MYINFO_REQ`、`Handlers.GI_CHANGEWP.cs` /
   `GI_CHANGEWP_REQ`，以及其同名 `*_ACK` builder。檔名、entry method 和 packet
-  catalog token 可直接對齊；`Handlers.Lobby.Registry.cs` 是唯一描述性例外，因為它
+  catalog token 可直接對齊；`Handlers.Lobby.Registry.cs` 是 Lobby 的描述性例外，因為它
   只有 `Opcode.<TOKEN> → <TOKEN>` 綁定，沒有 packet body、state transition 或 DB
-  side effect。Room 仍按 lifecycle / settings / membership 等 protocol role 拆分。
-  這些是導覽切分，不改 wire/state semantics。
+  side effect。Room 同樣讓每個已註冊 request 使用 canonical opcode-family source file，
+  例如 `Handlers.GR_MAPCHANGE.cs` / `GR_MAPCHANGE_REQ`、`Handlers.GL_ENTERROOM.cs` /
+  `GL_ENTERROOM_REQ`；`Handlers.Room.Registry.cs` 只做 bindings，
+  `Handlers.Room.Shared.cs` 則只承載多 family 共用的 map compatibility 與
+  room/member authority guard，兩者均沒有 handler entry。這些是導覽切分，不改
+  wire/state semantics。
 - `Db` 是一個依實際 persistence domain 拆成 **9 個 source partial** 的類別：
   `Db.cs` 主檔（connection、bootstrap、account、nickname、packet stats）加上
   Player、Economy、Social、Rooms、Voice、Warehouse、GameCenter、WeaponLoadout。
