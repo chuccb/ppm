@@ -271,6 +271,16 @@ NUL-terminated 字串；以此解析 21,164 筆後，總長 `8 + 21164×997 = 21
 我最初以前綴做交叉驗證時得到「3 個不符」，追查後發現**錯的是我的啟發式、
 不是資料**。任何模式歸屬一律以 bitmask 為準。
 
+### 5b-7. 第四輪：角色能力值與武器特性的三方對照
+
+| Wiki 敘述 | 三方比對結果 |
+|---|---|
+| [キャラクター一覧](https://wikiwiki.jp/paperman/キャラクター一覧) 歷史性地列出各角色能力差異 | **找到權威表**。`Extracted/convars.pat` 的 14 組 `m_cAvataAbility[ICT_*]` 是 client 端能力值來源：`def_hp`/`max_hp` 全 100、`jumpheight` 全 350，差異只在 **defence（−14…+15）、movespeed（85–90）與攝影機高度**。詳 [`RESOURCES.md` §5d-7](RESOURCES.md#5d-7-convarspat14-個角色能力值且第-15-個-ルーシー-刻意缺席)。 |
+| ルーシー(Lucy) 是服務末期（2016）才加入的角色 | **資源側強力佐證**。native 依序查詢 **15** 個 ICT，但 convars 只定義 **14** 個，缺的正是 `ICT_DEVILGIRL`；該角色因此吃 native 硬編碼 fallback（defence = 0）。`CharacterFitting.xml` 也只到第 13 個、`item/avatar/*.pav` 只到角色型別 `09`。越晚加入的角色資源覆蓋越少，形成清楚的分級。 |
+| 武器清單含「FMG-9(Dual Gun)」與「M1 Garand」等特殊武器 | **機制已定位**。`ui/system/SpecialWeaponType.xml` 以 `1=DUAL_GUN` / `2=EMPTY_RELOAD` 標記這 8 個 id，語義與武器本身完全吻合（M1 Garand 的 en-bloc 彈夾＝打空退夾）。同時揭示**第四種 id 空間**：其 `Index` 是 12.1M 段內偏移。詳 §5d-8。 |
+| 「Winchester(CP)」等變體另立條目 | itemdata 的 `t12` 在武器段的實際語義是**變體→基底武器**（`WINCHESTER [CP]` → `WINCHESTER`）。1,291 筆非零 t12 **全部**落在武器段，其中 97 筆為具名變體。 |
+| [MAP・ルール詳細](https://wikiwiki.jp/paperman/MAP・ルール詳細) 提到油桶等場景機關會造成傷害 | **確認為共用武器模型**。`gimmickproperty.xml` 的 7 個機關各自指定一個 `ReferenceWeapon`（油桶→`FIRE_BOMB`、瓦斯桶→`HE_BOMB`…），且與一般武器查詢**共用同一個名稱登錄表** `dword_1CC95A0`。ordinal 0..6 由讀取順序決定，已由 `GimmickProperties` 類的解析迴圈證實。詳 §5d-9。 |
+
 ### 5b-5. 兩項「僅 Wiki、刻意不採用」的記錄
 
 - **房間資訊欄位。** [MAP・ルール詳細](https://wikiwiki.jp/paperman/MAP・ルール詳細)

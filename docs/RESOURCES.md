@@ -764,6 +764,118 @@ map id、item id、lang id 三類 id 各自貫穿多個檔案。
 本輪的三個反例（檔名前綴推模式、`index` 誤認為 modeIndex、
 1808B 記憶體結構誤當檔案 stride）都源自跳過這一步。
 
+## 5d-7. convars.pat：14 個角色能力值，且第 15 個 (ルーシー) 刻意缺席
+
+`Extracted/convars.pat`（pmFile 加密，已解出；228 行）是**角色能力值的權威表**。
+除三個全域常數（`um_gr_accel 1250`、`um_gr_decel 333`、`gun_caliber 50`）外，
+其餘全是 `m_cAvataAbility[ICT_*]` 與 `m_cDmg2MultiplyAvataAbility[ICT_*]` 兩組。
+
+| ICT type | defence | movespeed | cam_offset | sitdownCam |
+|---|---:|---:|---:|---:|
+| `ICT_NORMAL_BOY` / `ICT_NORMAL_GIRL` | 0 | 90 | 0 | 47 |
+| `ICT_YOUNG_GIRL` | −10 | 88 | −8 | 47 |
+| `ICT_MUMMY` | −11 | 86 | 0 | **43** |
+| `ICT_TRUMP` / `ICT_ROKI` / `ICT_HANA` / `ICT_MOMO` / `ICT_PERO` | +15 | 90 | 0 或 −8 | 47 |
+| `ICT_UKA` | +12 | 90 | 0 | 47 |
+| `ICT_SPYGIRL` | −12 | **85** | 0 | **43** |
+| `ICT_ROBOTGIRL` | −14 | 87 | −8 | 47 |
+| `ICT_TSUNDEREGIRL` | −10 | 88 | 0 | 47 |
+| `ICT_MAGICGIRL` | +10 | 87 | −8 | **46**（standCam 亦為 61） |
+
+`def_hp` / `max_hp` 全為 100、`jumpheight` 全為 350 —— 差異只在
+**defence / movespeed / 攝影機高度**三組，這正好對應 Wiki
+[キャラクター一覧](https://wikiwiki.jp/paperman/キャラクター一覧) 所述
+「各角色有能力差異」的實際落點。`defence` 為負者（SPYGIRL −12、ROBOTGIRL −14）
+移動較慢或體型較小，是「脆但靈活」的設計取捨。
+
+**關鍵不對稱（Fact / HIGH）。** native 的載入函式**依序查詢 15 個** ICT
+（順序與 convars 前 14 筆**完全一致**，第 15 個是 `ICT_DEVILGIRL`），
+但 **convars.pat 只定義了 14 筆，沒有 `ICT_DEVILGIRL`**。
+native 對每個 key 都傳入硬編碼 fallback，`ICT_DEVILGIRL` 的 fallback 是
+`(100, 100, 0, 90, 350, -8, 62, 47)` —— 即 **defence = 0**。
+因此本 revision 中 ルーシー(devilgirl, 角色型別 15) 實際以「無防禦修正」運作。
+
+這與其他資源的**分級覆蓋**一致，形成可複驗的證據鏈：
+
+| 角色 | convars 能力值 | CharacterFitting.xml | avatar `.pav` 資產 |
+|---|---|---|---|
+| 型別 1–10（hayate…hood） | ✅ | ✅ | ✅（檔名前綴 `00`–`09`） |
+| 11 spygirl / 12 robotgirl / 13 tsunderegirl | ✅ | ✅ | ❌ |
+| 14 magicgirl (ルコット) | ✅ | ❌ | ❌ |
+| 15 devilgirl (ルーシー) | ❌（用 fallback） | ❌ | ❌ |
+
+`item/avatar/` 的 20,193 個檔中，符合 `%02d_%05d_%02d.pav` 命名的 20,189 個，
+其角色欄**只出現 `00`–`09`**（另 4 個是 `01_00239_07,pav` 逗號錯字、
+`05_01749_2.pav` 位數不足、兩個 `10500201_*.pav` 非該命名族）。
+`character/textures/` 則有完整的 `hand1..hand15.tga` 15 張。
+換言之**越晚加入的角色，資源以模組化方式掛載而非走 `.pav` 頭像族**，
+這是 Wiki 把 ルーシー 記為 2016 年（服務終止前半年）新增的資源側佐證。
+
+**界線。** 以上是 **client 端能力值與資產覆蓋**。伺服器是否也套用這些
+defence/movespeed、以及 devilgirl 的 0 防禦是有意或疏漏，
+皆無 server 證據，維持 UNRESOLVED。
+
+## 5d-8. SpecialWeaponType.xml：weapon index = item id − 12100000
+
+`Extracted/ui/system/SpecialWeaponType.xml` 只有 8 列，但示範了
+**第四種 id 空間**：它的 `Index` 既不是 item id 也不是 map id，而是
+**12.1M 主武器段的段內偏移**。加上 `12100000` 後全部命中且語義自洽：
+
+| Index | item id | 名稱 | SpecialType |
+|---|---|---|---|
+| 2381–2384 | 12102381–84 | `FMG-9(Dual Gun)` | `1 = DUAL_GUN` |
+| 2377–2380 | 12102377–80 | `M1 Garand` | `2 = EMPTY_RELOAD` |
+
+XML 自帶的列舉註解 `NONE=0, DUAL_GUN=1, EMPTY_RELOAD=2` 與名稱**完全吻合**：
+雙槍武器標 1、使用 en-bloc 彈夾（打空自動退夾）的 M1 Garand 標 2。
+8/8 全對，且兩者都在 Wiki 的武器清單中（FMG-9 在 SMG 類、M1 Garand 在 AR 類）。
+native 有 `L"SPECIALWEAPON"` 與 `L"SpecialType"` 兩個 reader 字串。
+
+同一名稱各佔 4 個連號 id，對應 §2d 的 `t8`/`t12` 變體鏈：
+`12102377` 為原型，`78/79/80` 以 `t8`／`t12` 指回原型。
+在武器段中 `t12` 的實際語義是**變體→基底武器**，例如
+`12100363 WINCHESTER [CP]` → `t12 = 12100013 WINCHESTER`
+（正是 Wiki 另立條目的「Winchester(CP)」），
+`12100364 P90 [CP]` → `12100024 P90` 等；1,291 筆非零中武器段佔 1,291 之多數，
+其中 1,194 筆與基底同名、97 筆為 `[CP]`／改色等具名變體。
+
+**順帶驗證。** 獨立重解 itemdata 後，`t4`/`t8`/`t12` 的非零筆數為
+**153 / 7,155 / 1,291**，與 §2d（十七輪）記載的數字**完全相同** ——
+這同時反向證明本輪的 997B stride 切段與當年的頭部欄位定義都正確。
+
+## 5d-9. gimmickproperty.xml：地圖機關 ordinal 0..6 → 參照武器
+
+`Extracted/ui/system/gimmickproperty.xml`（已解出，根標籤誤用
+`TUTORIALDEFINE`）只有 7 列，卻直接給出 749/750/751/753 這組
+`GG_GIMMICK_*` 封包所指的**機關型別表**。XML 自帶 `<!--0-->`..`<!--6-->` 序號：
+
+| ordinal | 機關 | ReferenceWeapon（傷害模型借用的投擲武器） |
+|---:|---|---|
+| 0 | `AirBomb` | `AIR_BOMB` |
+| 1 | `LPG`（瓦斯桶） | `HE_BOMB` |
+| 2 | `Barrel`（油桶） | `FIRE_BOMB` |
+| 3 | `StreetLamp`（路燈） | `FLASH_BOMB` |
+| 4 | `Smoke` | `steam_bomb` |
+| 5 | `Heal` | `Hill_BOMB`（原廠拼字，非 Heal_） |
+| 6 | `water` | `Liquid_Bomb` |
+
+**ordinal 由讀取順序決定，不是 XML 屬性（Fact / HIGH）。**
+native 有具名類別 `GimmickProperties`，其 `sub_9A6810` 以寫死的
+`L"system/gimmickproperty.xml"` 載入本檔，`sub_9A6860` 則以
+`for (j = 0; j < count; ++j)` 逐筆解析並存成 12 byte 的三元組
+`{v12, v10, j}` —— 第三欄**就是迴圈索引**，與 XML 註解的 0..6 完全一致。
+存取器 `sub_9A69A0` / `sub_9A6A50` 以 `12 * a2 + base` 定址並做邊界檢查，
+證實 stride 為 12 bytes、索引即 ordinal。
+
+**設計意涵。** 地圖機關（油桶、瓦斯桶、路燈…）不各自定義傷害，而是
+**借用既有投擲武器的傷害模型**。這解釋了為何 Wiki
+[MAP・ルール詳細](https://wikiwiki.jp/paperman/MAP・ルール詳細) 描述的
+「打爆油桶造成火焰傷害」與 FIRE BOMB 效果相同 —— 它們字面上共用同一個武器條目。
+
+**界線。** 這確立了 749/753 所傳 ordinal 的**字彙**（0..6）與其客戶端視覺／
+傷害來源。實際傷害值、誰有權宣告機關損毀、以及 750 的
+`s32 s32 u8` 三欄語義，仍需 server／封包證據，維持 UNRESOLVED。
+
 ## 5e. 版本考古 (廿一輪)
 - 根 datarevision.txt = 811034967 (patch 版本號)
 - map/maplist.dat = **舊版明文** (head f32 v1.02, 67 圖, 832B/條,
