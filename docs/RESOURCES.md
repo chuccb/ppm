@@ -911,21 +911,29 @@ native 對每個 key 都傳入硬編碼 fallback，`ICT_DEVILGIRL` 的 fallback 
 `(100, 100, 0, 90, 350, -8, 62, 47)` —— 即 **defence = 0**。
 因此本 revision 中 ルーシー(devilgirl, 角色型別 15) 實際以「無防禦修正」運作。
 
-這與其他資源的**分級覆蓋**一致，形成可複驗的證據鏈：
+這種「缺項」是**逐檔案**的，**不是**「越晚的角色資源越少」的通則 ——
+本輪重查三個角色屬性檔後必須修正先前的過度概括：
 
-| 角色 | convars 能力值 | CharacterFitting.xml | avatar `.pav` 資產 |
-|---|---|---|---|
-| 型別 1–10（hayate…hood） | ✅ | ✅ | ✅（檔名前綴 `00`–`09`） |
-| 11 spygirl / 12 robotgirl / 13 tsunderegirl | ✅ | ✅ | ❌ |
-| 14 magicgirl (ルコット) | ✅ | ❌ | ❌ |
-| 15 devilgirl (ルーシー) | ❌（用 fallback） | ❌ | ❌ |
+| 角色 | convars 能力值 | CharacterFitting | CharacterToCooki | CharacterToPushChar | avatar `.pav` |
+|---|---|---|---|---|---|
+| 型別 1–10（hayate…hood） | ✅ | ✅ | ✅ | ✅ | ✅（前綴 `00`–`09`） |
+| 11 spygirl / 12 robotgirl / 13 tsunderegirl | ✅ | ✅ | ✅ | ✅ | ❌ |
+| 14 magicgirl (ルコット) | ✅ | ❌ | ✅ | ✅ | ❌ |
+| 15 devilgirl (ルーシー) | ❌（用 fallback） | ❌ | ✅ | ✅ | ❌ |
+
+`CharacterToCooki.xml` 與 `CharacterToPushChar.xml` **都完整含 15 個角色段
+且 `bEnable` 全為 1**；`CharacterFitting.xml` 才是只到第 13 個
+（且 13 段中只有 `hayate` 的 `bEnable=1`）。
+因此正確的說法是：**devilgirl 缺的是 `convars` 能力值與 `CharacterFitting` 兩項**，
+而非全面缺席。
 
 `item/avatar/` 的 20,193 個檔中，符合 `%02d_%05d_%02d.pav` 命名的 20,189 個，
 其角色欄**只出現 `00`–`09`**（另 4 個是 `01_00239_07,pav` 逗號錯字、
 `05_01749_2.pav` 位數不足、兩個 `10500201_*.pav` 非該命名族）。
 `character/textures/` 則有完整的 `hand1..hand15.tga` 15 張。
-換言之**越晚加入的角色，資源以模組化方式掛載而非走 `.pav` 頭像族**，
-這是 Wiki 把 ルーシー 記為 2016 年（服務終止前半年）新增的資源側佐證。
+換言之**第 11 個角色之後就不再走 `.pav` 頭像族、改以模組化方式掛載**，
+這與 Wiki 把 ルーシー 記為 2016 年（服務終止前半年）新增相容，
+但**「資源覆蓋遞減」只在 convars／Fitting 兩處成立**，不可推廣。
 
 **界線。** 以上是 **client 端能力值與資產覆蓋**。伺服器是否也套用這些
 defence/movespeed、以及 devilgirl 的 0 防禦是有意或疏漏，
@@ -1234,6 +1242,64 @@ Wiki [各種ゲージ詳細](https://wikiwiki.jp/paperman/各種ゲージ詳細)
 **客戶端的投射物模擬參數**：命中判定、實際扣血與權威結算是否由伺服器覆核，
 **沒有任何 client 端證據**。不得據此實作伺服器傷害計算，維持 UNRESOLVED。
 `Wiki` 的威力一覧同屬歷史社群量測，兩者相符與否都不構成 service 事實。
+
+## 5d-17. 三個「角色暫時外觀／手感」屬性檔（本輪解讀，並修正先前概括）
+
+`ui/system/` 有三個同族的角色屬性檔，native 各以寫死路徑載入，
+根標籤皆可在 `PaperMan.exe.c` 找到：
+
+| 檔案 | 根標籤 | 角色段 | 內容 |
+|---|---|---:|---|
+| `CharacterFitting.xml` | `CHANGE_AVATAR_PROPERTY` | 13 | 試衣間暫時預覽（僅 `hayate` 的 `bEnable=1`） |
+| `CharacterToCooki.xml` | `CHANGE_AVATAR_TO_COOKI_PROPERTY` | **15** | 「餅乾化」變身外觀（全部 `bEnable=1`） |
+| `CharacterToPushChar.xml` | `CHARACTER_TO_PUSHCHAR_PROPERTY` | **15** | 被推擠／受擊時的鏡頭晃動參數（全部 `bEnable=1`） |
+
+### CharacterToCooki：15 個角色的變身外觀，item id 全可解
+
+每段是 `handTexture` / `head` / `face` / `set` / `acc1..acc4`。
+以 `dump_itemdata.py` 反查，`head` 與 `acc2` **全部解得出名稱**，語義完全自洽：
+
+* `acc2` 依序為 `10760001..10760014`，名稱**全是「クッキーアクセ」**（餅乾飾品）
+  —— 與檔名 `ToCooki` 吻合，證實這是一套變身用飾品。
+* `handTexture` 依角色順序恰為 **`hand1.tga` … `hand15.tga`**，
+  與 `character/textures/` 的 15 張手部貼圖 **1:1 對應**，
+  也獨立佐證「角色型別共 15 個」。
+* `head` 借用既有髮型 item（如 `10000204 Vカットヘア`、
+  `10001780 ひなまつり(2014)ヘア`），而非另造資產。
+  devilgirl 與 milly 共用 `10001780` 且 `acc2` 亦重用 `10760003`，
+  是本檔唯一的重複組。
+
+### CharacterToPushChar：受擊鏡頭晃動，且 `damage_aim` **有角色差異**
+
+每段四個參數，`damage_aim`／`pos_sin`／`shake_yaw` 三個鍵名都能在 exe 找到 reader。
+前三項 15 個角色**完全一致**（`pos_width=20.0f`、`pos_sin=5.0f`、`shake_yaw=5.0f`），
+但 **`damage_aim` 依角色不同**：
+
+| `damage_aim` | 角色 |
+|---|---|
+| `1f`（8 人） | hayate, tina, milly, Cyrus, spygirl, robotgirl, tsunderegirl, devilgirl |
+| `0.6f` | Doddon |
+| `0.4f` | van |
+| `0.3f` | alulu |
+| `0.25f`（2 人） | Guy, Tericia |
+| `0.2f`（2 人） | hood, magicgirl |
+
+數值越小代表受擊時準心偏移越輕微。這與 §5d-7 的 `convars` 能力值是
+**兩套獨立的角色差異化維度**：`convars` 管 defence／movespeed，
+本檔管受擊手感。值得注意的是 **devilgirl 在此為 `1f`（無減免）**，
+與它在 `convars` 缺席而吃 `defence=0` fallback 的情形方向一致。
+
+### ⚠ 修正 §5d-7 的過度概括
+
+先前我由「convars 缺 devilgirl、CharacterFitting 只到 13」推論出
+「越晚加入的角色資源越少」。本輪查完這兩個檔案後**這個通則不成立**：
+`CharacterToCooki` 與 `CharacterToPushChar` **都完整含 15 個角色**。
+正確說法是 **devilgirl 只缺 `convars` 能力值與 `CharacterFitting` 兩項**。
+§5d-7 的表格已改為逐檔案列出，不再作跨檔案的趨勢宣稱。
+
+**界線。** 這三個檔都是**客戶端外觀／鏡頭表現**。變身觸發條件、
+誰有權讓角色進入 Cooki 狀態、以及是否經由封包同步，
+皆無 client 可證事實，維持 UNRESOLVED。
 
 ## 5e. 版本考古 (廿一輪)
 - 根 datarevision.txt = 811034967 (patch 版本號)

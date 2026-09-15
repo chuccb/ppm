@@ -371,6 +371,25 @@ Wiki 的威力一覧則是歷史社群量測。兩者即使相符也不構成 se
 因此維持 UNRESOLVED，不得據此實作伺服器傷害計算。
 這與 §5d-11 對武器儀表的處理一致：**可讀出 ≠ 有權威**。
 
+### 5b-13. 第十輪：角色差異化的第二個維度，與一次被複驗推翻的宣稱
+
+| 主題 | 三方比對結果 |
+|---|---|
+| [キャラクター一覧](https://wikiwiki.jp/paperman/キャラクター一覧) 稱各角色有能力差異 | **找到第二個差異化維度**。除 §5d-7 的 `convars`（defence／movespeed）外，`ui/system/CharacterToPushChar.xml` 的 **`damage_aim` 依角色不同**：8 人為 `1f`（無減免），其餘自 `0.6f` 遞減至 `0.2f`（hood 與 magicgirl 最低）。數值越小＝受擊時準心偏移越輕。詳 [`RESOURCES.md` §5d-17](RESOURCES.md)。 |
+| 角色變身／特殊外觀 | **`CharacterToCooki.xml` 完整解出**。15 個角色段全部 `bEnable=1`，`acc2` 依序為 `10760001..10760014`，名稱**全是「クッキーアクセ」**，與檔名 `ToCooki` 完全吻合；`head` 借用既有髮型 item 而非另造資產。 |
+| 角色共 15 種 | **再獲一條獨立證據**。`CharacterToCooki` 的 `handTexture` 依角色順序恰為 `hand1.tga`..`hand15.tga`，與 `character/textures/` 的 15 張手部貼圖 1:1 對應。 |
+
+**兩次被自我複驗抓到的問題，都已更正：**
+
+1. **過度概括。** 我先前由「convars 缺 devilgirl、CharacterFitting 只到 13」
+   推出「越晚的角色資源越少」。本輪查完發現
+   `CharacterToCooki` 與 `CharacterToPushChar` **都完整含 15 個角色**，
+   通則不成立 —— devilgirl 其實只缺那兩項。§5d-7 的表已改為逐檔案列出。
+2. **誤讀為一致。** 我原本寫 `CharacterToPushChar` 的四個參數「15 個角色完全相同」，
+   複驗時發現只有前三項一致，`damage_aim` 有 6 種取值。已更正，
+   並把分布寫進 `verify_resource_claims.py`（現 45 項檢查）——
+   這條檢查正好就能擋下我當初那個錯誤宣稱。
+
 ### 5b-5. 兩項「僅 Wiki、刻意不採用」的記錄
 
 - **房間資訊欄位。** [MAP・ルール詳細](https://wikiwiki.jp/paperman/MAP・ルール詳細)

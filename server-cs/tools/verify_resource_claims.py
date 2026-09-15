@@ -214,6 +214,30 @@ def main() -> None:
                   sum(1 for g in gunindexes if any(band + g in item_ids for band in bands)),
                   resolving)
 
+    # Character appearance/feel tables. Cooki and PushChar cover all 15
+    # character types; only CharacterFitting stops at 13.
+    for filename, sections in (("CharacterFitting.xml", 13),
+                               ("CharacterToCooki.xml", 15),
+                               ("CharacterToPushChar.xml", 15)):
+        blob = decrypt(EXTRACTED / "ui" / "system" / filename)
+        if blob is None:
+            skipped.append(filename)
+            continue
+        text = blob.decode("utf-8", "replace")
+        check(f"{filename} character sections",
+              len(re.findall(r'<\w+ bEnable="\d"', text)), sections)
+        if filename == "CharacterToCooki.xml":
+            # handTexture runs hand1..hand15 in character order, which is an
+            # independent witness that there are exactly 15 character types.
+            check("CharacterToCooki.xml handTexture order",
+                  [int(v) for v in re.findall(r'handTexture="hand(\d+)\.tga"', text)],
+                  list(range(1, 16)))
+        if filename == "CharacterToPushChar.xml":
+            # damage_aim is per-character; the other three fields are uniform.
+            check("CharacterToPushChar.xml damage_aim spread",
+                  dict(Counter(re.findall(r'damage_aim="([^"]*)"', text))),
+                  {"1f": 8, "0.6f": 1, "0.4f": 1, "0.3f": 1, "0.25f": 2, "0.2f": 2})
+
     # Every datarevision.txt must agree: Extracted/ is one coherent snapshot.
     revisions = {path.read_text(encoding="utf-8", errors="replace").strip()
                  for path in EXTRACTED.rglob("datarevision.txt")}
