@@ -10,6 +10,7 @@ import { Packet, PacketStream, type Reader } from "./packet.ts";
 import { Op, opcodeName } from "./opcodes.ts";
 import type { Store } from "./store.ts";
 import { GL_ACCOUNTCONNSUCC, type GameServer, login, readGL_LOGIN_REQ } from "./login.ts";
+import { GT_PING_ACK, PING_INTERVAL_MS, PING_TIMEOUT_MS } from "./keepalive.ts";
 
 export interface Config {
   store: Store;
@@ -22,6 +23,10 @@ class Session {
   readonly #socket: Socket<Session>;
   readonly #config: Config;
   readonly #peer: string;
+  /** Serialises dispatch so replies keep the order the requests arrived in. */
+  #queue: Promise<void> = Promise.resolve();
+  #heartbeat: ReturnType<typeof setInterval> | null = null;
+  #lastSeen = Date.now();
   accountId: number | null = null;
 
   constructor(socket: Socket<Session>, config: Config) {
@@ -41,9 +46,24 @@ class Session {
    */
   greet(): void {
     this.send(GL_ACCOUNTCONNSUCC());
+    this.#heartbeat = setInterval(() => {
+      if (Date.now() - this.#lastSeen > PING_TIMEOUT_MS) {
+        this.#config.log(`${this.#peer}: no ping reply, closing`);
+        this.#socket.end();
+        return;
+      }
+      this.send(GT_PING_ACK());
+    }, PING_INTERVAL_MS);
+  }
+
+  /** Called from the socket's close callback. */
+  dispose(): void {
+    if (this.#heartbeat !== null) clearInterval(this.#heartbeat);
+    this.#heartbeat = null;
   }
 
   receive(chunk: Uint8Array): void {
+    this.#lastSeen = Date.now();
     this.#stream.push(chunk);
     let packets: Reader[];
     try {
@@ -52,7 +72,12 @@ class Session {
       this.#fail("malformed frame", error);
       return;
     }
-    for (const packet of packets) void this.#dispatch(packet);
+    // Handlers are async (argon2), so dispatching them concurrently would let
+    // a fast reply overtake a slow one. The client pairs replies to requests by
+    // order, so chain them.
+    for (const packet of packets) {
+      this.#queue = this.#queue.then(() => this.#dispatch(packet));
+    }
   }
 
   async #dispatch(r: Reader): Promise<void> {
@@ -61,7 +86,9 @@ class Session {
         case Op.GL_LOGIN_REQ:
           return await this.#onGL_LOGIN_REQ(r);
         case Op.GT_PING_REQ:
-          return; // reply shape not yet evidenced; ignore rather than invent one
+          // Proof of life only. #lastSeen is already updated in receive(), and
+          // replying with 102 here would loop the client forever.
+          return;
         default:
           // The client's own dispatcher silently ignores unknown opcodes. Mirror
           // that, but log so coverage gaps stay visible.
@@ -103,6 +130,7 @@ export function listen(config: Config & { hostname: string; port: number }) {
         socket.data.receive(new Uint8Array(chunk));
       },
       close(socket) {
+        socket.data.dispose();
         config.log(`${socket.remoteAddress}: disconnected`);
       },
       error(socket, error) {

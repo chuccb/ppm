@@ -15,7 +15,7 @@ reverse-engineering notes in [`../docs/`](../docs/).
 
 ```bash
 bun install
-bun test          # 48 tests
+bun test          # 53 tests
 bun run typecheck # tsc --noEmit, clean
 bun start         # login server on 0.0.0.0:40200
 ```
@@ -33,6 +33,7 @@ src/aes.ts       AES-128 + CFB-128, the client's cipher
 src/opcodes.ts   676-opcode catalogue, loaded from db/packets.tsv
 src/store.ts     accounts on bun:sqlite
 src/login.ts     GL_ACCOUNTCONNSUCC -> GL_LOGIN_REQ -> GL_LOGIN_ACK
+src/keepalive.ts GT_PING_ACK out, GT_PING_REQ back
 src/session.ts   per-connection dispatch, and Bun.listen
 src/main.ts      entry point
 ```
@@ -61,6 +62,13 @@ All of these are cited to `../docs/PACKETS.md`:
   client is CP949, whose WHATWG label is `euc-kr` (Bun rejects `cp949`).
 - **Credentials** — the client validates `[0-9A-Za-z@]` before sending, so the
   store rejects anything else too.
+- **Keepalive runs backwards from its names** — the server sends
+  `GT_PING_ACK(102)` and the client answers `GT_PING_REQ(101)`. The client's
+  dispatcher handles 102 by building 101 (`sub_58D6F0`), has no handler for 101
+  and no builder for 102. Replying to an inbound 101 would loop forever.
+- **Replies keep request order** — handlers are async, so dispatch is chained
+  per connection. The client pairs replies to requests positionally, and
+  concurrent dispatch let a fast reply overtake a slow one.
 
 ### A correction made while building this
 

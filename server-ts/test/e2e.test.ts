@@ -8,6 +8,7 @@ import { Op } from "../src/opcodes.ts";
 import { Store } from "../src/store.ts";
 import { listen } from "../src/session.ts";
 import { Result, type GameServer } from "../src/login.ts";
+import { PING_INTERVAL_MS } from "../src/keepalive.ts";
 
 const servers: readonly GameServer[] = [
   {
@@ -43,11 +44,18 @@ afterAll(() => {
   store.close();
 });
 
-/** Minimal client: collects decoded packets, lets a test await the next one. */
+/**
+ * Minimal client: decodes inbound packets into a queue and lets a test await
+ * the next one.
+ *
+ * Waiters are parked in a list rather than a single `notify` slot -- with one
+ * slot, a packet arriving while nobody is waiting would fire and clear the
+ * callback, losing the wakeup and making the test flaky.
+ */
 function connectClient() {
   const stream = new PacketStream();
   const inbox: Reader[] = [];
-  let notify: (() => void) | null = null;
+  const waiters: ((reader: Reader) => void)[] = [];
 
   const ready = Bun.connect({
     hostname: "127.0.0.1",
@@ -55,26 +63,43 @@ function connectClient() {
     socket: {
       data(_socket, chunk) {
         stream.push(new Uint8Array(chunk));
-        for (const reader of stream.drain()) inbox.push(reader);
-        notify?.();
+        for (const reader of stream.drain()) {
+          const waiter = waiters.shift();
+          if (waiter) waiter(reader);
+          else inbox.push(reader);
+        }
       },
     },
   });
 
-  const next = async (): Promise<Reader> => {
-    for (let waited = 0; waited < 2000; waited += 10) {
-      const reader = inbox.shift();
-      if (reader) return reader;
-      await new Promise<void>((resolve) => {
-        notify = resolve;
-        setTimeout(resolve, 10);
-      });
-      notify = null;
-    }
-    throw new Error("timed out waiting for a packet");
+  const next = (timeoutMs = 2000): Promise<Reader> => {
+    const buffered = inbox.shift();
+    if (buffered) return Promise.resolve(buffered);
+
+    return new Promise<Reader>((resolve, reject) => {
+      const timer = setTimeout(() => {
+        const at = waiters.indexOf(settle);
+        if (at >= 0) waiters.splice(at, 1);
+        reject(new Error("timed out waiting for a packet"));
+      }, timeoutMs);
+
+      const settle = (reader: Reader): void => {
+        clearTimeout(timer);
+        resolve(reader);
+      };
+      waiters.push(settle);
+    });
   };
 
-  return { ready, next };
+  /** Assert nothing arrives within `ms`. */
+  const expectSilence = async (ms: number): Promise<void> => {
+    await Bun.sleep(ms);
+    if (inbox.length > 0) {
+      throw new Error(`expected silence but received opcode ${inbox[0]!.opcode}`);
+    }
+  };
+
+  return { ready, next, expectSilence };
 }
 
 function loginRequest(account: string, password: string): Packet {
@@ -122,6 +147,24 @@ describe("live login over TCP", () => {
     socket.end();
   });
 
+  test("an inbound 101 is never answered with 102", async () => {
+    // Replying to the client's ping reply would loop both sides forever.
+    const client = connectClient();
+    const socket = await client.ready;
+    await client.next(); // 694
+
+    socket.write(new Packet(Op.GT_PING_REQ).encode());
+
+    // The heartbeat is far off, so any traffic now would be a wrong reply.
+    expect(PING_INTERVAL_MS).toBeGreaterThan(1000);
+    await client.expectSilence(200);
+
+    // Only a real request should produce traffic.
+    socket.write(loginRequest("alice", "hunter2").encode());
+    expect((await client.next()).opcode).toBe(Op.GL_LOGIN_ACK);
+    socket.end();
+  });
+
   test("two frames written together are both handled", async () => {
     const client = connectClient();
     const socket = await client.ready;
@@ -136,6 +179,31 @@ describe("live login over TCP", () => {
 
     expect((await client.next()).s32()).toBe(Result.BadCredentials);
     expect((await client.next()).s32()).toBe(Result.Success);
+    socket.end();
+  });
+
+  test("replies keep request order under concurrent handlers", async () => {
+    // Handlers are async (argon2 verify), and a wrong password resolves on a
+    // different path from a right one. Dispatching concurrently let the second
+    // reply overtake the first; the client pairs replies to requests by order.
+    const client = connectClient();
+    const socket = await client.ready;
+    await client.next();
+
+    const sequence = ["wrong", "hunter2", "wrong", "wrong", "hunter2"] as const;
+    const batch = sequence.map((pw) => loginRequest("alice", pw).encode());
+    const merged = new Uint8Array(batch.reduce((n, f) => n + f.length, 0));
+    let at = 0;
+    for (const frame of batch) {
+      merged.set(frame, at);
+      at += frame.length;
+    }
+    socket.write(merged);
+
+    for (const pw of sequence) {
+      const expected = pw === "hunter2" ? Result.Success : Result.BadCredentials;
+      expect((await client.next()).s32()).toBe(expected);
+    }
     socket.end();
   });
 });

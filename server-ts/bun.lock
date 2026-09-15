@@ -6,9 +6,7 @@
       "name": "server-ts",
       "devDependencies": {
         "@types/bun": "latest",
-      },
-      "peerDependencies": {
-        "typescript": "^7.1.0-dev.20260915.1",
+        "typescript": "next",
       },
     },
   },
