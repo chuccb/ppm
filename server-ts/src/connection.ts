@@ -33,7 +33,7 @@ export interface Config {
   servers: readonly GameServer[];
   log: (message: string) => void;
   /** Reported in the channel admission reply. */
-  channelName?: string;
+  channelName: string;
 }
 
 export class Connection {

@@ -46,6 +46,6 @@ export default function (r: Reader, connection: Connection): void {
 
   connection.reply("PM_UDPSTART_ACK", {
     result: Result.Success,
-    channelName: connection.config.channelName ?? "Channel 1",
+    channelName: connection.config.channelName,
   });
 }

@@ -35,6 +35,7 @@ beforeAll(async () => {
     store,
     servers,
     log: () => {},
+    channelName: "Channel 1",
   });
   port = listener.port;
 });

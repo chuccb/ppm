@@ -58,4 +58,25 @@ describe("store", () => {
     await expect(store.createAccount("dave", "pw2")).rejects.toThrow();
     store.close();
   });
+
+  test("an unknown user costs the same as a wrong password", async () => {
+    // Otherwise response time reveals which accounts exist. The miss path
+    // verifies against a real hash; if that constant were malformed the
+    // verify would throw and return early, and this would catch it.
+    const store = new Store();
+    await store.createAccount("real", "pw");
+
+    const time = async (user: string): Promise<number> => {
+      const start = Bun.nanoseconds();
+      expect(await store.verifyLogin(user, "wrong")).toBeNull();
+      return (Bun.nanoseconds() - start) / 1e6;
+    };
+
+    const miss = await time("ghost");
+    const hit = await time("real");
+    // Generous bound: this asserts the miss is not trivially fast, not that
+    // the two are identical.
+    expect(miss).toBeGreaterThan(hit * 0.5);
+    store.close();
+  });
 });
