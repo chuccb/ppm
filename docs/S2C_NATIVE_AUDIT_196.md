@@ -197,7 +197,9 @@ Important parser-boundary facts:
 - `list_count` is used by `for (i = 0; i < *(this + 38); ++i)` without the
   `j < 5` / `k < 32` caps used by the later arrays. A malformed or hostile
   type-3 packet can therefore overrun the native object; this is a client
-  parser defect, not permission to invent a smaller server grammar.
+  parser defect, not permission to invent a tournament-record cardinality.
+  The TS writer nevertheless rejects a list whose encoded bytes cannot fit
+  `Packet`'s 9592-byte payload budget; that is a transport/framing guard only.
 - The later two arrays are capped at 5 and 32 records respectively, but their
   count bytes are still consumed before the capped loops. Extra records beyond
   those caps are not skipped; the parser proceeds to the following fields, so

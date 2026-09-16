@@ -12,7 +12,7 @@
  * docs/S2C_NATIVE_AUDIT_196.md)
  */
 
-import { Packet } from "../../packet.ts";
+import { MAX_PAYLOAD, Packet } from "../../packet.ts";
 
 export const Result = {
   ChannelFull: 0,
@@ -161,6 +161,16 @@ function writeType3Tail(p: Packet, tail: Type3Tail): void {
   ] as const) requireU8(name, value);
   requireS32("type3.header1", tail.header1);
   requireS32("type3.listCount", tail.listCount);
+  if (tail.listCount >= 0) {
+    // Native has no upper bound for this loop. The server still needs a
+    // framing bound that cannot exceed Packet's fixed payload budget; this is
+    // a transport limit, not a claimed tournament-record cardinality.
+    const minimumAfterList = 36 + tail.name.length;
+    const maxListCount = Math.floor((MAX_PAYLOAD - p.length - minimumAfterList) / 4);
+    if (tail.listCount > maxListCount) {
+      throw new RangeError(`196 type3.listCount exceeds the ${MAX_PAYLOAD}-byte payload budget`);
+    }
+  }
   if (tail.listCount < 0) {
     if (tail.listValues.length !== 0) {
       throw new RangeError("196 negative type3 listCount cannot have listValues");

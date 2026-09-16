@@ -279,6 +279,20 @@ describe("GC_ENTERCHANNEL_ACK", () => {
         },
       }),
     ).toThrow(/at most 5/);
+    expect(() =>
+      buildPacket("GC_ENTERCHANNEL_ACK", {
+        result: EnterResult.Success,
+        channelId: 1,
+        channelIndex: 0,
+        endpoint: { host: "127.0.0.1", port: 40202 },
+        channelType: 3,
+        type3Tail: {
+          ...minimalType3Tail,
+          listCount: 2_400,
+          listValues: Array.from({ length: 2_400 }, () => 0),
+        },
+      }),
+    ).toThrow(/payload budget/);
   });
 });
 
