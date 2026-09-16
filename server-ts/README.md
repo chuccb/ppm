@@ -15,7 +15,7 @@ reverse-engineering notes in [`../docs/`](../docs/).
 
 ```bash
 bun install
-bun test          # 52 tests
+bun test          # 54 tests
 bun run typecheck # tsc --noEmit, clean
 bun start         # login server on 0.0.0.0:40200
 ```
@@ -33,7 +33,8 @@ src/aes.ts       AES-128 + CFB-128, the client's cipher
 src/opcodes.ts   676-opcode catalogue, loaded from db/packets.tsv
 src/store.ts     accounts on bun:sqlite
 src/wire.ts      filename -> opcode registry
-src/wire/        one module per packet, named after the opcode
+src/wire/c2s/    packets the client sends us  (one file per opcode)
+src/wire/s2c/    packets we send the client   (one file per opcode)
 src/session.ts   per-connection dispatch, and Bun.listen
 src/main.ts      entry point
 ```
@@ -44,9 +45,13 @@ inside it repeats the name. To find the code for a packet from
 `docs/PACKETS.md`, open the file with that name:
 
 ```
-src/wire/GL_LOGIN_REQ.ts   *_REQ  -> inbound handler
-src/wire/GL_LOGIN_ACK.ts   others -> outbound builder
+src/wire/c2s/GL_LOGIN_REQ.ts   the client sends it; we read it
+src/wire/s2c/GL_LOGIN_ACK.ts   we send it; we build it
 ```
+
+Direction is the folder, not the `_REQ`/`_ACK` suffix — those describe the
+client's view, and `GT_PING_ACK` is an `_ACK` the *server* sends. After adding
+a module run `bun run sync` to regenerate the folder's `index.ts`.
 
 ## Protocol facts this implements
 

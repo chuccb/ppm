@@ -14,31 +14,38 @@ audience. Two rules dominate everything else:
 Follow `db/packets.tsv`, which is the reverse-engineered source of truth.
 
 **The opcode name lives in the filename, and nowhere else.** One module per
-packet under `src/wire/`, named exactly as the catalogue names it:
+packet, in the folder for its direction:
 
 ```
-src/wire/GL_LOGIN_REQ.ts   *_REQ  -> inbound handler, default (reader, session)
-src/wire/GL_LOGIN_ACK.ts   others -> outbound builder, default (op, ...args)
+src/wire/c2s/GL_LOGIN_REQ.ts   the client sends it; we read it
+src/wire/s2c/GL_LOGIN_ACK.ts   we send it; we build it
 ```
 
-Inside the module the name never appears again — not in a constant, not in a
-comment header, not in `new Packet(...)`. The builder receives its own opcode
-as the first argument, so there is nothing to repeat and nothing to keep in
-sync. To find the code for a packet, open the file with that name.
+Inside the module the name never appears again — not in a constant, not in
+`new Packet(...)`. A builder receives its own opcode as the first argument, so
+there is nothing to repeat and nothing to keep in sync. To find the code for a
+packet, open the file with that name.
+
+**Direction comes from the folder, not the `_REQ`/`_ACK` suffix.** Those
+suffixes describe the client's view and do not always match ours: `GT_PING_ACK`
+is an `_ACK` the *server* sends, and `GT_PING_REQ` is a `_REQ` it *receives*.
+A suffix rule gets that pair backwards; a folder cannot.
 
 Everything else is normal camelCase: `frameLength`, `verifyLogin`.
 
 Two guards make the convention enforceable rather than aspirational:
 
-- `wire/index.ts` lists the modules, one `export { default as X } from "./X.ts"`
-  per line, so `reply("GL_LOGON_ACK")` is a *compile* error and a builder's
-  argument types are checked at each call site. The list is unavoidable: ES
-  modules have no glob import, and a dynamic `import(\`./${name}.ts\`)`
-  degrades to `any`, which would hand back exactly the runtime surprises the
-  naming scheme is meant to remove.
-- At startup the registry cross-checks that list against the directory and
-  every filename against `db/packets.tsv`. A file that is unlisted, a listing
-  with no file, or a name that is not a real opcode all fail immediately.
+- Each folder has a generated `index.ts`. Write a module, run `bun run sync`.
+  It exists because ES modules have no glob import and a dynamic
+  `import(\`./${name}.ts\`)` degrades to `any` — which would put opcode names
+  and builder arguments back to failing at runtime. Generating it means nobody
+  maintains it by hand and it cannot disagree with the directory.
+- Those lists give compile-time checking: `reply("GL_LOGON_ACK")` is a type
+  error, as is passing a c2s name to `reply` or the wrong argument shape.
+- At startup the registry re-checks the lists against the directories and every
+  filename against `db/packets.tsv`. A module added without running `sync`, a
+  listing with no file, or a name that is not a real opcode each fail
+  immediately. A test also asserts the generated files are current.
 
 Opcode families from the catalogue, for orientation:
 `GL_` lobby · `GG_` in-game relay · `GR_` room · `GS_` shop · `GP_` play ·

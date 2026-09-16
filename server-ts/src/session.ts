@@ -8,11 +8,10 @@
 import type { Socket } from "bun";
 import { PacketStream, type Packet, type Reader } from "./packet.ts";
 import { opcodeName } from "./opcodes.ts";
-import type { BuilderArgs, BuilderName, Registry } from "./wire.ts";
+import type { OutboundArgs, OutboundName, Registry } from "./wire.ts";
 import type { Store } from "./store.ts";
-import type { GameServer } from "./wire/GL_LOGIN_ACK.ts";
-import { Result } from "./wire/GL_LOGIN_ACK.ts";
-import type { Credentials } from "./wire/GL_LOGIN_REQ.ts";
+import { Result, type GameServer } from "./wire/s2c/GL_LOGIN_ACK.ts";
+import type { Credentials } from "./wire/c2s/GL_LOGIN_REQ.ts";
 
 /** How often to poll, and how long silence may last. Server-side choices. */
 export const PING_INTERVAL_MS = 15_000;
@@ -47,7 +46,7 @@ export class Session {
   }
 
   /** Build by opcode name and send. The name is checked at compile time. */
-  reply<N extends BuilderName>(name: N, ...args: BuilderArgs<N>): void {
+  reply<N extends OutboundName>(name: N, ...args: OutboundArgs<N>): void {
     this.send(this.#config.wire.build(name, ...args));
   }
 

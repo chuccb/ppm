@@ -8,7 +8,7 @@ import { opcodeFor } from "../src/opcodes.ts";
 import { Store } from "../src/store.ts";
 import { PING_INTERVAL_MS, listen } from "../src/session.ts";
 import { Registry } from "../src/wire.ts";
-import { Result, type GameServer } from "../src/wire/GL_LOGIN_ACK.ts";
+import { Result, type GameServer } from "../src/wire/s2c/GL_LOGIN_ACK.ts";
 
 const servers: readonly GameServer[] = [
   {

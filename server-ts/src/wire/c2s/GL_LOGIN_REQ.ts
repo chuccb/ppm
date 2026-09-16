@@ -7,8 +7,8 @@
  * (docs/PACKETS.md §1.4)
  */
 
-import type { Reader } from "../packet.ts";
-import type { Session } from "../session.ts";
+import type { Reader } from "../../packet.ts";
+import type { Session } from "../../session.ts";
 
 const GUARD_LOW = 0xf1e1ab0e;
 const GUARD_HIGH_XOR = 0xb1a9d7c7;

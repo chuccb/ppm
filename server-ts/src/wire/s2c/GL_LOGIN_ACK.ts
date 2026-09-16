@@ -6,7 +6,7 @@
  * on success. (docs/PACKETS.md §1.4)
  */
 
-import { Packet } from "../packet.ts";
+import { Packet } from "../../packet.ts";
 
 /** Low byte of the result word; only the documented codes are modelled. */
 export const Result = {

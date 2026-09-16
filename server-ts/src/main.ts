@@ -8,7 +8,7 @@
 
 import { OPCODE_COUNT } from "./opcodes.ts";
 import { Store } from "./store.ts";
-import type { GameServer } from "./wire/GL_LOGIN_ACK.ts";
+import type { GameServer } from "./wire/s2c/GL_LOGIN_ACK.ts";
 import { listen } from "./session.ts";
 import { Registry } from "./wire.ts";
 

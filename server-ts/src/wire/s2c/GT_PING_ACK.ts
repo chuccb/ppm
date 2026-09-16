@@ -9,7 +9,7 @@
  * answering one would loop both sides forever.
  */
 
-import { Packet } from "../packet.ts";
+import { Packet } from "../../packet.ts";
 
 export default function (op: number): Packet {
   return new Packet(op, 0);
