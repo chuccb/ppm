@@ -51,7 +51,7 @@ export default function (op: number, result: Result | Success): Packet {
   if (typeof result === "number") return new Packet(op).s32(result);
 
   const { userNo, servers, chargeMode = 0 } = result;
-  const p = new Packet(op, 512);
+  const p = new Packet(op);
   p.s32(Result.Success).s32(userNo).s32(chargeMode);
   p.s32(0); // ext_count: 0 = no netcafe feature extension
 

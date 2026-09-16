@@ -16,5 +16,5 @@
 import { Packet } from "../../packet.ts";
 
 export default function (op: number): Packet {
-  return new Packet(op, 0);
+  return new Packet(op);
 }

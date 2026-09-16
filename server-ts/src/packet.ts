@@ -47,19 +47,25 @@ function align16(size: number): number {
 /** Builds a payload. Chainable: `new Packet(op).s32(1).str("x")`. */
 export class Packet {
   readonly opcode: number;
-  #buf: Uint8Array;
+  /** Grows on demand; most packets are far smaller than one block. */
+  #buf = new Uint8Array(64);
   #len = 0;
 
-  constructor(opcode: number, capacity = 256) {
+  constructor(opcode: number) {
     this.opcode = opcode & 0xffff;
-    this.#buf = new Uint8Array(capacity);
   }
 
   get length(): number {
     return this.#len;
   }
 
-  /** Reserve `extra` bytes and return the offset to write at. */
+  /**
+   * Reserve `extra` bytes and return the offset to write at.
+   *
+   * Callers must resolve this *before* touching `#buf` or `#view()`: it may
+   * reallocate, and `this.#view().setX(this.#at(n), ...)` would evaluate the
+   * view against the old buffer and write into the copy that gets discarded.
+   */
   #at(extra: number): number {
     const at = this.#len;
     const needed = at + extra;
@@ -87,31 +93,38 @@ export class Packet {
     return this;
   }
   s8(v: number): this {
-    this.#view().setInt8(this.#at(1), v);
+    const at = this.#at(1);
+    this.#view().setInt8(at, v);
     return this;
   }
   u16(v: number): this {
-    this.#view().setUint16(this.#at(2), v & 0xffff, true);
+    const at = this.#at(2);
+    this.#view().setUint16(at, v & 0xffff, true);
     return this;
   }
   s16(v: number): this {
-    this.#view().setInt16(this.#at(2), v, true);
+    const at = this.#at(2);
+    this.#view().setInt16(at, v, true);
     return this;
   }
   u32(v: number): this {
-    this.#view().setUint32(this.#at(4), v >>> 0, true);
+    const at = this.#at(4);
+    this.#view().setUint32(at, v >>> 0, true);
     return this;
   }
   s32(v: number): this {
-    this.#view().setInt32(this.#at(4), v | 0, true);
+    const at = this.#at(4);
+    this.#view().setInt32(at, v | 0, true);
     return this;
   }
   u64(v: bigint): this {
-    this.#view().setBigUint64(this.#at(8), v, true);
+    const at = this.#at(8);
+    this.#view().setBigUint64(at, v, true);
     return this;
   }
   f32(v: number): this {
-    this.#view().setFloat32(this.#at(4), v, true);
+    const at = this.#at(4);
+    this.#view().setFloat32(at, v, true);
     return this;
   }
 

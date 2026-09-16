@@ -58,7 +58,7 @@ export default function (op: number, admission: Admission): Packet {
     throw new RangeError(`channel name longer than ${CHANNEL_NAME_MAX_BYTES} bytes`);
   }
 
-  return new Packet(op, 128)
+  return new Packet(op)
     .u8(result)
     .u8(rankRestricted ? 1 : 0)
     .s32(dailyLoginRewardPg)

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { Packet, PacketStream, decode } from "../src/packet.ts";
+import { Packet, PacketStream, decode, type Reader } from "../src/packet.ts";
 
 describe("frame header", () => {
   test("words follow docs/PACKETS.md §1.2", () => {
@@ -60,6 +60,38 @@ describe("round trip", () => {
     expect(r.u16()).toBe(205);
     expect(r.u32()).toBe(4);
     expect(r.s32()).toBe(42);
+  });
+
+  test("every writer survives the buffer growing under it", () => {
+    // The buffer reallocates as it fills, and a writer that resolves its
+    // DataView before reserving space writes into the copy that gets thrown
+    // away. The write under test has to be the one that crosses the boundary,
+    // so pad to 63 (any multi-byte write straddles it) and to 64 (even a
+    // single byte grows).
+    const writers: [string, (p: Packet) => void, (r: Reader) => unknown, unknown][] = [
+      ["s8", (p) => p.s8(-1), (r) => r.s8(), -1],
+      ["u16", (p) => p.u16(0xbeef), (r) => r.u16(), 0xbeef],
+      ["s16", (p) => p.s16(-2), (r) => r.s16(), -2],
+      ["u32", (p) => p.u32(0xdeadbeef), (r) => r.u32(), 0xdeadbeef],
+      ["s32", (p) => p.s32(-3), (r) => r.s32(), -3],
+      ["u64", (p) => p.u64(0x1122334455667788n), (r) => r.u64(), 0x1122334455667788n],
+      ["f32", (p) => p.f32(1.5), (r) => r.f32(), 1.5],
+      ["str", (p) => p.str("tail"), (r) => r.str(), "tail"],
+      ["wstr", (p) => p.wstr("\u5c3e"), (r) => r.wstr(), "\u5c3e"],
+      ["raw", (p) => p.raw(new Uint8Array([9])), (r) => r.raw(1)[0], 9],
+    ];
+
+    for (const [name, write, read, expected] of writers) {
+      for (const pad of [63, 64]) {
+        const packet = new Packet(1);
+        packet.raw(new Uint8Array(pad));
+        write(packet);
+
+        const r = decode(packet.encode());
+        r.raw(pad);
+        expect(read(r), `${name} lost its value growing at ${pad}`).toEqual(expected);
+      }
+    }
   });
 
   test("ANSI strings reject non-ASCII rather than mangling it", () => {
