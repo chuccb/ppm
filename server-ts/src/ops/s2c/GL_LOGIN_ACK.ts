@@ -117,6 +117,9 @@ export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Pac
     if (!Number.isSafeInteger(server.port) || server.port < 0 || server.port > 0xffff) {
       throw new RangeError("681 server_port must fit u16");
     }
+    if (!Number.isSafeInteger(server.flag) || server.flag < 0 || server.flag > 0xff) {
+      throw new RangeError("681 server flag must fit u8");
+    }
 
     // These are raw2 fields; native domain/signedness is unresolved.
     p.s16(server.serverId);
@@ -139,6 +142,12 @@ export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Pac
       if (channel.name.length > 49) {
         throw new RangeError("681 channel name must fit native char[50]");
       }
+      if (!Number.isSafeInteger(channel.type) || channel.type < 0 || channel.type > 0xff) {
+        throw new RangeError("681 channel type must fit u8");
+      }
+      if (!Number.isSafeInteger(channel.flag) || channel.flag < 0 || channel.flag > 0xff) {
+        throw new RangeError("681 channel flag must fit u8");
+      }
       requireNonNegativeS16(channel.currentUsers, "channel current_users");
       const extra = channel.extra;
       if (channel.type === 3) {
@@ -147,6 +156,9 @@ export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Pac
         }
       } else if (extra !== undefined) {
         throw new RangeError("681 channel extra is only valid for type 3");
+      }
+      if (extra !== undefined && (!Number.isSafeInteger(extra) || extra < 0 || extra > 0xff)) {
+        throw new RangeError("681 channel extra must fit u8");
       }
       p.u8(channel.type);
       p.str(channel.name);

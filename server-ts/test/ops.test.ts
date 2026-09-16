@@ -211,6 +211,19 @@ describe("681 — login ack", () => {
         }],
       }),
     ).toThrow(/extra is only valid/);
+    expect(() =>
+      buildPacket("GL_LOGIN_ACK", {
+        userNo: 1,
+        servers: [{
+          ...servers[0]!,
+          channelGroups: [
+            { maxUsers: 100, channel: { type: 0x103, name: "Normal", currentUsers: 0, flag: 0 } },
+            { maxUsers: 0 },
+            { maxUsers: 0 },
+          ],
+        }],
+      }),
+    ).toThrow(/channel type/);
   });
 
   test("insists on exactly three channel groups", () => {
