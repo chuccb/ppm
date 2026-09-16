@@ -287,9 +287,9 @@ security/device fingerprint material.
 
 The native client makes a **new** channel TCP connection after 681. Its 143
 identity comes from `String[24]` and is therefore limited to 23 ANSI bytes;
-its `n100` path passes through a signed-char local before its s32 write. The
-server consequently validates a lossless signed-byte billing/charge UI mode
-and grants a short-lived, source-IP-bound, one-use account→channel admission. Crucially, it
+its `n100` path is read and written as a 4-byte signed value. The server
+consequently preserves the full signed-s32 billing/charge UI mode and grants a
+short-lived, source-IP-bound, one-use account→channel admission. Crucially, it
 does **not** use the identity as an account/nickname key: the available C
 export proves the `String[24]` size and reuse but not its authoritative writer.
 If two live logins from one IP have identical native echo values, the server
@@ -1655,7 +1655,7 @@ Room，`Handlers.GL_JOINPLAY.cs` 的 flag 0 先加入空 slot 再回 269 code 6 
 
 143 PM_UDPSTART_REQ (sub_555C60; 693 的唯一 bootstrap 觸發):
     str identity (`String[24]`，此匯出尚不能定名，最多 23 ANSI bytes)
-    s32 n100 (681 回送；native signed-char temporary 擴展為 4B)
+    s32 n100 (681 回送；native 讀寫皆為 4B signed value)
     u8  literal 1
     s32 ext_count (681 回送)
     這是可比對 handoff claim，不是密碼學 credential；server 必須把它綁定

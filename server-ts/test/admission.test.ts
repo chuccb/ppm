@@ -29,6 +29,15 @@ describe("channel admissions", () => {
     expect(admissions.claim(0, 0, "10.0.0.4", 100)).toBeNull();
   });
 
+  test("preserves the full signed s32 n100 domain", () => {
+    const admissions = new ChannelAdmissionRegistry();
+    admissions.issue(7, 0x1234_5678, 0, "10.0.0.4", 1_000, 100);
+
+    expect(admissions.claim(0x1234_5678, 0, "10.0.0.4", 100)?.accountId).toBe(7);
+    expect(() => admissions.issue(8, 0x8000_0000, 0, "10.0.0.4", 1_000, 100)).toThrow(/n100/);
+    expect(() => admissions.issue(8, -0x8000_0001, 0, "10.0.0.4", 1_000, 100)).toThrow(/n100/);
+  });
+
   test("expires claims before matching", () => {
     const admissions = new ChannelAdmissionRegistry();
     admissions.issue(7, 0, 0, "10.0.0.4", 100, 100);

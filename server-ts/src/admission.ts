@@ -31,8 +31,8 @@ export class ChannelAdmissionRegistry {
     if (!Number.isSafeInteger(accountId) || accountId <= 0) {
       throw new RangeError("accountId must be a positive safe integer");
     }
-    if (!Number.isInteger(n100) || n100 < -128 || n100 > 127) {
-      throw new RangeError("n100 must fit the signed byte used by 143");
+    if (!Number.isInteger(n100) || n100 < -0x8000_0000 || n100 > 0x7fff_ffff) {
+      throw new RangeError("n100 must fit the s32 echoed by 143");
     }
     if (!Number.isSafeInteger(extCount) || extCount < 0) {
       throw new RangeError("extCount must be a non-negative safe integer");

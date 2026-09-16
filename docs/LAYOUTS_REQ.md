@@ -17,7 +17,7 @@
 > `str account, str password_or_token, u64 packed_data_revision, u8 fingerprint_source,
 > raw24 fingerprint`，沒有 optional tail。143 的 `str` 源自 native
 > `String[24]`（內容最多 23 ANSI bytes），後三欄依序為 681 回送的 `n100`
-> （經 signed-char 暫存再以 s32 寫出）、常數 `u8 1`、681 `ext_count`。
+> （native 讀寫皆為 4B signed value）、常數 `u8 1`、681 `ext_count`。
 > 因此 143 是新 channel TCP connection 對最近 681 的 handoff claim，而不能
 > 當作已驗證登入本身。141 是 private UDP op18 觸發的 empty endpoint-confirmation
 > request（`sub_556530`）；195 三個 byte 依序為 681 的 group、group-local
