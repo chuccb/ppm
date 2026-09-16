@@ -231,55 +231,119 @@ describe("681 — login ack", () => {
     expect(reader.u8()).toBe(9); // extra, only present for type 3
   });
 
-  test("requires the type-3 extra framing to match the channel type", () => {
-    expect(() =>
-      buildPacket("GL_LOGIN_ACK", {
-        userNo: 1,
-        servers: [{
-          ...servers[0]!,
-          channelGroups: [
-            { maxUsers: 100, channel: { type: 3, name: "AI", currentUsers: 0, flag: 0 } },
-            { maxUsers: 0 },
-            { maxUsers: 0 },
-          ],
-        }],
-      }),
-    ).toThrow(/type-3 channel requires/);
-    expect(() =>
-      buildPacket("GL_LOGIN_ACK", {
-        userNo: 1,
-        servers: [{
-          ...servers[0]!,
-          channelGroups: [
-            { maxUsers: 100, channel: { type: 1, name: "Normal", currentUsers: 0, flag: 0, extra: 9 } },
-            { maxUsers: 0 },
-            { maxUsers: 0 },
-          ],
-        }],
-      }),
-    ).toThrow(/extra is only valid/);
-    expect(() =>
-      buildPacket("GL_LOGIN_ACK", {
-        userNo: 1,
-        servers: [{
-          ...servers[0]!,
-          channelGroups: [
-            { maxUsers: 100, channel: { type: 0x103, name: "Normal", currentUsers: 0, flag: 0 } },
-            { maxUsers: 0 },
-            { maxUsers: 0 },
-          ],
-        }],
-      }),
-    ).toThrow(/channel type/);
+  test("defaults type-3 extra and ignores extra on other channel types", () => {
+    const missingExtra = build("GL_LOGIN_ACK", {
+      userNo: 1,
+      servers: [{
+        ...servers[0]!,
+        channelGroups: [
+          { maxUsers: 100, channel: { type: 3, name: "AI", currentUsers: 0, flag: 0 } },
+          { maxUsers: 0 },
+          { maxUsers: 0 },
+        ],
+      }],
+    });
+    for (let i = 0; i < 4; i++) missingExtra.s32();
+    missingExtra.s16();
+    missingExtra.s16();
+    missingExtra.str();
+    missingExtra.str();
+    missingExtra.s16();
+    missingExtra.u8();
+    missingExtra.s16();
+    expect(missingExtra.s16()).toBe(100);
+    expect(missingExtra.u8()).toBe(3);
+    expect(missingExtra.str()).toBe("AI");
+    expect(missingExtra.s16()).toBe(0);
+    expect(missingExtra.u8()).toBe(0);
+    expect(missingExtra.u8()).toBe(0);
+
+    const ignoredExtra = build("GL_LOGIN_ACK", {
+      userNo: 1,
+      servers: [{
+        ...servers[0]!,
+        channelGroups: [
+          { maxUsers: 100, channel: { type: 1, name: "Normal", currentUsers: 0, flag: 0, extra: 9 } },
+          { maxUsers: 0 },
+          { maxUsers: 0 },
+        ],
+      }],
+    });
+    for (let i = 0; i < 4; i++) ignoredExtra.s32();
+    ignoredExtra.s16();
+    ignoredExtra.s16();
+    ignoredExtra.str();
+    ignoredExtra.str();
+    ignoredExtra.s16();
+    ignoredExtra.u8();
+    ignoredExtra.s16();
+    expect(ignoredExtra.s16()).toBe(100);
+    expect(ignoredExtra.u8()).toBe(1);
+    expect(ignoredExtra.str()).toBe("Normal");
+    expect(ignoredExtra.s16()).toBe(0);
+    expect(ignoredExtra.u8()).toBe(0);
+    expect(ignoredExtra.s16()).toBe(0); // no extra byte for type 1
   });
 
-  test("insists on exactly three channel groups", () => {
-    expect(() =>
-      buildPacket("GL_LOGIN_ACK", {
-        userNo: 1,
-        servers: [{ ...servers[0]!, channelGroups: [{ maxUsers: 0 }] }],
-      }),
-    ).toThrow(/three channel groups/);
+  test("emits three group slots without requiring an exact input length", () => {
+    const reader = build("GL_LOGIN_ACK", {
+      userNo: 1,
+      servers: [{
+        ...servers[0]!,
+        channelGroups: [
+          { maxUsers: 0 },
+          { maxUsers: 0 },
+          { maxUsers: 0 },
+          { maxUsers: 100, channel: { type: 1, name: "ignored", currentUsers: 0, flag: 0 } },
+        ],
+      }],
+    });
+    for (let i = 0; i < 4; i++) reader.s32();
+    reader.s16();
+    reader.s16();
+    reader.str();
+    reader.str();
+    reader.s16();
+    reader.u8();
+    reader.s16();
+    expect(reader.s16()).toBe(0);
+    expect(reader.s16()).toBe(0);
+    expect(reader.s16()).toBe(0);
+    expect(reader.s32()).toBe(0);
+    expect(reader.s32()).toBe(0);
+    expect(reader.remaining).toBe(0);
+  });
+
+  test("keeps operational raw2 counts signed and width-safe", () => {
+    const reader = build("GL_LOGIN_ACK", {
+      userNo: 1,
+      servers: [{
+        ...servers[0]!,
+        channelGroups: [
+          { maxUsers: -1 },
+          { maxUsers: 1, channel: { type: 1, name: "Signed", currentUsers: -2, flag: 0 } },
+          { maxUsers: 0 },
+        ],
+      }],
+    });
+    for (let i = 0; i < 4; i++) reader.s32();
+    reader.s16();
+    reader.s16();
+    reader.str();
+    reader.str();
+    reader.s16();
+    reader.u8();
+    reader.s16();
+    expect(reader.s16()).toBe(-1);
+    expect(reader.s16()).toBe(1);
+    expect(reader.u8()).toBe(1);
+    expect(reader.str()).toBe("Signed");
+    expect(reader.s16()).toBe(-2);
+    expect(reader.u8()).toBe(0);
+    expect(reader.s16()).toBe(0);
+    expect(reader.s32()).toBe(0);
+    expect(reader.s32()).toBe(0);
+    expect(reader.remaining).toBe(0);
   });
 
   test("rejects names that overrun native fixed buffers", () => {
@@ -317,7 +381,7 @@ describe("681 — login ack", () => {
     })).toThrow(/server_id/);
   });
 
-  test("requires a channel exactly when the native group gate is positive", () => {
+  test("requires a channel body when the native group gate is positive", () => {
     expect(() =>
       buildPacket("GL_LOGIN_ACK", {
         userNo: 1,
@@ -326,7 +390,7 @@ describe("681 — login ack", () => {
           channelGroups: [{ maxUsers: 100 }, { maxUsers: 0 }, { maxUsers: 0 }],
         }],
       }),
-    ).toThrow(/exactly when max_users is positive/);
+    ).toThrow(/positive channel group needs a channel body/);
   });
 
 });

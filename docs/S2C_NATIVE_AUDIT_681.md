@@ -164,11 +164,13 @@ word; the low-byte branch does not change its wire width.
 The server id, group, max-users, and current-users values are all two-byte
 wire fields. The native code proves a positive `max_users` gate and later
 compares `max_users` with `current_users`, but it does not provide a universal
-unsigned domain for the raw id/group fields. The writer therefore keeps
+unsigned domain for any of these fields. The writer therefore keeps
 `serverId` and `group` as raw16 bit patterns (signed notation or `0..0xffff`)
-and does not apply a nonnegative-s16 policy to them. The operational user-count
-fields remain nonnegative s16 values because the native gate/UI treats them as
-capacities and displayed counts.
+and validates the two operational fields only as signed s16 values. A
+non-positive max gate emits no channel body; a positive gate still requires a
+body so the following group/tail cannot be misread. Missing group slots are
+written as empty gates and extra input slots are ignored, matching the native
+fixed three-iteration reader without adding an object-shape restriction.
 
 ## 5. The 132-byte native channel projection
 
@@ -318,9 +320,10 @@ cash, account balance, route, or entitlement fields.
   u16 because its consumer is a native Winsock `u_short`; this does not relabel
   the raw read helper globally.
 - All three group gates are always written. A positive gate writes exactly one
-  channel body, and type 3 alone writes its extra byte.
-- Fixed ANSI buffer limits and all direct u8/s32 widths are validated before
-  masking/coercing writer primitives.
+  channel body, and type 3 alone writes its extra byte; omitted input slots are
+  empty and surplus input slots are ignored.
+- Fixed ANSI buffer limits and all direct u8/s16/s32 widths are validated
+  before masking/coercing writer primitives.
 - No deployment semantic is inferred for flag, group, billing words, or the
   raw extension tuple.
 

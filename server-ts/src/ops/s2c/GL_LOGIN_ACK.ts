@@ -38,7 +38,7 @@ export interface Channel {
 }
 
 /**
- * One of the three fixed channel groups in a server row.
+ * One channel group in a server row.
  *
  * The leading raw2 is the native USERS denominator/capacity field. When it is
  * positive, the native reader consumes exactly one channel record; it is not a
@@ -49,7 +49,7 @@ export interface ChannelGroup {
   readonly channel?: Channel;
 }
 
-/** A server row. The client expects exactly three channel groups. */
+/** A server row; the writer always emits the client's three group slots. */
 export interface GameServer {
   readonly serverId: number;
   readonly name: string;
@@ -99,9 +99,9 @@ function requireU8(value: number, field: string): void {
   }
 }
 
-function requireNonNegativeS16(value: number, field: string): void {
-  if (!Number.isInteger(value) || value < 0 || value > 0x7fff) {
-    throw new RangeError(`681 ${field} must fit a non-negative s16`);
+function requireS16(value: number, field: string): void {
+  if (!Number.isInteger(value) || value < -0x8000 || value > 0x7fff) {
+    throw new RangeError(`681 ${field} must fit s16`);
   }
 }
 
@@ -149,9 +149,6 @@ export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Pac
 
   p.s16(servers.length);
   for (const server of servers) {
-    if (server.channelGroups.length !== CHANNEL_GROUP_COUNT) {
-      throw new RangeError("each server must declare exactly three channel groups");
-    }
     if (server.name.length > MAX_SERVER_NAME_BYTES) {
       throw new RangeError("681 server name must fit native char[50]");
     }
@@ -175,34 +172,36 @@ export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Pac
     p.u8(server.flag);
     p.s16(server.group);
 
-    for (const group of server.channelGroups) {
-      requireNonNegativeS16(group.maxUsers, "channel max_users");
-      const channel = group.channel;
-      if ((group.maxUsers > 0) !== (channel !== undefined)) {
-        throw new RangeError("681 channel group needs one channel exactly when max_users is positive");
+    for (let index = 0; index < CHANNEL_GROUP_COUNT; index++) {
+      const group = server.channelGroups[index];
+      if (group === undefined) {
+        p.s16(0);
+        continue;
       }
+
+      requireS16(group.maxUsers, "channel max_users");
       p.s16(group.maxUsers);
-      if (!channel) continue;
+      if (group.maxUsers <= 0) continue;
+
+      const channel = group.channel;
+      if (channel === undefined) {
+        throw new RangeError("681 positive channel group needs a channel body");
+      }
       if (channel.name.length > MAX_CHANNEL_NAME_BYTES) {
         throw new RangeError("681 channel name must fit native char[50]");
       }
       requireU8(channel.type, "channel type");
       requireU8(channel.flag, "channel flag");
-      requireNonNegativeS16(channel.currentUsers, "channel current_users");
-      const extra = channel.extra;
-      if (channel.type === 3) {
-        if (extra === undefined) {
-          throw new RangeError("681 type-3 channel requires its extra byte");
-        }
-      } else if (extra !== undefined) {
-        throw new RangeError("681 channel extra is only valid for type 3");
-      }
-      if (extra !== undefined) requireU8(extra, "channel extra");
+      requireS16(channel.currentUsers, "channel current_users");
       p.u8(channel.type);
       p.str(channel.name);
       p.s16(channel.currentUsers);
       p.u8(channel.flag);
-      if (extra !== undefined) p.u8(extra);
+      if (channel.type === 3) {
+        const extra = channel.extra ?? 0;
+        requireU8(extra, "channel extra");
+        p.u8(extra);
+      }
     }
   }
 
