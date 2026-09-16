@@ -6,6 +6,9 @@
  * response to the heartbeat, so answering it would loop forever.
  */
 
-export default function GT_PING_REQ(): void {
-  // Intentionally empty — see above.
+import type { Reader } from "../../packet.ts";
+
+export default function GT_PING_REQ(r: Reader): void {
+  if (r.remaining !== 0) throw new RangeError(`${r.remaining} trailing bytes in 101`);
+  // Intentionally no reply — see above.
 }

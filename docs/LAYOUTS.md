@@ -43,7 +43,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | op | 名稱 | handler | 讀取序列 |
 |---|---|---|---|
 | 102 | GT_PING_ACK | sub_58D6F0 | `(無直接讀取/轉發)` |
-| 106 | GL_USERLIST_ACK | sub_56A250 | `u16 u8 u8 s32 str s32 s32 str` |
+| 106 | GL_USERLIST_ACK | sub_56A250 | `raw2 u8 u8 s32 str s32 s32 str` |
 | 108 | GL_GAMEROOMINFO_ACK | sub_568CE0 | `u8 u8 u8 s8 u8 s8/bool u8 u16 u8 s8/bool s8/bool s8/bool s8/bool u8 u8 u8 str u8 s8/bool u8 u16 u8 s8/bool s8/bool ...` |
 | 110 | GL_ROOMINFOCHANGE_ACK | sub_569240 | `s8/bool u8 u8 u8 u8 u8 s32 s32 str u8 s32 s32 str u8 s32 u8 s32 u8 u8 s8/bool s8 u8 s8/bool u8 ...` |
 | 112 | GL_MAKEROOM_ACK | sub_56A7B0 | `u8 u8 u16 f32/s32 u8 s8/bool u8 s32 s32 str u8 s32 s32 str u8` |
@@ -168,10 +168,10 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 420 | GL_MSG_ADD_ACK | sub_559810 | `str u8 u8` |
 | 422 | GL_MSG_DEL_ACK | sub_55A310 | `s8/bool str` |
 | 424 | GL_MSG_READ_ACK | sub_55A4F0 | `s8/bool str` |
-| 426 | GL_MSG_RECVLIST_ACK | sub_55A630 | `u16 str u8 str s8 str f32/s32 str str s16` |
+| 426 | GL_MSG_RECVLIST_ACK | sub_55A630 | `raw2 str u8 str u8 str s32 str str s16` |
 | 430 | GL_FRIEND_ADD_ACK | sub_55AA90 | `u8 str` |
 | 432 | GL_FRIEND_DEL_ACK | sub_55AE10 | `u8 str` |
-| 434 | GL_FRIEND_LIST_ACK | sub_55AFC0 | `u16 str u8 str s32` |
+| 434 | GL_FRIEND_LIST_ACK | sub_55AFC0 | `raw2 str u8 str s32` |
 | 436 | GL_FRIEND_INFO_ACK | sub_55B2C0 | `u8 str u8 str u8` |
 | 440 | GL_FRIEND_CHAT_ACK | sub_55B660 | `u8 str str str` |
 | 442 | GL_FRIEND_WHERE_ACK | sub_55B9F0 | `u8 u8 u8 u8` |

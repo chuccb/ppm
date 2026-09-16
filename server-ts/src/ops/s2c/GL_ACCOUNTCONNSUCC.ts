@@ -13,8 +13,8 @@
 import { COMPRESSION_DISABLED, Packet } from "../../packet.ts";
 
 export default function GL_ACCOUNTCONNSUCC(op: number, threshold = COMPRESSION_DISABLED): Packet {
-  if (threshold <= 0 || threshold > COMPRESSION_DISABLED) {
-    throw new RangeError(`threshold ${threshold} outside 1..0x2580`);
+  if (!Number.isSafeInteger(threshold) || threshold < 0 || threshold > 0xffff) {
+    throw new RangeError(`threshold ${threshold} must fit u16`);
   }
   return new Packet(op).u16(threshold);
 }

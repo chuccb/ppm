@@ -60,15 +60,15 @@ export class Packet {
   }
 
   /**
-   * Reserve `extra` bytes and return the offset to write at.
+   * Reserve `byteCount` bytes and return the offset to write at.
    *
    * Callers must resolve this *before* touching `#buf` or `#view()`: it may
    * reallocate, and `this.#view().setX(this.#at(n), ...)` would evaluate the
    * view against the old buffer and write into the copy that gets discarded.
    */
-  #at(extra: number): number {
+  #at(byteCount: number): number {
     const at = this.#len;
-    const needed = at + extra;
+    const needed = at + byteCount;
     if (needed > MAX_PAYLOAD) throw new RangeError(`payload would exceed ${MAX_PAYLOAD} bytes`);
     if (needed > this.#buf.length) {
       let size = Math.max(this.#buf.length * 2, 16);
@@ -130,6 +130,7 @@ export class Packet {
 
   /** ANSI bytes + NUL (`sub_5926F0`). ASCII only; use `wstr` for the rest. */
   str(text: string): this {
+    if (typeof text !== "string") throw new TypeError("ANSI string must be a string");
     for (let i = 0; i < text.length; i++) {
       if (text.charCodeAt(i) > 0x7f) {
         throw new RangeError(`non-ASCII in ANSI string ${JSON.stringify(text)}; use wstr`);
@@ -143,6 +144,7 @@ export class Packet {
 
   /** UTF-16LE + 16-bit NUL (`sub_592770`). */
   wstr(text: string): this {
+    if (typeof text !== "string") throw new TypeError("UTF-16 string must be a string");
     const at = this.#at(text.length * 2 + 2);
     const view = this.#view();
     for (let i = 0; i < text.length; i++) view.setUint16(at + i * 2, text.charCodeAt(i), true);
@@ -175,22 +177,22 @@ export class Packet {
   /** Serialise to a complete encrypted frame. */
   encode(): Uint8Array {
     const payload = this.payload();
-    const plain = payload.length;
-    const aligned = align16(plain);
-    if (aligned >= MAX_ENCRYPTED) {
-      throw new RangeError(`payload ${plain} exceeds the encryptable maximum`);
+    const sizeBeforeAes = payload.length;
+    const size = align16(sizeBeforeAes);
+    if (size >= MAX_ENCRYPTED) {
+      throw new RangeError(`payload ${sizeBeforeAes} exceeds the encryptable maximum`);
     }
 
-    const staging = new Uint8Array(aligned); // pad to the block size
-    staging.set(payload);
+    const paddedPayload = new Uint8Array(size); // pad to the block size
+    paddedPayload.set(payload);
 
-    const frame = new Uint8Array(HEADER_SIZE + aligned);
+    const frame = new Uint8Array(HEADER_SIZE + size);
     const view = new DataView(frame.buffer);
-    view.setUint16(0, aligned, true);
+    view.setUint16(0, size, true);
     view.setUint16(2, this.opcode, true);
-    view.setUint16(4, plain, true);
-    view.setUint16(6, plain, true);
-    frame.set(cfbEncrypt(PACKET_ROUND_KEYS, staging), HEADER_SIZE);
+    view.setUint16(4, sizeBeforeAes, true);
+    view.setUint16(6, sizeBeforeAes, true);
+    frame.set(cfbEncrypt(PACKET_ROUND_KEYS, paddedPayload), HEADER_SIZE);
     return frame;
   }
 }
@@ -250,10 +252,13 @@ export class Reader {
     return this.#view().getFloat32(this.#at(4), true);
   }
 
-  str(encoding: Encoding = "euc-kr"): string {
+  str(encoding: Encoding = "euc-kr", maxBytes?: number): string {
     const start = this.#pos;
     const end = this.#buf.indexOf(0, start);
     if (end < 0) throw new RangeError("unterminated ANSI string");
+    if (maxBytes !== undefined && end - start > maxBytes) {
+      throw new RangeError(`ANSI string exceeds ${maxBytes} bytes`);
+    }
     this.#pos = end + 1;
     return decoder(encoding).decode(this.#buf.subarray(start, end));
   }
@@ -264,7 +269,8 @@ export class Reader {
     while (end + 1 < this.#buf.length && !(this.#buf[end] === 0 && this.#buf[end + 1] === 0)) {
       end += 2;
     }
-    this.#pos = Math.min(end + 2, this.#buf.length);
+    if (end + 1 >= this.#buf.length) throw new RangeError("unterminated UTF-16 string");
+    this.#pos = end + 2;
     const view = this.#view();
     let out = "";
     for (let i = start; i < end; i += 2) out += String.fromCharCode(view.getUint16(i, true));
@@ -329,10 +335,10 @@ export class PacketStream {
         throw new RangeError(`frame claims LZ compression (word3=${sizeBeforeLz})`);
       }
 
-      const body = buf.subarray(HEADER_SIZE, HEADER_SIZE + size);
-      const plain = cfbDecrypt(PACKET_ROUND_KEYS, body).subarray(0, sizeBeforeAes);
+      const encryptedPayload = buf.subarray(HEADER_SIZE, HEADER_SIZE + size);
+      const payload = cfbDecrypt(PACKET_ROUND_KEYS, encryptedPayload).subarray(0, sizeBeforeAes);
       this.#pending = buf.subarray(HEADER_SIZE + size);
-      yield new Reader(opcode, plain);
+      yield new Reader(opcode, payload);
     }
   }
 }

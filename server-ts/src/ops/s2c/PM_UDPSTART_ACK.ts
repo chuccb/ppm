@@ -25,20 +25,21 @@ export const Result = {
   IntermediateServerRestricted: 10,
 } as const;
 
-export type Result = (typeof Result)[keyof typeof Result];
+/** Native result is an opaque u8 at the wire boundary; constants above cover known UI branches. */
+export type Result = number;
 
 export interface Admission {
-  result: Result;
+  readonly result: Result;
   /** Native char[40]; at most 39 ANSI bytes. */
-  channelName: string;
+  readonly channelName: string;
   /** With `rank > 10` the client refuses the server. */
-  rankRestricted?: boolean;
+  readonly rankRestricted?: boolean;
   /** Shown as "today's login confirmed, %d PG awarded" when positive. */
-  dailyLoginRewardPg?: number;
+  readonly dailyLoginRewardPg?: number;
   /** The `%d` in the level-restriction messages. */
-  restrictionLevel?: number;
+  readonly restrictionLevel?: number;
   /** The `%.1f` in the K/D-restriction messages. */
-  restrictionKdr?: number;
+  readonly restrictionKdr?: number;
 }
 
 /** Native char[40]. */
@@ -54,8 +55,23 @@ export default function PM_UDPSTART_ACK(op: number, admission: Admission): Packe
     restrictionKdr = 0,
   } = admission;
 
+  if (!Number.isSafeInteger(result) || result < 0 || result > 0xff) {
+    throw new RangeError("144 result must fit u8");
+  }
+  if (typeof channelName !== "string") {
+    throw new TypeError("144 channel_name must be a string");
+  }
+  if (typeof rankRestricted !== "boolean") {
+    throw new TypeError("144 rank_restricted_server_flag must be boolean");
+  }
   if (channelName.length > CHANNEL_NAME_MAX_BYTES) {
     throw new RangeError(`channel name longer than ${CHANNEL_NAME_MAX_BYTES} bytes`);
+  }
+  if (!Number.isSafeInteger(dailyLoginRewardPg) || dailyLoginRewardPg < -0x8000_0000 || dailyLoginRewardPg > 0x7fff_ffff) {
+    throw new RangeError("144 daily_login_reward_pg must fit s32");
+  }
+  if (!Number.isSafeInteger(restrictionLevel) || restrictionLevel < -0x8000_0000 || restrictionLevel > 0x7fff_ffff) {
+    throw new RangeError("144 channel_restriction_level must fit s32");
   }
 
   return new Packet(op)

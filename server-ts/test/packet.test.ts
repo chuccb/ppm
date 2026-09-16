@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { Packet, PacketStream, decode, type Reader } from "../src/packet.ts";
+import { Packet, PacketStream, Reader, decode } from "../src/packet.ts";
 
 describe("frame header", () => {
   test("words follow docs/PACKETS.md §1.2", () => {
@@ -96,6 +96,11 @@ describe("round trip", () => {
 
   test("ANSI strings reject non-ASCII rather than mangling it", () => {
     expect(() => new Packet(1).str("紙")).toThrow(/use wstr/);
+  });
+
+  test("UTF-16 strings require a complete terminator", () => {
+    expect(() => new Reader(1, new Uint8Array([0x41, 0, 0])).wstr()).toThrow(/unterminated/);
+    expect(() => new Reader(1, new Uint8Array([0x41, 0])).wstr()).toThrow(/unterminated/);
   });
 });
 
