@@ -189,9 +189,11 @@ describe("lobby bootstrap packets", () => {
     expect(sparsePublicInfo.u8()).toBe(1); // 247 character-list index, not slotNo 9
     expect(sparsePublicInfo.u8()).toBe(2);
     expect(sparsePublicInfo.remaining).toBe(24); // 12 u16 appearance values
-    expect(() =>
-      build("GL_CLIENTINFO_ACK", { ...sparseCharacters, selectedCharIndex: 20 }),
-    ).toThrow(/0\.\.19/);
+    const invalidSelected = decode(
+      build("GL_CLIENTINFO_ACK", { ...sparseCharacters, selectedCharIndex: 20 }).encode(),
+    );
+    expect(invalidSelected.u8()).toBe(0);
+    expect(invalidSelected.remaining).toBe(0);
     store.close();
   });
 

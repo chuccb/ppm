@@ -16,10 +16,15 @@ export default function GL_CLIENTINFO_ACK(op: number, myInfo: MyInfo | null): Pa
   if (!myInfo || myInfo.characters.length === 0) return new Packet(op).u8(0);
 
   // 247's first byte is the serialized character-list index, not the
-  // persistent slot id. The native 198/247 basic block carries the same index;
-  // writeMyInfoBasicData rejects values outside the client's 20-slot array.
+  // persistent slot id. The native 198/247 basic block carries the same index.
+  // Do not fall back to another character: that would pair a valid index with
+  // the wrong appearance and hide an unresolved Store-slot mapping.
   const characterIndex = myInfo.selectedCharIndex;
-  const character = myInfo.characters[characterIndex] ?? myInfo.characters[0]!;
+  if (!Number.isSafeInteger(characterIndex) || characterIndex < 0 || characterIndex >= 20) {
+    return new Packet(op).u8(0);
+  }
+  const character = myInfo.characters[characterIndex];
+  if (!character) return new Packet(op).u8(0);
   const p = new Packet(op).u8(1);
   writeMyInfoBasicData(p, myInfo);
   p.u8(characterIndex).u8(character.charType);
