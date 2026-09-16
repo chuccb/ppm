@@ -264,6 +264,10 @@ describe("681 — login ack", () => {
     expect(reader.s32()).toBe(0x1234_5678);
     expect(() => buildPacket("GL_LOGIN_ACK", { userNo: 0x8000_0000, servers })).toThrow(/user_no/);
     expect(() => buildPacket("GL_LOGIN_ACK", { userNo: 1, n100: 0x8000_0000, servers })).toThrow(/n100/);
+    expect(() => buildPacket("GL_LOGIN_ACK", {
+      userNo: 1,
+      servers: [{ ...servers[0]!, serverId: Number.NaN }],
+    })).toThrow(/server_id/);
   });
 
   test("requires a channel exactly when the native group gate is positive", () => {

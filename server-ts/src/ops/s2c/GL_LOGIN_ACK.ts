@@ -74,6 +74,13 @@ function requireNonNegativeS16(value: number, field: string): void {
   }
 }
 
+/** Raw16 accepts either signed notation or the full unsigned bit pattern. */
+function requireRaw16(value: number, field: string): void {
+  if (!Number.isSafeInteger(value) || value < -0x8000 || value > 0xffff) {
+    throw new RangeError(`681 ${field} must fit raw2`);
+  }
+}
+
 /**
  * Two forms, distinguished by what you pass:
  *
@@ -122,6 +129,8 @@ export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Pac
     }
 
     // These are raw2 fields; native domain/signedness is unresolved.
+    requireRaw16(server.serverId, "server_id");
+    requireRaw16(server.group, "group");
     p.s16(server.serverId);
     p.str(server.name); // native char[50]
     p.str(server.host); // native char[16]
