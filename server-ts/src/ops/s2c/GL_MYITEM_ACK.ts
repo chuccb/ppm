@@ -27,6 +27,10 @@ export default function GL_MYITEM_ACK(op: number, items: readonly InvItem[] = []
 
   const p = new Packet(op).u8(1).s32(0);
   for (const item of items) {
+    // A negative slot is the native end-of-page sentinel, not a record value.
+    if (!Number.isSafeInteger(item.slot) || item.slot < 0 || item.slot > 0x7fff_ffff) {
+      throw new RangeError("200 inventory slot must be a non-negative s32");
+    }
     p.s32(item.slot)
       .s32(item.itemId)
       .f32(item.f1)

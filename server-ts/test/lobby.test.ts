@@ -168,6 +168,9 @@ describe("lobby bootstrap packets", () => {
     expect(items.s32()).toBe(0);
     expect(items.s32()).toBe(-1);
     expect(items.remaining).toBe(0);
+    expect(() =>
+      build("GL_MYITEM_ACK", [{ slot: -1, itemId: 1, f1: 0, f2: 0, period: 0, durability: 0 }]),
+    ).toThrow(/inventory slot/);
 
     const users = decode(build("GL_USERLIST_ACK").encode());
     expect(users.u16()).toBe(0);
