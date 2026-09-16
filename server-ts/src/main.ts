@@ -22,6 +22,8 @@ const env = {
   /** What the login reply tells clients to connect to; may differ from `host`. */
   advertiseHost: Bun.env["PM_ADVERTISE_HOST"] ?? "127.0.0.1",
   channelName: Bun.env["PM_CHANNEL_NAME"] ?? "Channel 1",
+  channelMaxUsers: Number(Bun.env["PM_CHANNEL_MAX_USERS"] ?? 100),
+  channelCurrentUsers: Number(Bun.env["PM_CHANNEL_CURRENT_USERS"] ?? 0),
   udpHost: Bun.env["PM_UDP_HOST"] ?? Bun.env["PM_ADVERTISE_HOST"] ?? "127.0.0.1",
   udpPort: Number(Bun.env["PM_UDP_PORT"] ?? 40202),
   admissionLifetimeMs: Number(Bun.env["PM_ADMISSION_TTL_MS"] ?? 120_000),
@@ -57,9 +59,12 @@ const servers: readonly GameServer[] = [
     flag: 0,
     group: 0,
     channelGroups: [
-      [{ type: 1, name: env.channelName, port: env.channelPort, flag: 0 }],
-      [],
-      [],
+      {
+        maxUsers: env.channelMaxUsers,
+        channel: { type: 1, name: env.channelName, currentUsers: env.channelCurrentUsers, flag: 0 },
+      },
+      { maxUsers: 0 },
+      { maxUsers: 0 },
     ],
   },
 ];

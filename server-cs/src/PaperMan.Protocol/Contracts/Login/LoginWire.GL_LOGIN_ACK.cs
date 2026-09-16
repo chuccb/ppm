@@ -50,24 +50,26 @@ public static partial class LoginWire
             packet.WriteS16(server.Id)
                   .WriteStr(server.Name)
                   .WriteStr(server.Host)
-                  // Native reads this with sub_5929C0 (s16), but immediately
-                  // uses the bit pattern as a Winsock u_short port.
-                  .WriteS16(unchecked((short)server.Port))
+                  // sub_58AD90 passes this raw2 field to sub_554810 as a
+                  // Winsock u_short TCP endpoint port.
+                  .WriteU16(server.Port)
                   .WriteU8(server.ListingFlag)
                   .WriteS16(server.Group);
 
-            foreach (var channel in server.ChannelGroups)
+            foreach (var channelGroup in server.ChannelGroups)
             {
+                packet.WriteS16(channelGroup.MaxUsers);
+                var channel = channelGroup.Channel;
                 if (channel is null)
                 {
-                    packet.WriteS16(0);
                     continue;
                 }
 
-                packet.WriteS16(1)
-                      .WriteU8(channel.Type)
+                packet.WriteU8(channel.Type)
                       .WriteStr(channel.Name)
-                      .WriteS16(unchecked((short)channel.Port))
+                      // Native renders this field as the USERS numerator;
+                      // it is not a second endpoint port.
+                      .WriteS16(channel.CurrentUsers)
                       .WriteU8(channel.ListingFlag);
 
                 if (channel.Type == 3)
@@ -116,13 +118,25 @@ public static partial class LoginWire
                 throw new ArgumentException("Every 681 server must contain exactly three channel groups.", nameof(success));
             }
 
-            foreach (var channel in server.ChannelGroups)
+            foreach (var channelGroup in server.ChannelGroups)
             {
+                if (channelGroup.MaxUsers < 0 || (channelGroup.MaxUsers == 0) != (channelGroup.Channel is null))
+                {
+                    throw new ArgumentException(
+                        "A 681 group needs one channel exactly when max users is positive.",
+                        nameof(success));
+                }
+
+                var channel = channelGroup.Channel;
                 if (channel is null)
                 {
                     continue;
                 }
 
+                if (channel.CurrentUsers < 0)
+                {
+                    throw new ArgumentException("681 current users must be non-negative.", nameof(success));
+                }
                 RequireAnsiString(channel.Name, MaxServerOrChannelNameBytes, "681 channel name");
                 if ((channel.Type == 3) != channel.TypeThreeExtension.HasValue)
                 {
@@ -163,13 +177,19 @@ public sealed record LoginServerEntry(
     ushort Port,
     byte ListingFlag,
     short Group,
-    IReadOnlyList<LoginChannelEntry?> ChannelGroups);
+    IReadOnlyList<LoginChannelGroup> ChannelGroups);
+
+/// <summary>
+/// One of the three fixed 681 groups. The native positive gate is the
+/// max-users/USERS denominator, not a count of channel records.
+/// </summary>
+public sealed record LoginChannelGroup(short MaxUsers, LoginChannelEntry? Channel);
 
 /// <summary>One selectable channel in a 681 channel group.</summary>
 public sealed record LoginChannelEntry(
     byte Type,
     string Name,
-    ushort Port,
+    short CurrentUsers,
     byte ListingFlag,
     byte? TypeThreeExtension = null);
 

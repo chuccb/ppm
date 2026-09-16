@@ -18,7 +18,11 @@ const servers: readonly GameServer[] = [
     port: 40201,
     flag: 0,
     group: 0,
-    channelGroups: [[{ type: 1, name: "Channel 1", port: 40201, flag: 0 }], [], []],
+    channelGroups: [
+      { maxUsers: 100, channel: { type: 1, name: "Channel 1", currentUsers: 0, flag: 0 } },
+      { maxUsers: 0 },
+      { maxUsers: 0 },
+    ],
   },
 ];
 

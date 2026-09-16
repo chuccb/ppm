@@ -257,33 +257,50 @@ raw4 result           native 以 raw 4B 讀入，但分支只檢查 low byte；
                        *_NETCAFE UI gate，故私服安全子集只能送 0 或 1。
   raw2 server_count                   (native loop gate; signedness unresolved)
   repeat server_count:                 ← 伺服器清單
-    raw2 server_id                     (2-byte wire field; domain/signedness unresolved)
+    raw2 server_id                     (domain/signedness unresolved)
     str  name  (ANSI; native char[50]，內容最多 49 bytes)
     str  host  (v124 char[16]，內容最多 15 bytes)
-    raw2 port  (sub_5929C0 只證明讀取 2 bytes；681 清單 reader 本身
-                未證明 signedness，也未在此處證明它會直接作 socket endpoint)
+    raw2 server_port                   (sub_58AD90 取此 2-byte field，作為
+                                       sub_554810 的 u_short TCP endpoint port)
     u8   flag                          (意義尚未確定)
-    raw2 group                        (2-byte wire field; domain/signedness unresolved)
+    raw2 group                         (2-byte wire field; domain/signedness unresolved)
     repeat 3:                          ← 每台固定 3 個頻道分組
-      raw2 ch_count                   (native reads one record when >0)
-      若 ch_count > 0 (⚠ 即使 >1 client 也只讀一個條目):
+      raw2 max_users                   (native positive gate；UI `USERS` 的
+                                       分母/容量，不是 record count)
+      若 max_users > 0 (native 只讀一個 channel record):
         u8   ch_type
         str  ch_name                   (char[50]，內容最多 49 bytes)
-        raw2 ch_port                  (sub_5929C0 只證明 2-byte wire field；consumer signedness/domain unresolved)
+        raw2 current_users             (UI `USERS` 的分子；不是 network port)
         u8   ch_flag                   (意義尚未確定)
         若 ch_type==3: u8 extra
   s32  billing_first, billing_second   (v142,v137；後續以 raw s32 進入 Tricod
-                                        argument block，業務名稱未知，非 u32)
+                                       argument block，業務名稱未知，非 u32)
 ```
+
+681 的兩個「看起來像 port」欄位並不重複。`server_port` 是真實的
+server-selector TCP endpoint：`sub_58AD90` 將 projection 的 `+102` host 與
+`+118` field 傳給 `sub_554810(SOCKET*, char*, u_short)`，後者直接建構
+`AF_INET/SOCK_STREAM` sockaddr 並呼叫 `WSAConnect`。相反地，channel record
+的 `+122` field 會在 `sub_416DA0` 中與 `+124` 一起格式化為 `"%d/%d"`，
+寫入 UI 欄位 `USERS`；`sub_4176C0` 也用 `max_users <= current_users` 判斷
+滿載。因此 channel wire field 應稱 `current_users`，不可再叫 `port`。
+
+讀取器仍只用 `sub_5929C0` 證明所有這些欄位是 2 bytes；server endpoint 的
+consumer 另證明其有效解讀為 unsigned `u_short`。`server_id`、`group`、
+`max_users`、`current_users` 的 wire signedness 不由 helper 單獨確定，TS
+對後三者只發送對應 raw2/s16 bits，不將它們誤當成 endpoint。
 
 681 的 server-list loop 會把 wire fields 讀入多個 local scratch，再於每次
 有 channel record 時呼叫 `sub_58E690(byte_13242F8, src)`。`src` 從
-`server_id` 的 2-byte scratch 開始，native vector helper 會以此位址複製
-固定 132 bytes；`sub_58E670` 依 projection 首 byte 排序，`sub_58E640`
-另依 projection offset 129 排序。這是 native 的 stack-layout projection/
-lookup context，不是額外的 132-byte wire field，也不足以替 `port`、`flag`、
-`group` 或 channel 欄位補上未證實的 domain 名稱。TS 只保留原本 wire 順序，
-不重建這個 native internal scratch object。
+`server_id` 的 scratch 開始，native vector helper 會以此位址複製固定 132
+bytes；`sub_58E670` 依 projection 首 byte 排序，`sub_58E640` 另依
+projection offset 129 排序。這是 native 的 stack-layout projection/lookup
+context，不是額外的 132-byte wire field。官方資源 `Extracted/ui/cfg/pm_lobbydata.dat`
+只提供 `LOBBYCHANNEL` 的 UI layout，沒有 endpoint schema；PaperManWiki 的
+[遊戲起動編](https://wikiwiki.jp/paperman/ひよこ用/ゲーム起動編) 只確認
+「server selection」與 channel/遊玩風格的階層，也沒有 port 欄位命名。故
+本段的 endpoint/USERS 命名以 native producer/consumer 為準，`flag`、`group`
+與 billing fields 仍維持 UNRESOLVED；TS 不重建 native internal scratch object。
 
 `user_no` 另外被格式化成字串，和 `billing_first/billing_second`、常數
 `5`、`0` 一起放入 `sub_7092C0` 的 Tricod argument block；這只能證明

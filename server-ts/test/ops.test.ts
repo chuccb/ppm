@@ -96,10 +96,14 @@ describe("681 — login ack", () => {
       serverId: 1,
       name: "PaperMan",
       host: "127.0.0.1",
-      port: 40201, // raw 2-byte field; native signedness policy is unresolved
+      port: 40201,
       flag: 0,
       group: 0,
-      channelGroups: [[{ type: 1, name: "Channel 1", port: 40301, flag: 0 }], [], []],
+      channelGroups: [
+        { maxUsers: 100, channel: { type: 1, name: "Channel 1", currentUsers: 0, flag: 0 } },
+        { maxUsers: 0 },
+        { maxUsers: 0 },
+      ],
     },
   ];
 
@@ -133,17 +137,17 @@ describe("681 — login ack", () => {
     expect(reader.s16()).toBe(1); // server_id
     expect(reader.str()).toBe("PaperMan");
     expect(reader.str()).toBe("127.0.0.1");
-    expect(reader.s16() & 0xffff).toBe(40201); // raw 2-byte bit pattern
+    expect(reader.u16()).toBe(40201); // selected-server TCP endpoint port
     expect(reader.u8()).toBe(0); // flag
     expect(reader.s16()).toBe(0); // group
 
-    expect(reader.s16()).toBe(1); // group 0 channel count
+    expect(reader.s16()).toBe(100); // max_users / USERS denominator
     expect(reader.u8()).toBe(1); // ch_type
     expect(reader.str()).toBe("Channel 1");
-    expect(reader.s16() & 0xffff).toBe(40301);
+    expect(reader.s16()).toBe(0); // current_users / USERS numerator
     expect(reader.u8()).toBe(0); // ch_flag
-    expect(reader.s16()).toBe(0); // group 1 is empty
-    expect(reader.s16()).toBe(0); // group 2 is empty
+    expect(reader.s16()).toBe(0); // group 1 max_users, empty
+    expect(reader.s16()).toBe(0); // group 2 max_users, empty
 
     expect(reader.s32()).toBe(0); // billing_first
     expect(reader.s32()).toBe(0); // billing_second
@@ -156,7 +160,11 @@ describe("681 — login ack", () => {
       servers: [
         {
           ...servers[0]!,
-          channelGroups: [[{ type: 3, name: "AI", port: 1, flag: 0, extra: 9 }], [], []],
+          channelGroups: [
+            { maxUsers: 100, channel: { type: 3, name: "AI", currentUsers: 0, flag: 0, extra: 9 } },
+            { maxUsers: 0 },
+            { maxUsers: 0 },
+          ],
         },
       ],
     });
@@ -168,10 +176,10 @@ describe("681 — login ack", () => {
     reader.s16();
     reader.u8();
     reader.s16();
-    expect(reader.s16()).toBe(1);
+    expect(reader.s16()).toBe(100); // max_users
     expect(reader.u8()).toBe(3); // ch_type
     expect(reader.str()).toBe("AI");
-    expect(reader.s16()).toBe(1);
+    expect(reader.s16()).toBe(0); // current_users
     expect(reader.u8()).toBe(0);
     expect(reader.u8()).toBe(9); // extra, only present for type 3
   });
@@ -180,7 +188,7 @@ describe("681 — login ack", () => {
     expect(() =>
       buildPacket("GL_LOGIN_ACK", {
         userNo: 1,
-        servers: [{ ...servers[0]!, channelGroups: [[]] }],
+        servers: [{ ...servers[0]!, channelGroups: [{ maxUsers: 0 }] }],
       }),
     ).toThrow(/three channel groups/);
   });
@@ -197,7 +205,11 @@ describe("681 — login ack", () => {
         userNo: 1,
         servers: [{
           ...servers[0]!,
-          channelGroups: [[{ type: 1, name: "c".repeat(50), port: 1, flag: 0 }], [], []],
+          channelGroups: [
+            { maxUsers: 1, channel: { type: 1, name: "c".repeat(50), currentUsers: 0, flag: 0 } },
+            { maxUsers: 0 },
+            { maxUsers: 0 },
+          ],
         }],
       }),
     ).toThrow(/channel name/);
@@ -212,19 +224,16 @@ describe("681 — login ack", () => {
     expect(() => buildPacket("GL_LOGIN_ACK", { userNo: 1, n100: 0x8000_0000, servers })).toThrow(/n100/);
   });
 
-  test("rejects a multi-entry group that the native reader cannot consume", () => {
+  test("requires a channel exactly when the native group gate is positive", () => {
     expect(() =>
       buildPacket("GL_LOGIN_ACK", {
         userNo: 1,
         servers: [{
           ...servers[0]!,
-          channelGroups: [[
-            { type: 1, name: "one", port: 1, flag: 0 },
-            { type: 1, name: "two", port: 2, flag: 0 },
-          ], [], []],
+          channelGroups: [{ maxUsers: 100 }, { maxUsers: 0 }, { maxUsers: 0 }],
         }],
       }),
-    ).toThrow(/at most one channel/);
+    ).toThrow(/exactly when max_users is positive/);
   });
 
 });

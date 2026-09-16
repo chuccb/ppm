@@ -391,11 +391,11 @@ bool IsNative311FailureAcknowledgement(Packet acknowledgement)
         && capturedDataRevision == 0x30576957u);
     Check("682 revision low-word guard", !LoginWire.TryDecodeDataRevision(obfuscatedDataRevision ^ 1, out _));
 
-    var groups = new LoginChannelEntry?[]
+    var groups = new LoginChannelGroup[]
     {
-        new LoginChannelEntry(0, "Normal", 40201, 0),
-        null,
-        new LoginChannelEntry(3, "AI", 40202, 9, TypeThreeExtension: 0x7E),
+        new LoginChannelGroup(100, new LoginChannelEntry(0, "Normal", 0, 0)),
+        new LoginChannelGroup(0, null),
+        new LoginChannelGroup(100, new LoginChannelEntry(3, "AI", 0, 9, TypeThreeExtension: 0x7E)),
     };
     var loginAck = LoginWire.CreateAcknowledgement(new LoginAcknowledgement(
         ResultCode: 1,
@@ -429,16 +429,16 @@ bool IsNative311FailureAcknowledgement(Packet acknowledgement)
 
     // Group 0: one normal channel. Group 1: empty. Group 2: one type-3
     // channel, whose extra trailing byte is mandatory.
-    native681Layout &= nativeReader.ReadS16() == 1
+    native681Layout &= nativeReader.ReadS16() == 100
         && nativeReader.ReadU8() == 0
         && nativeReader.ReadNulTerminatedAnsiString(49) == "Normal"
-        && nativeReader.ReadS16() == unchecked((short)40201)
+        && nativeReader.ReadS16() == 0
         && nativeReader.ReadU8() == 0
         && nativeReader.ReadS16() == 0
-        && nativeReader.ReadS16() == 1
+        && nativeReader.ReadS16() == 100
         && nativeReader.ReadU8() == 3
         && nativeReader.ReadNulTerminatedAnsiString(49) == "AI"
-        && nativeReader.ReadS16() == unchecked((short)40202)
+        && nativeReader.ReadS16() == 0
         && nativeReader.ReadU8() == 9
         && nativeReader.ReadU8() == 0x7E
         && nativeReader.ReadS32() == unchecked((int)0x89ABCDEF)

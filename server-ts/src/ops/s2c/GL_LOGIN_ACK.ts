@@ -21,14 +21,27 @@ export const Result = {
 /** The native result is a raw s32; the client branches on its low byte only. */
 export type Result = number;
 
-/** One channel in a group. The native reader adds `extra` only for type 3. */
+/** One selectable channel in a group. */
 export interface Channel {
   readonly type: number;
   readonly name: string;
-  readonly port: number;
+  /** Native raw2 field shown as the USERS numerator; not a network port. */
+  readonly currentUsers: number;
   /** Native `ch_flag`; its domain is not established here. */
   readonly flag: number;
   readonly extra?: number;
+}
+
+/**
+ * One of the three fixed channel groups in a server row.
+ *
+ * The leading raw2 is the native USERS denominator/capacity field. When it is
+ * positive, the native reader consumes exactly one channel record; it is not a
+ * count of records that the client loops over.
+ */
+export interface ChannelGroup {
+  readonly maxUsers: number;
+  readonly channel?: Channel;
 }
 
 /** A server row. The client expects exactly three channel groups. */
@@ -36,11 +49,12 @@ export interface GameServer {
   readonly serverId: number;
   readonly name: string;
   readonly host: string;
+  /** Native selector TCP endpoint port; sub_58AD90 passes it as u_short. */
   readonly port: number;
   /** Native `flag`; its domain is not established here. */
   readonly flag: number;
   readonly group: number;
-  readonly channelGroups: readonly (readonly Channel[])[];
+  readonly channelGroups: readonly ChannelGroup[];
 }
 
 export interface Success {
@@ -48,6 +62,24 @@ export interface Success {
   readonly servers: readonly GameServer[];
   /** Opaque billing/charge UI mode, echoed back in 143. Not a player level. */
   readonly n100?: number;
+}
+
+function requireS16(value: number, field: string): void {
+  if (!Number.isSafeInteger(value) || value < -0x8000 || value > 0x7fff) {
+    throw new RangeError(`681 ${field} must fit s16`);
+  }
+}
+
+function requireNonNegativeS16(value: number, field: string): void {
+  if (!Number.isSafeInteger(value) || value < 0 || value > 0x7fff) {
+    throw new RangeError(`681 ${field} must fit a non-negative s16`);
+  }
+}
+
+function requireU16(value: number, field: string): void {
+  if (!Number.isSafeInteger(value) || value < 0 || value > 0xffff) {
+    throw new RangeError(`681 ${field} must fit u16`);
+  }
 }
 
 /**
@@ -90,28 +122,34 @@ export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Pac
     if (server.host.length > 15) {
       throw new RangeError("681 server host must fit native char[16]");
     }
+    requireS16(server.serverId, "server_id");
+    requireU16(server.port, "server_port");
+    requireS16(server.group, "server group");
+
     p.s16(server.serverId);
     p.str(server.name); // native char[50]
     p.str(server.host); // native char[16]
-    p.s16(server.port); // native 2-byte field; this list reader does not prove signedness
+    // The reader gets raw2, but the selected-server consumer passes these bits
+    // to a Winsock u_short endpoint port.
+    p.u16(server.port);
     p.u8(server.flag);
     p.s16(server.group);
 
     for (const group of server.channelGroups) {
-      // The native reader consumes one channel record when count > 0, then
-      // immediately starts the next group; advertising more would desync it.
-      if (group.length > 1) {
-        throw new RangeError("681 client consumes at most one channel per group");
+      requireNonNegativeS16(group.maxUsers, "channel max_users");
+      const channel = group.channel;
+      if ((group.maxUsers > 0) !== (channel !== undefined)) {
+        throw new RangeError("681 channel group needs one channel exactly when max_users is positive");
       }
-      p.s16(group.length);
-      const channel = group[0];
+      p.s16(group.maxUsers);
       if (!channel) continue;
       if (channel.name.length > 49) {
         throw new RangeError("681 channel name must fit native char[50]");
       }
+      requireNonNegativeS16(channel.currentUsers, "channel current_users");
       p.u8(channel.type);
       p.str(channel.name);
-      p.s16(channel.port);
+      p.s16(channel.currentUsers);
       p.u8(channel.flag);
       if (channel.type === 3) p.u8(channel.extra ?? 0);
     }
