@@ -174,6 +174,21 @@ describe("681 — login ack", () => {
     ).toThrow(/channel name/);
   });
 
+  test("rejects a multi-entry group that the native reader cannot consume", () => {
+    expect(() =>
+      buildPacket("GL_LOGIN_ACK", {
+        userNo: 1,
+        servers: [{
+          ...servers[0]!,
+          channelGroups: [[
+            { type: 1, name: "one", port: 1, flag: 0 },
+            { type: 1, name: "two", port: 2, flag: 0 },
+          ], [], []],
+        }],
+      }),
+    ).toThrow(/at most one channel/);
+  });
+
 });
 
 describe("registry", () => {

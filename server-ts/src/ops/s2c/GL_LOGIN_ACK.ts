@@ -85,8 +85,11 @@ export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Pac
     p.s16(server.group);
 
     for (const group of server.channelGroups) {
+      if (group.length > 1) {
+        throw new RangeError("681 private host supports at most one channel per group");
+      }
       p.s16(group.length);
-      const channel = group[0]; // the client reads at most one, whatever the count
+      const channel = group[0];
       if (!channel) continue;
       if (channel.name.length > 49) {
         throw new RangeError("681 channel name must fit native char[50]");
