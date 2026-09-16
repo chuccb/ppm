@@ -202,8 +202,8 @@ describe("lobby bootstrap packets", () => {
       build("GL_MYITEM_ACK", [{ slot: -1, itemId: 1, f1: 0, f2: 0, period: 0, durability: 0 }]),
     ).toThrow(/inventory slot/);
     expect(() =>
-      build("GL_MYITEM_ACK", [{ slot: 0, itemId: -1, f1: 0, f2: 0, period: 0, durability: 0 }]),
-    ).toThrow(/item_id/);
+      build("GL_MYITEM_ACK", [{ slot: 0, itemId: 1, f1: Number.MAX_VALUE, f2: 0, period: 0, durability: 0 }]),
+    ).toThrow(/f1/);
 
     const item = decode(build("GL_MYITEM_ACK", [{
       slot: 12,

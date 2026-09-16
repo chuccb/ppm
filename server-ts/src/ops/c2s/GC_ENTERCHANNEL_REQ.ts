@@ -4,8 +4,9 @@
  * The client sends this after every 144, even when 144 reported failure; an
  * unauthenticated or wrong selection therefore receives an explicit non-
  * success 196 and never gains lobby authority. (`sub_56FF40`, `sub_4179D0`)
- * A type-3 continuation is optional: native sub_875680 stops after its
- * header0 when that gate is non-positive. A supplied continuation remains raw.
+ * Native sub_875680 has a header0 gate, but a server success without the
+ * complete continuation would be a false-success projection. The TS server
+ * therefore admits type 3 only when the complete raw tail is configured.
  *
  * The third byte is kept as a raw flag. Native loads it from the local option
  * block (`sub_7338D0`/`sub_735DE0`), but the recovered code does not establish
@@ -61,9 +62,9 @@ export default function GC_ENTERCHANNEL_REQ(r: Reader, connection: Connection): 
   const channel = connection.config.channel ?? 0;
   const channelType = connection.config.channelType ?? 0;
   const type3Tail: Type3Tail | undefined = connection.config.type3Tail;
-  // A type-3 continuation is optional at the native boundary. If supplied,
-  // it must still belong to type 3 so the reply does not append unconsumed data.
-  const type3ConfigurationValid = channelType === 3 || type3Tail === undefined;
+  const type3ConfigurationValid = channelType === 3
+    ? type3Tail !== undefined && "header1" in type3Tail
+    : type3Tail === undefined;
   const accepted =
     connection.authenticated &&
     type3ConfigurationValid &&

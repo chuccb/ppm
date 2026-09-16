@@ -26,8 +26,10 @@ function requireU16(name: string, value: number): void {
   }
 }
 
-function requireF32(name: string, value: number): void {
-  if (!Number.isFinite(value)) throw new RangeError(`200 ${name} must be finite f32`);
+function requireF32(name: string, value: number): number {
+  const wire = Math.fround(value);
+  if (!Number.isFinite(wire)) throw new RangeError(`200 ${name} must be finite f32`);
+  return wire;
 }
 
 export interface InvItem {
@@ -59,16 +61,16 @@ export default function GL_MYITEM_ACK(op: number, items: readonly InvItem[] = []
     if (!Number.isSafeInteger(item.itemId) || item.itemId < 0 || item.itemId > 0x7fff_ffff) {
       throw new RangeError("200 item_id must be a non-negative s32");
     }
-    requireF32("f1", item.f1);
-    requireF32("f2", item.f2);
+    const f1 = requireF32("f1", item.f1);
+    const f2 = requireF32("f2", item.f2);
     requireS32("period", item.period);
     const extra = item.extra ?? 0;
     requireU8("extra", extra);
     requireU16("durability", item.durability);
     p.s32(item.slot)
       .s32(item.itemId)
-      .f32(item.f1)
-      .f32(item.f2)
+      .f32(f1)
+      .f32(f2)
       .s32(item.period)
       .u8(extra)
       .u16(item.durability);

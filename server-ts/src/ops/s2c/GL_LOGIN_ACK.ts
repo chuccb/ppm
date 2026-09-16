@@ -163,14 +163,14 @@ export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Pac
     // These are raw2 fields; native domain/signedness is unresolved.
     requireRaw16(server.serverId, "server_id");
     requireRaw16(server.group, "group");
-    p.u16(server.serverId); // preserve raw2 bits; signedness is unresolved
+    p.s16(server.serverId); // native raw2; signedness remains unresolved
     p.str(server.name); // native char[50]
     p.str(server.host); // native char[16]
     // The reader gets raw2, but the selected-server consumer passes these bits
     // to a Winsock u_short endpoint port.
     p.u16(server.port);
     p.u8(server.flag);
-    p.u16(server.group); // preserve raw2 bits; signedness is unresolved
+    p.s16(server.group); // native raw2; signedness remains unresolved
 
     for (let index = 0; index < CHANNEL_GROUP_COUNT; index++) {
       const group = server.channelGroups[index];
@@ -180,14 +180,12 @@ export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Pac
       }
 
       requireS16(group.maxUsers, "channel max_users");
+      p.s16(group.maxUsers);
+      if (group.maxUsers <= 0) continue;
       const channel = group.channel;
-      // Native reads one channel body only when max_users is positive. A
-      // caller may provide a capacity without a body; emit the safe empty
-      // gate rather than shifting the next group's fields.
-      const maxUsers = group.maxUsers > 0 && channel === undefined ? 0 : group.maxUsers;
-      p.s16(maxUsers);
-      if (maxUsers <= 0) continue;
-      if (channel === undefined) throw new Error("unreachable missing channel body");
+      if (channel === undefined) {
+        throw new RangeError("681 positive channel group needs a channel body");
+      }
       if (channel.name.length > MAX_CHANNEL_NAME_BYTES) {
         throw new RangeError("681 channel name must fit native char[50]");
       }

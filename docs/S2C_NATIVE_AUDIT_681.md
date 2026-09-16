@@ -235,11 +235,9 @@ for fullness. The channel field is therefore `current_users`/USERS numerator;
 it is not another network port.
 
 The TypeScript model retains `GameServer.port` for the endpoint and uses one
-`ChannelGroup` per fixed group with `maxUsers` plus at most one `Channel`. If a
-caller supplies a positive capacity without a channel, the writer emits a
-zero gate; if a channel is supplied with a non-positive gate, it is omitted.
-This preserves native framing without turning caller shape into a server
-capacity policy.
+`ChannelGroup` per fixed group with `maxUsers` plus at most one `Channel`. It
+rejects a positive gate without a channel and a channel without a positive
+gate, preventing a body from being shifted into the next group.
 
 ## 7. Server-list UI and resource branches
 

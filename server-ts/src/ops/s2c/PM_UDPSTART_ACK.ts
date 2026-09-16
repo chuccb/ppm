@@ -73,6 +73,10 @@ export default function PM_UDPSTART_ACK(op: number, admission: Admission): Packe
   if (!Number.isSafeInteger(restrictionLevel) || restrictionLevel < -0x8000_0000 || restrictionLevel > 0x7fff_ffff) {
     throw new RangeError("144 channel_restriction_level must fit s32");
   }
+  const wireRestrictionKdr = Math.fround(restrictionKdr);
+  if (!Number.isFinite(wireRestrictionKdr)) {
+    throw new RangeError("144 channel_restriction_kdr must be finite f32");
+  }
 
   return new Packet(op)
     .u8(result)
@@ -82,7 +86,7 @@ export default function PM_UDPSTART_ACK(op: number, admission: Admission): Packe
     .s32(0) // read then unused
     .s32(0) // read then unused
     .s32(restrictionLevel)
-    .f32(restrictionKdr)
+    .f32(wireRestrictionKdr)
     .u32(0) // client_request_context: echoed into later requests, meaning unproven
     .u8(0); // has_net_cafe_info: 0 = omit the trailing block
 }

@@ -5,8 +5,9 @@
  * The endpoint is the private UDP control address established by the native
  * client after 196. This module only writes its source-proven wire shape; it
  * does not assign a meaning to the opaque byte, flags, or final default byte.
- * Type 3 enters the recovered `sub_875680` continuation. Its header0-only
- * boundary is also supported; a positive header0 requires the full raw tail.
+ * Type 3 enters the recovered `sub_875680` continuation. Native exposes a
+ * header0-only boundary, but this server projection requires the complete tail
+ * to avoid advertising a false-success handshake.
  * (docs/PACKETS.md §3.15d5;
  * docs/S2C_NATIVE_AUDIT_196.md)
  */
@@ -140,16 +141,11 @@ function isFullType3Tail(tail: Type3Tail): tail is Type3TailFull {
 }
 
 function writeType3Tail(p: Packet, tail: Type3Tail): void {
-  requireS32("type3.header0", tail.header0);
-  p.s32(tail.header0);
-
-  // Native sub_875680 returns immediately for a non-positive header0. A
-  // one-word projection is therefore a valid native boundary; any supplied
-  // full tail is deliberately ignored after that gate.
-  if (tail.header0 <= 0) return;
   if (!isFullType3Tail(tail)) {
-    throw new RangeError("196 positive type3.header0 requires the native continuation");
+    throw new RangeError("196 channel type 3 requires its native continuation");
   }
+  requireS32("type3.header0", tail.header0, 1);
+  p.s32(tail.header0);
 
   if (tail.name.length > 67) throw new RangeError("196 type3.name must fit native 68-byte storage");
   for (const [name, value] of [
@@ -276,6 +272,9 @@ export default function GC_ENTERCHANNEL_ACK(op: number, entry: Entry): Packet {
   if (!Number.isSafeInteger(channelType) || channelType < 0 || channelType > 0xff) {
     throw new RangeError("196 channel_type must fit u8");
   }
+  if (channelType === 3 && entry.type3Tail === undefined) {
+    throw new RangeError("196 channel type 3 requires its native continuation");
+  }
   if (channelType !== 3 && entry.type3Tail !== undefined) {
     throw new RangeError("196 type3Tail requires channel type 3");
   }
@@ -286,10 +285,12 @@ export default function GC_ENTERCHANNEL_ACK(op: number, entry: Entry): Packet {
     throw new RangeError("196 client_default must fit u8");
   }
 
-  if (entry.endpoint.host.length > 19) {
+  if (entry.endpoint.host.length === 0 || entry.endpoint.host.length > 19) {
     throw new RangeError("196 endpoint host must fit the native char[20]");
   }
-  requireS32("endpoint port", entry.endpoint.port);
+  if (!Number.isSafeInteger(entry.endpoint.port) || entry.endpoint.port < 1 || entry.endpoint.port > 0xffff) {
+    throw new RangeError("196 endpoint port must fit an unsigned 16-bit value");
+  }
 
   const success = p
     .str(entry.endpoint.host)

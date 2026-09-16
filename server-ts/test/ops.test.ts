@@ -360,12 +360,12 @@ describe("681 — login ack", () => {
     });
     for (let i = 0; i < 4; i++) reader.s32();
     reader.s16();
-    expect(reader.u16()).toBe(0xffff); // raw server_id
+    expect(reader.s16()).toBe(-1); // native raw2 bits are emitted as s16
     reader.str();
     reader.str();
-    reader.u16();
+    reader.s16();
     reader.u8();
-    expect(reader.u16()).toBe(0xffff); // raw group
+    expect(reader.s16()).toBe(-1); // native raw2 bits are emitted as s16
     expect(reader.s16()).toBe(-1);
     expect(reader.s16()).toBe(1);
     expect(reader.u8()).toBe(1);
@@ -413,27 +413,16 @@ describe("681 — login ack", () => {
     })).toThrow(/server_id/);
   });
 
-  test("turns a capacity-only group into the native-safe empty gate", () => {
-    const reader = build("GL_LOGIN_ACK", {
-      userNo: 1,
-      servers: [{
-        ...servers[0]!,
-        channelGroups: [{ maxUsers: 100 }, { maxUsers: 0 }, { maxUsers: 0 }],
-      }],
-    });
-    for (let i = 0; i < 4; i++) reader.s32();
-    reader.s16();
-    reader.s16();
-    reader.str();
-    reader.str();
-    reader.s16();
-    reader.u8();
-    reader.s16();
-    expect(reader.s16()).toBe(0);
-    expect(reader.s16()).toBe(0);
-    expect(reader.s16()).toBe(0);
-    expect(reader.s32()).toBe(0);
-    expect(reader.s32()).toBe(0);
+  test("requires a channel body when the native group gate is positive", () => {
+    expect(() =>
+      buildPacket("GL_LOGIN_ACK", {
+        userNo: 1,
+        servers: [{
+          ...servers[0]!,
+          channelGroups: [{ maxUsers: 100 }, { maxUsers: 0 }, { maxUsers: 0 }],
+        }],
+      }),
+    ).toThrow(/positive channel group needs a channel body/);
   });
 
 });

@@ -66,8 +66,8 @@ consumers use only `hostshort[0]` as a Winsock `u_short`:
 - `sub_596E60(&unk_1326908, cp, hostshort[0])` stores a second UDP sockaddr.
 
 Therefore the server wire field is `s32`; the practical endpoint value is the
-low unsigned 16 bits. TS validates only the native s32 wire width and leaves
-any endpoint-range policy to deployment code.
+low unsigned 16 bits. TS deliberately requires a normal `1..65535` endpoint
+value rather than advertising the native truncation as a server policy.
 
 The endpoint host is copied through `cp[20]`. The native code does not expose a
 separate length field; the string primitive is NUL-terminated. The TS builder
@@ -149,7 +149,7 @@ if type3_header_0 <= 0:
   parser returns 0 and consumes no more type-3 fields
 
 s32   type3_header_1
-str   type3_name              // recovered fixed storage: 68 bytes incl. NUL
+str   type3_name
 raw4  type3_raw4_0
 raw4  type3_raw4_1
 raw4  type3_raw4_2
@@ -247,11 +247,10 @@ they do not establish their encoding beyond the surrounding `sub_592730` ANSI
 string reader.
 
 The TS builder now writes this continuation as an explicit raw projection,
-with the native count caps represented and validated. Channel admission may
-select type 3 without a continuation; a supplied continuation is bounded by
-its native gate and count framing. The builder may emit the fixed success tail
-plus only a non-positive type-3 header0, but never a positive header without its
-remaining continuation.
+with the native count caps represented and validated. Channel admission only
+accepts type 3 when the connection config supplies a complete raw tail; without
+that reproducible configuration it remains rejected. The builder must not emit
+a fixed prefix plus only the six success bytes when type 3 is selected.
 
 ## 6. Cross-check against current TS
 
@@ -260,18 +259,17 @@ remaining continuation.
 - It writes `endpoint_port` as `s32`, not `u16`, matching `sub_592A40`.
 - It keeps `endpointOpaque`, `clientFlags`, and `clientDefault` raw-oriented;
   only the proven `client_flags & 1` consumer is documented.
-- It permits a type-3 success with no continuation, and supports the native
-  header0-only projection when `header0 <= 0`. A positive header0 requires the
-  complete raw continuation; count mismatches and capped-array overflows are
-  still rejected so later fields cannot be shifted.
+- It emits type 3 only with an explicit complete `type3Tail`; missing tails,
+  count mismatches, and capped-array overflows are rejected instead of creating
+  a false-success packet with a truncated grammar.
 - `server-ts/src/ops/c2s/GC_ENTERCHANNEL_REQ.ts` separately validates the
   three-byte 195 request and rejects unauthenticated/mismatched selection;
   this is necessary because native 144 → 195 does not gate on 144's result.
-  It allows the native type-3 header-only boundary while rejecting a tail on
-  any other channel type.
+  It also refuses type-3 admission unless the connection config supplies the
+  complete raw tail.
 - `server-ts/test/channel.test.ts` covers failure-prefix framing, unknown
   failure result preservation, success tail order, numeric widths, and the
-  type-3 gate/full-continuation split.
+  type-3 rejection.
 
 ## 7. Remaining unresolved items
 

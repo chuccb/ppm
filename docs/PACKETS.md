@@ -268,9 +268,8 @@ raw4 result           native 以 raw 4B 讀入，但分支只檢查 low byte；
     u8   flag                          (意義尚未確定)
     raw2 group                         (2-byte wire field; domain/signedness unresolved)
     repeat 3:                          ← 每台固定 3 個頻道分組
-      s16  max_users                   (native positive gate；UI `USERS` 的
-                                       分母/容量，不是 record count；wire helper
-                                       仍只提供 two-byte width)
+      raw2 max_users                   (native positive gate；UI `USERS` 的
+                                       分母/容量，不是 record count)
       若 max_users > 0 (native 只讀一個 channel record):
         u8   ch_type
         str  ch_name                   (char[50]，內容最多 49 bytes)
@@ -1051,19 +1050,11 @@ u8), f32 → 存 [494]。
 ```
 raw2 header, string self, u8 count; repeat: string nick, s32 status
 ```
-`sub_537F60` is the adjacent client consumer: it retains at most 100 rows,
-uses a 21-byte nickname slot (including the NUL), and stores status as a native
-`int`. These are client storage facts, not proof of friend/status policy.
-
 ### 3.11 GL_MSG_RECVLIST_ACK (426) — sub_55A630:
 ```
 raw2 header, string self, u8 count
 repeat: string from, u8 raw, string title, s32 msg_id, string body(≤201), string raw, s16 date
 ```
-`sub_5378C0` retains at most 10 records. Its local storage is 20 bytes for the
-sender, 21 for the title, 201 for the body, and a 2-byte final raw slot; the
-message id is native `int` and date is native `__int16`. No Extracted resource
-or caller in this snapshot supplies a mailbox schema or names either raw field.
 ### 3.12 GP_CH*C 家族 (222–245, 362–363, 380–389, 882) — 四輪交叉驗證修正:
 **REQ** (builder sub_5567F0@230 / sub_5568E0@232 / sub_556B90@244 等):
 `s32 新的絕對累計值` — client 送 **total 而非增量** (a1<0 時不送)。
@@ -1496,12 +1487,10 @@ GG 戰鬥事件中繼 (server 原樣轉發即可) 與 MASTER_* GM 工具組。
       str  udp_host      ⭐ UDP control endpoint (no P2P/NAT role inferred)
       s32  udp_port      (sub_58ED30 存 + sub_596E60 取 low u16 填 sockaddr)
       u8   endpoint_opaque → 1D0CFE4
-      u8   channel_type (==3 → 進入 sub_875680；詳見
-              docs/S2C_NATIVE_AUDIT_196.md；其先讀 s32 header0，header0<=0
-              時立即返回，因此 continuation 可在此 gate 結束；positive gate
-              才會讀完整 raw continuation。其四個固定 4-byte 欄位是 raw4，
-              不是 f32；name storage 由 native object layout 證明為 68 bytes
-              含 NUL，TS payload 上限為 67 ANSI bytes)
+      u8   channel_type (==3 → 續讀完整 AI/tournament 大塊 sub_875680，詳見
+              docs/S2C_NATIVE_AUDIT_196.md；其四個固定 4-byte 欄位是
+              raw4，不是 f32，後續含 capped/unbounded count loops；TS 只有
+              明確 raw `type3Tail` 才會發送此 continuation)
       raw4 client_flags (sub_592AC0；bit0 → byte_1D0D21B，⚠ 非 f32)
       u8   client_default → sub_417D00()[8] (native read target 預設 5)
 ```
@@ -1752,10 +1741,9 @@ Room，`Handlers.GL_JOINPLAY.cs` 的 flag 0 先加入空 slot 再回 269 code 6 
     result 1 會把第三欄寫成 active channel index；0=channel full (0xDA),
     2=rank restricted (0x148), 3=clan required (0x328), 4/5/7/9=generic
     error (0x1A5), 6/8 有各自 resource。`client_flags & 1` 是已證實的
-    native flag；`channel_type==3` 的 sub_875680 continuation 可只提供
-    `header0<=0` 的 gate projection，positive header0 才要求完整 tail。
-    TS channel admission 不把未提供 tail 偷換成 server policy；非 type-3
-    仍拒絕附帶未消費 tail。
+    native flag；`channel_type==3` 還要求完整 `sub_875680` continuation。
+    TS builder 只在明確提供 raw `type3Tail` 時發送；channel admission 也只有
+    在 config 提供該 tail 時接受 type 3，未配置時維持保守拒絕。
 ```
 
 **Fact/HIGH — current C# bootstrap guardrails.** `Contracts/Login/LoginWire.*.cs`

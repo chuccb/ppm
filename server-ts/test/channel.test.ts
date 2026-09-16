@@ -242,27 +242,7 @@ describe("GC_ENTERCHANNEL_ACK", () => {
     expect(r.remaining).toBe(0);
   });
 
-  test("supports the native header0-only boundary and keeps full-tail caps", () => {
-    const gateOnly = build("GC_ENTERCHANNEL_ACK", {
-      result: EnterResult.Success,
-      channelId: 1,
-      channelIndex: 0,
-      endpoint: { host: "127.0.0.1", port: -1 },
-      channelType: 3,
-      type3Tail: { header0: 0 },
-    });
-    gateOnly.u8();
-    gateOnly.s32();
-    gateOnly.u8();
-    gateOnly.str();
-    expect(gateOnly.s32()).toBe(-1);
-    gateOnly.u8();
-    gateOnly.u8();
-    gateOnly.u32();
-    gateOnly.u8();
-    expect(gateOnly.s32()).toBe(0);
-    expect(gateOnly.remaining).toBe(0);
-
+  test("rejects incomplete or structurally unsafe type-3 projections", () => {
     expect(() =>
       buildPacket("GC_ENTERCHANNEL_ACK", {
         result: EnterResult.Success,
@@ -270,9 +250,18 @@ describe("GC_ENTERCHANNEL_ACK", () => {
         channelIndex: 0,
         endpoint: { host: "127.0.0.1", port: 40202 },
         channelType: 3,
-        type3Tail: { header0: 1 },
       }),
-    ).toThrow(/positive type3.header0/);
+    ).toThrow(/requires its native continuation/);
+    expect(() =>
+      buildPacket("GC_ENTERCHANNEL_ACK", {
+        result: EnterResult.Success,
+        channelId: 1,
+        channelIndex: 0,
+        endpoint: { host: "127.0.0.1", port: 40202 },
+        channelType: 3,
+        type3Tail: { header0: 0 },
+      }),
+    ).toThrow(/requires its native continuation/);
     expect(() =>
       buildPacket("GC_ENTERCHANNEL_ACK", {
         result: EnterResult.Success,
@@ -294,7 +283,7 @@ describe("GC_ENTERCHANNEL_ACK", () => {
 });
 
 describe("GC_ENTERCHANNEL_REQ", () => {
-  test("admits type 3 with or without an optional continuation", () => {
+  test("admits type 3 only when config carries the complete raw tail", () => {
     const replies: unknown[] = [];
     let completed = false;
     const connection = {
@@ -323,24 +312,6 @@ describe("GC_ENTERCHANNEL_REQ", () => {
     expect((replies[0] as { type3Tail?: Type3Tail }).type3Tail).toEqual(minimalType3Tail);
   });
 
-  test("does not require a type-3 tail at the native optional boundary", () => {
-    const replies: unknown[] = [];
-    const connection = {
-      config: { role: "channel", group: 0, channel: 0, channelType: 3 },
-      authenticated: true,
-      channelEntryCompleted: false,
-      log: (_message: string) => undefined,
-      reply: (_name: string, entry: unknown) => replies.push(entry),
-      completeChannelEntry: () => undefined,
-    } as unknown as Parameters<typeof enterChannel>[1];
-
-    enterChannel(
-      decode(new Packet(opcodeFor("GC_ENTERCHANNEL_REQ")).u8(0).u8(0).u8(0).encode()),
-      connection,
-    );
-
-    expect((replies[0] as { type3Tail?: Type3Tail }).type3Tail).toBeUndefined();
-  });
 });
 
 describe("PM_UDPSTART_ACK", () => {
@@ -420,6 +391,20 @@ describe("PM_UDPSTART_ACK", () => {
         restrictionLevel: 0x8000_0000,
       }),
     ).toThrow(/channel_restriction_level/);
+    expect(() =>
+      buildPacket("PM_UDPSTART_ACK", {
+        result: Result.Success,
+        channelName: "x",
+        restrictionKdr: Number.NaN,
+      }),
+    ).toThrow(/channel_restriction_kdr/);
+    expect(() =>
+      buildPacket("PM_UDPSTART_ACK", {
+        result: Result.Success,
+        channelName: "x",
+        restrictionKdr: Number.MAX_VALUE,
+      }),
+    ).toThrow(/channel_restriction_kdr/);
   });
 
   test("rejects a channel name longer than the client's char[40]", () => {
