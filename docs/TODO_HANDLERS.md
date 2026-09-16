@@ -280,8 +280,10 @@
 >    部署時區預期；也以實包驗證 684
 >    `GL_LOGIN_DUPLICATE` 的方向與 payload（現有 C export 沒有可歸屬的 builder/
 >    reader，不能猜測發送）。
-> 3. 補 type-3 channel 的 `sub_875680` 196 AI tail；在完整 reader/writer與可重現
->    AI config 前，保持 `ServerConfig` 拒絕 type-3，而不送 truncated success tail。
+> 3. `GC_ENTERCHANNEL_ACK` 的 `sub_875680` type-3 continuation 已完成 raw
+>    reader/writer 與欄位 consumer audit（見 `docs/S2C_NATIVE_AUDIT_196.md`）。
+>    Channel admission 只有在明確提供完整 raw `type3Tail` 時接受 type 3；仍需
+>    官方可重現 config 才能補 semantic projection，不能用猜測名稱或 truncated tail。
 > 4. 取得 Pulp’n Roll 733/734 initial-state 和 959/961 ground-weapon 實包，建立
 >    可重現的 per-room object seed，才實作 730–742 Pulp 與 962 成功交換。
 > 5. 精讀並實作戰隊錦標賽進階流程 (756–776)：先對每項 builder/dispatcher/

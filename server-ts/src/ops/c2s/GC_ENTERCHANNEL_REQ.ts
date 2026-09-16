@@ -4,6 +4,8 @@
  * The client sends this after every 144, even when 144 reported failure; an
  * unauthenticated or wrong selection therefore receives an explicit non-
  * success 196 and never gains lobby authority. (`sub_56FF40`, `sub_4179D0`)
+ * A type-3 config is admitted only when it also carries the complete raw
+ * `type3Tail` needed by 196.
  *
  * The third byte is kept as a raw flag. Native loads it from the local option
  * block (`sub_7338D0`/`sub_735DE0`), but the recovered code does not establish
@@ -12,7 +14,7 @@
 
 import type { Reader } from "../../packet.ts";
 import type { Connection } from "../../connection.ts";
-import { Result } from "../s2c/GC_ENTERCHANNEL_ACK.ts";
+import { Result, type Type3Tail } from "../s2c/GC_ENTERCHANNEL_ACK.ts";
 
 export interface Selection {
   readonly group: number;
@@ -58,9 +60,13 @@ export default function GC_ENTERCHANNEL_REQ(r: Reader, connection: Connection): 
   const group = connection.config.group ?? 0;
   const channel = connection.config.channel ?? 0;
   const channelType = connection.config.channelType ?? 0;
+  const type3Tail: Type3Tail | undefined = connection.config.type3Tail;
+  const type3ConfigurationValid = channelType === 3
+    ? type3Tail !== undefined
+    : type3Tail === undefined;
   const accepted =
     connection.authenticated &&
-    channelType !== 3 &&
+    type3ConfigurationValid &&
     selection.group === group &&
     selection.channel === channel;
 
@@ -83,7 +89,8 @@ export default function GC_ENTERCHANNEL_REQ(r: Reader, connection: Connection): 
       port: connection.config.udpPort ?? 40202,
     },
     endpointOpaque: connection.config.endpointOpaque ?? 0,
-    channelType: connection.config.channelType ?? 0,
+    channelType,
+    type3Tail,
     clientFlags: connection.config.clientFlags ?? 0,
     clientDefault: connection.config.clientDefault ?? 5,
   } as const;

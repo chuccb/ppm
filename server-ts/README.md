@@ -88,7 +88,8 @@ All of these are cited to `../docs/PACKETS.md`:
 - **Channel entry is explicit** — `GC_ENTERCHANNEL_ACK` has a three-field
   failure prefix and a success-only endpoint tail. The server accepts only the
   one group/channel it advertises and binds lobby authority after the success
-  reply is written; type-3 AI tails and gameplay remain out of scope.
+  reply is written. Type-3 admission and emission require an explicit raw
+  `type3Tail`; semantic deployment config and gameplay remain out of scope.
 - **Compression** — the client only lowers its threshold when the value is
   strictly below `0x2580`, so sending `0x2580` disables LZ in both directions.
   The TCP LZ stage is therefore not implemented, and `decodeFrame` throws

@@ -1480,9 +1480,10 @@ GG 戰鬥事件中繼 (server 原樣轉發即可) 與 MASTER_* GM 工具組。
       str  udp_host      ⭐ UDP control endpoint (no P2P/NAT role inferred)
       s32  udp_port      (sub_58ED30 存 + sub_596E60 取 low u16 填 sockaddr)
       u8   endpoint_opaque → 1D0CFE4
-      u8   channel_type (==3 → 續讀 AI multi 大塊 sub_875680:
-              s32×2, str, f32×4, u8×3, s32×2, u8×6, s32×2... —
-              AI 協力頻道的關卡/波次參數!)
+      u8   channel_type (==3 → 續讀完整 AI/tournament 大塊 sub_875680，詳見
+              docs/S2C_NATIVE_AUDIT_196.md；其四個固定 4-byte 欄位是
+              raw4，不是 f32，後續含 capped/unbounded count loops；TS 只有
+              明確 raw `type3Tail` 才會發送此 continuation)
       raw4 client_flags (sub_592AC0；bit0 → byte_1D0D21B，⚠ 非 f32)
       u8   client_default → sub_417D00()[8] (native read target 預設 5)
 ```
@@ -1732,8 +1733,9 @@ Room，`Handlers.GL_JOINPLAY.cs` 的 flag 0 先加入空 slot 再回 269 code 6 
     result 1 會把第三欄寫成 active channel index；0=channel full (0xDA),
     2=rank restricted (0x148), 3=clan required (0x328), 4/5/7/9=generic
     error (0x1A5), 6/8 有各自 resource。`client_flags & 1` 是已證實的
-    native flag；`channel_type==3` 還要求 `sub_875680` AI tail，現行 server
-    因尚未實作該 tail 而拒絕 type-3 設定。
+    native flag；`channel_type==3` 還要求完整 `sub_875680` continuation。
+    TS builder 只在明確提供 raw `type3Tail` 時發送；channel admission 也只有
+    在 config 提供該 tail 時接受 type 3，未配置時維持保守拒絕。
 ```
 
 **Fact/HIGH — current C# bootstrap guardrails.** `Contracts/Login/LoginWire.*.cs`
