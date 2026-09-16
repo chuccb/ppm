@@ -92,8 +92,10 @@ export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Pac
     p.s16(server.group);
 
     for (const group of server.channelGroups) {
+      // The native reader consumes one channel record when count > 0, then
+      // immediately starts the next group; advertising more would desync it.
       if (group.length > 1) {
-        throw new RangeError("681 private host supports at most one channel per group");
+        throw new RangeError("681 client consumes at most one channel per group");
       }
       p.s16(group.length);
       const channel = group[0];

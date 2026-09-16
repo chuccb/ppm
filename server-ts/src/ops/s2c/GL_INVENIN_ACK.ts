@@ -20,8 +20,8 @@ export default function GL_INVENIN_ACK(
   contextRaw: number,
   snapshot: NewSkillProfileSnapshot,
 ): Packet {
-  if (!Number.isSafeInteger(uid) || uid <= 0) {
-    throw new RangeError("255 uid must be a positive safe integer");
+  if (!Number.isSafeInteger(uid) || uid <= 0 || uid > 0x7fff_ffff) {
+    throw new RangeError("255 uid must be a positive s32");
   }
   if (!Number.isInteger(contextRaw) || contextRaw < 0 || contextRaw > 0xff) {
     throw new RangeError("255 contextRaw must fit u8");
