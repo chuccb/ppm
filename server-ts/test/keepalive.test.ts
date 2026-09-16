@@ -1,7 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { decode } from "../src/packet.ts";
+import { Reader, decode } from "../src/packet.ts";
 import { opcodeFor } from "../src/opcodes.ts";
 import { build as buildPacket } from "../src/ops/registry.ts";
+import handlePing from "../src/ops/c2s/GT_PING_REQ.ts";
 
 const GT_PING_ACK = () => buildPacket("GT_PING_ACK");
 
@@ -23,5 +24,10 @@ describe("keepalive", () => {
     expect(opcodeFor("GT_PING_ACK")).toBe(102);
     expect(opcodeFor("GT_PING_REQ")).toBe(101);
     expect(GT_PING_ACK().opcode).toBe(102);
+  });
+
+  test("the inbound 101 reader accepts only an empty payload", () => {
+    expect(() => handlePing(new Reader(101, new Uint8Array()))).not.toThrow();
+    expect(() => handlePing(new Reader(101, new Uint8Array([0])))).toThrow(/trailing/);
   });
 });

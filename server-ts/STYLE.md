@@ -43,21 +43,26 @@ suffixes describe the client's view and do not always match ours: `GT_PING_ACK`
 is an `_ACK` the *server* sends, and `GT_PING_REQ` is a `_REQ` it *receives*.
 A suffix rule gets that pair backwards; a folder cannot.
 
-Everything else is normal camelCase: `frameLength`, `verifyLogin`.
+Everything else is normal camelCase: `frameLength`, `verifyLogin`. For a
+recovered wire field, this is only a mechanical separator change:
+`user_no` becomes `userNo`, while `uid`, `flag`, `extra`, `unknown`, and `raw`
+stay conservative. Do not promote a raw field into a semantic name merely
+because another implementation uses one.
 
 Two guards make the convention enforceable rather than aspirational:
 
-- Each folder has a generated `index.ts`. Write a module, run `bun run sync`.
-  It exists because ES modules have no glob import and a dynamic
-  `import(\`./${name}.ts\`)` degrades to `any` — which would put opcode names
-  and builder arguments back to failing at runtime. Generating it means nobody
-  maintains it by hand and it cannot disagree with the directory.
-- Those lists give compile-time checking: `reply("GL_LOGON_ACK")` is a type
-  error, as is passing a c2s name to `reply` or the wrong argument shape.
-- At startup the registry re-checks the lists against the directories and every
-  filename against `db/packets.tsv`. A module added without running `sync`, a
-  listing with no file, or a name that is not a real opcode each fail
-  immediately. A test also asserts the generated files are current.
+- The registry discovers each folder with Bun's `Glob` and loads modules with
+  `import.meta.require`. There are no generated barrel files to keep in sync.
+  `bun run sync` remains a cheap filename/catalogue check before tests.
+- Runtime module values remain `unknown` until the registry validates their
+  default export and, for s2c, the returned `Packet`; they are never widened
+  silently to `any`. A type-only builder map in `registry.ts` preserves the
+  literal outbound-name union and every builder's argument tuple even though
+  the implementation is discovered at runtime.
+- At startup the registry checks every filename against `db/packets.tsv` and
+  every default export against its filename. A missing, renamed, or unknown
+  operation fails immediately; the wire layout and module implementations do
+  not change.
 
 Opcode families from the catalogue, for orientation:
 `GL_` lobby · `GG_` in-game relay · `GR_` room · `GS_` shop · `GP_` play ·

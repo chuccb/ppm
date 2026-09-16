@@ -6,8 +6,10 @@
  * than invent a plausible rule — see STYLE.md.
  */
 
+import { ChannelAdmissionRegistry } from "./admission.ts";
 import { OPCODE_COUNT } from "./opcodes.ts";
 import { Store } from "./store.ts";
+import { UdpControlServer } from "./udp.ts";
 import type { GameServer } from "./ops/s2c/GL_LOGIN_ACK.ts";
 import { listen } from "./connection.ts";
 import { summary } from "./ops/registry.ts";
@@ -20,6 +22,11 @@ const env = {
   /** What the login reply tells clients to connect to; may differ from `host`. */
   advertiseHost: Bun.env["PM_ADVERTISE_HOST"] ?? "127.0.0.1",
   channelName: Bun.env["PM_CHANNEL_NAME"] ?? "Channel 1",
+  channelMaxUsers: Number(Bun.env["PM_CHANNEL_MAX_USERS"] ?? 100),
+  channelCurrentUsers: Number(Bun.env["PM_CHANNEL_CURRENT_USERS"] ?? 0),
+  udpHost: Bun.env["PM_UDP_HOST"] ?? Bun.env["PM_ADVERTISE_HOST"] ?? "127.0.0.1",
+  udpPort: Number(Bun.env["PM_UDP_PORT"] ?? 40202),
+  admissionLifetimeMs: Number(Bun.env["PM_ADMISSION_TTL_MS"] ?? 120_000),
   dbPath: Bun.env["PM_DB"] ?? "paperman.sqlite",
 } as const;
 
@@ -28,6 +35,14 @@ const log = (message: string): void => {
 };
 
 const store = new Store(env.dbPath);
+const admissions = new ChannelAdmissionRegistry();
+// Bind UDP before TCP so a successful 196 never advertises an endpoint this
+// process failed to own. The handler remains deliberately limited to 19 → 20.
+const udpServer = await UdpControlServer.listen({
+  hostname: env.host,
+  port: env.udpPort,
+  log,
+});
 
 /**
  * The server list the client receives on login, and then connects to.
@@ -37,21 +52,37 @@ const store = new Store(env.dbPath);
  */
 const servers: readonly GameServer[] = [
   {
-    id: 1,
+    serverId: 1,
     name: "PaperMan",
     host: env.advertiseHost,
     port: env.channelPort,
     flag: 0,
     group: 0,
     channelGroups: [
-      [{ type: 1, name: env.channelName, port: env.channelPort, flag: 0 }],
-      [],
-      [],
+      {
+        maxUsers: env.channelMaxUsers,
+        channel: { type: 1, name: env.channelName, currentUsers: env.channelCurrentUsers, flag: 0 },
+      },
+      { maxUsers: 0 },
+      { maxUsers: 0 },
     ],
   },
 ];
 
-const shared = { store, servers, log, channelName: env.channelName };
+const shared = {
+  store,
+  servers,
+  log,
+  admissions,
+  channelName: env.channelName,
+  group: 0,
+  channel: 0,
+  channelId: 1,
+  channelType: 1,
+  udpHost: env.udpHost,
+  udpPort: udpServer.port,
+  admissionLifetimeMs: env.admissionLifetimeMs,
+};
 
 // Two listeners, one per handshake. The client reaches the second using the
 // host and port it read from the server list above.
@@ -64,6 +95,7 @@ const channelServer = listen({
 });
 
 log(`login on ${env.host}:${env.loginPort}, channel on ${env.host}:${env.channelPort}`);
+log(`udp control on ${env.host}:${udpServer.port} (private 19 -> 20 only)`);
 log(`${OPCODE_COUNT} opcodes known; ${summary()}`);
 log(`sqlite ${store.sqliteVersion} at ${env.dbPath}`);
 log(`bun ${Bun.version} (${Bun.revision.slice(0, 9)})`);
@@ -73,6 +105,7 @@ for (const signal of ["SIGINT", "SIGTERM"] as const) {
     log(`${signal}: shutting down`);
     loginServer.stop();
     channelServer.stop();
+    udpServer.stop();
     store.close();
     process.exit(0);
   });

@@ -41,7 +41,7 @@ public sealed record ServerConfig
     /// <summary>681 server selector 的 channel TCP host；native buffer = 16 bytes incl. NUL.</summary>
     public string PublicHost { get; init; } = "127.0.0.1";
 
-    /// <summary>頻道 listener port；681 的 server/channel port 都指向此處。</summary>
+    /// <summary>頻道 listener and 681 server-selector endpoint port.</summary>
     public int ChannelPort => checked(Port + 1);
 
     /// <summary>
@@ -129,6 +129,12 @@ public sealed record ServerConfig
 
     /// <summary>Required only for a type-3 681 channel; native reads it as an extra u8.</summary>
     public byte? ChannelTypeThreeExtension { get; init; }
+
+    /// <summary>681 channel-group USERS denominator/capacity.</summary>
+    public short ChannelMaxUsers { get; init; } = 100;
+
+    /// <summary>681 channel USERS numerator; the native client does not treat it as a port.</summary>
+    public short ChannelCurrentUsers { get; init; }
 
     /// <summary>681 opaque channel-list flag.</summary>
     public byte ChannelListingFlag { get; init; }
@@ -219,6 +225,15 @@ public sealed record ServerConfig
         LoginWire.RequireAnsiString(ChannelName, LoginWire.MaxUdpStartChannelNameBytes, "144 channel name");
         LoginWire.RequireAnsiString(UdpHost, LoginWire.MaxUdpHostBytes, nameof(UdpHost));
 
+        if (ChannelMaxUsers <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(ChannelMaxUsers), "A listed 681 channel needs a positive USERS capacity.");
+        }
+        if (ChannelCurrentUsers < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(ChannelCurrentUsers), "681 current users must be non-negative.");
+        }
+
         if ((ChannelType == 3) != ChannelTypeThreeExtension.HasValue)
         {
             throw new ArgumentException("A type-3 channel needs exactly one type-three extension byte; other types need none.");
@@ -241,13 +256,20 @@ public sealed record ServerConfig
     /// <summary>Builds the one-server/one-channel 681 list represented by this single-process host.</summary>
     public LoginAcknowledgement CreateLoginAcknowledgement(int userId)
     {
-        LoginChannelEntry?[] channelGroups = [null, null, null];
-        channelGroups[ChannelGroupIndex] = new LoginChannelEntry(
-            ChannelType,
-            ChannelName,
-            checked((ushort)ChannelPort),
-            ChannelListingFlag,
-            ChannelTypeThreeExtension);
+        LoginChannelGroup[] channelGroups =
+        [
+            new LoginChannelGroup(0, null),
+            new LoginChannelGroup(0, null),
+            new LoginChannelGroup(0, null),
+        ];
+        channelGroups[ChannelGroupIndex] = new LoginChannelGroup(
+            ChannelMaxUsers,
+            new LoginChannelEntry(
+                ChannelType,
+                ChannelName,
+                ChannelCurrentUsers,
+                ChannelListingFlag,
+                ChannelTypeThreeExtension));
 
         var server = new LoginServerEntry(
             LoginServerId,

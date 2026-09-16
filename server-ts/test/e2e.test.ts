@@ -3,6 +3,7 @@
  * This is the exchange a real client performs on startup.
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { ChannelAdmissionRegistry } from "../src/admission.ts";
 import { Packet, PacketStream, type Reader } from "../src/packet.ts";
 import { opcodeFor } from "../src/opcodes.ts";
 import { Store } from "../src/store.ts";
@@ -11,22 +12,29 @@ import { Result, type GameServer } from "../src/ops/s2c/GL_LOGIN_ACK.ts";
 
 const servers: readonly GameServer[] = [
   {
-    id: 1,
+    serverId: 1,
     name: "PaperMan",
     host: "127.0.0.1",
     port: 40201,
     flag: 0,
     group: 0,
-    channelGroups: [[{ type: 1, name: "Channel 1", port: 40201, flag: 0 }], [], []],
+    channelGroups: [
+      { maxUsers: 100, channel: { type: 1, name: "Channel 1", currentUsers: 0, flag: 0 } },
+      { maxUsers: 0 },
+      { maxUsers: 0 },
+    ],
   },
 ];
 
 let store: Store;
 let listener: ReturnType<typeof listen>;
 let port: number;
+let admissions: ChannelAdmissionRegistry;
 
 beforeAll(async () => {
   store = new Store();
+  admissions = new ChannelAdmissionRegistry();
+  await store.createAccount("unused", "seed-password");
   await store.createAccount("alice", "hunter2");
   listener = listen({
     role: "login",
@@ -35,6 +43,7 @@ beforeAll(async () => {
     store,
     servers,
     log: () => {},
+    admissions,
     channelName: "Channel 1",
   });
   port = listener.port;
@@ -132,7 +141,7 @@ describe("live login over TCP", () => {
     const ack = await client.next();
     expect(ack.opcode).toBe(opcodeFor("GL_LOGIN_ACK"));
     expect(ack.s32()).toBe(Result.Success);
-    expect(ack.s32()).toBeGreaterThan(0); // user_no
+    expect(ack.s32()).toBe(2); // user_no is the account row id
     socket.end();
   });
 
@@ -187,11 +196,12 @@ describe("live login over TCP", () => {
     // Handlers are async (argon2 verify), and a wrong password resolves on a
     // different path from a right one. Dispatching concurrently let the second
     // reply overtake the first; the client pairs replies to requests by order.
+    // A successful 681 ends the login conversation, so the batch stops there.
     const client = connectClient();
     const socket = await client.ready;
     await client.next();
 
-    const sequence = ["wrong", "hunter2", "wrong", "wrong", "hunter2"] as const;
+    const sequence = ["wrong", "hunter2"] as const;
     const batch = sequence.map((pw) => loginRequest("alice", pw).encode());
     const merged = new Uint8Array(batch.reduce((n, f) => n + f.length, 0));
     let at = 0;
