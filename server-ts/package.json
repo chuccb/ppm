@@ -9,7 +9,7 @@
     "dev": "bun --watch src/main.ts",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
-    "sync": "bun run scripts/sync-wire.ts"
+    "sync": "bun run scripts/sync-ops.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",

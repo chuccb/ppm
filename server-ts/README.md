@@ -32,9 +32,9 @@ src/packet.ts    the whole wire format: header, cipher, reader, writer, reassemb
 src/aes.ts       AES-128 + CFB-128, the client's cipher
 src/opcodes.ts   676-opcode catalogue, loaded from db/packets.tsv
 src/store.ts     accounts on bun:sqlite
-src/wire.ts      filename -> opcode registry
-src/wire/c2s/    packets the client sends us  (one file per opcode)
-src/wire/s2c/    packets we send the client   (one file per opcode)
+src/ops/         one file per opcode, plus the registry that loads them
+src/ops/c2s/     packets the client sends us
+src/ops/s2c/     packets we send the client
 src/session.ts   per-connection dispatch, and Bun.listen
 src/main.ts      entry point
 ```
@@ -45,8 +45,8 @@ inside it repeats the name. To find the code for a packet from
 `docs/PACKETS.md`, open the file with that name:
 
 ```
-src/wire/c2s/GL_LOGIN_REQ.ts   the client sends it; we read it
-src/wire/s2c/GL_LOGIN_ACK.ts   we send it; we build it
+src/ops/c2s/GL_LOGIN_REQ.ts   the client sends it; we read it
+src/ops/s2c/GL_LOGIN_ACK.ts   we send it; we build it
 ```
 
 Direction is the folder, not the `_REQ`/`_ACK` suffix — those describe the

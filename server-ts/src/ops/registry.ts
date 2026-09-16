@@ -1,8 +1,8 @@
 /**
  * Packet registry, keyed by filename and split by direction.
  *
- *   src/wire/c2s/GL_LOGIN_REQ.ts   the client sends it; we read it
- *   src/wire/s2c/GL_LOGIN_ACK.ts   we send it; we build it
+ *   src/ops/c2s/GL_LOGIN_REQ.ts   the client sends it; we read it
+ *   src/ops/s2c/GL_LOGIN_ACK.ts   we send it; we build it
  *
  * The opcode name appears in the filename and nowhere inside the module — a
  * builder receives its own opcode as the first argument, so nothing is
@@ -20,11 +20,11 @@
  */
 
 import { Glob } from "bun";
-import type { Packet, Reader } from "./packet.ts";
-import { opcodeFor, opcodeName } from "./opcodes.ts";
-import type { Session } from "./session.ts";
-import * as c2s from "./wire/c2s/index.ts";
-import * as s2c from "./wire/s2c/index.ts";
+import type { Packet, Reader } from "../packet.ts";
+import { opcodeFor, opcodeName } from "../opcodes.ts";
+import type { Session } from "../session.ts";
+import * as c2s from "./c2s/index.ts";
+import * as s2c from "./s2c/index.ts";
 
 /** A c2s module: reads an inbound packet and acts on it. */
 export type Handler = (reader: Reader, session: Session) => void | Promise<void>;
@@ -44,11 +44,11 @@ export type OutboundArgs<N extends OutboundName> = Outbound[N] extends (
   ? A
   : never;
 
-const WIRE = new URL("./wire/", import.meta.url).pathname;
+const OPS = new URL("./", import.meta.url).pathname;
 
 function filesIn(dir: "c2s" | "s2c"): Set<string> {
   return new Set(
-    [...new Glob("*.ts").scanSync({ cwd: `${WIRE}${dir}` })]
+    [...new Glob("*.ts").scanSync({ cwd: `${OPS}${dir}` })]
       .filter((file) => file !== "index.ts")
       .map((file) => file.slice(0, -3)),
   );
@@ -71,12 +71,12 @@ export class Registry {
       const listed = new Set(Object.keys(modules));
       for (const name of onDisk) {
         if (!listed.has(name)) {
-          throw new Error(`src/wire/${dir}/${name}.ts is missing from index.ts — run \`bun run sync\``);
+          throw new Error(`src/ops/${dir}/${name}.ts is missing from index.ts — run \`bun run sync\``);
         }
       }
       for (const name of listed) {
         if (!onDisk.has(name)) {
-          throw new Error(`src/wire/${dir}/index.ts lists ${name}, which has no module`);
+          throw new Error(`src/ops/${dir}/index.ts lists ${name}, which has no module`);
         }
       }
 
@@ -95,7 +95,7 @@ export class Registry {
 
   build<N extends OutboundName>(name: N, ...args: OutboundArgs<N>): Packet {
     const entry = this.#builders.get(name);
-    if (!entry) throw new Error(`no module in src/wire/s2c/ for ${name}`);
+    if (!entry) throw new Error(`no module in src/ops/s2c/ for ${name}`);
     return (entry.build as (op: number, ...rest: unknown[]) => Packet)(entry.op, ...args);
   }
 

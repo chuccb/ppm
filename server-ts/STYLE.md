@@ -17,8 +17,8 @@ Follow `db/packets.tsv`, which is the reverse-engineered source of truth.
 packet, in the folder for its direction:
 
 ```
-src/wire/c2s/GL_LOGIN_REQ.ts   the client sends it; we read it
-src/wire/s2c/GL_LOGIN_ACK.ts   we send it; we build it
+src/ops/c2s/GL_LOGIN_REQ.ts   the client sends it; we read it
+src/ops/s2c/GL_LOGIN_ACK.ts   we send it; we build it
 ```
 
 Inside the module the name never appears again — not in a constant, not in
@@ -55,6 +55,10 @@ Opcode families from the catalogue, for orientation:
 
 - **One concept, one file.** `packet.ts` owns the whole wire format — header,
   cipher, reader, writer — because you never touch one without the others.
+- **One word, one meaning.** "wire" means the byte format and nothing else, so
+  it belongs to `packet.ts` alone. The per-opcode modules live in `src/ops/`
+  because each file *is* one opcode, and `opcode` is the vocabulary
+  `docs/PACKETS.md` uses most.
 - **No interface with a single implementation.** Depend on Bun's `Socket`
   directly rather than inventing a `SessionSink` to wrap it.
 - **No wrapper object used once.** If a type exists only to be the parameter of

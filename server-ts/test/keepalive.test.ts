@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { decode } from "../src/packet.ts";
 import { opcodeFor } from "../src/opcodes.ts";
-import { Registry } from "../src/wire.ts";
+import { Registry } from "../src/ops/registry.ts";
 
-const wire = Registry.load();
-const GT_PING_ACK = () => wire.build("GT_PING_ACK");
+const ops = Registry.load();
+const GT_PING_ACK = () => ops.build("GT_PING_ACK");
 
 describe("keepalive", () => {
   test("102 is the server-initiated heartbeat, with an empty payload", () => {

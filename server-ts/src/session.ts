@@ -8,10 +8,10 @@
 import type { Socket } from "bun";
 import { PacketStream, type Packet, type Reader } from "./packet.ts";
 import { opcodeName } from "./opcodes.ts";
-import type { OutboundArgs, OutboundName, Registry } from "./wire.ts";
+import type { OutboundArgs, OutboundName, Registry } from "./ops/registry.ts";
 import type { Store } from "./store.ts";
-import { Result, type GameServer } from "./wire/s2c/GL_LOGIN_ACK.ts";
-import type { Credentials } from "./wire/c2s/GL_LOGIN_REQ.ts";
+import { Result, type GameServer } from "./ops/s2c/GL_LOGIN_ACK.ts";
+import type { Credentials } from "./ops/c2s/GL_LOGIN_REQ.ts";
 
 /** How often to poll, and how long silence may last. Server-side choices. */
 export const PING_INTERVAL_MS = 15_000;
@@ -20,7 +20,7 @@ export const PING_TIMEOUT_MS = 60_000;
 export interface Config {
   store: Store;
   servers: readonly GameServer[];
-  wire: Registry;
+  ops: Registry;
   log: (message: string) => void;
 }
 
@@ -47,7 +47,7 @@ export class Session {
 
   /** Build by opcode name and send. The name is checked at compile time. */
   reply<N extends OutboundName>(name: N, ...args: OutboundArgs<N>): void {
-    this.send(this.#config.wire.build(name, ...args));
+    this.send(this.#config.ops.build(name, ...args));
   }
 
   /** Sent once on connect; it is what triggers the client to log in. */
@@ -88,7 +88,7 @@ export class Session {
   }
 
   async #dispatch(r: Reader): Promise<void> {
-    const handler = this.#config.wire.handlerFor(r.opcode);
+    const handler = this.#config.ops.handlerFor(r.opcode);
     if (!handler) {
       // The client's own dispatcher silently ignores unknown opcodes. Mirror
       // that, but log so coverage gaps stay visible.

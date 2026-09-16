@@ -4,7 +4,7 @@
  *
  * Loaded at runtime rather than copied into source so the two cannot drift.
  * There is deliberately no hand-written list of "opcodes we implement": the
- * filenames under `src/wire/` are that list.
+ * filenames under `src/ops/` are that list.
  */
 
 import { readFileSync } from "node:fs";

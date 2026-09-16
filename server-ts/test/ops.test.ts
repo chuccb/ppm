@@ -1,13 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import { Packet, decode } from "../src/packet.ts";
 import { opcodeFor } from "../src/opcodes.ts";
-import { Registry, type OutboundArgs, type OutboundName } from "../src/wire.ts";
-import { Result, type GameServer } from "../src/wire/s2c/GL_LOGIN_ACK.ts";
-import { read as readCredentials } from "../src/wire/c2s/GL_LOGIN_REQ.ts";
+import { Registry, type OutboundArgs, type OutboundName } from "../src/ops/registry.ts";
+import { Result, type GameServer } from "../src/ops/s2c/GL_LOGIN_ACK.ts";
+import { read as readCredentials } from "../src/ops/c2s/GL_LOGIN_REQ.ts";
 
-const wire = Registry.load();
+const ops = Registry.load();
 const build = <N extends OutboundName>(name: N, ...args: OutboundArgs<N>) =>
-  decode(wire.build(name, ...args).encode());
+  decode(ops.build(name, ...args).encode());
 
 /** Build a 682 exactly as the client's builder does. */
 function clientLoginRequest(account: string, password: string, dataRevision = 811034967) {
@@ -31,8 +31,8 @@ describe("694 — compression threshold and login trigger", () => {
   });
 
   test("rejects a threshold the client would ignore", () => {
-    expect(() => wire.build("GL_ACCOUNTCONNSUCC", 0x2581)).toThrow(RangeError);
-    expect(() => wire.build("GL_ACCOUNTCONNSUCC", 0)).toThrow(RangeError);
+    expect(() => ops.build("GL_ACCOUNTCONNSUCC", 0x2581)).toThrow(RangeError);
+    expect(() => ops.build("GL_ACCOUNTCONNSUCC", 0)).toThrow(RangeError);
   });
 });
 
@@ -150,7 +150,7 @@ describe("681 — login ack", () => {
 
   test("insists on exactly three channel groups", () => {
     expect(() =>
-      wire.build("GL_LOGIN_ACK", {
+      ops.build("GL_LOGIN_ACK", {
         userNo: 1,
         servers: [{ ...servers[0]!, channelGroups: [[]] }],
       }),
@@ -163,14 +163,14 @@ describe("registry", () => {
   test("direction comes from the folder, not the REQ/ACK suffix", () => {
     // GT_PING_ACK is an _ACK the server sends; GT_PING_REQ is a _REQ it
     // receives. A suffix rule would get both backwards.
-    expect(wire.handlerFor(opcodeFor("GT_PING_REQ"))).toBeDefined();
-    expect(wire.handlerFor(opcodeFor("GT_PING_ACK"))).toBeUndefined();
-    expect(() => wire.build("GT_PING_ACK")).not.toThrow();
+    expect(ops.handlerFor(opcodeFor("GT_PING_REQ"))).toBeDefined();
+    expect(ops.handlerFor(opcodeFor("GT_PING_ACK"))).toBeUndefined();
+    expect(() => ops.build("GT_PING_ACK")).not.toThrow();
   });
 
   test("the generated index files are in sync with the directories", async () => {
     // `bun run sync` regenerates them; this fails if someone forgot.
-    const proc = Bun.spawn(["bun", "run", "scripts/sync-wire.ts"], {
+    const proc = Bun.spawn(["bun", "run", "scripts/sync-ops.ts"], {
       cwd: new URL("..", import.meta.url).pathname,
       stdout: "pipe",
       stderr: "pipe",

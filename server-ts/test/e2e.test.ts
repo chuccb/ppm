@@ -7,8 +7,8 @@ import { Packet, PacketStream, type Reader } from "../src/packet.ts";
 import { opcodeFor } from "../src/opcodes.ts";
 import { Store } from "../src/store.ts";
 import { PING_INTERVAL_MS, listen } from "../src/session.ts";
-import { Registry } from "../src/wire.ts";
-import { Result, type GameServer } from "../src/wire/s2c/GL_LOGIN_ACK.ts";
+import { Registry } from "../src/ops/registry.ts";
+import { Result, type GameServer } from "../src/ops/s2c/GL_LOGIN_ACK.ts";
 
 const servers: readonly GameServer[] = [
   {
@@ -34,7 +34,7 @@ beforeAll(async () => {
     port: 0, // ephemeral
     store,
     servers,
-    wire: Registry.load(),
+    ops: Registry.load(),
     log: () => {},
   });
   port = listener.port;
