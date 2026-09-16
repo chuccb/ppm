@@ -52,6 +52,7 @@ export interface MyInfo {
   readonly experience: number;
   readonly gamePoints: number;
   readonly cash: number;
+  /** Serialized character-list index emitted in the native 198/247 fields. */
   readonly selectedCharIndex: number;
   readonly stats: Stats;
   readonly characters: readonly CharSlot[];
@@ -466,6 +467,15 @@ export class Store {
           characterRow.appearance11,
         ],
       }));
+    // The DB stores the persistent slot key, while native 198/247 serialize
+    // only the ordered character rows. Map the key to that compact wire index;
+    // never send the persistent slot number as the native selected index.
+    const selectedCharIndex = characters.findIndex(
+      (character) => character.slotNo === row.current_character,
+    );
+    if (selectedCharIndex < 0) {
+      throw new Error("current_character does not identify a serialized character");
+    }
 
     return {
       userId: row.id,
@@ -474,7 +484,7 @@ export class Store {
       experience: row.experience,
       gamePoints: row.game_points,
       cash: row.cash,
-      selectedCharIndex: row.current_character,
+      selectedCharIndex,
       stats: {
         wins: row.wins,
         losses: row.losses,

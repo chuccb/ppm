@@ -845,8 +845,11 @@ CClientData 的 sub_523A50 (523BF0+524010+524660+524B70(a3=0)) 其實屬於
   `sub_525790` 等 consumer 以它索引最多 20 個 character-list slots；因此
   Server 必須在 **兩個** 198/247 基本資料欄位寫 0..19 的 character-list
   slot/index，不能在 `+88` 寫角色 type。真正的 `char_type` 是後續每筆
-  `sub_524010` 記錄的首 byte。Persistent `current_character` 與 compact
-  serialized list 的映射仍須由 server-side character policy 證實。
+  `sub_524010` 記錄的首 byte。TS Store 將 DB 的 persistent `current_character`
+  slot key 映射到 `ORDER BY slot` 後的 compact serialized-list index；這是
+  server projection policy，不宣稱 native wire 還有一個 per-record persistent
+  slot 欄位。若 current slot 不在 serialized rows 中，Store 拒絕產生含歧義的
+  MyInfo，而不是把 persistent slot number 直接發到 198/247。
 - 對精確的 `origin/main:Extracted/ui/cfg/itemdata.pat` 解密後，變長 ItemData
   stream 的 header 是 `(version=1,count=21164)`，可無殘餘地解析全部 21,164
   records。`19,900,001..19,900,015` 連續 15 筆角色本體在 record `+532` 的
