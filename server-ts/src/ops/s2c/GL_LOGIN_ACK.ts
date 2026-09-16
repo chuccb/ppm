@@ -62,6 +62,13 @@ export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Pac
   if (typeof outcome === "number") return new Packet(op).s32(outcome);
 
   const { userNo, servers, n100 = 0 } = outcome;
+  if (!Number.isSafeInteger(userNo) || userNo < -0x8000_0000 || userNo > 0x7fff_ffff) {
+    throw new RangeError("681 user_no must fit s32");
+  }
+  if (!Number.isInteger(n100) || n100 < -128 || n100 > 127) {
+    throw new RangeError("681 n100 must fit the signed byte used by 143");
+  }
+  if (servers.length > 0x7fff) throw new RangeError("681 server_count must fit s16");
   const p = new Packet(op);
   p.s32(Result.Success).s32(userNo).s32(n100);
   p.s32(0); // ext_count: 0 = no netcafe feature extension
