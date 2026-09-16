@@ -23,6 +23,7 @@ export type Result = number;
 
 const MAX_SERVER_NAME_BYTES = 49; // native char[50], including NUL
 const MAX_SERVER_HOST_BYTES = 15; // native char[16], including NUL
+const MAX_CHANNEL_NAME_BYTES = 49; // native char[50], including NUL
 const CHANNEL_GROUP_COUNT = 3; // native `for (j = 0; j < 3; ++j)`
 
 /** One selectable channel in a group. */
@@ -122,9 +123,7 @@ function requireRaw16(value: number, field: string): void {
  */
 export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Packet {
   if (typeof outcome === "number") {
-    if (!Number.isSafeInteger(outcome) || outcome < -0x8000_0000 || outcome > 0x7fff_ffff) {
-      throw new RangeError("681 result must fit s32");
-    }
+    requireS32(outcome, "result");
     return new Packet(op).s32(outcome);
   }
 
@@ -162,9 +161,7 @@ export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Pac
     if (!Number.isSafeInteger(server.port) || server.port < 0 || server.port > 0xffff) {
       throw new RangeError("681 server_port must fit u16");
     }
-    if (!Number.isSafeInteger(server.flag) || server.flag < 0 || server.flag > 0xff) {
-      throw new RangeError("681 server flag must fit u8");
-    }
+    requireU8(server.flag, "server flag");
 
     // These are raw2 fields; native domain/signedness is unresolved.
     requireRaw16(server.serverId, "server_id");
@@ -186,15 +183,11 @@ export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Pac
       }
       p.s16(group.maxUsers);
       if (!channel) continue;
-      if (channel.name.length > 49) {
+      if (channel.name.length > MAX_CHANNEL_NAME_BYTES) {
         throw new RangeError("681 channel name must fit native char[50]");
       }
-      if (!Number.isSafeInteger(channel.type) || channel.type < 0 || channel.type > 0xff) {
-        throw new RangeError("681 channel type must fit u8");
-      }
-      if (!Number.isSafeInteger(channel.flag) || channel.flag < 0 || channel.flag > 0xff) {
-        throw new RangeError("681 channel flag must fit u8");
-      }
+      requireU8(channel.type, "channel type");
+      requireU8(channel.flag, "channel flag");
       requireNonNegativeS16(channel.currentUsers, "channel current_users");
       const extra = channel.extra;
       if (channel.type === 3) {
@@ -204,9 +197,7 @@ export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Pac
       } else if (extra !== undefined) {
         throw new RangeError("681 channel extra is only valid for type 3");
       }
-      if (extra !== undefined && (!Number.isSafeInteger(extra) || extra < 0 || extra > 0xff)) {
-        throw new RangeError("681 channel extra must fit u8");
-      }
+      if (extra !== undefined) requireU8(extra, "channel extra");
       p.u8(channel.type);
       p.str(channel.name);
       p.s16(channel.currentUsers);
