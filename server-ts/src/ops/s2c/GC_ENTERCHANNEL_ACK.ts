@@ -56,12 +56,22 @@ export default function GC_ENTERCHANNEL_ACK(op: number, entry: Entry): Packet {
     throw new RangeError("196 result must fit u8");
   }
 
+  if (!Number.isSafeInteger(entry.channelId) || entry.channelId < -0x8000_0000 || entry.channelId > 0x7fff_ffff) {
+    throw new RangeError("196 channel_id must fit s32");
+  }
+  if (!Number.isSafeInteger(entry.channelIndex) || entry.channelIndex < 0 || entry.channelIndex > 0xff) {
+    throw new RangeError("196 channel_index must fit u8");
+  }
+
   const p = new Packet(op)
     .u8(entry.result)
     .s32(entry.channelId)
     .u8(entry.channelIndex);
 
-  if (entry.result !== Result.Success || !("endpoint" in entry)) return p;
+  if (entry.result !== Result.Success) return p;
+  if (!("endpoint" in entry)) {
+    throw new RangeError("196 success requires its endpoint tail");
+  }
   if ((entry.channelType ?? 0) === 3) {
     throw new RangeError("196 channel type 3 requires the unrecovered AI tail");
   }
@@ -69,7 +79,7 @@ export default function GC_ENTERCHANNEL_ACK(op: number, entry: Entry): Packet {
   if (entry.endpoint.host.length === 0 || entry.endpoint.host.length > 19) {
     throw new RangeError("196 endpoint host must fit the native char[20]");
   }
-  if (entry.endpoint.port < 1 || entry.endpoint.port > 0xffff) {
+  if (!Number.isSafeInteger(entry.endpoint.port) || entry.endpoint.port < 1 || entry.endpoint.port > 0xffff) {
     throw new RangeError("196 endpoint port must fit an unsigned 16-bit value");
   }
 

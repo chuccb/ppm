@@ -103,6 +103,24 @@ describe("GC_ENTERCHANNEL_ACK", () => {
     expect(r.remaining).toBe(0);
   });
 
+  test("keeps the success tail and numeric widths exact", () => {
+    expect(() =>
+      buildPacket("GC_ENTERCHANNEL_ACK", {
+        result: EnterResult.Success,
+        channelId: 1,
+        channelIndex: 0,
+        endpoint: { host: "127.0.0.1", port: Number.NaN },
+      }),
+    ).toThrow(/endpoint port/);
+    expect(() =>
+      buildPacket("GC_ENTERCHANNEL_ACK", {
+        result: EnterResult.GenericError4,
+        channelId: Number.NaN,
+        channelIndex: 0,
+      }),
+    ).toThrow(/channel_id/);
+  });
+
   test("does not emit an incomplete type-3 AI response", () => {
     expect(() =>
       buildPacket("GC_ENTERCHANNEL_ACK", {

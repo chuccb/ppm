@@ -39,6 +39,9 @@ describe("lobby bootstrap packets", () => {
       expect(inventoryEnter.s32()).toBe(0);
     }
     expect(inventoryEnter.remaining).toBe(0);
+    expect(() =>
+      build("GL_INVENIN_ACK", first!.userId, 7, { ...snapshot, selectedProfile: Number.NaN }),
+    ).toThrow(/selected profile/);
     store.close();
   });
 

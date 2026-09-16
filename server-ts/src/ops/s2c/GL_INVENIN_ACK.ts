@@ -26,8 +26,8 @@ export default function GL_INVENIN_ACK(
   if (!Number.isInteger(contextRaw) || contextRaw < 0 || contextRaw > 0xff) {
     throw new RangeError("255 contextRaw must fit u8");
   }
-  if (snapshot.selectedProfile < 0 || snapshot.selectedProfile >= NEW_SKILL_PROFILE_COUNT) {
-    throw new RangeError("255 selected profile must be in 0..4");
+  if (!Number.isSafeInteger(snapshot.selectedProfile) || snapshot.selectedProfile < 0 || snapshot.selectedProfile >= NEW_SKILL_PROFILE_COUNT) {
+    throw new RangeError("255 selected profile must be an integer in 0..4");
   }
   if (snapshot.profiles.length !== NEW_SKILL_PROFILE_COUNT) {
     throw new RangeError("255 requires exactly five NewSkill profiles");
