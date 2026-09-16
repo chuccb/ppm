@@ -76,9 +76,9 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 194 | GC_CHANNEL_ACK | sub_56FE90 | `u8` |
 | 196 | GC_ENTERCHANNEL_ACK | sub_4179D0 | `u8 s32 u8 [str s32 u8 u8 u32 u8]` |
 | 198 | GL_MYINFO_ACK | sub_570550 | `s8/bool s32 u16 s32 u8 u8` |
-| 200 | GL_MYITEM_ACK | sub_570AB0 | `s8/bool` |
-| 201 | GL_MYPARTSUP_ACK | sub_95A3B0 | `s32 f32/s32 f32/s32 s8/bool f32/s32 f32/s32` |
-| 202 | GL_EXPIRE_PARTSUP_ACK | sub_95AE40 | `s32 f32/s32 f32/s32 s8/bool f32/s32 f32/s32` |
+| 200 | GL_MYITEM_ACK | sub_570AB0 | `u8 success, s32 start, repeat≤100 {s32 slot, s32 item, f32, f32, s32 period, u8 extra, u16 durability}, s32 negative-slot sentinel` |
+| 201 | GL_MYPARTSUP_ACK | sub_95A3B0 | `s32 count, repeat {raw4 raw4 raw1 raw4 raw4}` |
+| 202 | GL_EXPIRE_PARTSUP_ACK | sub_95AE40 | `s32 count, repeat {raw4 raw4 raw1 raw4 raw4}` |
 | 203 |  | sub_571D50 | `(無直接讀取/轉發)` |
 | 205 | GS_BUYITEM_ACK | sub_571910 | `u8 s8/bool s32 f32/s32 f32/s32 s32 u8 u16 s8/bool u8 s32 s32 s32 s32 s32 s32 s32` |
 | 207 | GS_BUY_WEAPONPARTS_ACK | sub_571B60 | `u8 rawResult; rawResult==0 → 21B part record + 6×s32 wallet tail; nonzero → no tail` |

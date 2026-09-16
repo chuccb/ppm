@@ -900,12 +900,20 @@ repeat until sentinel:
 ```
 相鄰 opcode (卅六輪型別定案 — 六輪的 f32 標註更正為 s32 鍵):
 - **201 GL_MYPARTSUP_ACK** (sub_95A3B0): `s32 count` + count×20B
-  `{s32 gun_item, s32 part_item, u8 kind, s32 val, s32 period}`
-  — 武器改裝裝配表; (gun,part) 雙鍵 (比較子 sub_95A0C0) 與
-  weapon_parts_catalog 結構互證
-- **202 GL_EXPIRE_PARTSUP_ACK** (sub_95AE40): 同構; 逐條
-  (part,gun) 進 sub_95A800 移除 = 改裝件到期拆除
-額外驗證: start<=0 → 背包游標歸 0; start>=5020 → 夾到 5020; item_id 需通過
+  `{raw4 key0, raw4 key1, raw1 kind, raw4 value, raw4 period}`;
+  native `sub_95A4A0` uses `(key0,key1)` as the duplicate/update key and
+  stores all five wire fields. The pair is consistent with the weapon/part
+  catalog projection, but the value/period policy is not established by this
+  reader.
+- **202 GL_EXPIRE_PARTSUP_ACK** (sub_95AE40): same 20B field widths; each
+  `{raw4 key0, raw4 key1, raw1 kind, raw4 value, raw4 period}` is passed to
+  `sub_95A800(key1,key0)` and removes the matching native pair. The reverse
+  callee argument order is direct native behavior; it does not by itself name
+  the two wire fields as part/gun.
+200 handler 完成後無論 success 都呼叫 `sub_41BF20(byte_BF0724)`（local
+狀態 8→9），並設 `byte_EE8C05=1`；成功 record 另以
+`sub_534450(item_id, durability)` 更新 client 目錄的 current/max durability。
+額外驗證: start<=0 → 背包游標欄歸 0; start>=5020 → 夾到 5020; item_id 需通過
 sub_535020 目錄檢查, 失敗即 sub_528960(6,...) 錯誤處理並中止本包。
 
 **205 入帳鏈 (卅五輪)**: per-item ok 塊 → sub_534450(item, dura)
@@ -1205,15 +1213,18 @@ kind 0/1/14 與 12/13/17 (可覆寫類) 走覆寫路徑, 其他 kind 重複購�
 ```
 【197→198 MyInfo】REQ 空 (sub_5704B0); 198 見 §3.2。
   另: 270 GL_MYINFO_OPEN (sub_556680): s8 — 個資公開開關 (單向)
-【199→200 MyItem】REQ 空! (sub_570A00; client 顯示 0x66「載入中」;
-  server 恆從 0 送 — 廿六輪結論三驗) ; 200 見 §3.3
+【199→200 MyItem】REQ 空! `sub_570A00` constructs opcode 199 with no
+  payload; observed lobby `+1905` and scene `+748` state-machine callers show
+  `INFORMATION`/`MYINFO` completion before the request, and client displays
+  resource string `0x66`「載入中」. Server projection may send success 200 from
+  start 0 — 199 has no start field; 200 見 §3.3
 【201 GL_MYPARTSUP_ACK】(sub_95A3B0): s32 count × 20B 條目
-  {s32 gun_item, s32 part_item, u8 kind, s32 val, s32 period}
-  — ⭐卅六輪語意定案: PARTSUP = 武器改裝(Parts-Up)裝配表!
-  等鍵比較子 sub_95A0C0 = ([0],[4]) 雙鍵 = (gun,part) —
-  與 weapon_parts_catalog 10,648 條 (gun,part) 結構互證!
-【202 GL_EXPIRE_PARTSUP_ACK】(sub_95AE40): 同構; 逐條以
-  (part,gun) 呼叫 sub_95A800 紅黑樹移除 = 改裝件到期拆除
+  `{raw4 key0, raw4 key1, raw1 kind, raw4 value, raw4 period}`。
+  `sub_95A4A0` 的 duplicate/update key 是 wire 前兩欄；weapon/part catalog
+  projection 與 pair shape 相容，但 value/period 與兩 key 的 wire 命名仍分開保留。
+【202 GL_EXPIRE_PARTSUP_ACK】(sub_95AE40): 同構；每筆 wire 前兩欄
+  以 `sub_95A800(key1,key0)` 反序刪除 native pair。這個 callee argument
+  順序是 native fact，不足以把欄位命名成 `(part,gun)`。
 【250→251 LobbyIn】REQ 空 ×2 builder (sub_574080 帶 state:=2 /
   sub_584FE0 純送); 251 死協定 (無 case) — server 不回 ✓
 【254→255 InvenIn】REQ 精確為一個 `u8 requestContextRaw` (sub_5741C0;
