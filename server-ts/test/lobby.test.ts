@@ -71,7 +71,7 @@ describe("lobby bootstrap packets", () => {
     expect(reader.s32()).toBe(0);
     expect(reader.s32()).toBe(0);
     expect(reader.raw(48)).toEqual(new Uint8Array(48));
-    expect(reader.u8()).toBe(0); // current character slot
+    expect(reader.u8()).toBe(0); // selected character-list index
     expect(reader.u8()).toBe(1); // character count
     expect(reader.u8()).toBe(1); // canonical type 1
     expect(Array.from({ length: 12 }, () => reader.u16())).toEqual([

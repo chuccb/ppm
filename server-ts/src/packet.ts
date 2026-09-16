@@ -175,22 +175,22 @@ export class Packet {
   /** Serialise to a complete encrypted frame. */
   encode(): Uint8Array {
     const payload = this.payload();
-    const plain = payload.length;
-    const aligned = align16(plain);
-    if (aligned >= MAX_ENCRYPTED) {
-      throw new RangeError(`payload ${plain} exceeds the encryptable maximum`);
+    const sizeBeforeAes = payload.length;
+    const size = align16(sizeBeforeAes);
+    if (size >= MAX_ENCRYPTED) {
+      throw new RangeError(`payload ${sizeBeforeAes} exceeds the encryptable maximum`);
     }
 
-    const staging = new Uint8Array(aligned); // pad to the block size
-    staging.set(payload);
+    const paddedPayload = new Uint8Array(size); // pad to the block size
+    paddedPayload.set(payload);
 
-    const frame = new Uint8Array(HEADER_SIZE + aligned);
+    const frame = new Uint8Array(HEADER_SIZE + size);
     const view = new DataView(frame.buffer);
-    view.setUint16(0, aligned, true);
+    view.setUint16(0, size, true);
     view.setUint16(2, this.opcode, true);
-    view.setUint16(4, plain, true);
-    view.setUint16(6, plain, true);
-    frame.set(cfbEncrypt(PACKET_ROUND_KEYS, staging), HEADER_SIZE);
+    view.setUint16(4, sizeBeforeAes, true);
+    view.setUint16(6, sizeBeforeAes, true);
+    frame.set(cfbEncrypt(PACKET_ROUND_KEYS, paddedPayload), HEADER_SIZE);
     return frame;
   }
 }
@@ -333,10 +333,10 @@ export class PacketStream {
         throw new RangeError(`frame claims LZ compression (word3=${sizeBeforeLz})`);
       }
 
-      const body = buf.subarray(HEADER_SIZE, HEADER_SIZE + size);
-      const plain = cfbDecrypt(PACKET_ROUND_KEYS, body).subarray(0, sizeBeforeAes);
+      const encryptedPayload = buf.subarray(HEADER_SIZE, HEADER_SIZE + size);
+      const payload = cfbDecrypt(PACKET_ROUND_KEYS, encryptedPayload).subarray(0, sizeBeforeAes);
       this.#pending = buf.subarray(HEADER_SIZE + size);
-      yield new Reader(opcode, plain);
+      yield new Reader(opcode, payload);
     }
   }
 }
