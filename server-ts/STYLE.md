@@ -30,8 +30,12 @@ Everything else is normal camelCase: `frameLength`, `verifyLogin`.
 
 Two guards make the convention enforceable rather than aspirational:
 
-- `wire/index.ts` lists the modules, so `reply("GL_LOGON_ACK")` is a *compile*
-  error and a builder's argument types are checked at each call site.
+- `wire/index.ts` lists the modules, one `export { default as X } from "./X.ts"`
+  per line, so `reply("GL_LOGON_ACK")` is a *compile* error and a builder's
+  argument types are checked at each call site. The list is unavoidable: ES
+  modules have no glob import, and a dynamic `import(\`./${name}.ts\`)`
+  degrades to `any`, which would hand back exactly the runtime surprises the
+  naming scheme is meant to remove.
 - At startup the registry cross-checks that list against the directory and
   every filename against `db/packets.tsv`. A file that is unlisted, a listing
   with no file, or a name that is not a real opcode all fail immediately.

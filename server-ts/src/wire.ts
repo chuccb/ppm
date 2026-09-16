@@ -18,7 +18,7 @@ import { Glob } from "bun";
 import type { Packet, Reader } from "./packet.ts";
 import { opcodeFor, opcodeName } from "./opcodes.ts";
 import type { Session } from "./session.ts";
-import { modules } from "./wire/index.ts";
+import * as modules from "./wire/index.ts";
 
 /** A `*_REQ` module: reads an inbound packet and acts on it. */
 export type Handler = (reader: Reader, session: Session) => void | Promise<void>;
@@ -34,9 +34,10 @@ export type BuilderName = {
 }[keyof Modules] &
   string;
 
-export type BuilderArgs<N extends BuilderName> = Modules[N] extends {
-  default: (op: number, ...args: infer A) => Packet;
-}
+export type BuilderArgs<N extends BuilderName> = Modules[N] extends (
+  op: number,
+  ...args: infer A
+) => Packet
   ? A
   : never;
 
@@ -65,12 +66,12 @@ export class Registry {
       if (!onDisk.has(name)) throw new Error(`wire/index.ts lists ${name}, which has no module`);
     }
 
-    for (const [name, module] of Object.entries(modules)) {
+    for (const [name, fn] of Object.entries(modules)) {
       const op = opcodeFor(name); // throws if the filename is not a real opcode
       if (name.endsWith("_REQ")) {
-        registry.#handlers.set(op, module.default as Handler);
+        registry.#handlers.set(op, fn as Handler);
       } else {
-        registry.#builders.set(name, { op, build: module.default as Builder });
+        registry.#builders.set(name, { op, build: fn as Builder });
       }
     }
     return registry;
