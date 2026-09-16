@@ -4,6 +4,7 @@
 
 export { default as GC_ENTERCHANNEL_REQ } from "./GC_ENTERCHANNEL_REQ.ts";
 export { default as GL_CLIENTINFO_REQ } from "./GL_CLIENTINFO_REQ.ts";
+export { default as GL_DATA_RECV_COMPLETED_REQ } from "./GL_DATA_RECV_COMPLETED_REQ.ts";
 export { default as GL_FRIEND_LIST_REQ } from "./GL_FRIEND_LIST_REQ.ts";
 export { default as GL_GAMEROOMINFO_REQ } from "./GL_GAMEROOMINFO_REQ.ts";
 export { default as GL_LOBBYIN_REQ } from "./GL_LOBBYIN_REQ.ts";
