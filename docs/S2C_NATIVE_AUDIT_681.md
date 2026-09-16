@@ -94,9 +94,13 @@ else:
 ```
 
 The positive branch reads exactly one tuple; it does **not** loop
-`ext_count` times. `sub_A1C870(dword_2318008, &v141, &v120, v140)` stores the
-second and first words plus the positive gate in a native feature object, while
-`v135` sets `byte_231807D` as a separate nonzero feature flag.
+`ext_count` times. `sub_A1C870(dword_2318008, &v141, &v120, v140)` has no
+conversion or validation in its recovered body: it stores `*a2` at native
+object offset `+23` (the second wire word), `*a3` at `+24` (the first wire
+word), and `a4` at `+1` (`dword_231800C`, the gate). The separately read
+`v135` sets `byte_231807D` to a boolean. `sub_44D640(dword_2318008)` only
+checks whether the `+1` gate is nonzero; it does not expose a tuple count or
+reinterpret either stored s32.
 
 Next, regardless of extension gate, the server list begins:
 
@@ -246,6 +250,12 @@ The channel scene constructor `CLobbyChannel::sub_415B80` loads
 state, and calls `sub_4169E0` and `sub_416DA0` to populate the `SERVERS`
 control. The extracted `pm_lobbydata.dat` has a `LOBBYCHANNEL` layout and
 button/scroll geometry, but no endpoint schema; it cannot rename wire fields.
+`Extracted/ui/system/netcafe_contents.xml` is a separate UTF-16 resource
+containing three `NetCafe_1..3` entries with `number`, `grade`, `logo`,
+`boost_exp`, `pg_exp`, `cash_discount`, `pg_discount`, and `level_limit`
+attributes. This is direct evidence for a client NetCafe configuration table
+used by the UI/resource layer, not a mapping from those values to the 681
+extension words or feature byte; no such byte-to-resource join is recovered.
 
 Recovered consumers include:
 
