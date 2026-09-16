@@ -949,7 +949,7 @@ ACK (sub_572D80/572E70): `u8 result` — **result 語意十輪逐分支定案**:
   state:=5 進大廳), `0` = 失敗 (彈窗, state:=4), 其他值被忽略
   (client 卡在原畫面) — 成功碼是 1 不是 0!
 ### 3.8 GL_USERLIST_REQ (105) / GL_USERLIST_ACK (106)
-REQ 端 `sub_56A0F0`: `s8 (=1)` — client 每 ≥1 秒 (timeGetTime 差
+REQ 端 `sub_56A0F0`: `u8 (=1)` — native parameter is `unsigned __int8`; client 每 ≥1 秒 (timeGetTime 差
 ≥0x3E8) 送一次要求刷新名單, log `L"Send UserList"`; server 直接回
 106。ACK 端 sub_56A250 (四輪修正):
 ```

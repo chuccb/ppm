@@ -27,7 +27,7 @@
 |---|---|---|---|
 | 101 | GT_PING_REQ | 1處 | `(空)` |
 | 103 | GE_LOGOUT_REQ | 1處 | `(空)` |
-| 105 | GL_USERLIST_REQ | 1處 | `s8` |
+| 105 | GL_USERLIST_REQ | 1處 | `u8` |
 | 107 | GL_GAMEROOMINFO_REQ | 1處 | `(空)` |
 | 111 | GL_MAKEROOM_REQ | 1處 | `u8 s8 u8 s8 str str u8 u8 u8 u8 u8 s8 u8 s8 str u8 u8 u8 u8` |
 | 113 | GL_ENTERROOM_REQ | 1處 | `u8` |

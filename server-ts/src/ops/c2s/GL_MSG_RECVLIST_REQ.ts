@@ -1,4 +1,4 @@
-/** 425 carries one signed s32; its mailbox/page meaning is not recovered. */
+/** 425 carries one s32; its mailbox/page meaning is not recovered. */
 
 import type { Connection } from "../../connection.ts";
 import type { Reader } from "../../packet.ts";
