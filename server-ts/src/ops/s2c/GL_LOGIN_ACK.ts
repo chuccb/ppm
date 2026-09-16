@@ -21,6 +21,10 @@ export const Result = {
 /** The native result is a raw s32; the client branches on its low byte only. */
 export type Result = number;
 
+const MAX_SERVER_NAME_BYTES = 49; // native char[50], including NUL
+const MAX_SERVER_HOST_BYTES = 15; // native char[16], including NUL
+const CHANNEL_GROUP_COUNT = 3; // native `for (j = 0; j < 3; ++j)`
+
 /** One selectable channel in a group. */
 export interface Channel {
   readonly type: number;
@@ -62,12 +66,6 @@ export interface Success {
   readonly servers: readonly GameServer[];
   /** Opaque billing/charge UI mode, echoed back in 143. Not a player level. */
   readonly n100?: number;
-}
-
-function requireS16(value: number, field: string): void {
-  if (!Number.isSafeInteger(value) || value < -0x8000 || value > 0x7fff) {
-    throw new RangeError(`681 ${field} must fit s16`);
-  }
 }
 
 function requireNonNegativeS16(value: number, field: string): void {
@@ -113,19 +111,18 @@ export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Pac
 
   p.s16(servers.length);
   for (const server of servers) {
-    if (server.channelGroups.length !== 3) {
+    if (server.channelGroups.length !== CHANNEL_GROUP_COUNT) {
       throw new RangeError("each server must declare exactly three channel groups");
     }
-    if (server.name.length > 49) {
+    if (server.name.length > MAX_SERVER_NAME_BYTES) {
       throw new RangeError("681 server name must fit native char[50]");
     }
-    if (server.host.length > 15) {
+    if (server.host.length > MAX_SERVER_HOST_BYTES) {
       throw new RangeError("681 server host must fit native char[16]");
     }
-    requireS16(server.serverId, "server_id");
     requireU16(server.port, "server_port");
-    requireS16(server.group, "server group");
 
+    // These are raw2 fields; native domain/signedness is unresolved.
     p.s16(server.serverId);
     p.str(server.name); // native char[50]
     p.str(server.host); // native char[16]
@@ -147,11 +144,19 @@ export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Pac
         throw new RangeError("681 channel name must fit native char[50]");
       }
       requireNonNegativeS16(channel.currentUsers, "channel current_users");
+      const extra = channel.extra;
+      if (channel.type === 3) {
+        if (extra === undefined) {
+          throw new RangeError("681 type-3 channel requires its extra byte");
+        }
+      } else if (extra !== undefined) {
+        throw new RangeError("681 channel extra is only valid for type 3");
+      }
       p.u8(channel.type);
       p.str(channel.name);
       p.s16(channel.currentUsers);
       p.u8(channel.flag);
-      if (channel.type === 3) p.u8(channel.extra ?? 0);
+      if (extra !== undefined) p.u8(extra);
     }
   }
 

@@ -184,6 +184,35 @@ describe("681 — login ack", () => {
     expect(reader.u8()).toBe(9); // extra, only present for type 3
   });
 
+  test("requires the type-3 extra framing to match the channel type", () => {
+    expect(() =>
+      buildPacket("GL_LOGIN_ACK", {
+        userNo: 1,
+        servers: [{
+          ...servers[0]!,
+          channelGroups: [
+            { maxUsers: 100, channel: { type: 3, name: "AI", currentUsers: 0, flag: 0 } },
+            { maxUsers: 0 },
+            { maxUsers: 0 },
+          ],
+        }],
+      }),
+    ).toThrow(/type-3 channel requires/);
+    expect(() =>
+      buildPacket("GL_LOGIN_ACK", {
+        userNo: 1,
+        servers: [{
+          ...servers[0]!,
+          channelGroups: [
+            { maxUsers: 100, channel: { type: 1, name: "Normal", currentUsers: 0, flag: 0, extra: 9 } },
+            { maxUsers: 0 },
+            { maxUsers: 0 },
+          ],
+        }],
+      }),
+    ).toThrow(/extra is only valid/);
+  });
+
   test("insists on exactly three channel groups", () => {
     expect(() =>
       buildPacket("GL_LOGIN_ACK", {
