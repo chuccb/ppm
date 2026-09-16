@@ -2,8 +2,9 @@
  * 107 -> 108 empty room list.
  *
  * Mode 0 is the ordinary list branch; with count zero the client reads no room
- * records. Room state is intentionally not synthesized before a Room model
- * exists in server-ts.
+ * records. Native mode 3 is a separate tournament grammar (it does not read
+ * the ordinary count), so it remains intentionally unsupported until a bounded
+ * tournament model exists in server-ts.
  */
 
 import { Packet } from "../../packet.ts";

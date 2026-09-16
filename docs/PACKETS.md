@@ -97,19 +97,31 @@ offset 8   ...  payload (小端, 緊湊, 無對齊)
 | 函數 | 型別 | 大小 |
 |------|------|------|
 | sub_592920,sub_5928E0,sub_592960 (寫) / sub_592900,sub_592940,sub_592980 (讀) | u8 (1B) | 1 |
-| sub_5929A0,sub_5929E0 (寫) / sub_592A00,sub_5929C0 (讀) | u16/s16 | 2 |
-| sub_592A20 / sub_592A40 | s32 | 4 |
-| sub_592A60 / sub_592A80 | u32 | 4 |
-| sub_592B20 / sub_592B40 | IEEE-754 f32 | 4 |
+| sub_5929A0,sub_5929E0 (寫) / sub_592A00,sub_5929C0 (讀) | raw2; caller may treat it as u16/s16 | 2 |
+| sub_592A20 / sub_592A40 | raw4; caller may treat it as s32/u32 or another 4-byte value | 4 |
+| sub_592A60 / sub_592A80 | raw4; this alias does not itself establish unsigned semantics | 4 |
+| sub_592B20 / sub_592B40 | raw4; float semantics require a native float caller | 4 |
 | sub_592AC0 | raw4; semantics come from its caller (142 calendar / 144 request context / 196 client flags are raw4 uses) | 4 |
-| sub_592AE0 / sub_592B00 | u64 | 8 |
+| sub_592AE0 / sub_592B00 | raw8; 682 guard is a caller-defined u64 projection | 8 |
 | sub_5926F0 / sub_592730 | ANSI 字串 (lstrlenA+1, 含 NUL) | 變長 |
 | sub_592770 / sub_5927B0 | UTF-16 字串 (2*len+2) | 變長 |
 | sub_5927F0 / sub_592850 | 內嵌整個 Packet (u16 opcode + u32 size + bytes) | 變長 |
 
 > 8 個 u8 讀取別名 (592900/940/980) 底層都是 `sub_592500(this,a2,1)`;
-> 寫入別名同理 (592920/8E0/960 → `sub_592580`)。Hex-Rays 的 `char` 參數
-> 只是 byte 寬度, wire 寬度以 size 為準 (u16=2B/u32=4B 亦然)。
+> 寫入別名同理 (592920/8E0/960 → `sub_592580`)。`sub_5929A0/9E0` 的
+> decompiler 參數雖顯示 `char`，函數實作仍從該參數位址複製 2 bytes；不可
+> 只用 Hex-Rays 參數型別決定 signedness。所有 2/4/8-byte aliases 同理，
+> wire 寬度以函數內的 `sub_592500/sub_592580` size 為準，語意必須回到 caller。
+
+**primitive implementation boundary（`PaperMan.exe.c` 00592500–00592B80）：**
+`sub_592500` 在 read cursor + requested size 超過 packet payload end 或
+allocated end 時回傳 0 且不 advance；成功才 `memcpy` 並 advance。`sub_592580`
+在 write cursor + size 不超過 allocated end 時才 copy、advance 並增加 packet
+payload size。這是 helper-level boundary，不等於整個 native reader fail-closed：
+108、426、434 等 reader 呼叫這些 helper 時沒有逐次檢查回傳值；上層 packet
+stream framing 仍是另一層責任。`sub_5926F0/sub_592730` 則以 ANSI NUL
+字串的 `lstrlenA()+1` 決定長度，因此字串語意與固定 buffer 上限仍須由各
+caller/consumer 分別驗證。
 
 **字串一律以 NUL 結尾直接寫進 payload，沒有長度前綴** (讀出端靠 lstrlenA)。
 
@@ -1076,13 +1088,24 @@ round_type==4] + 2×{s32 uid (+s32)} }; 之後 u8 has_my (≠0 → u8 room,
 u8), f32 → 存 [494]。
 ### 3.10 GL_FRIEND_LIST_ACK (434) — sub_55AFC0:
 ```
-raw2 header, string self, u8 count; repeat: string nick, s32 status
+raw2 header, string self, u8 count; repeat: string nick, raw4 field_a3
 ```
+`sub_537F60` accepts the full 4-byte record field but assigns it to the
+one-byte table slot `this+61585+index`; only the low byte is visibly retained by
+that local consumer. The 21-byte nickname copy loop has no visible per-byte clamp.
+
 ### 3.11 GL_MSG_RECVLIST_ACK (426) — sub_55A630:
 ```
-raw2 header, string self, u8 count
-repeat: string from, u8 raw, string title, s32 msg_id, string body(≤201), string raw, s16 date
+raw2 header, string field_s0, u8 count
+repeat: string field_s1, u8 field_a3, string field_s2, raw4 field_a5, string field_s3 (native local 201-byte stride; reader does not visibly clamp), string field_s4 (native 2-byte stride), raw2 field_a8
 ```
+Native `sub_5378C0` keeps at most 10 rows. Its string slots have strides 20/21/201/2
+and are NUL-copy loops without an explicit clamp. The consumed `raw4 field_a5` is
+then assigned to a one-byte table slot (`this+60536+index`), and the consumed `raw2
+field_a8` is assigned to another one-byte table slot (`this+122107+index`); only the
+low byte of each is visibly retained by this recovered consumer. This truncation is
+a client storage fact, not permission to narrow the wire fields in a server writer.
+
 ### 3.12 GP_CH*C 家族 (222–245, 362–363, 380–389, 882) — 四輪交叉驗證修正:
 **REQ** (builder sub_5567F0@230 / sub_5568E0@232 / sub_556B90@244 等):
 `s32 新的絕對累計值` — client 送 **total 而非增量** (a1<0 時不送)。
