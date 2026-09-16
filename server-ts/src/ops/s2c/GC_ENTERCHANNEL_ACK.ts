@@ -72,8 +72,25 @@ export default function GC_ENTERCHANNEL_ACK(op: number, entry: Entry): Packet {
   if (!("endpoint" in entry)) {
     throw new RangeError("196 success requires its endpoint tail");
   }
-  if ((entry.channelType ?? 0) === 3) {
+
+  const endpointOpaque = entry.endpointOpaque ?? 0;
+  const channelType = entry.channelType ?? 0;
+  const clientFlags = entry.clientFlags ?? 0;
+  const clientDefault = entry.clientDefault ?? 5;
+  if (!Number.isSafeInteger(endpointOpaque) || endpointOpaque < 0 || endpointOpaque > 0xff) {
+    throw new RangeError("196 endpoint_opaque must fit u8");
+  }
+  if (!Number.isSafeInteger(channelType) || channelType < 0 || channelType > 0xff) {
+    throw new RangeError("196 channel_type must fit u8");
+  }
+  if (channelType === 3) {
     throw new RangeError("196 channel type 3 requires the unrecovered AI tail");
+  }
+  if (!Number.isSafeInteger(clientFlags) || clientFlags < 0 || clientFlags > 0xffff_ffff) {
+    throw new RangeError("196 client_flags must fit raw4");
+  }
+  if (!Number.isSafeInteger(clientDefault) || clientDefault < 0 || clientDefault > 0xff) {
+    throw new RangeError("196 client_default must fit u8");
   }
 
   if (entry.endpoint.host.length === 0 || entry.endpoint.host.length > 19) {
@@ -86,8 +103,8 @@ export default function GC_ENTERCHANNEL_ACK(op: number, entry: Entry): Packet {
   return p
     .str(entry.endpoint.host)
     .s32(entry.endpoint.port)
-    .u8(entry.endpointOpaque ?? 0)
-    .u8(entry.channelType ?? 0)
-    .u32(entry.clientFlags ?? 0)
-    .u8(entry.clientDefault ?? 5);
+    .u8(endpointOpaque)
+    .u8(channelType)
+    .u32(clientFlags)
+    .u8(clientDefault);
 }

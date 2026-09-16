@@ -114,6 +114,15 @@ describe("GC_ENTERCHANNEL_ACK", () => {
     ).toThrow(/endpoint port/);
     expect(() =>
       buildPacket("GC_ENTERCHANNEL_ACK", {
+        result: EnterResult.Success,
+        channelId: 1,
+        channelIndex: 0,
+        endpoint: { host: "127.0.0.1", port: 40202 },
+        clientFlags: 0x1_0000_0000,
+      }),
+    ).toThrow(/client_flags/);
+    expect(() =>
+      buildPacket("GC_ENTERCHANNEL_ACK", {
         result: EnterResult.GenericError4,
         channelId: Number.NaN,
         channelIndex: 0,
