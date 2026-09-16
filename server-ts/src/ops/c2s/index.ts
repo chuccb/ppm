@@ -3,9 +3,11 @@
 // Packets the client sends us. Each module reads one and acts on it.
 
 export { default as GC_ENTERCHANNEL_REQ } from "./GC_ENTERCHANNEL_REQ.ts";
+export { default as GL_FRIEND_LIST_REQ } from "./GL_FRIEND_LIST_REQ.ts";
 export { default as GL_GAMEROOMINFO_REQ } from "./GL_GAMEROOMINFO_REQ.ts";
 export { default as GL_LOBBYIN_REQ } from "./GL_LOBBYIN_REQ.ts";
 export { default as GL_LOGIN_REQ } from "./GL_LOGIN_REQ.ts";
+export { default as GL_MSG_RECVLIST_REQ } from "./GL_MSG_RECVLIST_REQ.ts";
 export { default as GL_MYINFO_REQ } from "./GL_MYINFO_REQ.ts";
 export { default as GL_MYITEM_REQ } from "./GL_MYITEM_REQ.ts";
 export { default as GL_SHOPIN_REQ } from "./GL_SHOPIN_REQ.ts";

@@ -82,5 +82,17 @@ describe("lobby bootstrap packets", () => {
     expect(rooms.remaining).toBe(0);
 
     expect(decode(build("GL_SHOPIN_ACK").encode()).remaining).toBe(0);
+
+    const friends = decode(build("GL_FRIEND_LIST_ACK", "alice").encode());
+    expect(friends.u16()).toBe(0);
+    expect(friends.str()).toBe("alice");
+    expect(friends.u8()).toBe(0);
+    expect(friends.remaining).toBe(0);
+
+    const messages = decode(build("GL_MSG_RECVLIST_ACK", "alice").encode());
+    expect(messages.u16()).toBe(0);
+    expect(messages.str()).toBe("alice");
+    expect(messages.u8()).toBe(0);
+    expect(messages.remaining).toBe(0);
   });
 });
