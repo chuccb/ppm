@@ -62,6 +62,10 @@ export type OutboundArgs<N extends OutboundName> = OutboundModules[N] extends (
   : never;
 
 type Operation = (...args: unknown[]) => unknown;
+type LoadedOperation = {
+  readonly opcode: number;
+  readonly operation: Operation;
+};
 type ImportMetaWithRequire = ImportMeta & {
   require(path: string): unknown;
 };
@@ -97,8 +101,8 @@ function operationFromModule(dir: "c2s" | "s2c", name: string): Operation {
   return operation;
 }
 
-function loadOperations(dir: "c2s" | "s2c"): Map<string, Operation> {
-  const operations = new Map<string, Operation>();
+function loadOperations(dir: "c2s" | "s2c"): ReadonlyMap<string, LoadedOperation> {
+  const operations = new Map<string, LoadedOperation>();
   const opcodes = new Map<number, string>();
   for (const name of namesOnDisk(dir)) {
     // opcodeFor is deliberately called during discovery, not only on first use.
@@ -109,7 +113,7 @@ function loadOperations(dir: "c2s" | "s2c"): Map<string, Operation> {
       throw new Error(`duplicate ${dir} opcode ${opcodeName(opcode)}: ${previous} and ${name}`);
     }
     opcodes.set(opcode, name);
-    operations.set(name, operationFromModule(dir, name));
+    operations.set(name, { opcode, operation: operationFromModule(dir, name) });
   }
   return operations;
 }
@@ -119,8 +123,7 @@ const outboundOperations = loadOperations("s2c");
 
 /** opcode -> the module that handles it. */
 const handlers = new Map<number, Handler>();
-for (const [name, operation] of inboundOperations) {
-  const opcode = opcodeFor(name);
+for (const { opcode, operation } of inboundOperations.values()) {
   if (handlers.has(opcode)) throw new Error(`duplicate c2s opcode ${opcodeName(opcode)}`);
   handlers.set(opcode, operation as Handler);
 }
@@ -130,12 +133,12 @@ export function handlerFor(opcode: number): Handler | undefined {
 }
 
 export function build<N extends OutboundName>(name: N, ...args: OutboundArgs<N>): Packet {
-  const operation = outboundOperations.get(name);
-  if (!operation) throw new Error(`unknown outbound operation ${name}`);
+  const entry = outboundOperations.get(name);
+  if (!entry) throw new Error(`unknown outbound operation ${name}`);
 
   // The public tuple is checked by TypeScript; the runtime-loaded function is
   // intentionally unknown until its result is checked below.
-  const packet = operation(opcodeFor(name), ...(args as unknown[]));
+  const packet = entry.operation(entry.opcode, ...(args as unknown[]));
   if (!(packet instanceof Packet)) {
     throw new TypeError(`outbound operation ${name} did not return a Packet`);
   }
@@ -144,7 +147,7 @@ export function build<N extends OutboundName>(name: N, ...args: OutboundArgs<N>)
 
 /** One line for the startup log. */
 export function summary(): string {
-  const inbound = [...inboundOperations.keys()].map((name) => opcodeName(opcodeFor(name))).sort();
+  const inbound = [...inboundOperations.values()].map(({ opcode }) => opcodeName(opcode)).sort();
   const outbound = [...outboundOperations.keys()].sort();
   return `c2s ${inbound.length} (${inbound.join(", ")}), s2c ${outbound.length} (${outbound.join(", ")})`;
 }
