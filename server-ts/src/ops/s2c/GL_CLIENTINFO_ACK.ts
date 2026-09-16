@@ -16,7 +16,8 @@ export default function GL_CLIENTINFO_ACK(op: number, myInfo: MyInfo | null): Pa
   if (!myInfo || myInfo.characters.length === 0) return new Packet(op).u8(0);
 
   // 247's first byte is the serialized character-list index, not the
-  // persistent slot id. The native 198/247 basic block carries the same index.
+  // persistent slot id. The native 198/247 basic block carries the same index;
+  // writeMyInfoBasicData rejects values outside the client's 20-slot array.
   const characterIndex = myInfo.selectedCharIndex;
   const character = myInfo.characters[characterIndex] ?? myInfo.characters[0]!;
   const p = new Packet(op).u8(1);

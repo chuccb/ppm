@@ -841,9 +841,12 @@ CClientData 的 sub_523A50 (523BF0+524010+524660+524B70(a3=0)) 其實屬於
   已解析記錄；若仍找不到非 0 值，便取得 resource `0xCC` 並顯示 code 63。
 - `sub_523BF0` 在 nickname 後讀 `CClientData+88`，並在 48-byte blob 後
   讀 `+4`；`sub_526CA0` / `sub_884160` 將 `+88` 用作 `CHARSLOT` 選取值，
-  並由 `sub_884160` 原樣寫入 outbound opcode 312。Server 必須在 **兩個**
-  198/247 基本資料欄位寫目前的 character-list slot/index，不能在 `+88`
-  寫角色 type。真正的 `char_type` 是後續每筆 `sub_524010` 記錄的首 byte。
+  並由 `sub_884160` 原樣寫入 outbound opcode 312。`sub_525070`、
+  `sub_525790` 等 consumer 以它索引最多 20 個 character-list slots；因此
+  Server 必須在 **兩個** 198/247 基本資料欄位寫 0..19 的 character-list
+  slot/index，不能在 `+88` 寫角色 type。真正的 `char_type` 是後續每筆
+  `sub_524010` 記錄的首 byte。Persistent `current_character` 與 compact
+  serialized list 的映射仍須由 server-side character policy 證實。
 - 對精確的 `origin/main:Extracted/ui/cfg/itemdata.pat` 解密後，變長 ItemData
   stream 的 header 是 `(version=1,count=21164)`，可無殘餘地解析全部 21,164
   records。`19,900,001..19,900,015` 連續 15 筆角色本體在 record `+532` 的

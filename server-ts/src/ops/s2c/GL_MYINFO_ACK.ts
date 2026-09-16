@@ -29,6 +29,15 @@ function requireU8(name: string, value: number): void {
   }
 }
 
+const NATIVE_CHARACTER_SLOT_COUNT = 20;
+
+function requireCharacterIndex(name: string, value: number): void {
+  requireU8(name, value);
+  if (value >= NATIVE_CHARACTER_SLOT_COUNT) {
+    throw new RangeError(`198 ${name} must be a native character-list index in 0..19`);
+  }
+}
+
 function requireU16(name: string, value: number): void {
   if (!Number.isSafeInteger(value) || value < 0 || value > 0xffff) {
     throw new RangeError(`198 ${name} must fit u16`);
@@ -117,7 +126,7 @@ export function writeMyInfoBasicData(packet: Packet, myInfo: MyInfo): Packet {
   if (myInfo.nickname.length > NICKNAME_MAX_BYTES) {
     throw new RangeError(`198 nickname must fit native char[48]`);
   }
-  requireU8("selected_char_index", myInfo.selectedCharIndex);
+  requireCharacterIndex("selected_char_index", myInfo.selectedCharIndex);
   const { stats } = myInfo;
   const words: readonly [string, number][] = [
     ["level", myInfo.level],
