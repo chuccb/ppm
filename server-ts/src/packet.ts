@@ -267,7 +267,8 @@ export class Reader {
     while (end + 1 < this.#buf.length && !(this.#buf[end] === 0 && this.#buf[end + 1] === 0)) {
       end += 2;
     }
-    this.#pos = Math.min(end + 2, this.#buf.length);
+    if (end + 1 >= this.#buf.length) throw new RangeError("unterminated UTF-16 string");
+    this.#pos = end + 2;
     const view = this.#view();
     let out = "";
     for (let i = start; i < end; i += 2) out += String.fromCharCode(view.getUint16(i, true));
