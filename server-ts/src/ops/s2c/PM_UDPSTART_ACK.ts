@@ -25,7 +25,8 @@ export const Result = {
   IntermediateServerRestricted: 10,
 } as const;
 
-export type Result = (typeof Result)[keyof typeof Result];
+/** Native result is an opaque u8 at the wire boundary; constants above cover known UI branches. */
+export type Result = number;
 
 export interface Admission {
   readonly result: Result;
@@ -54,6 +55,9 @@ export default function PM_UDPSTART_ACK(op: number, admission: Admission): Packe
     restrictionKdr = 0,
   } = admission;
 
+  if (!Number.isSafeInteger(result) || result < 0 || result > 0xff) {
+    throw new RangeError("144 result must fit u8");
+  }
   if (channelName.length > CHANNEL_NAME_MAX_BYTES) {
     throw new RangeError(`channel name longer than ${CHANNEL_NAME_MAX_BYTES} bytes`);
   }

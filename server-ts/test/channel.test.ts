@@ -64,6 +64,21 @@ describe("GC_ENTERCHANNEL_ACK", () => {
     expect(r.remaining).toBe(0);
   });
 
+  test("preserves an unknown native u8 failure code", () => {
+    const r = build("GC_ENTERCHANNEL_ACK", {
+      result: 0xfe,
+      channelId: 7,
+      channelIndex: 2,
+    });
+    expect(r.u8()).toBe(0xfe);
+    expect(r.s32()).toBe(7);
+    expect(r.u8()).toBe(2);
+    expect(r.remaining).toBe(0);
+    expect(() =>
+      buildPacket("GC_ENTERCHANNEL_ACK", { result: 0x100, channelId: 7, channelIndex: 2 }),
+    ).toThrow(/u8/);
+  });
+
   test("writes the endpoint tail only for success", () => {
     const r = build("GC_ENTERCHANNEL_ACK", {
       result: EnterResult.Success,
@@ -110,6 +125,27 @@ describe("PM_UDPSTART_ACK", () => {
     expect(r.u32()).toBe(0); // client request context
     expect(r.u8()).toBe(0); // no netcafe block
     expect(r.remaining).toBe(0);
+  });
+
+  test("preserves an unknown native u8 result and keeps the fixed prefix", () => {
+    const r = build("PM_UDPSTART_ACK", {
+      result: 0xfe,
+      channelName: "x",
+    });
+    expect(r.u8()).toBe(0xfe);
+    r.u8();
+    r.s32();
+    r.str();
+    r.s32();
+    r.s32();
+    r.s32();
+    r.f32();
+    r.u32();
+    expect(r.u8()).toBe(0);
+    expect(r.remaining).toBe(0);
+    expect(() =>
+      buildPacket("PM_UDPSTART_ACK", { result: 0x100, channelName: "x" }),
+    ).toThrow(/u8/);
   });
 
   test("all fields are present even on failure, because the client reads first", () => {

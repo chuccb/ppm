@@ -23,8 +23,9 @@ export const Result = {
   GenericError9: 9,
 } as const;
 
-export type Result = (typeof Result)[keyof typeof Result];
-type FailureResult = Exclude<Result, typeof Result.Success>;
+/** Native result is an opaque u8 at the wire boundary; constants cover known UI branches. */
+export type Result = number;
+type FailureResult = number;
 
 export interface Endpoint {
   readonly host: string;
@@ -51,12 +52,16 @@ export interface SuccessEntry {
 export type Entry = FailureEntry | SuccessEntry;
 
 export default function GC_ENTERCHANNEL_ACK(op: number, entry: Entry): Packet {
+  if (!Number.isSafeInteger(entry.result) || entry.result < 0 || entry.result > 0xff) {
+    throw new RangeError("196 result must fit u8");
+  }
+
   const p = new Packet(op)
     .u8(entry.result)
     .s32(entry.channelId)
     .u8(entry.channelIndex);
 
-  if (entry.result !== Result.Success) return p;
+  if (entry.result !== Result.Success || !("endpoint" in entry)) return p;
 
   if (entry.endpoint.host.length === 0 || entry.endpoint.host.length > 19) {
     throw new RangeError("196 endpoint host must fit the native char[20]");
