@@ -227,6 +227,13 @@ describe("live channel handshake", () => {
     expect(entry.u8()).toBe(5); // native initial default
     expect(entry.remaining).toBe(0);
 
+    socket.write(new Packet(opcodeFor("GC_ENTERCHANNEL_REQ")).u8(0).u8(0).u8(0).encode());
+    const repeated = await next();
+    expect(repeated.u8()).toBe(EnterResult.GenericError4);
+    expect(repeated.s32()).toBe(1);
+    expect(repeated.u8()).toBe(0);
+    expect(repeated.remaining).toBe(0);
+
     socket.end();
   });
 });

@@ -40,6 +40,16 @@ export default function GC_ENTERCHANNEL_REQ(r: Reader, connection: Connection): 
     return;
   }
 
+  if (connection.channelEntryCompleted) {
+    connection.log("repeated channel selection -> rejected");
+    connection.reply("GC_ENTERCHANNEL_ACK", {
+      result: Result.GenericError4,
+      channelId: connection.config.channelId ?? 1,
+      channelIndex: selection.selectedChannel,
+    });
+    return;
+  }
+
   const group = connection.config.channelGroupIndex ?? 0;
   const channel = connection.config.channelIndex ?? 0;
   const channelType = connection.config.channelType ?? 0;
@@ -74,7 +84,7 @@ export default function GC_ENTERCHANNEL_REQ(r: Reader, connection: Connection): 
   } as const;
 
   connection.reply("GC_ENTERCHANNEL_ACK", entry);
-  if (!connection.channelEntryCompleted) connection.completeChannelEntry();
+  connection.completeChannelEntry();
   connection.log(`channel selection ${selection.selectedGroup}/${selection.selectedChannel} -> accepted`);
 }
 
