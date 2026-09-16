@@ -1,9 +1,9 @@
 /**
- * Accounts, on Bun's native `bun:sqlite` (SQLite 3.53.4).
+ * Account and minimal lobby identity state on Bun's native `bun:sqlite`.
  *
- * Scope note: this stores only what the server itself owns — accounts and
- * sessions. Game content (items, maps, quests) is read from the client
- * resources, which are authoritative and documented in docs/RESOURCES.md.
+ * The first server slice owns only facts needed by the login and 197/198
+ * bootstrap. It does not seed inventory, weapons, prices, quests, or rewards:
+ * those require a separate evidence chain in the client and resources.
  */
 
 import { Database } from "bun:sqlite";
@@ -16,6 +16,47 @@ export interface Account {
   readonly lastLoginAt: number | null;
 }
 
+export interface PlayerStats {
+  readonly wins: number;
+  readonly losses: number;
+  readonly kills: number;
+  readonly deaths: number;
+  readonly headshots: number;
+  readonly combos: number;
+  readonly hearts: number;
+  readonly doubleKill: number;
+  readonly tripleKill: number;
+  readonly criticals: number;
+  readonly multiKill: number;
+  readonly ultraKill: number;
+  readonly zKill: number;
+  readonly kKill: number;
+  readonly ddKill: number;
+  readonly playCount: number;
+  readonly roundCount: number;
+  readonly disconnects: number;
+  readonly playTimeSeconds: number;
+}
+
+export interface PlayerCharacter {
+  readonly slot: number;
+  readonly type: number;
+  /** The twelve category-relative u16 values read by 198. */
+  readonly appearance: readonly number[];
+}
+
+export interface PlayerInfo {
+  readonly id: number;
+  readonly nickname: string;
+  readonly level: number;
+  readonly experience: number;
+  readonly gamePoints: number;
+  readonly cash: number;
+  readonly currentCharacter: number;
+  readonly stats: PlayerStats;
+  readonly characters: readonly PlayerCharacter[];
+}
+
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS account (
   id            INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,6 +67,59 @@ CREATE TABLE IF NOT EXISTS account (
 ) STRICT;
 
 CREATE INDEX IF NOT EXISTS account_username ON account(username);
+
+CREATE TABLE IF NOT EXISTS player (
+  id              INTEGER PRIMARY KEY AUTOINCREMENT,
+  account_id      INTEGER NOT NULL UNIQUE REFERENCES account(id) ON DELETE CASCADE,
+  nickname        TEXT    NOT NULL UNIQUE,
+  level           INTEGER NOT NULL DEFAULT 1,
+  experience      INTEGER NOT NULL DEFAULT 0,
+  game_points     INTEGER NOT NULL DEFAULT 0,
+  cash            INTEGER NOT NULL DEFAULT 0,
+  current_character INTEGER NOT NULL DEFAULT 0 CHECK (current_character BETWEEN 0 AND 19)
+) STRICT;
+
+CREATE TABLE IF NOT EXISTS player_stats (
+  player_id       INTEGER PRIMARY KEY REFERENCES player(id) ON DELETE CASCADE,
+  wins            INTEGER NOT NULL DEFAULT 0,
+  losses          INTEGER NOT NULL DEFAULT 0,
+  kills           INTEGER NOT NULL DEFAULT 0,
+  deaths          INTEGER NOT NULL DEFAULT 0,
+  headshots       INTEGER NOT NULL DEFAULT 0,
+  combos          INTEGER NOT NULL DEFAULT 0,
+  hearts          INTEGER NOT NULL DEFAULT 0,
+  double_kill     INTEGER NOT NULL DEFAULT 0,
+  triple_kill     INTEGER NOT NULL DEFAULT 0,
+  criticals       INTEGER NOT NULL DEFAULT 0,
+  multi_kill      INTEGER NOT NULL DEFAULT 0,
+  ultra_kill      INTEGER NOT NULL DEFAULT 0,
+  z_kill          INTEGER NOT NULL DEFAULT 0,
+  k_kill          INTEGER NOT NULL DEFAULT 0,
+  dd_kill         INTEGER NOT NULL DEFAULT 0,
+  play_count      INTEGER NOT NULL DEFAULT 0,
+  round_count     INTEGER NOT NULL DEFAULT 0,
+  disconnects     INTEGER NOT NULL DEFAULT 0,
+  play_time_seconds INTEGER NOT NULL DEFAULT 0
+) STRICT;
+
+CREATE TABLE IF NOT EXISTS player_character (
+  player_id       INTEGER NOT NULL REFERENCES player(id) ON DELETE CASCADE,
+  slot            INTEGER NOT NULL CHECK (slot BETWEEN 0 AND 19),
+  character_type  INTEGER NOT NULL CHECK (character_type BETWEEN 1 AND 15),
+  appearance0     INTEGER NOT NULL DEFAULT 0 CHECK (appearance0 BETWEEN 0 AND 65535),
+  appearance1     INTEGER NOT NULL DEFAULT 0 CHECK (appearance1 BETWEEN 0 AND 65535),
+  appearance2     INTEGER NOT NULL DEFAULT 0 CHECK (appearance2 BETWEEN 0 AND 65535),
+  appearance3     INTEGER NOT NULL DEFAULT 0 CHECK (appearance3 BETWEEN 0 AND 65535),
+  appearance4     INTEGER NOT NULL DEFAULT 0 CHECK (appearance4 BETWEEN 0 AND 65535),
+  appearance5     INTEGER NOT NULL DEFAULT 0 CHECK (appearance5 BETWEEN 0 AND 65535),
+  appearance6     INTEGER NOT NULL DEFAULT 0 CHECK (appearance6 BETWEEN 0 AND 65535),
+  appearance7     INTEGER NOT NULL DEFAULT 0 CHECK (appearance7 BETWEEN 0 AND 65535),
+  appearance8     INTEGER NOT NULL DEFAULT 0 CHECK (appearance8 BETWEEN 0 AND 65535),
+  appearance9     INTEGER NOT NULL DEFAULT 0 CHECK (appearance9 BETWEEN 0 AND 65535),
+  appearance10    INTEGER NOT NULL DEFAULT 0 CHECK (appearance10 BETWEEN 0 AND 65535),
+  appearance11    INTEGER NOT NULL DEFAULT 0 CHECK (appearance11 BETWEEN 0 AND 65535),
+  PRIMARY KEY (player_id, slot)
+) STRICT;
 `;
 
 /**
@@ -101,6 +195,175 @@ export class Store {
     };
   }
 
+  /**
+   * Creates the minimal private-server player projection needed by 198.
+   * Canonical character type 1 and its six native body-template values are
+   * source-proven; no weapon, item, currency, or reward is granted here.
+   */
+  ensurePlayer(accountId: number): PlayerInfo | null {
+    const existing = this.getPlayer(accountId);
+    if (existing) return existing;
+
+    const account = this.#db
+      .query<{ username: string }, { id: number }>("SELECT username FROM account WHERE id = $id")
+      .get({ id: accountId });
+    if (!account) return null;
+
+    const nickname = nativeNickname(account.username, accountId);
+    this.#db.exec("BEGIN IMMEDIATE");
+    try {
+      const inserted = this.#db
+        .query("INSERT INTO player (account_id, nickname) VALUES ($a, $n)")
+        .run({ a: accountId, n: nickname });
+      if (inserted.changes !== 1) throw new Error("player insert did not affect one row");
+
+      const player = this.#db
+        .query<{ id: number }, []>("SELECT last_insert_rowid() AS id")
+        .get();
+      if (!player) throw new Error("player insert did not return an id");
+
+      this.#db.query("INSERT INTO player_stats (player_id) VALUES ($p)").run({ p: player.id });
+      this.#db
+        .query(
+          `INSERT INTO player_character (
+             player_id, slot, character_type,
+             appearance0, appearance1, appearance2, appearance3, appearance4, appearance5
+           ) VALUES ($p, 0, 1, 1, 1, 1, 1, 1, 1)`,
+        )
+        .run({ p: player.id });
+      this.#db.exec("COMMIT");
+    } catch (error) {
+      this.#db.exec("ROLLBACK");
+      throw error;
+    }
+
+    return this.getPlayer(accountId);
+  }
+
+  getPlayer(accountId: number): PlayerInfo | null {
+    const row = this.#db
+      .query<
+        {
+          id: number;
+          nickname: string;
+          level: number;
+          experience: number;
+          game_points: number;
+          cash: number;
+          current_character: number;
+          wins: number;
+          losses: number;
+          kills: number;
+          deaths: number;
+          headshots: number;
+          combos: number;
+          hearts: number;
+          double_kill: number;
+          triple_kill: number;
+          criticals: number;
+          multi_kill: number;
+          ultra_kill: number;
+          z_kill: number;
+          k_kill: number;
+          dd_kill: number;
+          play_count: number;
+          round_count: number;
+          disconnects: number;
+          play_time_seconds: number;
+        },
+        { a: number }
+      >(
+        `SELECT p.id, p.nickname, p.level, p.experience, p.game_points, p.cash,
+                p.current_character,
+                s.wins, s.losses, s.kills, s.deaths, s.headshots, s.combos, s.hearts,
+                s.double_kill, s.triple_kill, s.criticals, s.multi_kill, s.ultra_kill,
+                s.z_kill, s.k_kill, s.dd_kill, s.play_count, s.round_count,
+                s.disconnects, s.play_time_seconds
+           FROM player p
+           JOIN player_stats s ON s.player_id = p.id
+          WHERE p.account_id = $a`,
+      )
+      .get({ a: accountId });
+    if (!row) return null;
+
+    const characters = this.#db
+      .query<
+        {
+          slot: number;
+          character_type: number;
+          appearance0: number;
+          appearance1: number;
+          appearance2: number;
+          appearance3: number;
+          appearance4: number;
+          appearance5: number;
+          appearance6: number;
+          appearance7: number;
+          appearance8: number;
+          appearance9: number;
+          appearance10: number;
+          appearance11: number;
+        },
+        { p: number }
+      >(
+        `SELECT slot, character_type,
+                appearance0, appearance1, appearance2, appearance3, appearance4, appearance5,
+                appearance6, appearance7, appearance8, appearance9, appearance10, appearance11
+           FROM player_character WHERE player_id = $p ORDER BY slot`,
+      )
+      .all({ p: row.id })
+      .map((character) => ({
+        slot: character.slot,
+        type: character.character_type,
+        appearance: [
+          character.appearance0,
+          character.appearance1,
+          character.appearance2,
+          character.appearance3,
+          character.appearance4,
+          character.appearance5,
+          character.appearance6,
+          character.appearance7,
+          character.appearance8,
+          character.appearance9,
+          character.appearance10,
+          character.appearance11,
+        ],
+      }));
+
+    return {
+      id: row.id,
+      nickname: row.nickname,
+      level: row.level,
+      experience: row.experience,
+      gamePoints: row.game_points,
+      cash: row.cash,
+      currentCharacter: row.current_character,
+      stats: {
+        wins: row.wins,
+        losses: row.losses,
+        kills: row.kills,
+        deaths: row.deaths,
+        headshots: row.headshots,
+        combos: row.combos,
+        hearts: row.hearts,
+        doubleKill: row.double_kill,
+        tripleKill: row.triple_kill,
+        criticals: row.criticals,
+        multiKill: row.multi_kill,
+        ultraKill: row.ultra_kill,
+        zKill: row.z_kill,
+        kKill: row.k_kill,
+        ddKill: row.dd_kill,
+        playCount: row.play_count,
+        roundCount: row.round_count,
+        disconnects: row.disconnects,
+        playTimeSeconds: row.play_time_seconds,
+      },
+      characters,
+    };
+  }
+
   /** Returns the account on success, or null for unknown user / bad password. */
   async verifyLogin(username: string, password: string): Promise<Account | null> {
     const account = this.findAccount(username);
@@ -121,3 +384,7 @@ export class Store {
   }
 }
 
+function nativeNickname(username: string, accountId: number): string {
+  if (username.length >= 2 && username.length <= 16) return username;
+  return `P${accountId.toString(36).toUpperCase()}`;
+}

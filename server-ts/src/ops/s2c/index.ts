@@ -4,7 +4,12 @@
 
 export { default as GC_ENTERCHANNEL_ACK } from "./GC_ENTERCHANNEL_ACK.ts";
 export { default as GL_ACCOUNTCONNSUCC } from "./GL_ACCOUNTCONNSUCC.ts";
+export { default as GL_GAMEROOMINFO_ACK } from "./GL_GAMEROOMINFO_ACK.ts";
 export { default as GL_LOGIN_ACK } from "./GL_LOGIN_ACK.ts";
+export { default as GL_MYINFO_ACK } from "./GL_MYINFO_ACK.ts";
+export { default as GL_MYITEM_ACK } from "./GL_MYITEM_ACK.ts";
+export { default as GL_SHOPIN_ACK } from "./GL_SHOPIN_ACK.ts";
 export { default as GL_TCPCONNSUCC } from "./GL_TCPCONNSUCC.ts";
+export { default as GL_USERLIST_ACK } from "./GL_USERLIST_ACK.ts";
 export { default as GT_PING_ACK } from "./GT_PING_ACK.ts";
 export { default as PM_UDPSTART_ACK } from "./PM_UDPSTART_ACK.ts";
