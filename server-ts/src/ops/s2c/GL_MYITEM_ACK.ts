@@ -11,9 +11,9 @@ import { Packet } from "../../packet.ts";
 export interface InvItem {
   readonly slot: number;
   readonly itemId: number;
-  /** Native first f32; client-side appearance-skill roll projection. */
+  /** Native first f32; exact item-domain meaning is unresolved here. */
   readonly f1: number;
-  /** Native second f32; client-side rarity/grade projection. */
+  /** Native second f32; exact item-domain meaning is unresolved here. */
   readonly f2: number;
   readonly period: number;
   /** Native u8 after the period; its domain is unresolved. */
