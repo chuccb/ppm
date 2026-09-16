@@ -2,8 +2,8 @@
  * 433 -> 434 empty friend list.
  *
  * The friend table is not part of the current Store. The wire still requires
- * the unresolved u16 header, local nickname, and zero count before the client
- * can continue. The header is not guessed as a page or status.
+ * the unresolved 2-byte header, local nickname, and zero count before the
+ * client can continue. The header is not guessed as a page or status.
  */
 
 import { Packet } from "../../packet.ts";
