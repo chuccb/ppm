@@ -240,6 +240,15 @@ export class Store {
     return this.getPlayer(accountId);
   }
 
+  getPlayerByNickname(nickname: string): PlayerInfo | null {
+    const row = this.#db
+      .query<{ account_id: number }, { n: string }>(
+        "SELECT account_id FROM player WHERE nickname = $n",
+      )
+      .get({ n: nickname });
+    return row ? this.getPlayer(row.account_id) : null;
+  }
+
   getPlayer(accountId: number): PlayerInfo | null {
     const row = this.#db
       .query<

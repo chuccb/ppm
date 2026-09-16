@@ -62,6 +62,27 @@ describe("lobby bootstrap packets", () => {
     expect(reader.s32()).toBe(0);
     expect(reader.u8()).toBe(0);
     expect(reader.remaining).toBe(0);
+    const publicPlayer = store.getPlayerByNickname("bob");
+    expect(publicPlayer).toEqual(player);
+    const publicInfo = decode(build("GL_CLIENTINFO_ACK", publicPlayer).encode());
+    expect(publicInfo.u8()).toBe(1);
+    expect(publicInfo.str()).toBe("bob");
+    expect(publicInfo.u8()).toBe(0);
+    expect(publicInfo.s32()).toBe(1);
+    expect(publicInfo.s32()).toBe(0);
+    for (let i = 0; i < 19; i++) expect(publicInfo.s32()).toBe(0);
+    expect(publicInfo.raw(3)).toEqual(new Uint8Array(3));
+    expect(publicInfo.s32()).toBe(0);
+    expect(publicInfo.s32()).toBe(0);
+    expect(publicInfo.s32()).toBe(0);
+    expect(publicInfo.raw(48)).toEqual(new Uint8Array(48));
+    expect(publicInfo.u8()).toBe(0);
+    expect(publicInfo.u8()).toBe(0);
+    expect(publicInfo.u8()).toBe(1);
+    expect(Array.from({ length: 12 }, () => publicInfo.u16())).toEqual([
+      1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
+    ]);
+    expect(publicInfo.remaining).toBe(0);
     store.close();
   });
 

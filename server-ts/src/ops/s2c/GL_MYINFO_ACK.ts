@@ -14,10 +14,37 @@ import type { PlayerInfo } from "../../store.ts";
 export default function GL_MYINFO_ACK(op: number, player: PlayerInfo | null): Packet {
   if (!player) return new Packet(op).u8(0);
 
+  const p = new Packet(op).u8(1).s32(player.id);
+  writeMyInfoCore(p, player);
+
+  p.u8(Math.min(player.characters.length, 20));
+  for (const character of player.characters.slice(0, 20)) {
+    p.u8(character.type);
+    writeAppearance(p, character.appearance);
+  }
+
+  // Four empty weapon groups are the native-compatible no-loadout projection.
+  p.u8(4);
+  for (let group = 0; group < 4; group++) {
+    p.u8(group).u16(0);
+    if (group !== 3) p.u16(0).u16(0).u16(0);
+  }
+
+  // 9 UI-item slots; no nonzero ID is emitted without catalog validation.
+  for (let i = 0; i < 9; i++) p.s32(0);
+
+  // NewSkill profile selector and seven puzzle IDs. The selector is the
+  // recovered native-compatible raw convention; its semantic is unresolved.
+  p.u8(5);
+  for (let i = 0; i < 7; i++) p.s32(0);
+
+  return p.u16(0).s32(player.gamePoints).u8(0);
+}
+
+/** The shared sub_523BF0 basic-data block used by 198 and 247. */
+export function writeMyInfoCore(packet: Packet, player: PlayerInfo): Packet {
   const { stats } = player;
-  const p = new Packet(op)
-    .u8(1)
-    .s32(player.id)
+  return packet
     .str(player.nickname)
     .u8(player.currentCharacter)
     .s32(player.level)
@@ -48,29 +75,10 @@ export default function GL_MYINFO_ACK(op: number, player: PlayerInfo | null): Pa
     .s32(0)
     .s32(0)
     .zeros(48)
-    .u8(player.currentCharacter)
-    .u8(Math.min(player.characters.length, 20));
+    .u8(player.currentCharacter);
+}
 
-  for (const character of player.characters.slice(0, 20)) {
-    p.u8(character.type);
-    for (const value of character.appearance.slice(0, 12)) p.u16(value);
-    for (let i = character.appearance.length; i < 12; i++) p.u16(0);
-  }
-
-  // Four empty weapon groups are the native-compatible no-loadout projection.
-  p.u8(4);
-  for (let group = 0; group < 4; group++) {
-    p.u8(group).u16(0);
-    if (group !== 3) p.u16(0).u16(0).u16(0);
-  }
-
-  // 9 UI-item slots; no nonzero ID is emitted without catalog validation.
-  for (let i = 0; i < 9; i++) p.s32(0);
-
-  // NewSkill profile selector and seven puzzle IDs. The selector is the
-  // recovered native-compatible raw convention; its semantic is unresolved.
-  p.u8(5);
-  for (let i = 0; i < 7; i++) p.s32(0);
-
-  return p.u16(0).s32(player.gamePoints).u8(0);
+export function writeAppearance(packet: Packet, appearance: readonly number[]): Packet {
+  for (let i = 0; i < 12; i++) packet.u16(appearance[i] ?? 0);
+  return packet;
 }
