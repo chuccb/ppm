@@ -75,13 +75,13 @@ describe("682 — login request", () => {
 describe("681 — login ack", () => {
   const servers: GameServer[] = [
     {
-      id: 1,
+      serverId: 1,
       name: "PaperMan",
       host: "127.0.0.1",
       port: 40201, // > 32767: valid, the s16 bit pattern is reused as u_short
-      flag: 0,
+      listingFlag: 0,
       group: 0,
-      channelGroups: [[{ type: 1, name: "Channel 1", port: 40301, flag: 0 }], [], []],
+      channelGroups: [[{ channelType: 1, name: "Channel 1", port: 40301, listingFlag: 0 }], [], []],
     },
   ];
 
@@ -93,7 +93,7 @@ describe("681 — login ack", () => {
   });
 
   test("success round-trips in the documented field order", () => {
-    const reader = build("GL_LOGIN_ACK", { userNo: 7, servers });
+    const reader = build("GL_LOGIN_ACK", { userId: 7, servers });
 
     expect(reader.s32()).toBe(Result.Success);
     expect(reader.s32()).toBe(7); // user_no
@@ -123,11 +123,11 @@ describe("681 — login ack", () => {
 
   test("a type-3 channel carries the extra byte", () => {
     const reader = build("GL_LOGIN_ACK", {
-      userNo: 1,
+      userId: 1,
       servers: [
         {
           ...servers[0]!,
-          channelGroups: [[{ type: 3, name: "AI", port: 1, flag: 0, extra: 9 }], [], []],
+          channelGroups: [[{ channelType: 3, name: "AI", port: 1, listingFlag: 0, typeThreeExtension: 9 }], [], []],
         },
       ],
     });
@@ -150,7 +150,7 @@ describe("681 — login ack", () => {
   test("insists on exactly three channel groups", () => {
     expect(() =>
       buildPacket("GL_LOGIN_ACK", {
-        userNo: 1,
+        userId: 1,
         servers: [{ ...servers[0]!, channelGroups: [[]] }],
       }),
     ).toThrow(/three channel groups/);

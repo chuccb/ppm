@@ -8,28 +8,27 @@
 
 import { Packet } from "../../packet.ts";
 
-export interface Item {
+export interface InvItem {
   readonly slot: number;
   readonly itemId: number;
-  readonly firstValue: number;
-  readonly secondValue: number;
-  readonly period: number;
-  readonly durability: number;
+  readonly f1: number;
+  readonly f2: number;
+  readonly periodDaysLeft: number;
+  readonly duraCur: number;
 }
 
-export default function GL_MYITEM_ACK(op: number, start = 0, items: readonly Item[] = []): Packet {
-  if (!Number.isInteger(start) || start < 0) throw new RangeError("200 start must be non-negative");
+export default function GL_MYITEM_ACK(op: number, items: readonly InvItem[] = []): Packet {
   if (items.length > 100) throw new RangeError("200 page cannot contain more than 100 items");
 
-  const p = new Packet(op).u8(1).s32(start);
+  const p = new Packet(op).u8(1).s32(0);
   for (const item of items) {
     p.s32(item.slot)
       .s32(item.itemId)
-      .f32(item.firstValue)
-      .f32(item.secondValue)
-      .s32(item.period)
+      .f32(item.f1)
+      .f32(item.f2)
+      .s32(item.periodDaysLeft)
       .u8(0)
-      .u16(item.durability);
+      .u16(item.duraCur);
   }
   return p.s32(-1);
 }

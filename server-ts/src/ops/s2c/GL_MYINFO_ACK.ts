@@ -1,5 +1,5 @@
 /**
- * 197 -> 198 player bootstrap.
+ * 197 -> 198 MyInfo bootstrap.
  *
  * The field order is the native sub_570550 reader order documented in
  * docs/PACKETS.md §3.2. The Store deliberately supplies only a canonical type-1
@@ -9,22 +9,22 @@
  */
 
 import { Packet } from "../../packet.ts";
-import type { NewSkillProfileSnapshot, PlayerInfo } from "../../store.ts";
+import type { NewSkillProfileSnapshot, MyInfo } from "../../store.ts";
 
 export default function GL_MYINFO_ACK(
   op: number,
-  player: PlayerInfo | null,
+  myInfo: MyInfo | null,
   snapshot?: NewSkillProfileSnapshot,
 ): Packet {
-  if (!player) return new Packet(op).u8(0);
+  if (!myInfo) return new Packet(op).u8(0);
 
-  const p = new Packet(op).u8(1).s32(player.id);
-  writeMyInfoCore(p, player);
+  const p = new Packet(op).u8(1).s32(myInfo.userId);
+  writeMyInfoBasicData(p, myInfo);
 
-  p.u8(Math.min(player.characters.length, 20));
-  for (const character of player.characters.slice(0, 20)) {
-    p.u8(character.type);
-    writeAppearance(p, character.appearance);
+  p.u8(Math.min(myInfo.characters.length, 20));
+  for (const character of myInfo.characters.slice(0, 20)) {
+    p.u8(character.charType);
+    writeCharacterAppearance(p, character.equip);
   }
 
   // Four empty weapon groups are the native-compatible no-loadout projection.
@@ -44,17 +44,17 @@ export default function GL_MYINFO_ACK(
   p.u8(5);
   for (let i = 0; i < 7; i++) p.s32(selectedProfile?.puzzleItemIds[i] ?? 0);
 
-  return p.u16(0).s32(player.gamePoints).u8(0);
+  return p.u16(0).s32(myInfo.gamePoints).u8(0);
 }
 
 /** The shared sub_523BF0 basic-data block used by 198 and 247. */
-export function writeMyInfoCore(packet: Packet, player: PlayerInfo): Packet {
-  const { stats } = player;
+export function writeMyInfoBasicData(packet: Packet, myInfo: MyInfo): Packet {
+  const { stats } = myInfo;
   return packet
-    .str(player.nickname)
-    .u8(player.currentCharacter)
-    .s32(player.level)
-    .s32(player.experience)
+    .str(myInfo.nickname)
+    .u8(myInfo.currentChar)
+    .s32(myInfo.level)
+    .s32(myInfo.experience)
     .s32(0)
     .s32(stats.playCount)
     .s32(stats.roundCount)
@@ -77,14 +77,14 @@ export function writeMyInfoCore(packet: Packet, player: PlayerInfo): Packet {
     .u8(0)
     .u8(0)
     .u8(0)
-    .s32(player.cash)
+    .s32(myInfo.cash)
     .s32(0)
     .s32(0)
     .zeros(48)
-    .u8(player.currentCharacter);
+    .u8(myInfo.currentChar);
 }
 
-export function writeAppearance(packet: Packet, appearance: readonly number[]): Packet {
-  for (let i = 0; i < 12; i++) packet.u16(appearance[i] ?? 0);
+export function writeCharacterAppearance(packet: Packet, equip: readonly number[]): Packet {
+  for (let i = 0; i < 12; i++) packet.u16(equip[i] ?? 0);
   return packet;
 }

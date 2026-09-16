@@ -66,7 +66,7 @@ export default async function GL_LOGIN_REQ(r: Reader, connection: Connection): P
   );
   connection.log(`login ${account} -> account ${found.id}`);
   connection.reply("GL_LOGIN_ACK", {
-    userNo: found.id,
+    userId: found.id,
     servers: connection.config.servers,
     chargeMode,
   });

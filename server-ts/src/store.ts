@@ -16,7 +16,7 @@ export interface Account {
   readonly lastLoginAt: number | null;
 }
 
-export interface PlayerStats {
+export interface Stats {
   readonly wins: number;
   readonly losses: number;
   readonly kills: number;
@@ -38,23 +38,23 @@ export interface PlayerStats {
   readonly playTimeSeconds: number;
 }
 
-export interface PlayerCharacter {
-  readonly slot: number;
-  readonly type: number;
+export interface CharSlot {
+  readonly slotNo: number;
+  readonly charType: number;
   /** The twelve category-relative u16 values read by 198. */
-  readonly appearance: readonly number[];
+  readonly equip: readonly number[];
 }
 
-export interface PlayerInfo {
-  readonly id: number;
+export interface MyInfo {
+  readonly userId: number;
   readonly nickname: string;
   readonly level: number;
   readonly experience: number;
   readonly gamePoints: number;
   readonly cash: number;
-  readonly currentCharacter: number;
-  readonly stats: PlayerStats;
-  readonly characters: readonly PlayerCharacter[];
+  readonly currentChar: number;
+  readonly stats: Stats;
+  readonly characters: readonly CharSlot[];
 }
 
 export const NEW_SKILL_PROFILE_COUNT = 5;
@@ -229,12 +229,12 @@ export class Store {
   }
 
   /**
-   * Creates the minimal private-server player projection needed by 198.
-   * Canonical character type 1 and its six native body-template values are
+   * Creates the minimal private-server MyInfo projection needed by 198.
+   * The canonical CharSlot type 1 and its six native body-template values are
    * source-proven; no weapon, item, currency, or reward is granted here.
    */
-  ensurePlayer(accountId: number): PlayerInfo | null {
-    const existing = this.getPlayer(accountId);
+  ensurePlayerIdentity(accountId: number): MyInfo | null {
+    const existing = this.getMyInfo(accountId);
     if (existing) return existing;
 
     const account = this.#db
@@ -271,27 +271,27 @@ export class Store {
       throw error;
     }
 
-    return this.getPlayer(accountId);
+    return this.getMyInfo(accountId);
   }
 
-  getPlayerByNickname(nickname: string): PlayerInfo | null {
+  getMyInfoByNickname(nickname: string): MyInfo | null {
     const row = this.#db
       .query<{ account_id: number }, { n: string }>(
         "SELECT account_id FROM player WHERE nickname = $n",
       )
       .get({ n: nickname });
-    return row ? this.getPlayer(row.account_id) : null;
+    return row ? this.getMyInfo(row.account_id) : null;
   }
 
-  getNewSkillProfileSnapshot(playerId: number): NewSkillProfileSnapshot {
+  getNewSkillProfileSnapshot(userId: number): NewSkillProfileSnapshot {
     this.#db.exec("BEGIN IMMEDIATE");
     try {
-      this.ensureNewSkillProfileRows(playerId);
+      this.ensureNewSkillProfileRows(userId);
       const state = this.#db
         .query<{ selected_profile: number }, { p: number }>(
           "SELECT selected_profile FROM new_skill_profile_state WHERE player_id = $p",
         )
-        .get({ p: playerId });
+        .get({ p: userId });
       const rows = this.#db
         .query<
           {
@@ -313,7 +313,7 @@ export class Store {
             WHERE player_id = $p
             ORDER BY profile_index`,
         )
-        .all({ p: playerId });
+        .all({ p: userId });
 
       if (!state || rows.length !== NEW_SKILL_PROFILE_COUNT) {
         throw new Error("NewSkill profile bootstrap did not create a complete snapshot");
@@ -347,24 +347,24 @@ export class Store {
     }
   }
 
-  private ensureNewSkillProfileRows(playerId: number): void {
+  private ensureNewSkillProfileRows(userId: number): void {
     this.#db
       .query(
         `INSERT OR IGNORE INTO new_skill_profile_state(player_id, selected_profile)
          VALUES ($p, 0)`,
       )
-      .run({ p: playerId });
+      .run({ p: userId });
     for (let profileIndex = 0; profileIndex < NEW_SKILL_PROFILE_COUNT; profileIndex++) {
       this.#db
         .query(
           `INSERT OR IGNORE INTO new_skill_profiles(player_id, profile_index)
            VALUES ($p, $i)`,
         )
-        .run({ p: playerId, i: profileIndex });
+        .run({ p: userId, i: profileIndex });
     }
   }
 
-  getPlayer(accountId: number): PlayerInfo | null {
+  getMyInfo(accountId: number): MyInfo | null {
     const row = this.#db
       .query<
         {
@@ -436,33 +436,33 @@ export class Store {
            FROM player_character WHERE player_id = $p ORDER BY slot`,
       )
       .all({ p: row.id })
-      .map((character) => ({
-        slot: character.slot,
-        type: character.character_type,
-        appearance: [
-          character.appearance0,
-          character.appearance1,
-          character.appearance2,
-          character.appearance3,
-          character.appearance4,
-          character.appearance5,
-          character.appearance6,
-          character.appearance7,
-          character.appearance8,
-          character.appearance9,
-          character.appearance10,
-          character.appearance11,
+      .map((characterRow) => ({
+        slotNo: characterRow.slot,
+        charType: characterRow.character_type,
+        equip: [
+          characterRow.appearance0,
+          characterRow.appearance1,
+          characterRow.appearance2,
+          characterRow.appearance3,
+          characterRow.appearance4,
+          characterRow.appearance5,
+          characterRow.appearance6,
+          characterRow.appearance7,
+          characterRow.appearance8,
+          characterRow.appearance9,
+          characterRow.appearance10,
+          characterRow.appearance11,
         ],
       }));
 
     return {
-      id: row.id,
+      userId: row.id,
       nickname: row.nickname,
       level: row.level,
       experience: row.experience,
       gamePoints: row.game_points,
       cash: row.cash,
-      currentCharacter: row.current_character,
+      currentChar: row.current_character,
       stats: {
         wins: row.wins,
         losses: row.losses,

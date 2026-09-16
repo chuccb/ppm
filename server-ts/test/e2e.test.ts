@@ -12,13 +12,13 @@ import { Result, type GameServer } from "../src/ops/s2c/GL_LOGIN_ACK.ts";
 
 const servers: readonly GameServer[] = [
   {
-    id: 1,
+    serverId: 1,
     name: "PaperMan",
     host: "127.0.0.1",
     port: 40201,
-    flag: 0,
+    listingFlag: 0,
     group: 0,
-    channelGroups: [[{ type: 1, name: "Channel 1", port: 40201, flag: 0 }], [], []],
+    channelGroups: [[{ channelType: 1, name: "Channel 1", port: 40201, listingFlag: 0 }], [], []],
   },
 ];
 

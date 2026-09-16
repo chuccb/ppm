@@ -15,12 +15,12 @@ import {
 
 export default function GL_INVENIN_ACK(
   op: number,
-  playerId: number,
+  userId: number,
   requestContextRaw: number,
   snapshot: NewSkillProfileSnapshot,
 ): Packet {
-  if (!Number.isSafeInteger(playerId) || playerId <= 0) {
-    throw new RangeError("255 player id must be a positive safe integer");
+  if (!Number.isSafeInteger(userId) || userId <= 0) {
+    throw new RangeError("255 user ID must be a positive safe integer");
   }
   if (!Number.isInteger(requestContextRaw) || requestContextRaw < 0 || requestContextRaw > 0xff) {
     throw new RangeError("255 request context must fit u8");
@@ -34,7 +34,7 @@ export default function GL_INVENIN_ACK(
 
   const p = new Packet(op)
     .u8(1) // mode 1: local user snapshot
-    .s32(playerId)
+    .s32(userId)
     .u8(requestContextRaw)
     .u8(0) // unknownHeaderRaw: read by the client, semantic unresolved
     .u8(snapshot.selectedProfile);

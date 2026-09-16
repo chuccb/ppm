@@ -8,17 +8,17 @@ describe("lobby bootstrap packets", () => {
     const store = new Store();
     const account = await store.createAccount("alice", "pw");
 
-    const first = store.ensurePlayer(account.id);
-    const second = store.ensurePlayer(account.id);
+    const first = store.ensurePlayerIdentity(account.id);
+    const second = store.ensurePlayerIdentity(account.id);
     expect(first).not.toBeNull();
     expect(second).toEqual(first);
     expect(first?.nickname).toBe("alice");
-    expect(first?.currentCharacter).toBe(0);
+    expect(first?.currentChar).toBe(0);
     expect(first?.characters).toEqual([
-      { slot: 0, type: 1, appearance: [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0] },
+      { slotNo: 0, charType: 1, equip: [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0] },
     ]);
 
-    const snapshot = store.getNewSkillProfileSnapshot(first!.id);
+    const snapshot = store.getNewSkillProfileSnapshot(first!.userId);
     expect(snapshot.selectedProfile).toBe(0);
     expect(snapshot.profiles).toHaveLength(5);
     expect(snapshot.profiles).toEqual(
@@ -28,9 +28,9 @@ describe("lobby bootstrap packets", () => {
       })),
     );
 
-    const inventoryEnter = decode(build("GL_INVENIN_ACK", first!.id, 7, snapshot).encode());
+    const inventoryEnter = decode(build("GL_INVENIN_ACK", first!.userId, 7, snapshot).encode());
     expect(inventoryEnter.u8()).toBe(1);
-    expect(inventoryEnter.s32()).toBe(first!.id);
+    expect(inventoryEnter.s32()).toBe(first!.userId);
     expect(inventoryEnter.u8()).toBe(7);
     expect(inventoryEnter.u8()).toBe(0);
     expect(inventoryEnter.u8()).toBe(0);
@@ -45,8 +45,8 @@ describe("lobby bootstrap packets", () => {
   test("198 writes a successful minimal but complete CClientData", async () => {
     const store = new Store();
     const account = await store.createAccount("bob", "pw");
-    const player = store.ensurePlayer(account.id);
-    expect(player).not.toBeNull();
+    const myInfo = store.ensurePlayerIdentity(account.id);
+    expect(myInfo).not.toBeNull();
 
     const selectedSnapshot = {
       selectedProfile: 1,
@@ -57,9 +57,9 @@ describe("lobby bootstrap packets", () => {
         expiresAtPackedMinute: profile === 1 ? 0x12345678 : 0,
       })),
     };
-    const reader = decode(build("GL_MYINFO_ACK", player, selectedSnapshot).encode());
+    const reader = decode(build("GL_MYINFO_ACK", myInfo, selectedSnapshot).encode());
     expect(reader.u8()).toBe(1);
-    expect(reader.s32()).toBe(player!.id);
+    expect(reader.s32()).toBe(myInfo!.userId);
     expect(reader.str()).toBe("bob");
     expect(reader.u8()).toBe(0); // selected character-list index
     expect(reader.s32()).toBe(1); // level
@@ -101,9 +101,9 @@ describe("lobby bootstrap packets", () => {
     expect(reader.s32()).toBe(0);
     expect(reader.u8()).toBe(0);
     expect(reader.remaining).toBe(0);
-    const publicPlayer = store.getPlayerByNickname("bob");
-    expect(publicPlayer).toEqual(player);
-    const publicInfo = decode(build("GL_CLIENTINFO_ACK", publicPlayer).encode());
+    const publicMyInfo = store.getMyInfoByNickname("bob");
+    expect(publicMyInfo).toEqual(myInfo);
+    const publicInfo = decode(build("GL_CLIENTINFO_ACK", publicMyInfo).encode());
     expect(publicInfo.u8()).toBe(1);
     expect(publicInfo.str()).toBe("bob");
     expect(publicInfo.u8()).toBe(0);
