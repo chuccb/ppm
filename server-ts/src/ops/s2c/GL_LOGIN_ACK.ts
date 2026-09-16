@@ -20,31 +20,33 @@ export const Result = {
 
 export type Result = (typeof Result)[keyof typeof Result];
 
-/** One channel in a group. `extra` is read only when `type` is 3. */
+/** One channel in a group. The native reader adds `extra` only for type 3. */
 export interface Channel {
-  type: number;
-  name: string;
-  port: number;
-  flag: number;
-  extra?: number;
+  readonly type: number;
+  readonly name: string;
+  readonly port: number;
+  /** Native `ch_flag`; its domain is not established here. */
+  readonly flag: number;
+  readonly extra?: number;
 }
 
 /** A server row. The client expects exactly three channel groups. */
 export interface GameServer {
-  id: number;
-  name: string;
-  host: string;
-  port: number;
-  flag: number;
-  group: number;
-  channelGroups: readonly (readonly Channel[])[];
+  readonly id: number;
+  readonly name: string;
+  readonly host: string;
+  readonly port: number;
+  /** Native `flag`; its domain is not established here. */
+  readonly flag: number;
+  readonly group: number;
+  readonly channelGroups: readonly (readonly Channel[])[];
 }
 
 export interface Success {
-  userNo: number;
-  servers: readonly GameServer[];
+  readonly userNo: number;
+  readonly servers: readonly GameServer[];
   /** Opaque billing/charge UI mode, echoed back in 143. Not a player level. */
-  chargeMode?: number;
+  readonly n100?: number;
 }
 
 /**
@@ -59,9 +61,9 @@ export interface Success {
 export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Packet {
   if (typeof outcome === "number") return new Packet(op).s32(outcome);
 
-  const { userNo, servers, chargeMode = 0 } = outcome;
+  const { userNo, servers, n100 = 0 } = outcome;
   const p = new Packet(op);
-  p.s32(Result.Success).s32(userNo).s32(chargeMode);
+  p.s32(Result.Success).s32(userNo).s32(n100);
   p.s32(0); // ext_count: 0 = no netcafe feature extension
 
   p.s16(servers.length);

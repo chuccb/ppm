@@ -7,8 +7,9 @@
  */
 
 import type { Socket } from "bun";
+import { ChannelAdmissionRegistry } from "./admission.ts";
 import { PacketStream, type Packet, type Reader } from "./packet.ts";
-import { opcodeName } from "./opcodes.ts";
+import { opcodeFor, opcodeName } from "./opcodes.ts";
 import { build, handlerFor, type OutboundArgs, type OutboundName } from "./ops/registry.ts";
 import type { Store } from "./store.ts";
 import type { GameServer } from "./ops/s2c/GL_LOGIN_ACK.ts";
@@ -16,6 +17,20 @@ import type { GameServer } from "./ops/s2c/GL_LOGIN_ACK.ts";
 /** How often to poll, and how long silence may last. Server-side choices. */
 export const PING_INTERVAL_MS = 15_000;
 export const PING_TIMEOUT_MS = 60_000;
+
+/** Bun reports a TCP peer as `host:port`; admission is bound to the host only. */
+function remoteIp(address: string): string {
+  if (address.startsWith("[")) {
+    const end = address.indexOf("]");
+    if (end > 1) return address.slice(1, end);
+  }
+
+  const separator = address.lastIndexOf(":");
+  const port = address.slice(separator + 1);
+  return separator >= 0 && /^\d+$/.test(port)
+    ? address.slice(0, separator)
+    : address;
+}
 
 /**
  * The client makes two connections, with mirrored handshakes:
@@ -28,22 +43,41 @@ export const PING_TIMEOUT_MS = 60_000;
 export type Role = "login" | "channel";
 
 export interface Config {
-  role: Role;
-  store: Store;
-  servers: readonly GameServer[];
-  log: (message: string) => void;
-  /** Reported in the channel admission reply. */
-  channelName: string;
+  readonly role: Role;
+  readonly store: Store;
+  readonly servers: readonly GameServer[];
+  readonly log: (message: string) => void;
+  /** Shared between the login and channel listeners. */
+  readonly admissions: ChannelAdmissionRegistry;
+  /** Reported in the channel admission reply and the 681 channel list. */
+  readonly channelName: string;
+  /** The one advertised group/channel accepted by this single-channel host. */
+  readonly channelGroupIndex?: number;
+  readonly channelIndex?: number;
+  readonly channelId?: number;
+  /** Endpoint copied into the successful 196 tail. */
+  readonly udpHost?: string;
+  readonly udpPort?: number;
+  /** Opaque, source-proven values in the successful 196 tail. */
+  readonly channelType?: number;
+  readonly endpointOpaqueByte?: number;
+  readonly clientFlags?: number;
+  readonly clientDefaultValue?: number;
+  /** A 681 admission expires if the client never opens its channel socket. */
+  readonly admissionLifetimeMs?: number;
 }
 
 export class Connection {
   readonly config: Config;
-  /** Set by GL_LOGIN_REQ once credentials check out. */
+  /** Set by GL_LOGIN_REQ or PM_UDPSTART_REQ once the account is known. */
   accountId: number | null = null;
+  /** True only after a successful 195 → 196 channel selection. */
+  channelEntryCompleted = false;
 
   readonly #socket: Socket<Connection>;
   readonly #stream = new PacketStream();
   readonly #peer: string;
+  readonly #remoteIp: string;
   /** Serialises dispatch so replies keep the order the requests arrived in. */
   #queue: Promise<void> = Promise.resolve();
   #heartbeat: ReturnType<typeof setInterval> | null = null;
@@ -53,6 +87,15 @@ export class Connection {
     this.#socket = socket;
     this.config = config;
     this.#peer = socket.remoteAddress;
+    this.#remoteIp = remoteIp(this.#peer);
+  }
+
+  get remoteIp(): string {
+    return this.#remoteIp;
+  }
+
+  get authenticated(): boolean {
+    return this.accountId !== null;
   }
 
   log(message: string): void {
@@ -66,6 +109,21 @@ export class Connection {
   /** Build an outbound packet by name and send it. Names are checked by tsc. */
   reply<N extends OutboundName>(name: N, ...args: OutboundArgs<N>): void {
     this.send(build(name, ...args));
+  }
+
+  bindAccount(accountId: number): void {
+    if (!Number.isSafeInteger(accountId) || accountId <= 0) {
+      throw new RangeError("accountId must be a positive safe integer");
+    }
+    if (this.authenticated) throw new Error("connection is already authenticated");
+    this.accountId = accountId;
+  }
+
+  completeChannelEntry(): void {
+    if (this.config.role !== "channel") throw new Error("only a channel connection can enter");
+    if (!this.authenticated) throw new Error("channel entry requires an authenticated handoff");
+    if (this.channelEntryCompleted) throw new Error("channel entry already completed");
+    this.channelEntryCompleted = true;
   }
 
   /** Sent once on connect; it is what makes the client speak first. */
@@ -110,22 +168,47 @@ export class Connection {
   }
 
   async #dispatch(r: Reader): Promise<void> {
+    const name = opcodeName(r.opcode);
+    const ping = opcodeFor("GT_PING_REQ");
+
+    if (this.config.role === "login") {
+      if (r.opcode === opcodeFor("GL_LOGIN_REQ") && this.authenticated) {
+        this.log("repeated GL_LOGIN_REQ after successful login — ignored");
+        return;
+      }
+      if (r.opcode !== ping && r.opcode !== opcodeFor("GL_LOGIN_REQ")) {
+        this.log(`rejected ${name} on login listener`);
+        return;
+      }
+    } else if (r.opcode === opcodeFor("GL_LOGIN_REQ")) {
+      this.log("rejected GL_LOGIN_REQ on channel listener");
+      return;
+    } else if (!this.channelEntryCompleted) {
+      const handoff = opcodeFor("PM_UDPSTART_REQ");
+      const enter = opcodeFor("GC_ENTERCHANNEL_REQ");
+      if (r.opcode !== ping && r.opcode !== handoff && r.opcode !== enter) {
+        this.log(`rejected ${name} before successful channel entry`);
+        return;
+      }
+    }
+
     const handler = handlerFor(r.opcode);
     if (!handler) {
       // The client's own dispatcher silently ignores unknown opcodes. Mirror
       // that, but log so coverage gaps stay visible.
-      this.log(`unhandled ${opcodeName(r.opcode)} (${r.opcode})`);
+      this.log(`unhandled ${name} (${r.opcode})`);
       return;
     }
     try {
       await handler(r, this);
     } catch (error) {
-      this.#fail(opcodeName(r.opcode), error);
+      this.#fail(name, error);
     }
   }
 
   #fail(what: string, error: unknown): void {
-    this.log(`${what} — ${(error as Error).message}, closing`);
+    const message = error instanceof Error ? error.message : String(error);
+    this.log(`${what} — ${message}, closing`);
     this.#socket.end();
   }
 }

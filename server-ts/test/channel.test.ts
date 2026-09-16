@@ -1,20 +1,22 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { ChannelAdmissionRegistry } from "../src/admission.ts";
 import { Packet, PacketStream, decode, type Reader } from "../src/packet.ts";
 import { opcodeFor } from "../src/opcodes.ts";
 import { build as buildPacket, type OutboundArgs, type OutboundName } from "../src/ops/registry.ts";
 import { Store } from "../src/store.ts";
 import { listen } from "../src/connection.ts";
 import { read as readHandoff } from "../src/ops/c2s/PM_UDPSTART_REQ.ts";
+import { Result as EnterResult } from "../src/ops/s2c/GC_ENTERCHANNEL_ACK.ts";
 import { Result } from "../src/ops/s2c/PM_UDPSTART_ACK.ts";
 
 const build = <N extends OutboundName>(name: N, ...args: OutboundArgs<N>) =>
   decode(buildPacket(name, ...args).encode());
 
 /** Build PM_UDPSTART_REQ exactly as sub_555C60 does. */
-function handoff(identity: string, chargeMode = 0, extCount = 0, literal = 1): Packet {
+function handoff(identity: string, n100 = 0, extCount = 0, literal = 1): Packet {
   return new Packet(opcodeFor("PM_UDPSTART_REQ"))
     .str(identity)
-    .s32(chargeMode)
+    .s32(n100)
     .u8(literal)
     .s32(extCount);
 }
@@ -30,7 +32,7 @@ describe("GL_TCPCONNSUCC", () => {
 describe("PM_UDPSTART_REQ", () => {
   test("parses the shape sub_555C60 emits", () => {
     const parsed = readHandoff(decode(handoff("abc123", 7, 2).encode()));
-    expect(parsed).toEqual({ identity: "abc123", chargeMode: 7, extCount: 2 });
+    expect(parsed).toEqual({ identity: "abc123", n100: 7, extCount: 2 });
   });
 
   test("rejects a middle byte that is not the hardcoded 1", () => {
@@ -39,12 +41,51 @@ describe("PM_UDPSTART_REQ", () => {
 
   test("rejects an identity longer than the client's String[24]", () => {
     const tooLong = "x".repeat(24);
-    expect(() => readHandoff(decode(handoff(tooLong).encode()))).toThrow(/23-byte/);
+    expect(() => readHandoff(decode(handoff(tooLong).encode()))).toThrow(/23 bytes/);
   });
 
   test("rejects trailing bytes", () => {
     const padded = handoff("a").u8(0);
     expect(() => readHandoff(decode(padded.encode()))).toThrow(/trailing/);
+  });
+});
+
+describe("GC_ENTERCHANNEL_ACK", () => {
+  test("writes only the three-field failure prefix", () => {
+    const r = build("GC_ENTERCHANNEL_ACK", {
+      result: EnterResult.GenericError4,
+      channelId: 7,
+      channelIndex: 2,
+    });
+
+    expect(r.u8()).toBe(EnterResult.GenericError4);
+    expect(r.s32()).toBe(7);
+    expect(r.u8()).toBe(2);
+    expect(r.remaining).toBe(0);
+  });
+
+  test("writes the endpoint tail only for success", () => {
+    const r = build("GC_ENTERCHANNEL_ACK", {
+      result: EnterResult.Success,
+      channelId: 1,
+      channelIndex: 0,
+      endpoint: { host: "127.0.0.1", port: 40202 },
+      endpointOpaqueByte: 3,
+      channelType: 1,
+      clientFlags: 1,
+      clientDefaultValue: 5,
+    });
+
+    expect(r.u8()).toBe(EnterResult.Success);
+    expect(r.s32()).toBe(1);
+    expect(r.u8()).toBe(0);
+    expect(r.str()).toBe("127.0.0.1");
+    expect(r.s32()).toBe(40202);
+    expect(r.u8()).toBe(3);
+    expect(r.u8()).toBe(1);
+    expect(r.u32()).toBe(1);
+    expect(r.u8()).toBe(5);
+    expect(r.remaining).toBe(0);
   });
 });
 
@@ -102,9 +143,12 @@ describe("PM_UDPSTART_ACK", () => {
 describe("live channel handshake", () => {
   let store: Store;
   let listener: ReturnType<typeof listen>;
+  let admissions: ChannelAdmissionRegistry;
 
   beforeAll(() => {
     store = new Store();
+    admissions = new ChannelAdmissionRegistry();
+    admissions.issue(1, 0, 0, "127.0.0.1", 10_000);
     listener = listen({
       role: "channel",
       hostname: "127.0.0.1",
@@ -112,7 +156,11 @@ describe("live channel handshake", () => {
       store,
       servers: [],
       log: () => {},
+      admissions,
       channelName: "Test Channel",
+      channelType: 1,
+      udpHost: "127.0.0.1",
+      udpPort: 40202,
     });
   });
 
@@ -164,6 +212,20 @@ describe("live channel handshake", () => {
     ack.u8();
     ack.s32();
     expect(ack.str()).toBe("Test Channel");
+
+    socket.write(new Packet(opcodeFor("GC_ENTERCHANNEL_REQ")).u8(0).u8(0).u8(0).encode());
+    const entry = await next();
+    expect(entry.opcode).toBe(opcodeFor("GC_ENTERCHANNEL_ACK"));
+    expect(entry.u8()).toBe(EnterResult.Success);
+    expect(entry.s32()).toBe(1);
+    expect(entry.u8()).toBe(0);
+    expect(entry.str()).toBe("127.0.0.1");
+    expect(entry.s32()).toBe(40202);
+    expect(entry.u8()).toBe(0); // opaque byte
+    expect(entry.u8()).toBe(1); // normal channel type
+    expect(entry.u32()).toBe(0); // client flags
+    expect(entry.u8()).toBe(5); // native initial default
+    expect(entry.remaining).toBe(0);
 
     socket.end();
   });

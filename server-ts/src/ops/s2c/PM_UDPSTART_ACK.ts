@@ -28,17 +28,17 @@ export const Result = {
 export type Result = (typeof Result)[keyof typeof Result];
 
 export interface Admission {
-  result: Result;
+  readonly result: Result;
   /** Native char[40]; at most 39 ANSI bytes. */
-  channelName: string;
+  readonly channelName: string;
   /** With `rank > 10` the client refuses the server. */
-  rankRestricted?: boolean;
+  readonly rankRestricted?: boolean;
   /** Shown as "today's login confirmed, %d PG awarded" when positive. */
-  dailyLoginRewardPg?: number;
+  readonly dailyLoginRewardPg?: number;
   /** The `%d` in the level-restriction messages. */
-  restrictionLevel?: number;
+  readonly restrictionLevel?: number;
   /** The `%.1f` in the K/D-restriction messages. */
-  restrictionKdr?: number;
+  readonly restrictionKdr?: number;
 }
 
 /** Native char[40]. */

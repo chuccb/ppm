@@ -40,7 +40,7 @@ describe("682 — login request", () => {
     const reader = reread(clientLoginRequest("alice", "hunter2"));
     const request = readCredentials(reader);
     expect(request.account).toBe("alice");
-    expect(request.password).toBe("hunter2");
+    expect(request.passwordOrToken).toBe("hunter2");
     expect(request.dataRevision).toBe(811034967);
     expect(request.fingerprintSource).toBe(2);
     expect(request.fingerprint).toHaveLength(24);
@@ -169,7 +169,7 @@ describe("registry", () => {
 
   test("the generated index files are in sync with the directories", async () => {
     // `bun run sync` regenerates them; this fails if someone forgot.
-    const proc = Bun.spawn(["bun", "run", "scripts/sync-ops.ts"], {
+    const proc = Bun.spawn([process.execPath, "run", "scripts/sync-ops.ts"], {
       cwd: new URL("..", import.meta.url).pathname,
       stdout: "pipe",
       stderr: "pipe",

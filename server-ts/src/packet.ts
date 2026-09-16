@@ -60,15 +60,15 @@ export class Packet {
   }
 
   /**
-   * Reserve `extra` bytes and return the offset to write at.
+   * Reserve `byteCount` bytes and return the offset to write at.
    *
    * Callers must resolve this *before* touching `#buf` or `#view()`: it may
    * reallocate, and `this.#view().setX(this.#at(n), ...)` would evaluate the
    * view against the old buffer and write into the copy that gets discarded.
    */
-  #at(extra: number): number {
+  #at(byteCount: number): number {
     const at = this.#len;
-    const needed = at + extra;
+    const needed = at + byteCount;
     if (needed > MAX_PAYLOAD) throw new RangeError(`payload would exceed ${MAX_PAYLOAD} bytes`);
     if (needed > this.#buf.length) {
       let size = Math.max(this.#buf.length * 2, 16);
@@ -250,10 +250,13 @@ export class Reader {
     return this.#view().getFloat32(this.#at(4), true);
   }
 
-  str(encoding: Encoding = "euc-kr"): string {
+  str(encoding: Encoding = "euc-kr", maxBytes?: number): string {
     const start = this.#pos;
     const end = this.#buf.indexOf(0, start);
     if (end < 0) throw new RangeError("unterminated ANSI string");
+    if (maxBytes !== undefined && end - start > maxBytes) {
+      throw new RangeError(`ANSI string exceeds ${maxBytes} bytes`);
+    }
     this.#pos = end + 1;
     return decoder(encoding).decode(this.#buf.subarray(start, end));
   }
