@@ -192,6 +192,9 @@ describe("lobby bootstrap packets", () => {
     expect(() =>
       build("GL_MYITEM_ACK", [{ slot: -1, itemId: 1, f1: 0, f2: 0, period: 0, durability: 0 }]),
     ).toThrow(/inventory slot/);
+    expect(() =>
+      build("GL_MYITEM_ACK", [{ slot: 0, itemId: -1, f1: 0, f2: 0, period: 0, durability: 0 }]),
+    ).toThrow(/item_id/);
 
     const users = decode(build("GL_USERLIST_ACK").encode());
     expect(users.u16()).toBe(0);

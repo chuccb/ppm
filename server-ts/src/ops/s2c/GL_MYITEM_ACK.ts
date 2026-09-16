@@ -31,6 +31,9 @@ export default function GL_MYITEM_ACK(op: number, items: readonly InvItem[] = []
     if (!Number.isSafeInteger(item.slot) || item.slot < 0 || item.slot > 0x7fff_ffff) {
       throw new RangeError("200 inventory slot must be a non-negative s32");
     }
+    if (!Number.isSafeInteger(item.itemId) || item.itemId < 0 || item.itemId > 0x7fff_ffff) {
+      throw new RangeError("200 item_id must be a non-negative s32");
+    }
     p.s32(item.slot)
       .s32(item.itemId)
       .f32(item.f1)
