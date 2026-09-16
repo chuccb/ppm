@@ -58,19 +58,52 @@ describe("lobby bootstrap packets", () => {
         expiresAtPackedMinute: profile === 1 ? 0x12345678 : 0,
       })),
     };
-    const reader = decode(build("GL_MYINFO_ACK", myInfo, selectedSnapshot).encode());
+    const wireInfo = {
+      ...myInfo!,
+      stats: {
+        ...myInfo!.stats,
+        wins: 101,
+        losses: 102,
+        kills: 103,
+        deaths: 104,
+        disconnects: 105,
+        headshots: 106,
+        combos: 107,
+        hearts: 108,
+        doubleKill: 109,
+        tripleKill: 110,
+        multiKill: 111,
+        ultraKill: 112,
+        zKill: 113,
+        kKill: 114,
+        ddKill: 115,
+        criticals: 116,
+        playCount: 117,
+        roundCount: 118,
+        playTimeSeconds: 119,
+      },
+    };
+    const reader = decode(build("GL_MYINFO_ACK", wireInfo, selectedSnapshot).encode());
     expect(reader.u8()).toBe(1);
-    expect(reader.s32()).toBe(myInfo!.userId);
+    expect(reader.s32()).toBe(wireInfo.userId);
     expect(reader.str()).toBe("bob");
     expect(reader.u8()).toBe(0); // selected character-list index
     expect(reader.s32()).toBe(1); // level
     expect(reader.s32()).toBe(0); // exp
-    for (let i = 0; i < 19; i++) expect(reader.s32()).toBe(0);
+    expect(reader.s32()).toBe(0); // native derived-level slot
+    expect(Array.from({ length: 18 }, () => reader.s32())).toEqual([
+      0, 0, 0, // native [34..36] reserved words
+      101, 102, // wins, losses
+      103, 104, 105, 108, // kills, deaths, disconnects, hearts
+      106, 109, 110, 107, // headshots, double, triple, combos
+      111, 112, 113, 114, 115, // multi, ultra, z, k, dd
+    ]);
     expect(reader.raw(3)).toEqual(new Uint8Array(3));
     expect(reader.s32()).toBe(0); // cash
     expect(reader.s32()).toBe(0);
     expect(reader.s32()).toBe(0);
-    expect(reader.raw(48)).toEqual(new Uint8Array(48));
+    expect(reader.s32()).toBe(119); // blob [52], cumulative play seconds
+    expect(reader.raw(44)).toEqual(new Uint8Array(44));
     expect(reader.u8()).toBe(0); // selected character-list index
     expect(reader.u8()).toBe(1); // character count
     expect(reader.u8()).toBe(1); // canonical type 1

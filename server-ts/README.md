@@ -44,7 +44,9 @@ src/main.ts          entry point
 **One packet, one file, named after the opcode.** The name appears in the
 filename and nowhere else — the module gets its opcode injected, so nothing
 inside it repeats the name. To find the code for a packet from
-`docs/PACKETS.md`, open the file with that name:
+`docs/PACKETS.md`, open the file with that name. The complete field-by-field
+review of the 31 current packet modules is in
+[`../docs/SERVER_TS_PACKET_FIELDS.md`](../docs/SERVER_TS_PACKET_FIELDS.md):
 
 ```
 src/ops/c2s/GL_LOGIN_REQ.ts   the client sends it; we read it

@@ -1,4 +1,4 @@
-/** 252 -> 253: the recovered interoperability ACK has an empty payload. */
+/** 252 -> 253: empty compatibility ACK; no native success payload was recovered. */
 
 import { Packet } from "../../packet.ts";
 

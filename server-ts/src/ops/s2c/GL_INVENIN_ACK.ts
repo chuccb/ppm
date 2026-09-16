@@ -1,9 +1,10 @@
 /**
  * 254 -> 255 local-user NewSkill profile snapshot.
  *
- * The client has another mode-0 branch for remote-user preview, but 254's
- * native request is always the local inventory-enter path. This server emits
- * the proven mode-1 self snapshot only.
+ * The client has another mode-0 branch for remote-user preview: after the
+ * common mode/uid/context/unknown prefix it reads two more u8 values and one
+ * s32 lookup value. 254's native request is always the local inventory-enter
+ * path, so this server emits the proven mode-1 self snapshot only.
  */
 
 import { Packet } from "../../packet.ts";

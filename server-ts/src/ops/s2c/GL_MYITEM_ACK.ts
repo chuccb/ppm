@@ -11,10 +11,15 @@ import { Packet } from "../../packet.ts";
 export interface InvItem {
   readonly slot: number;
   readonly itemId: number;
+  /** Native first f32; client-side appearance-skill roll projection. */
   readonly f1: number;
+  /** Native second f32; client-side rarity/grade projection. */
   readonly f2: number;
   readonly period: number;
-  readonly dura: number;
+  /** Native u8 after the period; its domain is unresolved. */
+  readonly extra?: number;
+  /** Native u16 current/max durability word. */
+  readonly durability: number;
 }
 
 export default function GL_MYITEM_ACK(op: number, items: readonly InvItem[] = []): Packet {
@@ -27,8 +32,8 @@ export default function GL_MYITEM_ACK(op: number, items: readonly InvItem[] = []
       .f32(item.f1)
       .f32(item.f2)
       .s32(item.period)
-      .u8(0)
-      .u16(item.dura);
+      .u8(item.extra ?? 0)
+      .u16(item.durability);
   }
   return p.s32(-1);
 }

@@ -46,6 +46,7 @@ request builder → every caller/state gate → exact parser/consumer
 | 檔案 | 角色 | 維護規則 |
 |---|---|---|
 | `PACKETS.md` | 手工整理的 packet / consumer / state evidence 與 implementation boundaries | 新結論要附 function、field order、consumer 與 confidence。歷輪 section number 是穩定引用，勿為美觀大幅重排。 |
+| `SERVER_TS_PACKET_FIELDS.md` | 目前 server-ts 31 個 C2S/S2C Packet 的逐欄 wire meaning、TS use、zero projection 與 unresolved audit | 只收錄 `server-ts/src/ops` 現有 Packet；不要把保守 raw/unknown/flag/extra 欄位改成未證實的業務名稱。 |
 | `LAYOUTS.md` | S2C dispatcher 的自動 primitive-read inventory | 不把表內線性序列誤讀為完整 payload grammar；重要例外補到 `PACKETS.md`。 |
 | `LAYOUTS_REQ.md` | C2S builder 的自動 primitive-write inventory | 同一 opcode 可有多種 builder form；先回到所有 caller，不可只取第一列。 |
 | `RESOURCES.md` | Extracted resource format、resource-to-client cross-check 與資源界線 | 加入 ID/資產結論時同時標明是 display-only、lookup input 或已證實 authority。 |

@@ -55,10 +55,14 @@ export function writeMyInfoBasicData(packet: Packet, myInfo: MyInfo): Packet {
     .u8(myInfo.selectedCharIndex)
     .s32(myInfo.level)
     .s32(myInfo.experience)
+    .s32(0) // native derived-level slot; the client recomputes it from exp
+    // sub_523BF0 order: [34..36] are reserved, then wins/losses,
+    // kills/deaths/disconnects/hearts, headshots/double/triple/combos,
+    // and multi/ultra/z/k/dd. Criticals/playCount/roundCount are not
+    // proven owners of the three reserved words, so they stay zero here.
     .s32(0)
-    .s32(stats.playCount)
-    .s32(stats.roundCount)
-    .s32(stats.criticals)
+    .s32(0)
+    .s32(0)
     .s32(stats.wins)
     .s32(stats.losses)
     .s32(stats.kills)
@@ -80,7 +84,10 @@ export function writeMyInfoBasicData(packet: Packet, myInfo: MyInfo): Packet {
     .s32(myInfo.cash)
     .s32(0)
     .s32(0)
-    .zeros(48)
+    // Native [52] is the cumulative play-time task counter; [53..63]
+    // are mode counters/reserved words without a TS data model yet.
+    .s32(stats.playTimeSeconds)
+    .zeros(44)
     .u8(myInfo.selectedCharIndex);
 }
 

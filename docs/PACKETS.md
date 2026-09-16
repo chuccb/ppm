@@ -9,6 +9,11 @@
 > commit 和文件引用可追溯。因此數字標題未必是目錄順序。新增結論應放到對應
 > protocol family，並附 native builder、reader/consumer、field/state data flow、
 > confidence 與未確認限制；不要僅因資源或 opcode 名稱存在就推導 server policy。
+>
+> **目前 server-ts 31 個 Packet 的逐欄 implementation audit**：見
+> [`SERVER_TS_PACKET_FIELDS.md`](SERVER_TS_PACKET_FIELDS.md)。該文件把 native
+> wire meaning、TS 實際用途、zero projection 與 `UNRESOLVED` 欄位分開，並記錄
+> 2026-09-16 的 198/247 reserved/stat projection 修正。
 
 > **廿六輪終極對賬 (兩方向自動審計)**:
 > C# ACK 寫入序列 ↔ client 讀取序列: 18/18 ✓;
@@ -727,16 +732,18 @@ bool    success                 0 時直接顯示 resource 0x70 / code 17
   --- sub_523BF0: 基本資料 ---
   string  nickname            (this+60,  0x30 bytes 區)
   u8      selected_char_index (this+88; CHARSLOT list index, not char_type)
-  s32     level/exp 相關 x3   (this+92,96,108)
-  s32     win/loss/kill/death/disconnect x5 (this+136..152)
-  s32     headshot/combo/heart/dkill x4     (this+156..168)
-  s32     tkill/mkill/ukill/zkill x4        (this+172..184)
-  s32     kkill/ddkill/critical/playc/roundc x5 (this+188..204)
-  u8      flags x3            (this+304,305,306)
-  s32     cash?               (this+104)
-  s32     x2                  (this+112,116)
-  byte[48] extra blob         (this+208)
-  u8      slot_current        (this+4)
+  s32   level/exp/derived-level x3 (this+92,+96,+100; client recomputes +100)
+  s32   reserved x3             (this+136,+140,+144; no proven task/stat owner)
+  s32   wins/losses             (this+148,+152)
+  s32   kills/deaths/disconnect/hearts (this+156..168)
+  s32   headshots/double/triple/combos (wire order +172,+180,+184,+176)
+  s32   multi/ultra/z/k/dd      (this+188..204)
+  u8      flags x3              (this+304,305,306)
+  s32     cash                  (this+104)
+  s32     raw x2                (this+112,116)
+  byte[48] play-time/mode blob (this+208; [52] play seconds, [53..60] mode counts,
+                                [61..63] no proven consumer)
+  u8      slot_current          (this+4)
   --- sub_524010: character normal appearance records (最多 20 個) ---
   u8      char_count
   repeat char_count (≤20):
@@ -1973,7 +1980,7 @@ u8+slot 系列)
 | 707 | `GL_BILLTOKEN_ACK` | `sub_46AD00` | S2C | `str token` |
 | 787 | `GL_RACKINGWEB_TOKEN_REQ` | `sub_581E40` | C2S | `(空)` |
 | 788 | `GL_RACKINGWEB_TOKEN_ACK` | `sub_44BEA0` | S2C | `str token` |
-| 834 | `GL_DATA_RECV_COMPLETED_REQ` | `sub_583120` | C2S | `s32 user_id` |
+| 834 | `GL_DATA_RECV_COMPLETED_REQ` | `sub_583120` | C2S | `s32 raw client request context` (原樣取 `dword_F2A684`, 與 144 的 propagated raw4 共用；不可命名為 user_id) |
 | 835 | `GL_DATA_RECV_COMPLETED_ACK` | `sub_5831D0` | S2C | `(空)` |
 | 370 | `GL_CHANGECHANNEL_REQ` | `sub_570030` | C2S | `u8 channel_id` |
 | 371 | `GL_CHANGECHANNEL_ACK` | `sub_570100` | S2C | `u8 status, u8 channel_id, str host_ip, s32 host_port, u8 extra`; client passes this independently to `sub_596E60` (secondary UDP address field). Its relation to successful-196 primary endpoint is **UNRESOLVED**; do not merge endpoint state. |

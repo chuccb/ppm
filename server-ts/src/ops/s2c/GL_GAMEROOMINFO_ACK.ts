@@ -9,5 +9,7 @@
 import { Packet } from "../../packet.ts";
 
 export default function GL_GAMEROOMINFO_ACK(op: number): Packet {
-  return new Packet(op).u8(0).u8(0);
+  return new Packet(op)
+    .u8(0) // ordinary room-list mode, not tournament mode
+    .u8(0); // room record count; therefore no room fields follow
 }
