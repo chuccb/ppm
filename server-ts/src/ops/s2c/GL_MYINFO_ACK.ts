@@ -12,6 +12,7 @@ import { Packet } from "../../packet.ts";
 import {
   NEW_SKILL_PROFILE_COUNT,
   NEW_SKILL_PUZZLE_SLOT_COUNT,
+  type NewSkillProfile,
   type NewSkillProfileSnapshot,
   type MyInfo,
 } from "../../store.ts";
@@ -45,7 +46,7 @@ export default function GL_MYINFO_ACK(
   // NewSkill profile selector and the selected profile's seven puzzle IDs.
   // `n5=5` is the recovered native-compatible raw convention; its semantic is
   // unresolved. A missing snapshot is kept useful for packet-only callers.
-  let selectedProfile: NewSkillProfileSnapshot["profiles"][number] | undefined;
+  let selectedProfile: NewSkillProfile | undefined;
   if (snapshot) {
     if (!Number.isSafeInteger(snapshot.selectedProfile) || snapshot.selectedProfile < 0 || snapshot.selectedProfile >= NEW_SKILL_PROFILE_COUNT) {
       throw new RangeError("198 selected profile must be an integer in 0..4");
