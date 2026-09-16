@@ -4,6 +4,10 @@
  * The client sends this after every 144, even when 144 reported failure; an
  * unauthenticated or wrong selection therefore receives an explicit non-
  * success 196 and never gains lobby authority. (`sub_56FF40`, `sub_4179D0`)
+ *
+ * The third byte is kept as a raw flag. Native loads it from the local option
+ * block (`sub_7338D0`/`sub_735DE0`), but the recovered code does not establish
+ * a replay or other server-domain name for it.
  */
 
 import type { Reader } from "../../packet.ts";
@@ -13,14 +17,14 @@ import { Result } from "../s2c/GC_ENTERCHANNEL_ACK.ts";
 export interface Selection {
   readonly group: number;
   readonly channel: number;
-  readonly replay: number;
+  readonly rawFlag: number;
 }
 
 export function read(r: Reader): Selection {
   const selection = {
     group: r.u8(),
     channel: r.u8(),
-    replay: r.u8(),
+    rawFlag: r.u8(),
   };
   if (r.remaining !== 0) throw new RangeError(`${r.remaining} trailing bytes`);
   return selection;
