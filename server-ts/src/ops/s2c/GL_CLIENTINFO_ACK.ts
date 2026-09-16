@@ -12,12 +12,13 @@ import { writeCharacterAppearance, writeMyInfoBasicData } from "./GL_MYINFO_ACK.
 export default function GL_CLIENTINFO_ACK(op: number, myInfo: MyInfo | null): Packet {
   if (!myInfo) return new Packet(op).u8(0);
 
-  const character = myInfo.characters.find(
-    ({ slotNo }) => slotNo === myInfo.selectedCharIndex,
-  ) ?? myInfo.characters[0];
+  // 247's first byte is the serialized character-list index, not the
+  // persistent slot id. The native 198/247 basic block carries the same index.
+  const characterIndex = myInfo.selectedCharIndex;
+  const character = myInfo.characters[characterIndex] ?? myInfo.characters[0];
   const p = new Packet(op).u8(1);
   writeMyInfoBasicData(p, myInfo);
-  p.u8(character?.slotNo ?? 0).u8(character?.charType ?? 1);
+  p.u8(character ? characterIndex : 0).u8(character?.charType ?? 1);
   writeCharacterAppearance(p, character?.equip ?? []);
   return p;
 }

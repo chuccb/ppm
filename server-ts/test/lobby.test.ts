@@ -159,6 +159,28 @@ describe("lobby bootstrap packets", () => {
       1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
     ]);
     expect(publicInfo.remaining).toBe(0);
+
+    const sparseCharacters = {
+      ...myInfo!,
+      selectedCharIndex: 1,
+      characters: [
+        { slotNo: 7, charType: 1, equip: [] },
+        { slotNo: 9, charType: 2, equip: [] },
+      ],
+    };
+    const sparsePublicInfo = decode(build("GL_CLIENTINFO_ACK", sparseCharacters).encode());
+    sparsePublicInfo.u8(); // success
+    sparsePublicInfo.s32(); // user_id
+    sparsePublicInfo.str();
+    expect(sparsePublicInfo.u8()).toBe(1); // basic selected wire index
+    for (let i = 0; i < 21; i++) sparsePublicInfo.s32();
+    sparsePublicInfo.raw(3);
+    for (let i = 0; i < 3; i++) sparsePublicInfo.s32();
+    sparsePublicInfo.raw(48);
+    expect(sparsePublicInfo.u8()).toBe(1); // basic slot_current
+    expect(sparsePublicInfo.u8()).toBe(1); // 247 character-list index, not slotNo 9
+    expect(sparsePublicInfo.u8()).toBe(2);
+    expect(sparsePublicInfo.remaining).toBe(24); // 12 u16 appearance values
     store.close();
   });
 
