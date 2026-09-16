@@ -1014,7 +1014,7 @@ u16 x, string self, u8 count; repeat: string nick, s32 status
 ### 3.11 GL_MSG_RECVLIST_ACK (426) — sub_55A630:
 ```
 u16 x, string self, u8 count
-repeat: string from, u8, string title, u32 msg_id, string body(≤201), string, u16 date
+repeat: string from, u8 raw, string title, s32 msg_id, string body(≤201), string raw, s16 date
 ```
 ### 3.12 GP_CH*C 家族 (222–245, 362–363, 380–389, 882) — 四輪交叉驗證修正:
 **REQ** (builder sub_5567F0@230 / sub_5568E0@232 / sub_556B90@244 等):

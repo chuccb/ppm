@@ -121,7 +121,7 @@ server policy，也不改 frame bytes 的欄位數。
 |---|---|---|---|
 | 198/247 basic data | `PaperMan.exe.c` `sub_523BF0` | `docs/PACKETS.md §3.2`、shared TS builder | stats order corrected; 247 stops after one appearance |
 | 255 | fixed mode-1 reader and 254 caller | `server-ts/src/store.ts`, NewSkill resource notes | uid/profile snapshot kept separate from appearance; context/unknown conservative |
-| 105/106 | `sub_56A0F0`, `sub_56A250` | `LAYOUTS*.md`, TS zero projection | s8 trigger and count-zero tail confirmed |
+| 105/106 | `sub_56A0F0`, `sub_56A250` | `LAYOUTS*.md`, TS zero projection | u8 trigger and count-zero tail confirmed |
 | 425/426 | `sub_55A630` | `LAYOUTS.md`, TS zero projection | first u16/header stays unresolved; no invented page semantics |
 | 433/434 | `sub_55AFC0` | TS output | self string + count confirmed; header/status remain raw |
 | 246/247 | `sub_573EB0`, `sub_523BF0`, `sub_524360` | TS public lookup and single-character builder | no 198 character-list tail copied into 247 |

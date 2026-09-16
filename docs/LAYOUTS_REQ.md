@@ -21,7 +21,7 @@
 > 因此 143 是新 channel TCP connection 對最近 681 的 handoff claim，而不能
 > 當作已驗證登入本身。141 是 private UDP op18 觸發的 empty endpoint-confirmation
 > request（`sub_556530`）；195 三個 byte 依序為 681 的 group、group-local
-> channel index、replay-module availability（`sub_56FF40`）。
+> channel index、local-option-derived raw flag（domain UNRESOLVED；`sub_56FF40`）。
 
 | op | 名稱 | 出現處 | 寫入序列 (變體) |
 |---|---|---|---|
