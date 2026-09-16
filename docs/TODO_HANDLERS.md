@@ -267,12 +267,15 @@
 ## Current next evidence
 
 > 下一輪可做:
-> 1. 取得一組已知正常及一組拒絕的 681→143→144→195→196 實包，定位
->    `String[24]` 的 writer（仍不能猜為 account/nickname）、681 extension 的兩個
->    s32、尾端 billing s32×2、144 的兩個 read-but-unused raw4 與 propagated
->    `dword_F2A684` server-domain meaning。144 的 daily PG、rank flag、level/KD
->    restrictions、net-café 4×u8+8×raw4 shape，及 142 calendar 已經 source-verified，
->    不再列為未知。
+> 1. 取得一組已知正常及一組拒絕的 681→143→144→195→196 實包，補出
+>    `String[24]` 的 writer（仍不能猜為 account/nickname）、681 raw extension
+>    兩個 s32 與尾端 billing s32×2 的實際值/服務語意，以及 144 的兩個
+>    read-but-unused raw4 與 propagated `dword_F2A684` server-domain meaning。
+>    681 的 complete native grammar、caller/callee、UI/resource/state consumer
+>    audit 已完成（見 `docs/S2C_NATIVE_AUDIT_681.md`）；在實包前 TS 只保留
+>    exact raw extension shape，production gate 仍為 0。144 的 daily PG, rank
+>    flag, level/KD restrictions, net-café 4×u8+8×raw4 shape, 及 142 calendar
+>    已經 source-verified，不再列為未知。
 > 2. 已實作並下發 source-proven AES-only UDP-private 19→empty-20 control
 >    endpoint；它不是 relay。後續必須先逐一追完 `sub_595E80` 各 case、371 的
 >    secondary socket、`sub_596330` send callers 與 remote-address/correlation

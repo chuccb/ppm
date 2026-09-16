@@ -154,6 +154,53 @@ describe("681 — login ack", () => {
     expect(reader.remaining).toBe(0);
   });
 
+  test("writes exactly one raw extension tuple when its positive gate is explicit", () => {
+    const reader = build("GL_LOGIN_ACK", {
+      userNo: 7,
+      rawExtension: { gate: 2, s32First: -11, s32Second: 0x1234_5678, featureFlag: 1 },
+      servers,
+    });
+
+    reader.s32(); // result
+    reader.s32(); // user_no
+    reader.s32(); // n100
+    expect(reader.s32()).toBe(2); // positive gate is not a tuple count
+    expect(reader.s32()).toBe(-11);
+    expect(reader.s32()).toBe(0x1234_5678);
+    expect(reader.u8()).toBe(1);
+    expect(reader.s16()).toBe(1); // server_count follows the one tuple
+  });
+
+  test("validates the raw extension tuple without changing the safe default", () => {
+    const defaultReader = build("GL_LOGIN_ACK", { userNo: 7, servers });
+    defaultReader.s32();
+    defaultReader.s32();
+    defaultReader.s32();
+    expect(defaultReader.s32()).toBe(0); // no extension tuple follows
+
+    const negativeGateReader = build("GL_LOGIN_ACK", {
+      userNo: 7,
+      rawExtension: { gate: -1, s32First: 0, s32Second: 0, featureFlag: 0 },
+      servers,
+    });
+    negativeGateReader.s32();
+    negativeGateReader.s32();
+    negativeGateReader.s32();
+    expect(negativeGateReader.s32()).toBe(-1); // <= 0 also has no tuple
+    expect(negativeGateReader.s16()).toBe(1); // server_count is next
+
+    expect(() => buildPacket("GL_LOGIN_ACK", {
+      userNo: 7,
+      rawExtension: { gate: 1, s32First: 0x8000_0000, s32Second: 0, featureFlag: 0 },
+      servers,
+    })).toThrow(/s32First/);
+    expect(() => buildPacket("GL_LOGIN_ACK", {
+      userNo: 7,
+      rawExtension: { gate: 1, s32First: 0, s32Second: 0, featureFlag: 0x100 },
+      servers,
+    })).toThrow(/featureFlag/);
+  });
+
   test("a type-3 channel carries the extra byte", () => {
     const reader = build("GL_LOGIN_ACK", {
       userNo: 1,

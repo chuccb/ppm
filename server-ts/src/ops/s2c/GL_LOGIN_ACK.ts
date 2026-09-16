@@ -61,11 +61,41 @@ export interface GameServer {
   readonly channelGroups: readonly ChannelGroup[];
 }
 
+/**
+ * The positive `ext_count` arm is intentionally raw. Native consumes exactly
+ * one tuple when the gate is positive; it does not loop `ext_count` times.
+ */
+export interface RawExtension {
+  /** Native `ext_count` gate; any positive value enables the tuple. */
+  readonly gate: number;
+  readonly s32First: number;
+  readonly s32Second: number;
+  readonly featureFlag: number;
+}
+
 export interface Success {
   readonly userNo: number;
   readonly servers: readonly GameServer[];
   /** Opaque billing/charge UI mode, echoed back in 143. Not a player level. */
   readonly n100?: number;
+  /**
+   * Optional native extension projection. Production login keeps this absent
+   * and therefore writes the safe `gate = 0` arm; callers that possess an
+   * official extension configuration may provide the exact raw tuple.
+   */
+  readonly rawExtension?: RawExtension;
+}
+
+function requireS32(value: number, field: string): void {
+  if (!Number.isSafeInteger(value) || value < -0x8000_0000 || value > 0x7fff_ffff) {
+    throw new RangeError(`681 ${field} must fit s32`);
+  }
+}
+
+function requireU8(value: number, field: string): void {
+  if (!Number.isSafeInteger(value) || value < 0 || value > 0xff) {
+    throw new RangeError(`681 ${field} must fit u8`);
+  }
 }
 
 function requireNonNegativeS16(value: number, field: string): void {
@@ -98,17 +128,25 @@ export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Pac
     return new Packet(op).s32(outcome);
   }
 
-  const { userNo, servers, n100 = 0 } = outcome;
-  if (!Number.isSafeInteger(userNo) || userNo < -0x8000_0000 || userNo > 0x7fff_ffff) {
-    throw new RangeError("681 user_no must fit s32");
-  }
-  if (!Number.isSafeInteger(n100) || n100 < -0x8000_0000 || n100 > 0x7fff_ffff) {
-    throw new RangeError("681 n100 must fit the s32 echoed by 143");
-  }
+  const { userNo, servers, n100 = 0, rawExtension } = outcome;
+  requireS32(userNo, "user_no");
+  requireS32(n100, "n100");
   if (servers.length > 0x7fff) throw new RangeError("681 server_count must fit s16");
   const p = new Packet(op);
   p.s32(Result.Success).s32(userNo).s32(n100);
-  p.s32(0); // ext_count: 0 = no netcafe feature extension
+
+  if (!rawExtension) {
+    p.s32(0); // ext_count: safe default, no extension tuple follows
+  } else {
+    requireS32(rawExtension.gate, "raw extension gate");
+    p.s32(rawExtension.gate);
+    if (rawExtension.gate > 0) {
+      requireS32(rawExtension.s32First, "raw extension s32First");
+      requireS32(rawExtension.s32Second, "raw extension s32Second");
+      requireU8(rawExtension.featureFlag, "raw extension featureFlag");
+      p.s32(rawExtension.s32First).s32(rawExtension.s32Second).u8(rawExtension.featureFlag);
+    }
+  }
 
   p.s16(servers.length);
   for (const server of servers) {

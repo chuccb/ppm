@@ -251,10 +251,13 @@ raw4 result           native 以 raw 4B 讀入，但分支只檢查 low byte；
                        CHARGE UI。後端業務名稱未能由 native code 確認，
                        應視為 opaque billing/charge UI mode，不是「玩家等級」
                        或 route token。
-  s32  ext_count      0 = 無帳號/網咖 feature extension；>0 時 client **只讀
+  s32  ext_count      0 或負值 = 不讀 extension；>0 時 client **只讀
                        一組** `s32 first, s32 second, u8 feature_flag` 再交給
-                       sub_A1C870。count 存在 dword_231800C，非零會影響多個
-                       *_NETCAFE UI gate，故私服安全子集只能送 0 或 1。
+                       sub_A1C870。它是 native positive gate，不是 tuple count；
+                       count/gate 存在 dword_231800C，非零會影響多個
+                       *_NETCAFE UI gate。TS production 預設仍送 0；只有持有
+                       官方可重現設定時，才可透過 raw extension API 送 exact
+                       gate + one tuple，不替三欄臆造業務名稱。
   raw2 server_count                   (native loop gate; signedness unresolved)
   repeat server_count:                 ← 伺服器清單
     raw2 server_id                     (domain/signedness unresolved)
@@ -299,8 +302,12 @@ context，不是額外的 132-byte wire field。官方資源 `Extracted/ui/cfg/p
 只提供 `LOBBYCHANNEL` 的 UI layout，沒有 endpoint schema；PaperManWiki 的
 [遊戲起動編](https://wikiwiki.jp/paperman/ひよこ用/ゲーム起動編) 只確認
 「server selection」與 channel/遊玩風格的階層，也沒有 port 欄位命名。故
-本段的 endpoint/USERS 命名以 native producer/consumer 為準，`flag`、`group`
-與 billing fields 仍維持 UNRESOLVED；TS 不重建 native internal scratch object。
+本段的 endpoint/USERS 命名以 native producer/consumer 為準；後續 144→195 的
+`sub_4179D0`→`sub_56FF40` 另以 projection `+129/+131` 交叉確認 `ch_type`
+與 `ch_flag`，而 type-3-only projection `+130` 只在 `sub_416DA0` 的 UI/state
+switch 出現。`flag`、`group` 與 billing fields 仍維持 UNRESOLVED；TS 不重建
+native internal scratch object。完整 caller/callee 與 raw extension audit 見
+`docs/S2C_NATIVE_AUDIT_681.md`。
 
 `user_no` 另外被格式化成字串，和 `billing_first/billing_second`、常數
 `5`、`0` 一起放入 `sub_7092C0` 的 Tricod argument block；這只能證明
@@ -1493,9 +1500,10 @@ GG 戰鬥事件中繼 (server 原樣轉發即可) 與 MASTER_* GM 工具組。
 **頻道→大廳鏈全閉環**。196 handler 經場景 vtable (sub_407360 的
 vtbl+52) 分發, 與 CLobbyShop 同層 (引用計數 1 = 純虛表呼叫證據)。
 
-festival: 681 的 3 頻道組 ↔ 195 的 group 序號互證; 頻道類型 n2==3
-= AI 頻道 (bitmask 1024 段地圖) — 與 ch_type==3 讀 extra byte
-(二輪 681 佈局) 同源!
+cross-check: 681 的 3 頻道組 ↔ 195 的 group 序號互證；`ch_type` 是 195
+第一 byte（projection `+129`），`ch_flag` 是第二 byte（projection `+131`）。
+`ch_type==3` 的第三 wire byte 是 projection `+130`，由 lobby UI/state switch
+消費；目前維持 raw，不因 196 的 type-3 continuation 或資源標籤替它命名。
 
 ### 3.15e GL_JOINPLAY_ACK (269) — sub_574B20, 1524 行巨型函數 (全鏈定案)
 中途加入/觀戰的「全房間快照」。頂層: `u8 n7` switch:
@@ -2226,7 +2234,7 @@ u8+slot 系列)
 | 198 [28][29] (+112/116) | 閒置, 0 安全 | 僅複製建構 |
 | 198 blob [52..60] | 遊玩秒+模式場次 | cond20 + sub_923BF0 |
 | 681 n100 | 計費模式 id | ==100/101 → CHARGE UI (Tricod) |
-| 681 ext (a,b,c) | 物品等級 gate ×2 + 隱藏物品可見 flag | sub_A1CE20 / byte_231807D |
+| 681 ext (a,b,c) | raw positive gate plus one `s32,s32,u8` tuple; native UI/feature gate is proven, business names remain unresolved | `sub_43E500` → `sub_A1C870`, `dword_231800C`, `byte_231807D`, `CHANNEL_NETCAFE` branches |
 | 681 billing ×2 | Tricod SDK session 參數 | sub_7092C0 → CTricodLog |
 | 106 第三個 s32 | **exp** (顯示等級用) | sub_588560 → sub_403360 |
 | 205 尾 7×s32 | PG/CASH/CP + 保留×3 + 旗標 | UI 標籤 (十一輪) |
