@@ -953,11 +953,11 @@ REQ 端 `sub_56A0F0`: `u8 (=1)` — native parameter is `unsigned __int8`; clien
 ≥0x3E8) 送一次要求刷新名單, log `L"Send UserList"`; server 直接回
 106。ACK 端 sub_56A250 (四輪修正):
 ```
-u16    count
-若 count != 0:      ← count==0 時後面什麼都沒有
+raw2   gate (native only tests zero/nonzero; domain unresolved)
+若 gate != 0:       ← gate==0 時後面什麼都沒有
   u8   flags        (bit0: 開啟清單 UI; bit0|bit2: 關閉)
-  u8   n
-  repeat n: s32 user_id, string nick, s32 exp
+  u8   recordCount
+  repeat recordCount: s32 user_id, string nick, s32 exp
             if user_id>0 { s32 custom_tex_id, string tex_name(64) }
 ```
 ⚠ 第三個 s32 是 **exp 不是 status** (十二輪定案): sub_588560 對它呼叫
@@ -2875,3 +2875,4 @@ byte 偏移 (this 為物件基址):
    password, item_mode, balance, skill_off, observer。
 8. **好友/訊息/倉庫/任務/公會/禮物** 都有對應 packet 家族 → 各自建表。
 9. period 天數 & 商店 kind 白名單直接寫進 CHECK constraint。
+�店 kind 白名單直接寫進 CHECK constraint。
