@@ -38,9 +38,30 @@ const servers: readonly GameServer[] = [
   },
 ];
 
-const server = listen({ hostname: host, port, store, servers, ops, log });
+const loginServer = listen({
+  role: "login",
+  hostname: host,
+  port,
+  store,
+  servers,
+  ops,
+  log,
+});
 
-log(`login server on ${host}:${port}`);
+// The client opens a second connection for the channel, using the host and
+// port advertised in the login reply's server list.
+const channelServer = listen({
+  role: "channel",
+  hostname: host,
+  port: channelPort,
+  store,
+  servers,
+  ops,
+  log,
+  channelName: Bun.env["PM_CHANNEL_NAME"] ?? "Channel 1",
+});
+
+log(`login server on ${host}:${port}, channel server on ${host}:${channelPort}`);
 log(`${OPCODE_COUNT} opcodes known; ${ops.summary}`);
 log(`sqlite ${store.sqliteVersion} at ${dbPath}`);
 log(`bun ${Bun.version} (${Bun.revision.slice(0, 9)})`);
@@ -48,7 +69,8 @@ log(`bun ${Bun.version} (${Bun.revision.slice(0, 9)})`);
 for (const signal of ["SIGINT", "SIGTERM"] as const) {
   process.on(signal, () => {
     log(`${signal}: shutting down`);
-    server.stop();
+    loginServer.stop();
+    channelServer.stop();
     store.close();
     process.exit(0);
   });

@@ -30,6 +30,7 @@ beforeAll(async () => {
   store = new Store();
   await store.createAccount("alice", "hunter2");
   listener = listen({
+    role: "login",
     hostname: "127.0.0.1",
     port: 0, // ephemeral
     store,

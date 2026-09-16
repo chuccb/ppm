@@ -4,4 +4,6 @@
 
 export { default as GL_ACCOUNTCONNSUCC } from "./GL_ACCOUNTCONNSUCC.ts";
 export { default as GL_LOGIN_ACK } from "./GL_LOGIN_ACK.ts";
+export { default as GL_TCPCONNSUCC } from "./GL_TCPCONNSUCC.ts";
 export { default as GT_PING_ACK } from "./GT_PING_ACK.ts";
+export { default as PM_UDPSTART_ACK } from "./PM_UDPSTART_ACK.ts";

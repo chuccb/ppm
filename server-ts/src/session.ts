@@ -12,16 +12,31 @@ import type { OutboundArgs, OutboundName, Registry } from "./ops/registry.ts";
 import type { Store } from "./store.ts";
 import { Result, type GameServer } from "./ops/s2c/GL_LOGIN_ACK.ts";
 import type { Credentials } from "./ops/c2s/GL_LOGIN_REQ.ts";
+import type { Handoff } from "./ops/c2s/PM_UDPSTART_REQ.ts";
+import { Result as Admission } from "./ops/s2c/PM_UDPSTART_ACK.ts";
 
 /** How often to poll, and how long silence may last. Server-side choices. */
 export const PING_INTERVAL_MS = 15_000;
 export const PING_TIMEOUT_MS = 60_000;
 
+/**
+ * The client opens two TCP connections with different handshakes:
+ *
+ *   login    GL_ACCOUNTCONNSUCC -> GL_LOGIN_REQ    -> GL_LOGIN_ACK
+ *   channel  GL_TCPCONNSUCC     -> PM_UDPSTART_REQ -> PM_UDPSTART_ACK
+ *
+ * Only the greeting differs, so one Session serves both.
+ */
+export type Role = "login" | "channel";
+
 export interface Config {
+  role: Role;
   store: Store;
   servers: readonly GameServer[];
   ops: Registry;
   log: (message: string) => void;
+  /** Shown in the channel admission reply. */
+  channelName?: string;
 }
 
 export class Session {
@@ -50,9 +65,12 @@ export class Session {
     this.send(this.#config.ops.build(name, ...args));
   }
 
-  /** Sent once on connect; it is what triggers the client to log in. */
+  /** Sent once on connect; it is what makes the client speak first. */
   greet(): void {
-    this.reply("GL_ACCOUNTCONNSUCC");
+    // Branch rather than a ternary: each builder takes its own arguments, so a
+    // union of names would leave the call site unable to type them.
+    if (this.#config.role === "login") this.reply("GL_ACCOUNTCONNSUCC");
+    else this.reply("GL_TCPCONNSUCC");
     this.#heartbeat = setInterval(() => {
       if (Date.now() - this.#lastSeen > PING_TIMEOUT_MS) {
         this.#config.log(`${this.#peer}: no ping reply, closing`);
@@ -122,6 +140,21 @@ export class Session {
       "GL_LOGIN_ACK",
       account ? { userNo: account.id, servers: this.#config.servers } : Result.BadCredentials,
     );
+  }
+
+  /**
+   * Admit a connection to the channel after login.
+   *
+   * The handoff claim is matched against a recent login rather than trusted as
+   * an identity: its `String[24]` writer has never been located, so treating it
+   * as an account key would be a guess. (docs/PACKETS.md §3.15d)
+   */
+  admitToChannel(handoff: Handoff): void {
+    this.#config.log(`${this.#peer}: channel handoff ${JSON.stringify(handoff.identity)}`);
+    this.reply("PM_UDPSTART_ACK", {
+      result: Admission.Success,
+      channelName: this.#config.channelName ?? "Channel 1",
+    });
   }
 
   #fail(what: string, error: unknown): void {

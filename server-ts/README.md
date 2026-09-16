@@ -15,13 +15,13 @@ reverse-engineering notes in [`../docs/`](../docs/).
 
 ```bash
 bun install
-bun test          # 54 tests
+bun test          # 63 tests
 bun run typecheck # tsc --noEmit, clean
 bun start         # login server on 0.0.0.0:40200
 ```
 
 Environment: `PM_HOST`, `PM_PORT`, `PM_DB`, `PM_ADVERTISE_HOST`,
-`PM_CHANNEL_PORT`.
+`PM_CHANNEL_PORT`, `PM_CHANNEL_NAME`.
 
 ## Layout
 
@@ -62,10 +62,23 @@ All of these are cited to `../docs/PACKETS.md`:
 - **Cipher** — AES-128-CFB (128-bit feedback, zero IV) over a 16-byte-aligned
   buffer. An empty payload still costs one block. The key is the EUC-KR literal
   「트렁크점령전머지」.
-- **Login order** — the client does not send credentials unsolicited. The
-  server sends `694` on connect, which both negotiates the compression
-  threshold and triggers the client's `682` builder. `694` must be sent exactly
-  once: repeating it after login makes the client resend `682` forever.
+- **Two connections, two handshakes** — the client connects to the login
+  server, then opens a *second* connection to the channel host and port it
+  read from the login reply. In both cases the server speaks first:
+
+  ```
+  login    GL_ACCOUNTCONNSUCC -> GL_LOGIN_REQ    -> GL_LOGIN_ACK
+  channel  GL_TCPCONNSUCC     -> PM_UDPSTART_REQ -> PM_UDPSTART_ACK
+  ```
+
+  `GL_ACCOUNTCONNSUCC` must be sent exactly once: it also triggers the client's
+  credential builder, so repeating it after login loops the client forever.
+- **The channel handoff is not an identity** — `PM_UDPSTART_REQ` carries a
+  `String[24]` whose writer has never been located, so it is matched against a
+  recent login rather than trusted as an account key, and it is not a
+  credential. The server also cannot rely on rejecting it: the client's
+  second-level handler ignores the result and sends the enter-channel request
+  regardless, so that must be refused separately.
 - **Compression** — the client only lowers its threshold when the value is
   strictly below `0x2580`, so sending `0x2580` disables LZ in both directions.
   The LZ stage is therefore not implemented, and `decodeFrame` throws rather
