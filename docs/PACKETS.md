@@ -254,21 +254,21 @@ raw4 result           native 以 raw 4B 讀入，但分支只檢查 low byte；
                        一組** `s32 first, s32 second, u8 feature_flag` 再交給
                        sub_A1C870。count 存在 dword_231800C，非零會影響多個
                        *_NETCAFE UI gate，故私服安全子集只能送 0 或 1。
-  s16  server_count
+  raw2 server_count                   (native loop gate; signedness unresolved)
   repeat server_count:                 ← 伺服器清單
-    s16  server_id
+    raw2 server_id                     (2-byte wire field; domain/signedness unresolved)
     str  name  (ANSI; native char[50]，內容最多 49 bytes)
     str  host  (v124 char[16]，內容最多 15 bytes)
-    s16  port  (⚠ 讀取函式是 sub_5929C0；其 16-bit bit pattern 隨後作
-                Winsock u_short port 使用，故 40201 等 >32767 port 合法)
+    raw2 port  (sub_5929C0 只證明讀取 2 bytes；681 清單 reader 本身
+                未證明 signedness，也未在此處證明它會直接作 socket endpoint)
     u8   flag                          (意義尚未確定)
-    s16  group                         (意義尚未確定)
+    raw2 group                        (2-byte wire field; domain/signedness unresolved)
     repeat 3:                          ← 每台固定 3 個頻道分組
-      s16  ch_count
+      raw2 ch_count                   (native reads one record when >0)
       若 ch_count > 0 (⚠ 即使 >1 client 也只讀一個條目):
         u8   ch_type
         str  ch_name                   (char[50]，內容最多 49 bytes)
-        s16  ch_port                   (同樣是 u_short bit pattern)
+        raw2 ch_port                  (sub_5929C0 只證明 2-byte wire field；consumer signedness/domain unresolved)
         u8   ch_flag                   (意義尚未確定)
         若 ch_type==3: u8 extra
   s32  billing_first, billing_second   (v142,v137 → Tricod account/billing client;

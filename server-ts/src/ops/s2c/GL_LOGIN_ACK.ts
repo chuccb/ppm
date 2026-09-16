@@ -87,7 +87,7 @@ export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Pac
     p.s16(server.serverId);
     p.str(server.name); // native char[50]
     p.str(server.host); // native char[16]
-    p.s16(server.port); // 16-bit pattern reused as u_short, so >32767 is fine
+    p.s16(server.port); // native 2-byte field; this list reader does not prove signedness
     p.u8(server.flag);
     p.s16(server.group);
 
