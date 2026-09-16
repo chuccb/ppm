@@ -1,7 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import { Packet, decode } from "../src/packet.ts";
 import { opcodeFor } from "../src/opcodes.ts";
-import { build as buildPacket, handlerFor, type OutboundArgs, type OutboundName } from "../src/ops/registry.ts";
+import {
+  build as buildPacket,
+  handlerFor,
+  summary,
+  type OutboundArgs,
+  type OutboundName,
+} from "../src/ops/registry.ts";
 import { Result, type GameServer } from "../src/ops/s2c/GL_LOGIN_ACK.ts";
 import { read as readCredentials } from "../src/ops/c2s/GL_LOGIN_REQ.ts";
 
@@ -205,15 +211,10 @@ describe("registry", () => {
     expect(() => buildPacket("GT_PING_ACK")).not.toThrow();
   });
 
-  test("the generated index files are in sync with the directories", async () => {
-    // `bun run sync` regenerates them; this fails if someone forgot.
-    const proc = Bun.spawn([process.execPath, "run", "scripts/sync-ops.ts"], {
-      cwd: new URL("..", import.meta.url).pathname,
-      stdout: "pipe",
-      stderr: "pipe",
-    });
-    const out = await new Response(proc.stdout).text();
-    await proc.exited;
-    expect(out).not.toContain("wrote");
+  test("the registry discovers both operation folders at startup", () => {
+    expect(summary()).toMatch(/^c2s 15 \(/);
+    expect(summary()).toMatch(/\), s2c 16 \(/);
+    expect(summary()).toContain("GL_LOGIN_ACK");
+    expect(summary()).toContain("GL_LOGIN_REQ");
   });
 });

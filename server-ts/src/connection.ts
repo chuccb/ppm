@@ -106,7 +106,7 @@ export class Connection {
     this.#socket.write(packet.encode());
   }
 
-  /** Build an outbound packet by name and send it. Names are checked by tsc. */
+  /** Build an outbound packet by name and send it. Names and args are typed; files are checked at startup. */
   reply<N extends OutboundName>(name: N, ...args: OutboundArgs<N>): void {
     this.send(build(name, ...args));
   }

@@ -52,8 +52,9 @@ src/ops/s2c/GL_LOGIN_ACK.ts   we send it; we build it
 ```
 
 Direction is the folder, not the `_REQ`/`_ACK` suffix — those describe the
-client's view, and `GT_PING_ACK` is an `_ACK` the *server* sends. After adding
-a module run `bun run sync` to regenerate the folder's `index.ts`.
+client's view, and `GT_PING_ACK` is an `_ACK` the *server* sends. The registry
+discovers these files directly with Bun's `Glob` and `import.meta.require`;
+`bun run sync` checks that every filename is in `db/packets.tsv`.
 
 ## Protocol facts this implements
 
