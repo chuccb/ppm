@@ -168,10 +168,10 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 420 | GL_MSG_ADD_ACK | sub_559810 | `str u8 u8` |
 | 422 | GL_MSG_DEL_ACK | sub_55A310 | `s8/bool str` |
 | 424 | GL_MSG_READ_ACK | sub_55A4F0 | `s8/bool str` |
-| 426 | GL_MSG_RECVLIST_ACK | sub_55A630 | `raw2 str u8 str u8 str s32 str str s16` |
+| 426 | GL_MSG_RECVLIST_ACK | sub_55A630 | `raw2 context-str u8 record-str u8 record-str raw4 record-str record-str raw2` |
 | 430 | GL_FRIEND_ADD_ACK | sub_55AA90 | `u8 str` |
 | 432 | GL_FRIEND_DEL_ACK | sub_55AE10 | `u8 str` |
-| 434 | GL_FRIEND_LIST_ACK | sub_55AFC0 | `raw2 str u8 str s32` |
+| 434 | GL_FRIEND_LIST_ACK | sub_55AFC0 | `raw2 context-str u8 record-str raw4` |
 | 436 | GL_FRIEND_INFO_ACK | sub_55B2C0 | `u8 str u8 str u8` |
 | 440 | GL_FRIEND_CHAT_ACK | sub_55B660 | `u8 str str str` |
 | 442 | GL_FRIEND_WHERE_ACK | sub_55B9F0 | `u8 u8 u8 u8` |

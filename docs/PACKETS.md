@@ -1088,11 +1088,11 @@ round_type==4] + 2×{s32 uid (+s32)} }; 之後 u8 has_my (≠0 → u8 room,
 u8), f32 → 存 [494]。
 ### 3.10 GL_FRIEND_LIST_ACK (434) — sub_55AFC0:
 ```
-raw2 header, string self, u8 count; repeat: string nick, raw4 field_a3
+raw2 header, string field_s0, u8 count; repeat: string field_s1, raw4 field_a3
 ```
 `sub_537F60` accepts the full 4-byte record field but assigns it to the
 one-byte table slot `this+61585+index`; only the low byte is visibly retained by
-that local consumer. The 21-byte nickname copy loop has no visible per-byte clamp.
+that local consumer. The 21-byte record-string copy loop has no visible per-byte clamp.
 
 ### 3.11 GL_MSG_RECVLIST_ACK (426) — sub_55A630:
 ```
