@@ -74,12 +74,6 @@ function requireNonNegativeS16(value: number, field: string): void {
   }
 }
 
-function requireU16(value: number, field: string): void {
-  if (!Number.isSafeInteger(value) || value < 0 || value > 0xffff) {
-    throw new RangeError(`681 ${field} must fit u16`);
-  }
-}
-
 /**
  * Two forms, distinguished by what you pass:
  *
@@ -120,7 +114,9 @@ export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Pac
     if (server.host.length > MAX_SERVER_HOST_BYTES) {
       throw new RangeError("681 server host must fit native char[16]");
     }
-    requireU16(server.port, "server_port");
+    if (!Number.isSafeInteger(server.port) || server.port < 0 || server.port > 0xffff) {
+      throw new RangeError("681 server_port must fit u16");
+    }
 
     // These are raw2 fields; native domain/signedness is unresolved.
     p.s16(server.serverId);
