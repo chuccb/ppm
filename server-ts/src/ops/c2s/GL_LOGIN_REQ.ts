@@ -54,7 +54,20 @@ export default async function GL_LOGIN_REQ(r: Reader, connection: Connection): P
     return;
   }
 
-  connection.accountId = found.id;
+  const chargeMode = 0;
+  const extensionCount = 0;
+  connection.bindAccount(found.id);
+  connection.config.admissions.issue(
+    found.id,
+    chargeMode,
+    extensionCount,
+    connection.remoteIp,
+    connection.config.admissionLifetimeMs ?? 120_000,
+  );
   connection.log(`login ${account} -> account ${found.id}`);
-  connection.reply("GL_LOGIN_ACK", { userNo: found.id, servers: connection.config.servers });
+  connection.reply("GL_LOGIN_ACK", {
+    userNo: found.id,
+    servers: connection.config.servers,
+    chargeMode,
+  });
 }

@@ -250,10 +250,13 @@ export class Reader {
     return this.#view().getFloat32(this.#at(4), true);
   }
 
-  str(encoding: Encoding = "euc-kr"): string {
+  str(encoding: Encoding = "euc-kr", maxBytes?: number): string {
     const start = this.#pos;
     const end = this.#buf.indexOf(0, start);
     if (end < 0) throw new RangeError("unterminated ANSI string");
+    if (maxBytes !== undefined && end - start > maxBytes) {
+      throw new RangeError(`ANSI string exceeds ${maxBytes} bytes`);
+    }
     this.#pos = end + 1;
     return decoder(encoding).decode(this.#buf.subarray(start, end));
   }

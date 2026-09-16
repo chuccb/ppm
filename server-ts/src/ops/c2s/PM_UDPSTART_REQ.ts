@@ -7,8 +7,8 @@
  *
  * `identity` comes from a native `String[24]`, so at most 23 ANSI bytes. Its
  * writer has not been located, so it is **not** treated as an account or
- * nickname key — only as a value to match against a recent login. It is not a
- * cryptographic credential either. (docs/PACKETS.md §3.15d)
+ * nickname key. The handoff is accepted only when the shared, recent login
+ * admission matches the source IP and echoed values. (docs/PACKETS.md §3.15d)
  */
 
 import type { Reader } from "../../packet.ts";
@@ -26,26 +26,60 @@ export interface Handoff {
 }
 
 export function read(r: Reader): Handoff {
-  const identity = r.str();
+  const identity = r.str("euc-kr", IDENTITY_MAX_BYTES);
   const chargeMode = r.s32();
   const literal = r.u8();
   const extCount = r.s32();
 
   if (r.remaining !== 0) throw new RangeError(`${r.remaining} trailing bytes`);
   if (literal !== 1) throw new RangeError(`expected the literal 1, got ${literal}`);
-  if (identity.length > IDENTITY_MAX_BYTES) {
-    throw new RangeError(`identity longer than the client's ${IDENTITY_MAX_BYTES}-byte buffer`);
-  }
 
   return { identity, chargeMode, extCount };
 }
 
 export default function PM_UDPSTART_REQ(r: Reader, connection: Connection): void {
-  const { identity } = read(r);
-  connection.log(`channel handoff ${JSON.stringify(identity)}`);
+  if (connection.authenticated) {
+    connection.reply("PM_UDPSTART_ACK", {
+      result: Result.AlreadyConnected,
+      channelName: connection.config.channelName,
+    });
+    return;
+  }
 
+  let handoff: Handoff;
+  try {
+    handoff = read(r);
+  } catch (error) {
+    connection.log(`malformed channel handoff — ${errorMessage(error)}`);
+    connection.reply("PM_UDPSTART_ACK", {
+      result: Result.UnauthorisedId,
+      channelName: connection.config.channelName,
+    });
+    return;
+  }
+
+  const admission = connection.config.admissions.claim(
+    handoff.chargeMode,
+    handoff.extCount,
+    connection.remoteIp,
+  );
+  if (!admission) {
+    connection.log(`channel handoff ${JSON.stringify(handoff.identity)} -> rejected`);
+    connection.reply("PM_UDPSTART_ACK", {
+      result: Result.UnauthorisedId,
+      channelName: connection.config.channelName,
+    });
+    return;
+  }
+
+  connection.bindAccount(admission.accountId);
+  connection.log(`channel handoff ${JSON.stringify(handoff.identity)} -> account ${admission.accountId}`);
   connection.reply("PM_UDPSTART_ACK", {
     result: Result.Success,
     channelName: connection.config.channelName,
   });
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }

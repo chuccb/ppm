@@ -2,6 +2,7 @@
 //
 // Packets the client sends us. Each module reads one and acts on it.
 
+export { default as GC_ENTERCHANNEL_REQ } from "./GC_ENTERCHANNEL_REQ.ts";
 export { default as GL_LOGIN_REQ } from "./GL_LOGIN_REQ.ts";
 export { default as GT_PING_REQ } from "./GT_PING_REQ.ts";
 export { default as PM_UDPSTART_REQ } from "./PM_UDPSTART_REQ.ts";

@@ -2,6 +2,7 @@
 //
 // Packets we send the client. Each module builds one from its own opcode.
 
+export { default as GC_ENTERCHANNEL_ACK } from "./GC_ENTERCHANNEL_ACK.ts";
 export { default as GL_ACCOUNTCONNSUCC } from "./GL_ACCOUNTCONNSUCC.ts";
 export { default as GL_LOGIN_ACK } from "./GL_LOGIN_ACK.ts";
 export { default as GL_TCPCONNSUCC } from "./GL_TCPCONNSUCC.ts";
