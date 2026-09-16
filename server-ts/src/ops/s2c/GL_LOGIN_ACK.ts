@@ -47,10 +47,19 @@ export interface Success {
   chargeMode?: number;
 }
 
-export default function (op: number, result: Result | Success): Packet {
-  if (typeof result === "number") return new Packet(op).s32(result);
+/**
+ * Two forms, distinguished by what you pass:
+ *
+ *   build("GL_LOGIN_ACK", Result.BadCredentials)          just the result word
+ *   build("GL_LOGIN_ACK", { userNo, servers })            the full payload
+ *
+ * A failure really is only that word on the wire — the client branches on its
+ * low byte before reading anything else.
+ */
+export default function (op: number, outcome: Result | Success): Packet {
+  if (typeof outcome === "number") return new Packet(op).s32(outcome);
 
-  const { userNo, servers, chargeMode = 0 } = result;
+  const { userNo, servers, chargeMode = 0 } = outcome;
   const p = new Packet(op);
   p.s32(Result.Success).s32(userNo).s32(chargeMode);
   p.s32(0); // ext_count: 0 = no netcafe feature extension

@@ -48,11 +48,13 @@ export default async function (r: Reader, connection: Connection): Promise<void>
   const { account, password } = read(r);
   const found = await connection.config.store.verifyLogin(account, password);
 
-  connection.accountId = found?.id ?? null;
-  connection.log(`login ${account} -> ${connection.accountId ?? "rejected"}`);
+  if (!found) {
+    connection.log(`login ${account} -> rejected`);
+    connection.reply("GL_LOGIN_ACK", Result.BadCredentials);
+    return;
+  }
 
-  connection.reply(
-    "GL_LOGIN_ACK",
-    found ? { userNo: found.id, servers: connection.config.servers } : Result.BadCredentials,
-  );
+  connection.accountId = found.id;
+  connection.log(`login ${account} -> account ${found.id}`);
+  connection.reply("GL_LOGIN_ACK", { userNo: found.id, servers: connection.config.servers });
 }
