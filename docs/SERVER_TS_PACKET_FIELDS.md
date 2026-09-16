@@ -224,6 +224,136 @@ context 目前均不能因為欄位名稱相似而互換。
 | 694 `GL_ACCOUNTCONNSUCC` | `u16 compression_threshold` | Native `sub_43E651` reads exactly one 2-byte value into `n0x2580`; only a value strictly below `0x2580` replaces the local compression threshold, while `0x2580` or larger leaves compression disabled. The same handler then invokes the 682 login builder. TS validates only the native `u16` boundary and sends the value unchanged, including values the client ignores; the default remains `0x2580` so compression is disabled. | `sub_43E651` `n694==694` branch、`sub_592A00`、`sub_592CE0/sub_592E00` compression path；HIGH for wire/client behavior |
 | 835 `GL_DATA_RECV_COMPLETED_ACK` | empty | Completion ACK after 834. No payload is consumed by the recovered client path. | 834/835 mapping and completion consumer；HIGH |
 
+## 425–434 native caller / UI / adjacent-handshake supplement
+
+This supplement supersedes any older field label in the index above. The packet
+names are retained as dispatcher identifiers, but field domains stay raw unless
+the native consumer below proves more.
+
+### 425 → 426
+
+- `sub_55A580` is called by the native UI path, not only by an isolated builder.
+  The `REFRESH_INBOX` UI command resets the messenger object's `+65` flag through
+  `sub_44E4A0`, reads `+63` through `sub_44E480`, and sends that value. The
+  `CUIMessageList::sub_6D9990` setup path also initializes the messenger `+63`
+  value to `1` before sending it.
+- `CUIMessageList::sub_6DC6C0` is the previous-step caller: it requires the
+  request-in-flight flag at `+260` to be clear and `+252 != 1`, saves `+252` at
+  `+256`, records mode `1`, records a timer at `+264`, subtracts `10`, floors
+  the result at `1`, and calls `sub_55A580`. `sub_6DC760` is the next-step
+  caller: it requires `+260 == 0`, saves the old value/mode/timer, adds `10`,
+  and calls `sub_55A580`. These are native UI step facts; they do not prove a
+  total-count, server cursor, or mailbox policy.
+- Dispatcher case 426 calls `sub_55A630`. The reader first consumes raw2 and
+  the context string, then a u8 count. The context string is not passed to the
+  table insertion helper, so no account/page-token meaning is recovered.
+
+### 426 record fields
+
+The following are consumer facts, not reconstructed business names.
+
+- `field_s1` is a row key in the local 20-byte slots. `sub_537DE0` searches it,
+  `sub_537A80` removes and compacts a matching row, and `sub_537D20` marks a
+  matching row with byte `89`. `sub_55A1E0` builds 421 only when the key exists;
+  `sub_55A3C0` builds 423 only when the key is not already marked `89`;
+  nonzero 422 calls the remove helper and nonzero 424 calls the `89` marker
+  helper. The key is therefore directly evidenced, but sender/recipient/message
+  id/folder semantics are not.
+- `field_a3` is stored at the 2-byte-stride state area beginning at
+  `byte_F23A60`. The UI tests the corresponding byte against ASCII `N` (`78`)
+  in `CUIMessageColumn::sub_6D84A0`; the 424 success path writes ASCII `Y`
+  (`89`). This proves the observed one-byte state branch and its `N`/`Y`
+  values. It does not justify a database `is_read` projection without a server
+  join.
+- `field_s2` is copied to the 21-byte-stride area beginning at
+  `byte_F23A74`. The message-list UI passes the matching slot to its `MSG_NAME`
+  display path, and its reply path (`sub_6D95C0`) uses the same slot when it
+  constructs a reply. This proves a displayed/action-associated string, not
+  whether it is a sender or recipient.
+- `field_a5` remains wire `raw4`. The recovered list insertion assigns it to
+  `this + 60536 + index`, visibly retaining only one byte. The UI separately
+  formats a dword local array at `dword_F23B48[index]` as a date/time, but the
+  dump does not show a direct write from this reader's `field_a5` to that dword
+  array. Do not rename `field_a5` to timestamp.
+- `field_s3` is copied into a 201-byte local slot. The message-list UI has a
+  `MESSAGE` control, but the recovered dump does not provide a direct address
+  join from this wire string to that control's source; keep it raw.
+- `field_s4` is copied into a 2-byte-stride area beginning at `0xF2434A`.
+  Native UI code compares each slot with the literal `F` and with `M`: an `M`
+  slot selects the reply path using `field_s2`, while an `F` slot participates
+  in the friend-apply/refuse UI branch when a separate local marker is `1`.
+  This proves a small type/control string domain with observed values `F` and
+  `M`, but not a general enum or the meaning of the other values.
+- `field_a8` remains wire `raw2`; its recovered table assignment retains only
+  the low byte at `this + 122107 + index`, and no semantic consumer was found.
+  The header raw2 and context string likewise remain unresolved. The shipped
+  `Extracted/` tree contains no message-record schema that joins the unresolved
+  fields to a catalog or mailbox model.
+
+### 421/422 and 423/424 adjacent operations
+
+The dispatcher routes 422 to `sub_55A310` and 424 to `sub_55A4F0`. Each reader
+consumes `u8 statusRaw` followed by one string. For 422, a nonzero status calls
+`sub_537A80` with the string key; for 424, a nonzero status calls
+`sub_537D20`. Zero status selects a localized error path. The C2S builders
+validate a nonempty string of at most 20 bytes and use the same local key table
+as 426. This proves the key/remove and key/marker handshakes, while the status
+values and server persistence remain raw.
+
+### 429–434 friend-list-adjacent operations
+
+- 429 validates a nonempty string of at most 23 bytes, rejects the current local
+  account and an already-present local friend-table key, then sends one string.
+  430 reads `u8 statusRaw, str`; status branches select localized resources
+  `0x1E8` through `0x1EC`, while status 0 inserts the returned string into
+  the 100-entry table and then sends an empty 433 refresh request. The resource
+  strings and the native `friend` UI establish the feature context, but do not
+  establish a complete server result-code policy.
+- 431 validates a nonempty string of at most 23 bytes and sends it. 432 reads
+  `u8 statusRaw, str`; status 0 removes the string from the local 100-entry
+  table and sends 433, while nonzero branches only select localized paths in
+  the recovered handler. Keep the status and string as raw/key fields.
+- 433 is an empty request. Its builder sends opcode 433, and 434 dispatches to
+  `sub_55AFC0`. That reader consumes raw2, a context string, u8 count, and
+  repeated `str, raw4`; `sub_537F60` stores at most 100 rows, keeps only the
+  low byte of the raw4 in its local side slot, and copies the string without a
+  visible stride clamp.
+- After 434 insertion, `sub_55B0A0` uses the locally accumulated strings to
+  optionally build 435 as a comma-separated string request. The 436 reader
+  consumes the 435/436 follow-up and calls `sub_5382D0` with each key, online
+  byte, optional location string, and channel byte. This is direct adjacent
+  handshake evidence for the 434 row strings; it does not give the 434 raw4 a
+  meaning, because the recovered 436 fields are read from a different packet.
+  The 434 header/context and raw4 remain raw, and `Extracted/` has no friend-row
+  schema that changes that conclusion.
+
+### 834 → 835 shared-context and completion path
+
+- `sub_583120` is called from at least two native state-machine paths: from
+  `sub_488050` after its room/data progression, and from `sub_449F90` where the
+  lobby/session progression sets local state `+1905` to 6. It constructs
+  834 with exactly one raw4 written from `dword_F2A684`. The dispatcher routes
+  835 to `sub_5831D0`, which consumes no payload and calls `sub_522440` to
+  clear the common native progress object.
+- `dword_F2A684` is assigned by the 144 reader (`sub_555D50`) from one raw4
+  field. It is then reused by multiple unrelated native builders, including
+  the 419 message-add builder, 820, 834, and the 344/346/348/350 text-related
+  builders. This reuse is direct evidence that the 834 word is a shared raw
+  context value, not evidence for a user id, account id, or completion token.
+  The TS handler therefore validates one signed 32-bit wire field and does not
+  join it to Store identity; 835 stays empty.
+
+The resource cross-check is limited to the strings selected by the native
+resource IDs. In `Extracted/ui/lang/msgtableres.lang` (CP932), the relevant
+entries are: `0x1E3` recipient-character-name check, `0x1E4` message-send
+failure, `0x1E7` message-receive failure, `0x1E8` self cannot be registered as a
+friend, `0x1E9` character already registered, `0x1EA` friend-list registration
+success, `0x1EB` reconnect-after-disconnect notice, `0x1EC` account not
+registered, `0x1ED` already-registered-user text, and `0x1EE` friend-list
+registration failure. These are UI/resource facts about the branches; the
+presence of a generic or apparently mismatched localized string does not prove
+a server result-code meaning or alter any wire width.
+
 ## 已修正的 TS 行為
 
 這次逐欄核對發現一個會被全零 fixture 掩蓋的實作問題：198/247 共用的

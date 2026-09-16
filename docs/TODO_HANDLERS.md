@@ -167,7 +167,7 @@
 > ③ **商城/背包/信件/任務 (453/454, 802/803, 423/424, 876/877, 878/879)**:
 >    - 453/454: REQ/ACK wire and client cache key are recovered, but original gift-state/authority policy is not. Server validates exact `{s32 giftId,s32 itemId}` then returns a non-mutating `result=0` echo; it must not delete SQLite gifts before 298/300/315 are reconciled.
 >    - 802/803: request layout remains **UNRESOLVED**. The server deliberately emits only the fully evidenced no-mutation failure `{u8 nonzero_result,u8 raw_code,u8 affected_count=0}`; it does not delete or decrement inventory.
->    - 423/424: 信件標記已讀 (messages.is_read = 1);
+>    - 423/424: native client sends a string key only when the 426 local entry is not marker `89`, and a nonzero 424 result writes marker `89`; do not project this to `messages.is_read` until the key/database join is evidenced;
 >    - 876/877: 每日任務接取 (回傳 13B 任務結構);
 >    - 878/879: 榮譽任務完成確認 (榮譽標題與稱號)。
 > ④ **轉蛋機與膠囊機 (698-703, 900/901) — 後續證據已推翻當時的成功實作敘述**:
@@ -267,12 +267,15 @@
 ## Current next evidence
 
 > 下一輪可做:
-> 1. 取得一組已知正常及一組拒絕的 681→143→144→195→196 實包，定位
->    `String[24]` 的 writer（仍不能猜為 account/nickname）、681 extension 的兩個
->    s32、尾端 billing s32×2、144 的兩個 read-but-unused raw4 與 propagated
->    `dword_F2A684` server-domain meaning。144 的 daily PG、rank flag、level/KD
->    restrictions、net-café 4×u8+8×raw4 shape，及 142 calendar 已經 source-verified，
->    不再列為未知。
+> 1. 取得一組已知正常及一組拒絕的 681→143→144→195→196 實包，補出
+>    `String[24]` 的 writer（仍不能猜為 account/nickname）、681 raw extension
+>    兩個 s32 與尾端 billing s32×2 的實際值/服務語意，以及 144 的兩個
+>    read-but-unused raw4 與 propagated `dword_F2A684` server-domain meaning。
+>    681 的 complete native grammar、caller/callee、UI/resource/state consumer
+>    audit 已完成（見 `docs/S2C_NATIVE_AUDIT_681.md`）；在實包前 TS 只保留
+>    exact raw extension shape，production gate 仍為 0。144 的 daily PG, rank
+>    flag, level/KD restrictions, net-café 4×u8+8×raw4 shape, 及 142 calendar
+>    已經 source-verified，不再列為未知。
 > 2. 已實作並下發 source-proven AES-only UDP-private 19→empty-20 control
 >    endpoint；它不是 relay。後續必須先逐一追完 `sub_595E80` 各 case、371 的
 >    secondary socket、`sub_596330` send callers 與 remote-address/correlation
@@ -280,8 +283,10 @@
 >    部署時區預期；也以實包驗證 684
 >    `GL_LOGIN_DUPLICATE` 的方向與 payload（現有 C export 沒有可歸屬的 builder/
 >    reader，不能猜測發送）。
-> 3. 補 type-3 channel 的 `sub_875680` 196 AI tail；在完整 reader/writer與可重現
->    AI config 前，保持 `ServerConfig` 拒絕 type-3，而不送 truncated success tail。
+> 3. `GC_ENTERCHANNEL_ACK` 的 `sub_875680` type-3 continuation 已完成 raw
+>    reader/writer 與欄位 consumer audit（見 `docs/S2C_NATIVE_AUDIT_196.md`）。
+>    Channel admission 只有在明確提供完整 raw `type3Tail` 時接受 type 3；仍需
+>    官方可重現 config 才能補 semantic projection，不能用猜測名稱或 truncated tail。
 > 4. 取得 Pulp’n Roll 733/734 initial-state 和 959/961 ground-weapon 實包，建立
 >    可重現的 per-room object seed，才實作 730–742 Pulp 與 962 成功交換。
 > 5. 精讀並實作戰隊錦標賽進階流程 (756–776)：先對每項 builder/dispatcher/

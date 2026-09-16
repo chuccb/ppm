@@ -1120,6 +1120,27 @@ the key is a sender, recipient, message id, or folder. The remaining record
 strings and stored low-byte raw fields still have no recovered semantic
 consumer; keep their wire names raw.
 
+The message-list UI adds several direct consumer facts without proving a
+server schema: the 20-byte key slots drive 421/423 and the row-removal/marker
+helpers; the 21-byte string slots feed the `MSG_NAME`/reply path; the final
+2-byte-stride string is compared with `F` and `M` to select friend-action or
+reply controls; and a separate local dword array is formatted as `MSG_TIME`.
+The dump does not show the wire raw4 being written to that dword array, so
+raw4 must not be renamed timestamp. The 201-byte string has no recovered direct
+address join to the `MESSAGE` control, and raw2/header/context remain raw.
+
+The adjacent 421/422 and 423/424 readers consume `u8 statusRaw, str key`;
+nonzero 422 removes the matching key and nonzero 424 writes marker `89`.
+For 434, the client stores up to 100 string/raw4 rows and can immediately
+construct a comma-separated 435 request from the stored strings; the 436
+follow-up then updates online/location/channel state through a separate reader.
+That handshake does not assign a meaning to 434's raw4. The corresponding
+`Extracted/ui/lang/msgtableres.lang` entries selected by the native handlers
+include the recipient-name check (`0x1E3`), message-send failure (`0x1E4`),
+message-receive failure (`0x1E7`), friend self/duplicate/success/reconnect/not-
+registered strings (`0x1E8..0x1EC`), and the `0x1ED..0x1EE` nonzero 432 paths.
+These are localized branch text facts, not a complete server status enum.
+
 ### 3.12 GP_CH*C 家族 (222–245, 362–363, 380–389, 882) — 四輪交叉驗證修正:
 **REQ** (builder sub_5567F0@230 / sub_5568E0@232 / sub_556B90@244 等):
 `s32 新的絕對累計值` — client 送 **total 而非增量** (a1<0 時不送)。
@@ -2040,17 +2061,26 @@ u8+slot 系列)
 ```
 419 GL_MSG_ADD_REQ → 420 ACK (sub_559810): str to_nick, u8 x, u8 result
     (0=成功 1=對方拒收 2=信箱滿; 讀序 str→u8→u8)
-421 GL_MSG_DEL_REQ → 422 ACK (sub_55A310): u8 ok, str msg_key
-423 GL_MSG_READ_REQ → 424 ACK (sub_55A4F0): u8 ok, str msg_key (與 422 同構)
-429 GL_FRIEND_ADD_REQ (builder): str nick
-430 GL_FRIEND_ADD_ACK (sub_55AA90): u8 result (0=成功 1..4 錯誤碼:
-    重複/不存在/滿/對方拒), str nick
-431 GL_FRIEND_DEL_REQ: str nick → 432 ACK (sub_55AE10):
-    u8 result (0/1/2), str nick
+421 GL_MSG_DEL_REQ → 422 ACK (sub_55A310): str key → `u8 statusRaw, str key`
+    The client sends 421 only when this key exists in the 426 local table; 422 status
+    nonzero invokes the local key-removal helper, while zero selects a localized error.
+423 GL_MSG_READ_REQ → 424 ACK (sub_55A4F0): str key → `u8 statusRaw, str key`
+    The client sends 423 only when the key is not already marked `89`; 424 status
+    nonzero invokes the helper that marks the matching 426 entry `89`. The dump/UI
+    prove this key/state transition, not a server database column named `msg_id`.
+429 GL_FRIEND_ADD_REQ (builder): str characterName/key
+430 GL_FRIEND_ADD_ACK (sub_55AA90): `u8 statusRaw, str characterName/key`
+    Native status branches select resource IDs `0x1E8..0x1EC`, status 0 inserts the
+    returned string into the 100-entry local friend table, and every response sends
+    an empty 433 refresh request. Do not assign a complete result-code policy from
+    the status values alone.
+431 GL_FRIEND_DEL_REQ: str characterName/key → 432 ACK (sub_55AE10):
+    `u8 statusRaw, str characterName/key`; status 0 removes the key from the local
+    friend table and sends 433, while nonzero statuses only select localized paths.
 433 GL_FRIEND_LIST_REQ: 無 payload
-435 GL_FRIEND_INFO_REQ: str nick → 436 ACK (sub_55B2C0):
-    u8 count, count×{str nick, u8 online(1=線上), [online: str where,
-    u8 channel] } → sub_5382D0(nick, online, where, ch+1)
+435 GL_FRIEND_INFO_REQ: one comma-separated string list assembled from 434
+    row strings → 436 ACK (sub_55B2C0): u8 count, count×{str key, u8 online,
+    [online: str where, u8 channel]} → sub_5382D0(key, online, where, ch+1)
 439 GL_FRIEND_CHAT_REQ (sub_55B510): s32 uid(dword_F2A684), str my_nick,
     str friend_nick, str message (ANSI ×3; message ≤180 才送)
 440 GL_FRIEND_CHAT_ACK (sub_55B660): u8 status, str nick1, str nick2,
@@ -2116,8 +2146,8 @@ u8+slot 系列)
 | 454 | `GS_DELETEGIFT_ACK` | `sub_57BCF0` | S2C | `u8 status` (only exactly 1 mutates the local cached list), `s32 gift_uid, s32 item_id` |
 | 802 | `GS_DESTROYITEM_REQ` | **UNRESOLVED** | C2S | The earlier five-field claim was not an evidenced packet constructor (`sub_894E70` is not one). Do not consume request-dependent fields or mutate inventory until the actual builder and its caller are reconciled. |
 | 803 | `GS_DESTROYITEM_ACK` | `sub_895EE0` | S2C | `u8 result, u8 raw_code`; if `result!=0`, then `u8 affected_count` + `affected_count×{s32 raw_id,u8 raw_value}`. The success arm instead consumes `s32 raw_value_a, s32 coupon_after, u8 affected_count` + `affected_count×{s32 item_id,s32 remaining_raw}`. Only the failure arm is currently safe to emit. |
-| 423 | `GL_MSG_READ_REQ` | `sub_55A3C0` | C2S | `str msg_id` |
-| 424 | `GL_MSG_READ_ACK` | `sub_55A4F0` | S2C | `u8 status(1), str msg_id` |
+| 423 | `GL_MSG_READ_REQ` | `sub_55A3C0` | C2S | `str key` (native sends only when the 426 local key is not marked `89`) |
+| 424 | `GL_MSG_READ_ACK` | `sub_55A4F0` | S2C | `u8 statusRaw, str key`; nonzero invokes the local `89` marker helper |
 | 876 | `GQ_QUEST_ACCEPT_DAILY_REQ` | `sub_91D730` | C2S | `(空)` |
 | 877 | `GQ_QUEST_ACCEPT_DAILY_ACK` | `sub_91D7E0` | S2C | `u8 err(0), s32 count(0), count×13B snapshot` |
 | 878 | `GQ_QUEST_USER_COMPLETE_HONOR_REQ` | `sub_91C9D0` | C2S | `s8 flag` |
