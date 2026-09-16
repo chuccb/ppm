@@ -8,7 +8,8 @@
  */
 
 import type { Reader } from "../../packet.ts";
-import type { Session } from "../../session.ts";
+import type { Connection } from "../../connection.ts";
+import { Result } from "../s2c/GL_LOGIN_ACK.ts";
 
 const GUARD_LOW = 0xf1e1ab0e;
 const GUARD_HIGH_XOR = 0xb1a9d7c7;
@@ -37,6 +38,21 @@ export function read(r: Reader): Credentials {
   return { account, password, dataRevision, fingerprintSource, fingerprint };
 }
 
-export default async function (r: Reader, session: Session): Promise<void> {
-  await session.login(read(r));
+/**
+ * Authenticate and reply.
+ *
+ * Boundary: the wire contract only. Entitlements, billing and the contents of
+ * the server list are deployment policy, not reverse-engineered fact.
+ */
+export default async function (r: Reader, connection: Connection): Promise<void> {
+  const { account, password } = read(r);
+  const found = await connection.config.store.verifyLogin(account, password);
+
+  connection.accountId = found?.id ?? null;
+  connection.log(`login ${account} -> ${connection.accountId ?? "rejected"}`);
+
+  connection.reply(
+    "GL_LOGIN_ACK",
+    found ? { userNo: found.id, servers: connection.config.servers } : Result.BadCredentials,
+  );
 }

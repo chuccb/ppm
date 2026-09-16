@@ -9,8 +9,8 @@
 import { OPCODE_COUNT } from "./opcodes.ts";
 import { Store } from "./store.ts";
 import type { GameServer } from "./ops/s2c/GL_LOGIN_ACK.ts";
-import { listen } from "./session.ts";
-import { Registry } from "./ops/registry.ts";
+import { listen } from "./connection.ts";
+import { summary } from "./ops/registry.ts";
 
 const host = Bun.env["PM_HOST"] ?? "0.0.0.0";
 const port = Number(Bun.env["PM_PORT"] ?? 40200);
@@ -21,8 +21,6 @@ const log = (message: string): void => {
   console.log(`[${new Date().toISOString()}] ${message}`);
 };
 
-// Filenames under src/ops/ are the registration; an unknown name throws here.
-const ops = Registry.load();
 const store = new Store(dbPath);
 
 // Deployment policy, not reverse-engineered fact: what to advertise.
@@ -44,7 +42,6 @@ const loginServer = listen({
   port,
   store,
   servers,
-  ops,
   log,
 });
 
@@ -56,13 +53,12 @@ const channelServer = listen({
   port: channelPort,
   store,
   servers,
-  ops,
   log,
   channelName: Bun.env["PM_CHANNEL_NAME"] ?? "Channel 1",
 });
 
 log(`login server on ${host}:${port}, channel server on ${host}:${channelPort}`);
-log(`${OPCODE_COUNT} opcodes known; ${ops.summary}`);
+log(`${OPCODE_COUNT} opcodes known; ${summary()}`);
 log(`sqlite ${store.sqliteVersion} at ${dbPath}`);
 log(`bun ${Bun.version} (${Bun.revision.slice(0, 9)})`);
 

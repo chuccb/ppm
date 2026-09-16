@@ -12,7 +12,8 @@
  */
 
 import type { Reader } from "../../packet.ts";
-import type { Session } from "../../session.ts";
+import type { Connection } from "../../connection.ts";
+import { Result } from "../s2c/PM_UDPSTART_ACK.ts";
 
 /** Native `String[24]`, so 23 bytes plus the NUL. */
 export const IDENTITY_MAX_BYTES = 23;
@@ -39,6 +40,12 @@ export function read(r: Reader): Handoff {
   return { identity, chargeMode, extCount };
 }
 
-export default function (r: Reader, session: Session): void {
-  session.admitToChannel(read(r));
+export default function (r: Reader, connection: Connection): void {
+  const { identity } = read(r);
+  connection.log(`channel handoff ${JSON.stringify(identity)}`);
+
+  connection.reply("PM_UDPSTART_ACK", {
+    result: Result.Success,
+    channelName: connection.config.channelName ?? "Channel 1",
+  });
 }

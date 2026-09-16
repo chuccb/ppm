@@ -6,8 +6,7 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { Packet, PacketStream, type Reader } from "../src/packet.ts";
 import { opcodeFor } from "../src/opcodes.ts";
 import { Store } from "../src/store.ts";
-import { PING_INTERVAL_MS, listen } from "../src/session.ts";
-import { Registry } from "../src/ops/registry.ts";
+import { PING_INTERVAL_MS, listen } from "../src/connection.ts";
 import { Result, type GameServer } from "../src/ops/s2c/GL_LOGIN_ACK.ts";
 
 const servers: readonly GameServer[] = [
@@ -35,7 +34,6 @@ beforeAll(async () => {
     port: 0, // ephemeral
     store,
     servers,
-    ops: Registry.load(),
     log: () => {},
   });
   port = listener.port;

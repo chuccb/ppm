@@ -1,15 +1,14 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { Packet, PacketStream, decode, type Reader } from "../src/packet.ts";
 import { opcodeFor } from "../src/opcodes.ts";
-import { Registry, type OutboundArgs, type OutboundName } from "../src/ops/registry.ts";
+import { build as buildPacket, type OutboundArgs, type OutboundName } from "../src/ops/registry.ts";
 import { Store } from "../src/store.ts";
-import { listen } from "../src/session.ts";
+import { listen } from "../src/connection.ts";
 import { read as readHandoff } from "../src/ops/c2s/PM_UDPSTART_REQ.ts";
 import { Result } from "../src/ops/s2c/PM_UDPSTART_ACK.ts";
 
-const ops = Registry.load();
 const build = <N extends OutboundName>(name: N, ...args: OutboundArgs<N>) =>
-  decode(ops.build(name, ...args).encode());
+  decode(buildPacket(name, ...args).encode());
 
 /** Build PM_UDPSTART_REQ exactly as sub_555C60 does. */
 function handoff(identity: string, chargeMode = 0, extCount = 0, literal = 1): Packet {
@@ -92,7 +91,7 @@ describe("PM_UDPSTART_ACK", () => {
 
   test("rejects a channel name longer than the client's char[40]", () => {
     expect(() =>
-      ops.build("PM_UDPSTART_ACK", {
+      buildPacket("PM_UDPSTART_ACK", {
         result: Result.Success,
         channelName: "y".repeat(40),
       }),
@@ -112,7 +111,6 @@ describe("live channel handshake", () => {
       port: 0,
       store,
       servers: [],
-      ops,
       log: () => {},
       channelName: "Test Channel",
     });

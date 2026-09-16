@@ -64,6 +64,12 @@ Opcode families from the catalogue, for orientation:
 - **No wrapper object used once.** If a type exists only to be the parameter of
   one function, pass the fields.
 - **Prefer a flat function to a class** unless there is per-instance state.
+  `Connection` is a class because each socket has its own buffer and timer; the
+  registry is plain functions because there is only ever one of it.
+- **A packet's module is the whole story for that packet.** `GL_LOGIN_REQ.ts`
+  parses *and* authenticates *and* replies. It must not parse and then call a
+  method on `Connection` — that splits one simple thing across two files and
+  makes `Connection` grow a method per opcode.
 
 ## Comments
 

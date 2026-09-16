@@ -25,18 +25,18 @@ Environment: `PM_HOST`, `PM_PORT`, `PM_DB`, `PM_ADVERTISE_HOST`,
 
 ## Layout
 
-Seven files, no subdirectories. See [STYLE.md](STYLE.md) for the conventions.
+See [STYLE.md](STYLE.md) for the conventions.
 
 ```
-src/packet.ts    the whole wire format: header, cipher, reader, writer, reassembly
-src/aes.ts       AES-128 + CFB-128, the client's cipher
-src/opcodes.ts   676-opcode catalogue, loaded from db/packets.tsv
-src/store.ts     accounts on bun:sqlite
-src/ops/         one file per opcode, plus the registry that loads them
-src/ops/c2s/     packets the client sends us
-src/ops/s2c/     packets we send the client
-src/session.ts   per-connection dispatch, and Bun.listen
-src/main.ts      entry point
+src/packet.ts        the whole wire format: header, cipher, reader, writer, reassembly
+src/aes.ts           AES-128 + CFB-128, the client's cipher
+src/opcodes.ts       676-opcode catalogue, loaded from db/packets.tsv
+src/store.ts         accounts on bun:sqlite
+src/connection.ts    one TCP connection: reassembly, liveness, dispatch, Bun.listen
+src/ops/registry.ts  filename -> opcode, and the typed build() / handlerFor()
+src/ops/c2s/         packets the client sends us
+src/ops/s2c/         packets we send the client
+src/main.ts          entry point
 ```
 
 **One packet, one file, named after the opcode.** The name appears in the
