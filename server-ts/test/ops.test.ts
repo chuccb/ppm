@@ -156,6 +156,24 @@ describe("681 — login ack", () => {
     ).toThrow(/three channel groups/);
   });
 
+  test("rejects names that overrun native fixed buffers", () => {
+    expect(() =>
+      buildPacket("GL_LOGIN_ACK", {
+        userNo: 1,
+        servers: [{ ...servers[0]!, name: "s".repeat(50) }],
+      }),
+    ).toThrow(/server name/);
+    expect(() =>
+      buildPacket("GL_LOGIN_ACK", {
+        userNo: 1,
+        servers: [{
+          ...servers[0]!,
+          channelGroups: [[{ type: 1, name: "c".repeat(50), port: 1, flag: 0 }], [], []],
+        }],
+      }),
+    ).toThrow(/channel name/);
+  });
+
 });
 
 describe("registry", () => {

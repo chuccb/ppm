@@ -71,6 +71,12 @@ export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Pac
     if (server.channelGroups.length !== 3) {
       throw new RangeError("each server must declare exactly three channel groups");
     }
+    if (server.name.length > 49) {
+      throw new RangeError("681 server name must fit native char[50]");
+    }
+    if (server.host.length > 15) {
+      throw new RangeError("681 server host must fit native char[16]");
+    }
     p.s16(server.id);
     p.str(server.name); // native char[50]
     p.str(server.host); // native char[16]
@@ -82,6 +88,9 @@ export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Pac
       p.s16(group.length);
       const channel = group[0]; // the client reads at most one, whatever the count
       if (!channel) continue;
+      if (channel.name.length > 49) {
+        throw new RangeError("681 channel name must fit native char[50]");
+      }
       p.u8(channel.type);
       p.str(channel.name);
       p.s16(channel.port);
