@@ -62,6 +62,9 @@ export default function GC_ENTERCHANNEL_ACK(op: number, entry: Entry): Packet {
     .u8(entry.channelIndex);
 
   if (entry.result !== Result.Success || !("endpoint" in entry)) return p;
+  if ((entry.channelType ?? 0) === 3) {
+    throw new RangeError("196 channel type 3 requires the unrecovered AI tail");
+  }
 
   if (entry.endpoint.host.length === 0 || entry.endpoint.host.length > 19) {
     throw new RangeError("196 endpoint host must fit the native char[20]");

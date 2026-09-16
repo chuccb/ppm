@@ -102,6 +102,18 @@ describe("GC_ENTERCHANNEL_ACK", () => {
     expect(r.u8()).toBe(5);
     expect(r.remaining).toBe(0);
   });
+
+  test("does not emit an incomplete type-3 AI response", () => {
+    expect(() =>
+      buildPacket("GC_ENTERCHANNEL_ACK", {
+        result: EnterResult.Success,
+        channelId: 1,
+        channelIndex: 0,
+        endpoint: { host: "127.0.0.1", port: 40202 },
+        channelType: 3,
+      }),
+    ).toThrow(/AI tail/);
+  });
 });
 
 describe("PM_UDPSTART_ACK", () => {
