@@ -1,8 +1,8 @@
 /**
- * 425 -> 426 empty inbox page.
+ * 425 -> 426 empty message-list projection.
  *
- * A zero count omits every optional message record; no message policy is
- * invented until the Store has a mailbox model.
+ * A zero count omits every optional message record; no mailbox/page policy is
+ * invented until the Store has a message model.
  */
 
 import { Packet } from "../../packet.ts";
