@@ -1012,14 +1012,17 @@ REQ 端 `sub_56A0F0`: `u8 (=1)` — native parameter is `unsigned __int8`; clien
 ```
 raw2   gate (native only tests zero/nonzero; domain unresolved)
 若 gate != 0:       ← gate==0 時後面什麼都沒有
-  u8   flags        (bit0: 開啟清單 UI; bit0|bit2: 關閉)
+  u8   flags        (bit0: clears progress and sets a mode-specific native list-state flag;
+                     bit2: clears that flag; exact UI policy unresolved)
   u8   recordCount
-  repeat recordCount: s32 user_id, string nick, s32 exp
-            if user_id>0 { s32 custom_tex_id, string tex_name(64) }
+  repeat recordCount: raw4 userKey, string nick, s32 exp
+            if userKey>0 { raw4 custom_tex_key, string tex_name(64) }
 ```
-⚠ 第三個 s32 是 **exp 不是 status** (十二輪定案): sub_588560 對它呼叫
-sub_403360(exp→level 查表) 後把 level 顯示在清單。custom_tex_id 進
-CCustomTexture 快取請求 (個人頭像貼圖)。
+⚠ 第三個 s32 是 **exp 不是 status** (十二輪定案): `sub_588560` 對它呼叫
+`sub_403360(exp→Class index)`，`CUIWaiterList` 再用該 index 渲染 `Class`。
+第一個 raw4 會作為 client user/profile table key；只有 key>0 且 lookup
+成功時，custom texture key 才會註冊到 `EMBLEM`。wire width 仍不可因 local
+consumer 的 cache/lookup 而縮成 u8。
 ### 3.9 GL_GAMEROOMINFO_ACK (108) — sub_568CE0 (卅七輪逐欄定案):
 ```
 u8   mode (3 = 錦標賽樹狀圖, 委派 sub_580A80; 其他 = 房間清單)
@@ -1226,7 +1229,7 @@ kind 0/1/14 與 12/13/17 (可覆寫類) 走覆寫路徑, 其他 kind 重複購�
   native local-time conversion uses `_mktime64`, so bit-field values such as
   month 0/31, day 0/63, hour 63, minute 127 are normalized rather than a separate
   malformed-date wire error; raw zero is simply an already-expired profile 1..4.
-  **Inference / MEDIUM:** 466 沒有角色索引且 snapshot 以 uid 定址，故 profiles
+  **Inference / MEDIUM:** 255 沒有角色索引且 snapshot 以 uid 定址，故 profiles
   應為 user/account-level，而非 198/247 的 character 12-slot 外觀。
 【783→784 NewMsgCount】REQ 空 (sub_5643E0); 784 (sub_564480):
   s32 count → dword_F0C104 → UI vtbl+72(count!=0) 信箱紅點

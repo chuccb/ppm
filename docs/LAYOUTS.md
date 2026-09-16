@@ -43,7 +43,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | op | 名稱 | handler | 讀取序列 |
 |---|---|---|---|
 | 102 | GT_PING_ACK | sub_58D6F0 | `(無直接讀取/轉發)` |
-| 106 | GL_USERLIST_ACK | sub_56A250 | `raw2 u8 u8 s32 str s32 s32 str` |
+| 106 | GL_USERLIST_ACK | sub_56A250 | `raw2 gate; if nonzero: u8 flags, u8 count, repeat {raw4 userKey, str nick, s32 exp, if userKey>0: raw4 customTexKey, str texName}` |
 | 108 | GL_GAMEROOMINFO_ACK | sub_568CE0 | `u8 u8 u8 s8 u8 s8/bool u8 u16 u8 s8/bool s8/bool s8/bool s8/bool u8 u8 u8 str u8 s8/bool u8 u16 u8 s8/bool s8/bool ...` |
 | 110 | GL_ROOMINFOCHANGE_ACK | sub_569240 | `s8/bool u8 u8 u8 u8 u8 s32 s32 str u8 s32 s32 str u8 s32 u8 s32 u8 u8 s8/bool s8 u8 s8/bool u8 ...` |
 | 112 | GL_MAKEROOM_ACK | sub_56A7B0 | `u8 u8 u16 f32/s32 u8 s8/bool u8 s32 s32 str u8 s32 s32 str u8` |
