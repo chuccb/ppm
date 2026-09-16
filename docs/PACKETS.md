@@ -217,10 +217,11 @@ offset 8   ...  payload (小端, 緊湊, 無對齊)
 全域 `n0x2580` 初始 0x2580(9600, 即「從不壓縮」)。
 `GL_ACCOUNTCONNSUCC(694)` 攜帶一個 u16，**只有嚴格小於** `0x2580`
 才覆寫門檻 (0x43E651 的 `n694==694` 分支)；`0x2580` 或更大值都被
-client 忽略並保留 9600。故 server 的 694 值與 `PacketCodec` 值必須是同
-一個 `0..0x2580` 規範化門檻；若讓 server 使用 `>0x2580`，client 在
-9600..server-threshold 範圍送入的 LZ frame 便不會被 server 解壓。
-實作對 `0` 規範為 `0x2580`，拒絕 `>0x2580`。
+client 忽略並保留 9600。這是 client 的消費行為，不是 server 可用值的
+wire 限制：TS 只驗證值能放進 u16 並原樣寫出，包含 client 會忽略的值。
+預設值仍是 `0x2580`，以維持雙向不壓縮；若 server 選擇低於 9600 的門檻，
+`PacketCodec` 必須使用同一個門檻，否則 9600..server-threshold 範圍的
+LZ frame 會無法正確解壓。
 ⚠ 更關鍵的第二功用: 讀完門檻後緊接呼叫 `sub_43DF00` = **682 登入
 REQ 的 builder** (帳密欄位先驗證 sub_43DD60: 只允許 [0-9A-Za-z@],
 非法則顯示 0xE1 訊息不送包)。所以 **694 是登入流程的觸發器**:

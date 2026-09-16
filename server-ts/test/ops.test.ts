@@ -45,9 +45,11 @@ describe("694 — compression threshold and login trigger", () => {
     expect(reader.u16()).toBe(0x2580); // compression disabled
   });
 
-  test("rejects a threshold the client would ignore", () => {
-    expect(() => buildPacket("GL_ACCOUNTCONNSUCC", 0x2581)).toThrow(RangeError);
-    expect(() => buildPacket("GL_ACCOUNTCONNSUCC", 0)).toThrow(RangeError);
+  test("preserves every valid native u16 threshold, including ignored values", () => {
+    expect(reread(buildPacket("GL_ACCOUNTCONNSUCC", 0x2581)).u16()).toBe(0x2581);
+    expect(reread(buildPacket("GL_ACCOUNTCONNSUCC", 0)).u16()).toBe(0);
+    expect(() => buildPacket("GL_ACCOUNTCONNSUCC", 0x10000)).toThrow(RangeError);
+    expect(() => buildPacket("GL_ACCOUNTCONNSUCC", 1.5)).toThrow(RangeError);
   });
 });
 
