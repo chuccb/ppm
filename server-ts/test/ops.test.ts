@@ -190,9 +190,13 @@ describe("681 — login ack", () => {
     ).toThrow(/channel name/);
   });
 
-  test("rejects out-of-range login words before masking them", () => {
+  test("keeps the s32 login words unmasked", () => {
+    const reader = build("GL_LOGIN_ACK", { userNo: 7, n100: 0x1234_5678, servers });
+    reader.s32();
+    reader.s32();
+    expect(reader.s32()).toBe(0x1234_5678);
     expect(() => buildPacket("GL_LOGIN_ACK", { userNo: 0x8000_0000, servers })).toThrow(/user_no/);
-    expect(() => buildPacket("GL_LOGIN_ACK", { userNo: 1, n100: 128, servers })).toThrow(/n100/);
+    expect(() => buildPacket("GL_LOGIN_ACK", { userNo: 1, n100: 0x8000_0000, servers })).toThrow(/n100/);
   });
 
   test("rejects a multi-entry group that the native reader cannot consume", () => {

@@ -65,8 +65,8 @@ export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Pac
   if (!Number.isSafeInteger(userNo) || userNo < -0x8000_0000 || userNo > 0x7fff_ffff) {
     throw new RangeError("681 user_no must fit s32");
   }
-  if (!Number.isInteger(n100) || n100 < -128 || n100 > 127) {
-    throw new RangeError("681 n100 must fit the signed byte used by 143");
+  if (!Number.isSafeInteger(n100) || n100 < -0x8000_0000 || n100 > 0x7fff_ffff) {
+    throw new RangeError("681 n100 must fit the s32 echoed by 143");
   }
   if (servers.length > 0x7fff) throw new RangeError("681 server_count must fit s16");
   const p = new Packet(op);
