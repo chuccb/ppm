@@ -14,6 +14,16 @@ import { read as readCredentials } from "../src/ops/c2s/GL_LOGIN_REQ.ts";
 const build = <N extends OutboundName>(name: N, ...args: OutboundArgs<N>) =>
   decode(buildPacket(name, ...args).encode());
 
+// Keep the type-only contract honest without executing invalid calls.
+if (false) {
+  // @ts-expect-error c2s names are not outbound builders
+  buildPacket("GL_LOGIN_REQ");
+  // @ts-expect-error GL_LOGIN_ACK requires its result argument
+  buildPacket("GL_LOGIN_ACK");
+  // @ts-expect-error the result argument is not a string
+  buildPacket("GL_LOGIN_ACK", "not-a-result");
+}
+
 /** Build a 682 exactly as the client's builder does. */
 function clientLoginRequest(account: string, password: string, dataRevision = 811034967) {
   const low = 0xf1e1ab0en;
