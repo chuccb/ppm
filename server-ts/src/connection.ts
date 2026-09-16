@@ -206,7 +206,8 @@ export class Connection {
   }
 
   #fail(what: string, error: unknown): void {
-    this.log(`${what} — ${(error as Error).message}, closing`);
+    const message = error instanceof Error ? error.message : String(error);
+    this.log(`${what} — ${message}, closing`);
     this.#socket.end();
   }
 }
