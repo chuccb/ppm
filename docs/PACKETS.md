@@ -1005,28 +1005,56 @@ CCustomTexture 快取請求 (個人頭像貼圖)。
 ### 3.9 GL_GAMEROOMINFO_ACK (108) — sub_568CE0 (卅七輪逐欄定案):
 ```
 u8   mode (3 = 錦標賽樹狀圖, 委派 sub_580A80; 其他 = 房間清單)
-u8   count
-repeat count:
-  u8    room_no (需 <0xD2=210), s8 state
-  state>=0: title 由 client 查字串表 state+309 (msgtableres 0x135+state
-            = 預設房名片語, 如「私達はペラペラだ！」「日々の努力が実力に
-            なる」…); state<0: string title (自訂房名) — 之後皆為下列 12 欄:
-    u8   cur_players   (+105; sub_44E970, 「cur/max」第一數)
-    bool has_pass      (+106)
-    u8   max_players   (+129; 冗餘 — client 以 +110 popcount 重算覆寫)
-    u16  max_slot_mask (+110; bit 0..max-1 = 1, sub_53FB10 以 popcount
-                        重算 +129 並展開 +112..+127 逐槽旗標)
-    u8   game_mode     (→ sub_53FBB0 建立 CyGameModes LobbyUI, 見下表)
-    bool room_type_A   (+108; sub_44E7B0 — ROOMTYPE bit)
-    u8   mode_param_a  (→ mode 物件 +12)
-    bool room_type_B   (+109; sub_44DA70 — ROOMTYPE bit)
-    bool double_damage (+128; sub_44DBB0)
-    u8   map           (+130; sub_540280/sub_540260 — 122 亦寫此欄,
-                        124/125 = 特殊地圖 id)
-    u8   mode_param_b  (→ mode 物件 +4, sub_74F450)
-    bool no_skill_bg   (+185; sub_44E820 — NOSKILLBG)
-  若 mode==2: 兩組 {s32 team_id, u32 custom_tex_crc, str(75/87) tex_name,
-              u8 x} (隊伍自訂圖示, 存 room+188.., CCustomTexture 註冊)
+if mode != 3:
+  u8   count
+  repeat count:
+    u8    room_no (需 <0xD2=210), s8 state
+    state>=0: title 由 client 查字串表 state+309 (msgtableres 0x135+state
+              = 預設房名片語, 如「私達はペラペラだ！」「日々の努力が実力に
+              なる」…); state<0: string title (自訂房名) — 之後皆為下列 12 欄:
+      u8   cur_players   (+105; sub_44E970, 「cur/max」第一數)
+      u8   has_pass      (+106)
+      u8   max_players   (+129; 冗餘 — client 以 +110 popcount 重算覆寫)
+      u16  max_slot_mask (+110; bit 0..max-1 = 1, sub_53FB10 以 popcount
+                          重算 +129 並展開 +112..+127 逐槽旗標)
+      u8   game_mode     (→ sub_53FBB0 建立 CyGameModes LobbyUI, 見下表)
+      u8   room_type_A   (+108; sub_44E7B0 — ROOMTYPE bit)
+      u8   mode_param_a  (→ mode 物件 +12)
+      u8   room_type_B   (+109; sub_44DA70 — ROOMTYPE bit)
+      u8   double_damage (+128; sub_44DBB0)
+      u8   map           (+130; sub_540280/sub_540260 — 122 亦寫此欄,
+                          124/125 = 特殊地圖 id)
+      u8   mode_param_b  (→ mode 物件 +4, sub_74F450)
+      u8   no_skill_bg   (+185; sub_44E820 — NOSKILLBG)
+    若 mode==2: 兩組 {s32 team_id, u32 custom_tex_crc, str(75/87) tex_name,
+                u8 x} (隊伍自訂圖示, 存 room+188.., CCustomTexture 註冊)
+else:
+  u8   n4, u8 i1, u8 flags142
+  repeat i=n4-1 downto i1:
+    u8   stage_raw
+    u8   round_type
+    u8   mode_raw
+    raw4 stage_raw_word_1
+    raw4 stage_raw_word_2
+    u8   pair_count
+    repeat pair_count:
+      raw4 node_or_room_id
+      u8   pair_byte_1
+      u8   pair_byte_2
+      u8   pair_byte_3
+      u8   pair_byte_4
+      raw2 pair_word
+      if round_type==4: u8 round4_raw + 4×raw4 participant blocks
+      else: 2×raw4 participant blocks
+  u8 has_my
+  if has_my != 0: u8 selected_raw, u8 footer_raw
+  raw4 state494 (native local `float`, stored at client state [494])
+```
+`sub_580A80` 的 round-4/non-round-4 分支讀取數量不同；不要把 mode-3
+header 的 `n4` 當 ordinary room count，也不要把 `pair_byte_3` 直接命名成
+bool：native `sub_592900/sub_592940` 都只證明它們各是一個 byte。兩個
+participant blocks 由 `sub_875C20` 消費，第一個 dword 會與 local identity
+block (`sub_54B570(dword_131E238)`) 比對；其 uid/emblem/score 語意仍未定。
 ```
 房物件語義 (getter 定案): `+105=cur_players (sub_44E970)`,
 `+129=max_players (sub_44E990; sub_5403F0 取 /2 為單隊上限)`,
