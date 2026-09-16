@@ -94,18 +94,29 @@ describe("681 — login ack", () => {
       serverId: 1,
       name: "PaperMan",
       host: "127.0.0.1",
-      port: 40201, // > 32767: valid, the s16 bit pattern is reused as u_short
+      port: 40201, // raw 2-byte field; native signedness policy is unresolved
       flag: 0,
       group: 0,
       channelGroups: [[{ type: 1, name: "Channel 1", port: 40301, flag: 0 }], [], []],
     },
   ];
 
-  test("failure writes a full s32 word", () => {
-    const reader = build("GL_LOGIN_ACK", Result.BadCredentials);
+  test("failure writes a full raw s32 word", () => {
+    const reader = build("GL_LOGIN_ACK", 0x1234_5678);
     expect(reader.opcode).toBe(681);
+    expect(reader.s32()).toBe(0x1234_5678);
+    expect(reader.remaining).toBe(0);
+  });
+
+  test("keeps the named bad-credentials code available", () => {
+    const reader = build("GL_LOGIN_ACK", Result.BadCredentials);
     expect(reader.s32()).toBe(2);
     expect(reader.remaining).toBe(0);
+  });
+
+  test("rejects a result outside native s32", () => {
+    expect(() => buildPacket("GL_LOGIN_ACK", 0x8000_0000)).toThrow(/result/);
+    expect(() => buildPacket("GL_LOGIN_ACK", -0x8000_0001)).toThrow(/result/);
   });
 
   test("success round-trips in the documented field order", () => {
@@ -120,7 +131,7 @@ describe("681 — login ack", () => {
     expect(reader.s16()).toBe(1); // server_id
     expect(reader.str()).toBe("PaperMan");
     expect(reader.str()).toBe("127.0.0.1");
-    expect(reader.s16() & 0xffff).toBe(40201); // u_short bit pattern
+    expect(reader.s16() & 0xffff).toBe(40201); // raw 2-byte bit pattern
     expect(reader.u8()).toBe(0); // flag
     expect(reader.s16()).toBe(0); // group
 

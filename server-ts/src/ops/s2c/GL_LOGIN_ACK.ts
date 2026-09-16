@@ -8,7 +8,7 @@
 
 import { Packet } from "../../packet.ts";
 
-/** Low byte of the result word; only the documented codes are modelled. */
+/** Named low-byte codes observed in the native UI branch. */
 export const Result = {
   GeneralFailure: 0,
   Success: 1,
@@ -18,7 +18,8 @@ export const Result = {
   AlreadyOnline: 210,
 } as const;
 
-export type Result = (typeof Result)[keyof typeof Result];
+/** The native result is a raw s32; the client branches on its low byte only. */
+export type Result = number;
 
 /** One channel in a group. The native reader adds `extra` only for type 3. */
 export interface Channel {
@@ -59,7 +60,12 @@ export interface Success {
  * low byte before reading anything else.
  */
 export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Packet {
-  if (typeof outcome === "number") return new Packet(op).s32(outcome);
+  if (typeof outcome === "number") {
+    if (!Number.isSafeInteger(outcome) || outcome < -0x8000_0000 || outcome > 0x7fff_ffff) {
+      throw new RangeError("681 result must fit s32");
+    }
+    return new Packet(op).s32(outcome);
+  }
 
   const { userNo, servers, n100 = 0 } = outcome;
   if (!Number.isSafeInteger(userNo) || userNo < -0x8000_0000 || userNo > 0x7fff_ffff) {

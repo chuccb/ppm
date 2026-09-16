@@ -271,9 +271,23 @@ raw4 result           native 以 raw 4B 讀入，但分支只檢查 low byte；
         raw2 ch_port                  (sub_5929C0 只證明 2-byte wire field；consumer signedness/domain unresolved)
         u8   ch_flag                   (意義尚未確定)
         若 ch_type==3: u8 extra
-  s32  billing_first, billing_second   (v142,v137 → Tricod account/billing client;
-                                        名稱未知，非 u32)
+  s32  billing_first, billing_second   (v142,v137；後續以 raw s32 進入 Tricod
+                                        argument block，業務名稱未知，非 u32)
 ```
+
+681 的 server-list loop 會把 wire fields 讀入多個 local scratch，再於每次
+有 channel record 時呼叫 `sub_58E690(byte_13242F8, src)`。`src` 從
+`server_id` 的 2-byte scratch 開始，native vector helper 會以此位址複製
+固定 132 bytes；`sub_58E670` 依 projection 首 byte 排序，`sub_58E640`
+另依 projection offset 129 排序。這是 native 的 stack-layout projection/
+lookup context，不是額外的 132-byte wire field，也不足以替 `port`、`flag`、
+`group` 或 channel 欄位補上未證實的 domain 名稱。TS 只保留原本 wire 順序，
+不重建這個 native internal scratch object。
+
+`user_no` 另外被格式化成字串，和 `billing_first/billing_second`、常數
+`5`、`0` 一起放入 `sub_7092C0` 的 Tricod argument block；這只能證明
+client-side billing/telemetry consumer，不足以命名兩個 billing words 的
+server business meaning。
 
 **2026-09 login cross-check / server guardrails.** `server-cs` now puts this
 wire contract in `PaperMan.Protocol/Contracts/Login/LoginWire.GL_LOGIN_REQ.cs`, including a self-test that
