@@ -96,8 +96,9 @@ else:
 The positive branch reads exactly one tuple; it does **not** loop
 `ext_count` times. `sub_A1C870(dword_2318008, &v141, &v120, v140)` has no
 conversion or validation in its recovered body: it stores `*a2` at native
-object offset `+23` (the second wire word), `*a3` at `+24` (the first wire
-word), and `a4` at `+1` (`dword_231800C`, the gate). The separately read
+object DWORD slot `+23` (the second wire word), `*a3` at slot `+24`
+(the first wire word), and `a4` at slot `+1` (`dword_231800C`, the gate).
+The separately read
 `v135` sets `byte_231807D` to a boolean. `sub_44D640(dword_2318008)` only
 checks whether the `+1` gate is nonzero; it does not expose a tuple count or
 reinterpret either stored s32.
