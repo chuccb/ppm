@@ -17,6 +17,28 @@ describe("lobby bootstrap packets", () => {
     expect(first?.characters).toEqual([
       { slot: 0, type: 1, appearance: [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0] },
     ]);
+
+    const snapshot = store.getNewSkillProfileSnapshot(first!.id);
+    expect(snapshot.selectedProfile).toBe(0);
+    expect(snapshot.profiles).toHaveLength(5);
+    expect(snapshot.profiles).toEqual(
+      Array.from({ length: 5 }, () => ({
+        puzzleItemIds: [0, 0, 0, 0, 0, 0, 0],
+        expiresAtPackedMinute: 0,
+      })),
+    );
+
+    const inventoryEnter = decode(build("GL_INVENIN_ACK", first!.id, 7, snapshot).encode());
+    expect(inventoryEnter.u8()).toBe(1);
+    expect(inventoryEnter.s32()).toBe(first!.id);
+    expect(inventoryEnter.u8()).toBe(7);
+    expect(inventoryEnter.u8()).toBe(0);
+    expect(inventoryEnter.u8()).toBe(0);
+    for (let profile = 0; profile < 5; profile++) {
+      for (let slot = 0; slot < 7; slot++) expect(inventoryEnter.s32()).toBe(0);
+      expect(inventoryEnter.s32()).toBe(0);
+    }
+    expect(inventoryEnter.remaining).toBe(0);
     store.close();
   });
 
@@ -26,7 +48,16 @@ describe("lobby bootstrap packets", () => {
     const player = store.ensurePlayer(account.id);
     expect(player).not.toBeNull();
 
-    const reader = decode(build("GL_MYINFO_ACK", player).encode());
+    const selectedSnapshot = {
+      selectedProfile: 1,
+      profiles: Array.from({ length: 5 }, (_, profile) => ({
+        puzzleItemIds: profile === 1
+          ? [11010001, 11020001, 11030001, 11040001, 11050001, 11060001, 11060002]
+          : [0, 0, 0, 0, 0, 0, 0],
+        expiresAtPackedMinute: profile === 1 ? 0x12345678 : 0,
+      })),
+    };
+    const reader = decode(build("GL_MYINFO_ACK", player, selectedSnapshot).encode());
     expect(reader.u8()).toBe(1);
     expect(reader.s32()).toBe(player!.id);
     expect(reader.str()).toBe("bob");
@@ -57,7 +88,15 @@ describe("lobby bootstrap packets", () => {
     }
     for (let i = 0; i < 9; i++) expect(reader.s32()).toBe(0);
     expect(reader.u8()).toBe(5);
-    for (let i = 0; i < 7; i++) expect(reader.s32()).toBe(0);
+    expect(Array.from({ length: 7 }, () => reader.s32())).toEqual([
+      11010001,
+      11020001,
+      11030001,
+      11040001,
+      11050001,
+      11060001,
+      11060002,
+    ]);
     expect(reader.u16()).toBe(0);
     expect(reader.s32()).toBe(0);
     expect(reader.u8()).toBe(0);

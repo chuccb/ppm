@@ -9,9 +9,13 @@
  */
 
 import { Packet } from "../../packet.ts";
-import type { PlayerInfo } from "../../store.ts";
+import type { NewSkillProfileSnapshot, PlayerInfo } from "../../store.ts";
 
-export default function GL_MYINFO_ACK(op: number, player: PlayerInfo | null): Packet {
+export default function GL_MYINFO_ACK(
+  op: number,
+  player: PlayerInfo | null,
+  snapshot?: NewSkillProfileSnapshot,
+): Packet {
   if (!player) return new Packet(op).u8(0);
 
   const p = new Packet(op).u8(1).s32(player.id);
@@ -33,10 +37,12 @@ export default function GL_MYINFO_ACK(op: number, player: PlayerInfo | null): Pa
   // 9 UI-item slots; no nonzero ID is emitted without catalog validation.
   for (let i = 0; i < 9; i++) p.s32(0);
 
-  // NewSkill profile selector and seven puzzle IDs. The selector is the
-  // recovered native-compatible raw convention; its semantic is unresolved.
+  // NewSkill profile selector and the selected profile's seven puzzle IDs.
+  // `n5=5` is the recovered native-compatible raw convention; its semantic is
+  // unresolved. A missing snapshot is kept useful for packet-only callers.
+  const selectedProfile = snapshot?.profiles[snapshot.selectedProfile];
   p.u8(5);
-  for (let i = 0; i < 7; i++) p.s32(0);
+  for (let i = 0; i < 7; i++) p.s32(selectedProfile?.puzzleItemIds[i] ?? 0);
 
   return p.u16(0).s32(player.gamePoints).u8(0);
 }

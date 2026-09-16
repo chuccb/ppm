@@ -8,5 +8,8 @@ export default function GL_MYINFO_REQ(r: Reader, connection: Connection): void {
   const player = connection.accountId === null
     ? null
     : connection.config.store.ensurePlayer(connection.accountId);
-  connection.reply("GL_MYINFO_ACK", player);
+  const snapshot = player
+    ? connection.config.store.getNewSkillProfileSnapshot(player.id)
+    : undefined;
+  connection.reply("GL_MYINFO_ACK", player, snapshot);
 }

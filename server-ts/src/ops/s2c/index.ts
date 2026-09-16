@@ -8,6 +8,7 @@ export { default as GL_CLIENTINFO_ACK } from "./GL_CLIENTINFO_ACK.ts";
 export { default as GL_DATA_RECV_COMPLETED_ACK } from "./GL_DATA_RECV_COMPLETED_ACK.ts";
 export { default as GL_FRIEND_LIST_ACK } from "./GL_FRIEND_LIST_ACK.ts";
 export { default as GL_GAMEROOMINFO_ACK } from "./GL_GAMEROOMINFO_ACK.ts";
+export { default as GL_INVENIN_ACK } from "./GL_INVENIN_ACK.ts";
 export { default as GL_LOGIN_ACK } from "./GL_LOGIN_ACK.ts";
 export { default as GL_MSG_RECVLIST_ACK } from "./GL_MSG_RECVLIST_ACK.ts";
 export { default as GL_MYINFO_ACK } from "./GL_MYINFO_ACK.ts";

@@ -16,6 +16,34 @@ connect ──► server 發一次 694 (門檻 0x2580) ──► client 送 682 
   105→106 名單(exp!) 107→108 房間清單 433→434 好友 425→426 信箱
 心跳: server 每30s 發 102, client 回 101
 
+### 254/255 NewSkill profile scene
+
+`GL_INVENIN_REQ(254)` 不是空封包，而是恰好一個 `u8 requestContextRaw`。
+client 從當前 UI/entity 物件取出這個 byte；其業務語義仍是 **UNRESOLVED**，
+server 只做結構性回送，不把它命名成倉庫頁籤或其他假定語義。
+
+目前可確認且由 `server-ts` 實作的本機 user 分支是：
+
+```text
+254: u8 requestContextRaw
+255: u8 mode=1, s32 user_id, u8 requestContextRaw,
+    u8 unknownHeaderRaw=0, u8 selectedProfile,
+    5 × { 7×s32 puzzleItemId, s32 expiresAtPackedMinute }
+```
+
+五個 profile 是 **user/account-level NewSkill state**，不是 198/247 的角色
+12-slot appearance。新 player 只建立 profile 0 與五筆零值 raw32 record；profile 0
+的 expiry word 由 client 忽略，profile 1..4 的 raw zero 表示沒有已確認的有效期限。
+這是 bootstrap state，不是贈送、解鎖或商店政策。
+
+198 的 selected NewSkill 七個 puzzle IDs 與 255 來自同一份 snapshot，避免兩個
+response 顯示互相矛盾。`NewSkillLevTable.xml`、`NewSkillColorTable.xml` 只作
+client 合成/顯示資料，沒有被當成 server grant 或效果驗證規則。
+
+`GI_CHANGE_SKILLITEMSLOT(466/467)` 的七 ID ownership、profile 1..4 expiry
+授予/延長及失敗碼仍未在 `server-ts` 實作；在取得足夠 server policy 證據前，
+不能用 255 的 bootstrap record 假造 466 成功。
+
 【房間流程】
 111 建房→112 (room_uid) / 216 密碼→217 / 113 進房→114(sub_type多態)
 125 房聊→126廣播 121 換圖→122 127 ready→128 135 換位→136

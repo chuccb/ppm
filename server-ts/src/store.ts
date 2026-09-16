@@ -57,6 +57,20 @@ export interface PlayerInfo {
   readonly characters: readonly PlayerCharacter[];
 }
 
+export const NEW_SKILL_PROFILE_COUNT = 5;
+export const NEW_SKILL_PUZZLE_SLOT_COUNT = 7;
+
+export interface NewSkillProfile {
+  readonly puzzleItemIds: readonly number[];
+  /** Native packed local-time word; profile 0 ignores it on the client. */
+  readonly expiresAtPackedMinute: number;
+}
+
+export interface NewSkillProfileSnapshot {
+  readonly selectedProfile: number;
+  readonly profiles: readonly NewSkillProfile[];
+}
+
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS account (
   id            INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -119,6 +133,25 @@ CREATE TABLE IF NOT EXISTS player_character (
   appearance10    INTEGER NOT NULL DEFAULT 0 CHECK (appearance10 BETWEEN 0 AND 65535),
   appearance11    INTEGER NOT NULL DEFAULT 0 CHECK (appearance11 BETWEEN 0 AND 65535),
   PRIMARY KEY (player_id, slot)
+) STRICT;
+
+CREATE TABLE IF NOT EXISTS new_skill_profile_state (
+  player_id       INTEGER PRIMARY KEY REFERENCES player(id) ON DELETE CASCADE,
+  selected_profile INTEGER NOT NULL DEFAULT 0 CHECK (selected_profile BETWEEN 0 AND 4)
+) STRICT;
+
+CREATE TABLE IF NOT EXISTS new_skill_profiles (
+  player_id       INTEGER NOT NULL REFERENCES player(id) ON DELETE CASCADE,
+  profile_index   INTEGER NOT NULL CHECK (profile_index BETWEEN 0 AND 4),
+  puzzle0         INTEGER NOT NULL DEFAULT 0,
+  puzzle1         INTEGER NOT NULL DEFAULT 0,
+  puzzle2         INTEGER NOT NULL DEFAULT 0,
+  puzzle3         INTEGER NOT NULL DEFAULT 0,
+  puzzle4         INTEGER NOT NULL DEFAULT 0,
+  puzzle5         INTEGER NOT NULL DEFAULT 0,
+  puzzle6         INTEGER NOT NULL DEFAULT 0,
+  expires_at_packed_minute INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (player_id, profile_index)
 ) STRICT;
 `;
 
@@ -231,6 +264,7 @@ export class Store {
            ) VALUES ($p, 0, 1, 1, 1, 1, 1, 1, 1)`,
         )
         .run({ p: player.id });
+      this.ensureNewSkillProfileRows(player.id);
       this.#db.exec("COMMIT");
     } catch (error) {
       this.#db.exec("ROLLBACK");
@@ -247,6 +281,87 @@ export class Store {
       )
       .get({ n: nickname });
     return row ? this.getPlayer(row.account_id) : null;
+  }
+
+  getNewSkillProfileSnapshot(playerId: number): NewSkillProfileSnapshot {
+    this.#db.exec("BEGIN IMMEDIATE");
+    try {
+      this.ensureNewSkillProfileRows(playerId);
+      const state = this.#db
+        .query<{ selected_profile: number }, { p: number }>(
+          "SELECT selected_profile FROM new_skill_profile_state WHERE player_id = $p",
+        )
+        .get({ p: playerId });
+      const rows = this.#db
+        .query<
+          {
+            profile_index: number;
+            puzzle0: number;
+            puzzle1: number;
+            puzzle2: number;
+            puzzle3: number;
+            puzzle4: number;
+            puzzle5: number;
+            puzzle6: number;
+            expires_at_packed_minute: number;
+          },
+          { p: number }
+        >(
+          `SELECT profile_index, puzzle0, puzzle1, puzzle2, puzzle3, puzzle4, puzzle5, puzzle6,
+                  expires_at_packed_minute
+             FROM new_skill_profiles
+            WHERE player_id = $p
+            ORDER BY profile_index`,
+        )
+        .all({ p: playerId });
+
+      if (!state || rows.length !== NEW_SKILL_PROFILE_COUNT) {
+        throw new Error("NewSkill profile bootstrap did not create a complete snapshot");
+      }
+      for (const [index, row] of rows.entries()) {
+        if (row.profile_index !== index) {
+          throw new Error("NewSkill profile snapshot has a non-contiguous profile index");
+        }
+      }
+
+      const snapshot = {
+        selectedProfile: state.selected_profile,
+        profiles: rows.map((row) => ({
+          puzzleItemIds: [
+            row.puzzle0,
+            row.puzzle1,
+            row.puzzle2,
+            row.puzzle3,
+            row.puzzle4,
+            row.puzzle5,
+            row.puzzle6,
+          ],
+          expiresAtPackedMinute: row.expires_at_packed_minute,
+        })),
+      } satisfies NewSkillProfileSnapshot;
+      this.#db.exec("COMMIT");
+      return snapshot;
+    } catch (error) {
+      this.#db.exec("ROLLBACK");
+      throw error;
+    }
+  }
+
+  private ensureNewSkillProfileRows(playerId: number): void {
+    this.#db
+      .query(
+        `INSERT OR IGNORE INTO new_skill_profile_state(player_id, selected_profile)
+         VALUES ($p, 0)`,
+      )
+      .run({ p: playerId });
+    for (let profileIndex = 0; profileIndex < NEW_SKILL_PROFILE_COUNT; profileIndex++) {
+      this.#db
+        .query(
+          `INSERT OR IGNORE INTO new_skill_profiles(player_id, profile_index)
+           VALUES ($p, $i)`,
+        )
+        .run({ p: playerId, i: profileIndex });
+    }
   }
 
   getPlayer(accountId: number): PlayerInfo | null {
