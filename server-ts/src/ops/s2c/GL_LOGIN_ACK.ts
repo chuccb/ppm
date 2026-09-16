@@ -88,26 +88,26 @@ export interface Success {
 }
 
 function requireS32(value: number, field: string): void {
-  if (!Number.isSafeInteger(value) || value < -0x8000_0000 || value > 0x7fff_ffff) {
+  if (!Number.isInteger(value) || value < -0x8000_0000 || value > 0x7fff_ffff) {
     throw new RangeError(`681 ${field} must fit s32`);
   }
 }
 
 function requireU8(value: number, field: string): void {
-  if (!Number.isSafeInteger(value) || value < 0 || value > 0xff) {
+  if (!Number.isInteger(value) || value < 0 || value > 0xff) {
     throw new RangeError(`681 ${field} must fit u8`);
   }
 }
 
 function requireNonNegativeS16(value: number, field: string): void {
-  if (!Number.isSafeInteger(value) || value < 0 || value > 0x7fff) {
+  if (!Number.isInteger(value) || value < 0 || value > 0x7fff) {
     throw new RangeError(`681 ${field} must fit a non-negative s16`);
   }
 }
 
 /** Raw16 accepts either signed notation or the full unsigned bit pattern. */
 function requireRaw16(value: number, field: string): void {
-  if (!Number.isSafeInteger(value) || value < -0x8000 || value > 0xffff) {
+  if (!Number.isInteger(value) || value < -0x8000 || value > 0xffff) {
     throw new RangeError(`681 ${field} must fit raw2`);
   }
 }
@@ -158,7 +158,7 @@ export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Pac
     if (server.host.length > MAX_SERVER_HOST_BYTES) {
       throw new RangeError("681 server host must fit native char[16]");
     }
-    if (!Number.isSafeInteger(server.port) || server.port < 0 || server.port > 0xffff) {
+    if (!Number.isInteger(server.port) || server.port < 0 || server.port > 0xffff) {
       throw new RangeError("681 server_port must fit u16");
     }
     requireU8(server.flag, "server flag");
