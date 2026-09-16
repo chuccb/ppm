@@ -9,6 +9,11 @@
 > commit 和文件引用可追溯。因此數字標題未必是目錄順序。新增結論應放到對應
 > protocol family，並附 native builder、reader/consumer、field/state data flow、
 > confidence 與未確認限制；不要僅因資源或 opcode 名稱存在就推導 server policy。
+>
+> **目前 server-ts 31 個 Packet 的逐欄 implementation audit**：見
+> [`SERVER_TS_PACKET_FIELDS.md`](SERVER_TS_PACKET_FIELDS.md)。該文件把 native
+> wire meaning、TS 實際用途、zero projection 與 `UNRESOLVED` 欄位分開，並記錄
+> 2026-09-16 的 198/247 reserved/stat projection 修正。
 
 > **廿六輪終極對賬 (兩方向自動審計)**:
 > C# ACK 寫入序列 ↔ client 讀取序列: 18/18 ✓;
@@ -92,19 +97,31 @@ offset 8   ...  payload (小端, 緊湊, 無對齊)
 | 函數 | 型別 | 大小 |
 |------|------|------|
 | sub_592920,sub_5928E0,sub_592960 (寫) / sub_592900,sub_592940,sub_592980 (讀) | u8 (1B) | 1 |
-| sub_5929A0,sub_5929E0 (寫) / sub_592A00,sub_5929C0 (讀) | u16/s16 | 2 |
-| sub_592A20 / sub_592A40 | s32 | 4 |
-| sub_592A60 / sub_592A80 | u32 | 4 |
-| sub_592B20 / sub_592B40 | IEEE-754 f32 | 4 |
+| sub_5929A0,sub_5929E0 (寫) / sub_592A00,sub_5929C0 (讀) | raw2; caller may treat it as u16/s16 | 2 |
+| sub_592A20 / sub_592A40 | raw4; caller may treat it as s32/u32 or another 4-byte value | 4 |
+| sub_592A60 / sub_592A80 | raw4; this alias does not itself establish unsigned semantics | 4 |
+| sub_592B20 / sub_592B40 | raw4; float semantics require a native float caller | 4 |
 | sub_592AC0 | raw4; semantics come from its caller (142 calendar / 144 request context / 196 client flags are raw4 uses) | 4 |
-| sub_592AE0 / sub_592B00 | u64 | 8 |
+| sub_592AE0 / sub_592B00 | raw8; 682 guard is a caller-defined u64 projection | 8 |
 | sub_5926F0 / sub_592730 | ANSI 字串 (lstrlenA+1, 含 NUL) | 變長 |
 | sub_592770 / sub_5927B0 | UTF-16 字串 (2*len+2) | 變長 |
 | sub_5927F0 / sub_592850 | 內嵌整個 Packet (u16 opcode + u32 size + bytes) | 變長 |
 
 > 8 個 u8 讀取別名 (592900/940/980) 底層都是 `sub_592500(this,a2,1)`;
-> 寫入別名同理 (592920/8E0/960 → `sub_592580`)。Hex-Rays 的 `char` 參數
-> 只是 byte 寬度, wire 寬度以 size 為準 (u16=2B/u32=4B 亦然)。
+> 寫入別名同理 (592920/8E0/960 → `sub_592580`)。`sub_5929A0/9E0` 的
+> decompiler 參數雖顯示 `char`，函數實作仍從該參數位址複製 2 bytes；不可
+> 只用 Hex-Rays 參數型別決定 signedness。所有 2/4/8-byte aliases 同理，
+> wire 寬度以函數內的 `sub_592500/sub_592580` size 為準，語意必須回到 caller。
+
+**primitive implementation boundary（`PaperMan.exe.c` 00592500–00592B80）：**
+`sub_592500` 在 read cursor + requested size 超過 packet payload end 或
+allocated end 時回傳 0 且不 advance；成功才 `memcpy` 並 advance。`sub_592580`
+在 write cursor + size 不超過 allocated end 時才 copy、advance 並增加 packet
+payload size。這是 helper-level boundary，不等於整個 native reader fail-closed：
+108、426、434 等 reader 呼叫這些 helper 時沒有逐次檢查回傳值；上層 packet
+stream framing 仍是另一層責任。`sub_5926F0/sub_592730` 則以 ANSI NUL
+字串的 `lstrlenA()+1` 決定長度，因此字串語意與固定 buffer 上限仍須由各
+caller/consumer 分別驗證。
 
 **字串一律以 NUL 結尾直接寫進 payload，沒有長度前綴** (讀出端靠 lstrlenA)。
 
@@ -212,10 +229,11 @@ offset 8   ...  payload (小端, 緊湊, 無對齊)
 全域 `n0x2580` 初始 0x2580(9600, 即「從不壓縮」)。
 `GL_ACCOUNTCONNSUCC(694)` 攜帶一個 u16，**只有嚴格小於** `0x2580`
 才覆寫門檻 (0x43E651 的 `n694==694` 分支)；`0x2580` 或更大值都被
-client 忽略並保留 9600。故 server 的 694 值與 `PacketCodec` 值必須是同
-一個 `0..0x2580` 規範化門檻；若讓 server 使用 `>0x2580`，client 在
-9600..server-threshold 範圍送入的 LZ frame 便不會被 server 解壓。
-實作對 `0` 規範為 `0x2580`，拒絕 `>0x2580`。
+client 忽略並保留 9600。這是 client 的消費行為，不是 server 可用值的
+wire 限制：TS 只驗證值能放進 u16 並原樣寫出，包含 client 會忽略的值。
+預設值仍是 `0x2580`，以維持雙向不壓縮；若 server 選擇低於 9600 的門檻，
+`PacketCodec` 必須使用同一個門檻，否則 9600..server-threshold 範圍的
+LZ frame 會無法正確解壓。
 ⚠ 更關鍵的第二功用: 讀完門檻後緊接呼叫 `sub_43DF00` = **682 登入
 REQ 的 builder** (帳密欄位先驗證 sub_43DD60: 只允許 [0-9A-Za-z@],
 非法則顯示 0xE1 訊息不送包)。所以 **694 是登入流程的觸發器**:
@@ -245,30 +263,68 @@ raw4 result           native 以 raw 4B 讀入，但分支只檢查 low byte；
                        CHARGE UI。後端業務名稱未能由 native code 確認，
                        應視為 opaque billing/charge UI mode，不是「玩家等級」
                        或 route token。
-  s32  ext_count      0 = 無帳號/網咖 feature extension；>0 時 client **只讀
+  s32  ext_count      0 或負值 = 不讀 extension；>0 時 client **只讀
                        一組** `s32 first, s32 second, u8 feature_flag` 再交給
-                       sub_A1C870。count 存在 dword_231800C，非零會影響多個
-                       *_NETCAFE UI gate，故私服安全子集只能送 0 或 1。
-  s16  server_count
+                       sub_A1C870。它是 native positive gate，不是 tuple count；
+                       count/gate 存在 dword_231800C，非零會影響多個
+                       *_NETCAFE UI gate。TS production 預設仍送 0；只有持有
+                       官方可重現設定時，才可透過 raw extension API 送 exact
+                       gate + one tuple，不替三欄臆造業務名稱。
+  raw2 server_count                   (native loop gate; signedness unresolved)
   repeat server_count:                 ← 伺服器清單
-    s16  server_id
+    raw2 server_id                     (domain/signedness unresolved)
     str  name  (ANSI; native char[50]，內容最多 49 bytes)
     str  host  (v124 char[16]，內容最多 15 bytes)
-    s16  port  (⚠ 讀取函式是 sub_5929C0；其 16-bit bit pattern 隨後作
-                Winsock u_short port 使用，故 40201 等 >32767 port 合法)
+    raw2 server_port                   (sub_58AD90 取此 2-byte field，作為
+                                       sub_554810 的 u_short TCP endpoint port)
     u8   flag                          (意義尚未確定)
-    s16  group                         (意義尚未確定)
+    raw2 group                         (2-byte wire field; domain/signedness unresolved)
     repeat 3:                          ← 每台固定 3 個頻道分組
-      s16  ch_count
-      若 ch_count > 0 (⚠ 即使 >1 client 也只讀一個條目):
+      raw2 max_users                   (native positive gate；UI `USERS` 的
+                                       分母/容量，不是 record count)
+      若 max_users > 0 (native 只讀一個 channel record):
         u8   ch_type
         str  ch_name                   (char[50]，內容最多 49 bytes)
-        s16  ch_port                   (同樣是 u_short bit pattern)
+        raw2 current_users             (UI `USERS` 的分子；不是 network port)
         u8   ch_flag                   (意義尚未確定)
         若 ch_type==3: u8 extra
-  s32  billing_first, billing_second   (v142,v137 → Tricod account/billing client;
-                                        名稱未知，非 u32)
+  s32  billing_first, billing_second   (v142,v137；後續以 raw s32 進入 Tricod
+                                       argument block，業務名稱未知，非 u32)
 ```
+
+681 的兩個「看起來像 port」欄位並不重複。`server_port` 是真實的
+server-selector TCP endpoint：`sub_58AD90` 將 projection 的 `+102` host 與
+`+118` field 傳給 `sub_554810(SOCKET*, char*, u_short)`，後者直接建構
+`AF_INET/SOCK_STREAM` sockaddr 並呼叫 `WSAConnect`。相反地，channel record
+的 `+122` field 會在 `sub_416DA0` 中與 `+124` 一起格式化為 `"%d/%d"`，
+寫入 UI 欄位 `USERS`；`sub_4176C0` 也用 `max_users <= current_users` 判斷
+滿載。因此 channel wire field 應稱 `current_users`，不可再叫 `port`。
+
+讀取器仍只用 `sub_5929C0` 證明所有這些欄位是 2 bytes；server endpoint 的
+consumer 另證明其有效解讀為 unsigned `u_short`。`server_id`、`group`、
+`max_users`、`current_users` 的 wire signedness 不由 helper 單獨確定，TS
+對後三者只發送對應 raw2/s16 bits，不將它們誤當成 endpoint。
+
+681 的 server-list loop 會把 wire fields 讀入多個 local scratch，再於每次
+有 channel record 時呼叫 `sub_58E690(byte_13242F8, src)`。`src` 從
+`server_id` 的 scratch 開始，native vector helper 會以此位址複製固定 132
+bytes；`sub_58E670` 依 projection 首 byte 排序，`sub_58E640` 另依
+projection offset 129 排序。這是 native 的 stack-layout projection/lookup
+context，不是額外的 132-byte wire field。官方資源 `Extracted/ui/cfg/pm_lobbydata.dat`
+只提供 `LOBBYCHANNEL` 的 UI layout，沒有 endpoint schema；PaperManWiki 的
+[遊戲起動編](https://wikiwiki.jp/paperman/ひよこ用/ゲーム起動編) 只確認
+「server selection」與 channel/遊玩風格的階層，也沒有 port 欄位命名。故
+本段的 endpoint/USERS 命名以 native producer/consumer 為準；後續 144→195 的
+`sub_4179D0`→`sub_56FF40` 另以 projection `+129/+131` 交叉確認 `ch_type`
+與 `ch_flag`，而 type-3-only projection `+130` 只在 `sub_416DA0` 的 UI/state
+switch 出現。`flag`、`group` 與 billing fields 仍維持 UNRESOLVED；TS 不重建
+native internal scratch object。完整 caller/callee 與 raw extension audit 見
+`docs/S2C_NATIVE_AUDIT_681.md`。
+
+`user_no` 另外被格式化成字串，和 `billing_first/billing_second`、常數
+`5`、`0` 一起放入 `sub_7092C0` 的 Tricod argument block；這只能證明
+client-side billing/telemetry consumer，不足以命名兩個 billing words 的
+server business meaning。
 
 **2026-09 login cross-check / server guardrails.** `server-cs` now puts this
 wire contract in `PaperMan.Protocol/Contracts/Login/LoginWire.GL_LOGIN_REQ.cs`, including a self-test that
@@ -282,9 +338,9 @@ security/device fingerprint material.
 
 The native client makes a **new** channel TCP connection after 681. Its 143
 identity comes from `String[24]` and is therefore limited to 23 ANSI bytes;
-its `n100` path passes through a signed-char local before its s32 write. The
-server consequently validates a lossless signed-byte billing/charge UI mode
-and grants a short-lived, source-IP-bound, one-use account→channel admission. Crucially, it
+its `n100` path is read and written as a 4-byte signed value. The server
+consequently preserves the full signed-s32 billing/charge UI mode and grants a
+short-lived, source-IP-bound, one-use account→channel admission. Crucially, it
 does **not** use the identity as an account/nickname key: the available C
 export proves the `String[24]` size and reuse but not its authoritative writer.
 If two live logins from one IP have identical native echo values, the server
@@ -727,16 +783,18 @@ bool    success                 0 時直接顯示 resource 0x70 / code 17
   --- sub_523BF0: 基本資料 ---
   string  nickname            (this+60,  0x30 bytes 區)
   u8      selected_char_index (this+88; CHARSLOT list index, not char_type)
-  s32     level/exp 相關 x3   (this+92,96,108)
-  s32     win/loss/kill/death/disconnect x5 (this+136..152)
-  s32     headshot/combo/heart/dkill x4     (this+156..168)
-  s32     tkill/mkill/ukill/zkill x4        (this+172..184)
-  s32     kkill/ddkill/critical/playc/roundc x5 (this+188..204)
-  u8      flags x3            (this+304,305,306)
-  s32     cash?               (this+104)
-  s32     x2                  (this+112,116)
-  byte[48] extra blob         (this+208)
-  u8      slot_current        (this+4)
+  s32   level/exp/derived-level x3 (this+92,+96,+100; client recomputes +100)
+  s32   reserved x3             (this+136,+140,+144; no proven task/stat owner)
+  s32   wins/losses             (this+148,+152)
+  s32   kills/deaths/disconnect/hearts (this+156..168)
+  s32   headshots/double/triple/combos (wire order +172,+180,+184,+176)
+  s32   multi/ultra/z/k/dd      (this+188..204)
+  u8      flags x3              (this+304,305,306)
+  s32     cash                  (this+104)
+  s32     raw x2                (this+112,116)
+  byte[48] play-time/mode blob (this+208; [52] play seconds, [53..60] mode counts,
+                                [61..63] no proven consumer)
+  u8      slot_current          (this+4)
   --- sub_524010: character normal appearance records (最多 20 個) ---
   u8      char_count
   repeat char_count (≤20):
@@ -783,9 +841,15 @@ CClientData 的 sub_523A50 (523BF0+524010+524660+524B70(a3=0)) 其實屬於
   已解析記錄；若仍找不到非 0 值，便取得 resource `0xCC` 並顯示 code 63。
 - `sub_523BF0` 在 nickname 後讀 `CClientData+88`，並在 48-byte blob 後
   讀 `+4`；`sub_526CA0` / `sub_884160` 將 `+88` 用作 `CHARSLOT` 選取值，
-  並由 `sub_884160` 原樣寫入 outbound opcode 312。Server 必須在 **兩個**
-  198/247 基本資料欄位寫目前的 character-list slot/index，不能在 `+88`
-  寫角色 type。真正的 `char_type` 是後續每筆 `sub_524010` 記錄的首 byte。
+  並由 `sub_884160` 原樣寫入 outbound opcode 312。`sub_525070`、
+  `sub_525790` 等 consumer 以它索引最多 20 個 character-list slots；因此
+  Server 必須在 **兩個** 198/247 基本資料欄位寫 0..19 的 character-list
+  slot/index，不能在 `+88` 寫角色 type。真正的 `char_type` 是後續每筆
+  `sub_524010` 記錄的首 byte。TS Store 將 DB 的 persistent `current_character`
+  slot key 映射到 `ORDER BY slot` 後的 compact serialized-list index；這是
+  server projection policy，不宣稱 native wire 還有一個 per-record persistent
+  slot 欄位。若 current slot 不在 serialized rows 中，Store 拒絕產生含歧義的
+  MyInfo，而不是把 persistent slot number 直接發到 198/247。
 - 對精確的 `origin/main:Extracted/ui/cfg/itemdata.pat` 解密後，變長 ItemData
   stream 的 header 是 `(version=1,count=21164)`，可無殘餘地解析全部 21,164
   records。`19,900,001..19,900,015` 連續 15 筆角色本體在 record `+532` 的
@@ -825,10 +889,10 @@ s32     start_index          (分頁, 每包最多 100 條, 背包上限 5120)
 repeat until sentinel:
   s32   inv_slot   (負值 = 結束)
   s32   item_id    (負值/非法 = 中止)
-  float f1         (⭐ 廿一輪定案: 外觀技能 roll 值 — NewSkillLevTable
-  float f2          0..140 稀有度分級, Hair/Jacket/Pants/Shoes/Accessory/
-                    Set 六槽適用; 舊制 ItemAbility 為負值懲罰表。
-                    server 送 0 = 無技能 (合法); 進階可隨機 roll)
+  float f1         (native first float; exact item-domain meaning UNRESOLVED)
+  float f2         (native second float; exact item-domain meaning UNRESOLVED;
+                    NewSkillLevTable is client display/combine data, not authority
+                    for naming or granting these server inventory values)
   s32   period     (剩餘天數)
   u8    extra      ⚠ 四輪修正: 200 有 extra (sub_570AB0 呼叫 sub_524B70(cd,pkt,1));
                    無-extra 版 (a3=0) 屬 290/294 MASTER_USERINFO 系
@@ -942,15 +1006,15 @@ ACK (sub_572D80/572E70): `u8 result` — **result 語意十輪逐分支定案**:
   state:=5 進大廳), `0` = 失敗 (彈窗, state:=4), 其他值被忽略
   (client 卡在原畫面) — 成功碼是 1 不是 0!
 ### 3.8 GL_USERLIST_REQ (105) / GL_USERLIST_ACK (106)
-REQ 端 `sub_56A0F0`: `s8 (=1)` — client 每 ≥1 秒 (timeGetTime 差
+REQ 端 `sub_56A0F0`: `u8 (=1)` — native parameter is `unsigned __int8`; client 每 ≥1 秒 (timeGetTime 差
 ≥0x3E8) 送一次要求刷新名單, log `L"Send UserList"`; server 直接回
 106。ACK 端 sub_56A250 (四輪修正):
 ```
-u16    count
-若 count != 0:      ← count==0 時後面什麼都沒有
+raw2   gate (native only tests zero/nonzero; domain unresolved)
+若 gate != 0:       ← gate==0 時後面什麼都沒有
   u8   flags        (bit0: 開啟清單 UI; bit0|bit2: 關閉)
-  u8   n
-  repeat n: s32 user_id, string nick, s32 exp
+  u8   recordCount
+  repeat recordCount: s32 user_id, string nick, s32 exp
             if user_id>0 { s32 custom_tex_id, string tex_name(64) }
 ```
 ⚠ 第三個 s32 是 **exp 不是 status** (十二輪定案): sub_588560 對它呼叫
@@ -959,28 +1023,56 @@ CCustomTexture 快取請求 (個人頭像貼圖)。
 ### 3.9 GL_GAMEROOMINFO_ACK (108) — sub_568CE0 (卅七輪逐欄定案):
 ```
 u8   mode (3 = 錦標賽樹狀圖, 委派 sub_580A80; 其他 = 房間清單)
-u8   count
-repeat count:
-  u8    room_no (需 <0xD2=210), s8 state
-  state>=0: title 由 client 查字串表 state+309 (msgtableres 0x135+state
-            = 預設房名片語, 如「私達はペラペラだ！」「日々の努力が実力に
-            なる」…); state<0: string title (自訂房名) — 之後皆為下列 12 欄:
-    u8   cur_players   (+105; sub_44E970, 「cur/max」第一數)
-    bool has_pass      (+106)
-    u8   max_players   (+129; 冗餘 — client 以 +110 popcount 重算覆寫)
-    u16  max_slot_mask (+110; bit 0..max-1 = 1, sub_53FB10 以 popcount
-                        重算 +129 並展開 +112..+127 逐槽旗標)
-    u8   game_mode     (→ sub_53FBB0 建立 CyGameModes LobbyUI, 見下表)
-    bool room_type_A   (+108; sub_44E7B0 — ROOMTYPE bit)
-    u8   mode_param_a  (→ mode 物件 +12)
-    bool room_type_B   (+109; sub_44DA70 — ROOMTYPE bit)
-    bool double_damage (+128; sub_44DBB0)
-    u8   map           (+130; sub_540280/sub_540260 — 122 亦寫此欄,
-                        124/125 = 特殊地圖 id)
-    u8   mode_param_b  (→ mode 物件 +4, sub_74F450)
-    bool no_skill_bg   (+185; sub_44E820 — NOSKILLBG)
-  若 mode==2: 兩組 {s32 team_id, u32 custom_tex_crc, str(75/87) tex_name,
-              u8 x} (隊伍自訂圖示, 存 room+188.., CCustomTexture 註冊)
+if mode != 3:
+  u8   count
+  repeat count:
+    u8    room_no (需 <0xD2=210), s8 state
+    state>=0: title 由 client 查字串表 state+309 (msgtableres 0x135+state
+              = 預設房名片語, 如「私達はペラペラだ！」「日々の努力が実力に
+              なる」…); state<0: string title (自訂房名) — 之後皆為下列 12 欄:
+      u8   cur_players   (+105; sub_44E970, 「cur/max」第一數)
+      u8   has_pass      (+106)
+      u8   max_players   (+129; 冗餘 — client 以 +110 popcount 重算覆寫)
+      u16  max_slot_mask (+110; bit 0..max-1 = 1, sub_53FB10 以 popcount
+                          重算 +129 並展開 +112..+127 逐槽旗標)
+      u8   game_mode     (→ sub_53FBB0 建立 CyGameModes LobbyUI, 見下表)
+      u8   room_type_A   (+108; sub_44E7B0 — ROOMTYPE bit)
+      u8   mode_param_a  (→ mode 物件 +12)
+      u8   room_type_B   (+109; sub_44DA70 — ROOMTYPE bit)
+      u8   double_damage (+128; sub_44DBB0)
+      u8   map           (+130; sub_540280/sub_540260 — 122 亦寫此欄,
+                          124/125 = 特殊地圖 id)
+      u8   mode_param_b  (→ mode 物件 +4, sub_74F450)
+      u8   no_skill_bg   (+185; sub_44E820 — NOSKILLBG)
+    若 mode==2: 兩組 {s32 team_id, u32 custom_tex_crc, str(75/87) tex_name,
+                u8 x} (隊伍自訂圖示, 存 room+188.., CCustomTexture 註冊)
+else:
+  u8   n4, u8 i1, u8 flags142
+  repeat i=n4-1 downto i1:
+    u8   stage_raw
+    u8   round_type
+    u8   mode_raw
+    raw4 stage_raw_word_1
+    raw4 stage_raw_word_2
+    u8   pair_count
+    repeat pair_count:
+      raw4 node_or_room_id
+      u8   pair_byte_1
+      u8   pair_byte_2
+      u8   pair_byte_3
+      u8   pair_byte_4
+      raw2 pair_word
+      if round_type==4: u8 round4_raw + 4×raw4 participant blocks
+      else: 2×raw4 participant blocks
+  u8 has_my
+  if has_my != 0: u8 selected_raw, u8 footer_raw
+  raw4 state494 (native local `float`, stored at client state [494])
+```
+`sub_580A80` 的 round-4/non-round-4 分支讀取數量不同；不要把 mode-3
+header 的 `n4` 當 ordinary room count，也不要把 `pair_byte_3` 直接命名成
+bool：native `sub_592900/sub_592940` 都只證明它們各是一個 byte。兩個
+participant blocks 由 `sub_875C20` 消費，第一個 dword 會與 local identity
+block (`sub_54B570(dword_131E238)`) 比對；其 uid/emblem/score 語意仍未定。
 ```
 房物件語義 (getter 定案): `+105=cur_players (sub_44E970)`,
 `+129=max_players (sub_44E990; sub_5403F0 取 /2 為單隊上限)`,
@@ -1002,13 +1094,32 @@ round_type==4] + 2×{s32 uid (+s32)} }; 之後 u8 has_my (≠0 → u8 room,
 u8), f32 → 存 [494]。
 ### 3.10 GL_FRIEND_LIST_ACK (434) — sub_55AFC0:
 ```
-u16 x, string self, u8 count; repeat: string nick, s32 status
+raw2 header, string field_s0, u8 count; repeat: string field_s1, raw4 field_a3
 ```
+`sub_537F60` accepts the full 4-byte record field but assigns it to the
+one-byte table slot `this+61585+index`; only the low byte is visibly retained by
+that local consumer. The 21-byte record-string copy loop has no visible per-byte clamp.
+
 ### 3.11 GL_MSG_RECVLIST_ACK (426) — sub_55A630:
 ```
-u16 x, string self, u8 count
-repeat: string from, u8, string title, u32 msg_id, string body(≤201), string, u16 date
+raw2 header, string field_s0, u8 count
+repeat: string field_s1, u8 field_a3, string field_s2, raw4 field_a5, string field_s3 (native local 201-byte stride; reader does not visibly clamp), string field_s4 (native 2-byte stride), raw2 field_a8
 ```
+Native `sub_5378C0` keeps at most 10 rows. Its string slots have strides 20/21/201/2
+and are NUL-copy loops without an explicit clamp. The consumed `raw4 field_a5` is
+then assigned to a one-byte table slot (`this+60536+index`), and the consumed `raw2
+field_a8` is assigned to another one-byte table slot (`this+122107+index`); only the
+low byte of each is visibly retained by this recovered consumer. This truncation is
+a client storage fact, not permission to narrow the wire fields in a server writer.
+The first per-record string does have a recovered state consumer: `sub_537D20`
+marks a matching entry with byte `89`, `sub_537E90` tests that marker, and
+`sub_55A1E0`/`sub_55A3C0` build 421/423 requests from the key and its state;
+`sub_55A310`/`sub_55A4F0` receive those requests and invoke the corresponding
+mark/unmark helper. This proves a string-key/read-state path, but not whether
+the key is a sender, recipient, message id, or folder. The remaining record
+strings and stored low-byte raw fields still have no recovered semantic
+consumer; keep their wire names raw.
+
 ### 3.12 GP_CH*C 家族 (222–245, 362–363, 380–389, 882) — 四輪交叉驗證修正:
 **REQ** (builder sub_5567F0@230 / sub_5568E0@232 / sub_556B90@244 等):
 `s32 新的絕對累計值` — client 送 **total 而非增量** (a1<0 時不送)。
@@ -1427,7 +1538,7 @@ GG 戰鬥事件中繼 (server 原樣轉發即可) 與 MASTER_* GM 工具組。
 195 REQ (sub_56FF40; CLobbyChannel 的 144 wrapper 每次收到 144 都會送):
     u8 group    (頻道群組 = 681 清單 3 組之序, CLobbyChannel+129)
     u8 channel  (組內頻道編號, +131)
-    u8 replay   (回放模組啟用 flag — sub_7338D0/sub_735DE0 檢查)
+    u8 rawFlag  (local option-derived raw flag; domain UNRESOLVED — sub_7338D0/sub_735DE0)
 
 196 ACK (CLobbyChannel::sub_4179D0 case 196 — 不在 dispatcher!
          經 vtable 場景層分發):
@@ -1441,9 +1552,10 @@ GG 戰鬥事件中繼 (server 原樣轉發即可) 與 MASTER_* GM 工具組。
       str  udp_host      ⭐ UDP control endpoint (no P2P/NAT role inferred)
       s32  udp_port      (sub_58ED30 存 + sub_596E60 取 low u16 填 sockaddr)
       u8   endpoint_opaque → 1D0CFE4
-      u8   channel_type (==3 → 續讀 AI multi 大塊 sub_875680:
-              s32×2, str, f32×4, u8×3, s32×2, u8×6, s32×2... —
-              AI 協力頻道的關卡/波次參數!)
+      u8   channel_type (==3 → 續讀完整 AI/tournament 大塊 sub_875680，詳見
+              docs/S2C_NATIVE_AUDIT_196.md；其四個固定 4-byte 欄位是
+              raw4，不是 f32，後續含 capped/unbounded count loops；TS 只有
+              明確 raw `type3Tail` 才會發送此 continuation)
       raw4 client_flags (sub_592AC0；bit0 → byte_1D0D21B，⚠ 非 f32)
       u8   client_default → sub_417D00()[8] (native read target 預設 5)
 ```
@@ -1453,9 +1565,10 @@ GG 戰鬥事件中繼 (server 原樣轉發即可) 與 MASTER_* GM 工具組。
 **頻道→大廳鏈全閉環**。196 handler 經場景 vtable (sub_407360 的
 vtbl+52) 分發, 與 CLobbyShop 同層 (引用計數 1 = 純虛表呼叫證據)。
 
-festival: 681 的 3 頻道組 ↔ 195 的 group 序號互證; 頻道類型 n2==3
-= AI 頻道 (bitmask 1024 段地圖) — 與 ch_type==3 讀 extra byte
-(二輪 681 佈局) 同源!
+cross-check: 681 的 3 頻道組 ↔ 195 的 group 序號互證；`ch_type` 是 195
+第一 byte（projection `+129`），`ch_flag` 是第二 byte（projection `+131`）。
+`ch_type==3` 的第三 wire byte 是 projection `+130`，由 lobby UI/state switch
+消費；目前維持 raw，不因 196 的 type-3 continuation 或資源標籤替它命名。
 
 ### 3.15e GL_JOINPLAY_ACK (269) — sub_574B20, 1524 行巨型函數 (全鏈定案)
 中途加入/觀戰的「全房間快照」。頂層: `u8 n7` switch:
@@ -1648,7 +1761,7 @@ Room，`Handlers.GL_JOINPLAY.cs` 的 flag 0 先加入空 slot 再回 269 code 6 
 
 143 PM_UDPSTART_REQ (sub_555C60; 693 的唯一 bootstrap 觸發):
     str identity (`String[24]`，此匯出尚不能定名，最多 23 ANSI bytes)
-    s32 n100 (681 回送；native signed-char temporary 擴展為 4B)
+    s32 n100 (681 回送；native 讀寫皆為 4B signed value)
     u8  literal 1
     s32 ext_count (681 回送)
     這是可比對 handoff claim，不是密碼學 credential；server 必須把它綁定
@@ -1685,7 +1798,7 @@ Room，`Handlers.GL_JOINPLAY.cs` 的 flag 0 先加入空 slot 再回 269 code 6 
     server 即使拒絕 143，也應把未認證的後續 195 回成明確的 non-success
     196，而不可讓它取得任何 authenticated lobby authority。
 
-195 GC_ENTERCHANNEL_REQ (sub_56FF40): `u8 group, u8 channel, u8 replay`。
+195 GC_ENTERCHANNEL_REQ (sub_56FF40): `u8 group, u8 channel, u8 rawFlag`; native derives the third byte from the local option block, but its domain is UNRESOLVED.
 196 GC_ENTERCHANNEL_ACK (CLobbyChannel::sub_4179D0，不走主 dispatcher):
     u8 result, s32 channel_id, u8 channel_index
     **只有 result==1** 才續讀 `str endpoint_host, s32 endpoint_port,
@@ -1693,8 +1806,9 @@ Room，`Handlers.GL_JOINPLAY.cs` 的 flag 0 先加入空 slot 再回 269 code 6 
     result 1 會把第三欄寫成 active channel index；0=channel full (0xDA),
     2=rank restricted (0x148), 3=clan required (0x328), 4/5/7/9=generic
     error (0x1A5), 6/8 有各自 resource。`client_flags & 1` 是已證實的
-    native flag；`channel_type==3` 還要求 `sub_875680` AI tail，現行 server
-    因尚未實作該 tail 而拒絕 type-3 設定。
+    native flag；`channel_type==3` 還要求完整 `sub_875680` continuation。
+    TS builder 只在明確提供 raw `type3Tail` 時發送；channel admission 也只有
+    在 config 提供該 tail 時接受 type 3，未配置時維持保守拒絕。
 ```
 
 **Fact/HIGH — current C# bootstrap guardrails.** `Contracts/Login/LoginWire.*.cs`
@@ -1973,7 +2087,7 @@ u8+slot 系列)
 | 707 | `GL_BILLTOKEN_ACK` | `sub_46AD00` | S2C | `str token` |
 | 787 | `GL_RACKINGWEB_TOKEN_REQ` | `sub_581E40` | C2S | `(空)` |
 | 788 | `GL_RACKINGWEB_TOKEN_ACK` | `sub_44BEA0` | S2C | `str token` |
-| 834 | `GL_DATA_RECV_COMPLETED_REQ` | `sub_583120` | C2S | `s32 user_id` |
+| 834 | `GL_DATA_RECV_COMPLETED_REQ` | `sub_583120` | C2S | `s32 raw client request context` (原樣取 `dword_F2A684`, 與 144 的 propagated raw4 共用；不可命名為 user_id) |
 | 835 | `GL_DATA_RECV_COMPLETED_ACK` | `sub_5831D0` | S2C | `(空)` |
 | 370 | `GL_CHANGECHANNEL_REQ` | `sub_570030` | C2S | `u8 channel_id` |
 | 371 | `GL_CHANGECHANNEL_ACK` | `sub_570100` | S2C | `u8 status, u8 channel_id, str host_ip, s32 host_port, u8 extra`; client passes this independently to `sub_596E60` (secondary UDP address field). Its relation to successful-196 primary endpoint is **UNRESOLVED**; do not merge endpoint state. |
@@ -2185,7 +2299,7 @@ u8+slot 系列)
 | 198 [28][29] (+112/116) | 閒置, 0 安全 | 僅複製建構 |
 | 198 blob [52..60] | 遊玩秒+模式場次 | cond20 + sub_923BF0 |
 | 681 n100 | 計費模式 id | ==100/101 → CHARGE UI (Tricod) |
-| 681 ext (a,b,c) | 物品等級 gate ×2 + 隱藏物品可見 flag | sub_A1CE20 / byte_231807D |
+| 681 ext (a,b,c) | raw positive gate plus one `s32,s32,u8` tuple; native UI/feature gate is proven, business names remain unresolved | `sub_43E500` → `sub_A1C870`, `dword_231800C`, `byte_231807D`, `CHANNEL_NETCAFE` branches |
 | 681 billing ×2 | Tricod SDK session 參數 | sub_7092C0 → CTricodLog |
 | 106 第三個 s32 | **exp** (顯示等級用) | sub_588560 → sub_403360 |
 | 205 尾 7×s32 | PG/CASH/CP + 保留×3 + 旗標 | UI 標籤 (十一輪) |
@@ -2863,8 +2977,9 @@ byte 偏移 (this 為物件基址):
    weapon; a nonempty primary carries 8 parts.
 4. **9-slot UI-item block** (sub_522480) 與 **NewSkill 5×7 profile**（selected record 由 sub_527AF0 讀 0x1C=7*4）分離儲存；466 操作後者。
 5. **戰績 19 個計數器** (GP_CH*C 家族)。
-6. **道具屬性**: item_id(s32), 兩個 float(耐久/強化), period(天), kind(u8), durability(u16)。
+6. **道具欄位**: item_id(s32), raw f1/f2 floats（domain UNRESOLVED）, period(s32), raw extra(u8), durability(u16)。NewSkillLevTable 不作這些 inventory wire 欄位的 server authority。
 7. **房間**: no(≤210), title, map, modeIndex, win_count, time_limit, max_player(≤10 slots),
    password, item_mode, balance, skill_off, observer。
 8. **好友/訊息/倉庫/任務/公會/禮物** 都有對應 packet 家族 → 各自建表。
 9. period 天數 & 商店 kind 白名單直接寫進 CHECK constraint。
+�店 kind 白名單直接寫進 CHECK constraint。
