@@ -6,6 +6,6 @@
  * response to the heartbeat, so answering it would loop forever.
  */
 
-export default function (): void {
+export default function GT_PING_REQ(): void {
   // Intentionally empty — see above.
 }

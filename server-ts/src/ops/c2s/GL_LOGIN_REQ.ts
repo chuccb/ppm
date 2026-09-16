@@ -44,7 +44,7 @@ export function read(r: Reader): Credentials {
  * Boundary: the wire contract only. Entitlements, billing and the contents of
  * the server list are deployment policy, not reverse-engineered fact.
  */
-export default async function (r: Reader, connection: Connection): Promise<void> {
+export default async function GL_LOGIN_REQ(r: Reader, connection: Connection): Promise<void> {
   const { account, password } = read(r);
   const found = await connection.config.store.verifyLogin(account, password);
 

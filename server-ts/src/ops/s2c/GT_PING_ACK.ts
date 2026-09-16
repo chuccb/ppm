@@ -11,6 +11,6 @@
 
 import { Packet } from "../../packet.ts";
 
-export default function (op: number): Packet {
+export default function GT_PING_ACK(op: number): Packet {
   return new Packet(op);
 }

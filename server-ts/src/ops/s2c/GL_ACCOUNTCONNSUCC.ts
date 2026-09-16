@@ -12,7 +12,7 @@
 
 import { COMPRESSION_DISABLED, Packet } from "../../packet.ts";
 
-export default function (op: number, threshold = COMPRESSION_DISABLED): Packet {
+export default function GL_ACCOUNTCONNSUCC(op: number, threshold = COMPRESSION_DISABLED): Packet {
   if (threshold <= 0 || threshold > COMPRESSION_DISABLED) {
     throw new RangeError(`threshold ${threshold} outside 1..0x2580`);
   }

@@ -56,7 +56,7 @@ export interface Success {
  * A failure really is only that word on the wire — the client branches on its
  * low byte before reading anything else.
  */
-export default function (op: number, outcome: Result | Success): Packet {
+export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Packet {
   if (typeof outcome === "number") return new Packet(op).s32(outcome);
 
   const { userNo, servers, chargeMode = 0 } = outcome;

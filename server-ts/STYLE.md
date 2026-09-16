@@ -21,9 +21,21 @@ src/ops/c2s/GL_LOGIN_REQ.ts   the client sends it; we read it
 src/ops/s2c/GL_LOGIN_ACK.ts   we send it; we build it
 ```
 
-Inside the module the name never appears again — not in a constant, not in
-`new Packet(...)`. A builder receives its own opcode as the first argument, so
-there is nothing to repeat and nothing to keep in sync. To find the code for a
+Inside the module the name appears in exactly one more place: the exported
+function is named after the opcode too.
+
+```ts
+export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Packet
+```
+
+That is a deliberate exception to "write it once", and it buys two things: the
+packet is identifiable when you land mid-file from a grep, and stack traces say
+`at GL_LOGIN_ACK` rather than `at GL_LOGIN_ACK_default`. It is safe because the
+registry asserts `fn.name` matches the filename at startup, so a rename that
+touches only one of them fails immediately instead of drifting.
+
+Nothing else repeats the name — no constant, no `new Packet(...)` argument. A
+builder receives its own opcode as the first parameter. To find the code for a
 packet, open the file with that name.
 
 **Direction comes from the folder, not the `_REQ`/`_ACK` suffix.** Those

@@ -48,7 +48,8 @@ function namesOnDisk(dir: "c2s" | "s2c"): string[] {
 }
 
 /** Fail loudly if a module was added without regenerating the index. */
-function checkInSync(dir: "c2s" | "s2c", listed: string[]): void {
+function checkInSync(dir: "c2s" | "s2c", modules: Record<string, unknown>): void {
+  const listed = Object.keys(modules);
   const onDisk = namesOnDisk(dir);
   const missing = onDisk.filter((name) => !listed.includes(name));
   const extra = listed.filter((name) => !onDisk.includes(name));
@@ -58,10 +59,20 @@ function checkInSync(dir: "c2s" | "s2c", listed: string[]): void {
   if (extra.length) {
     throw new Error(`src/ops/${dir}/index.ts lists ${extra.join(", ")}, which have no module`);
   }
+
+  // Each module's function is named after its opcode, so the name shows up in
+  // stack traces and when reading the file itself. That repeats the filename,
+  // which is only safe because a mismatch is caught right here.
+  for (const [name, fn] of Object.entries(modules)) {
+    const actual = (fn as { name?: string }).name ?? "";
+    if (actual !== name && actual !== `${name}_default`) {
+      throw new Error(`src/ops/${dir}/${name}.ts exports a function named ${actual || "(anonymous)"}`);
+    }
+  }
 }
 
-checkInSync("c2s", Object.keys(c2s));
-checkInSync("s2c", Object.keys(s2c));
+checkInSync("c2s", c2s);
+checkInSync("s2c", s2c);
 
 /** opcode -> the module that handles it. */
 const handlers = new Map<number, Handler>(

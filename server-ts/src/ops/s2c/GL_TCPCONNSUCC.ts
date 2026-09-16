@@ -15,6 +15,6 @@
 
 import { Packet } from "../../packet.ts";
 
-export default function (op: number): Packet {
+export default function GL_TCPCONNSUCC(op: number): Packet {
   return new Packet(op);
 }

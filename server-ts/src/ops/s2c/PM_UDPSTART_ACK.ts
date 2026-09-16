@@ -44,7 +44,7 @@ export interface Admission {
 /** Native char[40]. */
 export const CHANNEL_NAME_MAX_BYTES = 39;
 
-export default function (op: number, admission: Admission): Packet {
+export default function PM_UDPSTART_ACK(op: number, admission: Admission): Packet {
   const {
     result,
     channelName,

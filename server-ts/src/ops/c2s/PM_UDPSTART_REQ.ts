@@ -40,7 +40,7 @@ export function read(r: Reader): Handoff {
   return { identity, chargeMode, extCount };
 }
 
-export default function (r: Reader, connection: Connection): void {
+export default function PM_UDPSTART_REQ(r: Reader, connection: Connection): void {
   const { identity } = read(r);
   connection.log(`channel handoff ${JSON.stringify(identity)}`);
 
