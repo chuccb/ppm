@@ -1009,11 +1009,11 @@ round_type==4] + 2×{s32 uid (+s32)} }; 之後 u8 has_my (≠0 → u8 room,
 u8), f32 → 存 [494]。
 ### 3.10 GL_FRIEND_LIST_ACK (434) — sub_55AFC0:
 ```
-u16 x, string self, u8 count; repeat: string nick, s32 status
+raw2 header, string self, u8 count; repeat: string nick, s32 status
 ```
 ### 3.11 GL_MSG_RECVLIST_ACK (426) — sub_55A630:
 ```
-u16 x, string self, u8 count
+raw2 header, string self, u8 count
 repeat: string from, u8 raw, string title, s32 msg_id, string body(≤201), string raw, s16 date
 ```
 ### 3.12 GP_CH*C 家族 (222–245, 362–363, 380–389, 882) — 四輪交叉驗證修正:
