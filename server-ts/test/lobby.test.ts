@@ -170,7 +170,6 @@ describe("lobby bootstrap packets", () => {
     };
     const sparsePublicInfo = decode(build("GL_CLIENTINFO_ACK", sparseCharacters).encode());
     sparsePublicInfo.u8(); // success
-    sparsePublicInfo.s32(); // user_id
     sparsePublicInfo.str();
     expect(sparsePublicInfo.u8()).toBe(1); // basic selected wire index
     for (let i = 0; i < 21; i++) sparsePublicInfo.s32();
