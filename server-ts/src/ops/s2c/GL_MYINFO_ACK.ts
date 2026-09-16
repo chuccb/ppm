@@ -9,7 +9,12 @@
  */
 
 import { Packet } from "../../packet.ts";
-import type { NewSkillProfileSnapshot, MyInfo } from "../../store.ts";
+import {
+  NEW_SKILL_PROFILE_COUNT,
+  NEW_SKILL_PUZZLE_SLOT_COUNT,
+  type NewSkillProfileSnapshot,
+  type MyInfo,
+} from "../../store.ts";
 
 export default function GL_MYINFO_ACK(
   op: number,
@@ -40,7 +45,19 @@ export default function GL_MYINFO_ACK(
   // NewSkill profile selector and the selected profile's seven puzzle IDs.
   // `n5=5` is the recovered native-compatible raw convention; its semantic is
   // unresolved. A missing snapshot is kept useful for packet-only callers.
-  const selectedProfile = snapshot?.profiles[snapshot.selectedProfile];
+  let selectedProfile: NewSkillProfileSnapshot["profiles"][number] | undefined;
+  if (snapshot) {
+    if (!Number.isSafeInteger(snapshot.selectedProfile) || snapshot.selectedProfile < 0 || snapshot.selectedProfile >= NEW_SKILL_PROFILE_COUNT) {
+      throw new RangeError("198 selected profile must be an integer in 0..4");
+    }
+    if (snapshot.profiles.length !== NEW_SKILL_PROFILE_COUNT) {
+      throw new RangeError("198 requires exactly five NewSkill profiles");
+    }
+    selectedProfile = snapshot.profiles[snapshot.selectedProfile];
+    if (!selectedProfile || selectedProfile.puzzleItemIds.length !== NEW_SKILL_PUZZLE_SLOT_COUNT) {
+      throw new RangeError("198 selected profile requires exactly seven puzzle item ids");
+    }
+  }
   p.u8(5);
   for (let i = 0; i < 7; i++) p.s32(selectedProfile?.puzzleItemIds[i] ?? 0);
 

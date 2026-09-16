@@ -138,6 +138,9 @@ describe("lobby bootstrap packets", () => {
     expect(reader.s32()).toBe(0);
     expect(reader.u8()).toBe(0);
     expect(reader.remaining).toBe(0);
+    expect(() =>
+      build("GL_MYINFO_ACK", myInfo!, { ...selectedSnapshot, selectedProfile: Number.NaN }),
+    ).toThrow(/selected profile/);
     const publicMyInfo = store.getMyInfoByNickname("bob");
     expect(publicMyInfo).toEqual(myInfo);
     const publicInfo = decode(build("GL_CLIENTINFO_ACK", publicMyInfo).encode());
