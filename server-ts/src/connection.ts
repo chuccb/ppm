@@ -18,6 +18,11 @@ import type { GameServer } from "./ops/s2c/GL_LOGIN_ACK.ts";
 export const PING_INTERVAL_MS = 15_000;
 export const PING_TIMEOUT_MS = 60_000;
 
+const GT_PING_REQ = opcodeFor("GT_PING_REQ");
+const GL_LOGIN_REQ = opcodeFor("GL_LOGIN_REQ");
+const PM_UDPSTART_REQ = opcodeFor("PM_UDPSTART_REQ");
+const GC_ENTERCHANNEL_REQ = opcodeFor("GC_ENTERCHANNEL_REQ");
+
 /** Bun reports a TCP peer as `host:port`; admission is bound to the host only. */
 function remoteIp(address: string): string {
   if (address.startsWith("[")) {
@@ -52,17 +57,17 @@ export interface Config {
   /** Reported in the channel admission reply and the 681 channel list. */
   readonly channelName: string;
   /** The one advertised group/channel accepted by this single-channel host. */
-  readonly channelGroupIndex?: number;
-  readonly channelIndex?: number;
+  readonly group?: number;
+  readonly channel?: number;
   readonly channelId?: number;
   /** Endpoint copied into the successful 196 tail. */
   readonly udpHost?: string;
   readonly udpPort?: number;
   /** Opaque, source-proven values in the successful 196 tail. */
   readonly channelType?: number;
-  readonly endpointOpaqueByte?: number;
+  readonly endpointOpaque?: number;
   readonly clientFlags?: number;
-  readonly clientDefaultValue?: number;
+  readonly clientDefault?: number;
   /** A 681 admission expires if the client never opens its channel socket. */
   readonly admissionLifetimeMs?: number;
 }
@@ -106,7 +111,8 @@ export class Connection {
     this.#socket.write(packet.encode());
   }
 
-  /** Build an outbound packet by name and send it. Names and args are typed; files are checked at startup. */
+  /** Build an outbound packet by name and send it. Names and args are typed;
+   * files are checked at startup. */
   reply<N extends OutboundName>(name: N, ...args: OutboundArgs<N>): void {
     this.send(build(name, ...args));
   }
@@ -169,24 +175,25 @@ export class Connection {
 
   async #dispatch(r: Reader): Promise<void> {
     const name = opcodeName(r.opcode);
-    const ping = opcodeFor("GT_PING_REQ");
 
     if (this.config.role === "login") {
-      if (r.opcode === opcodeFor("GL_LOGIN_REQ") && this.authenticated) {
+      if (r.opcode === GL_LOGIN_REQ && this.authenticated) {
         this.log("repeated GL_LOGIN_REQ after successful login — ignored");
         return;
       }
-      if (r.opcode !== ping && r.opcode !== opcodeFor("GL_LOGIN_REQ")) {
+      if (r.opcode !== GT_PING_REQ && r.opcode !== GL_LOGIN_REQ) {
         this.log(`rejected ${name} on login listener`);
         return;
       }
-    } else if (r.opcode === opcodeFor("GL_LOGIN_REQ")) {
+    } else if (r.opcode === GL_LOGIN_REQ) {
       this.log("rejected GL_LOGIN_REQ on channel listener");
       return;
     } else if (!this.channelEntryCompleted) {
-      const handoff = opcodeFor("PM_UDPSTART_REQ");
-      const enter = opcodeFor("GC_ENTERCHANNEL_REQ");
-      if (r.opcode !== ping && r.opcode !== handoff && r.opcode !== enter) {
+      if (
+        r.opcode !== GT_PING_REQ &&
+        r.opcode !== PM_UDPSTART_REQ &&
+        r.opcode !== GC_ENTERCHANNEL_REQ
+      ) {
         this.log(`rejected ${name} before successful channel entry`);
         return;
       }

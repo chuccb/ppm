@@ -52,13 +52,11 @@ type OutboundModules = {
 };
 
 export type OutboundName = keyof OutboundModules;
-type DropOpcode<Args extends readonly unknown[]> = Args extends [number, ...infer Rest]
-  ? Rest
-  : never;
 export type OutboundArgs<N extends OutboundName> = OutboundModules[N] extends (
+  _op: number,
   ...args: infer Args
 ) => unknown
-  ? DropOpcode<Args>
+  ? Args
   : never;
 
 type Operation = (...args: unknown[]) => unknown;

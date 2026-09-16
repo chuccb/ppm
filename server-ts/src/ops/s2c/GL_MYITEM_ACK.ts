@@ -13,8 +13,8 @@ export interface InvItem {
   readonly itemId: number;
   readonly f1: number;
   readonly f2: number;
-  readonly periodDaysLeft: number;
-  readonly duraCur: number;
+  readonly period: number;
+  readonly dura: number;
 }
 
 export default function GL_MYITEM_ACK(op: number, items: readonly InvItem[] = []): Packet {
@@ -26,9 +26,9 @@ export default function GL_MYITEM_ACK(op: number, items: readonly InvItem[] = []
       .s32(item.itemId)
       .f32(item.f1)
       .f32(item.f2)
-      .s32(item.periodDaysLeft)
+      .s32(item.period)
       .u8(0)
-      .u16(item.duraCur);
+      .u16(item.dura);
   }
   return p.s32(-1);
 }

@@ -42,10 +42,10 @@ export interface SuccessEntry {
   readonly channelId: number;
   readonly channelIndex: number;
   readonly endpoint: Endpoint;
-  readonly endpointOpaqueByte?: number;
+  readonly endpointOpaque?: number;
   readonly channelType?: number;
   readonly clientFlags?: number;
-  readonly clientDefaultValue?: number;
+  readonly clientDefault?: number;
 }
 
 export type Entry = FailureEntry | SuccessEntry;
@@ -68,8 +68,8 @@ export default function GC_ENTERCHANNEL_ACK(op: number, entry: Entry): Packet {
   return p
     .str(entry.endpoint.host)
     .s32(entry.endpoint.port)
-    .u8(entry.endpointOpaqueByte ?? 0)
+    .u8(entry.endpointOpaque ?? 0)
     .u8(entry.channelType ?? 0)
     .u32(entry.clientFlags ?? 0)
-    .u8(entry.clientDefaultValue ?? 5);
+    .u8(entry.clientDefault ?? 5);
 }

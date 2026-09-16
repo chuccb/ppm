@@ -50,7 +50,8 @@ export default function PM_UDPSTART_REQ(r: Reader, connection: Connection): void
   try {
     handoff = read(r);
   } catch (error) {
-    connection.log(`malformed channel handoff — ${errorMessage(error)}`);
+    const message = error instanceof Error ? error.message : String(error);
+    connection.log(`malformed channel handoff — ${message}`);
     connection.reply("PM_UDPSTART_ACK", {
       result: Result.UnauthorisedId,
       channelName: connection.config.channelName,
@@ -78,8 +79,4 @@ export default function PM_UDPSTART_REQ(r: Reader, connection: Connection): void
     result: Result.Success,
     channelName: connection.config.channelName,
   });
-}
-
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
 }

@@ -52,7 +52,7 @@ export interface MyInfo {
   readonly experience: number;
   readonly gamePoints: number;
   readonly cash: number;
-  readonly currentChar: number;
+  readonly selectedCharIndex: number;
   readonly stats: Stats;
   readonly characters: readonly CharSlot[];
 }
@@ -474,7 +474,7 @@ export class Store {
       experience: row.experience,
       gamePoints: row.game_points,
       cash: row.cash,
-      currentChar: row.current_character,
+      selectedCharIndex: row.current_character,
       stats: {
         wins: row.wins,
         losses: row.losses,

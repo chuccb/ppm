@@ -15,6 +15,7 @@ export default function GL_INVENIN_REQ(r: Reader, connection: Connection): void 
   const myInfo = connection.config.store.ensurePlayerIdentity(connection.accountId);
   if (!myInfo) throw new Error("254 account has no user profile");
 
-  const snapshot = connection.config.store.getNewSkillProfileSnapshot(myInfo.userId);
-  connection.reply("GL_INVENIN_ACK", myInfo.userId, requestContextRaw, snapshot);
+  const uid = myInfo.userId;
+  const snapshot = connection.config.store.getNewSkillProfileSnapshot(uid);
+  connection.reply("GL_INVENIN_ACK", uid, requestContextRaw, snapshot);
 }

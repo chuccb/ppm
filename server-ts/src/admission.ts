@@ -12,7 +12,7 @@
 export interface ChannelAdmission {
   readonly accountId: number;
   readonly n100: number;
-  readonly extensionCount: number;
+  readonly extCount: number;
   readonly remoteIp: string;
   readonly expiresAt: number;
 }
@@ -23,7 +23,7 @@ export class ChannelAdmissionRegistry {
   issue(
     accountId: number,
     n100: number,
-    extensionCount: number,
+    extCount: number,
     remoteIp: string,
     lifetimeMs: number,
     now = Date.now(),
@@ -34,8 +34,8 @@ export class ChannelAdmissionRegistry {
     if (!Number.isInteger(n100) || n100 < -128 || n100 > 127) {
       throw new RangeError("n100 must fit the signed byte used by 143");
     }
-    if (!Number.isSafeInteger(extensionCount) || extensionCount < 0) {
-      throw new RangeError("extensionCount must be a non-negative safe integer");
+    if (!Number.isSafeInteger(extCount) || extCount < 0) {
+      throw new RangeError("extCount must be a non-negative safe integer");
     }
     if (!Number.isSafeInteger(lifetimeMs) || lifetimeMs <= 0) {
       throw new RangeError("admission lifetime must be a positive safe integer");
@@ -46,7 +46,7 @@ export class ChannelAdmissionRegistry {
     this.#byAccount.set(accountId, {
       accountId,
       n100,
-      extensionCount,
+      extCount,
       remoteIp,
       expiresAt: now + lifetimeMs,
     });
@@ -58,7 +58,7 @@ export class ChannelAdmissionRegistry {
    */
   claim(
     n100: number,
-    extensionCount: number,
+    extCount: number,
     remoteIp: string,
     now = Date.now(),
   ): ChannelAdmission | null {
@@ -68,7 +68,7 @@ export class ChannelAdmissionRegistry {
     for (const admission of this.#byAccount.values()) {
       if (
         admission.n100 !== n100 ||
-        admission.extensionCount !== extensionCount ||
+        admission.extCount !== extCount ||
         admission.remoteIp !== remoteIp
       ) {
         continue;

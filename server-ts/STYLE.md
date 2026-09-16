@@ -43,7 +43,11 @@ suffixes describe the client's view and do not always match ours: `GT_PING_ACK`
 is an `_ACK` the *server* sends, and `GT_PING_REQ` is a `_REQ` it *receives*.
 A suffix rule gets that pair backwards; a folder cannot.
 
-Everything else is normal camelCase: `frameLength`, `verifyLogin`.
+Everything else is normal camelCase: `frameLength`, `verifyLogin`. For a
+recovered wire field, this is only a mechanical separator change:
+`user_no` becomes `userNo`, while `uid`, `flag`, `extra`, `unknown`, and `raw`
+stay conservative. Do not promote a raw field into a semantic name merely
+because another implementation uses one.
 
 Two guards make the convention enforceable rather than aspirational:
 

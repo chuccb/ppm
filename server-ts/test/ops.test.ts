@@ -91,7 +91,7 @@ describe("682 — login request", () => {
 describe("681 — login ack", () => {
   const servers: GameServer[] = [
     {
-      id: 1,
+      serverId: 1,
       name: "PaperMan",
       host: "127.0.0.1",
       port: 40201, // > 32767: valid, the s16 bit pattern is reused as u_short

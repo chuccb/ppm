@@ -55,12 +55,12 @@ export default async function GL_LOGIN_REQ(r: Reader, connection: Connection): P
   }
 
   const n100 = 0;
-  const extensionCount = 0;
+  const extCount = 0;
   connection.bindAccount(found.id);
   connection.config.admissions.issue(
     found.id,
     n100,
-    extensionCount,
+    extCount,
     connection.remoteIp,
     connection.config.admissionLifetimeMs ?? 120_000,
   );

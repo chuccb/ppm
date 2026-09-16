@@ -32,7 +32,7 @@ export interface Channel {
 
 /** A server row. The client expects exactly three channel groups. */
 export interface GameServer {
-  readonly id: number;
+  readonly serverId: number;
   readonly name: string;
   readonly host: string;
   readonly port: number;
@@ -84,7 +84,7 @@ export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Pac
     if (server.host.length > 15) {
       throw new RangeError("681 server host must fit native char[16]");
     }
-    p.s16(server.id);
+    p.s16(server.serverId);
     p.str(server.name); // native char[50]
     p.str(server.host); // native char[16]
     p.s16(server.port); // 16-bit pattern reused as u_short, so >32767 is fine

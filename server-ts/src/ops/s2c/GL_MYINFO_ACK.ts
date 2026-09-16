@@ -52,7 +52,7 @@ export function writeMyInfoBasicData(packet: Packet, myInfo: MyInfo): Packet {
   const { stats } = myInfo;
   return packet
     .str(myInfo.nickname)
-    .u8(myInfo.currentChar)
+    .u8(myInfo.selectedCharIndex)
     .s32(myInfo.level)
     .s32(myInfo.experience)
     .s32(0)
@@ -81,7 +81,7 @@ export function writeMyInfoBasicData(packet: Packet, myInfo: MyInfo): Packet {
     .s32(0)
     .s32(0)
     .zeros(48)
-    .u8(myInfo.currentChar);
+    .u8(myInfo.selectedCharIndex);
 }
 
 export function writeCharacterAppearance(packet: Packet, equip: readonly number[]): Packet {

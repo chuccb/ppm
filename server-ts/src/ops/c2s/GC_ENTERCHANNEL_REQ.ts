@@ -11,15 +11,15 @@ import type { Connection } from "../../connection.ts";
 import { Result } from "../s2c/GC_ENTERCHANNEL_ACK.ts";
 
 export interface Selection {
-  readonly selectedGroup: number;
-  readonly selectedChannel: number;
+  readonly group: number;
+  readonly channel: number;
   readonly replay: number;
 }
 
 export function read(r: Reader): Selection {
   const selection = {
-    selectedGroup: r.u8(),
-    selectedChannel: r.u8(),
+    group: r.u8(),
+    channel: r.u8(),
     replay: r.u8(),
   };
   if (r.remaining !== 0) throw new RangeError(`${r.remaining} trailing bytes`);
@@ -31,7 +31,8 @@ export default function GC_ENTERCHANNEL_REQ(r: Reader, connection: Connection): 
   try {
     selection = read(r);
   } catch (error) {
-    connection.log(`malformed channel selection — ${errorMessage(error)}`);
+    const message = error instanceof Error ? error.message : String(error);
+    connection.log(`malformed channel selection — ${message}`);
     connection.reply("GC_ENTERCHANNEL_ACK", {
       result: Result.GenericError4,
       channelId: connection.config.channelId ?? 1,
@@ -45,26 +46,26 @@ export default function GC_ENTERCHANNEL_REQ(r: Reader, connection: Connection): 
     connection.reply("GC_ENTERCHANNEL_ACK", {
       result: Result.GenericError4,
       channelId: connection.config.channelId ?? 1,
-      channelIndex: selection.selectedChannel,
+      channelIndex: selection.channel,
     });
     return;
   }
 
-  const group = connection.config.channelGroupIndex ?? 0;
-  const channel = connection.config.channelIndex ?? 0;
+  const group = connection.config.group ?? 0;
+  const channel = connection.config.channel ?? 0;
   const channelType = connection.config.channelType ?? 0;
   const accepted =
     connection.authenticated &&
     channelType !== 3 &&
-    selection.selectedGroup === group &&
-    selection.selectedChannel === channel;
+    selection.group === group &&
+    selection.channel === channel;
 
   if (!accepted) {
-    connection.log(`channel selection ${selection.selectedGroup}/${selection.selectedChannel} -> rejected`);
+    connection.log(`channel selection ${selection.group}/${selection.channel} -> rejected`);
     connection.reply("GC_ENTERCHANNEL_ACK", {
       result: Result.GenericError4,
       channelId: connection.config.channelId ?? 1,
-      channelIndex: selection.selectedChannel,
+      channelIndex: selection.channel,
     });
     return;
   }
@@ -72,22 +73,18 @@ export default function GC_ENTERCHANNEL_REQ(r: Reader, connection: Connection): 
   const entry = {
     result: Result.Success,
     channelId: connection.config.channelId ?? 1,
-    channelIndex: selection.selectedChannel,
+    channelIndex: selection.channel,
     endpoint: {
       host: connection.config.udpHost ?? "127.0.0.1",
       port: connection.config.udpPort ?? 40202,
     },
-    endpointOpaqueByte: connection.config.endpointOpaqueByte ?? 0,
+    endpointOpaque: connection.config.endpointOpaque ?? 0,
     channelType: connection.config.channelType ?? 0,
     clientFlags: connection.config.clientFlags ?? 0,
-    clientDefaultValue: connection.config.clientDefaultValue ?? 5,
+    clientDefault: connection.config.clientDefault ?? 5,
   } as const;
 
   connection.reply("GC_ENTERCHANNEL_ACK", entry);
   connection.completeChannelEntry();
-  connection.log(`channel selection ${selection.selectedGroup}/${selection.selectedChannel} -> accepted`);
-}
-
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
+  connection.log(`channel selection ${selection.group}/${selection.channel} -> accepted`);
 }

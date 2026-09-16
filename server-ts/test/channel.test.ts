@@ -70,10 +70,10 @@ describe("GC_ENTERCHANNEL_ACK", () => {
       channelId: 1,
       channelIndex: 0,
       endpoint: { host: "127.0.0.1", port: 40202 },
-      endpointOpaqueByte: 3,
+      endpointOpaque: 3,
       channelType: 1,
       clientFlags: 1,
-      clientDefaultValue: 5,
+      clientDefault: 5,
     });
 
     expect(r.u8()).toBe(EnterResult.Success);

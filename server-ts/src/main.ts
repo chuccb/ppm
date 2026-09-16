@@ -50,7 +50,7 @@ const udpServer = await UdpControlServer.listen({
  */
 const servers: readonly GameServer[] = [
   {
-    id: 1,
+    serverId: 1,
     name: "PaperMan",
     host: env.advertiseHost,
     port: env.channelPort,
@@ -70,8 +70,8 @@ const shared = {
   log,
   admissions,
   channelName: env.channelName,
-  channelGroupIndex: 0,
-  channelIndex: 0,
+  group: 0,
+  channel: 0,
   channelId: 1,
   channelType: 1,
   udpHost: env.udpHost,

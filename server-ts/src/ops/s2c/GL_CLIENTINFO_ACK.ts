@@ -13,7 +13,7 @@ export default function GL_CLIENTINFO_ACK(op: number, myInfo: MyInfo | null): Pa
   if (!myInfo) return new Packet(op).u8(0);
 
   const character = myInfo.characters.find(
-    ({ slotNo }) => slotNo === myInfo.currentChar,
+    ({ slotNo }) => slotNo === myInfo.selectedCharIndex,
   ) ?? myInfo.characters[0];
   const p = new Packet(op).u8(1);
   writeMyInfoBasicData(p, myInfo);

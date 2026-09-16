@@ -13,7 +13,7 @@ describe("lobby bootstrap packets", () => {
     expect(first).not.toBeNull();
     expect(second).toEqual(first);
     expect(first?.nickname).toBe("alice");
-    expect(first?.currentChar).toBe(0);
+    expect(first?.selectedCharIndex).toBe(0);
     expect(first?.characters).toEqual([
       { slotNo: 0, charType: 1, equip: [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0] },
     ]);
