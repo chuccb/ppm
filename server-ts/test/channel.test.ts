@@ -205,6 +205,23 @@ describe("PM_UDPSTART_ACK", () => {
     expect(r.remaining).toBe(0);
   });
 
+  test("rejects fixed s32 fields that would otherwise be coerced", () => {
+    expect(() =>
+      buildPacket("PM_UDPSTART_ACK", {
+        result: Result.Success,
+        channelName: "x",
+        dailyLoginRewardPg: Number.NaN,
+      }),
+    ).toThrow(/daily_login_reward_pg/);
+    expect(() =>
+      buildPacket("PM_UDPSTART_ACK", {
+        result: Result.Success,
+        channelName: "x",
+        restrictionLevel: 0x8000_0000,
+      }),
+    ).toThrow(/channel_restriction_level/);
+  });
+
   test("rejects a channel name longer than the client's char[40]", () => {
     expect(() =>
       buildPacket("PM_UDPSTART_ACK", {

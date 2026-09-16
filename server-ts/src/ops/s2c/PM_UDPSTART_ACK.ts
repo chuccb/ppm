@@ -61,6 +61,12 @@ export default function PM_UDPSTART_ACK(op: number, admission: Admission): Packe
   if (channelName.length > CHANNEL_NAME_MAX_BYTES) {
     throw new RangeError(`channel name longer than ${CHANNEL_NAME_MAX_BYTES} bytes`);
   }
+  if (!Number.isSafeInteger(dailyLoginRewardPg) || dailyLoginRewardPg < -0x8000_0000 || dailyLoginRewardPg > 0x7fff_ffff) {
+    throw new RangeError("144 daily_login_reward_pg must fit s32");
+  }
+  if (!Number.isSafeInteger(restrictionLevel) || restrictionLevel < -0x8000_0000 || restrictionLevel > 0x7fff_ffff) {
+    throw new RangeError("144 channel_restriction_level must fit s32");
+  }
 
   return new Packet(op)
     .u8(result)
