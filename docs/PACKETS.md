@@ -832,10 +832,10 @@ s32     start_index          (分頁, 每包最多 100 條, 背包上限 5120)
 repeat until sentinel:
   s32   inv_slot   (負值 = 結束)
   s32   item_id    (負值/非法 = 中止)
-  float f1         (⭐ 廿一輪定案: 外觀技能 roll 值 — NewSkillLevTable
-  float f2          0..140 稀有度分級, Hair/Jacket/Pants/Shoes/Accessory/
-                    Set 六槽適用; 舊制 ItemAbility 為負值懲罰表。
-                    server 送 0 = 無技能 (合法); 進階可隨機 roll)
+  float f1         (native first float; exact item-domain meaning UNRESOLVED)
+  float f2         (native second float; exact item-domain meaning UNRESOLVED;
+                    NewSkillLevTable is client display/combine data, not authority
+                    for naming or granting these server inventory values)
   s32   period     (剩餘天數)
   u8    extra      ⚠ 四輪修正: 200 有 extra (sub_570AB0 呼叫 sub_524B70(cd,pkt,1));
                    無-extra 版 (a3=0) 屬 290/294 MASTER_USERINFO 系
@@ -2870,7 +2870,7 @@ byte 偏移 (this 為物件基址):
    weapon; a nonempty primary carries 8 parts.
 4. **9-slot UI-item block** (sub_522480) 與 **NewSkill 5×7 profile**（selected record 由 sub_527AF0 讀 0x1C=7*4）分離儲存；466 操作後者。
 5. **戰績 19 個計數器** (GP_CH*C 家族)。
-6. **道具屬性**: item_id(s32), 兩個 float(耐久/強化), period(天), kind(u8), durability(u16)。
+6. **道具欄位**: item_id(s32), raw f1/f2 floats（domain UNRESOLVED）, period(s32), raw extra(u8), durability(u16)。NewSkillLevTable 不作這些 inventory wire 欄位的 server authority。
 7. **房間**: no(≤210), title, map, modeIndex, win_count, time_limit, max_player(≤10 slots),
    password, item_mode, balance, skill_off, observer。
 8. **好友/訊息/倉庫/任務/公會/禮物** 都有對應 packet 家族 → 各自建表。
