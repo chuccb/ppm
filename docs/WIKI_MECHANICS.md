@@ -1332,6 +1332,85 @@ GameCenter 的 native 證據鏈如下，完整 wire evidence 見 [`PACKETS.md` �
 
 上述四類全部維持 **UNRESOLVED**。特別是 `gamecenter_map_info.xml` 的 `shieldhp`、Wiki 的首次 clear／coin／reward 文字和 `477` 的 local field，都不能單獨替代 server-side capture 或 server implementation evidence。
 
+### 5b-42. 第三十八輪：頁面全集盤點、掉落效果與踢人投票的最後一層分界
+
+本輪先把 Wiki 的 [頁面一覧](https://wikiwiki.jp/paperman/::cmd/list) 當作**頁面
+inventory** 瀏覽，再按「規則／模式／經濟／progression／高影響社交」分類閱讀
+入口頁；沒有把數百個 `武器詳細`、變體頁、`/コメント` 頁當成數百套獨立機制。
+這個分類本身很重要：武器 detail corpus 是 item/variant evidence，不能取代
+模式規則或原服交易 evidence。
+
+#### 掉落物：Wiki 效果表比前輪更完整，但仍不是 service authority
+
+[出現アイテム一覧](https://wikiwiki.jp/paperman/出現アイテム一覧) 的歷史觀察是：
+只有勾選アイテム戦、且被擊倒者至少取得過 1 kill 時才可能出現一般掉落；未勾選時
+則掉落金錢圖示。拾取一般掉落會補主武器總備彈約 20% 並給 PG；帶星號的掉落同時
+被 Wiki 用作部分任務條件，且它的彈藥／PG 敘述為兩倍。後續拾取的同一類效果會
+覆蓋先前效果，而名誉 Lv 影響高等級掉落的歷史出現傾向。
+
+頁面列出的七族 × 三級效果值為：
+
+| Wiki 族 | Wiki 效果（Lv1／Lv2／Lv3） | native/resource 交叉結果 |
+|---|---|---|
+| 武器強化 | 15 秒／150%；25 秒／150%；25 秒／200% | `gameobject.dat` 證明七族×三級目錄，沒有證明倍率是權威計算表 |
+| 命中強化 | 10／15／20 秒 | 名稱與效果值未由 `D_Item` 目錄本身證成 |
+| 體力回復 | 30／50／100 HP | `gameobject.dat` 的七族結構可對上族數，不可對上效果值 |
+| 投擲武器補充 | 1／2／3 個 | native pickup／battle authority 未閉合 |
+| 迅速移動 | 20／30／40 秒，150% | 不把 Wiki 的角色／skill 加算說法寫成 server movement formula |
+| 無限發射 | 15／20／30 秒 | 不把「主武器不消耗彈藥」寫成 959/UDP mutation |
+| 無敵 | 10／15／20 秒 | 不把攻擊／特殊效果無效與 client shield UI 混成 server invulnerability rule |
+
+`gameobject.dat` 的 88 個 `D_Item`、三階模型／貼圖及其 105/105 資源閉環，仍只
+把「有這些可顯示／可生成的 object 類別」提升為 Fact / HIGH；掉落率、效果值、
+kill gate、上覆蓋規則、PG 補發與任務星號的原服政策全部保留 **UNRESOLVED**。
+名誉頁另記 Lv0 起始、普通擊殺 +1、特殊擊殺 +2、Lv9 再擊殺或死亡歸零；native
+目前只直接證明 9 格顯示與 Lv9 閃爍，這些數值與掉落權重不可回填。
+
+#### 戰鬥資訊與操作：UI／輸入事實，不是戰鬥結算權威
+
+[戦闘中のキャラ情報](https://wikiwiki.jp/paperman/戦闘中のキャラ情報) 和
+[HPゲージ](https://wikiwiki.jp/paperman/HPゲージ) 說明隊友 HP、clan、title、emblem
+與 skill mark 可由選項控制；HP 圖示以 100–90、89–80 … 9–2、1 分段，skill 使
+HP 超過 100 時仍維持 100 圖示。這可和 native 的 clan/title/emblem/skill UI
+consumer 對讀，但不能推出 HP 上限、傷害、治療、skill stat 或 server broadcast。
+[操作ガイド](https://wikiwiki.jp/paperman/操作ガイド) 的 WASD、武器鍵、radio、
+observer／地圖等內容同樣是 client input/UI；只有實際存在的 packet writer、reader
+與 state consumer 才能成為 wire fact。
+
+#### 踢人投票：wire chain 已閉合，Wiki 的社群政策仍不升格
+
+[操作ガイド](https://wikiwiki.jp/paperman/操作ガイド) 記錄的歷史 UI 規則包括：
+個人 survival、爆破、團隊 survival、Steal、團隊戰術等模式可用，Practice 與
+ChattingRoom 不可用；投票時限 70 秒；目標不能投票；一局只能申請一次；有效票須
+全部同意才踢出；團隊踢與全體踢各有至少 3 人門檻；全體名單超過 9 人可用 0 翻頁；
+理由有 cheat、妨礙遊戲、謾罵／搗亂、掛機、abuse、其他違規六類。這些保留為
+**Wiki／UI policy observation**。
+
+native 可證的只是下列 wire／client chain（完整 packet 表見
+[`PACKETS.md` §3.15h](PACKETS.md#315h-系統角色商城投票與轉蛋封包簇-五十三輪全鏈定案)）：
+
+- `718 GR_START_VOTING_REQ` 送三個 `s32`（target、reason、initiator 的 raw slot
+  candidates）；`sub_A191D0` 先經 client voter gate，再建 packet。
+- `719` 是發起人 status `u8`；`720` 廣播 `s32 target, s32 reason, s32 initiator,
+  s32 duration, u8 team`；`721 GR_DO_VOTING` 只有一個 `s8 vote`；`722` 是
+  `s32 target, u8 result`；`723 GR_END_RESULT` 由 reader 消費 `u8` 加 `s32`。
+- `Voter`／`CVoteTargetList`／`VoterMgr` 可證明本地 voter list、target exclusion、
+  yes/no counters、UI countdown 與 `VotingAble` 顯示，但沒有證明 server 接受規則、
+  70 秒單位、全票門檻、一次／每模式限制或 result 的帳戶／房間 mutation。
+
+另外，`397 PM_KICKUSER_REQ/ACK` 是房主直接 force-out 家族，不能因 Wiki 都叫
+「kick」就和 718–723 合併。投票規則、理由值到文字的完整對應、server 踢出時機及
+重放／斷線處理仍是 **UNRESOLVED**。
+
+#### 本輪的完備性結論
+
+Wiki page index 已確認「武器變體數量」與「獨立系統數量」必須分開；高影響入口
+（模式／房間、商店／轉蛋／福袋、角色／skill／parts、任務／clan／tournament、
+PvE／Single、掉落／名誉、controls／kick vote）均已有來源索引與 native/resource
+交叉矩陣。剩餘不能由 Wiki 補上的部分不是閱讀遺漏，而是原服資料缺口：交易／
+grant／RNG／掉落率／戰鬥數值／結算／反作弊／social mutation 必須有原服 trace 或
+server evidence；在此之前一律 fail-closed、保留 **UNRESOLVED**。
+
 ## 6. 本輪瀏覽頁面（來源索引）
 
 本索引記錄已閱讀的主題入口，避免日後把搜尋摘要誤當完整頁面內容；個別頁的 last-modified
@@ -1355,6 +1434,8 @@ GameCenter 的 native 證據鏈如下，完整 wire evidence 見 [`PACKETS.md` �
   徽章三層與 120/60/60 素材數；對應 583/584 隧道與 585 的 `s32 emblem`（見 §5b-37）。
 - **第三十七輪新增**：[シングルモード](https://wikiwiki.jp/paperman/シングルモード)、[ロボット達の反乱詳細](https://wikiwiki.jp/paperman/シングルモード/ロボット達の反乱詳細)、[記憶の手掛かり詳細](https://wikiwiki.jp/paperman/シングルモード/記憶の手掛かり詳細)、[PvEモード](https://wikiwiki.jp/paperman/PvEモード)、[MAP・ルール詳細](https://wikiwiki.jp/paperman/MAP・ルール詳細)、[武器パーツアップシステム](https://wikiwiki.jp/paperman/武器パーツアップシステム)、[武器耐久値情報](https://wikiwiki.jp/paperman/武器耐久値情報)、[スキル一覧](https://wikiwiki.jp/paperman/スキル一覧)、[階級関連](https://wikiwiki.jp/paperman/階級関連)、[リサイクルシステム](https://wikiwiki.jp/paperman/リサイクルシステム)、[通常ショップ武器一覧](https://wikiwiki.jp/paperman/通常ショップ武器一覧)—
   本輪以 Single/PvE 與高影響 progression 規則作全面瀏覽；Single 的兩圖與 UI/resource/GameCenter 證據交叉結論見 §5b-41，PvE 結構見 §5b-24/§5b-25，其他頁只把 Wiki policy/玩家觀測留作索引，未將其直接升格為 server authority。
+- **第三十八輪新增**：[頁面一覧](https://wikiwiki.jp/paperman/::cmd/list)、[出現アイテム一覧](https://wikiwiki.jp/paperman/出現アイテム一覧)、[名誉ゲージ](https://wikiwiki.jp/paperman/名誉ゲージ)、[戦闘中のキャラ情報](https://wikiwiki.jp/paperman/戦闘中のキャラ情報)、[HPゲージ](https://wikiwiki.jp/paperman/HPゲージ)、[操作ガイド](https://wikiwiki.jp/paperman/操作ガイド)、[各種戦闘指南](https://wikiwiki.jp/paperman/各種戦闘指南)、[動作環境・設定](https://wikiwiki.jp/paperman/動作環境・設定)—
+  先按分類入口閱讀，再以 `gameobject.dat`、native UI／voter consumer 與 718–723 packet chain 交叉；掉落效果與 kick vote 的歷史規則仍保留 Wiki-only／UNRESOLVED，武器 detail／variant／comment 頁不另算獨立系統，詳 §5b-42。
 - 對戰／社交：[MAP・ルール詳細](https://wikiwiki.jp/paperman/MAP・ルール詳細)、[出現アイテム一覧](https://wikiwiki.jp/paperman/出現アイテム一覧)、[名誉ゲージ](https://wikiwiki.jp/paperman/名誉ゲージ)、[クエストシステム](https://wikiwiki.jp/paperman/クエストシステム)、[クラン](https://wikiwiki.jp/paperman/クラン)、[PvEモード](https://wikiwiki.jp/paperman/PvEモード)、[アシストポイント機能](https://wikiwiki.jp/paperman/アシストポイント機能)、[戦闘中のキャラ情報](https://wikiwiki.jp/paperman/戦闘中のキャラ情報)、[武器移動速度](https://wikiwiki.jp/paperman/武器移動速度)
 
 **第二輪（本節 §5b 的來源）。** 服務已於 2016-12-26 12:00 終止（首頁公告），

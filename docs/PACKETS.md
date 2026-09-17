@@ -1094,7 +1094,6 @@ header 的 `n4` 當 ordinary room count，也不要把 `pair_byte_3` 直接命�
 bool：native `sub_592900/sub_592940` 都只證明它們各是一個 byte。兩個
 participant blocks 由 `sub_875C20` 消費，第一個 dword 會與 local identity
 block (`sub_54B570(dword_131E238)`) 比對；其 uid/emblem/score 語意仍未定。
-```
 房物件語義 (getter 定案): `+105=cur_players (sub_44E970)`,
 `+129=max_players (sub_44E990; sub_5403F0 取 /2 為單隊上限)`,
 `+110=上限槽位點陣 (popcount=最大人數; 非勝場點陣)`, `sub_44E7D0 =
@@ -2878,7 +2877,7 @@ pmSlotMachineMovieSequenceTable → 讀 pepachi/pe-pachi_scenario.xml
 
 ## 3.99 廿六輪終極盤點 — 676-entry catalog 全分類收官
 ```
-✔ dispatcher 直讀     300 條 (LAYOUTS.md 自動表)
+✔ dispatcher 直讀     306 條 (LAYOUTS.md 自動表)
 ✔ REQ builder         261 條 (LAYOUTS_REQ.md 自動表)
 ✔ 場景 vtable 層      699/703/707/807/809 (CLobbyShop), 719-723
                       (IVotingNetwork), 788 (sub_407360)
@@ -3141,4 +3140,3 @@ byte 偏移 (this 為物件基址):
    password, item_mode, balance, skill_off, observer。
 8. **好友/訊息/倉庫/任務/公會/禮物** 都有對應 packet 家族 → 各自建表。
 9. period 天數 & 商店 kind 白名單直接寫進 CHECK constraint。
-�店 kind 白名單直接寫進 CHECK constraint。
