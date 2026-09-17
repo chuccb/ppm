@@ -15,7 +15,8 @@
 > 367/970/991 先前是對 `db/packets.tsv` 的 stale 空白，已回填官方名；
 > 14 列依 native 證據鏈推定命名（標 `〔推定〕`）；933、1007、1009
 > 的 handler 於本 dump 無函式體（`unknown_libname_94/95/105`），
-> 489、1010 語義證據不足 —— 此五列明確保留 unnamed，詳下節，
+> 489、1010 語義證據不足 —— 此五列明確保留 unnamed，詳
+> 〈S2C 推定命名審計（2026-09-17）〉節，
 > 屬正確標示而非缺漏。
 >
 > 型別對照: u8=sub_592940/592980, s8/bool=592900, u16=592A00,
@@ -47,7 +48,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 ### S2C 推定命名審計（2026-09-17）
 
 > **對象**：2026-09 時點本表 25 個名稱空白列。**方法與規則**比照
-> `LAYOUTS_REQ.md`〈C2S 推定命名審計（2026-09-16）〉節：
+> `LAYOUTS_REQ.md`〈推定命名審計（2026-09-17）〉節：
 > ① dispatcher `sub_58B010` case 本體 → handler 函式體逐案抽取核對
 > （brace-match）；原自動抽取誤記者已校正（880 誤取 getter
 > `sub_407E00`；203、914、1010 讀取序列見下表與主表）；
