@@ -752,6 +752,14 @@ byte[24] fingerprint          source=2: hard-drive serial bytes，超過 23 byte
                               GetAdaptersInfo 第一個 adapter MAC，餘位為零；
                               source=0: 全零
 ```
+`sub_401B50` is only a conversion wrapper in the recovered C: its `Target__7`
+call resolves through `sub_A366EF` to `kernel32!WideCharToMultiByte`, then returns
+the scratch at `unk_23197F0`. The decompiler elides that imported call's stack
+arguments, so this proves ANSI conversion but not an account/password business
+name or a smaller per-field wire limit. Keep both fields as NUL ANSI strings at
+the packet boundary; credential-domain validation remains a separate Store
+policy.
+
 **2026-09-15 native primitive re-check.** `sub_43CBA0`/`sub_43CCF0` loads
 `datarevision.txt` into `this+396`; `sub_43DF00` writes
 `0xF1E1AB0E` into the first dword and `revision^0xB1A9D7C7` into the
@@ -781,7 +789,7 @@ bool    success                 0 時直接顯示 resource 0x70 / code 17
 若 success:
   s32   user_id (v19)
   --- sub_523BF0: 基本資料 ---
-  string  nickname            (this+60,  0x30 bytes 區)
+  string  nickname            (this+60,  char[24] / 0x18 bytes including NUL; sub_46F450 copies this run separately from +84)
   u8      selected_char_index (this+88; CHARSLOT list index, not char_type)
   s32   level/exp/derived-level x3 (this+92,+96,+100; client recomputes +100)
   s32   reserved x3             (this+136,+140,+144; no proven task/stat owner)
@@ -839,7 +847,7 @@ CClientData 的 sub_523A50 (523BF0+524010+524660+524B70(a3=0)) 其實屬於
 - `sub_570550` 在完整讀取 198 後，以目前角色的 `word_EE8DE8[13*i]`
   （`sub_524010` 角色記錄的第一個 `u16`）判斷可用性。它是 0 時掃描
   已解析記錄；若仍找不到非 0 值，便取得 resource `0xCC` 並顯示 code 63。
-- `sub_523BF0` 在 nickname 後讀 `CClientData+88`，並在 48-byte blob 後
+- `sub_523BF0` 在 `char[24]` nickname 後讀 `CClientData+88`，並在 48-byte blob 後
   讀 `+4`；`sub_526CA0` / `sub_884160` 將 `+88` 用作 `CHARSLOT` 選取值，
   並由 `sub_884160` 原樣寫入 outbound opcode 312。`sub_525070`、
   `sub_525790` 等 consumer 以它索引最多 20 個 character-list slots；因此

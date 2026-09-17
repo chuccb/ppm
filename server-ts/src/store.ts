@@ -184,10 +184,12 @@ export class Store {
   /**
    * The client restricts credentials to [0-9A-Za-z@] before it will even send
    * opcode 682 (`sub_43DD60`), so anything outside that set cannot come from a
-   * legitimate client and is rejected here too.
+   * legitimate client and is rejected here too. This server projects the
+   * account name into the native 198 nickname field without inventing an alias;
+   * that field is `CClientData::char[24]`, so keep the shared value to 23 bytes.
    */
   static isValidUsername(name: string): boolean {
-    return name.length > 0 && name.length <= 32 && /^[0-9A-Za-z@]+$/.test(name);
+    return name.length > 0 && name.length <= 23 && /^[0-9A-Za-z@]+$/.test(name);
   }
 
   async createAccount(username: string, password: string): Promise<Account> {

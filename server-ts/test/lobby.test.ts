@@ -6,6 +6,7 @@ import { Store } from "../src/store.ts";
 describe("lobby bootstrap packets", () => {
   test("creates one canonical starter and reuses it", async () => {
     const store = new Store();
+    await expect(store.createAccount("a".repeat(24), "pw")).rejects.toThrow(/client-representable/);
     const account = await store.createAccount("alice", "pw");
 
     const first = store.ensurePlayerIdentity(account.id);
@@ -144,6 +145,9 @@ describe("lobby bootstrap packets", () => {
     expect(reader.s32()).toBe(0);
     expect(reader.u8()).toBe(0);
     expect(reader.remaining).toBe(0);
+    expect(() =>
+      build("GL_MYINFO_ACK", { ...wireInfo, nickname: "n".repeat(24) }, selectedSnapshot),
+    ).toThrow(/char\[24\]/);
     expect(() =>
       build("GL_MYINFO_ACK", myInfo!, { ...selectedSnapshot, selectedProfile: Number.NaN }),
     ).toThrow(/selected profile/);

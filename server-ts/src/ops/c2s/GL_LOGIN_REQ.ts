@@ -2,7 +2,8 @@
  * Credentials, exactly as the client builds them — no trailing bytes accepted.
  *
  * `str account, str password_or_token, u64 guard, u8 fingerprint_source, raw[24]`.
- * The u64 is a guard pair: a fixed low dword, and the data revision XORed into
+ * Native `sub_401B50` is a WideCharToMultiByte scratch conversion; it does not
+ * establish a smaller credential field limit. The u64 is a guard pair: a fixed low dword, and the data revision XORed into
  * the high dword. It is decoded only when the whole guard matches.
  * (docs/PACKETS.md §1.4)
  */

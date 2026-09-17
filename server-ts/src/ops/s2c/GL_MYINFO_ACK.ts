@@ -44,7 +44,8 @@ function requireU16(name: string, value: number): void {
   }
 }
 
-const NICKNAME_MAX_BYTES = 47; // native CClientData nickname char[48], including NUL
+// sub_46F450 copies exactly 0x18 bytes at +60, then copies +84 separately.
+const NICKNAME_MAX_BYTES = 23; // native CClientData char[24], including NUL
 const NEW_SKILL_RANGES = [
   [11_010_001, 11_020_000],
   [11_020_001, 11_030_000],
@@ -124,7 +125,7 @@ export default function GL_MYINFO_ACK(
 export function writeMyInfoBasicData(packet: Packet, myInfo: MyInfo): Packet {
   if (typeof myInfo.nickname !== "string") throw new TypeError("198 nickname must be a string");
   if (myInfo.nickname.length > NICKNAME_MAX_BYTES) {
-    throw new RangeError(`198 nickname must fit native char[48]`);
+    throw new RangeError(`198 nickname must fit native char[24]`);
   }
   requireCharacterIndex("selected_char_index", myInfo.selectedCharIndex);
   const { stats } = myInfo;
