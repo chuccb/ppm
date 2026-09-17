@@ -1137,7 +1137,8 @@ CyAIMultiModeLobbyUI → `sub_4070B0()` busy-wait 重送直到 20 或逾時）�
 離房/停止 `sub_407290()`（同 busy-wait，最多 100 輪）。
 **op20（入）＝註冊完成**：設 `byte_1D0CFE7=1`、清 mgr 重送列（+44/+8/+4）、
 +24=now、清 stateB、`sub_594F00`；其下游閘門（Fact）：
-`sub_4070B0/sub_407290` 設 `n15=13` → `sub_593510` 開始排空移動佇列；
+`sub_4070B0/sub_407290` 設 `n15=13`（debug 字串證明 n15＝**g_byGamePlay**，
+13＝in-game 串流態）→ `sub_593510` 開始排空移動佇列；
 `sub_595D80` 的 op21 傳送排程以 `byte_1D0CFE7!=0 && !sub_67EAC0()` 為旗標
 （`sub_A05E40` 寫 mgr+56 計時器）。**20 是所有戰鬥 UDP 流量的總閘**。
 
@@ -1169,7 +1170,14 @@ CyAIMultiModeLobbyUI → `sub_4070B0()` busy-wait 重送直到 20 或逾時）�
   條件擴充區；送出經 `sub_602D70`（閘：!67EAC0 && !67F120 && 本地
   row +239823!=0）；送後 `sub_744B00` 更新快取、`sub_5B71F0` 將我方
   位置自登入空間索引（與 8/24 消費者同一路徑）。
-- **8/24（入）＝成員移動批次**：`sub_596940→sub_593750` 入佇（僅 n15==13），
+- **8/24（入）＝成員移動批次**：共用 handler `sub_596940`，其內嵌 debug
+  字串 **`CUDPNetworkManager::OnY_UDP_S_MOVE_INF : [g_byGamePlay : %d]`**
+  ——native 字串錨定 **handler 家族名＝`Y_UDP_S_MOVE_INF`**（**此名未
+  登錄於 `db/packets.tsv`，屬內部/legacy 命名**；依 155/156 同款慣例
+  推定＝UDP server→client 移動資訊〔HIGH〕；153..164 官方帶經複查為
+  `ALL_PING/C_HOLE/S_HOLE/DEAD/LIVE` 12 名，無 MOVE_INF），且 `n15`
+  ＝**g_byGamePlay**（==13 為 in-game 串流態，否則走 BUG 日誌＋
+  崩潰路徑）。入佇（僅 n15==13）`sub_596940→sub_593750`，
   主執行緒 `sub_593510` 排空 → **`sub_602E30` 逐筆套用**（Fact 欄位序）：
   `u8 count`；每筆 `u8 v28, u8 v19, u8 memberKey, raw4, raw4 v16,
   u8[16] anim/state blob, s16×3 位置, u8 v23, u8, u8, u8, u8 n0x1C, raw4 v29`；
@@ -1177,8 +1185,9 @@ CyAIMultiModeLobbyUI → `sub_4070B0()` busy-wait 重送直到 20 或逾時）�
   寫移動列（含 `byte_13242D0`）、漂移平滑（∆v16: >+100 收 −10、>+20 加 +10）、
   `sub_5B3180(obj, blob[0])`、`sub_5B34B0(obj, v29, n0x1C, …)`、
   `sub_5B71F0(&pos, memberKey)`；碰撞/遮蔽 `sub_5E2570(dword_1D37AB4,…)`。
-  `memberKey!=本地 && 槽位 0..15` 才套用；8 與 24 各自的精確 op-to-name
-  對應仍 UNRESOLVED（共用 handler，官方 token 無從切分）。
+  `memberKey!=本地 && 槽位 0..15` 才套用；handler 家族已由 debug 字串
+  錨定（`Y_UDP_S_MOVE_INF`，tsv 未登錄者），惟 8 與 24 各自的數值
+  歸屬仍 UNRESOLVED（切分鍵在 server 端）。
 - **27（出）＝互動實體的一擊事件報告（edge-trigger；語義升級）**：
   `sub_6013E0` 每幀遍歷實體向量（this+74/76）；當實體 `v24` 的掛載件
   `v24[80]` 經 vtable+96 更新、`v22=vtable+8(v27, flags112/113) > 0` 且
@@ -1281,9 +1290,11 @@ CyAIMultiModeLobbyUI → `sub_4070B0()` busy-wait 重送直到 20 或逾時）�
    無 data 段 xref 可查；其 sockaddr#1 目標亦從未初始化 → 本 build
    層面視為殘留設計，觸發條件不可得。
 4. **8 與 24 的個別歸屬**：dispatcher 中 `case 8: case 24:` 共用同一
-   標籤進 `sub_596940`，client 端完全等價處理；依 n+1 成對結構，
-   24 為 23（本地移動）的回聲之說最自然，8 則無 client 端送出對應
-   ——切分鍵在 server 端，本 dump 無從分辨。
+   標籤進 `sub_596940`，client 端完全等價處理；handler 家族已由
+   native debug 字串錨定為 `Y_UDP_S_MOVE_INF`（未登錄於 tsv 的
+   內部名），但兩個數值與 token 的一一對應仍無從分辨——依 n+1
+   成對結構，24 為 23（本地移動）的回聲之說最自然，8 則無 client
+   端送出對應；切分鍵在 server 端，本 dump 無從分辨。
 
 > **邊界重申**：以上全是 **client 端**觸發/caller/consumer 事實。server 端
 > 行為（應收什麼、位址所有權、轉發/carrier 角色）除既有 19→20 投影外
