@@ -173,5 +173,6 @@ describe("validation", () => {
   test("fixed-count primitives reject negative lengths", () => {
     expect(() => new Packet(1).zeros(-1)).toThrow(RangeError);
     expect(() => new Reader(1, new Uint8Array()).raw(-1)).toThrow(RangeError);
+    expect(() => new Reader(1, new Uint8Array([0])).str(-1)).toThrow(RangeError);
   });
 });

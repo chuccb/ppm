@@ -40,7 +40,7 @@ export function readUdpControlRequest(r: Reader): UdpControlRequest {
   }
   if (r.remaining < 1) throw new RangeError("UDP opcode 19 has no nickname");
 
-  const localNickname = r.str("euc-kr", r.remaining - 1);
+  const localNickname = r.str(r.remaining - 1);
   if (r.remaining !== 0) throw new RangeError(`${r.remaining} trailing UDP bytes`);
 
   return {

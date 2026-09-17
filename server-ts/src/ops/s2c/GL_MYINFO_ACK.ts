@@ -167,7 +167,6 @@ export function writeMyInfoBasicData(packet: Packet, myInfo: MyInfo): Packet {
     // sub_523BF0 order: [34..36] are reserved, then the native UI consumers'
     // direct order: wins/losses, kills/deaths, headshots, air-combo, hearts,
     // criticals, and the double/triple/multi/ultra/z/k/dd counters.
-    // Store disconnects/playCount/roundCount have no proven wire owner.
     .s32(0)
     .s32(0)
     .s32(0)
@@ -200,6 +199,7 @@ export function writeMyInfoBasicData(packet: Packet, myInfo: MyInfo): Packet {
 }
 
 export function writeCharacterAppearance(packet: Packet, appearance: readonly number[]): Packet {
+  if (appearance.length > 12) throw new RangeError("appearance must have at most 12 values");
   for (let i = 0; i < 12; i++) {
     const value = appearance[i] ?? 0;
     requireU16(`appearance[${i}]`, value);

@@ -25,18 +25,8 @@ export const COMPRESSION_DISABLED = 0x2580;
 
 const BLOCK = 16;
 
-/**
- * Legacy code pages the client uses. The Korean build is CP949, whose WHATWG
- * label is "euc-kr" — Bun rejects "cp949" outright.
- */
-export type Encoding = "euc-kr" | "shift_jis" | "utf-8";
-
-const decoders = new Map<Encoding, TextDecoder>();
-function decoder(encoding: Encoding): TextDecoder {
-  let cached = decoders.get(encoding);
-  if (!cached) decoders.set(encoding, (cached = new TextDecoder(encoding)));
-  return cached;
-}
+/** The Korean client's ANSI strings are CP949 (`euc-kr` in WHATWG). */
+const ANSI_DECODER = new TextDecoder("euc-kr");
 
 function align16(size: number): number {
   return size === 0 ? BLOCK : Math.ceil(size / BLOCK) * BLOCK;
@@ -255,7 +245,10 @@ export class Reader {
     return this.#view().getFloat32(this.#at(4), true);
   }
 
-  str(encoding: Encoding = "euc-kr", maxBytes?: number): string {
+  str(maxBytes?: number): string {
+    if (maxBytes !== undefined && (!Number.isSafeInteger(maxBytes) || maxBytes < 0)) {
+      throw new RangeError("ANSI string limit must be a non-negative integer");
+    }
     const start = this.#pos;
     const end = this.#buf.indexOf(0, start);
     if (end < 0) throw new RangeError("unterminated ANSI string");
@@ -263,7 +256,7 @@ export class Reader {
       throw new RangeError(`ANSI string exceeds ${maxBytes} bytes`);
     }
     this.#pos = end + 1;
-    return decoder(encoding).decode(this.#buf.subarray(start, end));
+    return ANSI_DECODER.decode(this.#buf.subarray(start, end));
   }
 
   wstr(): string {
@@ -287,10 +280,6 @@ export class Reader {
     return this.#buf.subarray(this.#at(count), this.#pos);
   }
 
-  /** Unconsumed bytes, for logging unmapped tails. */
-  rest(): Uint8Array {
-    return this.#buf.subarray(this.#pos);
-  }
 }
 
 // ------------------------------------------------------------ reassembly

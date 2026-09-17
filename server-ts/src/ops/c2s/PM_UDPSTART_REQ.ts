@@ -18,7 +18,7 @@ export interface Handoff {
 }
 
 export function read(r: Reader): Handoff {
-  const identity = r.str("euc-kr", IDENTITY_MAX_BYTES);
+  const identity = r.str(IDENTITY_MAX_BYTES);
   const n100 = r.s32();
   const literal = r.u8();
   const extCount = r.s32();

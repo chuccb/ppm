@@ -76,7 +76,6 @@ describe("lobby bootstrap packets", () => {
         losses: 102,
         kills: 103,
         deaths: 104,
-        disconnects: 105,
         headshots: 106,
         combos: 107,
         hearts: 108,
@@ -88,8 +87,6 @@ describe("lobby bootstrap packets", () => {
         kKill: 114,
         ddKill: 115,
         criticals: 116,
-        playCount: 117,
-        roundCount: 118,
         playTimeSeconds: 119,
       },
     };
@@ -154,6 +151,12 @@ describe("lobby bootstrap packets", () => {
         characters: Array.from({ length: 21 }, (_, slot) => ({ ...myInfo!.characters[0]!, slotNo: slot })),
       }),
     ).toThrow(/at most 20/);
+    expect(() =>
+      build("GL_MYINFO_ACK", {
+        ...myInfo!,
+        characters: [{ ...myInfo!.characters[0]!, appearance: Array(13).fill(0) }],
+      }),
+    ).toThrow(/at most 12/);
     expect(() =>
       build("GL_MYINFO_ACK", myInfo!, { ...selectedSnapshot, selectedProfile: Number.NaN }),
     ).toThrow(/selected profile/);

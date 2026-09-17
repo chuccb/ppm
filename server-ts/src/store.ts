@@ -32,9 +32,6 @@ export interface Stats {
   readonly zKill: number;
   readonly kKill: number;
   readonly ddKill: number;
-  readonly playCount: number;
-  readonly roundCount: number;
-  readonly disconnects: number;
   readonly playTimeSeconds: number;
 }
 
@@ -91,9 +88,6 @@ interface PlayerRow {
   z_kill: number;
   k_kill: number;
   dd_kill: number;
-  play_count: number;
-  round_count: number;
-  disconnects: number;
   play_time_seconds: number;
 }
 
@@ -153,9 +147,6 @@ function statsFromRow(row: PlayerRow): Stats {
     zKill: row.z_kill,
     kKill: row.k_kill,
     ddKill: row.dd_kill,
-    playCount: row.play_count,
-    roundCount: row.round_count,
-    disconnects: row.disconnects,
     playTimeSeconds: row.play_time_seconds,
   };
 }
@@ -204,8 +195,6 @@ CREATE TABLE IF NOT EXISTS account (
   last_login_at INTEGER
 ) STRICT;
 
-CREATE INDEX IF NOT EXISTS account_username ON account(username);
-
 CREATE TABLE IF NOT EXISTS player (
   id              INTEGER PRIMARY KEY AUTOINCREMENT,
   account_id      INTEGER NOT NULL UNIQUE REFERENCES account(id) ON DELETE CASCADE,
@@ -234,9 +223,6 @@ CREATE TABLE IF NOT EXISTS player_stats (
   z_kill          INTEGER NOT NULL DEFAULT 0,
   k_kill          INTEGER NOT NULL DEFAULT 0,
   dd_kill         INTEGER NOT NULL DEFAULT 0,
-  play_count      INTEGER NOT NULL DEFAULT 0,
-  round_count     INTEGER NOT NULL DEFAULT 0,
-  disconnects     INTEGER NOT NULL DEFAULT 0,
   play_time_seconds INTEGER NOT NULL DEFAULT 0
 ) STRICT;
 
@@ -480,8 +466,7 @@ export class Store {
                 p.current_character,
                 s.wins, s.losses, s.kills, s.deaths, s.headshots, s.combos, s.hearts,
                 s.double_kill, s.triple_kill, s.criticals, s.multi_kill, s.ultra_kill,
-                s.z_kill, s.k_kill, s.dd_kill, s.play_count, s.round_count,
-                s.disconnects, s.play_time_seconds
+                s.z_kill, s.k_kill, s.dd_kill, s.play_time_seconds
            FROM player p
            JOIN player_stats s ON s.player_id = p.id
           WHERE p.id = $u`,

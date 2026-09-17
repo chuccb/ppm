@@ -159,6 +159,9 @@ export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Pac
       throw new RangeError("681 server_port must fit u16");
     }
     requireU8(server.flag, "server flag");
+    if (server.channelGroups.length > CHANNEL_GROUP_COUNT) {
+      throw new RangeError("681 server must have at most three channel groups");
+    }
 
     // These are raw2 fields; native domain/signedness is unresolved.
     requireRaw16(server.serverId, "server_id");
