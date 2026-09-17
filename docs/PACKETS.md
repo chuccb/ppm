@@ -928,30 +928,48 @@ relay、authentication 與 peer admission 仍是 **UNRESOLVED**。
   client」的終局通知；37/65 為該彈窗的內部錯誤碼編目，其碼表不在
   client 端（不與 lang id 同空間；同 id 的 lang 文字屬巧合）。
 
-### 殘留 UNRESOLVED（四項）
+### 殘留 UNRESOLVED（四項；2026-09-18 飽和覆驗：邊界不變）
 
 > 原六項清單中「notice code 37/65 編目空間」與「A/B 雙通道角色分工」
-> 兩項已於第二輪定案（見 G 節與 A/B 節）；其餘四項皆附證據邊界：
+> 兩項已於第二輪定案（見 G 節與 A/B 節）；其餘四項皆附證據邊界。
+> 2026-09-18 以本 dump 逐項完整再攻（研究憲章飽和原則）：
+> 四項 **UNRESOLVED 邊界全部維持**，僅補機體級細節如下。
 
 1. **op15 入方向** raw16 latch `unk_F25648`：別名掃描（F25648..F25658
-   逐位址）後仍**只有宣告＋單一寫入**（`sub_592C40`），零讀者 →
-   本 build 不可能觀測其語義。
+   逐位址）後仍**只有宣告＋單一寫入**——op15 handler `sub_593DF0` 以
+   `sub_592C40(packet, &unk_F25648)`（16-byte 複製輔助，本體＝
+   `sub_592500(this, dst, 0x10)`，**他處亦用、非本槽專用**）從 packet
+   複入；latch `byte_F25646` 僅由該 handler 自身讀寫自鎖（見活即置 1
+   後不再進），零讀者 → 本 build 不可能觀測其語義。
+   （2026-09-18 重新全引址掃，結論不變。）
+
 2. **op26** `unknown_libname_107`：位址 0x596CB0 介於 `sub_596C50`
    與 `CUDPNetworkManager::sub_596CC0` 之間、**僅 16-byte** 的 stub，
    函式體不在 dump；僅知攜 packet 參數、無回覆——語義不可回收。
-3. **op17 雙變體的送出驅動**：builder 函式本身完整（raw primary lane、
-   1 秒節拍、op18 latch 停送語義自洽），但 .c 匯出無 direct caller 亦
-   無 data 段 xref 可查；其 sockaddr#1 目標亦從未初始化 → 本 build
-   層面視為殘留設計。字串變體的 payload 來源已解出（全域 String[24]
-   ＝143/191/246 identity 家族，唯一可見 mutator＝393 GL_CHANGEID_ACK
-   的 `'_'` append），唯 buffer 的初始化/正常填值路徑屬 .c 盲區，
-   觸發條件仍不可得。
+   （2026-09-18 覆驗：邊界屬實，結論不變；`sub_596C50` 戳章器定性
+   另詳 §2.6 G0 存活度註記。）
+
+3. **op17 雙變體的送出驅動**：兩 builder 本體 2026-09-18 完整覆驗，
+   beacon 語義（1 秒節拍、op18 latch 停送）詳 §2.6 C 節，自洽閉合。
+   本輪新增補記兩點：
+   - 空變體 `sub_596180` 的節拍全在函式內自足（全域 `dword_132436C`
+     記上次送出時刻、回傳值累進 `dword_1D0CFF4`——該計數器乃全 lane
+     共用的送出累積器，見 §2.5「Private opcode 19 → 20」註記）；
+   - 字串變體 `sub_596240` 與之**不對稱**：無 latch、無節拍，屬一次性
+     送出（只投影 `String[24]`，身份家族詳 C 節）。
+   **仍 UNRESOLVED 的部分**：兩 builder 的呼出者（函指／計時器註冊不在
+   .c 匯出）與 `String` 的正常填值路徑（.c 盲區）。
+
 4. **8 與 24 的個別歸屬**：dispatcher 中 `case 8: case 24:` 共用同一
    標籤進 `sub_596940`，client 端完全等價處理；handler 家族已由
    native debug 字串錨定為 `Y_UDP_S_MOVE_INF`（未登錄於 tsv 的
    內部名），但兩個數值與 token 的一一對應仍無從分辨——依 n+1
    成對結構，24 為 23（本地移動）的回聲之說最自然，8 則無 client
    端送出對應；切分鍵在 server 端，本 dump 無從分辨。
+   （2026-09-18 曾嘗試以欄位序證明 24=echo(23)：主執行緒 per-record
+   parser `sub_602E30` 與 op23 builder 僅**前 5 欄**（u8×3 s32 raw4）
+   對齊，第 6 欄起長度/分段不一致（parser 有 u8[16] blob；builder 有
+   u8×8 尾巴）——證據不足，維持原「最自然」不升級。）
 
 > **邊界重申**：以上全是 **client 端**觸發/caller/consumer 事實。server 端
 > 行為（應收什麼、位址所有權、轉發/carrier 角色）除既有 19→20 投影外
