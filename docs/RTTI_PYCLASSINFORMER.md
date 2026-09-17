@@ -45,8 +45,8 @@
 | `CLobbyMainRoom` | `0xAE0A84`, 34 methods, `CLobbyScreen` base at `+0x0` | [`PACKETS.md` §3.15](PACKETS.md#315-房間系統-七輪讀畢)、[`ARCHITECTURE.md`](ARCHITECTURE.md) | 將建房/房單 UI path 定位為 client lobby screen；不代表 server room authority。 |
 | `CPopUpCreateRoom` | package/document `0xAEA3D4`, control `0xAEA31C +0x4`, event container `0xAEA314 +0xE0` | 111 builder/caller evidence in `PACKETS.md` | 對照 UI object 的多重繼承與 callback vtable；111 欄位仍以 sender/caller 為準。 |
 | `CClientData` / `CRoomInfo` / `CUserInfo` | `0xAEB274` / `0xAEBA3C` / `0xAEC1A4` | `PACKETS.md` §3.2、§3.15 | 搜尋 client state container；不從 RTTI 反推其 field layout。 |
-| `Packet` | `0xAEE4F8`, 1 method | [`PACKETS.md` §1](PACKETS.md#1-packet-類-0x591ac0-系列-vftable-packetvftable--0xaee4f8) | 驗證既有 `Packet::vftable` anchor 的同一類別。 |
-| `CUDPManager` / `CUDPNetworkManager` | `0xAEE54C` / `0xAEE584` | `PACKETS.md` §2.5、`UdpControlServer.cs` | 作為 UDP transport investigation 的 xref anchor；不解除 `sub_596670` scope gate。 |
+| `Packet` | `0xAEE4F8`, 1 method | [`PACKETS.md` §1](PACKETS.md#1-packet-類-0x591ac0-系列-vftable-packetvftable-0xaee4f8) | 驗證既有 `Packet::vftable` anchor 的同一類別。 |
+| `CUDPManager` / `CUDPNetworkManager` | `0xAEE54C` / `0xAEE584` | `PACKETS.md` §2.5、`server-ts/src/udp.ts` | 作為 UDP transport investigation 的 xref anchor；不解除 `sub_596670` scope gate。 |
 | `VoterMgr` / `IVotingNetwork` | `VoterMgr` has `Voter +0x0` and `IVotingNetwork +0x30` records | `PACKETS.md` dispatcher notes; `TODO_HANDLERS.md` | 證明 client-side voting types exist；不證明 original server vote timer/outcome/membership policy。 |
 | `CyGameModes::*` | 15 lobby-UI types and corresponding game-mode/factory family | [`RESOURCES.md` §4b](RESOURCES.md#4b-cfgmaplistpat-格式-十五輪以真實檔案實測修正) | 補強 mode implementation family 的查找入口；mode value mapping 仍以 factory/resource/consumer evidence 為準。 |
 
@@ -733,7 +733,7 @@ runtime/library code、避免誤認為 PaperMan domain logic；不應直接變�
 | `CPopUpCreateRoom`, `CLobbyMainRoom`, and the mode lobby UI classes are present. | **Fact/HIGH** for client type existence. | Use as xref anchors for 111/112 and room UI behavior. | Do not infer server room creation policy from the class names alone. |
 | `VoterMgr`, `IVotingNetwork`, target/approval/state UI types are present. | **Fact/HIGH** for a client voting implementation family. | Use the vftables to locate client voting functions and verify request/ACK consumers. | Do not re-register 718/721 or fabricate vote queue/timer/result server state. |
 | `CUDPManager`, UDP socket/thread/network manager are present. | **Fact/HIGH** for client UDP class family. | Continue the bounded `sub_596670` transport/state analysis before expanding UDP. | Do not infer that all UDP/private opcodes are safe to accept or relay. |
-| `CClientData`, room/user info, `Packet`, and file-system classes are present. | **Fact/HIGH** for named client-side types. | Cross-reference constructors, readers, writers and object offsets when a concrete field is investigated. | Do not turn RTTI roots into a guessed C# object layout. |
+| `CClientData`, room/user info, `Packet`, and file-system classes are present. | **Fact/HIGH** for named client-side types. | Cross-reference constructors, readers, writers and object offsets when a concrete field is investigated. | Do not turn RTTI roots into a guessed server object layout. |
 | Many item, ability, NewSkill, effect, shop, tournament and game-center UI classes are present. | **Fact/HIGH** for client presentation/implementation types. | Treat names as search hints alongside resources and packet chains. | Do not use them to grant items, infer catalog ownership, price, entitlement, default equipment or success responses. |
 
 ## Maintenance

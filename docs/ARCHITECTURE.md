@@ -1,7 +1,9 @@
-# PaperMan 私服全景架構 (廿九輪融會貫通版)
+# PaperMan 私服全景架構
 
-> 29 輪逆向的知識總圖 — 每個結論都可在 PACKETS/RESOURCES/LAYOUTS 找到
-> 逐行證據與互證鏈。
+> 這是 server lifecycle、native/client state、wire boundary 與 runtime ownership 的
+> 高層索引。欄位級證據回到 [`PACKETS.md`](PACKETS.md)、[`RESOURCES.md`](RESOURCES.md)、
+> [`LAYOUTS.md`](LAYOUTS.md)、[`SERVER_TS_PACKET_FIELDS.md`](SERVER_TS_PACKET_FIELDS.md)
+> 與三份登入／頻道 native audit；本頁不取代它們。
 
 ## 1. 完整生命週期 (實測定案的因果鏈)
 
@@ -15,6 +17,34 @@ connect ──► server 發一次 694 (門檻 0x2580) ──► client 送 682 
   197→198 MyInfo (統計佈局=任務cond對映!) 199→200 背包(28B條目)
   105→106 名單(exp!) 107→108 房間清單 433→434 好友 425→426 信箱
 心跳: server 每30s 發 102, client 回 101
+
+### 254/255 NewSkill profile scene
+
+`GL_INVENIN_REQ(254)` 不是空封包，而是恰好一個 `u8 requestContextRaw`。
+client 從當前 UI/entity 物件取出這個 byte；其業務語義仍是 **UNRESOLVED**，
+server 只做結構性回送，不把它命名成倉庫頁籤或其他假定語義。
+
+目前可確認且由 `server-ts` 實作的本機 user 分支是：
+
+```text
+254: u8 requestContextRaw
+255: u8 mode=1, s32 user_id, u8 requestContextRaw,
+    u8 unknownHeaderRaw=0, u8 selectedProfile,
+    5 × { 7×s32 puzzleItemId, s32 expiresAtPackedMinute }
+```
+
+五個 profile 是 **user/account-level NewSkill state**，不是 198/247 的角色
+12-slot appearance。新 player 只建立 profile 0 與五筆零值 raw32 record；profile 0
+的 expiry word 由 client 忽略，profile 1..4 的 raw zero 表示沒有已確認的有效期限。
+這是 bootstrap state，不是贈送、解鎖或商店政策。
+
+198 的 selected NewSkill 七個 puzzle IDs 與 255 來自同一份 snapshot，避免兩個
+response 顯示互相矛盾。`NewSkillLevTable.xml`、`NewSkillColorTable.xml` 只作
+client 合成/顯示資料，沒有被當成 server grant 或效果驗證規則。
+
+`GI_CHANGE_SKILLITEMSLOT(466/467)` 的七 ID ownership、profile 1..4 expiry
+授予/延長及失敗碼仍未在 `server-ts` 實作；在取得足夠 server policy 證據前，
+不能用 255 的 bootstrap record 假造 466 成功。
 
 【房間流程】
 111 建房→112 (room_uid) / 216 密碼→217 / 113 進房→114(sub_type多態)
@@ -60,7 +90,7 @@ server 實作的宣稱。
 | 195 → successful 196 | **Fact / HIGH**：196 reader 僅在 `result==1` 讀 endpoint tail，並進入 selected channel 的後續場景。 | **Inference / HIGH**：只在成功 196 寫入完成後標記 `ChannelEntryCompleted`；在此之前拒絕 lobby、room、economy 與 gameplay request。 |
 | 143 未通過後的 195 | **Fact / MEDIUM**：native channel wrapper 仍會在收到 144 後送 195；196 有完整非成功形狀。 | 保留 195，回傳沒有 endpoint tail 的非成功 196；不因此授權 socket。 |
 
-這些 boundary 都集中在 `Router`、`Session`、`ChannelHandlers`，使每一個
+這些 boundary 都集中在 `connection.ts`、`admission.ts`、packet handlers，使每一個
 server-side transition 可搜尋、可記錄、可替換；它們不依賴 143 的
 `String[24]` 語意（該 writer 仍是 **UNRESOLVED**）。
 
@@ -85,7 +115,7 @@ server-side transition 可搜尋、可記錄、可替換；它們不依賴 143 �
 | ⑥ 戰場引擎 | sub_749B90 (1D37560) | TCP catalog 166 subtype 1-9; its relation to UDP is UNRESOLVED |
 | + UDP 層 | sub_595E80 | private UDP dispatcher; private 20 completion is direct evidence, remaining case semantics require per-case proof |
 
-## 3. 資料層 (7 表 37,044 條真實日版)
+## 3. 資源與資料層（native/resource inventory；不等同 runtime schema）
 
 item 21,164 (id=基底+偏移編碼) / quest 844 (cond 雙機制) /
 map 123 (模式bitmask) / weapon_parts 10,648 (8組) /
@@ -98,62 +128,50 @@ parts_ability 413 (31欄彈道) / recommend 3,180 / protocol 676
 3. pmFile per-byte 滾動 (keystream FA5387AD/0F3A94AA/48945DCA/1A68DCCF)
 4. data.pat 容器 (pmFile→ROL混淆→zlib 1.2.3→CRC自帶表)
 
-## 4b. C# Server 結構（2026-09 整理）
+## 4.1 TypeScript / Bun server 結構（2026-09-17）
 
-`Program` 只負責建立 DB、固定組態、Router、login/channel TCP listeners，及
-`UdpControlServer`；每個 TCP socket 的 receive loop 按收到順序
-`await Router.DispatchAsync`，不把同一 session 的 stateful request 平行化。
-UDP 端點同樣串列處理收到的 datagram，但它是無 state 的、source-address
-回覆的 19→20 control exchange，不是 TCP session dispatcher。Native client shutdown is
-explicitly *not* copied: it uses `TerminateThread` before `closesocket`; the C# endpoint
-uses cancellation and disposes its socket only after its receive loop exits.
+`server-ts/src/main.ts` 負責組態、SQLite bootstrap、login/channel TCP listeners
+與 UDP control server；每個 TCP socket 的 receive loop 按收到順序串接 dispatch，
+不把同一 connection 的 stateful request 平行化。UDP 端點同樣串列處理 datagram，
+但它是無 state、source-address 回覆的 19→20 control exchange，不是 TCP session
+dispatcher。Server 使用 cancellation 與 receive-loop 結束後的 socket cleanup，
+不複製 client shutdown 的 native thread 行為。
 
-- `Session` 持有單一 TCP socket 的 connection state、account identity、room
-  seat、send gate；`ChannelEntryCompleted` 明確表示 143 handoff 與 195→196
-  channel entry 之間的不同 state。
-- `Router` 是唯一的 listener/state boundary 與 frozen opcode lookup；它不承載
-  gameplay policy。`PaperMan.HandlerGenerator` 在**編譯期**尋找 `PaperMan.Server`
-  中、名稱為已驗證 C2S catalog token（目前為 `*_REQ` 加單向
-  `GL_MYINFO_OPEN`）的 static `ValueTask (Session, Packet, ServerContext)`
-  methods，並產生直接 method-group registration。執行時沒有 type scan、runtime
-  reflection 或人工 `Register` list。
-  唯一無官方 request token 的 206 以顯式 `[RawOpcodeHandler(206)]` 保留 raw boundary，
-  而非臆造 GS 名稱。這只表示 dispatch discovery 是 trim / NativeAOT-friendly，**不**
-  證明含 SQLite 與其他 dependencies 的整個 server 已通過 NativeAOT publish。
-- 各 `Handlers.<TOKEN>.cs` direct source 仍以協定子系統目錄切分（GT、Login、Channel、
-  Lobby、Room、Join、Battle relay/object、Shop、Stats、Clan、Quest、Friend、Voice、
-  Warehouse、Master、GameCenter、AI），因此檔名、entry method 與 packet catalog token
-  可直接對齊。例如 `Handlers.GL_LOGIN.cs` / `GL_LOGIN_REQ`、
-  `Handlers.PM_UDPSTART.cs` / `PM_UDPSTART_REQ`、`Handlers.GL_MYINFO.cs` /
-  `GL_MYINFO_REQ`、`Handlers.GR_MAPCHANGE.cs` / `GR_MAPCHANGE_REQ`、
-  `Handlers.GQ_QUEST_ACCEPT.cs` / `GQ_QUEST_ACCEPT_REQ`。`Handlers.*.Shared.cs` 僅保留
-  明確跨 request 的 wire / authority support，沒有 receive entry；Stats 的
-  `Handlers.GP_CHPLAYTIMEC_ACK.cs` 則是 source-proven server push，不是 C2S handler。
-  分組只是一項本地導航決定，不改 wire/state semantics 或聲稱原服務有相同 subsystem。
-- `Db` 的 connection/bootstrap 與每個 persisted-domain partial 都在 `Database/`；
-  `Db.Connection.cs` 持有共用 connection / lock / command creation，跨表不可分割操作
-  仍在擁有 operation 的 partial 以明確 transaction 包住。完整的 file-to-boundary map
-  維持在 `PaperMan.Server/README.md`，避免將 local partial 分界誤寫成 native-service
-  evidence。
-- `ChannelAdmissionRegistry` 只保存一次性的 681→143 handoff；`RoomManager` /
-  `SessionRegistry` 只持有 process-local live state。SQLite 是 account、inventory、
-  quest 等可持久狀態的唯一來源。
-- `UdpControlServer` 與 `UdpPacketCodec` 是刻意分離的 UDP-private 層：前者只
-  parse source-proven opcode 19 並回覆空 opcode 20，後者只做 native AES framing
-  （不帶 TCP LZ）。client-reported UDP values 不取得 `Session` 或 DB authority。
+- `connection.ts` 持有單一 TCP socket 的 reassembly、connection state、account
+  identity、send gate 與 ordered dispatch；`admission.ts` 明確表示 143 handoff 與
+  195→196 channel entry 之間的不同 state。
+- `ops/registry.ts` 是 opcode lookup、typed packet builder 與 handler boundary；
+  以 explicit imports 綁定 `src/ops/c2s/` 與 `src/ops/s2c/` 的 packet modules，
+  並以 Bun directory check 防止新增檔案遺漏。TypeScript compile-time types
+  不取代 packet reader 的 runtime width、framing、fixed-buffer 與 malformed-input checks。
+- 每一個 packet module 以 opcode 命名並依方向分目錄；registry 將 filename 綁定
+  到 `db/packets.tsv`，避免重複的名稱常數。未有足夠 evidence 的 opcode 保留
+  fail-closed/no-op，不臆造 service policy。
+- `store.ts` 是 `bun:sqlite` 的 account、identity、角色與 NewSkill projection
+  邊界；跨表操作在明確 transaction 中完成。`ChannelAdmissionRegistry` 只保存
+  一次性的 681→143 handoff，process-local live state 不冒充 persistent authority。
+- `udp.ts` 與 `packet.ts` 刻意分離：前者只 parse source-proven private opcode 19
+  並回覆 empty opcode 20，後者負責 native AES framing（不帶 TCP LZ）。
+  client-reported UDP values 不取得 account 或 DB authority。
 
 此切分是依 socket lifecycle 與 protocol domain，而非為了套用通用 pattern；
-重要 side effect 仍可從 Router → Handler → Db / RoomManager 直接追蹤。
+重要 side effect 仍可從 connection → ops registry/handler → store 直接追蹤。
 
 ## 5. Server 現況
 
-- handlers: 42 個獨立 opcode (19 個經通用轉發器)
-- 覆蓋: 登入/大廳/商店與禮物的 fail-closed wire boundary/好友/信箱/任務/戰隊/戰績/
-  房間全流程/開戰鏈/戰鬥 TCP relay/查人/場景，以及 UDP-private 19→空 20 control
-- UDP 範圍: 只實作 source-proven AES-only 19→20；其餘 private UDP opcode、P2P/
-  NAT/relay 語意均未實作且不宣稱已定性
-- 死協定 ~80 條已定性 (PM 中控/GV 工具/韓版安全) — 無需實作
-- 待辦: docs/TODO_HANDLERS.md (照自動序列施工)
+- Packet modules：15 個 C2S、16 個 S2C；由 `ops/registry.ts` explicit registry
+  綁定，並以 directory check 防止遺漏檔案；filename 必須存在於 `db/packets.tsv`，
+  重複或未知 opcode 會在啟動時失敗。
+- 已涵蓋：694/682/681 login handshake、693/143/144/195/196 channel handshake、
+  lobby bootstrap（197/198、199/200、105/106、107/108、425/426、433/434）、
+  250/252/254 compatibility projections、keepalive，以及 private UDP 19→空 20。
+- Wire safety：9600-byte frame、AES-CFB、native field width、fixed-buffer bounds、
+  count/length limits、single-use admission 與 196 success gate 均保留；未知 policy
+  不做成功 mutation。
+- UDP 範圍：只實作 source-proven AES-only 19→20；其餘 private UDP、P2P、NAT、
+  relay 與 gameplay semantics 均未實作且不宣稱已定性。
+- 下一步與未實作 request：[`TODO_HANDLERS.md`](TODO_HANDLERS.md)；native/resource
+  cross-check：[`SERVER_TS_PACKET_FIELDS.md`](SERVER_TS_PACKET_FIELDS.md)。
 
 ## 6. 關鍵互證鏈 (12+ 次資料↔逆向對撞全中)
 

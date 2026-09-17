@@ -1,18 +1,29 @@
 #!/usr/bin/env python3
 """
-煙霧測試: 模擬伺服器處理封包時對 DB 的完整讀寫路徑。
+煙霧測試: 模擬伺服器處理封包時對離線 DB 的完整讀寫路徑。
+
+用法:
+  python3 db/smoke_test.py [--db /tmp/paperman.sqlite]
+
 對應封包流程:
   GL_LOGIN_REQ(682) -> GM_CREATENICK(212) -> GL_MYINFO_ACK(198)
   -> GS_BUYITEM(204) -> GL_MYITEM_ACK(200 分頁) -> GI_CHANGEWP(220)
   -> GL_MAKEROOM(111) -> GR_END(133 結算) -> GP_CH*C 累計
   -> GL_FRIEND_ADD(429) -> GL_MSG_ADD(419) -> GQ_QUEST_ACCEPT(867)
 """
+import argparse
 import os
 import sqlite3
-import sys
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-DB = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, 'paperman.db')
+DEFAULT_DB = os.environ.get('PAPERMAN_DB', '/tmp/paperman.sqlite')
+
+parser = argparse.ArgumentParser(description='Exercise the offline SQLite schema and triggers')
+parser.add_argument(
+    '--db',
+    default=DEFAULT_DB,
+    help='generated SQLite path (default: PAPERMAN_DB or /tmp/paperman.sqlite)',
+)
+DB = parser.parse_args().db
 
 con = sqlite3.connect(DB)
 con.execute('PRAGMA foreign_keys = ON')
@@ -48,7 +59,7 @@ c.execute("INSERT INTO users(account_id,nickname) VALUES (?, 'PaperBob')", (c.la
 uid2 = c.lastrowid
 
 # 682 raw24 fingerprint: fresh databases enforce its exact native size in SQL,
-# rather than relying on only the C# packet reader to preserve this invariant.
+# rather than relying on only the TypeScript packet reader to preserve this invariant.
 c.execute("UPDATE accounts SET client_fingerprint=? WHERE account_id=?", (bytes(24), aid))
 try:
     c.execute("UPDATE accounts SET client_fingerprint=? WHERE account_id=?", (bytes(23), aid))

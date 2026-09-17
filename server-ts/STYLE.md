@@ -13,51 +13,50 @@ audience. Two rules dominate everything else:
 
 Follow `db/packets.tsv`, which is the reverse-engineered source of truth.
 
-**The opcode name lives in the filename, and nowhere else.** One module per
-packet, in the folder for its direction:
+**The opcode name lives in the filename and the explicit registry map.** One
+module per packet, in the folder for its direction:
 
 ```
 src/ops/c2s/GL_LOGIN_REQ.ts   the client sends it; we read it
 src/ops/s2c/GL_LOGIN_ACK.ts   we send it; we build it
 ```
 
-Inside the module the name appears in exactly one more place: the exported
-function is named after the opcode too.
+Inside the module the default function is named after the opcode too:
 
 ```ts
 export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Packet
 ```
 
-That is a deliberate exception to "write it once", and it buys two things: the
-packet is identifiable when you land mid-file from a grep, and stack traces say
-`at GL_LOGIN_ACK` rather than `at GL_LOGIN_ACK_default`. It is safe because the
-registry asserts `fn.name` matches the filename at startup, so a rename that
-touches only one of them fails immediately instead of drifting.
-
-Nothing else repeats the name — no constant, no `new Packet(...)` argument. A
-builder receives its own opcode as the first parameter. To find the code for a
-packet, open the file with that name.
+The registry intentionally repeats each name once so the complete 15/16 runtime
+surface and the outbound argument types are visible to TypeScript. A builder
+receives its own opcode as the first parameter; it does not carry a second
+numeric table. To find the code for a packet, open the file with that name.
 
 **Direction comes from the folder, not the `_REQ`/`_ACK` suffix.** Those
 suffixes describe the client's view and do not always match ours: `GT_PING_ACK`
 is an `_ACK` the *server* sends, and `GT_PING_REQ` is a `_REQ` it *receives*.
 A suffix rule gets that pair backwards; a folder cannot.
 
-Everything else is normal camelCase: `frameLength`, `verifyLogin`.
+Everything else is normal camelCase: `frameLength`, `verifyLogin`. For a
+recovered wire field, this is only a mechanical separator change:
+`user_no` becomes `userNo`, while `uid`, `flag`, `extra`, `unknown`, and `raw`
+stay conservative. Do not promote a raw field into a semantic name merely
+because another implementation uses one.
 
 Two guards make the convention enforceable rather than aspirational:
 
-- Each folder has a generated `index.ts`. Write a module, run `bun run sync`.
-  It exists because ES modules have no glob import and a dynamic
-  `import(\`./${name}.ts\`)` degrades to `any` — which would put opcode names
-  and builder arguments back to failing at runtime. Generating it means nobody
-  maintains it by hand and it cannot disagree with the directory.
-- Those lists give compile-time checking: `reply("GL_LOGON_ACK")` is a type
-  error, as is passing a c2s name to `reply` or the wrong argument shape.
-- At startup the registry re-checks the lists against the directories and every
-  filename against `db/packets.tsv`. A module added without running `sync`, a
-  listing with no file, or a name that is not a real opcode each fail
-  immediately. A test also asserts the generated files are current.
+- The registry imports each packet module explicitly, so the 15 C2S and 16 S2C
+  operations are visible in one short file. Bun's `Glob` is used only to catch
+  a packet file that was added without being registered. `bun run sync` remains
+  a cheap filename/catalogue check before tests.
+- The outbound object is the compile-time map: `OutboundName` and
+  `OutboundArgs<N>` are inferred from the actual builder functions. `build()`
+  performs the small runtime check that the result is a `Packet`; no `any` or
+  dynamic module adapter is needed.
+- At startup the registry checks every registered name against `db/packets.tsv`
+  and every file against the explicit map. A missing, renamed, or unknown
+  operation fails immediately; the wire layout and module implementations do
+  not change.
 
 Opcode families from the catalogue, for orientation:
 `GL_` lobby · `GG_` in-game relay · `GR_` room · `GS_` shop · `GP_` play ·

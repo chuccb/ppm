@@ -1,7 +1,9 @@
-# PaperMan 客戶端資源檔案地圖 (十四輪逆向)
+# PaperMan 客戶端資源檔案地圖
 
-> 這份文件回答:「伺服器/工具還需要哪些客戶端資源檔案?」
-> 以及每個檔案的容器格式 (全部由 PaperMan.exe.c 逐行讀出)。
+> 這份文件回答「哪些 client 資源被讀取、格式是什麼、能支持哪一條結論」。
+> 所有格式與數字都以 `Extracted/` 與 `PaperMan.exe.c` 交叉比對；本檔保留歷史
+> section number 以維持引用，但 client content 不直接授權 server catalog、
+> ownership、grant、價格或交易 policy。
 
 ## 1. 對私服最有價值的檔案 (若能提供, 可完善 DB 目錄)
 
@@ -232,7 +234,7 @@ sub_5359B0 (getter) 證實記憶體 1212..1224/1228..1240 = 兩檔位 4×s32
 但**請勿反過來依賴這一點**：這是本 revision 資料的觀察性質，
 若日後加入新武器造成碰撞就會失效；解析時仍應優先使用明示的段資訊。
 
-## 1z. 2026-09 新 IDA 導出：40 個具名 global 取代原本的 `off_` 位址
+## 2c-0. 2026-09 新 IDA 導出：40 個具名 global 取代原本的 `off_` 位址
 
 `main` 分支新上傳的 `PaperMan.exe.c` 與既有版本**函數內容等價**
 （17,830 具名函數、19,835 function body，集合完全相同），
@@ -431,31 +433,28 @@ already present in the switch-weapon row. A selected primary causes
 parts only with a nonzero primary. This UI filtering is client behavior, not
 historical-server authorization evidence.
 
-**Inference / MEDIUM (server policy).** Server-side 220 accepts only items that
-are actually owned and unexpired and parts that match the exact imported
-`weaponparts.pat` row. A fresh database has an intentionally empty compatibility
-table, so it fails closed until the resource importer supplies it. The native
-client does not reveal the original server's authorization result code; rejected
-220 has no invented success payload or state mutation.
+**Future implementation boundary / Inference / MEDIUM (not native service
+policy).** If a future 220 module is added, it should accept only items that are
+actually owned and unexpired and parts that match the exact imported
+`weaponparts.pat` row. A fresh database should fail closed until the resource
+importer supplies the compatibility table. The native client does not reveal
+the original server's authorization result code; no rejected 220 success payload
+or state mutation may be invented.
 
 **UNRESOLVED.** Neither client initialization, the static resource tables, nor
 any observed packet producer establishes a character-specific starter primary,
 secondary, melee, throw weapon, or part. Empty bootstrap loadout containers are
 not evidence of an equipment grant.
 
-**Implementation status (not native evidence).** `Database/Db.WeaponLoadout.cs` applies
-only the submitted delta in one SQLite transaction, validates the merged
-four-row state, and returns it in order for 221. `PaperMan.SelfTest` contains a
-routed 220→221 63-byte full-snapshot case plus no-mutation negative cases for a
-truncated record, duplicate primary, expired/unowned primary, unowned compatible
-part, owned incompatible part, parts with an empty primary, and group-3
-secondary/melee/throw words. The checked-in C# test has **not been executed in
-this environment** because no `dotnet` SDK/compiler is installed. Separately,
-the Python schema smoke test and an in-memory import of the decoded
-`weaponparts.pat` have run: the latter inserted 10,648 rows and confirmed a
-known `(12100016, grp=0, 15210001)` edge while rejecting its wrong-group and
-wrong-gun variants. This only verifies schema/import data, not C# runtime
-behavior.
+**Implementation status (not native evidence).** The current `server-ts` runtime does
+not register a 220→221 handler. The offline SQLite schema/import path is the only
+local projection for this evidence: it must validate owned, unexpired items and
+exact `weaponparts.pat` compatibility in one transaction, while retaining the
+no-mutation failure boundary. The Python schema smoke test and an in-memory import
+of the decoded `weaponparts.pat` have run: the latter inserted 10,648 rows and
+confirmed a known `(12100016, grp=0, 15210001)` edge while rejecting its
+wrong-group and wrong-gun variants. This verifies schema/import data, not a
+server runtime grant policy.
 
 (RecommandItem 頭兩行: 1030=資料行數, 20=概念類別數)
 
@@ -491,7 +490,7 @@ record or a PAV thumbnail is not, by itself, starter-state evidence.
 | The vector is part of the native character-creation visual model, rather than only a shop display. | **Fact / HIGH** | `CLobbyCharMake::sub_41B330` passes body plus all five map results to `sub_4148D0`; `sub_41BDE0` passes mapped face/head offsets with the selected body into `sub_572EB0` (opcode 214). |
 | The vector materializes ordinary character state when normal pieces are absent. | **Fact / HIGH** | `sub_522580(mask, a2)` writes mapped components into `a2[2..6]` from body `a2[1]`. `CPaperCtrl::sub_5B40E0` additionally fills mapped head/face/top/bottom/shoes when its normal appearance record has an absent head/body-template prefix. |
 | All 75 mapped component records are compatible free normal-avatar resources. | **Fact / HIGH** | Decoded `cfg/ItemData.pat`: matching character type, `kind=6`, price `0`; every item has a matching `origin/main:Extracted/item/avatar/%02d_%05d_%02d.pav` asset. This corroborates the native state mapping; it does not establish it alone. |
-| A private server should persist and acknowledge these six values for a newly created canonical character. | **Inference / MEDIUM** | The facts above plus the exact 311 reader establish the client-side canonical creation state and its accepted wire representation. The original server executable that generated historical 311 responses is unavailable. |
+| A future character-creation module may persist and acknowledge these six values for a newly created canonical character. | **Inference / MEDIUM** | The facts above plus the exact 311 reader establish the client-side canonical creation state and its accepted wire representation. The current `server-ts` runtime does not register 310/311; the original server executable that generated historical 311 responses is unavailable. |
 
 ### Raw offset map
 
@@ -1293,10 +1292,10 @@ AI 協力模式的過關獎勵表，結構為
 ```
 
 `8 + 123 × 836 = 102,836` 恰等於解密後檔案大小，零剩餘位元組。
-工具：`python3 server-cs/tools/dump_maplist.py [--mode N|--id N|--check]`。
+工具：`python3 tools/dump_maplist.py [--mode N|--id N|--check]`。
 
 **獨立驗證既有的 modeIndex→bit 表。** 用
-`verify_server_naming.py` 的 `MODE_INDEX_MAP_BITS` 去解這 123 張圖的 bitmask，
+the checked-in `MODE_INDEX_MAP_BITS` table in `tools/dump_maplist.py` 去解這 123 張圖的 bitmask，
 **123 張全部至少帶一個已知 mode bit，無一例外**。各模式可用圖數：
 
 | mode | 圖數 | | mode | 圖數 |
@@ -1988,7 +1987,7 @@ extraction 中，因此**試衣間動畫子系統無法從現有資料完整還�
 `hayate` 的 `bEnable=1`」互相呼應：試衣間相關資料本就不完整。
 任何關於試衣間的結論都應停在 UNRESOLVED。
 
-**可重跑。** `python3 server-cs/tools/verify_resource_coverage.py`
+**可重跑。** `python3 tools/verify_resource_coverage.py`
 （需完整 `Extracted/`；工作分支上會自動跳過並說明原因）。
 出現未分類的缺檔即失敗，代表 extraction 或 dump 換版，需要重新確認。
 
@@ -2631,6 +2630,74 @@ AppearSound DisAppearSound`
 但同目錄的 `ItemAbilityEffectColorTable.xml`／`ItemAbilityEffectNameTable.xml`
 是明文（§5d-20 已記）。**同一子系統的三張表加密狀態並不一致。**
 
+## 5d-29. Single mode / GunShooting 的 resource parser、兩圖參數與 UI stage 閉環
+
+本節把 Wiki 的 Single domain 與 resource/native 交叉結果集中記錄，避免把 `gamecenter_map_info.xml` 當成一張「看到 XML 就全部生效」的設定表。
+
+### 5d-29a. `gamecenter_map_info.xml` 的實際載入器
+
+`sub_411DA0` 只從固定路徑 `ui/system/AI/gamecenter_map_info.xml` 的 root `GAMECENTER_MAP_INFO` 取兩類節點：
+
+- `GUNSHOOTING_MAP_INFO` → normal collection；
+- `GUNSHOOTING_MAP_INFO_EASY` → `this + 12` 的 easy collection。
+
+`sub_4124D0` 的 parser 實際讀取：
+
+```
+index time angle langScenarioID langDialogueID langClearID
+mapname botlaserTex botplasmaTex shieldhp feverTime
+startPos shieldPos
+```
+
+並另外處理兩個 child collection：第一個 child 讀 `pos0..posN` 的 `WARNING_LIGHT_POS`，第二個 child 以 `shild_%d` 讀 `SHILD_NAME` 的 shield texture names。檔案裡的 `index` 會被放進 map-info object；它不是 modeIndex。
+
+`Extracted/ui/system/AI/gamecenter_map_info.xml` 的兩張圖如下：
+
+| `index` | maplist record | `mapname` | normal | easy | `shieldhp` | language ids | `feverTime` |
+|---:|---|---|---:|---:|---:|---|---:|
+| 81 | `maps\\AI_01_Monster.pmm` | `ロボットたちの反乱` | `time=5` | `time=3` | 1000 | 1085 / 1084 / 1128 | 3000 |
+| 89 | `maps\\AI_02_Monster.pmm` | `記憶の手掛かり` | `time=5` | `time=3` | 1100 | 1212 / 1211 / 1213 | 3000 |
+
+normal/easy 的 `startPos`、`shieldPos`、warning-light positions 與 shield texture names 也各自存在；它們是 client map setup evidence，不是 server clear/reward policy。`time`／`feverTime` 的單位未由此 XML 或本輪 parser trace 安全確定，保留 raw value。
+
+### 5d-29b. map id、mode bit 與 Wiki 名稱的四來源鏈
+
+```
+maplist.pat
+  81 → maps\AI_01_Monster.pmm, GunShooting bit (modeIndex 9)
+  89 → maps\AI_02_Monster.pmm, GunShooting bit (modeIndex 9)
+       ↓ same map id
+ui/system/AI/gamecenter_map_info.xml
+  GUNSHOOTING_MAP_INFO index="81"/"89"
+       ↓ langScenarioID/langDialogueID/langClearID
+msgtableres.lang
+       ↓ same mode index
+map_StartIndex.xml
+  modeName="GunShooting", modeIndex=9, default map id=89
+```
+
+這條鏈的重點是 **id type**：81/89 是 map id，9 是 modeIndex，1084 等是 language id。檔名前綴 `AI_` 不是 parser 的 mode 判定依據；既有 `maplist.pat` 的 bitmask 結果與 [`RESOURCES.md` §5d-5/§5d-6](#5d-5-maplistpat-全解123-圖-mode-bitmask與既有-bit-表-100-相符) 互相驗證。
+
+### 5d-29c. Popup stage 與 GameCenter writers
+
+Single popup 的 native event branch 使用 resource/UI literal，而不是自行推測的 domain enum：
+
+| UI literal | native stage | 後續 writer |
+|---|---:|---|
+| `EASY_START` | 3 | `sub_457350` → `sub_584DB0` → opcode 474 |
+| `FREE_START` | 1 | `sub_457350` → `sub_584DB0` → opcode 474 |
+| `CASH_START` | 2 | `sub_457350` → `sub_584DB0` → opcode 474 |
+
+`sub_584DB0` 只把目前 `game_id` 與 stage 寫入 474，送出後顯示 local message code `0x66`。map selection 的 472 path 則送 `sub_584850(map_id,0)`；另一條 `sub_4074A0` path 送 `sub_584850(game_id,1)`，兩個 flag 同時寫入 `byte_EA12F4`／`byte_1D0D20B`。這些 local flags 不可直接當成 paid/free authorization。
+
+結算與 handshake 的 client/resource 邊界記在 [`PACKETS.md` §3.15j-a](PACKETS.md#315j-a-2026-09-17-gamecenter-472484-direct-writerreadercaller-re-audit)：476 是 `1 primitive + 24B + 44B`，478 是 `36B` check block，480 是 `game_id + mode` 且有 local state gate，483 只有 `game_id`；477/481/484 readers 更新 local state/cache。resource 與 UI 只能說明 client 要送什麼、顯示什麼，不能補 coin 扣除、score authority、reward grant 或 ranking persistence。
+
+### 5d-29d. 與 Wiki 的交叉結論與限制
+
+[シングルモード](https://wikiwiki.jp/paperman/シングルモード) 的兩張地圖、Easy/Ranking 分流、coin 與首次 clear reward 是很好的歷史 domain 導航；其中兩圖、map id、normal/easy `time`、shield HP 與 popup stage 已由本 extraction 的 native/resource 閉合。相反地，Wiki 的 Fever／boss／score multiplier／support item 攻略，以及 coin refill/cap、價格、首次 clear、PG／武器／稱號 grant，不能由這些檔案升格為私服 server policy。
+
+因此本節明確保留以下 `UNRESOLVED`：coin 扣款與補充、game-start authorization、476/477 score/reward mutation、first-clear uniqueness、ranking write/persistence，以及 478 check 的 server decision。`gamecenter_map_info.xml` 的 `shieldhp` 與 `feverTime` 只表示 client 具有這些 map-info 欄位，不代表 client 可以裁決原服的 clear、score 或 grant。
+
 ## 6. 其他已知資源
 
 - `system/map_StartIndex.xml`, `SelectRandomMap.xml`: 地圖選擇
@@ -2854,11 +2921,11 @@ roommake 結論。
 
 ---
 
-## 9. 客戶端字串解密與 UI 槽位/改裝/倉庫定名對照 (五十四輪更新)
+## 10. 客戶端字串解密與 UI 槽位/改裝/倉庫定名對照
 
 五十四輪對 `PaperMan.exe.c` 進行了反編譯字串修復，揭露了大量先前為 `&off_XXXXXX` 偏移的 UI 標籤、技能槽、改裝件與倉庫頁籤字串：
 
-### 9.1 sub_527550 的 9 個技能/能力槽（Ability Slots）正式名稱
+### 10.1 sub_527550 的 9 個技能/能力槽（Ability Slots）正式名稱
 對應 `sub_4C4990` 與 `sub_4C4E70` 的 9 個槽位陣列：
 1. `Crosshair` (0): 準心自訂
 2. `NAME` (1): 名稱/暱稱卡
@@ -2870,14 +2937,14 @@ roommake 結論。
 8. `EXTRA_ABILITY` (7): 額外能力 2
 9. `VOICE` (8): 角色語音槽
 
-### 9.2 武器零件改裝槽（Weapon Parts Slots）與標記
+### 10.2 武器零件改裝槽（Weapon Parts Slots）與標記
 對應 `sub_4C50A0`、`sub_95B180`：
 - 改裝槽位：`PARTS_01` 至 `PARTS_07` (7 個改裝槽)
 - 零件設定：`PARTS_SET_%d`, `PARTS_SET_MOUSE_%d`, `PARTS_SET_EMPTY_%d`
 - 操作按鈕：`PARTS_EQUIP`, `PARTS_CLEAR`
 - 狀態標籤：`COUPON_MARK`, `ONLY_NETCAFE_MARK`, `RECYCLE_OUTLINE`, `PARTS_WAITING`
 
-### 9.3 倉庫頁籤（Warehouse Tabs）
+### 10.3 倉庫頁籤（Warehouse Tabs）
 對應 `sub_4F0240`：
 - 頁籤 ID：`WAREHOUSE_1` 至 `WAREHOUSE_6`
 - 格式字串：`L"WAREHOUSE_%d"`、`L"WARE_TAB_%d"`

@@ -1,4 +1,4 @@
-# Dispatcher 全 306 case 自動佈局表 (廿三輪；本輪補齊為全覆蓋)
+# Dispatcher S2C primitive-read inventory（306 cases）
 
 > 由自動抽取器產生: 對每個 handler 抽出 sub_592xxx 讀取原語序列。
 > 已與 5 個歷輪手工佈局抽查比對全部吻合 (106/118/120/122/142)。
@@ -8,7 +8,7 @@
 > **417**（`MASTER_KILLALL_ACK`，dispatcher inline 無獨立 handler）、
 > **803**（`GS_DESTROYITEM_ACK`）、**882**（`GP_CHPLAYTIMEC_ACK`，inline 差分）
 > —— 現為 **306/306 全覆蓋**。可用
-> `python3 server-cs/tools/verify_dispatcher_coverage.py` 重驗。
+> `python3 tools/verify_dispatcher_coverage.py` 重驗。
 >
 > 本表另含 dispatcher 以外的 S2C（例如走 vtable 前置轉發器者），
 > 故列數多於 306。名稱欄留空者為**名稱表未註冊**的 opcode，
@@ -23,7 +23,7 @@
 >
 > ⚠ 此表為「讀取序列」非精確佈局: 條件分支/迴圈會使實際 wire 依
 > 內容變化 — 精確語意以 PACKETS.md 手工條目為準; 本表用於快速
-> 查閱與覆蓋保證 (300/306 case, 6 個非 sub 直呼)。
+> 查閱與覆蓋保證（306 個 dispatcher case，另含 6 個非 sub 直呼）。
 
 
 ### Bootstrap fields cross-checked in native source (2026-09)
@@ -43,7 +43,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | op | 名稱 | handler | 讀取序列 |
 |---|---|---|---|
 | 102 | GT_PING_ACK | sub_58D6F0 | `(無直接讀取/轉發)` |
-| 106 | GL_USERLIST_ACK | sub_56A250 | `u16 u8 u8 s32 str s32 s32 str` |
+| 106 | GL_USERLIST_ACK | sub_56A250 | `raw2 gate; if nonzero: u8 flags, u8 count, repeat {raw4 userKey, str nick, s32 exp, if userKey>0: raw4 customTexKey, str texName}` |
 | 108 | GL_GAMEROOMINFO_ACK | sub_568CE0 | `u8 u8 u8 s8 u8 s8/bool u8 u16 u8 s8/bool s8/bool s8/bool s8/bool u8 u8 u8 str u8 s8/bool u8 u16 u8 s8/bool s8/bool ...` |
 | 110 | GL_ROOMINFOCHANGE_ACK | sub_569240 | `s8/bool u8 u8 u8 u8 u8 s32 s32 str u8 s32 s32 str u8 s32 u8 s32 u8 u8 s8/bool s8 u8 s8/bool u8 ...` |
 | 112 | GL_MAKEROOM_ACK | sub_56A7B0 | `u8 u8 u16 f32/s32 u8 s8/bool u8 s32 s32 str u8 s32 s32 str u8` |
@@ -61,7 +61,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 136 | GR_CHANGESLOT_ACK | sub_56EF40 | `u8 u8 u8 f32/s32 s32 u8 u8 s32` |
 | 140 | GG_EXITGAME_ACK | sub_563430 | `u8 u8` |
 | 142 | PM_CONNECT_ACK | sub_5565D0 | `str s32 u8 u32` |
-| 144 | PM_UDPSTART_ACK | sub_555D50 | `u8 u8 s32 str s32 s32 s32 f32 u32 u8 [u8 u8 u8 u8 s32×8]` |
+| 144 | PM_UDPSTART_ACK | sub_555D50 | `u8 u8 raw4 str raw4 raw4 raw4 f32 raw4 u8 [u8 u8 u8 u8 raw4×8]` |
 | 160 | TCP_UDP_DEAD_ACK | sub_58D790 | `(無直接讀取/轉發)` |
 | 166 | Y_TCP_INF_ACK | sub_58D820 | `(無直接讀取/轉發)` |
 | 168 | GR_CHANGEUSER_ACK | sub_56F410 | `u16` |
@@ -76,9 +76,9 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 194 | GC_CHANNEL_ACK | sub_56FE90 | `u8` |
 | 196 | GC_ENTERCHANNEL_ACK | sub_4179D0 | `u8 s32 u8 [str s32 u8 u8 u32 u8]` |
 | 198 | GL_MYINFO_ACK | sub_570550 | `s8/bool s32 u16 s32 u8 u8` |
-| 200 | GL_MYITEM_ACK | sub_570AB0 | `s8/bool` |
-| 201 | GL_MYPARTSUP_ACK | sub_95A3B0 | `s32 f32/s32 f32/s32 s8/bool f32/s32 f32/s32` |
-| 202 | GL_EXPIRE_PARTSUP_ACK | sub_95AE40 | `s32 f32/s32 f32/s32 s8/bool f32/s32 f32/s32` |
+| 200 | GL_MYITEM_ACK | sub_570AB0 | `u8 success, s32 start, repeat≤100 {s32 slot, s32 item, f32, f32, s32 period, u8 extra, u16 durability}, s32 negative-slot sentinel` |
+| 201 | GL_MYPARTSUP_ACK | sub_95A3B0 | `s32 count, repeat {raw4 raw4 raw1 raw4 raw4}` |
+| 202 | GL_EXPIRE_PARTSUP_ACK | sub_95AE40 | `s32 count, repeat {raw4 raw4 raw1 raw4 raw4}` |
 | 203 |  | sub_571D50 | `(無直接讀取/轉發)` |
 | 205 | GS_BUYITEM_ACK | sub_571910 | `u8 s8/bool s32 f32/s32 f32/s32 s32 u8 u16 s8/bool u8 s32 s32 s32 s32 s32 s32 s32` |
 | 207 | GS_BUY_WEAPONPARTS_ACK | sub_571B60 | `u8 rawResult; rawResult==0 → 21B part record + 6×s32 wallet tail; nonzero → no tail` |
@@ -166,13 +166,13 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 405 | MASTER_EVENTEXP_ACK | sub_579650 | `f32` |
 | 417 | MASTER_KILLALL_ACK | *(dispatcher inline)* | `(空)` — 不讀 payload; 顯示 msg 0xA5 後斷線提示 |
 | 420 | GL_MSG_ADD_ACK | sub_559810 | `str u8 u8` |
-| 422 | GL_MSG_DEL_ACK | sub_55A310 | `s8/bool str` |
-| 424 | GL_MSG_READ_ACK | sub_55A4F0 | `s8/bool str` |
-| 426 | GL_MSG_RECVLIST_ACK | sub_55A630 | `u16 str u8 str s8 str f32/s32 str str s16` |
-| 430 | GL_FRIEND_ADD_ACK | sub_55AA90 | `u8 str` |
-| 432 | GL_FRIEND_DEL_ACK | sub_55AE10 | `u8 str` |
-| 434 | GL_FRIEND_LIST_ACK | sub_55AFC0 | `u16 str u8 str s32` |
-| 436 | GL_FRIEND_INFO_ACK | sub_55B2C0 | `u8 str u8 str u8` |
+| 422 | GL_MSG_DEL_ACK | sub_55A310 | `u8 statusRaw, str key` |
+| 424 | GL_MSG_READ_ACK | sub_55A4F0 | `u8 statusRaw, str key` |
+| 426 | GL_MSG_RECVLIST_ACK | sub_55A630 | `raw2 header, str context, u8 count, repeat {str key, u8 stateRaw, str rawString2, raw4 raw4, str rawString3, str typeString, raw2 raw2}` |
+| 430 | GL_FRIEND_ADD_ACK | sub_55AA90 | `u8 statusRaw, str characterName/key` |
+| 432 | GL_FRIEND_DEL_ACK | sub_55AE10 | `u8 statusRaw, str characterName/key` |
+| 434 | GL_FRIEND_LIST_ACK | sub_55AFC0 | `raw2 header, str context, u8 count, repeat {str characterName/key, raw4 rowRaw4}` |
+| 436 | GL_FRIEND_INFO_ACK | sub_55B2C0 | `u8 count, repeat {str key, u8 online, if online: str where, u8 channel}` |
 | 440 | GL_FRIEND_CHAT_ACK | sub_55B660 | `u8 str str str` |
 | 442 | GL_FRIEND_WHERE_ACK | sub_55B9F0 | `u8 u8 u8 u8` |
 | 444 | GG_STEALSUCK_ACK | sub_55BE80 | `u8 u8 u16 u16 u16` |
@@ -189,8 +189,8 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 471 | GS_GET_HUKUBUKURO_ACK | sub_57D210 | `u8 status; status==0 → s32 count, count×{s32 itemId,u8 rawValue}; nonzero → no tail` |
 | 473 | GL_GAMECENTER_REC_ACK | sub_584910 | `u16 s32 u8 u8 u8 u8 u16 s32 u8 u8 u16 u16` |
 | 475 | GG_GAMECENTER_GAME_START_ACK | sub_584E80 | `(無直接讀取/轉發)` |
-| 477 | GG_GAMECENTER_GAME_END_ACK | sub_564A00 | `(無直接讀取/轉發)` |
-| 481 | GG_GAMECENTER_RANKING_ACK | sub_585080 | `u16 u8 u16 s32 u8 u8` |
+| 477 | GG_GAMECENTER_GAME_END_ACK | sub_564A00 (mode gate) → sub_76E450 | `u16, raw32, raw44, raw4, raw24, raw8, 4×raw4, multiple u8 flags` |
+| 481 | GG_GAMECENTER_RANKING_ACK | sub_585080 | `u16 u8 u16 s32, u8 count1 + count1×raw56 (max 3), u8 count2 + count2×raw56 (max 10)` |
 | 482 | GL_GAMECENTER_COIN_CHANGED_ACK | sub_585F50 | `u16 u16` |
 | 484 | GG_GAMECENTER_GAME_START_OK_ACK | sub_584F70 | `u16 u8 u16 s32` |
 | 486 | GL_GET_GAMEROOM_PROGRESSTIME_ACK | sub_56AE30 | `u8 u8 s8/bool u8 s8/bool u16 u8 s32 u8 s8/bool u16 u8 s32 u8 s8/bool u8 s8/bool u8 u8 s8/bool s8/bool u8 s8/bool` |
