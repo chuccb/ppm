@@ -152,9 +152,13 @@ UDP_SHARED_HEADER_BUILDERS = {1: "sub_593830", 9: "sub_594300", 19: "sub_596670"
                               21: "sub_596330", 23: "sub_744450", 27: "sub_6013E0",
                               30: "sub_6065E0", 32: "sub_96BF70", 35: "sub_7463E0"}
 UDP_IDENTITY_SOURCES = ("sub_417D00", "byte_EE896D", "dword_EE8CB4")
-WRITE_PRIMITIVE = {"sub_592920": "u8", "sub_5929E0": "s16", "sub_592A20": "s32",
-                   "sub_592960": "s8", "sub_592AE0": "str", "sub_592A60": "u32",
-                   "sub_592B60": "f32", "sub_592AC0": "raw4", "sub_592B20": "u64"}
+WRITE_PRIMITIVE = {
+    "sub_592920": "u8", "sub_592960": "u8", "sub_5928E0": "s8",
+    "sub_5929A0": "u16", "sub_5929E0": "s16",
+    "sub_592A20": "s32", "sub_592A60": "u32", "sub_592AA0": "raw4",
+    "sub_592AC0": "raw4", "sub_592B20": "f32",
+    "sub_592AE0": "u64", "sub_592B60": "u64", "sub_5926F0": "str",
+}
 
 
 def check_udp_opcode_space(text: str) -> None:
@@ -211,9 +215,11 @@ def check_udp_opcode_space(text: str) -> None:
                    in re.findall(r"(sub_592[0-9A-F]{3})\(", after)
                    if name in WRITE_PRIMITIVE]
         missing = [source for source in UDP_IDENTITY_SOURCES if source not in body]
-        if written[:4] != ["u8", "u8", "u8", "s32"] or missing:
+        expected_prefix = (["u8", "u8", "s8", "u8", "s32"]
+                           if opcode == 19 else ["u8", "u8", "u8", "s32"])
+        if written[:len(expected_prefix)] != expected_prefix or missing:
             print(f"dispatcher verification failed: UDP {opcode} ({builder}) header changed")
-            print(f"  prefix {written[:4]}, missing identity sources {missing}")
+            print(f"  prefix {written[:len(expected_prefix)]}, missing identity sources {missing}")
             raise SystemExit(1)
 
 

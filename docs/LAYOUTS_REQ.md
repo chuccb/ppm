@@ -29,16 +29,16 @@
 > 或最大長度。`||` 代表同一 builder 的互斥或
 > 條件變體，不是把它們串成一個可線性消費的 packet。count-prefixed record、
 >
-> **signedness audit（Fact / boundary）**：`rawN` 是 wire width label，不是宣稱
-> signedness 永遠無法由 source 推出。部分 source expression 可以標成
-> `char/byte-shaped`、`bool/flag-shaped`、`int-shaped`、或 `signed-capable`；
-> 例如 low UDP 的 `n0x10` branch 明確寫入 `-2`，opcode 30 的 `v33` 是
-> `unsigned int` count，opcode 23 的 movement branch 將 delta clamp 到 `-127`。
-> 但 wire writer 本身不能替欄位補上 signed/unsigned：`sub_592920` 的 decompiler
-> prototype 是 `char` 卻寫 1B，`sub_5929A0` 仍顯示 `char` 卻寫 2B，
-> `sub_592A20`/`sub_592AA0` 顯示 `char` 卻寫 4B，`sub_592AE0` 顯示 `char`
-> 卻寫 8B。故本表只在 source 有直接 evidence 時標出 type-shape；其餘保留
-> `rawN`，不把 C decompiler parameter type 冒充 protocol signedness。
+> **signedness audit（Fact / boundary）**：`rawN` 是 wire width label；但本輪
+> 已恢復 native primitive alias mapping，不能把所有欄位退回 raw：
+> `sub_592920/592960=u8`、`sub_5928E0=s8`、`sub_5929A0=u16`、
+> `sub_5929E0=s16`、`sub_592A20=s32`、`sub_592A60=u32`、
+> `sub_592B20=f32`、`sub_592AE0/592B60=u64`。`sub_592AA0/592AC0` 是
+> caller-defined generic `raw4` alias。故 low UDP 的 `n0x10` 即使 source branch
+> 寫入 `-2`，只要 call 是 `sub_592920`，wire type 仍是 `u8`、byte 為 `0xFE`；
+> 同理 opcode 23 的 `sub_592960` movement tail 是 `u8`，不能只因 source delta
+> clamp 到 `-127` 就標成 `s8`。Hex-Rays 的 helper parameter 普遍顯示 `char`，
+> 只能作為 width/decompiler evidence，不能覆蓋已確認的 helper identity。
 >
 > optional tail、固定 buffer 與 opcode substitution 只在 native branch 已觀察到時
 > 才寫出；`raw24`、`raw36` 等固定值是 source copy/array boundary 的 Fact；常見
@@ -361,21 +361,21 @@
 
 | op | direct ctor xref（19 sites） | write order after opcode | native send / caller / boundary |
 |---:|---|---|---|
-| 1 | `sub_593830`（1 site；shared function 的 `n2!=2` branch） | `raw1×3 raw4` | `sub_5937D0` timer/state caller；`sub_595A10` secondary AES lane；client send fact only |
-| 5 | `sub_593AB0` | `raw1 raw4` | called by `sub_595E80` case 4；explicit `raw16` destination via `sub_595980`；matching stored member addresses are retried three times；server role UNRESOLVED |
-| 6 | `sub_593E60` | `raw1 raw4` | called by `sub_595E80` case 5；explicit `raw16` destination via `sub_595980`；first matching received source is stored and retried three times；server role UNRESOLVED |
-| 9 | `sub_594300` | `raw1×3 raw4` | called by `sub_5942B0`；`sub_595A10` secondary AES lane；periodic client path; no server behavior inferred |
-| 13 | `sub_594460`; `sub_5946C0`（2 sites） | each `raw1 raw4` | called by `sub_595E80` cases 10/12；explicit stored-address sends via `sub_595980`；the two constructors remain separate native call sites |
-| 14 | `sub_594A10` | `raw1 raw4` | called by `sub_595E80` case 13；explicit stored-address sends via `sub_595980`；source/local state branch differs from 13; domain UNRESOLVED |
-| 15 | `sub_593830`（1 site；shared function 的 `n2==2` branch） | `raw1 raw1` | `sub_5937D0` timer/state caller；`sub_595A10` secondary AES lane；same native function as 1, but not the same wire form |
+| 1 | `sub_593830`（1 site；shared function 的 `n2!=2` branch） | `u8×3 s32` | `sub_5937D0` timer/state caller；`sub_595A10` secondary AES lane；client send fact only |
+| 5 | `sub_593AB0` | `u8 raw4` | called by `sub_595E80` case 4；explicit `raw16` destination via `sub_595980`；matching stored member addresses are retried three times；`raw4` is the `sub_592AA0` caller-defined elapsed/context value；server role UNRESOLVED |
+| 6 | `sub_593E60` | `u8 raw4` | called by `sub_595E80` case 5；explicit `raw16` destination via `sub_595980`；first matching received source is stored and retried three times；`raw4` is the `sub_592AA0` caller-defined elapsed/context value；server role UNRESOLVED |
+| 9 | `sub_594300` | `u8×3 s32` | called by `sub_5942B0`；`sub_595A10` secondary AES lane；periodic client path; no server behavior inferred |
+| 13 | `sub_594460`; `sub_5946C0`（2 sites） | each `u8 raw4` | called by `sub_595E80` cases 10/12；explicit stored-address sends via `sub_595980`；the two constructors remain separate native call sites；`raw4` is caller-defined `sub_592AA0` output |
+| 14 | `sub_594A10` | `u8 raw4` | called by `sub_595E80` case 13；explicit stored-address sends via `sub_595980`；source/local state branch differs from 13; `raw4` is caller-defined `sub_592AA0` output; domain UNRESOLVED |
+| 15 | `sub_593830`（1 site；shared function 的 `n2==2` branch） | `u8×2` | `sub_5937D0` timer/state caller；`sub_595A10` secondary AES lane；same native function as 1, but not the same wire form |
 | 17 | `sub_596180`; `sub_596240`（2 sites） | `sub_596180`: empty; `sub_596240`: `str` (ANSI/NUL) | no named direct caller recovered for either global builder; both use primary raw `sub_595900`, bypass AES; empty and string forms must remain separate |
-| 19 | `sub_596670` | `raw1×4 raw4 str` | direct callers: `sub_4070B0`, `sub_407290`, `CLobbyGameStart::sub_43C380`；`sub_595A10` secondary AES lane；nickname string is native writer output；the extra raw1 before raw4 is source-observed and must not be removed by “common header” flattening |
-| 21 | `sub_596330` | `raw1×3 raw4×3` | `sub_595D80` active-manager caller；via `sub_595A10`; two tail raw4 values remain raw/domain UNRESOLVED |
-| 23 | `sub_744450` | `raw1×3 raw4×2 raw1 raw2×3 raw1×5 raw4` | direct callers: `sub_600770`, `sub_73E170`；gated through `sub_602D70 → sub_596B90 → sub_595A10`; width is Fact, field meaning UNRESOLVED |
-| 27 | `sub_6013E0`; `sub_6036F0`（2 sites） | each `raw1×3 raw4 raw1×2` | direct callers: `sub_73E170`→`sub_6013E0`; `sub_5607C0` / `sub_6013E0`→`sub_6036F0`；`sub_602D70 → sub_596B90 → sub_595A10` gate; two trailing raw1 values are native state bytes |
-| 30 | `sub_606340`（empty constructor; no send at this site）；`sub_6065E0` | `sub_606340`: empty; `sub_6065E0`: `raw1×3 raw4 raw2 count, count×{raw1 status,[raw2 if status!=0,[conditional raw2 raw1 raw2 raw4×4]]}` | callers: `sub_73E170`→`sub_606340`; `sub_606340` (2 sites) / `sub_6065D1`→`sub_6065E0`; only `sub_6065E0` calls `sub_595A10`; `sub_761500(...)` is a local temporary, not a wire field |
-| 32 | `sub_96BF70` | `raw1×3 raw4 raw1×2 raw2×3` | `sub_967E90` caller；object/position path via `sub_595A10`; the three raw2 values have no proven domain names |
-| 35 | `sub_7463E0` | `raw1×3 raw4` | `sub_749B90` (2 direct calls)；`sub_67F380` gate then `sub_595A10` secondary AES lane；send-only evidence, no receiver or gameplay meaning inferred |
+| 19 | `sub_596670` | `u8×2 s8 u8 s32 str` | direct callers: `sub_4070B0`, `sub_407290`, `CLobbyGameStart::sub_43C380`；`sub_595A10` secondary AES lane；offset 2 uses `sub_5928E0` s8；offset 3 uses `sub_592920` u8 and emits `0xFE` for source `-2`；nickname string is native writer output |
+| 21 | `sub_596330` | `u8×3 s32 raw4 raw4` | `sub_595D80` active-manager caller；via `sub_595A10`; the two `sub_592AA0` tail values remain caller-defined raw4 |
+| 23 | `sub_744450` | `u8×3 s32 raw4 u8 u16×3 u8 u8×8 s32` | direct callers: `sub_600770`, `sub_73E170`；gated through `sub_602D70 → sub_596B90 → sub_595A10`; `sub_592AA0` n0x64 is caller-defined raw4；width is Fact, field meaning UNRESOLVED |
+| 27 | `sub_6013E0`; `sub_6036F0`（2 sites） | each `u8×3 s32 u8×2` | direct callers: `sub_73E170`→`sub_6013E0`; `sub_5607C0` / `sub_6013E0`→`sub_6036F0`；`sub_602D70 → sub_596B90 → sub_595A10` gate; two trailing u8 values are native state bytes |
+| 30 | `sub_606340`（empty constructor; no send at this site）；`sub_6065E0` | `sub_606340`: empty; `sub_6065E0`: `u8×3 s32 u16 count, count×{s8 status,[u16 if status!=0,[conditional u16 s8 u16 f32×3 s32]]}` | callers: `sub_73E170`→`sub_606340`; `sub_606340` (2 sites) / `sub_6065D1`→`sub_6065E0`; only `sub_6065E0` calls `sub_595A10`; `sub_761500(...)` is a local temporary, not a wire field |
+| 32 | `sub_96BF70` | `u8×3 s32 u8 s8 u16×3` | `sub_967E90` caller；object/position path via `sub_595A10`; the three `u16` values have no proven domain names |
+| 35 | `sub_7463E0` | `u8×3 s32` | `sub_749B90` (2 direct calls)；`sub_67F380` gate then `sub_595A10` secondary AES lane；send-only evidence, no receiver or gameplay meaning inferred |
 
 > **UDP framing boundary（Fact / HIGH）**：ops 1/5/6/9/13/14/15/19/21/23/27/30/32/35
 > use the observed AES send lane unless the row says otherwise; op 17 uses the separate

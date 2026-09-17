@@ -14,10 +14,10 @@
 > 故列數多於 306。名稱欄留空者為**名稱表未註冊**的 opcode，
 > 屬正確標示而非缺漏，詳 `PACKETS.md` 的 676-catalog 說明。
 >
-> 型別對照: u8=sub_592940, s8/bool=592900, s8=592980, u16=592A00,
-> s16=5929C0, s32=592A40/592AA0, u32=592A80, raw4=592AC0 (caller determines
+> 型別對照: u8=sub_592940/592980, s8/bool=592900, u16=592A00,
+> s16=5929C0, s32=592A40, u32=592A80, raw4=592AC0 (caller determines
 > semantics; 142/144/196 contain both signed/raw4 fields—see bootstrap notes),
-> f32=592B40, u64=592B00,
+> f32=592B40, u64=592B00/592B80,
 > str=592730 (NUL ANSI), wstr=5927B0 (UTF-16),
 > raw16=592C40。
 >

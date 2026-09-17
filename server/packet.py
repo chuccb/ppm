@@ -57,7 +57,7 @@ class Packet:
         self.buf += data
         return self
 
-    def write_u8(self, v):   return self._w(struct.pack('<B', v & 0xFF))          # sub_592920
+    def write_u8(self, v):   return self._w(struct.pack('<B', v & 0xFF))          # sub_592920 / sub_592960
     def write_s8(self, v):   return self._w(struct.pack('<b', v))                 # sub_5928E0
     def write_u16(self, v):  return self._w(struct.pack('<H', v & 0xFFFF))        # sub_5929A0
     def write_s16(self, v):  return self._w(struct.pack('<h', v))                 # sub_5929E0
@@ -92,7 +92,7 @@ class Packet:
         self.rpos += n
         return out
 
-    def read_u8(self):  return self._r(1)[0]                                      # sub_592940
+    def read_u8(self):  return self._r(1)[0]                                      # sub_592940 / sub_592980
     def read_s8(self):  return struct.unpack('<b', self._r(1))[0]                 # sub_592900
     def read_u16(self): return struct.unpack('<H', self._r(2))[0]                 # sub_592A00
     def read_s16(self): return struct.unpack('<h', self._r(2))[0]                 # sub_5929C0

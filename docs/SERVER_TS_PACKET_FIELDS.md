@@ -153,12 +153,15 @@ IDA export 的 Packet helper 本身只證明 byte width；不能只看 Hex-Rays 
 
 | native helper | 實際動作 | TS 對照 | 限制 |
 |---|---|---|---|
-| `sub_5928E0`、`sub_592920`、`sub_592960` | 寫入 1 byte | `u8`/`s8` | helper 的 `char` 型別不代表業務是 bool/status |
-| `sub_592900`、`sub_592940`、`sub_592980` | 讀取 1 byte | `u8`/`s8` | signedness 只在 direct consumer 有比較證據時採用 |
-| `sub_5929A0`、`sub_5929E0`（寫）；`sub_592A00`、`sub_5929C0`（讀） | raw copy 2 bytes | `raw2`/caller-defined `u16`/`s16` | 681 channel/server counts、198 appearance 等再由 consumer 判斷 |
-| `sub_592A20`、`sub_592A40`、`sub_592A60`、`sub_592A80`、`sub_592AA0`、`sub_592AC0` | raw copy 4 bytes | `raw4`/caller-defined `s32`/`u32`/`f32` | 4-byte width 不等於 user id、page、status 或 float；要看 native consumer |
-| `sub_592AE0`、`sub_592B00`、`sub_592B60`、`sub_592B80` | raw copy 8 bytes | `raw8`/caller-defined `u64` | 682 guard 由 low/high direct consumer 定義；其他 raw8 不可重命名 |
-| `sub_592B20`、`sub_592B40` | raw copy 4 bytes | `raw4`; native float destination 才可投影為 `f32` | helper 自身只是 copy；144 K/D 是 consumer 造成的 f32 語意 |
+| `sub_592920`、`sub_592960`（寫）；`sub_592940`、`sub_592980`（讀） | u8，1 byte | `u8` | function identity 已固定 unsigned alias；caller domain 仍可 unresolved |
+| `sub_5928E0`（寫）；`sub_592900`（讀） | s8，1 byte | `s8` | `char` prototype 不能覆蓋 native signed alias；bool-like source 仍保留 source evidence |
+| `sub_5929A0`（寫）；`sub_592A00`（讀） | u16，2 bytes | `u16` | caller domain 仍須由 consumer 判斷 |
+| `sub_5929E0`（寫）；`sub_5929C0`（讀） | s16，2 bytes | `s16` | caller domain 仍須由 consumer 判斷 |
+| `sub_592A20`、`sub_592A40` | s32，4 bytes | `s32` | exact signed alias；業務名稱仍不可由 width 自動命名 |
+| `sub_592A60`、`sub_592A80` | u32，4 bytes | `u32` | exact unsigned alias；業務名稱仍不可由 width 自動命名 |
+| `sub_592AA0`、`sub_592AC0` | raw copy 4 bytes | `raw4`/caller-defined | generic 4-byte alias；不能直接投影成 s32/u32/f32 |
+| `sub_592B20`、`sub_592B40` | IEEE-754 f32，4 bytes | `f32` | float semantics follow this helper identity |
+| `sub_592AE0`、`sub_592B00`、`sub_592B60`、`sub_592B80` | u64，8 bytes | `u64` | 682 guard 由 low/high direct consumer 定義；其他 u64 不可重命名 |
 | `sub_592500`、`sub_592580` | exact raw byte run | `raw`/`zeros` | 48B blob、fingerprint、160B profile block 不能按鄰近欄位猜語意 |
 | `sub_5926F0`、`sub_592730` | 寫/讀 NUL-terminated ANSI bytes | `str` | native buffer capacity與encoding另由 caller證明；不存在 wire length prefix |
 | `sub_592770`、`sub_5927B0` | 讀 NUL-terminated UTF-16 bytes | `wstr` | 本 31-opcode TS review 沒有把它誤套進 ANSI packet |

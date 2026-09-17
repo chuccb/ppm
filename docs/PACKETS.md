@@ -96,22 +96,26 @@ offset 8   ...  payload (小端, 緊湊, 無對齊)
 
 | 函數 | 型別 | 大小 |
 |------|------|------|
-| sub_592920,sub_5928E0,sub_592960 (寫) / sub_592900,sub_592940,sub_592980 (讀) | u8 (1B) | 1 |
-| sub_5929A0,sub_5929E0 (寫) / sub_592A00,sub_5929C0 (讀) | raw2; caller may treat it as u16/s16 | 2 |
-| sub_592A20 / sub_592A40 | raw4; caller may treat it as s32/u32 or another 4-byte value | 4 |
-| sub_592A60 / sub_592A80 | raw4; this alias does not itself establish unsigned semantics | 4 |
-| sub_592B20 / sub_592B40 | raw4; float semantics require a native float caller | 4 |
-| sub_592AC0 | raw4; semantics come from its caller (142 calendar / 144 request context / 196 client flags are raw4 uses) | 4 |
-| sub_592AE0 / sub_592B00 | raw8; 682 guard is a caller-defined u64 projection | 8 |
+| sub_592920,sub_592960 (寫) / sub_592940,sub_592980 (讀) | u8 | 1 |
+| sub_5928E0 (寫) / sub_592900 (讀) | s8 | 1 |
+| sub_5929A0 (寫) / sub_592A00 (讀) | u16 | 2 |
+| sub_5929E0 (寫) / sub_5929C0 (讀) | s16 | 2 |
+| sub_592A20 / sub_592A40 | s32 | 4 |
+| sub_592A60 / sub_592A80 | u32 | 4 |
+| sub_592AA0 / sub_592AC0 | raw4; caller-defined 4-byte value | 4 |
+| sub_592B20 / sub_592B40 | IEEE-754 f32 | 4 |
+| sub_592AE0 / sub_592B00,sub_592B60 / sub_592B80 | u64 | 8 |
 | sub_5926F0 / sub_592730 | ANSI 字串 (lstrlenA+1, 含 NUL) | 變長 |
 | sub_592770 / sub_5927B0 | UTF-16 字串 (2*len+2) | 變長 |
 | sub_5927F0 / sub_592850 | 內嵌整個 Packet (u16 opcode + u32 size + bytes) | 變長 |
 
-> 8 個 u8 讀取別名 (592900/940/980) 底層都是 `sub_592500(this,a2,1)`;
-> 寫入別名同理 (592920/8E0/960 → `sub_592580`)。`sub_5929A0/9E0` 的
-> decompiler 參數雖顯示 `char`，函數實作仍從該參數位址複製 2 bytes；不可
-> 只用 Hex-Rays 參數型別決定 signedness。所有 2/4/8-byte aliases 同理，
-> wire 寬度以函數內的 `sub_592500/sub_592580` size 為準，語意必須回到 caller。
+> 每一組 helper alias 的 signedness 以 native primitive audit 的 function identity
+> 為準：`592920/592960=u8`、`5928E0=s8`、`5929A0=u16`、`5929E0=s16`、
+> `592A20=s32`、`592A60=u32`、`592B20=f32`、`592AE0/592B60=u64`。
+> `592AA0/592AC0` 保留為 caller-defined `raw4`，因這一組 helper 本身只做
+> 4-byte copy。Hex-Rays 的參數仍普遍顯示為 `char`，所以不能用參數宣告取代
+> alias identity；但也不能因此把已知的 `u8/s8/u16/s16/s32/u32/f32` 全部退回
+> `rawN`。wire width 仍由函數內的 `sub_592500/sub_592580` size 確認。
 
 **primitive implementation boundary（`PaperMan.exe.c` 00592500–00592B80）：**
 `sub_592500` 在 read cursor + requested size 超過 packet payload end 或
@@ -519,24 +523,24 @@ history or application state; it only records the two observed native send lanes
 
 | 形狀 | opcode | native 寫入序列（不含 Packet 8-byte wire header） |
 |---|---|---|
-| 共用標頭、沒有額外 body | `1 9 35` | `u8 u8 u8 raw4` |
-| opcode-19 variant（多一個 source byte） | `19` | `raw1×4 raw4 + ANSI/NUL string` |
-| 共用標頭 + 兩個 body byte | `27` | `u8 u8 u8 raw4 + u8 u8` |
-| 共用標頭 + 兩個 raw4 | `21` | `u8 u8 u8 raw4 + raw4 raw4` |
-| 共用標頭 + 變長 bot records | `30` | `u8 u8 u8 raw4 + raw2 count + records` |
-| 共用標頭 + movement-like fields | `23` | `u8 u8 u8 raw4 + raw4 u8 raw2×3 u8 u8×4 raw4` |
-| 共用標頭 + object/position fields | `32` | `u8 u8 u8 raw4 + u8 u8 raw2×3` |
+| 共用標頭、沒有額外 body | `1 9 35` | `u8 u8 u8 s32` |
+| opcode-19 variant（多一個 source byte） | `19` | `u8 u8 s8 u8 s32 + ANSI/NUL string` |
+| 共用標頭 + 兩個 body byte | `27` | `u8 u8 u8 s32 + u8 u8` |
+| 共用標頭 + 兩個 raw4 | `21` | `u8 u8 u8 s32 + raw4 raw4` |
+| 共用標頭 + 變長 bot records | `30` | `u8 u8 u8 s32 + u16 count + records` |
+| 共用標頭 + movement-like fields | `23` | `u8×3 s32 raw4 u8 u16×3 u8 u8×8 s32` |
+| 共用標頭 + object/position fields | `32` | `u8×3 s32 u8 s8 u16×3` |
 | 無共用標頭、`u8 + raw4` | `5 6 13 14` | `u8 raw4` |
 | 無共用標頭、兩個 byte | `15` | `u8 u8` |
 | 變體 | `17` | 空 payload **或** ANSI/NUL string |
 
 對 `1/9/21/23/27/30/32/35` 而言，前四欄的來源型別是：
 `sub_417D00()` 的 channel byte、`byte_EE896D`（`CMyData+5`）的 room-slot
-byte、`sub_592920`／`sub_5928E0` 寫入的 source-dependent byte，以及
-`dword_EE8CB4`（`CMyData+844`）的 raw4。除特殊 `n2==2` 分支寫入 `0xFE`
-外，source-dependent byte 來自 `CMyData+13`。這證明了 wire 形狀相同，
-**不證明第三欄的 domain 語義**；應保留 source-oriented 名稱，不要把它命名
-成 team、mode 或 peer id。
+byte、`sub_592920` 寫入的 source-dependent `u8`，以及 `dword_EE8CB4`
+（`CMyData+844`）經 `sub_592A20` 寫入的 `s32`。除特殊 `n2==2` 分支寫入
+`0xFE` 外，source-dependent byte 來自 `CMyData+13`。這證明了 wire 形狀
+與 primitive signedness，**不證明第三欄的 domain 語義**；應保留
+source-oriented 名稱，不要把它命名成 team、mode 或 peer id。
 
 #### UDP builder wire audit（本輪逐欄校正）
 
@@ -545,75 +549,75 @@ byte、`sub_592920`／`sub_5928E0` 寫入的 source-dependent byte，以及
 
 | opcode | builder | payload after opcode | direct send/state evidence |
 |---:|---|---|---|
-| `1` | `sub_593830`（`n2 != 2`） | 共用四欄：`u8 channel, u8 roomSlot, u8 sourceDependentSlot, raw4 dword_EE8CB4` | secondary sockaddr via `sub_595A10`；elapsed >1000 ms 且 global retry gate 為 0 時送一次，更新 `dword_F2563C`。 |
+| `1` | `sub_593830`（`n2 != 2`） | `u8 channel, u8 roomSlot, u8 sourceDependentSlot, s32 dword_EE8CB4` | secondary sockaddr via `sub_595A10`；elapsed >1000 ms 且 global retry gate 為 0 時送一次，更新 `dword_F2563C`。 |
 | `5` | `sub_593AB0` | `u8 sourceDependentSlot, raw4 n0x3E8_3/dword_F25640` | 每個已儲存的 non-local member address 送三次；輸入 `4` 的 member list 後 state 設為 4。 |
 | `6` | `sub_593E60` | `u8 sourceDependentSlot, raw4 n0x3E8_3/dword_F25640` | 第一次匹配 member key 時保存 `recvfrom` sockaddr，對該來源送三次；後續只增加 member counter。 |
-| `9` | `sub_594300` | 共用四欄，無額外 body：`u8 u8 u8 raw4` | periodic send to the secondary sockaddr via `sub_595A10`；此 builder 本身只證明 client-side send gate。 |
+| `9` | `sub_594300` | `u8 u8 u8 s32` | periodic send to the secondary sockaddr via `sub_595A10`；此 builder 本身只證明 client-side send gate。 |
 | `13` | `sub_594460` / `sub_5946C0`（2 direct ctor sites） | `u8 sourceDependentSlot, raw4 n0x3E8_3/dword_F25640` | 對儲存 address 送三次；`sub_592C40` 先讀入每個 member 的 raw16 address blob；兩個 native constructor sites 保持分列。 |
 | `14` | `sub_594A10` | `u8 sourceDependentSlot, raw4 n0x3E8_3/dword_F25640` | 對儲存 address 送三次；與 opcode 13 使用不同的 local member state byte。 |
 | `15` | `sub_593830`（只在 `n2 == 2`） | `u8 channel, u8 roomSlot` | secondary sockaddr via `sub_595A10` 送三次，然後將 local state byte 設為 7；沒有四欄共用標頭。 |
 | `17` | `sub_596180` / `sub_596240` | 空 payload（raw `word0=0`，送 8-byte Packet）；另一 caller 是 `lstrlenA(String)+1` bytes 的 ANSI/NUL payload | 兩個 caller 都用 primary destination 的 direct `sub_595900` lane，**不經 AES**；不能以 periodic empty variant 代表全部 opcode 17。 |
-| `19` | `sub_596670` | `raw1×4 raw4` + ANSI/NUL nickname | secondary sockaddr via `sub_595A10`；完整欄位與 retry/completion 見下節。第四個 raw1 是 native source-observed，不能套用其他 builder 的三個 byte prefix。 |
-| `21` | `sub_596330` | 共用四欄 + `raw4 manager+4` + `raw4 dword_EE8978` (`CMyData+16`) | `sub_595D80` 的 active-manager periodic path，經 `sub_595A10` 送 secondary sockaddr；兩個 tail raw4 的 semantics 均 unresolved。 |
-| `23` | `sub_744450` | 共用四欄 + `raw4 n0x64` + `u8` + `raw2×3` + flags `u8` + four `u8` + `raw4` | movement/game-state caller；`sub_602D70 → sub_596B90 → sub_595A10` gate/send 到 secondary sockaddr，不追加欄位。 |
-| `27` | `sub_6036F0`（另有 `sub_6013E0` 同序列） | 共用四欄 + `u8 this+406` + `u8 this+404` | 先將 `this+404=0`，再經 `sub_602D70 → sub_596B90 → sub_595A10` gate/send 到 secondary sockaddr；兩 byte 的 domain 尚未定案。 |
-| `30` | `sub_606340` / `sub_6065E0` | `sub_606340` 先建構 empty op-30 buffer 但在該 site 不 send；`sub_6065E0` 才寫 `raw1×3 raw4` + `raw2 count` + variable records | `sub_606340` 分段呼叫 `sub_6065E0`；只有後者經 `sub_595A10` 送 secondary sockaddr；`v32 = sub_761500(...)` 是 local temporary，**沒有被寫入 packet**。 |
-| `32` | `sub_96BF70` | 共用四欄 + object-derived `u8` + object-derived `u8` + `raw2×3` | `sub_595A10` 送 secondary sockaddr；local object position/state path；三個 `sub_5929A0` 的確切 domain 未證實。 |
-| `35` | `sub_7463E0` | 共用四欄，沒有後續 write primitive | `sub_67F380()` gate 下經 `sub_595A10` 送 secondary sockaddr；不是一般 ready、P2P 或 gameplay authority 的證據。 |
+| `19` | `sub_596670` | `u8×2 s8 u8 s32` + ANSI/NUL nickname | secondary sockaddr via `sub_595A10`；完整欄位與 retry/completion 見下節。offset 2 使用 `sub_5928E0`；offset 3 的 `-2` 會由 `sub_592920` 以 u8 `0xFE` 寫出。 |
+| `21` | `sub_596330` | `u8×3 s32 raw4 raw4` | `sub_595D80` 的 active-manager periodic path，經 `sub_595A10` 送 secondary sockaddr；兩個 `sub_592AA0` tail 仍是 caller-defined raw4。 |
+| `23` | `sub_744450` | `u8×3 s32 raw4 u8 u16×3 u8 u8×8 s32` | movement/game-state caller；`sub_602D70 → sub_596B90 → sub_595A10` gate/send 到 secondary sockaddr；三個 `u16` 與八個 `u8` 的 domain semantics UNRESOLVED。 |
+| `27` | `sub_6036F0`（另有 `sub_6013E0` 同序列） | `u8×3 s32 u8×2` | 先將 `this+404=0`，再經 `sub_602D70 → sub_596B90 → sub_595A10` gate/send 到 secondary sockaddr；兩 byte 的 domain 尚未定案。 |
+| `30` | `sub_606340` / `sub_6065E0` | `sub_606340` 先建構 empty op-30 buffer 但在該 site 不 send；`sub_6065E0` 寫 `u8×3 s32 u16 count` + variable records | `sub_606340` 分段呼叫 `sub_6065E0`；只有後者經 `sub_595A10` 送 secondary sockaddr；`v32 = sub_761500(...)` 是 local temporary，**沒有被寫入 packet**。 |
+| `32` | `sub_96BF70` | `u8×3 s32 u8 s8 u16×3` | `sub_967E90` caller；object/position path via `sub_595A10`；三個 `u16` 的 domain 未證實。 |
+| `35` | `sub_7463E0` | `u8×3 s32` | `sub_67F380()` gate 下經 `sub_595A10` 送 secondary sockaddr；不是一般 ready、P2P 或 gameplay authority 的證據。 |
 
 **Opcode 30 的 record framing 特別重要。** `sub_606340` 的 direct constructor site 只是 empty buffer initialization，沒有對應的 send；真正送出的 `sub_6065E0` 先以
-`sub_5929A0` 寫入 `v33`（`j3-i` 或 bounded range），所以 count 是 **raw2**，
-不是 raw4。每個 record 至少有一個 `u8` status；status non-zero 時再寫一個
-raw2。只有 `CPaperBot` 且 `sub_67E940(...)` 為真時，才追加
-`raw2, u8, raw2, raw4×3, raw4`。這些 conditional tails 不能被壓扁成固定
+`sub_5929A0` 寫入 `v33`（`j3-i` 或 bounded range），所以 count 是 **u16**，
+不是 raw4。每個 record 至少有一個 `s8` status；status non-zero 時再寫一個
+`u16`。只有 `CPaperBot` 且 `sub_67E940(...)` 為真時，才追加
+`u16, s8, u16, f32×3, s32`。這些 conditional tails 不能被壓扁成固定
 record width；`v32` 雖由 `sub_761500` 計算，沒有任何 `sub_592*` writer 使用。
 各 record 欄位的遊戲語義仍是 **UNRESOLVED**。
 
-**Opcode 23 的 width 也不能由變數宣告猜測。** `sub_5929A0` 是 raw2，
-`sub_592960` 是 u8，`sub_592B20` 是 raw4；因此這個 builder 的 body 不是
-早期筆記中的 `u8 u8 + s8×8 + s32`。其中三組 raw2 來自同一個 position-like
-source，四個 u8 來自 flags/height/state-like values；語義仍不命名。
+**Opcode 23 的 width/type 也不能由變數宣告猜測。** Native helper sequence 是
+`u8×3 s32 raw4 u8 u16×3 u8 u8×8 s32`：`sub_5929A0` 是 `u16`、
+`sub_592960` 是 `u8`、`sub_592B20` 沒有出現在這個 builder；`sub_592A20`
+是最後的 `s32`。三組 `u16` 來自同一個 position-like source，八個 `u8` 來自
+movement/flags/height/state-like branches；語意仍不命名。
 
 #### UDP signedness / native type-shape re-audit（2026-09-17）
 
-這裡需要把「wire signedness」和「source expression type」拆開。`raw1/raw2/raw4`
-只表示 writer 寫出的 exact byte width；它不表示 source 完全沒有 signed/unsigned
-證據，也不表示 wire 上存在一個可以驗證 signedness 的標記。native writer 的
-Hex-Rays prototypes 本身不能作為 signedness 終點：`sub_592920` 顯示 `char`
-但寫 1B，`sub_5929A0` 顯示 `char` 但寫 2B，`sub_592A20`/`sub_592AA0`
-顯示 `char` 但寫 4B，`sub_592AE0` 顯示 `char` 但寫 8B。
+你不能只看 `rawN` 這個 width label 就說 signedness 無法確認。這批 native
+primitive 已經有 function-identity mapping：`sub_592920`/`sub_592960` 是
+`u8` writer，`sub_5928E0` 是 `s8` writer；`sub_5929A0` 是 `u16`，
+`sub_5929E0` 是 `s16`，`sub_592A20` 是 `s32`，`sub_592A60` 是 `u32`，
+`sub_592B20` 是 `f32`，`sub_592AE0`/`sub_592B60` 是 `u64`。這是 helper
+alias evidence，不是從 Hex-Rays 的 `char` parameter 猜出來；那些 prototypes
+在 1/2/4/8-byte writer 上普遍失真。`sub_592AA0`/`sub_592AC0` 才保留為
+caller-defined `raw4` alias。
 
-目前能升格的 source evidence 是：
+套回 low private-UDP builders 後：
 
-- 共用 sender prefix 的第三個 byte `n0x10` 在 `n2 == 2` 時明確寫入 `-2`
-  （wire byte `0xFE`）；因此它是 **signed-capable / sentinel-shaped**，不能
-  只寫成純 `u8`。第一個 `sub_417D00()` byte 與第二個 `byte_EE896D`
-  仍是 native `char`/byte-shaped，不能僅憑名稱定成 unsigned。
-- opcode 19 的第三個 byte `v12 = (n2 == 2)` 是 bool/flag-shaped；第四個
-  source byte 仍沿用上述 `-2` branch。其 `raw4` 來自 native `int`-shaped
-  `dword_EE8CB4`，但 player-id/domain 的 protocol signedness 仍未證實。
-- opcode 5/6/13/14 的第一個 byte 同樣使用 `n0x10` 的 `-2` branch；其
-  `raw4` `n0x3E8_3` 是 native `int`-shaped elapsed/context value，而不是
-  可以從 `raw4` 三字面直接命名成 `u32` 的欄位。
-- opcode 30 的 `v33` 在 source 宣告為 `unsigned int`，且是 bounded
-  `j3-i` record count；因此 count 可標作 **unsigned/count-shaped raw2**。
-  每 record 的 status 是 byte/flag-shaped；optional `raw2/raw4` tails 的
-  signedness 仍依 CPaperBot fields and float/int consumers 保留 unresolved。
-- opcode 23 的三個 `raw2` 是 float position-like expression 經 `×3 + 0.5`
-  的 quantization；它們不是由 `sub_5929A0` prototype 證明的 `s16` 或 `u16`。
-  movement tail 的某一 branch 明確把 delta 下限 clamp 到 `-127`，所以該
-  branch 是 signed-capable；其他 mutually-exclusive movement sources 仍不能
-  統一升格。opcode 32 的三個 raw2 同樣來自 position-like values，保持同一
-  邊界。
-- opcode 21 的兩個 tail raw4 來自 native `int`-shaped `this+1` 與
-  `dword_EE8978`；這是 source type-shape evidence，不是 server/parser 已證明
-  的 `s32`/`u32` contract。opcode 27 的兩個 tail byte 則是 object state bytes，
-  目前沒有負值或 unsigned consumer 的直接證據。
+- 共用 prefix 是 **`u8 u8 u8 s32`**。第三個 `n0x10` 在 `n2 == 2` 時 source
+  會是 `-2`，但它呼叫的是 `sub_592920`，所以 wire type 仍是 **u8**，實際
+  byte 是 `0xFE`；不能因 source literal 是負數就改成 `s8`。
+- opcode 19 的順序是 **`u8 u8 s8 u8 s32 str`**。offset 2 使用
+  `sub_5928E0`，offset 3 使用 `sub_592920`；兩者不能互換。offset 2 的
+  source value 是 bool-like，但 native serializer identity 仍是 `s8`。
+- opcode 5/6/13/14 是 **`u8 raw4`**：leading byte 是 `sub_592920` 的
+  `u8`，後面的 `sub_592AA0` 是 caller-defined 4-byte alias，不能直接從
+  helper body 命名成 `s32` 或 `u32`。
+- opcode 30 的 count 是 **`u16`**，因為使用 `sub_5929A0`；record status
+  使用 `sub_5928E0` 的 **`s8`**。status non-zero 後的 `sub_5929A0` 是
+  `u16`，conditional tail 依序含 `u16, s8, u16, f32×3, s32`。
+- opcode 23 的完整 helper sequence 是 **`u8×3 s32 raw4 u8 u16×3
+  u8 u8×8 s32`**：`raw4` 是 `sub_592AA0` 的 caller-defined `n0x64`，三個
+  position-like words 是 `u16`，movement/state tail 的八個 writer 都是
+  `sub_592960` 的 `u8`，最後是 `sub_592A20` 的 `s32`。即使某一 branch
+  的 source delta 先 clamp 到 `-127`，serializer identity 仍是 `u8`。
+- opcode 32 是 **`u8×3 s32 u8 s8 u16×3`**；其中單一 `s8` 來自
+  `sub_5928E0`，三個 position-like words 來自 `sub_5929A0` 的 `u16`。
+- opcode 27 是 **`u8×3 s32 u8×2`**；opcode 21 是
+  **`u8×3 s32 raw4 raw4`**；兩者的 `raw4` 仍因使用 `sub_592AA0` 而保持
+  caller-defined，不把 native `int`-shaped source 直接升格成 wire `s32`。
 
-因此原表保留 `rawN` 是刻意區分 **wire width Fact** 與 **signedness inference**，
-不是宣稱完全無法從 C evidence 追出 signed-capable、bool-like、unsigned count
-或 int-shaped 部分；沒有直接 consumer/range/negative-value evidence 的欄位，才
-維持 `UNRESOLVED`。
+因此需要保留 `raw4` 的地方很少，而且理由是 **該 alias 本身是 generic
+4-byte copy**；不能再把已由 `sub_592920/8E0/960`、`sub_5929A0`、
+`sub_592A20`、`sub_592B20` 證明的 typed writes 退回 raw。
 
 **Opcode 5/6/13/14 的 correction。** 這四個 builder 都不是單一 `u8`：
 它們先寫 source-dependent byte，再用 `sub_592AA0` 寫入 elapsed/context raw4。
@@ -767,7 +771,7 @@ native little-endian scalars):
 | 0 | `u8` | `*sub_417D00()` via `sub_592920` | active channel index; set by the 142/196 channel paths. |
 | 1 | `u8` | `CMyData + 5` (`byte_EE896D`) | current room-member slot. `sub_537690` writes it from room/join response slot fields and callers use it to select the local room member. |
 | 2 | `s8` | `CMyData + 840 == 2` via `sub_5928E0` | exact boolean comparison only; the domain of `CMyData+840` remains **UNRESOLVED**. Normal client emissions are 0 or 1. |
-| 3 | `s8` | `-2` when `CMyData+840==2`, otherwise `CMyData+13`, via `sub_592920` | source-dependent one-byte value. Its non-special domain is **UNRESOLVED**; do not rename it team/mode/peer id. |
+| 3 | `u8` | `-2` when `CMyData+840==2`, otherwise `CMyData+13`, via `sub_592920` | source-dependent one-byte value; the special `-2` is emitted as wire byte `0xFE`. Its non-special domain is **UNRESOLVED**; do not rename it team/mode/peer id. |
 | 4 | `s32` | `CMyData + 844` (`dword_EE8CB4`) via `sub_592A20` | client-reported local player identifier. It is compared with player records during room/join processing; no server-side authorization rule is recovered. |
 | 8 | NUL-terminated CP949/ANSI string | `sub_537740(CMyData)` = `CMyData + 896`, via `sub_5926F0` | local nickname. It is copied from character UI data and reused in client chat/name comparisons. No length prefix; emission includes the NUL. |
 
