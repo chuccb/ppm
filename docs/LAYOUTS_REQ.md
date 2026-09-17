@@ -22,11 +22,14 @@
 > **序列讀法與證據界線**：表中的 `u8/s8/u16/s16/s32/u32/u64/f32` 首先是
 > wire width/type-shaped writer 的 native shorthand：分別為 1/1/2/2/4/4/8/4
 > bytes；相同 width 不代表相同 domain semantics。`raw1/raw2/raw4/raw8` 是只宣稱
-> exact byte width 的保守寫法，`rawN` 則是 runtime-sized raw/bulk write。native
-> helper xref 為 `sub_592920/8E0/960`→raw1、`sub_5929A0/9E0`→raw2、
-> `sub_592A20/60/AA0`→raw4、`sub_592AE0`→raw8、`sub_592B20`→raw4；
-> `str`、`wstr` 是 native string writer call，沒有在此表臆測 encoding、terminator
-> 或最大長度。`||` 代表同一 builder 的互斥或
+> exact byte width 的保守寫法，`rawN` 則是 runtime-sized raw/bulk write。這裡的
+> primitive xref 先記錄 byte width；native helper identity audit 再細分 wire type：
+> `592920/592960=u8`、`5928E0=s8`、`5929A0=u16`、`5929E0=s16`、
+> `592A20=s32`、`592A60=u32`、`592B20=f32`、`592AE0/592B60=u64`，而
+> `592AA0/592AC0` 明確保留為 caller-defined generic `raw4`。因此不能把所有
+> 4-byte helper 都自動壓成同一 `raw4`，也不能把 `592AA0/AC0` 反向命名成
+> numeric type。`str`、`wstr` 是 native string writer call，沒有在此表臆測
+> encoding、terminator 或最大長度。`||` 代表同一 builder 的互斥或
 > 條件變體，不是把它們串成一個可線性消費的 packet。count-prefixed record、
 >
 > **signedness audit（Fact / boundary）**：`rawN` 是 wire width label；但本輪

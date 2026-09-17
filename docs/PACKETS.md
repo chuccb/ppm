@@ -1133,8 +1133,8 @@ s32     start_index          (分頁, 每包最多 100 條, 背包上限 5120)
 repeat until sentinel:
   s32   inv_slot   (負值 = 結束)
   s32   item_id    (≤0/非法 = 中止)
-  float f1         (native first float; exact item-domain meaning UNRESOLVED)
-  float f2         (native second float; exact item-domain meaning UNRESOLVED;
+  raw4 f1         (native first 4-byte word via sub_592AC0; numeric/domain meaning UNRESOLVED)
+  raw4 f2         (native second 4-byte word via sub_592AC0; numeric/domain meaning UNRESOLVED;
                     NewSkillLevTable is client display/combine data, not authority
                     for naming or granting these server inventory values)
   s32   period     (剩餘天數)
@@ -1171,7 +1171,7 @@ kind 12/13/17 覆寫) — client 端帳目完全由 205 驅動, server 是
 u8      count
 repeat count:
   bool  ok
-  若 ok: s32 item_id, float f1, float f2, s32 period_days,
+  若 ok: s32 item_id, raw4 f1, raw4 f2, s32 period_days,
          u8 item_kind, u16 durability
 若 count==0: bool err, u8 err2     (錯誤碼對, sub_468470 顯示)
 尾端固定 7×s32 (無條件讀取; ⚠ 十一輪以商店 UI 標籤逐槽定案,
@@ -1321,7 +1321,7 @@ else:
       else: 2×raw4 participant blocks
   u8 has_my
   if has_my != 0: u8 selected_raw, u8 footer_raw
-  raw4 state494 (native local `float`, stored at client state [494])
+  raw4 state494 (native local `int v57`, stored at client state [494])
 ```
 `sub_580A80` 的 round-4/non-round-4 分支讀取數量不同；不要把 mode-3
 header 的 `n4` 當 ordinary room count，也不要把 `pair_byte_3` 直接命名成
@@ -1439,7 +1439,7 @@ total 送錯會讓任務進度爆走 (再次強調: 必須 MAX 單調)。
 限定武器)。
 
 ### 3.12c 庫存條目記憶體結構 (sub_524F70, 28B) — 廿一輪
-`{u32 flags=0, s32 item_id, f32 f1, f32 f2, s32 period, u8 kind,
+`{u32 flags=0, s32 item_id, raw4 f1, raw4 f2, s32 period, u8 kind,
 u16 dura, u16 dura_max}` (7 dword × 最多 5,120 槽 @ this+210)。
 kind 0/1/14 與 12/13/17 (可覆寫類) 走覆寫路徑, 其他 kind 重複購買
 會新增槽位 — 對應 200/205 條目欄位一一吻合。
@@ -1999,7 +1999,7 @@ future implementation evidence。沒有 process-local room state、battle owner�
 858 GL_MYWAREHOUSEITEMLIST_ACK (sub_4FACE0): u8 err, u8 tab;
     err 1..5 → 0x49C「ロッカー情報のロードに失敗しました。」;
     err==0 → s32 count, s32 total, count×{s32 slot(<0 停),
-    s32 item_id(≤0 停; 需過 sub_535020), f32 f1, f32 f2, s32 period,
+    s32 item_id(≤0 停; 需過 sub_535020), raw4 f1, raw4 f2, s32 period,
     u8 kind, u16 dura(複製為 dura_max)} — 28B 條目與背包同構!
     (count==total → 一次載完 → 標 loaded)
 859 GL_PUSH_TO_WAREHOUSE_REQ (sub_585720): u8 tab + s32 inv_slot
@@ -2073,19 +2073,19 @@ future implementation evidence。沒有 process-local room state、battle owner�
     u8  result
     u8  rank_restricted_server_flag (`==1 && rank>10` 顯示 resource 0x11C:
         「目前的階級不能連線到所選 server」)
-    raw4 daily_login_value (存 dword_1D0D23C；native 只在 >0 時以 `%d`
+    s32 daily_login_value (存 dword_1D0D23C；native 只在 >0 時以 `%d`
         顯示 CP932 table 0xC9「本日 login confirmed, %d PG awarded」；
-        UI 文字支持 PG 顯示單位，但 wire helper 是 raw4)
+        UI 文字支持 PG 顯示單位，但 domain 仍未命名)
     str raw_string_v71 (native local char[40]，最多 39 ANSI bytes；reader 後未找到 consumer，不能由欄位位置定名 channel/name)
-    raw4 post_name_raw_0 (sub_555D50 讀取後未找到 consumer)
-    raw4 post_name_raw_1 (同上)
-    raw4 restriction_value (result 6/8/9/10 使用低 byte 作 `%d`；8/10
+    s32 post_name_raw_0 (sub_555D50 讀取後未找到 consumer，domain unresolved)
+    s32 post_name_raw_1 (同上)
+    s32 restriction_value (result 6/8/9/10 使用低 byte 作 `%d`；8/10
         顯示 low byte - 1；不可縮成 u8)
     f32 restriction_value_float (result 7/8/9/10 的 `%.1f`)
     raw4 client_request_context (sub_592AC0 → dword_F2A684；client 隨後
-        原樣帶入多個 request，但 server-domain 意義尚未證實，非已證實 s32)
+        原樣帶入多個 request，但 server-domain 意義尚未證實)
     u8  has_net_cafe_info
-    if nonzero: u8×4 + raw4×8，依序交 `sub_A1C800` 初始化
+    if nonzero: u8×4 + s32×8，依序交 `sub_A1C800` 初始化
         `sNetCafeInfo`；完整可發送 shape 已在 TypeScript login ACK builder
         建模，四個 byte/八個 slot 的業務域仍未命名。
 
@@ -3369,7 +3369,7 @@ byte 偏移 (this 為物件基址):
    weapon; a nonempty primary carries 8 parts.
 4. **9-slot UI-item block** (sub_522480) 與 **NewSkill 5×7 profile**（selected record 由 sub_527AF0 讀 0x1C=7*4）分離儲存；466 操作後者。
 5. **戰績 19 個計數器** (GP_CH*C 家族)。
-6. **道具欄位**: item_id(s32), raw f1/f2 floats（domain UNRESOLVED）, period(s32), raw extra(u8), durability(u16)。NewSkillLevTable 不作這些 inventory wire 欄位的 server authority。
+6. **道具欄位**: item_id(s32), raw4 f1/f2 slots（domain and numeric interpretation UNRESOLVED）, period(s32), raw extra(u8), durability(u16)。NewSkillLevTable 不作這些 inventory wire 欄位的 server authority。
 7. **房間**: no(≤210), title, map, modeIndex, win_count, time_limit, max_player(≤10 slots),
    password, item_mode, balance, skill_off, observer。
 8. **好友/訊息/倉庫/任務/公會/禮物** 都有對應 packet 家族 → 各自建表。

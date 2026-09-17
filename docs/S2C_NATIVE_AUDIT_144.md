@@ -39,37 +39,38 @@ admission handshake, not a password or token protocol.
 
 `sub_555D50(a1)` reads the following bytes before branching on the first byte.
 The helper names are significant: `sub_592940` is a one-byte read,
-`sub_592A40` copies four raw bytes, `sub_592730` reads the native NUL string,
+`sub_592A40` is the audited `s32` reader (the local destination may still be used as domain-raw storage), `sub_592730` reads the native NUL string,
 and `sub_592B40` reads a native little-endian `f32`.
 
 ```text
 u8    result                         n108
 u8    rank_or_server_flag            v65
-raw4  daily_login_value              dword_1D0D23C
+s32   daily_login_value              dword_1D0D23C
 str   raw_string_v71                  v71, fixed local 40-byte destination
-raw4  post_name_raw_0                v72
-raw4  post_name_raw_1                v68
-raw4  restriction_value_raw          v70[4]
+s32   post_name_raw_0                v72
+s32   post_name_raw_1                v68
+s32   restriction_value_raw          v70[4] (low-byte consumer)
 f32   restriction_value_float        v75
-raw4  client_request_context         v69 -> dword_F2A684
+raw4  client_request_context         v69 -> dword_F2A684 (sub_592AC0)
 u8    has_net_cafe_info              v66
 if v66 != 0:
   u8    net_cafe_byte_0              v73
   u8    net_cafe_byte_1              v63
   u8    net_cafe_byte_2              v64
   u8    net_cafe_byte_3              v67
-  raw4  net_cafe_slot[0..7]          v62[0..7]
+  s32   net_cafe_slot[0..7]          v62[0..7] (domain-raw slots)
 ```
 
 The native local declarations sometimes make the fields look narrower than
 the wire grammar. In particular, `v70` is `char[4]`, but the reader still calls
-`sub_592A40`; it consumes four bytes. The restriction UI later uses only
+`sub_592A40` s32; it consumes four bytes. The restriction UI later uses only
 `*v70`, the low byte, including `*v70 - 1` in two messages. The server must
 therefore preserve the four-byte position; it must not replace the field with a
 one-byte wire field.
 
-`dword_1D0D23C`, `dword_F2A684`, and the optional `sNetCafeInfo` assignments are
-also raw four-byte paths. The current TS writer emits the mandatory prefix and
+`dword_1D0D23C`, the post-name/restriction locals, and the optional `sNetCafeInfo`
+word inputs are all four-byte `s32` wire paths; `dword_F2A684` is the separate
+`sub_592AC0` generic raw4 context path. The current TS writer emits the mandatory prefix and
 uses `u32(0)` for the context, which preserves the four bytes even though the
 current projection has no context owner.
 
@@ -81,8 +82,8 @@ current projection has no context owner.
 | `rank_or_server_flag` | copied to `byte_132432D`; later channel/lobby UI checks `byte_132432D == 1 && n10_2 > 10` and shows resource `0x11C` | a binary admission/UI flag that participates in the rank-over-10 restriction notice; no broader enum is proven |
 | `daily_login_value` | copied to `dword_1D0D23C`; later lobby progress/UI code tests `> 0`, formats resource `0xC9` with the value, displays it, then clears it | a positive login-reward notice value; the executable does not prove a currency name from the bytes alone, although the localized text identifies the displayed unit as PG |
 | `raw_string_v71` | `sub_592730` fills the local 40-byte buffer `v71`; no later use of `v71` is recovered in `sub_555D50`, and the nearby `sub_4B56C0` call copies a different buffer returned by `sub_401B20` | a NUL string with a 40-byte native local destination; its channel/display/identity domain is **not proven** by this reader |
-| `post_name_raw_0/1` | read into `v72`/`v68`; no recovered use follows in `sub_555D50` or the audited consumer search | exact raw4 fields, conservatively reserved/unknown |
-| `restriction_value_raw` | `*v70` is formatted into resources `0x31B`, `0x32D`, `0x321`, `0x334`; messages `0x32D` and `0x334` use `*v70 - 1` | raw4 wire field whose currently recovered UI consumer uses the low byte as a level/value; the field is not proven to be a general signed `s32` domain |
+| `post_name_raw_0/1` | read into `v72`/`v68`; no recovered use follows in `sub_555D50` or the audited consumer search | exact s32 wire fields, conservatively reserved/unknown domain |
+| `restriction_value_raw` | `*v70` is formatted into resources `0x31B`, `0x32D`, `0x321`, `0x334`; messages `0x32D` and `0x334` use `*v70 - 1` | s32 wire field whose currently recovered UI consumer uses the low byte as a level/value; the field is not proven to be a general signed `s32` domain |
 | `restriction_value_float` | formatted with `%.1f` into resources `0x31C`, `0x32D`, `0x321`, `0x334` | native `f32` and a restriction-message numeric value; the executable does not establish a server-side K/D policy |
 | `client_request_context` | copied byte-for-byte to `dword_F2A684`; later builders write that global into 119, 125, 344/346/348/350, 419, 439, 820, and 834 | shared raw4 context propagated across unrelated client requests; no user/account/session semantic owner is proven |
 | `has_net_cafe_info` | sets both `byte_EE8CB1` and `byte_EE896C`; these gates are consumed by NetCafe/discount/feature paths and lobby/game UI | presence gate for a native optional feature object; it is not itself a billing result code |

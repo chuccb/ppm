@@ -235,14 +235,14 @@ CREATE TABLE IF NOT EXISTS item_catalog (
 
 -- ----------------------------------------------------------------------------
 -- 8. 背包 — sub_524B70: 5120 slots, 分頁 100/包
---    欄位對 GL_MYITEM_ACK(200): slot,s32 item,float f1,float f2,s32 period,u16 dura
+--    欄位對 GL_MYITEM_ACK(200): slot,s32 item,raw4 f1,raw4 f2,s32 period,u16 dura
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS inventory (
     user_id        INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     slot           INTEGER NOT NULL CHECK (slot BETWEEN 0 AND 5119),
     item_id        INTEGER NOT NULL REFERENCES item_catalog(item_id),
-    stat_f1        REAL    NOT NULL DEFAULT 0,   -- float #1 (sub_592AC0)
-    stat_f2        REAL    NOT NULL DEFAULT 0,   -- float #2
+    stat_f1        REAL    NOT NULL DEFAULT 0,   -- server projection of raw4 #1; sub_592AC0 is generic
+    stat_f2        REAL    NOT NULL DEFAULT 0,   -- server projection of raw4 #2
     period_days    INTEGER NOT NULL DEFAULT 0
                    CHECK (period_days IN (0,1,5,7,10,15,20,30,50,60,80,90,100)),
                    -- sub_570B00/sub_571100 白名單 (含消耗品數量 5/10/20/30/50/80/100)
@@ -263,8 +263,8 @@ CREATE TABLE IF NOT EXISTS warehouse (
     user_id     INTEGER NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     slot        INTEGER NOT NULL CHECK (slot >= 0),
     item_id     INTEGER NOT NULL REFERENCES item_catalog(item_id),
-    stat_f1     REAL    NOT NULL DEFAULT 0,
-    stat_f2     REAL    NOT NULL DEFAULT 0,
+    stat_f1     REAL    NOT NULL DEFAULT 0,   -- server projection; warehouse wire slot is raw4
+    stat_f2     REAL    NOT NULL DEFAULT 0,   -- server projection; warehouse wire slot is raw4
     period_days INTEGER NOT NULL DEFAULT 0,
     expires_at  INTEGER,
     stored_at   INTEGER NOT NULL DEFAULT (unixepoch()),
@@ -508,8 +508,8 @@ CREATE TABLE IF NOT EXISTS warehouse_items (
     tab            INTEGER NOT NULL CHECK (tab BETWEEN 1 AND 6),
     slot           INTEGER NOT NULL CHECK (slot >= 0),      -- 倉庫頁籤內 slot
     item_id        INTEGER NOT NULL REFERENCES item_catalog(item_id),
-    stat_f1        REAL    NOT NULL DEFAULT 0,              -- f32 #1 (同背包)
-    stat_f2        REAL    NOT NULL DEFAULT 0,              -- f32 #2
+    stat_f1        REAL    NOT NULL DEFAULT 0,              -- raw4 slot #1; REAL is a server projection
+    stat_f2        REAL    NOT NULL DEFAULT 0,              -- raw4 slot #2; REAL is a server projection
     period_days    INTEGER NOT NULL DEFAULT 0,
     expires_at     INTEGER,                                 -- epoch; NULL=永久
     durability_cur INTEGER NOT NULL DEFAULT 0 CHECK (durability_cur BETWEEN 0 AND 65535),

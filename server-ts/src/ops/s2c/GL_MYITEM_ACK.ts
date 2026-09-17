@@ -26,18 +26,18 @@ function requireU16(name: string, value: number): void {
   }
 }
 
-function requireF32(name: string, value: number): number {
+function requireF32Projection(name: string, value: number): number {
   const wire = Math.fround(value);
-  if (!Number.isFinite(wire)) throw new RangeError(`200 ${name} must be finite f32`);
+  if (!Number.isFinite(wire)) throw new RangeError(`200 ${name} must be a finite f32 projection`);
   return wire;
 }
 
 export interface InvItem {
   readonly slot: number;
   readonly itemId: number;
-  /** Native first f32; exact item-domain meaning is unresolved here. */
+  /** Native generic raw4 slot; current TS accepts a finite f32 projection only. */
   readonly f1: number;
-  /** Native second f32; exact item-domain meaning is unresolved here. */
+  /** Native generic raw4 slot; current TS accepts a finite f32 projection only. */
   readonly f2: number;
   readonly period: number;
   /** Native u8 after the period; its domain is unresolved. */
@@ -61,12 +61,15 @@ export default function GL_MYITEM_ACK(op: number, items: readonly InvItem[] = []
     if (!Number.isSafeInteger(item.itemId) || item.itemId <= 0 || item.itemId > 0x7fff_ffff) {
       throw new RangeError("200 item_id must be a positive s32");
     }
-    const f1 = requireF32("f1", item.f1);
-    const f2 = requireF32("f2", item.f2);
+    const f1 = requireF32Projection("f1", item.f1);
+    const f2 = requireF32Projection("f2", item.f2);
     requireS32("period", item.period);
     const extra = item.extra ?? 0;
     requireU8("extra", extra);
     requireU16("durability", item.durability);
+    // Native 200 reads both slots with sub_592AC0 (generic raw4), not the
+    // typed sub_592B40 f32 reader. f32() here is only a byte-compatible
+    // projection for the current number-based API.
     p.s32(item.slot)
       .s32(item.itemId)
       .f32(f1)

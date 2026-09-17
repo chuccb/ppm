@@ -62,19 +62,19 @@ The relevant packet helpers are direct byte-copy wrappers in
 | `sub_592A40` | read | 4 | `sub_592500(this, a2, 4)` |
 | `sub_592730` | read string | NUL-terminated ANSI | `lstrlenA`/copy of the encoded string including NUL |
 
-The adjacent wrapper families are not typed serializers: `sub_592940` and
-`sub_592A40` copy bytes into caller-provided storage, while `sub_592920`
-copies the low-level one-byte value out. Their C parameter declarations do
-not prove signedness; signedness below comes only from the destination type,
-subsequent branch, or endpoint API. The 681 reader's `sub_592A40` calls are
-therefore retained as raw four-byte words unless the consumer establishes an
-`s32` interpretation, and the `sub_5929C0` calls remain raw two-byte words
-except where the native `__int16` loop/consumer provides signed evidence.
+The wrapper bodies are byte-copy primitives, so their C parameter declarations
+alone do not prove business names. The cross-file helper audit nevertheless
+has a stable wire alias mapping from the native helper family and paired direct
+consumers: `sub_592940=u8`, `sub_592A40=s32`, and `sub_5929C0=s16`.
+Accordingly, the 681 reader's `sub_592A40` calls are **s32 wire fields** and its
+`sub_5929C0` calls are **s16 wire fields**; the native consumers may still leave
+their domain semantics unresolved. That is different from `sub_592AC0`, whose
+helper identity remains generic `raw4` because its direct callsites do not
+establish one numeric interpretation.
 
-The helper's destination local type is not used to invent signedness. A
-`sub_5929C0` call proves two wire bytes; it does not by itself prove `s16` or
-`u16`. Signedness below is stated only when a later native branch or consumer
-adds evidence.
+The destination local type is still not a license to invent a business name:
+`s32`/`s16` here are wire aliases, while field meaning and server policy remain
+separate evidence questions.
 
 ## 3. Exact 681 read order
 

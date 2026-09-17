@@ -31,7 +31,7 @@
 | op | Exact field meanings beyond the generated read sequence | Native evidence |
 |---:|---|---|
 | 142 | `str endpoint_host` (client `char[20]`), raw4/s32 port whose low u16 is used, `u8 active_channel_index`, then packed calendar `u32`: `(year-2000)<<24 \| month<<19 \| day<<13 \| hour<<7 \| minute`. | `sub_5565D0`, `sub_534F20` |
-| 144 | `u8 result`, `u8 rank-restricted flag`, `s32 daily-login PG notice`, `str[40] channel`, two read-but-unused `s32`, level `s32`, K/D `f32`, propagated raw4 request context, `u8 has_net_cafe`, then exactly `u8×4 + raw4×8` when present. | `sub_555D50`, `sub_A1C800`, CP932 msg table ids 0xC9/0x11C/0x31B… |
+| 144 | `u8 result`, `u8 rank-restricted flag`, `s32 daily-login PG notice`, `str[40] channel`, two read-but-unused `s32`, level `s32`, K/D `f32`, propagated raw4 request context, `u8 has_net_cafe`, then exactly `u8×4 + s32×8` when present. | `sub_555D50`, `sub_A1C800`, CP932 msg table ids 0xC9/0x11C/0x31B… |
 | 196 | Prefix is always `u8 result, s32 channel_id, u8 active_channel_index`; the seven-field endpoint tail exists **only when result==1**. | `CLobbyChannel::sub_4179D0`, `sub_4177B0` |
 | 693 | Empty packet; its handler displays message 0xFF then immediately builds/sends 143. | `sub_57CAE0`, `sub_555C60` |
 
@@ -61,7 +61,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 136 | GR_CHANGESLOT_ACK | sub_56EF40 | `u8 u8 u8 f32/s32 s32 u8 u8 s32` |
 | 140 | GG_EXITGAME_ACK | sub_563430 | `u8 u8` |
 | 142 | PM_CONNECT_ACK | sub_5565D0 | `str s32 u8 u32` |
-| 144 | PM_UDPSTART_ACK | sub_555D50 | `u8 u8 raw4 str raw4 raw4 raw4 f32 raw4 u8 [u8 u8 u8 u8 raw4×8]` |
+| 144 | PM_UDPSTART_ACK | sub_555D50 | `u8 u8 s32 str s32 s32 s32 f32 raw4 u8 [u8 u8 u8 u8 s32×8]` |
 | 160 | TCP_UDP_DEAD_ACK | sub_58D790 | `(無直接讀取/轉發)` |
 | 166 | Y_TCP_INF_ACK | sub_58D820 | `(無直接讀取/轉發)` |
 | 168 | GR_CHANGEUSER_ACK | sub_56F410 | `u16` |
@@ -76,7 +76,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 194 | GC_CHANNEL_ACK | sub_56FE90 | `u8` |
 | 196 | GC_ENTERCHANNEL_ACK | sub_4179D0 | `u8 s32 u8 [str s32 u8 u8 u32 u8]` |
 | 198 | GL_MYINFO_ACK | sub_570550 | `s8/bool s32 u16 s32 u8 u8` |
-| 200 | GL_MYITEM_ACK | sub_570AB0 | `u8 success, s32 start, repeat≤100 {s32 slot, s32 item, f32, f32, s32 period, u8 extra, u16 durability}, s32 negative-slot sentinel` |
+| 200 | GL_MYITEM_ACK | sub_570AB0 | `u8 success, s32 start, repeat≤100 {s32 slot, s32 item, raw4 f1, raw4 f2, s32 period, u8 extra, u16 durability}, s32 negative-slot sentinel` |
 | 201 | GL_MYPARTSUP_ACK | sub_95A3B0 | `s32 count, repeat {raw4 raw4 raw1 raw4 raw4}` |
 | 202 | GL_EXPIRE_PARTSUP_ACK | sub_95AE40 | `s32 count, repeat {raw4 raw4 raw1 raw4 raw4}` |
 | 203 |  | sub_571D50 | `(無直接讀取/轉發)` |
