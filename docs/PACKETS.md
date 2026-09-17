@@ -1891,7 +1891,7 @@ cross-check: 681 的 3 頻道組 ↔ 195 的 group 序號互證；`ch_type` 是 
 
 房單 (108) 點「入室」→ 進房/加入進行中遊戲的流程; 與 113 ENTERROOM
 (快速/受邀進房) 的差別在於: 由房單 UI 驅動 + 密碼關卡 + 觀戰分支。
-client 端函數地址見括號, 訊息文字出自 msgtableres.lang (§8)。
+client 端函數地址見括號, 訊息文字出自 msgtableres.lang (RESOURCES.md §8)。
 
 ```
 流程 (client 側狀態機, room 列表 UI 物件 dword_E9FE70):
