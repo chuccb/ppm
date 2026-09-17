@@ -1,16 +1,55 @@
-# Wire layout primitive inventory（S2C 306 cases 收端 ／ C2S 261 TCP rows + 15 private-UDP 送端）
+# LAYOUTS：Packet wire-layout 原語總表（S2C 306＋C2S 261＋私人 UDP＋全 op 索引）
 
-> **合併說明（2026-09-17）**：本檔由 `LAYOUTS.md`（S2C dispatcher
-> primitive-read inventory）與 `LAYOUTS_REQ.md`（C2S REQ builder
-> primitive-write inventory＋private UDP Appendix A/B）合併而成；兩者本是
-> 同一 primitive 證據紀律的收/寫兩半，合併後 Part I / Part II 各自獨立
-> 閱讀，內容逐字保留（原 LAYOUTS_REQ 的 Appendix A/B 標題與表格行保持
-> byte-identical，為 `tools/verify_dispatcher_coverage.py` 的 marker
-> 錨定）。命名審計各半份：Part I 為 S2C 向、Part II 為 C2S 向，互不覆蓋。
+> **這份文件是什麼**：`PaperMan.exe` wire 面的 opcode 級中心目錄。每個 packet
+> 至少可在其中一處查到 native 事實：**Part I**（S2C 收端讀取原語，dispatcher
+> `sub_58B010` 306 case 全覆蓋）、**Part II**（C2S 送端 builder 寫入原語，
+> 261 unique op）、**Appendix A/B**（私人 UDP 送端 15 op／收端 22 case，
+> 獨立命名空間）、**Part III**（全 opcode 覆蓋總表：官方 676＋無官方名 76，
+> 共 752 列索引）。語意、consumer 與 server policy 界線在
+> [`PACKETS.md`](PACKETS.md)；本檔只管 native primitive 證據與命名狀態。
+>
+> **建議讀法**：找「某個 op 在哪裡」→ 直接翻 **Part III**（按數值排）；
+> 查「欄位怎麼讀/寫」→ 回 Part I/II/App 該列；查「這個 op 選什麼命名」→
+> 各審計節（Part I、Part II、PACKETS §2.6 命名總表）。
+>
+> **圖例（全文通用）**：
+> - 名稱狀態：`官方名`＝tsv catalog（Fact）；`〔推定〕`＝native 證據鏈比照官方
+>   風格之推定名（審計節為唯一定義處）；`〔未命名〕`＝**明確保留不命名**
+>   （UNRESOLVED，非缺漏；理由見各審計節／PACKETS §2.6）。
+> - 型別速記 S2C（讀取 helper）：u8=sub_592940/592980 · s8/bool=592900 ·
+>   u16=592A00 · s16=5929C0 · s32=592A40 · u32=592A80 · raw4=592AC0 ·
+>   f32=592B40 · u64=592B00/592B80 · str=592730 · wstr=5927B0 · raw16=592C40。
+> - 型別速記 C2S（寫入 helper）：u8=592920/592960 · s8=5928E0 · u16=5929A0 ·
+>   s16=5929E0 · s32=592A20 · u32=592A60 · f32=592B20 · u64=592AE0/592B60 ·
+>   raw4=592AA0/592AC0（caller-defined） · str=5926F0。
+> - ⚠ 兩張主表是「原語序列」而非精確語法：條件分支／迴圈／可選尾段會改變
+>   實際 wire 形狀；精確語意以 `PACKETS.md` 手工條目為準。
+>
+> **覆蓋率儀表板**（機器複驗；`python3 tools/verify_dispatcher_coverage.py` 可重跑）：
+
+| 集合 | 數量 | 收錄處 |
+|---|---:|---|
+| 官方 catalog 名錄（670 binary 註冊＋6 UI 補名） | 676 | 名稱來源（`db/packets.tsv`） |
+| S2C dispatcher case 覆蓋 | 306/306 | Part I（307 列＝306＋switch 外 196） |
+| C2S TCP builder（unique op；321 direct sites） | 261 | Part II |
+| 私人 UDP 送端 builder（19 direct sites） | 15 op | Appendix A |
+| 私人 UDP 收端 dispatcher case | 22 | Appendix B |
+| 有 native 證據但無官方名 | 76（TCP 46＋UDP 30） | Part III 標〔推定〕/〔未命名〕 |
+| 官方有名但無已定位 native endpoint（registry-only） | 150 | Part III 標注 |
+| 數值 op 全宇宙 | 752 | Part III 全收錄 |
+
+> **switch 外處理**：`681`／`694` 由 login TCP 層專屬 handler 處理（詳
+> `S2C_NATIVE_AUDITS.md` 681 part）；`196` 經 vtable 前置轉發、非
+> `sub_58B010` switch case，但仍列於 Part I 表。
+>
+> **沿革（2026-09-17 合併）**：本檔由原 `LAYOUTS.md`（S2C 收端）與
+> `LAYOUTS_REQ.md`（C2S 送端＋UDP Appendix A/B）合併；Appendix A/B 標題與
+> 表格行維持 byte-identical，作為 verifier 的 marker 錨定。Part I／Part II
+> 命名審計各半份，互不覆蓋。
 
 ---
 
-## Part I — S2C dispatcher primitive-read inventory（原 LAYOUTS.md）
+## Part I — S2C 收端：dispatcher 讀取原語清單（306/306 全覆蓋＋dispatch 外 694）
 
 ---
 
@@ -25,12 +64,12 @@
 > `python3 tools/verify_dispatcher_coverage.py` 重驗。
 >
 > 本表另含 dispatcher 以外的 S2C（例如走 vtable 前置轉發器者），
-> 故列數多於 306。名稱欄留空情形經 2026-09-17 S2C 未命名列稽核後：
+> 故列數多於 306。名稱欄原留空之列經 2026-09-17 S2C 未命名列稽核後：
 > 367/970/991 先前是對 `db/packets.tsv` 的 stale 空白，已回填官方名；
 > 17 列依 native 證據鏈推定命名（標 `〔推定〕`；含 880/914/946/947/949 第二波）；
 > 933、1007、1009
 > 的 handler 於本 dump 無函式體（`unknown_libname_94/95/105`），
-> 489、1010 語義證據不足 —— 此五列明確保留 unnamed，詳
+> 489、1010 語義證據不足 —— 此五列以 `〔未命名〕` 明確標示，詳
 > 〈S2C 推定命名審計（2026-09-17）〉節，
 > 屬正確標示而非缺漏。
 >
@@ -46,19 +85,18 @@
 > 查閱與覆蓋保證（306 個 dispatcher case，另含 6 個非 sub 直呼）。
 
 
-### Bootstrap fields cross-checked in native source (2026-09)
+### Bootstrap 欄位 native 交叉核對（2026-09；自動讀取序列之外的精確語意）
 
-| op | Exact field meanings beyond the generated read sequence | Native evidence |
+| op | 自動讀取序列之外的精確欄位語意 | Native 證據 |
 |---:|---|---|
-| 142 | `str endpoint_host` (client `char[20]`), raw4/s32 port whose low u16 is used, `u8 active_channel_index`, then packed calendar `u32`: `(year-2000)<<24 \| month<<19 \| day<<13 \| hour<<7 \| minute`. | `sub_5565D0`, `sub_534F20` |
-| 144 | `u8 result`, `u8 rank-restricted flag`, `s32 daily-login PG notice`, `str[40] channel`, two read-but-unused `s32`, level `s32`, K/D `f32`, propagated raw4 request context, `u8 has_net_cafe`, then exactly `u8×4 + s32×8` when present. | `sub_555D50`, `sub_A1C800`, CP932 msg table ids 0xC9/0x11C/0x31B… |
-| 196 | Prefix is always `u8 result, s32 channel_id, u8 active_channel_index`; the seven-field endpoint tail exists **only when result==1**. | `CLobbyChannel::sub_4179D0`, `sub_4177B0` |
-| 693 | Empty packet; its handler displays message 0xFF then immediately builds/sends 143. | `sub_57CAE0`, `sub_555C60` |
+| 142 | `str endpoint_host`（client `char[20]`）、port 為 raw4/s32（實際只用低 u16）、`u8 active_channel_index`、再一個打包日曆 `u32`：`(year-2000)<<24 \| month<<19 \| day<<13 \| hour<<7 \| minute`。 | `sub_5565D0`, `sub_534F20` |
+| 144 | `u8 result`、`u8 rank 限制旗標`、`s32 每日登入 PG 通知`、`str[40] channel`、兩個讀而未用的 `s32`、等級 `s32`、K/D `f32`、透傳的 raw4 request context、`u8 has_net_cafe`，存在時恰為 `u8×4 + s32×8`。 | `sub_555D50`, `sub_A1C800`, CP932 msg table ids 0xC9/0x11C/0x31B… |
+| 196 | 前綴恆為 `u8 result, s32 channel_id, u8 active_channel_index`；七欄 endpoint 尾段**僅在 result==1** 存在。 | `CLobbyChannel::sub_4179D0`, `sub_4177B0` |
+| 693 | 空 packet；handler 顯示訊息 0xFF 後立即構成並送出 143。 | `sub_57CAE0`, `sub_555C60` |
 
-`694` is handled by `CLobbyLogin::sub_43E500` outside this dispatcher table: its
-u16 replaces the initial 9600 compression threshold only when `<0x2580`; at or
-above the ceiling it is ignored. `681` result is read as raw4 but its branch
-selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout.
+`694` 由 `CLobbyLogin::sub_43E500` 在本 dispatcher 表之外處理：其 u16 僅在
+`<0x2580` 時替換預設 9600 壓縮門檻，達門檻上限即忽略。`681` 的 result 以
+raw4 讀取，但分支選擇器取其低位元組。完整佈局見 `PACKETS.md` §1.4 與 §3.15d。
 
 ### S2C 推定命名審計（2026-09-17）
 
@@ -275,7 +313,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 484 | GG_GAMECENTER_GAME_START_OK_ACK | sub_584F70 | `u16 u8 u16 s32` |
 | 486 | GL_GET_GAMEROOM_PROGRESSTIME_ACK | sub_56AE30 | `u8 u8 s8/bool u8 s8/bool u16 u8 s32 u8 s8/bool u16 u8 s32 u8 s8/bool u8 s8/bool u8 u8 s8/bool s8/bool u8 s8/bool` |
 | 488 | GL_MYROOMCHANGE_ACK〔推定〕 | sub_5861C0 | `u8 u8` |
-| 489 |  | sub_57C230 | `u8`（bit0→清全域 `this_5`；UNRESOLVED，見審計節） |
+| 489 | 〔未命名〕 | sub_57C230 | `u8`（bit0→清全域 `this_5`；UNRESOLVED，見審計節） |
 | 572 | GV_TEST_ACK | sub_58E5E0 | `(無直接讀取/轉發)` |
 | 584 | GC_CLAN_PROTOCOL_ACK | sub_54D040 | `s32` |
 | 586 | GC_CLAN_CREATE_ACK | sub_54CB90 | `s8` |
@@ -390,7 +428,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 927 | GR_AI_RECHARGE_MAGAZINE_END_ACK | sub_558880 | `u8 u8 s8/bool u8 u8 s32` |
 | 929 | GR_AI_CONTINUE_START_ACK | sub_761E90 | `u8 u8 s32 str s32 s32` |
 | 931 | GR_AI_CONTINUE_FAIL_ACK〔推定〕 | sub_762170 | `u8 u8` |
-| 933 |  | unknown_libname_105 | `(非 sub 直呼；無函式體，見審計節)` |
+| 933 | 〔未命名〕 | unknown_libname_105 | `(非 sub 直呼；無函式體，見審計節)` |
 | 934 | GR_AI_TEAMSCORE_NOTIFY | sub_762630 | `s32 u8 s32 u8 s32 s32` |
 | 936 | GR_AI_FEVER_START_ACK | sub_7623A0 | `u8 u8 s32 u8` |
 | 937 | GR_AI_FEVER_END_NOTIFY | sub_762560 | `u8` |
@@ -426,13 +464,13 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 1001 | GL_BLOCK_LIST_ACK〔推定〕 | sub_567D50 | `u16 str s32 s32 str` |
 | 1003 | GL_BLOCKME_LIST_ACK〔推定〕 | sub_567BD0 | `u16 str s32 str` |
 | 1005 | GL_RANDOMMAP_LIST_ACK〔推定〕 | sub_5884C0 | `u8 u8 u8` |
-| 1007 |  | unknown_libname_94 | `(非 sub 直呼；16-byte 微 thunk 無函式體，見審計節)` |
-| 1009 |  | unknown_libname_95 | `(非 sub 直呼；16-byte 微 thunk 無函式體，見審計節)` |
-| 1010 |  | sub_5680E0 | `u8 u8 s32`（count×{u8 playerKey, s32}→玩家 row+240776；無讀者，UNRESOLVED，見審計節） |
+| 1007 | 〔未命名〕 | unknown_libname_94 | `(非 sub 直呼；16-byte 微 thunk 無函式體，見審計節)` |
+| 1009 | 〔未命名〕 | unknown_libname_95 | `(非 sub 直呼；16-byte 微 thunk 無函式體，見審計節)` |
+| 1010 | 〔未命名〕 | sub_5680E0 | `u8 u8 s32`（count×{u8 playerKey, s32}→玩家 row+240776；無讀者，UNRESOLVED，見審計節） |
 
 ---
 
-## Part II — C2S REQ builder primitive-write inventory（原 LAYOUTS_REQ.md）
+## Part II — C2S 送端：builder 寫入原語清單（261 unique op／321 direct sites）
 
 ---
 
@@ -524,7 +562,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 > channel index、local-option-derived raw flag（domain UNRESOLVED；`sub_56FF40`）。
 
 
-## 推定命名審計（2026-09-17）
+## C2S 推定命名審計（2026-09-17）
 
 > 主表中 22 個 **catalog 未註冊**的 row（206 加原 unnamed 21 個）經多輪
 > native 證據鏈稽核後，依官方命名風格推定命名。所有證據出自
@@ -666,7 +704,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 - 1006/1008 寫入 helper 為 `sub_592920`（`u8`）。
 
 
-## 主表：C2S REQ builder primitive-write rows
+## 主表：C2S builder 寫入原語（261 列）
 
 | op | 名稱 | direct ctor xref | 寫入序列 (變體) |
 |---|---|---|---|
@@ -935,6 +973,9 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 
 ## Appendix A — low private-UDP Packet constructors excluded from the TCP count
 
+> **中文導讀**：本節＝私人 UDP **送端** builder 清單（15 op／19 direct sites）。
+> 這些低 op 刻意不計入 Part II 的 261 TCP 口徑；方向恆為 client → UDP 目的端。
+
 > **Scope / count（Fact；current `PaperMan.exe.c`）**：本輪 source snapshot 是
 > 23,357,375 bytes、SHA-256 `e40df3d16efd7340810de8cfed7a46e270f854d04cf1b16b3f6b1d88b1791125`。
 > native scan 找到 19 個 `Packet::possible_ctor_or_dtor_0(..., N)` low-opcode direct sites、15 個 unique
@@ -989,6 +1030,9 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 
 
 ## Appendix B — `sub_595E80` UDP-private dispatcher / every verified receive case
+
+> **中文導讀**：本節＝私人 UDP **收端** dispatcher 全 22 case。`sub_595E80` 與
+> TCP 主 dispatcher `sub_58B010` 是兩個獨立命名空間；數值相同也不共用 layout。
 
 > **Dispatcher boundary（Fact / HIGH）**：UDP receive 的唯一已定位主要 dispatcher 是
 > `sub_595E80(CUDPNetworkManager, packet)`。呼叫鏈是
@@ -1112,3 +1156,838 @@ native 名稱或雙向協議證據之前，維持 unnamed/source-oriented。
 `python3 tools/verify_dispatcher_coverage.py` 檢查 opcode 集合與 shared
 builder 前綴。native helper 函式體與 direct-caller 稽核仍為獨立檢查；
 通過本 Appendix 不會把 UNRESOLVED 的 client state 升格為 server 權限。
+
+---
+
+## Part III — 全 opcode 覆蓋總表（752 個數值 op 索引；2026-09-18 生成）
+
+> **這張表收錄所有已知 packet 數值**：官方 catalog 676＋有 native 證據但無官方名
+> 76（TCP 46＋私人 UDP 30；`verify_dispatcher_coverage.py` 的 74 口徑因
+> `| 8 / 24 |` 合體列而不含 8 與 24）＝**752 列，無缺漏**。它只是**索引**：欄位細節請回 Part I（S2C 讀取）、
+> Part II（C2S 寫入）、Appendix A/B（私人 UDP）各列；語意與 consumer 請跳
+> `PACKETS.md`。
+>
+> **欄位讀法**：
+> - `S2C`/`C2S`/`UDP出`/`UDP入`：`✓`＝本檔有對應列；`✗`＝client build 無此方向
+>   native endpoint；`—`＝命名空間不適用（私人 UDP op 不屬 TCP 兩表；TCP op
+>   不屬 UDP 兩表）。
+> - 名稱狀態：`官方 catalog`＝`db/packets.tsv` 註冊名（Fact，唯一定義處）；
+>   `推定〔S2C 審計〕`／`推定〔C2S 審計〕`＝Part I/II 〈推定命名審計〉之推定名；
+>   `推定〔UDP 命名總表〕`＝`PACKETS.md` §2.6 之推定名；`未命名`＝有 native
+>   endpoint 但證據不足以命名（明確保留，非缺漏）。
+> - **registry-only**（官方有名錄、但四個 lane 全 `✗`）：共 150 op——本檔
+>   無任何已定位 native endpoint，可能是舊版遺留或純 server 內部用途；不得因
+>   名字存在而推斷 client 行為。`681`／`694` 雖無表列但屬 login TCP 專屬處理
+>   （`S2C_NATIVE_AUDITS.md`），已自本類除外；十二帶 153..164 的完整傳輸層
+>   定案見 `PACKETS.md` §2.6。
+> - **私人 UDP 帶（1–99）是獨立命名空間**（`sub_595E80`／`sub_595A10` lane）：
+>   數值與 catalog 重複時互不通用；3/7/11/16/25/36..39 從未觀察到，不列。
+> - 唯二雙棲＝**154／158**：官方名同時落在私人收端 case（詳 Appendix B.3）。
+
+#### 1–99（私人 UDP 命名空間；數值與 catalog 重複亦不通用）
+
+| op | 名稱 | 名稱狀態 | S2C | C2S | UDP出 | UDP入 | 備註 |
+|---:|---|---|:-:|:-:|:-:|:-:|---|
+| 1 | `Y_UDP_C_AHOLE_INF`〔推定〕 | 推定〔UDP 命名總表〕 | — | — | ✓ | ✗ |  |
+| 2 | `Y_UDP_S_AHOLE_ACK`〔推定〕 | 推定〔UDP 命名總表〕 | — | — | ✗ | ✓ |  |
+| 4 | `Y_UDP_S_AHOLE_LIST_INF`〔推定〕 | 推定〔UDP 命名總表〕 | — | — | ✗ | ✓ |  |
+| 5 | `Y_UDP_C_APUNCH_INF`〔推定〕 | 推定〔UDP 命名總表〕 | — | — | ✓ | ✓ | C2C 打孔（client-authored） |
+| 6 | `Y_UDP_C_APUNCH_ACK`〔推定〕 | 推定〔UDP 命名總表〕 | — | — | ✓ | ✓ | C2C 打孔 |
+| 8 | 〔未命名〕 | 未命名〔UNRESOLVED〕 | — | — | ✗ | ✓ | 與 24 共用 handler `sub_596940`；native 字串標籤 `Y_UDP_S_MOVE_INF` 之 8/24 歸屬未定 |
+| 9 | `Y_UDP_C_BHOLE_INF`〔推定〕 | 推定〔UDP 命名總表〕 | — | — | ✓ | ✗ |  |
+| 10 | `Y_UDP_S_BHOLE_ONE_INF`〔推定〕 | 推定〔UDP 命名總表〕 | — | — | ✗ | ✓ |  |
+| 12 | `Y_UDP_S_BHOLE_LIST_INF`〔推定〕 | 推定〔UDP 命名總表〕 | — | — | ✗ | ✓ |  |
+| 13 | `Y_UDP_C_BPUNCH_INF`〔推定〕 | 推定〔UDP 命名總表〕 | — | — | ✓ | ✓ | C2C 打孔 |
+| 14 | `Y_UDP_C_BPUNCH_ACK`〔推定〕 | 推定〔UDP 命名總表〕 | — | — | ✓ | ✓ | C2C 打孔 |
+| 15 | 〔未命名〕 | 未命名〔UNRESOLVED〕 | — | — | ✓ | ✓ | 不賜名：mode-2 語理未證（PACKETS §2.6） |
+| 17 | `UDP_PROBE_REQ`〔推定〕 | 推定〔UDP 命名總表〕 | — | — | ✓ | ✗ | 死鏈：兩 builder 零進入邊（PACKETS §2.6 存活度註記） |
+| 18 | `UDP_PROBE_ACK`〔推定〕 | 推定〔UDP 命名總表〕 | — | — | ✗ | ✓ |  |
+| 19 | `UDP_REGISTER_REQ`〔推定〕 | 推定〔UDP 命名總表〕 | — | — | ✓ | ✗ |  |
+| 20 | `UDP_REGISTER_ACK`〔推定〕 | 推定〔UDP 命名總表〕 | — | — | ✗ | ✓ |  |
+| 21 | `UDP_KEEPALIVE_REQ`〔推定〕 | 推定〔UDP 命名總表〕 | — | — | ✓ | ✗ |  |
+| 22 | `UDP_MEMBERPING_INF`〔推定〕 | 推定〔UDP 命名總表〕 | — | — | ✗ | ✓ |  |
+| 23 | `Y_UDP_C_MOVE_INF`〔推定〕 | 推定〔UDP 命名總表〕 | — | — | ✓ | ✗ |  |
+| 24 | 〔未命名〕 | 未命名〔UNRESOLVED〕 | — | — | ✗ | ✓ | 與 8 共用 handler（同上） |
+| 26 | 〔未命名〕 | 未命名〔UNRESOLVED〕 | — | — | ✗ | ✓ | PE 直讀＝空 thiscall（16B 本體）；`unknown_libname_107` |
+| 27 | `Y_UDP_C_HIT_INF`〔推定〕 | 推定〔UDP 命名總表〕 | — | — | ✓ | ✗ |  |
+| 28 | 〔未命名〕 | 未命名〔UNRESOLVED〕 | — | — | ✗ | ✓ | 不賜名：consumer 無名（PACKETS §2.6） |
+| 29 | `UDP_DISCONNECT_INF`〔推定〕 | 推定〔UDP 命名總表〕 | — | — | ✗ | ✓ |  |
+| 30 | `Y_UDP_C_BOT_INF`〔推定〕 | 推定〔UDP 命名總表〕 | — | — | ✓ | ✗ |  |
+| 31 | `Y_UDP_S_BOT_INF`〔推定〕 | 推定〔UDP 命名總表〕 | — | — | ✗ | ✓ |  |
+| 32 | `Y_UDP_C_OBJPOS_INF`〔推定〕 | 推定〔UDP 命名總表〕 | — | — | ✓ | ✗ |  |
+| 33 | `Y_UDP_S_OBJPOS_INF`〔推定〕 | 推定〔UDP 命名總表〕 | — | — | ✗ | ✓ |  |
+| 34 | 〔未命名〕 | 未命名〔UNRESOLVED〕 | — | — | ✗ | ✓ | 不賜名：consumer 無名（PACKETS §2.6） |
+| 35 | `Y_UDP_C_TCPINF_ACK`〔推定〕 | 推定〔UDP 命名總表〕 | — | — | ✓ | ✗ |  |
+
+#### 100–199
+
+| op | 名稱 | 名稱狀態 | S2C | C2S | UDP出 | UDP入 | 備註 |
+|---:|---|---|:-:|:-:|:-:|:-:|---|
+| 100 | `GS_BASE` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 101 | `GT_PING_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 102 | `GT_PING_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 103 | `GE_LOGOUT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 104 | `GE_LOGOUT_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 105 | `GL_USERLIST_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 106 | `GL_USERLIST_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 107 | `GL_GAMEROOMINFO_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 108 | `GL_GAMEROOMINFO_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 109 | `GL_ROOMINFOCHANGE_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 110 | `GL_ROOMINFOCHANGE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 111 | `GL_MAKEROOM_REQ` | 官方 catalog | ✗ | ✓ | — | — | `PACKETS.md` §3.15：線性序列為機械壓平，真正 wire 以該節為準 |
+| 112 | `GL_MAKEROOM_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 113 | `GL_ENTERROOM_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 114 | `GL_ENTERROOM_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 115 | `GL_ADDUSER_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 116 | `GL_ADDUSER_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 117 | `GL_DELETEUSER_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 118 | `GL_DELETEUSER_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 119 | `GL_CHATTING_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 120 | `GL_CHATTING_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 121 | `GR_MAPCHANGE_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 122 | `GR_MAPCHANGE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 123 | `GR_LEAVE_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 124 | `GR_LEAVE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 125 | `GR_CHATTING_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 126 | `GR_CHATTING_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 127 | `GR_READY_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 128 | `GR_READY_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 129 | `GR_START_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 130 | `GR_START_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 131 | `GR_FORCEOUT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 132 | `GR_FORCEOUT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 133 | `GR_END_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 134 | `GR_END_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 135 | `GR_CHANGESLOT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 136 | `GR_CHANGESLOT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 137 | `GR_STARTTIME_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 138 | `GR_STARTTIME_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 139 | `GG_EXITGAME_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 140 | `GG_EXITGAME_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 141 | `PM_CONNECT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 142 | `PM_CONNECT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 143 | `PM_UDPSTART_REQ` | 官方 catalog | ✗ | ✓ | — | — | 十二帶 TCP-live（PACKETS §2.6 傳輸層定案） |
+| 144 | `PM_UDPSTART_ACK` | 官方 catalog | ✓ | ✗ | — | — | 十二帶 TCP-live（同上） |
+| 145 | `PM_MASTER_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 146 | `PM_MASTER_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 147 | `PM_ID_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 148 | `PM_ID_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 149 | `PM_LOGOUT_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 150 | `PM_LOGOUT_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 151 | `PM_CH_SERVER_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 152 | `PM_CH_SERVER_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 153 | `UDP_ALL_PING_REQ` | 官方 catalog | ✗ | ✗ | — | — | 十二帶 registry-only（PACKETS §2.6 傳輸層定案） |
+| 154 | `UDP_ALL_PING_ACK` | 官方 catalog | ✗ | ✗ | — | ✓ | 雙棲：官方 catalog 名＋私人 UDP 收端 case（`sub_5965D0`） |
+| 155 | `Y_UDP_C_HOLE_INF` | 官方 catalog | ✗ | ✗ | — | — | 十二帶 registry-only（PACKETS §2.6 傳輸層定案） |
+| 156 | `Y_UDP_S_HOLE_INF` | 官方 catalog | ✗ | ✗ | — | — | 十二帶 registry-only（PACKETS §2.6 傳輸層定案） |
+| 157 | `UDP_TCP_DEAD_REQ` | 官方 catalog | ✗ | ✗ | — | — | 十二帶 registry-only（PACKETS §2.6 傳輸層定案） |
+| 158 | `UDP_TCP_DEAD_ACK` | 官方 catalog | ✗ | ✗ | — | ✓ | 雙棲：官方 catalog 名＋私人 UDP 收端 case（`sub_596910`） |
+| 159 | `TCP_UDP_DEAD_REQ` | 官方 catalog | ✗ | ✗ | — | — | 十二帶：僅名錄＋`sub_58D940` logger，無 case/builder |
+| 160 | `TCP_UDP_DEAD_ACK` | 官方 catalog | ✓ | ✗ | — | — | 十二帶 TCP-live（同上） |
+| 161 | `UDP_TCP_LIVE_REQ` | 官方 catalog | ✗ | ✗ | — | — | 十二帶 registry-only（PACKETS §2.6 傳輸層定案） |
+| 162 | `UDP_TCP_LIVE_ACK` | 官方 catalog | ✗ | ✗ | — | — | 十二帶 registry-only（PACKETS §2.6 傳輸層定案） |
+| 163 | `TCP_UDP_LIVE_REQ` | 官方 catalog | ✗ | ✗ | — | — | 十二帶 registry-only（PACKETS §2.6 傳輸層定案） |
+| 164 | `TCP_UDP_LIVE_ACK` | 官方 catalog | ✗ | ✗ | — | — | 十二帶 registry-only（PACKETS §2.6 傳輸層定案） |
+| 165 | `Y_TCP_INF_REQ` | 官方 catalog | ✗ | ✓ | — | — | 十二帶 TCP-live（17 builder 站；同上） |
+| 166 | `Y_TCP_INF_ACK` | 官方 catalog | ✓ | ✗ | — | — | 十二帶 TCP-live（同上） |
+| 167 | `GR_CHANGEUSER_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 168 | `GR_CHANGEUSER_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 169 | `GR_RULECHANGE_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 170 | `GR_RULECHANGE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 171 | `GR_WINCHANGE_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 172 | `GR_WINCHANGE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 173 | `GR_TIMECHANGE_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 174 | `GR_TIMECHANGE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 175 | `GR_ITEMCHANGE_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 176 | `GR_ITEMCHANGE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 177 | `GR_AUTOCHANGE_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 178 | `GR_AUTOCHANGE_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 179 | `GS_STOREOK_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 180 | `GS_STOREOK_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 181 | `GL_ENTERSTARTROOM_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 182 | `GL_ENTERSTARTROOM_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 183 | `GR_ENDLOADING_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 184 | `GR_ENDLOADING_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 185 | `GR_JOINGAME_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 186 | `GR_JOINGAME_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 187 | `GG_STARTGAME_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 188 | `GG_STARTGAME_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 189 | `GR_CHANGEMASTER_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 190 | `GR_CHANGEMASTER_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 191 | `GR_CALLUSER_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 192 | `GR_CALLUSER_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 193 | `GC_CHANNEL_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 194 | `GC_CHANNEL_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 195 | `GC_ENTERCHANNEL_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 196 | `GC_ENTERCHANNEL_ACK` | 官方 catalog | ✓ | ✗ | — | — | switch 外：vtable 前置轉發處理（見 Bootstrap 段）；七欄尾段僅 result==1 |
+| 197 | `GL_MYINFO_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 198 | `GL_MYINFO_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 199 | `GL_MYITEM_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+
+#### 200–299
+
+| op | 名稱 | 名稱狀態 | S2C | C2S | UDP出 | UDP入 | 備註 |
+|---:|---|---|:-:|:-:|:-:|:-:|---|
+| 200 | `GL_MYITEM_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 201 | `GL_MYPARTSUP_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 202 | `GL_EXPIRE_PARTSUP_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 203 | `GL_MYAVATARINFO_ACK`〔推定〕 | 推定〔S2C 審計〕 | ✓ | ✗ | — | — |  |
+| 204 | `GS_BUYITEM_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 205 | `GS_BUYITEM_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 206 | `GS_BUY_WEAPONPARTS_REQ`〔推定〕 | 推定〔C2S 審計〕 | ✗ | ✓ | — | — |  |
+| 207 | `GS_BUY_WEAPONPARTS_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 208 | `GS_SELLITEM_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 209 | `GS_SELLITEM_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 210 | `GM_CHECKNICK_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 211 | `GM_CHECKNICK_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 212 | `GM_CREATENICK_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 213 | `GM_CREATENICK_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 214 | `GM_CREATECHAR_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 215 | `GM_CREATECHAR_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 216 | `GL_ENTERROOMPASS_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 217 | `GL_ENTERROOMPASS_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 218 | `GI_CHANGEDATA_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 219 | `GI_CHANGEDATA_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 220 | `GI_CHANGEWP_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 221 | `GI_CHANGEWP_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 222 | `GP_CHPLAYC_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 223 | `GP_CHPLAYC_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 224 | `GP_CHROUNDC_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 225 | `GP_CHROUNDC_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 226 | `GP_CHDISC_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 227 | `GP_CHDISC_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 228 | `GP_CHWINC_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 229 | `GP_CHWINC_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 230 | `GP_CHLOSSC_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 231 | `GP_CHLOSSC_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 232 | `GP_CHKILLC_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 233 | `GP_CHKILLC_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 234 | `GP_CHDEADC_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 235 | `GP_CHDEADC_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 236 | `GP_CHHEADSC_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 237 | `GP_CHHEADSC_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 238 | `GP_CHACOMBOC_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 239 | `GP_CHACOMBOC_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 240 | `GP_CHHEARTC_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 241 | `GP_CHHEARTC_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 242 | `GP_CHDKILLC_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 243 | `GP_CHDKILLC_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 244 | `GP_CHTKILLC_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 245 | `GP_CHTKILLC_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 246 | `GL_CLIENTINFO_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 247 | `GL_CLIENTINFO_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 248 | `GR_CLIENTINFO_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 249 | `GR_CLIENTINFO_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 250 | `GL_LOBBYIN_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 251 | `GL_LOBBYIN_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 252 | `GL_SHOPIN_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 253 | `GL_SHOPIN_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 254 | `GL_INVENIN_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 255 | `GL_INVENIN_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 256 | `GL_ENTERROOMOB_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 257 | `GL_ENTERROOMOB_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 258 | `GR_LEAVEOB_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 259 | `GR_LEAVEOB_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 260 | `GL_JOIN_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 261 | `GL_JOIN_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 262 | `GL_JOINPASS_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 263 | `GL_JOINPASS_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 264 | `GL_JOININFO_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 265 | `GL_JOININFO_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 266 | `GL_JOINGAME_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 267 | `GL_JOINGAME_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 268 | `GL_JOINPLAY_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 269 | `GL_JOINPLAY_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 270 | `GL_MYINFO_OPEN` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 271 | `PM_TSPOSUPDATE_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 272 | `PM_TSPOSUPDATE_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 273 | `GR_TSTARTPOS_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 274 | `GR_TSTARTPOS_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 275 | `MASTER_MEMO_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 276 | `MASTER_MEMO_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 277 | `MASTER_MEMOALL_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 278 | `MASTER_MEMOALL_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 279 | `MASTER_USERCUT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 280 | `MASTER_USERCUT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 281 | `MASTER_USERCUT2_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 282 | `MASTER_USERCUT2_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 283 | `MASTER_ROOMCUT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 284 | `MASTER_ROOMCUT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 285 | `MASTER_MSET_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 286 | `MASTER_MSET_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 287 | `MASTER_PRINTUSER_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 288 | `MASTER_PRINTUSER_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 289 | `MASTER_USERINFO_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 290 | `MASTER_USERINFO_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 291 | `MASTER_LISTCUT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 292 | `MASTER_LISTCUT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 293 | `MASTER_USERINFODB_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 294 | `MASTER_USERINFODB_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 295 | `MASTER_RELOAD_GM_NOTICE_REQ`〔推定〕 | 推定〔C2S 審計〕 | ✗ | ✓ | — | — |  |
+| 296 | `GS_GIVEGIFT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 297 | `GS_GIVEGIFT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 298 | `GS_TAKEGIFT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 299 | `GS_TAKEGIFT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+
+#### 300–399
+
+| op | 名稱 | 名稱狀態 | S2C | C2S | UDP出 | UDP入 | 備註 |
+|---:|---|---|:-:|:-:|:-:|:-:|---|
+| 300 | `GS_MOVEGIFT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 301 | `GS_MOVEGIFT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 302 | `GG_JJCREATE_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 303 | `GG_JJCREATE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 304 | `GG_JJCHANGE_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 305 | `GG_JJCHANGE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 306 | `GG_JJGET_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 307 | `GG_JJGET_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 308 | `GG_JJGAMEEND_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 309 | `GG_JJGAMEEND_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 310 | `GS_BUYCHAR_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 311 | `GS_BUYCHAR_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 312 | `GI_CHANGESLOT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 313 | `GI_CHANGESLOT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 314 | `GS_MOVEONEGIFT_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 315 | `GS_MOVEONEGIFT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 316 | `GG_HACKSTART_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 317 | `GG_HACKSTART_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 318 | `GG_HACKSUCC_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 319 | `GG_HACKSUCC_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 320 | `GG_HACKFAIL_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 321 | `GG_HACKFAIL_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 322 | `GG_BOMBSUCC_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 323 | `GG_BOMBSUCC_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 324 | `GG_BOMBEND_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 325 | `GG_BOMBEND_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 326 | `GG_UNHACKSTART_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 327 | `GG_UNHACKSTART_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 328 | `GG_UNHACKSUCC_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 329 | `GG_UNHACKSUCC_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 330 | `GG_UNHACKFAIL_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 331 | `GG_UNHACKFAIL_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 332 | `GG_KILLJJ_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 333 | `GG_KILLJJ_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 334 | `GG_SEEDKEY_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 335 | `GG_SEEDKEY_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 336 | `GG_UNIQUEKEY_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 337 | `GG_UNIQUEKEY_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 338 | `GG_DETECTCRACK_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 339 | `GG_DETECTCRACK_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 340 | `GR_KILLCHANGE_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 341 | `GR_KILLCHANGE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 342 | `GG_SOLORESPON_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 343 | `GG_SOLORESPON_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 344 | `GG_LIVECHAT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 345 | `GG_LIVECHAT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 346 | `GG_TEAMCHAT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 347 | `GG_TEAMCHAT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 348 | `GG_DEADCHAT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 349 | `GG_DEADCHAT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 350 | `GG_TEAMDEADCHAT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 351 | `GG_TEAMDEADCHAT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 352 | `GG_LEVELJJ_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 353 | `GG_LEVELJJ_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 354 | `MASTER_UPITEM_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 355 | `MASTER_UPITEM_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 356 | `GS_CASH_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 357 | `GS_CASH_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 358 | `GS_BUYCASHITEM_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 359 | `GS_BUYCASHITEM_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 360 | `GG_TSURRESPON_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 361 | `GG_TSURRESPON_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 362 | `GP_CHCRITICALC_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 363 | `GP_CHCRITICALC_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 364 | `GR_BALANCECHANGE_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 365 | `GR_BALANCECHANGE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 366 | `GR_LOCALROOM_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 367 | `GR_LOCALROOM_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 368 | `GR_TEAMSHUFFLECHANGE_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 369 | `GR_TEAMSHUFFLECHANGE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 370 | `GL_CHANGECHANNEL_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 371 | `GL_CHANGECHANNEL_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 372 | `GR_ALLCRYSTAL_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 373 | `GR_ALLCRYSTAL_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 374 | `GR_GETCRYSTAL_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 375 | `GR_GETCRYSTAL_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 376 | `GR_RECRYSTAL_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 377 | `GR_RECRYSTAL_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 378 | `GR_RADIOMSG_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 379 | `GR_RADIOMSG_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 380 | `GP_CHMKILLC_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 381 | `GP_CHMKILLC_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 382 | `GP_CHUKILLC_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 383 | `GP_CHUKILLC_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 384 | `GP_CHZKILLC_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 385 | `GP_CHZKILLC_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 386 | `GP_CHKKILLC_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 387 | `GP_CHKKILLC_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 388 | `GP_CHDDKILLC_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 389 | `GP_CHDDKILLC_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 390 | `GL_DELETEITEM_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 391 | `GL_DELETEITEM_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 392 | `GL_CHANGEID_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 393 | `GL_CHANGEID_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 394 | `MASTER_ROOMINFO_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 395 | `MASTER_ROOMINFO_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 396 | `PM_KICKUSER_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 397 | `PM_KICKUSER_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 398 | `MASTER_SVRCLASS_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 399 | `MASTER_SVRCLASS_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+
+#### 400–499
+
+| op | 名稱 | 名稱狀態 | S2C | C2S | UDP出 | UDP入 | 備註 |
+|---:|---|---|:-:|:-:|:-:|:-:|---|
+| 400 | `MASTER_CONNTYPE_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 401 | `MASTER_CONNTYPE_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 402 | `MASTER_EVENTPAGE_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 403 | `MASTER_EVENTPAGE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 404 | `MASTER_EVENTEXP_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 405 | `MASTER_EVENTEXP_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 406 | `MASTER_ENABLE_LOGIN` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 407 | `MASTER_DISABLE_LOGIN` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 408 | `MASTER_DISBILL_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 409 | `MASTER_DISBILL_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 410 | `MASTER_DISLOGIN_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 411 | `MASTER_DISLOGIN_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 412 | `MASTER_DISGMS_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 413 | `MASTER_DISGMS_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 414 | `MASTER_DISLOG_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 415 | `MASTER_DISLOG_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 416 | `MASTER_KILLALL_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 417 | `MASTER_KILLALL_ACK`〔推定〕 | 推定〔PACKETS §3.15i〕 | ✓ | ✗ | — | — | dispatcher inline 處理，無獨立 handler |
+| 418 | `MASTER_RESETTCPGROUPINFO_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 419 | `GL_MSG_ADD_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 420 | `GL_MSG_ADD_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 421 | `GL_MSG_DEL_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 422 | `GL_MSG_DEL_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 423 | `GL_MSG_READ_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 424 | `GL_MSG_READ_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 425 | `GL_MSG_RECVLIST_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 426 | `GL_MSG_RECVLIST_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 427 | `GL_MSG_SENDLIST_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 428 | `GL_MSG_SENDLIST_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 429 | `GL_FRIEND_ADD_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 430 | `GL_FRIEND_ADD_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 431 | `GL_FRIEND_DEL_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 432 | `GL_FRIEND_DEL_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 433 | `GL_FRIEND_LIST_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 434 | `GL_FRIEND_LIST_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 435 | `GL_FRIEND_INFO_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 436 | `GL_FRIEND_INFO_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 437 | `GG_ROOMBROADCAST_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 438 | `GG_ROOMBROADCAST_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 439 | `GL_FRIEND_CHAT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 440 | `GL_FRIEND_CHAT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 441 | `GL_FRIEND_WHERE_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 442 | `GL_FRIEND_WHERE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 443 | `GG_STEALSUCK_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 444 | `GG_STEALSUCK_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 445 | `GG_STEALPUSH_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 446 | `GG_STEALPUSH_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 447 | `GG_STEALCOLORS_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 448 | `GG_STEALCOLORS_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 449 | `GG_STEALRESPON_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 450 | `GG_STEALRESPON_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 451 | `GS_NEWGIFT_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 452 | `GS_NEWGIFT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 453 | `GS_DELETEGIFT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 454 | `GS_DELETEGIFT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 455 | `GG_EXERCISERESPON_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 456 | `GG_EXERCISERESPON_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 457 | `GI_CHANGEITEMSLOT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 458 | `GI_CHANGEITEMSLOT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 459 | `GC_CHANGECHANNEL_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 460 | `GC_CHANGECHANNEL_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 461 | `GS_USE_PAPERCODEGIFT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 462 | `GS_USE_PAPERCODEGIFT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 463 | `GS_ENTERPAPERCODEGIFT_NOTIFY` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 464 | `GS_USE_PAPERCODEGIFT_IGNORE_DUPLICATED_ITEM_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 465 | `GS_USE_PAPERCODEGIFT_IGNORE_DUPLICATED_ITEM_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 466 | `GI_CHANGE_SKILLITEMSLOT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 467 | `GI_CHANGE_SKILLITEMSLOT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 468 | `GS_BUY_HUKUBUKURO_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 469 | `GS_BUY_HUKUBUKURO_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 470 | `GS_GET_HUKUBUKURO_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 471 | `GS_GET_HUKUBUKURO_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 472 | `GL_GAMECENTER_REC_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 473 | `GL_GAMECENTER_REC_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 474 | `GG_GAMECENTER_GAME_START_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 475 | `GG_GAMECENTER_GAME_START_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 476 | `GG_GAMECENTER_GAME_END_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 477 | `GG_GAMECENTER_GAME_END_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 478 | `GG_GAMECENTER_GAME_PLAY_CHECK_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 479 | `GG_GAMECENTER_GAME_PLAY_CHECK_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 480 | `GG_GAMECENTER_RANKING_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 481 | `GG_GAMECENTER_RANKING_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 482 | `GL_GAMECENTER_COIN_CHANGED_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 483 | `GG_GAMECENTER_GAME_START_OK_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 484 | `GG_GAMECENTER_GAME_START_OK_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 485 | `GL_GET_GAMEROOM_PROGRESSTIME_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 486 | `GL_GET_GAMEROOM_PROGRESSTIME_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 487 | `GL_MYROOMCHANGE_REQ`〔推定〕 | 推定〔C2S 審計〕 | ✗ | ✓ | — | — |  |
+| 488 | `GL_MYROOMCHANGE_ACK`〔推定〕 | 推定〔S2C 審計〕 | ✓ | ✗ | — | — |  |
+| 489 | 〔未命名〕 | 未命名〔UNRESOLVED〕 | ✓ | ✗ | — | — | 行為紀錄見 Part I 審計節（bit0 死路徑級） |
+
+#### 500–599
+
+| op | 名稱 | 名稱狀態 | S2C | C2S | UDP出 | UDP入 | 備註 |
+|---:|---|---|:-:|:-:|:-:|:-:|---|
+| 560 | `GV_VIEWER_BASE` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 561 | `GV_ROOMDUMP_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 562 | `GV_ROOMDUMP_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 563 | `GV_USERDUMP_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 564 | `GV_USERDUMP_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 565 | `GV_AUTHORIZE_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 566 | `GV_AUTHORIZE_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 567 | `GV_HACKBLOCK_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 568 | `GV_HACKBLOCK_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 569 | `GV_HACKCLEAR_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 570 | `GV_HACKCLEAR_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 571 | `GV_TEST_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 572 | `GV_TEST_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 580 | `GC_CLAN_BASE` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 581 | `GC_CLAN_START_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 582 | `GC_CLAN_START_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 583 | `GC_CLAN_PROTOCOL_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 584 | `GC_CLAN_PROTOCOL_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 585 | `GC_CLAN_CREATE_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 586 | `GC_CLAN_CREATE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 587 | `GC_CLAN_GAMEEND_RESULT_NOTIFY` | 官方 catalog | ✓ | ✗ | — | — |  |
+
+#### 600–699
+
+| op | 名稱 | 名稱狀態 | S2C | C2S | UDP出 | UDP入 | 備註 |
+|---:|---|---|:-:|:-:|:-:|:-:|---|
+| 680 | `GL_LOGIN_BASE` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 681 | `GL_LOGIN_ACK` | 官方 catalog | ✓ | ✗ | — | — | switch 外：login TCP 專屬 reader（詳 `S2C_NATIVE_AUDITS.md` 681 part） |
+| 682 | `GL_LOGIN_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 683 | `GL_SERVERLIST_NOTICE` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 684 | `GL_LOGIN_DUPLICATE` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 685 | `GL_TUTORIALINDEX_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 686 | `GL_TUTORIALINDEX_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 687 | `GL_TUTORIAL_START` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 688 | `GL_TUTORIAL_END` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 689 | `GL_TUTORIAL_INDEX_SET_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 690 | `GL_TUTORIAL_INDEX_SET_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 691 | `GL_ITEM_MODIFY_NOTIFIER` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 692 | `GG_CP_TERMINATE_APP` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 693 | `GL_TCPCONNSUCC` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 694 | `GL_ACCOUNTCONNSUCC` | 官方 catalog | ✓ | ✗ | — | — | dispatch 外專屬 handler `CLobbyLogin::sub_43E500`；u16<0x2580 才替換壓縮門檻 |
+| 695 | `GS_BUY_ONCEITEM_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 696 | `GS_BUY_ONCEITEM_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 697 | `GG_CHEATER_REPORT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 698 | `GP_ENTER_PEPACHI_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 699 | `GP_ENTER_PEPACHI_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+
+#### 700–799
+
+| op | 名稱 | 名稱狀態 | S2C | C2S | UDP出 | UDP入 | 備註 |
+|---:|---|---|:-:|:-:|:-:|:-:|---|
+| 700 | `GP_START_GAME_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 701 | `GP_START_GAME_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 702 | `GP_PEPACHI_LIST_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 703 | `GP_PEPACHI_LIST_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 704 | `GL_LEVEL_KILL_LIMIT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 705 | `GL_LEVEL_KILL_LIMIT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 706 | `GL_BILLTOKEN_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 707 | `GL_BILLTOKEN_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 708 | `GL_CHECKCASHPG_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 709 | `GL_CHECKCASHPG_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 710 | `GL_RESERVECHANGENICK_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 711 | `GL_RESERVECHANGENICK_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 712 | `GR_NOSKILL_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 713 | `GR_NOSKILL_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 714 | `GG_INVALIDWPDATA_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 715 | `GG_INVALIDWPDATA_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 716 | `GG_CHANGEWPQUICKSLOT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 717 | `GG_CHANGEWPQUICKSLOT_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 718 | `GR_START_VOTING_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 719 | `GR_START_VOTING_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 720 | `GR_START_VOTING` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 721 | `GR_DO_VOTING` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 722 | `GR_VOTING_RESULT` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 723 | `GR_END_RESULT` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 724 | `GL_COMBISKILLITEM_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 725 | `GL_COMBISKILLITEM_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 726 | `GG_OBSERVERCHAT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 727 | `GG_OBSERVERCHAT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 728 | `GR_OBSERVERCHAT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 729 | `GR_OBSERVERCHAT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 730 | `GG_GETPULP_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 731 | `GG_GETPULP_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 732 | `GG_DROPPULP_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 733 | `GG_SPAWNPULP_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 734 | `GG_SPAWNPULP_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 735 | `GG_RESPAWNPULP_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 736 | `GG_PULPSTEAL_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 737 | `GG_DESTROY_START_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 738 | `GG_DESTROY_START_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 739 | `GG_DESTROY_SUCC_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 740 | `GG_DESTROY_SUCC_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 741 | `GG_DESTROY_FAIL_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 742 | `GG_DESTROY_FAIL_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 743 | `GG_TIMEOVER_CHANGE` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 744 | `GG_MAGIC_GAUGE_CHANGE` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 745 | `GG_DEFENSE_REWARD_NOTICE` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 746 | `GG_PNR_RESPON_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 747 | `GG_PNR_RESPON_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 748 | `GR_SELECTRANDOMMAP_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 749 | `GG_GIMMICK_DAMAGE_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 750 | `GG_GIMMICK_DAMAGE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 751 | `GG_GIMMICK_RESPON_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 752 | `GG_MAPINFO_RELOAD_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 753 | `GG_GIMMICKINFO` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 754 | `GG_PNR_OB_MODE_END` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 755 | `GG_SYNC_TIME` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 756 | `GL_CLAN_TNMT_RECEIPT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 757 | `GL_CLAN_TNMT_RECEIPT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 758 | `GL_CLAN_TNMT_RECEIPT_CANCEL_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 759 | `GL_CLAN_TNMT_RECEIPT_CANCEL_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 760 | `GC_CLAN_TNMT_RECEIPT_OK_NOTICE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 761 | `GC_CLAN_TNMT_RECEIPT_CANCEL_NOTICE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 762 | `GL_CLAN_TNMT_CURRENT_STATE_NOTICE_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 763 | `GL_CLAN_TNMT_CURRENT_STATE_NOTICE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 764 | `GL_CLAN_TNMT_ENTERROOM_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 765 | `GL_CLAN_TNMT_ENTERROOM_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 766 | `GL_CLAN_TNMT_ROUND_END_NOTIFY` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 767 | `GL_CLAN_TNTM_AWARD_INFO_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 768 | `GL_CLAN_TNTM_AWARD_INFO_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 769 | `GR_CLAN_TNMT_ROUND_START_COUNTER` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 770 | `GL_CLAN_TNMT_CHANGE_STATE_START_COUNTER` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 771 | `GL_CLAN_TNMT_ALL_INFO_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 772 | `GL_CLAN_TNMT_ALL_INFO_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 773 | `MASTER_RELOAD_TNMT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 774 | `MASTER_RELOAD_TNMT_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 775 | `GL_CLAN_TNMT_BROADCAST_TNMT_STATE_NOTIFY` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 776 | `GL_CLAN_TNMT_CLANREC_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 777 | `GL_CLAN_TNMT_CLANREC_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 778 | `GR_CLAN_TNMT_PREVENT_ENTER_ROOM_NOTIFY` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 779 | `GL_CLAN_TNMT_CHANGE_CLAN_INFO_NOTIFY` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 780 | `GS_GET_PRESENTPACKAGE_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 781 | `GS_GET_PRESENTPACKAGE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 782 | `GL_RECEIVE_NEW_MSG` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 783 | `GL_NEW_MSG_COUNT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 784 | `GL_NEW_MSG_COUNT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 785 | `GL_FRIEND_ADD_PROCESS_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 786 | `GL_FRIEND_ADD_PROCESS_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 787 | `GL_RACKINGWEB_TOKEN_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 788 | `GL_RACKINGWEB_TOKEN_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 789 | `MASTER_TEST_COMMAND_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 790 | `MASTER_TEST_COMMAND_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 791 | `GL_VOICEITEMSLOT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 792 | `GL_VOICEITEMSLOT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 793 | `GI_VOICEITEMSLOT_ALL_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 794 | `GI_VOICEITEMSLOT_ALL_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 795 | `GI_CHANGE_VOICEITEMSLOT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 796 | `GI_CHANGE_VOICEITEMSLOT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 797 | `SECURITY_AHNLAB_RESPONSE_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 798 | `SECURITY_AHNLAB_RESPONSE_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 799 | `GT_CRITICAL_ERROR_REPORT` | 官方 catalog | ✗ | ✓ | — | — |  |
+
+#### 800–899
+
+| op | 名稱 | 名稱狀態 | S2C | C2S | UDP出 | UDP入 | 備註 |
+|---:|---|---|:-:|:-:|:-:|:-:|---|
+| 800 | `MASTER_XTRAP_RELOAD` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 801 | `GT_WEAPON_ERROR_REPORT` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 802 | `GS_DESTROYITEM_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 803 | `GS_DESTROYITEM_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 804 | `MASTER_RELOAD_HIDDEN_ITEM_LIST_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 805 | `MASTER_RELOAD_HIDDEN_ITEM_LIST_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 806 | `GS_HIDDEN_ITEM_LIST_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 807 | `GS_HIDDEN_ITEM_LIST_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 808 | `GS_GET_RECOMMENDSET_INFO_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 809 | `GS_GET_RECOMMENDSET_INFO_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 810 | `GS_HIDDENMAP_LIST_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 811 | `GR_PROBABILITY_APPLY_NOTIFY` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 812 | `MASTER_SPECIAL_ABILITY_ITEMSLOT_PROBABILITY_APPLY_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 813 | `MASTER_SPECIAL_ABILITY_ITEMSLOT_PROBABILITY_APPLY_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 814 | `MASTER_CHECK_BOMB_CHEATER_APPLY_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 815 | `MASTER_CHECK_BOMB_CHEATER_APPLY_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 816 | `GL_ADDICTION_PREVENT_ALARM` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 817 | `GC_NPGAMEGUARD_QUERY_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 818 | `GC_NPGAMEGUARD_QUERY_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 819 | `MASTER_CHECK_NPGAMEGUARD_QUERY_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 820 | `GG_CHATTING_PENALTY_REPORT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 821 | `GG_CHATTING_PENALTY_REPORT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 822 | `MASTER_CHAT_BAN_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 823 | `MASTER_CHAT_BAN_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 824 | `MASTER_USERLIST_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 825 | `MASTER_LOBBY_USERLIST_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 826 | `MASTER_ROOM_USERLIST_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 828 | `MASTER_RESETCOINTIME_REQ`〔推定〕 | 推定〔C2S 審計〕 | ✗ | ✓ | — | — |  |
+| 830 | `MASTER_CHAT_FORCE_BAN_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 831 | `MASTER_RESET_PACKET_DELAY_ALLOW_TIME_SEC_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 832 | `MASTER_RESET_PACKET_DELAY_ALLOW_TIME_SEC_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 833 | `GG_NETWORKERROR_NOTIFY` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 834 | `GL_DATA_RECV_COMPLETED_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 835 | `GL_DATA_RECV_COMPLETED_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 836 | `GL_SHOUTCHAT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 837 | `GL_SHOUTCHAT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 838 | `GR_CLAN_JOIN_RECOMMAND_REQUEST_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 839 | `GR_CLAN_JOIN_RECOMMAND_REQUEST_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 840 | `GR_CLAN_JOIN_RECOMMAND_REQUESTED_REQ` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 841 | `MASTER_SETALL_EVENTEXP_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 842 | `MASTER_SETALL_EVENTEXP_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 843 | `MASTER_SETALL_EVENTPAGE_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 844 | `MASTER_SETALL_EVENTPAGE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 845 | `MASTER_VIEWALL_EVENTSTATE_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 846 | `MASTER_VIEWALL_EVENTSTATE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 847 | `GR_NETCAFEWEAPONINFO_NOTIFY` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 848 | `GR_NETCAFEWEAPON_DISABLE_NOTIFY` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 849 | `MASTER_TNMT_VIEW_STATE_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 850 | `MASTER_TNMT_VIEW_STATE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 851 | `MASTER_RELOAD_GAMECENTER_RANKING_REQ`〔推定〕 | 推定〔C2S 審計〕 | ✗ | ✓ | — | — |  |
+| 852 | `MASTER_RELOAD_GAMECENTER_RANKING_ACK`〔推定〕 | 推定〔S2C 審計〕 | ✓ | ✗ | — | — |  |
+| 853 | `MASTER_PRINTGCRANK_REQ`〔推定〕 | 推定〔C2S 審計〕 | ✗ | ✓ | — | — |  |
+| 855 | `GL_MYWAREHOUSEINFO_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 856 | `GL_MYWAREHOUSEINFO_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 857 | `GL_MYWAREHOUSEITEMLIST_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 858 | `GL_MYWAREHOUSEITEMLIST_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 859 | `GL_PUSH_TO_WAREHOUSE_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 860 | `GL_PUSH_TO_WAREHOUSE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 861 | `GL_POP_TO_WAREHOSUE_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 862 | `GL_POP_TO_WAREHOSUE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 863 | `GL_CHANGED_WAREHOUSEINFO_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 864 | `GL_SERVER_DATETIME_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 865 | `GL_SERVER_DATETIME_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 866 | `GQ_QUEST_LIST_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 867 | `GQ_QUEST_ACCEPT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 868 | `GQ_QUEST_ACCEPT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 869 | `GQ_QUEST_CANCEL_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 870 | `GQ_QUEST_CANCEL_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 871 | `GQ_QUEST_SUCCESS_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 872 | `GQ_QUEST_SUCCESS_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 873 | `GQ_QUEST_COMPLETE_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 874 | `GQ_QUEST_COMPLETE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 875 | `GQ_QUEST_CHANGEDSTATE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 876 | `GQ_QUEST_ACCEPT_DAILY_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 877 | `GQ_QUEST_ACCEPT_DAILY_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 878 | `GQ_QUEST_USER_COMPLETE_HONOR_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 879 | `GQ_QUEST_USER_COMPLETE_HONOR_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 880 | `GQ_QUEST_ACCEPT_DAILY_NOTIFY`〔推定〕 | 推定〔S2C 審計〕 | ✓ | ✗ | — | — |  |
+| 881 | `GQ_QUEST_CURRENTITEMQUEST_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 882 | `GP_CHPLAYTIMEC_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 883 | `MASTER_FIND_USER_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 884 | `MASTER_FIND_USER_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 885 | `MASTER_PLAY_WITH_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 886 | `MASTER_PLAY_WITH_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 887 | `GX_XIGNCODE_DATA_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 888 | `GX_XIGNCODE_DATA_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 889 | `GX_XIGNCODE_DATA_BAN_NOTIFY` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 890 | `GC_QUERY_CLANRANKING_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 891 | `GC_QUERY_CLANRANKING_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 892 | `MASTER_RELOAD_CLANRANKING_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 893 | `MASTER_RELOAD_CLANRANKING_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 894 | `GR_TEAMSHUFFLE_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 895 | `GR_TEAMSHUFFLE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 896 | `MASTER_RSHUFFLEWT_REQ`〔推定〕 | 推定〔C2S 審計〕 | ✗ | ✓ | — | — |  |
+| 898 | `MASTER_RSHUFFLEVT_REQ`〔推定〕 | 推定〔C2S 審計〕 | ✗ | ✓ | — | — |  |
+
+#### 900–999
+
+| op | 名稱 | 名稱狀態 | S2C | C2S | UDP出 | UDP入 | 備註 |
+|---:|---|---|:-:|:-:|:-:|:-:|---|
+| 900 | `GS_CAPSULEMACHINE_START_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 901 | `GS_CAPSULEMACHINE_START_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 902 | `GG_OCC_START_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 903 | `GG_OCC_START_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 904 | `GG_OCC_SUCC_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 905 | `GG_OCC_SUCC_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 906 | `GG_OCC_FAIL_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 907 | `GG_OCC_FAIL_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 908 | `GG_OCC_AB_SUCC_NOTIFY` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 909 | `GG_OCC_RESPON_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 910 | `GG_OCC_RESPON_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 911 | `GL_SCHEDULED_GM_NOTICE_NOTIFY` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 912 | `GL_WEAPONPARTS_EQUIP_CHANGE_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 913 | `GL_WEAPONPARTS_EQUIP_CHANGE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 914 | `GG_MISSILE_INFO_NOTIFY`〔推定〕 | 推定〔S2C 審計〕 | ✓ | ✗ | — | — |  |
+| 917 | `GR_AI_NEXTWAVE_NOTIFY` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 918 | `GR_AI_GET_REWARD_ITEM_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 919 | `GR_AI_GET_REWARD_ITEM_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 920 | `GR_AI_GET_REWARD_ITEM_RESULT_NOTIFY` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 921 | `GR_AI_APPEARED_BOT_NOTIFY` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 922 | `GR_AI_DAMAGE_SHIELD_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 923 | `GR_AI_DAMAGE_SHIELD_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 924 | `GR_AI_RECHARGE_MAGAZINE_START_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 925 | `GR_AI_RECHARGE_MAGAZINE_START_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 926 | `GR_AI_RECHARGE_MAGAZINE_END_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 927 | `GR_AI_RECHARGE_MAGAZINE_END_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 928 | `GR_AI_CONTINUE_START_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 929 | `GR_AI_CONTINUE_START_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 930 | `GR_AI_CONTINUE_FAIL_REQ`〔推定〕 | 推定〔C2S 審計〕 | ✗ | ✓ | — | — |  |
+| 931 | `GR_AI_CONTINUE_FAIL_ACK`〔推定〕 | 推定〔S2C 審計〕 | ✓ | ✗ | — | — |  |
+| 932 | `MASTER_RELOAD_AIXML_REQ`〔推定〕 | 推定〔C2S 審計〕 | ✗ | ✓ | — | — |  |
+| 933 | 〔未命名〕 | 未命名〔handler 不可回收〕 | ✓ | ✗ | — | — | handler 本體不可回收（lib thunk）；保留未命名 |
+| 934 | `GR_AI_TEAMSCORE_NOTIFY` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 935 | `GR_AI_FEVER_START_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 936 | `GR_AI_FEVER_START_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 937 | `GR_AI_FEVER_END_NOTIFY` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 938 | `GR_AI_WAVE_END_NOTIFY` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 939 | `GR_AI_GO_NEXT_WAVE_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 940 | `GR_AI_GO_NEXT_WAVE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 941 | `MASTER_GO_AI_MULTI_WAVE_DIRECTLY_REQ` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 942 | `GR_AI_REWARDITEM_SELECT_START_NOTIFY` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 943 | `GR_AI_REWARDITEM_NEXTTURN_NOTIFY` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 944 | `GR_RESET_GAMEROOMSLOT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 945 | `GR_RESET_GAMEROOMSLOT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 946 | `GR_AI_UDPSENDER_CHANGE_START_NOTIFY`〔推定〕 | 推定〔S2C 審計〕 | ✓ | ✗ | — | — |  |
+| 947 | `GR_AI_UDPSENDER_CHANGE_END_NOTIFY`〔推定〕 | 推定〔S2C 審計〕 | ✓ | ✗ | — | — |  |
+| 949 | `GR_AI_MULTI_SHIELD_NOTIFY`〔推定〕 | 推定〔S2C 審計〕 | ✓ | ✗ | — | — |  |
+| 953 | `MASTER_PVE_REQ`〔推定〕 | 推定〔C2S 審計〕 | ✗ | ✓ | — | — |  |
+| 954 | `MASTER_PVE_ACK`〔推定〕 | 推定〔S2C 審計〕 | ✓ | ✗ | — | — |  |
+| 957 | `GR_TIMEOVER_ONGAME_RESPON_REQ`〔推定〕 | 推定〔C2S 審計〕 | ✗ | ✓ | — | — |  |
+| 958 | `GR_TIMEOVER_ONGAME_ACK`〔推定〕 | 推定〔S2C 審計〕 | ✓ | ✗ | — | — |  |
+| 959 | `GG_DROPWEAPON_CREATE_NOTIFY` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 960 | `GG_DROPWEAPON_DESTROY_NOTIFY` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 961 | `GG_DROPWEAPON_INFO_NOTIFY` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 962 | `GG_DROPWEAPON_GET_AND_DROP_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 963 | `GG_DROPWEAPON_GET_AND_DROP_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 964 | `GG_GET_BALL_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 965 | `GG_GET_BALL_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 966 | `GG_RESPAWN_BALL_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 967 | `GG_GET_GOAL_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 968 | `GG_GET_GOAL_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 969 | `GR_SOCCER_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 970 | `GR_SOCCER_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 971 | `GG_SOCCER_RESPON_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 972 | `GG_SOCCER_RESPON_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 973 | `MASTER_RESETSOCCERBALLRESPAWNTIME_REQ`〔推定〕 | 推定〔C2S 審計〕 | ✗ | ✓ | — | — |  |
+| 974 | `GG_SOCCERBALL_HAVE_INCREASE_PG_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 975 | `MASTER_SETMULTIPLYDAMAGE_REQ`〔推定〕 | 推定〔C2S 審計〕 | ✗ | ✓ | — | — |  |
+| 976 | `MASTER_SETMULTIPLYDAMAGE_ACK`〔推定〕 | 推定〔S2C 審計〕 | ✓ | ✗ | — | — |  |
+| 983 | `GL_MATCHINGROOM_MAKE_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 984 | `GL_MATCHINGROOM_MAKE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 985 | `GL_ENTERMATCHINGROOM_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 986 | `GR_MATCHINGROOM_START_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 987 | `GR_MATCHINGSUCCESS_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 988 | `GL_MATCHINGROOM_CANCLE_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 989 | `GL_MATCHINGROOM_CANCLE_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 990 | `GR_DAMAGEROOM_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
+| 991 | `GR_DAMAGEROOM_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 992 | `GQ_QUEST_LIST_REQ`〔推定〕 | 推定〔C2S 審計〕 | ✗ | ✓ | — | — |  |
+| 994 | `GG_ASSISTPOINT_NOTIFY` | 官方 catalog | ✓ | ✗ | — | — |  |
+| 995 | 〔未命名〕 | 未命名〔UNRESOLVED〕 | ✓ | ✗ | — | — | 錢包/等級推播 → PACKETS.md §3.15r |
+| 996 | `GL_BLOCK_ADD_REQ`〔推定〕 | 推定〔C2S 審計〕 | ✗ | ✓ | — | — |  |
+| 997 | `GL_BLOCK_ADD_ACK`〔推定〕 | 推定〔S2C 審計〕 | ✓ | ✗ | — | — |  |
+| 998 | `GL_BLOCK_DEL_REQ`〔推定〕 | 推定〔C2S 審計〕 | ✗ | ✓ | — | — |  |
+| 999 | `GL_BLOCK_DEL_ACK`〔推定〕 | 推定〔S2C 審計〕 | ✓ | ✗ | — | — |  |
+
+#### 1000–1010
+
+| op | 名稱 | 名稱狀態 | S2C | C2S | UDP出 | UDP入 | 備註 |
+|---:|---|---|:-:|:-:|:-:|:-:|---|
+| 1000 | `GL_BLOCK_LIST_REQ`〔推定〕 | 推定〔C2S 審計〕 | ✗ | ✓ | — | — |  |
+| 1001 | `GL_BLOCK_LIST_ACK`〔推定〕 | 推定〔S2C 審計〕 | ✓ | ✗ | — | — |  |
+| 1002 | `GL_BLOCKME_LIST_REQ`〔推定〕 | 推定〔C2S 審計〕 | ✗ | ✓ | — | — |  |
+| 1003 | `GL_BLOCKME_LIST_ACK`〔推定〕 | 推定〔S2C 審計〕 | ✓ | ✗ | — | — |  |
+| 1004 | `GL_RANDOMMAP_LIST_REQ`〔推定〕 | 推定〔C2S 審計〕 | ✗ | ✓ | — | — |  |
+| 1005 | `GL_RANDOMMAP_LIST_ACK`〔推定〕 | 推定〔S2C 審計〕 | ✓ | ✗ | — | — |  |
+| 1006 | `GG_OCC_ZONE_ENTER_REQ`〔推定〕 | 推定〔C2S 審計〕 | ✗ | ✓ | — | — |  |
+| 1007 | 〔未命名〕 | 未命名〔handler 不可回收〕 | ✓ | ✗ | — | — | handler 為 16-byte 微 thunk，不可回收；禁止鄰接臆名 |
+| 1008 | `GG_OCC_ZONE_LEAVE_REQ`〔推定〕 | 推定〔C2S 審計〕 | ✗ | ✓ | — | — |  |
+| 1009 | 〔未命名〕 | 未命名〔handler 不可回收〕 | ✓ | ✗ | — | — | 同上（16-byte 微 thunk） |
+| 1010 | 〔未命名〕 | 未命名〔UNRESOLVED〕 | ✓ | ✗ | — | — | 行為紀錄見 Part I 審計節（無讀者，UNRESOLVED） |
+

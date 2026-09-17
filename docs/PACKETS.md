@@ -3,7 +3,8 @@
 > **閱讀導覽。** 這份文件保存欄位級、consumer 級與 state 級的手工證據；先由
 > [`docs/README.md`](README.md) 判斷它與 `LAYOUTS.md`、`RESOURCES.md`、
 > `SERVER_TS_EVIDENCE.md` 的不同角色。`LAYOUTS.md` 是自動 primitive
-> inventory（S2C/C2S 兩 Parts），
+> inventory（S2C/C2S 兩 Parts＋私人 UDP Appendix A/B＋全 opcode 索引
+> Part III），
 > 不能代替此處的 optional branch、count framing 或 service-policy boundary。
 >
 > 本檔保留歷史 section number，因為其他文件與 commit 會引用它；數字標題因此
