@@ -10,6 +10,7 @@ import {
 } from "../src/ops/registry.ts";
 import { Result, type GameServer } from "../src/ops/s2c/GL_LOGIN_ACK.ts";
 import { read as readCredentials } from "../src/ops/c2s/GL_LOGIN_REQ.ts";
+import userListRequest from "../src/ops/c2s/GL_USERLIST_REQ.ts";
 
 const build = <N extends OutboundName>(name: N, ...args: OutboundArgs<N>) =>
   decode(buildPacket(name, ...args).encode());
@@ -50,6 +51,20 @@ describe("694 — compression threshold and login trigger", () => {
     expect(reread(buildPacket("GL_ACCOUNTCONNSUCC", 0)).u16()).toBe(0);
     expect(() => buildPacket("GL_ACCOUNTCONNSUCC", 0x10000)).toThrow(RangeError);
     expect(() => buildPacket("GL_ACCOUNTCONNSUCC", 1.5)).toThrow(RangeError);
+  });
+});
+
+describe("105 — user-list request", () => {
+  test("accepts only the value the native writer can emit", () => {
+    const replies: string[] = [];
+    const connection = {
+      reply: (name: string) => replies.push(name),
+    } as unknown as Parameters<typeof userListRequest>[1];
+    const packet = (value: number) => new Packet(opcodeFor("GL_USERLIST_REQ")).u8(value);
+
+    userListRequest(reread(packet(1)), connection);
+    expect(replies).toEqual(["GL_USERLIST_ACK"]);
+    expect(() => userListRequest(reread(packet(0)), connection)).toThrow(/native writer emits/);
   });
 });
 
