@@ -149,8 +149,10 @@ UDP_RECEIVE_CASES = [2, 4, 5, 6, 8, 10, 12, 13, 14, 15, 18, 20, 22, 24, 26, 28,
 UDP_SEND_OPCODES = [1, 5, 6, 9, 13, 14, 15, 17, 19, 21, 23, 27, 30, 32, 35]
 # Direct branch identity for sub_595E80. The grouped 8/24 branch is intentional:
 # the native dispatcher does not establish separate official names for those two
-# numeric cases. Keep unknown_libname_107 in the map so a decompiler re-export
-# cannot silently turn case 26 into a guessed layout.
+# numeric cases. Case 26 was decoded from the PE on 2026-09-18: its 16-byte body
+# is an empty thiscall (prologue; save ecx; ret 4), so the doc anchors the raw
+# byte signature "55 8B EC 51 89 4D FC" — keep unknown_libname_107 in the map
+# so a decompiler re-export cannot silently turn case 26 into a guessed layout.
 UDP_RECEIVE_HANDLERS = {
     2: "sub_593A60", 4: "sub_593AB0", 5: "sub_593E60", 6: "sub_5940E0",
     10: "sub_594460", 12: "sub_5946C0", 13: "sub_594A10", 14: "sub_594CA0",
@@ -162,7 +164,7 @@ UDP_RECEIVE_HANDLERS = {
 UDP_SHARED_RECEIVE_HANDLER = (8, 24, "sub_596940")
 UDP_DOC_CASE_MARKERS = [
     "## Appendix B — `sub_595E80` UDP-private dispatcher / every verified receive case",
-    "`unknown_libname_107`", "明確 UNRESOLVED",
+    "`unknown_libname_107`", "55 8B EC 51 89 4D FC",
     "`154 UDP_ALL_PING_ACK`", "`158 UDP_TCP_DEAD_ACK`",
     "`sub_595980` 為明確位址 AES 送出",
 ]

@@ -625,9 +625,10 @@ framing `sub_591D50` 且長度 ≥ header+8 且 `sub_5930C0` AES 解密成功
 
 **送出 lane 全家（第二輪 Fact）**：①`sub_595900`＝**primary raw**
 （sendto socket sockaddr#1 +24；無 AES）——唯一已知使用者是 op17
-empty（死驅動器家族）；且 **sockaddr#1（socket+24）在整份 dump 無任何
-寫入者** → 目標恆為全 0，op17 raw beacon 在本 build 連目的地都未
-初始化＝雙重殘留；②`sub_595940`＝secondary raw（sockaddr#2，
+empty（**零進入邊死鏈，2026-09-18 PE 定案**）；且 **sockaddr#1
+（socket+24）在整份 dump 及 PE `.data` 初值中皆無寫入者**（位於 BSS
+尾段，開機全零定案） → 目標恆為全 0，op17 raw beacon 在本 build
+連目的地都未初始化＝雙重殘留；②`sub_595940`＝secondary raw（sockaddr#2，
 無 AES）——**全 dump 零 caller＝殘留**；③**`sub_595A10`＝secondary
 AES 主力**（`sub_595BD0` 讀 socket+9680 的 sockaddr#2 → `sub_595980`
 AES `sub_592F60` 加密 → sendto）——送出 19/21/23/27/30/32/35 全部
@@ -636,7 +637,9 @@ AES `sub_592F60` 加密 → sendto）——送出 19/21/23/27/30/32/35 全部
 攜入）——僅 A/B punch 回應（5/6/13/14）使用。另有兩件零 caller 殘留：
 `sub_596C50`（寫 seq+timeGetTime 戳記的 secondary 戳章器，若接上的
 話會給 keepalive 家族加序號/時戳）與 `sub_595E20`（>2000ms 未收即
-Sleep(10000)＋本地 row +59954=10000 的看門狗）。
+Sleep(10000)＋本地 row +59954=10000 的看門狗）；兩者連同上方
+lane ② `sub_595940` 之「零 caller」，2026-09-18 已一併經 PE 三式
+掃描確認為零進入邊（非僅 .c 層面）。
 
 UDP session/queue 物件基底 `&byte_1324330`：+0/+1 為 A/B 狀態位元組、
 +8/+12 移動封包 intrusive list、+20 critical section。
@@ -671,15 +674,33 @@ isLocal、+0x464 ping 值（`dword_F6D9E8`）、+0x770 memberKey
 回應**（`sub_595980` 直接呼叫，exact-address AES 送出 ×3）——本 dump
 沒有任何 gameplay 流量使用這些 peer 位址，⇒ 架構為「經伺服器
 secondary lane 中繼」，hole-punch 表在本 build 屬建立後不再使用
-（呼應一死驅動器的存活度標注；16 列陣列另有戰鬥用平行陣列
+（與 2026-09-18 存活度改判相容：A/B 驅動送出的落點是 secondary
+lane 的 sockaddr#2，與本表位址無涉；16 列陣列另有戰鬥用平行陣列
 `byte_F33120`，stride 相同但世代/用途不同，不混用）。
 
-> **⚠ 存活度標注（2026-09-17 新 Fact）**：`sub_5937D0`、`sub_5942B0`、
-> `sub_596180`、`sub_596240` 在本 .c dump 中**沒有任何 direct caller**
-> （各僅出現定義一次；op1/15、op9 的 builder 亦僅分別被這兩個死驅動器
-> 呼叫）。不能排除 data-section 函式指標註冊（.c 匯出不含 data xref），
-> 但本 dump 層面 **op1/9/15/17 主動送出鏈未被證明存活**——A/B 交換在
-> client 端只保證「作為回應方」的接收鏈（4/5/6/10/12/13/14 全部 wired）
+> **⚠ 存活度標注（2026-09-18 二進位覆驗版，取代 09-17 純 .c 判斷）**：
+> 直接掃描 `PaperMan.exe` 本體——三式並查：全映像搜 VA 4-byte 形式、
+> 全映像搜 RVA 4-byte 形式（VA−imagebase 0x400000）、.text 全部
+> E8/E9 前向目標反解；可疑站點再以 objdump 對齊確認指令邊界。
+>
+> - **存活改判——`sub_5937D0`（op1/15 驅動）、`sub_5942B0`（op9 驅動）
+>   確證 wired**：`sub_4070B0`+0x88（VA 0x407138）與
+>   `sub_407290`+0x5C（VA 0x4072EC）皆 `call sub_5942B0`；
+>   `CLobbyGameStart::sub_43C380`+0x3B（VA 0x43C3BB）`call sub_5937D0`。
+>   三站樣式一致：`mov ecx, 0x1324330`（manager this）→ call →
+>   `movzx reg, al` → `==1` 時設 `byte_1D0CFE7`（0x43C3BB 處續設
+>   `n15=13`）。**IDA 反編譯匯出未以正確名字顯示這些呼叫**
+>   （.c 的兩函式本體 grep 不到 callee 名，故 09-17 的「無 direct
+>   caller」屬顯示偽陰性）——**凡存活度判斷自本版起以 PE 掃描為準**。
+>   op1/9/15 主動送出鏈連帶改判**存活**（lobby/UI 等待期由三站供能）。
+> - **死鏈定案——`sub_596180`、`sub_596240`、`sub_596C50` 零進入邊**：
+>   三式掃描全部 0 命中（對照組如預期命中：op26←0x595F57、
+>   op18←0x595EF1、op15←0x59600A、8/24←0x595F24+0x595FB4，證明方法
+>   有效）；raw primary lane `sub_595900` 唯二 caller 正是兩死 builder
+>   （0x5961F7、0x5962B1）→ **op17 raw beacon 鏈在本 build 為完整死鏈**，
+>   不再是「dump 層面未證明」而是「二進位層面不可能發生」。
+> - A/B 接收鏈（4/5/6/10/12/13/14 wired）結構不變；上方「送出 lane
+>   全家」等結構 Fact 亦不變——本註記只更替存活度結論與其依據。
 
 ### C — Raw beacon 與 TCP 觸發（17/18）
 
@@ -692,11 +713,14 @@ secondary lane 中繼」，hole-punch 表在本 build 屬建立後不再使用
   其他初始化/填值路徑（如 UI 經計算指標寫入）屬 .c 匯出盲區，無從
   證明。它同時是 **143 `PM_UDPSTART_REQ` 的 identity 欄**（`sub_555C60`
   讀取）以及 191、246 `GL_CLIENTINFO_REQ` 的同源字串——op17-str 屬
-  此「identity echo」家族而非獨立 payload。兩 builder 皆無 direct
-  caller（見上存活度注記）。
+  此「identity echo」家族而非獨立 payload。兩 builder 於 2026-09-18
+  PE 全掃描**確證零進入邊**——此 beacon 鏈在本 build 實際不運行
+  （完整判決見上存活度註記 2026-09-18 二進位版）。
 - **18（入）**：一次性 latch 後 `sub_556530` 經 TCP 送 **141
   `PM_CONNECT_REQ`**（端點確認）。「UDP raw beacon → server 見活 →
-  client TCP 登入」的 bootstrap 鏈完整。
+  client TCP 登入」為**設計意圖**上的 bootstrap 鏈；實際存活度是
+  單向的——18 的接收半邊仍 wired（dispatcher→`sub_596300`），
+  17 的送出半邊已經上註確證枯死，server 若不放 18 此鏈亦不觸發。
 
 ### D — 工作階段註冊 19↔20（已實作交換，語義升級定案）
 
@@ -928,12 +952,12 @@ relay、authentication 與 peer admission 仍是 **UNRESOLVED**。
   client」的終局通知；37/65 為該彈窗的內部錯誤碼編目，其碼表不在
   client 端（不與 lang id 同空間；同 id 的 lang 文字屬巧合）。
 
-### 殘留 UNRESOLVED（四項；2026-09-18 飽和覆驗：邊界不變）
+### 殘留 UNRESOLVED（兩項；另兩項 2026-09-18 PE 直讀後除名）
 
 > 原六項清單中「notice code 37/65 編目空間」與「A/B 雙通道角色分工」
-> 兩項已於第二輪定案（見 G 節與 A/B 節）；其餘四項皆附證據邊界。
-> 2026-09-18 以本 dump 逐項完整再攻（研究憲章飽和原則）：
-> 四項 **UNRESOLVED 邊界全部維持**，僅補機體級細節如下。
+> 兩項已於第二輪定案（見 G 節與 A/B 節）。其餘四項經 2026-09-18
+> 直接讀取 `PaperMan.exe` 本體覆驗：**op26 與 op17 送出驅動兩項除名**
+> （條目保留作判決記錄）；**op15 latch 與 8/24 歸屬兩項邊界維持**。
 
 1. **op15 入方向** raw16 latch `unk_F25648`：別名掃描（F25648..F25658
    逐位址）後仍**只有宣告＋單一寫入**——op15 handler `sub_593DF0` 以
@@ -941,24 +965,32 @@ relay、authentication 與 peer admission 仍是 **UNRESOLVED**。
    `sub_592500(this, dst, 0x10)`，**他處亦用、非本槽專用**）從 packet
    複入；latch `byte_F25646` 僅由該 handler 自身讀寫自鎖（見活即置 1
    後不再進），零讀者 → 本 build 不可能觀測其語義。
-   （2026-09-18 重新全引址掃，結論不變。）
+   （2026-09-18 重新全引址掃，結論不變。另補：本項牽涉全域全數位於
+   .data 之 BSS 尾段（0xBF0000..0x23290A8，PE 無檔案位元組）→ 開機
+   全零，「零初始值」由 .c 推定升為二進位事實。）
 
-2. **op26** `unknown_libname_107`：位址 0x596CB0 介於 `sub_596C50`
-   與 `CUDPNetworkManager::sub_596CC0` 之間、**僅 16-byte** 的 stub，
-   函式體不在 dump；僅知攜 packet 參數、無回覆——語義不可回收。
-   （2026-09-18 覆驗：邊界屬實，結論不變；`sub_596C50` 戳章器定性
-   另詳 §2.6 G0 存活度註記。）
+2. **op26** `unknown_libname_107`：**已除名**（2026-09-18 PE 直讀）。
+   原先「16-byte stub、函式體不在 dump」只是 IDA 未反編譯；本體
+   位元組完整——`55 8B EC 51 89 4D FC 8B E5 5D C2 04 00` + `CC×3`
+   padding，即標準**空 thiscall**：prologue、`mov [ebp-4], ecx` 保存
+   this 後立即 `ret 4`（吞掉唯一 packet 參數）。**不讀、不寫、不
+   回應——client 收到 op26 的效果確定為零**。殘留僅 server 端的
+   送出理由（本 dump 無證據，屬下方「邊界重申」範圍）。
 
-3. **op17 雙變體的送出驅動**：兩 builder 本體 2026-09-18 完整覆驗，
-   beacon 語義（1 秒節拍、op18 latch 停送）詳 §2.6 C 節，自洽閉合。
-   本輪新增補記兩點：
-   - 空變體 `sub_596180` 的節拍全在函式內自足（全域 `dword_132436C`
-     記上次送出時刻、回傳值累進 `dword_1D0CFF4`——該計數器乃全 lane
-     共用的送出累積器，見 §2.5「Private opcode 19 → 20」註記）；
-   - 字串變體 `sub_596240` 與之**不對稱**：無 latch、無節拍，屬一次性
-     送出（只投影 `String[24]`，身份家族詳 C 節）。
-   **仍 UNRESOLVED 的部分**：兩 builder 的呼出者（函指／計時器註冊不在
-   .c 匯出）與 `String` 的正常填值路徑（.c 盲區）。
+3. **op17 雙變體的送出驅動**：**已除名**（2026-09-18 PE 三式掃描）。
+   判決：兩 builder（`sub_596180`、`sub_596240`）**沒有呼出者**——
+   不是「呼出者註冊在 .c 匯出盲區」，而是二進位內不存在任何取得其
+   位址的途徑；整條 raw beacon 鏈（含 raw lane `sub_595900` 唯二
+   caller、其 `dword_1D0CFF4` 累積路徑）為完整死鏈，方法與對照組
+   見上方「存活度標注（二進位覆驗版）」。補記兩點機體細節：
+   - 空變體的節拍全在函式內自足（全域 `dword_132436C` 記上次送出
+     時刻、回傳值累進 `dword_1D0CFF4`——該計數器乃全 lane 共用的
+     送出累積器，見 §2.5「Private opcode 19 → 20」註記）；
+   - 字串變體與之**不對稱**：無 latch、無節拍，屬一次性送出（只投影
+     `String[24]`）。
+   原掛於本項的「`String` 正常填值路徑」盲區轉註：該 buffer 的主要
+   消費者是 TCP 身份家族（143/191/246，詳 C 節），op17 既已死鏈，
+   此盲區與 UDP 層已無關聯，不再列為 op17 之 UNRESOLVED。
 
 4. **8 與 24 的個別歸屬**：dispatcher 中 `case 8: case 24:` 共用同一
    標籤進 `sub_596940`，client 端完全等價處理；handler 家族已由
@@ -966,10 +998,13 @@ relay、authentication 與 peer admission 仍是 **UNRESOLVED**。
    內部名），但兩個數值與 token 的一一對應仍無從分辨——依 n+1
    成對結構，24 為 23（本地移動）的回聲之說最自然，8 則無 client
    端送出對應；切分鍵在 server 端，本 dump 無從分辨。
-   （2026-09-18 曾嘗試以欄位序證明 24=echo(23)：主執行緒 per-record
-   parser `sub_602E30` 與 op23 builder 僅**前 5 欄**（u8×3 s32 raw4）
-   對齊，第 6 欄起長度/分段不一致（parser 有 u8[16] blob；builder 有
-   u8×8 尾巴）——證據不足，維持原「最自然」不升級。）
+   （2026-09-18 二進位複核：case 8 與 case 24 兩個 E8 站點
+   （0x595F24、0x595FB4）目標皆為 `sub_596940`——「共用 handler」
+   獲 PE 層級確認。另曾嘗試以欄位序證明 24=echo(23)：主執行緒
+   per-record parser `sub_602E30` 與 op23 builder 僅**前 5 欄**
+   （u8×3 s32 raw4）對齊，第 6 欄起長度/分段不一致（parser 有
+   u8[16] blob；builder 有 u8×8 尾巴）——證據不足，維持原
+   「最自然」不升級。）
 
 > **邊界重申**：以上全是 **client 端**觸發/caller/consumer 事實。server 端
 > 行為（應收什麼、位址所有權、轉發/carrier 角色）除既有 19→20 投影外

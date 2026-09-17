@@ -963,7 +963,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 13 | `sub_594460`; `sub_5946C0`（2 sites） | 各為 `u8 raw4` | 由 `sub_595E80` cases 10/12 呼叫；經 `sub_595980` 以已存位址送出；兩個 constructor 維持獨立 native call site；`raw4` 為 `sub_592AA0` 之 caller-defined 輸出 |
 | 14 | `sub_594A10` | `u8 raw4` | 由 `sub_595E80` case 13 呼叫；經 `sub_595980` 以已存位址送出；source/本地 state 分支與 13 不同；`raw4` 為 `sub_592AA0` 之 caller-defined 輸出；domain UNRESOLVED |
 | 15 | `sub_593830`（1 site；shared function 的 `n2==2` branch） | `u8×2` | `sub_5937D0` timer/state caller；`sub_595A10` secondary AES lane；與 1 同屬一個 native function，但 wire form 不相同 |
-| 17 | `sub_596180`; `sub_596240`（2 sites） | `sub_596180`：空；`sub_596240`：`str`（ANSI/NUL） | 兩個 global builder 均未回收具名 direct caller；兩者皆走 primary raw `sub_595900`，繞過 AES；空形式與字串形式必須維持分開 |
+| 17 | `sub_596180`; `sub_596240`（2 sites） | `sub_596180`：空；`sub_596240`：`str`（ANSI/NUL） | 兩個 global builder 2026-09-18 經 `PaperMan.exe` 三式掃描確證**零進入邊＝死鏈**（詳 PACKETS §2.6 存活度註記）；兩者皆走 primary raw `sub_595900`，繞過 AES；空形式與字串形式必須維持分開 |
 | 19 | `sub_596670` | `u8×2 s8 u8 s32 str` | direct callers：`sub_4070B0`、`sub_407290`、`CLobbyGameStart::sub_43C380`；`sub_595A10` secondary AES lane；offset 2 使用 `sub_5928E0` s8；offset 3 使用 `sub_592920` u8，source 為 `-2` 時送出 `0xFE`；nickname 字串為 native writer 輸出 |
 | 21 | `sub_596330` | `u8×3 s32 raw4 raw4` | `sub_595D80` active-manager caller；經 `sub_595A10`；尾端兩個 `sub_592AA0` 值維持 caller-defined raw4 |
 | 23 | `sub_744450` | `u8×3 s32 raw4 u8 u16×3 u8 u8×8 s32` | direct callers：`sub_600770`、`sub_73E170`；經 `sub_602D70 → sub_596B90 → sub_595A10` gate；`sub_592AA0` n0x64 為 caller-defined raw4；寬度為 Fact，欄位涵義 UNRESOLVED |
@@ -1027,7 +1027,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 18 | `sub_596300` | 未讀 body | 一次性 latch `n0x3E8_1`；首個 packet 呼叫 `sub_556530`，於 TCP socket 構成並送出 catalog/TCP opcode `141 PM_CONNECT_REQ`；後續 packet 無作用。未回收任何 UDP body 消費者。 | private UDP trigger 維持 source-oriented 描述；內層 TCP opcode 141 有官方 `PM_CONNECT_REQ` 證據 |
 | 20 | `sub_5968C0` | 未讀 body | 設 `byte_1D0CFE7=1`，清 manager retry/state word `+44,+8,+4`，更新 `+24=timeGetTime()`，並經 `sub_594F00` 清 `byte_1324331`。不讀任何 identity 或 gameplay 欄位。 | 為 outbound op 19 之 private completion；官方名未回收 |
 | 22 | `sub_5964E0` | `u8 updateFlag`；若 `==1`：`u8 count`，重複 `u8 memberKey + raw4 value` | 更新 timer/network-manager 本地 state，再僅對已知 key 將 `raw4 value` 寫入 `dword_F6D9E8[i]`。無回應。flag 非 1 時讀完第一個 byte 即停止。 | private unnamed |
-| 26 | `unknown_libname_107` | 無法從匯出之 C body 回收 | dispatcher 呼叫已驗證，但 callee 函式體／名稱不在本 dump；不得臆造任何欄位順序或效果。 | 明確 UNRESOLVED |
+| 26 | `unknown_libname_107` | 無（不讀 body） | 2026-09-18 由 `PaperMan.exe` 直讀 16-byte 本體（`55 8B EC 51 89 4D FC` `8B E5 5D C2 04 00` + `CC×3`）＝**空 thiscall**：存 this 後即 `ret 4` 吞掉唯一 packet 參數；不讀、不寫、不回應——效果確定為零。原「函式體不在 dump」僅是 IDA 未反編譯 | 行為 Fact（PE 直讀）；名稱因無原生字串仍維持 IDA 標籤；server 端送出理由 UNRESOLVED |
 | 28 | `sub_594E80 → sub_74D130 → sub_9FA000` | gated reader：`u8×3, u8, u8, raw2, u8 count`；選定規則下 `count×{u8 index, raw4 value, raw2 state}` | 僅在已回收之 gameplay/object gate 成立時進入。合法 record 可經 `sub_9FA860` 更新內部 object flag/timestamp 並插入 queue；本地 gate 失敗可能不讀任何 body。無回應。 | shared consumer 無名；不得沿用 outbound op 27 之名 |
 | 29 | `sub_593E20` | 未讀 body | 經 `sub_555030(&dword_1321D00)` 關閉 TCP socket，載入 resource `0xA8`，呼叫本地 notice `sub_9A7DE0(...,37,1)`。無 packet 衍生欄位。 | private 本地 notice 觸發；unnamed |
 | 31 | `sub_594EA0 → sub_606AD0` | gated header `u8×3, raw4 gateValue, s16 recordCount`；每筆 record 以 `u8 active` 起頭，尾段依 object 而異 | 合法 object 分支消費 object/member key、status、raw2 state、`f32×3` position 類值與 raw4；fallback 分支消費不同尾段但不使用其值。僅更新 client object state；無回應。`recordCount` 為 native `s16`，非已證明之 unsigned count。 | shared consumer unnamed |
@@ -1042,9 +1042,10 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 > **UNRESOLVED**。`Y_UDP_S_MOVE_INF` 對 shared consumer 字串是 **HIGH** 證據，
 > 但不含 8 與 24 各自的歸屬判定。`UDP_ALL_PING_ACK`、`UDP_TCP_DEAD_ACK` 是
 > **HIGH catalog-name/value fact** 加 private case xref，但 dump 未證明
-> private handler 是 catalog 協議的別名。`unknown_libname_107` 是 **HIGH 的
-> 未解決邊界 fact**：呼叫存在但 callee 函式體缺席，所以不升格任何
-> layout／名稱。
+> private handler 是 catalog 協議的別名。`unknown_libname_107` 原為
+> **HIGH 的未解決邊界 fact**；2026-09-18 由 `PaperMan.exe` 直讀其
+> 16-byte 本體證明＝空函式（行為 Fact），邊界解除——layout 升格為
+> 「無（不讀 body）」，名稱因無原生字串仍維持 IDA 標籤。
 >
 > **Reader 失敗邊界**：`sub_592500`／native Packet reader 可能失敗且不回滾
 > 已修改的 caller state。case 4/12/22/28/31/33/34 的 count 迴圈不是 server
