@@ -951,7 +951,11 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 > 觸發點、state 消費者與生命週期定案，見 `PACKETS.md` §2.6（含 A/B 雙通道
 > hole-punch 狀態機、19↔20 註冊握手、8/24 移動套用鏈與存活度標注）。**
 > **2026-09-18：用途定案者已比照官方 catalog 風格賜予推定名，唯一定義處為
-> `PACKETS.md` §2.6〈命名總表〉；本表各列僅記名稱句柄。**現有 native evidence 證明的
+> `PACKETS.md` §2.6〈命名總表〉；本表各列僅記名稱句柄。**
+> **2026-09-18 傳輸層定案（詳 PACKETS §2.6）：catalog ≥100 的 UDP 命名帶屬
+> TCP/catalog 命名空間——`sub_58B010` 調度、且無一站經 `sub_595A10`／
+> `sub_595980` private lane；唯 154/158 在 `sub_595E80` 上與本表私人線
+> 數值重疊雙棲。**現有 native evidence 證明的
 > `n → n+1` case pairs、AES/raw send lane、secondary sockaddr 與 `UNRESOLVED`
 > server boundary 詳見 [`PACKETS.md`](PACKETS.md) §2.5；這裡保留 constructor-level
 > inventory，避免把 UDP evidence 從本文件的完整 native builder audit 中遺漏。

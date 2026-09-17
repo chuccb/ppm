@@ -952,6 +952,51 @@ relay、authentication 與 peer admission 仍是 **UNRESOLVED**。
   client」的終局通知；37/65 為該彈窗的內部錯誤碼編目，其碼表不在
   client 端（不與 lang id 同空間；同 id 的 lang 文字屬巧合）。
 
+### ≥100 UDP 命名帶的傳輸層定案（2026-09-18 三錨點交叉）
+
+> **命題**：「op≥100 且名稱含 UDP 的 packet 只是**與 UDP 有關**，實際傳輸
+> 應仍是 TCP」。以三錨點交叉核對後——**命題對其中 6 個成立、2 個是
+> 雙棲、8 個在本 build 屬 registry-only**，逐項如下。
+>
+> **錨點 Fact**：TCP/S2C 主 dispatcher＝`sub_58B010`（306 case，全數在
+> LAYOUTS Part I）；UDP-private 主 dispatcher＝`sub_595E80`（22 case，
+> App B 全表）；private UDP 送出主因 lane＝**`sub_595A10`（secondary
+> AES）——全 PE 僅 10 個 E8 站、落於 8 個函式**：`sub_593830`×2
+> （op1/15 builder）、`sub_594300`（op9）、`sub_596670`（op19）、
+> `sub_596330`（op21）、`sub_596B90`（op23 與 op27 共用送出匣）、
+> `sub_6065E0`（op30）、`sub_96BF70`（op32）、`sub_7463E0`（op35），
+> 外加死鏈 `sub_596C50`。**例外站**＝punch ×3 回覆（5/6/13/14 走
+> `sub_595980` exact-address ×3，不經 595A10）、op17 raw `sub_595900`
+> （死鏈）、`sub_595940`（零進入邊）。
+>
+> | op | 官方名 | 註冊表 `sub_9D2050` | TCP 58B010 case | TCP builder（Packet ctor） | UDP 595E80 case | 名稱 logger `sub_58D940` | 定案 |
+> |---|---|---|---|---|---|---|---|
+> | 143 | PM_UDPSTART_REQ | 有 | —（C2S） | **`sub_555C60`（1 站）** | — | 有 | **TCP**（UDP 啟動握手） |
+> | 144 | PM_UDPSTART_ACK | 有 | **`sub_555D50`** | —（S2C） | — | 有 | **TCP** |
+> | 159 | TCP_UDP_DEAD_REQ | 有 | —（C2S） | **0 站** | — | 有 | TCP 命名族；本 build 無 builder |
+> | 160 | TCP_UDP_DEAD_ACK | 有 | **`sub_58D790`** | —（S2C） | — | 有 | **TCP** |
+> | 165 | Y_TCP_INF_REQ | 有 | —（C2S） | **17 站** | — | 有 | **TCP**（戰鬥 TCP 窗；與 op35 的 UDP 回執鏈互讀） |
+> | 166 | Y_TCP_INF_ACK | 有 | **`sub_58D820`** | —（S2C） | — | 有 | **TCP** |
+> | 154 | UDP_ALL_PING_ACK | 有 | **無** | 0 站 | **`sub_5965D0`**（ping 值寫 `dword_F6D9E8`） | 無 | **雙棲**：名在 catalog、線在 private wire；行為與標籤相容 |
+> | 158 | UDP_TCP_DEAD_ACK | 有 | **無** | 0 站 | **`sub_596910`**（notice 65＋resource 0x127） | 無 | **雙棲**：同上 |
+> | 153/155/157/161/163 | UDP_ALL_PING_REQ、Y_UDP_C_HOLE_INF、UDP_TCP_DEAD_REQ、UDP_TCP_LIVE_REQ、TCP_UDP_LIVE_REQ | 有 | 無 | **0 站** | 無 | 無 | **registry-only**（本 build 無任何線端點） |
+> | 156/162/164 | Y_UDP_S_HOLE_INF、UDP_TCP_LIVE_ACK、TCP_UDP_LIVE_ACK | 有 | 無 | —（S2C） | 無 | 無 | **registry-only** |
+>
+> **結論**：
+> 1. 「含 UDP 之名於 catalog ⇒ 與 UDP 有關、**傳輸層仍是 TCP**」——對
+>    **143/144/159/160/165/166** 為 **Fact**：它們有 TCP dispatcher case、
+>    TCP builder、且案名 logger 皆以 TCP 流呈現；**沒有一個出現在
+>    `sub_595E80` 或 595A10 系 lane**。
+> 2. 唯 **154/158** 兩數值在 `sub_595E80` 上另有 private handler（雙棲；
+>    其行為與官方標籤相容——這正是命名總表 22 條「姊妹路徑」註腳的結構
+>    背景）。除此之外，**private UDP 的線上空間（1..35＋154/158）與
+>    catalog 名空間徹底分離**：catalog ≥100 的 UDP 命名不經 UDP lane，
+>    private op 即使數值與 catalog 重疊也只由 private handler 消費。
+> 3. 8 個帶內名（153/155/156/157/161/162/163/164）在本 build 無
+>    dispatcher case、無 builder、無 logger case——稱其為「TCP packet」
+>    亦不成立；它們只是註冊表名錄（server 端故事維持 UNRESOLVED）。
+>    159 有名錄＋logger 但無 builder，歸 TCP 命名族記錄。
+
 ### 命名總表（2026-09-18；推定名，比照官方 catalog 風格）
 
 > **性質與邊界**：以下 24 個名稱是**本研究推定命名**（`〔推定〕`），
