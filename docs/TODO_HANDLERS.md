@@ -7,9 +7,9 @@ native/resource evidence；它不把 client reader/writer 自動推導成 servic
 
 ## Current implementation surface
 
-Bun 在 `server-ts/src/ops/registry.ts` 以目錄直接發現 packet modules，啟動時將
-每個 filename 對到 `db/packets.tsv`。目前有 15 個 C2S modules 與 16 個 S2C
-modules：
+`server-ts/src/ops/registry.ts` 明確列出 packet modules，並以 directory check
+防止新增檔案遺漏；啟動時將每個 filename 對到 `db/packets.tsv`。
+目前有 15 個 C2S modules 與 16 個 S2C modules：
 
 - Login/channel: `GL_LOGIN_REQ`、`PM_UDPSTART_REQ`、`GC_ENTERCHANNEL_REQ`，以及
   694、681、693、144、196 的 handshake replies。

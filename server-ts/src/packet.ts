@@ -160,6 +160,9 @@ export class Packet {
 
   /** Documented reserved/padding runs. */
   zeros(count: number): this {
+    if (!Number.isSafeInteger(count) || count < 0) {
+      throw new RangeError("zero run length must be a non-negative integer");
+    }
     const at = this.#at(count);
     this.#buf.fill(0, at, this.#len);
     return this;
@@ -278,6 +281,9 @@ export class Reader {
   }
 
   raw(count: number): Uint8Array {
+    if (!Number.isSafeInteger(count) || count < 0) {
+      throw new RangeError("raw read length must be a non-negative integer");
+    }
     return this.#buf.subarray(this.#at(count), this.#pos);
   }
 

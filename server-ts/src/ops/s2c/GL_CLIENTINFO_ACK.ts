@@ -29,6 +29,6 @@ export default function GL_CLIENTINFO_ACK(op: number, myInfo: MyInfo | null): Pa
   const p = new Packet(op).u8(1);
   writeMyInfoBasicData(p, myInfo);
   p.u8(characterIndex).u8(character.charType);
-  writeCharacterAppearance(p, character.equip);
+  writeCharacterAppearance(p, character.appearance);
   return p;
 }

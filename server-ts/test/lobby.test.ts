@@ -16,7 +16,7 @@ describe("lobby bootstrap packets", () => {
     expect(first?.nickname).toBe("alice");
     expect(first?.selectedCharIndex).toBe(0);
     expect(first?.characters).toEqual([
-      { slotNo: 0, charType: 1, equip: [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0] },
+      { slotNo: 0, charType: 1, appearance: [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0] },
     ]);
 
     const snapshot = store.getNewSkillProfileSnapshot(first!.userId);
@@ -183,8 +183,8 @@ describe("lobby bootstrap packets", () => {
       ...myInfo!,
       selectedCharIndex: 1,
       characters: [
-        { slotNo: 7, charType: 1, equip: [] },
-        { slotNo: 9, charType: 2, equip: [] },
+        { slotNo: 7, charType: 1, appearance: [] },
+        { slotNo: 9, charType: 2, appearance: [] },
       ],
     };
     const sparsePublicInfo = decode(build("GL_CLIENTINFO_ACK", sparseCharacters).encode());

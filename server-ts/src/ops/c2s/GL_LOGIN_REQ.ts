@@ -75,7 +75,7 @@ export default async function GL_LOGIN_REQ(r: Reader, connection: Connection): P
     n100,
     extCount,
     connection.remoteIp,
-    connection.config.admissionLifetimeMs ?? 120_000,
+    connection.config.admissionLifetimeMs,
   );
   connection.log(`login ${account} -> account ${found.id}`);
   // `user_no` is the native wire name. The available evidence does not prove

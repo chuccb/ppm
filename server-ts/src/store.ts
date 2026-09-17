@@ -38,11 +38,12 @@ export interface Stats {
   readonly playTimeSeconds: number;
 }
 
-export interface CharSlot {
+export interface Character {
+  /** Persistent character-list slot; 198 serializes the row index separately. */
   readonly slotNo: number;
   readonly charType: number;
-  /** The twelve category-relative u16 values read by 198. */
-  readonly equip: readonly number[];
+  /** The twelve category-relative u16 normal-appearance values read by 198. */
+  readonly appearance: readonly number[];
 }
 
 export interface MyInfo {
@@ -55,7 +56,129 @@ export interface MyInfo {
   /** Serialized character-list index emitted in the native 198/247 fields. */
   readonly selectedCharIndex: number;
   readonly stats: Stats;
-  readonly characters: readonly CharSlot[];
+  readonly characters: readonly Character[];
+}
+
+/** SQLite rows stay snake_case; only the returned projection is camelCase. */
+interface AccountRow {
+  id: number;
+  username: string;
+  password_hash: string;
+  created_at: number;
+  last_login_at: number | null;
+}
+
+interface PlayerRow {
+  id: number;
+  nickname: string;
+  level: number;
+  experience: number;
+  game_points: number;
+  cash: number;
+  current_character: number;
+  wins: number;
+  losses: number;
+  kills: number;
+  deaths: number;
+  headshots: number;
+  combos: number;
+  hearts: number;
+  double_kill: number;
+  triple_kill: number;
+  criticals: number;
+  multi_kill: number;
+  ultra_kill: number;
+  z_kill: number;
+  k_kill: number;
+  dd_kill: number;
+  play_count: number;
+  round_count: number;
+  disconnects: number;
+  play_time_seconds: number;
+}
+
+interface CharacterRow {
+  slot: number;
+  character_type: number;
+  appearance0: number;
+  appearance1: number;
+  appearance2: number;
+  appearance3: number;
+  appearance4: number;
+  appearance5: number;
+  appearance6: number;
+  appearance7: number;
+  appearance8: number;
+  appearance9: number;
+  appearance10: number;
+  appearance11: number;
+}
+
+interface ProfileRow {
+  profile_index: number;
+  puzzle0: number;
+  puzzle1: number;
+  puzzle2: number;
+  puzzle3: number;
+  puzzle4: number;
+  puzzle5: number;
+  puzzle6: number;
+  expires_at_packed_minute: number;
+}
+
+function accountFromRow(row: AccountRow): Account {
+  return {
+    id: row.id,
+    username: row.username,
+    passwordHash: row.password_hash,
+    createdAt: row.created_at,
+    lastLoginAt: row.last_login_at,
+  };
+}
+
+function statsFromRow(row: PlayerRow): Stats {
+  return {
+    wins: row.wins,
+    losses: row.losses,
+    kills: row.kills,
+    deaths: row.deaths,
+    headshots: row.headshots,
+    combos: row.combos,
+    hearts: row.hearts,
+    doubleKill: row.double_kill,
+    tripleKill: row.triple_kill,
+    criticals: row.criticals,
+    multiKill: row.multi_kill,
+    ultraKill: row.ultra_kill,
+    zKill: row.z_kill,
+    kKill: row.k_kill,
+    ddKill: row.dd_kill,
+    playCount: row.play_count,
+    roundCount: row.round_count,
+    disconnects: row.disconnects,
+    playTimeSeconds: row.play_time_seconds,
+  };
+}
+
+function characterFromRow(row: CharacterRow): Character {
+  return {
+    slotNo: row.slot,
+    charType: row.character_type,
+    appearance: [
+      row.appearance0,
+      row.appearance1,
+      row.appearance2,
+      row.appearance3,
+      row.appearance4,
+      row.appearance5,
+      row.appearance6,
+      row.appearance7,
+      row.appearance8,
+      row.appearance9,
+      row.appearance10,
+      row.appearance11,
+    ],
+  };
 }
 
 export const NEW_SKILL_PROFILE_COUNT = 5;
@@ -210,30 +333,14 @@ export class Store {
 
   findAccount(username: string): Account | null {
     const row = this.#db
-      .query<
-        {
-          id: number;
-          username: string;
-          password_hash: string;
-          created_at: number;
-          last_login_at: number | null;
-        },
-        { u: string }
-      >("SELECT * FROM account WHERE username = $u")
+      .query<AccountRow, { u: string }>("SELECT * FROM account WHERE username = $u")
       .get({ u: username });
-    if (!row) return null;
-    return {
-      id: row.id,
-      username: row.username,
-      passwordHash: row.password_hash,
-      createdAt: row.created_at,
-      lastLoginAt: row.last_login_at,
-    };
+    return row ? accountFromRow(row) : null;
   }
 
   /**
    * Creates the minimal private-server MyInfo projection needed by 198.
-   * The canonical CharSlot type 1 and its six native body-template values are
+   * The canonical character type 1 and its six native body-template values are
    * source-proven; no weapon, item, currency, or reward is granted here.
    */
   ensurePlayerIdentity(accountId: number): MyInfo | null {
@@ -307,20 +414,7 @@ export class Store {
         )
         .get({ p: userId });
       const rows = this.#db
-        .query<
-          {
-            profile_index: number;
-            puzzle0: number;
-            puzzle1: number;
-            puzzle2: number;
-            puzzle3: number;
-            puzzle4: number;
-            puzzle5: number;
-            puzzle6: number;
-            expires_at_packed_minute: number;
-          },
-          { p: number }
-        >(
+        .query<ProfileRow, { p: number }>(
           `SELECT profile_index, puzzle0, puzzle1, puzzle2, puzzle3, puzzle4, puzzle5, puzzle6,
                   expires_at_packed_minute
              FROM new_skill_profiles
@@ -381,37 +475,7 @@ export class Store {
   /** Load the native 198 MyInfo projection by its user ID. */
   getMyInfo(userId: number): MyInfo | null {
     const row = this.#db
-      .query<
-        {
-          id: number;
-          nickname: string;
-          level: number;
-          experience: number;
-          game_points: number;
-          cash: number;
-          current_character: number;
-          wins: number;
-          losses: number;
-          kills: number;
-          deaths: number;
-          headshots: number;
-          combos: number;
-          hearts: number;
-          double_kill: number;
-          triple_kill: number;
-          criticals: number;
-          multi_kill: number;
-          ultra_kill: number;
-          z_kill: number;
-          k_kill: number;
-          dd_kill: number;
-          play_count: number;
-          round_count: number;
-          disconnects: number;
-          play_time_seconds: number;
-        },
-        { u: number }
-      >(
+      .query<PlayerRow, { u: number }>(
         `SELECT p.id, p.nickname, p.level, p.experience, p.game_points, p.cash,
                 p.current_character,
                 s.wins, s.losses, s.kills, s.deaths, s.headshots, s.combos, s.hearts,
@@ -426,49 +490,14 @@ export class Store {
     if (!row) return null;
 
     const characters = this.#db
-      .query<
-        {
-          slot: number;
-          character_type: number;
-          appearance0: number;
-          appearance1: number;
-          appearance2: number;
-          appearance3: number;
-          appearance4: number;
-          appearance5: number;
-          appearance6: number;
-          appearance7: number;
-          appearance8: number;
-          appearance9: number;
-          appearance10: number;
-          appearance11: number;
-        },
-        { p: number }
-      >(
+      .query<CharacterRow, { p: number }>(
         `SELECT slot, character_type,
                 appearance0, appearance1, appearance2, appearance3, appearance4, appearance5,
                 appearance6, appearance7, appearance8, appearance9, appearance10, appearance11
            FROM player_character WHERE player_id = $p ORDER BY slot`,
       )
       .all({ p: row.id })
-      .map((characterRow) => ({
-        slotNo: characterRow.slot,
-        charType: characterRow.character_type,
-        equip: [
-          characterRow.appearance0,
-          characterRow.appearance1,
-          characterRow.appearance2,
-          characterRow.appearance3,
-          characterRow.appearance4,
-          characterRow.appearance5,
-          characterRow.appearance6,
-          characterRow.appearance7,
-          characterRow.appearance8,
-          characterRow.appearance9,
-          characterRow.appearance10,
-          characterRow.appearance11,
-        ],
-      }));
+      .map(characterFromRow);
     // The DB stores the persistent slot key, while native 198/247 serialize
     // only the ordered character rows. Map the key to that compact wire index;
     // never send the persistent slot number as the native selected index.
@@ -487,27 +516,7 @@ export class Store {
       gamePoints: row.game_points,
       cash: row.cash,
       selectedCharIndex,
-      stats: {
-        wins: row.wins,
-        losses: row.losses,
-        kills: row.kills,
-        deaths: row.deaths,
-        headshots: row.headshots,
-        combos: row.combos,
-        hearts: row.hearts,
-        doubleKill: row.double_kill,
-        tripleKill: row.triple_kill,
-        criticals: row.criticals,
-        multiKill: row.multi_kill,
-        ultraKill: row.ultra_kill,
-        zKill: row.z_kill,
-        kKill: row.k_kill,
-        ddKill: row.dd_kill,
-        playCount: row.play_count,
-        roundCount: row.round_count,
-        disconnects: row.disconnects,
-        playTimeSeconds: row.play_time_seconds,
-      },
+      stats: statsFromRow(row),
       characters,
     };
   }

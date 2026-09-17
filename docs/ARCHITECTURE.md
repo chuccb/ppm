@@ -141,9 +141,9 @@ dispatcher。Server 使用 cancellation 與 receive-loop 結束後的 socket cle
   identity、send gate 與 ordered dispatch；`admission.ts` 明確表示 143 handoff 與
   195→196 channel entry 之間的不同 state。
 - `ops/registry.ts` 是 opcode lookup、typed packet builder 與 handler boundary；
-  Bun 直接載入 `src/ops/c2s/` 與 `src/ops/s2c/` 的 packet modules。TypeScript
-  compile-time types 不取代 packet reader 的 runtime width、framing、fixed-buffer
-  與 malformed-input checks。
+  以 explicit imports 綁定 `src/ops/c2s/` 與 `src/ops/s2c/` 的 packet modules，
+  並以 Bun directory check 防止新增檔案遺漏。TypeScript compile-time types
+  不取代 packet reader 的 runtime width、framing、fixed-buffer 與 malformed-input checks。
 - 每一個 packet module 以 opcode 命名並依方向分目錄；registry 將 filename 綁定
   到 `db/packets.tsv`，避免重複的名稱常數。未有足夠 evidence 的 opcode 保留
   fail-closed/no-op，不臆造 service policy。
@@ -159,8 +159,9 @@ dispatcher。Server 使用 cancellation 與 receive-loop 結束後的 socket cle
 
 ## 5. Server 現況
 
-- Packet modules：15 個 C2S、16 個 S2C；由 `ops/registry.ts` runtime discovery，
-  filename 必須存在於 `db/packets.tsv`，重複或未知 opcode 會在啟動時失敗。
+- Packet modules：15 個 C2S、16 個 S2C；由 `ops/registry.ts` explicit registry
+  綁定，並以 directory check 防止遺漏檔案；filename 必須存在於 `db/packets.tsv`，
+  重複或未知 opcode 會在啟動時失敗。
 - 已涵蓋：694/682/681 login handshake、693/143/144/195/196 channel handshake、
   lobby bootstrap（197/198、199/200、105/106、107/108、425/426、433/434）、
   250/252/254 compatibility projections、keepalive，以及 private UDP 19→空 20。

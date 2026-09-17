@@ -1,22 +1,15 @@
 /**
  * Selects the group and channel advertised by 681.
  *
- * The client sends this after every 144, even when 144 reported failure; an
- * unauthenticated or wrong selection therefore receives an explicit non-
- * success 196 and never gains lobby authority. (`sub_56FF40`, `sub_4179D0`)
- * Native sub_875680 has a header0 gate, but a server success without the
- * complete continuation would be a false-success projection. The TS server
- * therefore admits type 3 only when the complete raw tail is configured.
- *
- * The third byte is a native boolean wire value (`0` or `1`), still kept as a
- * raw flag. Native loads it from the local option block
- * (`sub_7338D0`/`sub_735DE0`), but the recovered code does not establish a
- * replay or other server-domain name for it.
+ * The client sends this after every 144, even after a failed 144. A failed
+ * selection therefore gets a real 196 failure and never grants lobby access.
+ * The third byte is a native boolean flag; its business meaning is unknown.
+ * Type 3 is fail-closed: a success packet needs the complete raw continuation.
  */
 
-import type { Reader } from "../../packet.ts";
 import type { Connection } from "../../connection.ts";
-import { Result, type Type3Tail } from "../s2c/GC_ENTERCHANNEL_ACK.ts";
+import type { Reader } from "../../packet.ts";
+import { Result } from "../s2c/GC_ENTERCHANNEL_ACK.ts";
 
 export interface Selection {
   readonly group: number;
@@ -25,16 +18,20 @@ export interface Selection {
 }
 
 export function read(r: Reader): Selection {
-  const selection = {
-    group: r.u8(),
-    channel: r.u8(),
-    rawFlag: r.u8(),
-  };
+  const selection = { group: r.u8(), channel: r.u8(), rawFlag: r.u8() };
   if (r.remaining !== 0) throw new RangeError(`${r.remaining} trailing bytes`);
   if (selection.rawFlag > 1) {
     throw new RangeError(`195 native raw flag is boolean, got ${selection.rawFlag}`);
   }
   return selection;
+}
+
+function reject(connection: Connection, channelIndex: number): void {
+  connection.reply("GC_ENTERCHANNEL_ACK", {
+    result: Result.GenericError4,
+    channelId: connection.config.channel.id,
+    channelIndex,
+  });
 }
 
 export default function GC_ENTERCHANNEL_REQ(r: Reader, connection: Connection): void {
@@ -44,63 +41,42 @@ export default function GC_ENTERCHANNEL_REQ(r: Reader, connection: Connection): 
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     connection.log(`malformed channel selection — ${message}`);
-    connection.reply("GC_ENTERCHANNEL_ACK", {
-      result: Result.GenericError4,
-      channelId: connection.config.channelId ?? 1,
-      channelIndex: 0,
-    });
+    reject(connection, 0);
     return;
   }
 
   if (connection.channelEntryCompleted) {
     connection.log("repeated channel selection -> rejected");
-    connection.reply("GC_ENTERCHANNEL_ACK", {
-      result: Result.GenericError4,
-      channelId: connection.config.channelId ?? 1,
-      channelIndex: selection.channel,
-    });
+    reject(connection, selection.channel);
     return;
   }
 
-  const group = connection.config.group ?? 0;
-  const channel = connection.config.channel ?? 0;
-  const channelType = connection.config.channelType ?? 0;
-  const type3Tail: Type3Tail | undefined = connection.config.type3Tail;
-  const type3ConfigurationValid = channelType === 3
-    ? type3Tail !== undefined && "header1" in type3Tail
-    : type3Tail === undefined;
-  const accepted =
-    connection.authenticated &&
-    type3ConfigurationValid &&
-    selection.group === group &&
-    selection.channel === channel;
+  const channel = connection.config.channel;
+  const type3Ready = channel.type === 3
+    ? channel.type3Tail !== undefined && "header1" in channel.type3Tail
+    : channel.type3Tail === undefined;
+  const accepted = connection.authenticated &&
+    type3Ready &&
+    selection.group === channel.group &&
+    selection.channel === channel.index;
 
   if (!accepted) {
     connection.log(`channel selection ${selection.group}/${selection.channel} -> rejected`);
-    connection.reply("GC_ENTERCHANNEL_ACK", {
-      result: Result.GenericError4,
-      channelId: connection.config.channelId ?? 1,
-      channelIndex: selection.channel,
-    });
+    reject(connection, selection.channel);
     return;
   }
 
-  const entry = {
+  connection.reply("GC_ENTERCHANNEL_ACK", {
     result: Result.Success,
-    channelId: connection.config.channelId ?? 1,
+    channelId: channel.id,
     channelIndex: selection.channel,
-    endpoint: {
-      host: connection.config.udpHost ?? "127.0.0.1",
-      port: connection.config.udpPort ?? 40202,
-    },
-    endpointOpaque: connection.config.endpointOpaque ?? 0,
-    channelType,
-    type3Tail,
-    clientFlags: connection.config.clientFlags ?? 0,
-    clientDefault: connection.config.clientDefault ?? 5,
-  } as const;
-
-  connection.reply("GC_ENTERCHANNEL_ACK", entry);
+    endpoint: channel.endpoint,
+    endpointOpaque: channel.endpointOpaque,
+    channelType: channel.type,
+    type3Tail: channel.type3Tail,
+    clientFlags: channel.clientFlags,
+    clientDefault: channel.clientDefault,
+  });
   connection.completeChannelEntry();
   connection.log(`channel selection ${selection.group}/${selection.channel} -> accepted`);
 }

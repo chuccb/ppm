@@ -51,16 +51,16 @@ because another implementation uses one.
 
 Two guards make the convention enforceable rather than aspirational:
 
-- The registry discovers each folder with Bun's `Glob` and loads modules with
-  `import.meta.require`. There are no generated barrel files to keep in sync.
-  `bun run sync` remains a cheap filename/catalogue check before tests.
-- Runtime module values remain `unknown` until the registry validates their
-  default export and, for s2c, the returned `Packet`; they are never widened
-  silently to `any`. A type-only builder map in `registry.ts` preserves the
-  literal outbound-name union and every builder's argument tuple even though
-  the implementation is discovered at runtime.
-- At startup the registry checks every filename against `db/packets.tsv` and
-  every default export against its filename. A missing, renamed, or unknown
+- The registry imports each packet module explicitly, so the 15 C2S and 16 S2C
+  operations are visible in one short file. Bun's `Glob` is used only to catch
+  a packet file that was added without being registered. `bun run sync` remains
+  a cheap filename/catalogue check before tests.
+- The outbound object is the compile-time map: `OutboundName` and
+  `OutboundArgs<N>` are inferred from the actual builder functions. `build()`
+  performs the small runtime check that the result is a `Packet`; no `any` or
+  dynamic module adapter is needed.
+- At startup the registry checks every registered name against `db/packets.tsv`
+  and every file against the explicit map. A missing, renamed, or unknown
   operation fails immediately; the wire layout and module implementations do
   not change.
 

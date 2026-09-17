@@ -85,7 +85,7 @@ export default function GL_MYINFO_ACK(
   for (const character of characters) {
     requireU8("char_type", character.charType);
     p.u8(character.charType);
-    writeCharacterAppearance(p, character.equip);
+    writeCharacterAppearance(p, character.appearance);
   }
 
   // Four empty weapon groups are the native-compatible no-loadout projection.
@@ -199,9 +199,9 @@ export function writeMyInfoBasicData(packet: Packet, myInfo: MyInfo): Packet {
     .u8(myInfo.selectedCharIndex);
 }
 
-export function writeCharacterAppearance(packet: Packet, equip: readonly number[]): Packet {
+export function writeCharacterAppearance(packet: Packet, appearance: readonly number[]): Packet {
   for (let i = 0; i < 12; i++) {
-    const value = equip[i] ?? 0;
+    const value = appearance[i] ?? 0;
     requireU16(`appearance[${i}]`, value);
     packet.u16(value);
   }

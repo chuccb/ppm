@@ -1,20 +1,14 @@
 /**
- * Runtime packet registry, discovered directly from `src/ops/{c2s,s2c}`.
+ * The small, explicit operation registry.
  *
- * Each packet is one file named after its opcode. Bun's `import.meta.require`
- * lets the registry load that directory without generated barrel files:
+ * A packet module is imported once, in the direction in which it is used:
  *
- *   src/ops/c2s/GL_LOGIN_REQ.ts   the client sends it; we read and handle it
- *   src/ops/s2c/GL_LOGIN_ACK.ts   we send it; we build it
+ *   c2s  reader + Connection -> void
+ *   s2c  opcode + fields     -> Packet
  *
- * Direction comes from the folder, not the `_REQ`/`_ACK` suffix. Those suffixes
- * describe the client's view and do not always match ours: `GT_PING_ACK` is an
- * `_ACK` the server sends, while `GT_PING_REQ` is a `_REQ` it receives.
- * (docs/PACKETS.md §3.15pre)
- *
- * The runtime loader checks every discovered filename against db/packets.tsv and
- * every default export against its filename. A missing, renamed, or unknown
- * operation therefore fails at startup instead of silently disappearing.
+ * This is intentionally not a dynamic import registry. Static imports make the
+ * actual 15/16 runtime surface visible to TypeScript, while the directory
+ * check below still fails startup if a packet file is added and forgotten.
  */
 
 import { Glob } from "bun";
@@ -22,54 +16,83 @@ import { Packet, type Reader } from "../packet.ts";
 import { opcodeFor, opcodeName } from "../opcodes.ts";
 import type { Connection } from "../connection.ts";
 
-/** A c2s module: reads an inbound packet and handles it, start to finish. */
+import GC_ENTERCHANNEL_REQ from "./c2s/GC_ENTERCHANNEL_REQ.ts";
+import GL_CLIENTINFO_REQ from "./c2s/GL_CLIENTINFO_REQ.ts";
+import GL_DATA_RECV_COMPLETED_REQ from "./c2s/GL_DATA_RECV_COMPLETED_REQ.ts";
+import GL_FRIEND_LIST_REQ from "./c2s/GL_FRIEND_LIST_REQ.ts";
+import GL_GAMEROOMINFO_REQ from "./c2s/GL_GAMEROOMINFO_REQ.ts";
+import GL_INVENIN_REQ from "./c2s/GL_INVENIN_REQ.ts";
+import GL_LOBBYIN_REQ from "./c2s/GL_LOBBYIN_REQ.ts";
+import GL_LOGIN_REQ from "./c2s/GL_LOGIN_REQ.ts";
+import GL_MSG_RECVLIST_REQ from "./c2s/GL_MSG_RECVLIST_REQ.ts";
+import GL_MYINFO_REQ from "./c2s/GL_MYINFO_REQ.ts";
+import GL_MYITEM_REQ from "./c2s/GL_MYITEM_REQ.ts";
+import GL_SHOPIN_REQ from "./c2s/GL_SHOPIN_REQ.ts";
+import GL_USERLIST_REQ from "./c2s/GL_USERLIST_REQ.ts";
+import GT_PING_REQ from "./c2s/GT_PING_REQ.ts";
+import PM_UDPSTART_REQ from "./c2s/PM_UDPSTART_REQ.ts";
+
+import GC_ENTERCHANNEL_ACK from "./s2c/GC_ENTERCHANNEL_ACK.ts";
+import GL_ACCOUNTCONNSUCC from "./s2c/GL_ACCOUNTCONNSUCC.ts";
+import GL_CLIENTINFO_ACK from "./s2c/GL_CLIENTINFO_ACK.ts";
+import GL_DATA_RECV_COMPLETED_ACK from "./s2c/GL_DATA_RECV_COMPLETED_ACK.ts";
+import GL_FRIEND_LIST_ACK from "./s2c/GL_FRIEND_LIST_ACK.ts";
+import GL_GAMEROOMINFO_ACK from "./s2c/GL_GAMEROOMINFO_ACK.ts";
+import GL_INVENIN_ACK from "./s2c/GL_INVENIN_ACK.ts";
+import GL_LOGIN_ACK from "./s2c/GL_LOGIN_ACK.ts";
+import GL_MSG_RECVLIST_ACK from "./s2c/GL_MSG_RECVLIST_ACK.ts";
+import GL_MYINFO_ACK from "./s2c/GL_MYINFO_ACK.ts";
+import GL_MYITEM_ACK from "./s2c/GL_MYITEM_ACK.ts";
+import GL_SHOPIN_ACK from "./s2c/GL_SHOPIN_ACK.ts";
+import GL_TCPCONNSUCC from "./s2c/GL_TCPCONNSUCC.ts";
+import GL_USERLIST_ACK from "./s2c/GL_USERLIST_ACK.ts";
+import GT_PING_ACK from "./s2c/GT_PING_ACK.ts";
+import PM_UDPSTART_ACK from "./s2c/PM_UDPSTART_ACK.ts";
+
 export type Handler = (reader: Reader, connection: Connection) => void | Promise<void>;
 
-/**
- * Type-only view of the s2c builders. The imports are erased; runtime loading
- * still comes from the directory below. Keeping this small surface here means
- * removing generated barrel files does not weaken `reply()` or `build()`:
- * names stay a literal union and the opcode argument is stripped from each
- * builder's parameter tuple.
- */
-type OutboundModules = {
-  GC_ENTERCHANNEL_ACK: typeof import("./s2c/GC_ENTERCHANNEL_ACK.ts").default;
-  GL_ACCOUNTCONNSUCC: typeof import("./s2c/GL_ACCOUNTCONNSUCC.ts").default;
-  GL_CLIENTINFO_ACK: typeof import("./s2c/GL_CLIENTINFO_ACK.ts").default;
-  GL_DATA_RECV_COMPLETED_ACK: typeof import("./s2c/GL_DATA_RECV_COMPLETED_ACK.ts").default;
-  GL_FRIEND_LIST_ACK: typeof import("./s2c/GL_FRIEND_LIST_ACK.ts").default;
-  GL_GAMEROOMINFO_ACK: typeof import("./s2c/GL_GAMEROOMINFO_ACK.ts").default;
-  GL_INVENIN_ACK: typeof import("./s2c/GL_INVENIN_ACK.ts").default;
-  GL_LOGIN_ACK: typeof import("./s2c/GL_LOGIN_ACK.ts").default;
-  GL_MSG_RECVLIST_ACK: typeof import("./s2c/GL_MSG_RECVLIST_ACK.ts").default;
-  GL_MYINFO_ACK: typeof import("./s2c/GL_MYINFO_ACK.ts").default;
-  GL_MYITEM_ACK: typeof import("./s2c/GL_MYITEM_ACK.ts").default;
-  GL_SHOPIN_ACK: typeof import("./s2c/GL_SHOPIN_ACK.ts").default;
-  GL_TCPCONNSUCC: typeof import("./s2c/GL_TCPCONNSUCC.ts").default;
-  GL_USERLIST_ACK: typeof import("./s2c/GL_USERLIST_ACK.ts").default;
-  GT_PING_ACK: typeof import("./s2c/GT_PING_ACK.ts").default;
-  PM_UDPSTART_ACK: typeof import("./s2c/PM_UDPSTART_ACK.ts").default;
-};
+const inbound = {
+  GC_ENTERCHANNEL_REQ,
+  GL_CLIENTINFO_REQ,
+  GL_DATA_RECV_COMPLETED_REQ,
+  GL_FRIEND_LIST_REQ,
+  GL_GAMEROOMINFO_REQ,
+  GL_INVENIN_REQ,
+  GL_LOBBYIN_REQ,
+  GL_LOGIN_REQ,
+  GL_MSG_RECVLIST_REQ,
+  GL_MYINFO_REQ,
+  GL_MYITEM_REQ,
+  GL_SHOPIN_REQ,
+  GL_USERLIST_REQ,
+  GT_PING_REQ,
+  PM_UDPSTART_REQ,
+} satisfies Record<string, Handler>;
 
-export type OutboundName = keyof OutboundModules;
-export type OutboundArgs<N extends OutboundName> = OutboundModules[N] extends (
-  _op: number,
-  ...args: infer Args
-) => unknown
-  ? Args
-  : never;
+const outbound = {
+  GC_ENTERCHANNEL_ACK,
+  GL_ACCOUNTCONNSUCC,
+  GL_CLIENTINFO_ACK,
+  GL_DATA_RECV_COMPLETED_ACK,
+  GL_FRIEND_LIST_ACK,
+  GL_GAMEROOMINFO_ACK,
+  GL_INVENIN_ACK,
+  GL_LOGIN_ACK,
+  GL_MSG_RECVLIST_ACK,
+  GL_MYINFO_ACK,
+  GL_MYITEM_ACK,
+  GL_SHOPIN_ACK,
+  GL_TCPCONNSUCC,
+  GL_USERLIST_ACK,
+  GT_PING_ACK,
+  PM_UDPSTART_ACK,
+} as const;
+
+export type OutboundName = keyof typeof outbound;
+export type OutboundArgs<N extends OutboundName> =
+  Parameters<(typeof outbound)[N]> extends [number, ...infer Args] ? Args : never;
 
 type Operation = (...args: unknown[]) => unknown;
-type LoadedOperation = {
-  readonly opcode: number;
-  readonly operation: Operation;
-};
-type ImportMetaWithRequire = ImportMeta & {
-  require(path: string): unknown;
-};
-
-const requireModule = (path: string): unknown =>
-  (import.meta as ImportMetaWithRequire).require(path);
 
 function namesOnDisk(dir: "c2s" | "s2c"): string[] {
   const folder = new URL(`./${dir}/`, import.meta.url).pathname;
@@ -78,52 +101,26 @@ function namesOnDisk(dir: "c2s" | "s2c"): string[] {
     .sort();
 }
 
-function operationFromModule(dir: "c2s" | "s2c", name: string): Operation {
-  const namespace = requireModule(`./${dir}/${name}.ts`);
-  if (
-    typeof namespace !== "object" ||
-    namespace === null ||
-    !("default" in namespace) ||
-    typeof namespace.default !== "function"
-  ) {
-    throw new TypeError(`src/ops/${dir}/${name}.ts must export a default function`);
-  }
-
-  const operation = namespace.default as Operation;
-  const actualName = operation.name;
-  if (actualName !== name && actualName !== `${name}_default`) {
-    throw new Error(
-      `src/ops/${dir}/${name}.ts exports a function named ${actualName || "(anonymous)"}`,
-    );
-  }
-  return operation;
-}
-
-function loadOperations(dir: "c2s" | "s2c"): ReadonlyMap<string, LoadedOperation> {
-  const operations = new Map<string, LoadedOperation>();
-  const opcodes = new Map<number, string>();
-  for (const name of namesOnDisk(dir)) {
-    // opcodeFor is deliberately called during discovery, not only on first use.
-    // A typo in a filename must fail while the server starts.
-    const opcode = opcodeFor(name);
-    const previous = opcodes.get(opcode);
-    if (previous) {
-      throw new Error(`duplicate ${dir} opcode ${opcodeName(opcode)}: ${previous} and ${name}`);
+function verifyDirectory(dir: "c2s" | "s2c", names: readonly string[]): void {
+  const expected = new Set(names);
+  for (const file of namesOnDisk(dir)) {
+    if (!expected.has(file)) {
+      throw new Error(`src/ops/${dir}/${file}.ts is not registered in ops/registry.ts`);
     }
-    opcodes.set(opcode, name);
-    operations.set(name, { opcode, operation: operationFromModule(dir, name) });
   }
-  return operations;
+  for (const name of names) opcodeFor(name);
 }
 
-const inboundOperations = loadOperations("c2s");
-const outboundOperations = loadOperations("s2c");
+const inboundNames = Object.keys(inbound);
+const outboundNames = Object.keys(outbound);
+verifyDirectory("c2s", inboundNames);
+verifyDirectory("s2c", outboundNames);
 
-/** opcode -> the module that handles it. */
 const handlers = new Map<number, Handler>();
-for (const { opcode, operation } of inboundOperations.values()) {
+for (const [name, operation] of Object.entries(inbound)) {
+  const opcode = opcodeFor(name);
   if (handlers.has(opcode)) throw new Error(`duplicate c2s opcode ${opcodeName(opcode)}`);
-  handlers.set(opcode, operation as Handler);
+  handlers.set(opcode, operation);
 }
 
 export function handlerFor(opcode: number): Handler | undefined {
@@ -131,21 +128,16 @@ export function handlerFor(opcode: number): Handler | undefined {
 }
 
 export function build<N extends OutboundName>(name: N, ...args: OutboundArgs<N>): Packet {
-  const entry = outboundOperations.get(name);
-  if (!entry) throw new Error(`unknown outbound operation ${name}`);
-
-  // The public tuple is checked by TypeScript; the runtime-loaded function is
-  // intentionally unknown until its result is checked below.
-  const packet = entry.operation(entry.opcode, ...(args as unknown[]));
+  const operation = outbound[name] as unknown as Operation;
+  const packet = operation(opcodeFor(name), ...(args as unknown[]));
   if (!(packet instanceof Packet)) {
     throw new TypeError(`outbound operation ${name} did not return a Packet`);
   }
   return packet;
 }
 
-/** One line for the startup log. */
 export function summary(): string {
-  const inbound = [...inboundOperations.values()].map(({ opcode }) => opcodeName(opcode)).sort();
-  const outbound = [...outboundOperations.keys()].sort();
-  return `c2s ${inbound.length} (${inbound.join(", ")}), s2c ${outbound.length} (${outbound.join(", ")})`;
+  const c2s = [...inboundNames].sort().join(", ");
+  const s2c = [...outboundNames].sort().join(", ");
+  return `c2s ${inboundNames.length} (${c2s}), s2c ${outboundNames.length} (${s2c})`;
 }

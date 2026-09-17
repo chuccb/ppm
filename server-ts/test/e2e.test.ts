@@ -44,7 +44,18 @@ beforeAll(async () => {
     servers,
     log: () => {},
     admissions,
-    channelName: "Channel 1",
+    channel: {
+      name: "Channel 1",
+      group: 0,
+      index: 0,
+      id: 1,
+      endpoint: { host: "127.0.0.1", port: 40202 },
+      type: 1,
+      endpointOpaque: 0,
+      clientFlags: 0,
+      clientDefault: 5,
+    },
+    admissionLifetimeMs: 120_000,
   });
   port = listener.port;
 });

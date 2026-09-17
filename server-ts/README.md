@@ -45,11 +45,12 @@ src/ops/s2c/         packets we send the client
 src/main.ts          entry point
 ```
 
-**One packet, one file, named after the opcode.** The name appears in the
-filename and nowhere else — the module gets its opcode injected, so nothing
-inside it repeats the name. To find the code for a packet from
-`docs/PACKETS.md`, open the file with that name. The complete field-by-field
-review of the 31 current packet modules is in
+**One packet, one file, named after the opcode.** The packet implementation
+lives in the file with that name; the small registry repeats the name only to
+make the current runtime surface and typed builder map visible. The module gets
+its opcode injected, so wire code does not carry a second numeric table. To find
+the code for a packet from `docs/PACKETS.md`, open the file with that name. The
+complete field-by-field review of the 31 current packet modules is in
 [`../docs/SERVER_TS_PACKET_FIELDS.md`](../docs/SERVER_TS_PACKET_FIELDS.md):
 
 ```
@@ -59,8 +60,9 @@ src/ops/s2c/GL_LOGIN_ACK.ts   we send it; we build it
 
 Direction is the folder, not the `_REQ`/`_ACK` suffix — those describe the
 client's view, and `GT_PING_ACK` is an `_ACK` the *server* sends. The registry
-discovers these files directly with Bun's `Glob` and `import.meta.require`;
-`bun run sync` checks that every filename is in `db/packets.tsv`.
+imports the 15/16 modules explicitly so the runtime surface is visible to
+TypeScript, then uses Bun's `Glob` only to reject an unregistered packet file.
+`bun run sync` checks the same filename/catalogue boundary.
 
 ## Protocol facts this implements
 

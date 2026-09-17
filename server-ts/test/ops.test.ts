@@ -451,7 +451,7 @@ describe("registry", () => {
     expect(() => buildPacket("GT_PING_ACK")).not.toThrow();
   });
 
-  test("the registry discovers both operation folders at startup", () => {
+  test("the registry exposes both operation folders at startup", () => {
     expect(summary()).toMatch(/^c2s 15 \(/);
     expect(summary()).toMatch(/\), s2c 16 \(/);
     expect(summary()).toContain("GL_LOGIN_ACK");

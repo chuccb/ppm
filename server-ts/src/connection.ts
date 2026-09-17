@@ -1,9 +1,7 @@
 /**
- * One TCP connection: reassembly, liveness, dispatch, and sending.
- *
- * Nothing here is packet-specific — each opcode is handled entirely by its own
- * module under `src/ops/c2s/`. `listen` lives here too, since its callbacks are
- * a few lines each and a separate file would only add a hop.
+ * One TCP session: frame reassembly, handshake state, ordered dispatch and
+ * liveness. Packet field order stays in `src/ops`; this file only decides
+ * which state may reach a handler.
  */
 
 import type { Socket } from "bun";
@@ -15,16 +13,44 @@ import type { Store } from "./store.ts";
 import type { GameServer } from "./ops/s2c/GL_LOGIN_ACK.ts";
 import type { Type3Tail } from "./ops/s2c/GC_ENTERCHANNEL_ACK.ts";
 
-/** How often to poll, and how long silence may last. Server-side choices. */
 export const PING_INTERVAL_MS = 15_000;
 export const PING_TIMEOUT_MS = 60_000;
 
-const GT_PING_REQ = opcodeFor("GT_PING_REQ");
-const GL_LOGIN_REQ = opcodeFor("GL_LOGIN_REQ");
-const PM_UDPSTART_REQ = opcodeFor("PM_UDPSTART_REQ");
-const GC_ENTERCHANNEL_REQ = opcodeFor("GC_ENTERCHANNEL_REQ");
+const PING_REQ = opcodeFor("GT_PING_REQ");
+const LOGIN_REQ = opcodeFor("GL_LOGIN_REQ");
+const HANDOFF_REQ = opcodeFor("PM_UDPSTART_REQ");
+const ENTER_CHANNEL_REQ = opcodeFor("GC_ENTERCHANNEL_REQ");
 
-/** Bun reports a TCP peer as `host:port`; admission is bound to the host only. */
+export type Role = "login" | "channel";
+
+/** Values needed by the one channel advertised in GL_LOGIN_ACK. */
+export interface ChannelConfig {
+  readonly name: string;
+  readonly group: number;
+  readonly index: number;
+  readonly id: number;
+  readonly endpoint: {
+    readonly host: string;
+    readonly port: number;
+  };
+  readonly type: number;
+  readonly type3Tail?: Type3Tail;
+  readonly endpointOpaque: number;
+  readonly clientFlags: number;
+  readonly clientDefault: number;
+}
+
+export interface Config {
+  readonly role: Role;
+  readonly store: Store;
+  readonly servers: readonly GameServer[];
+  readonly log: (message: string) => void;
+  readonly admissions: ChannelAdmissionRegistry;
+  readonly channel: ChannelConfig;
+  readonly admissionLifetimeMs: number;
+}
+
+/** Bun reports a TCP peer as `host:port`; admission is bound to the host. */
 function remoteIp(address: string): string {
   if (address.startsWith("[")) {
     const end = address.indexOf("]");
@@ -38,54 +64,15 @@ function remoteIp(address: string): string {
     : address;
 }
 
-/**
- * The client makes two connections, with mirrored handshakes:
- *
- *   login    GL_ACCOUNTCONNSUCC -> GL_LOGIN_REQ    -> GL_LOGIN_ACK
- *   channel  GL_TCPCONNSUCC     -> PM_UDPSTART_REQ -> PM_UDPSTART_ACK
- *
- * Only the greeting differs, so one Connection serves both.
- */
-export type Role = "login" | "channel";
-
-export interface Config {
-  readonly role: Role;
-  readonly store: Store;
-  readonly servers: readonly GameServer[];
-  readonly log: (message: string) => void;
-  /** Shared between the login and channel listeners. */
-  readonly admissions: ChannelAdmissionRegistry;
-  /** Reported in the channel admission reply and the 681 channel list. */
-  readonly channelName: string;
-  /** The one advertised group/channel accepted by this single-channel host. */
-  readonly group?: number;
-  readonly channel?: number;
-  readonly channelId?: number;
-  /** Endpoint copied into the successful 196 tail. */
-  readonly udpHost?: string;
-  readonly udpPort?: number;
-  /** Opaque, source-proven values in the successful 196 tail. */
-  readonly channelType?: number;
-  readonly type3Tail?: Type3Tail;
-  readonly endpointOpaque?: number;
-  readonly clientFlags?: number;
-  readonly clientDefault?: number;
-  /** A 681 admission expires if the client never opens its channel socket. */
-  readonly admissionLifetimeMs?: number;
-}
-
 export class Connection {
   readonly config: Config;
-  /** Set by GL_LOGIN_REQ or PM_UDPSTART_REQ once the account is known. */
   accountId: number | null = null;
-  /** True only after a successful 195 → 196 channel selection. */
   channelEntryCompleted = false;
 
   readonly #socket: Socket<Connection>;
-  readonly #stream = new PacketStream();
   readonly #peer: string;
   readonly #remoteIp: string;
-  /** Serialises dispatch so replies keep the order the requests arrived in. */
+  readonly #stream = new PacketStream();
   #queue: Promise<void> = Promise.resolve();
   #heartbeat: ReturnType<typeof setInterval> | null = null;
   #lastSeen = Date.now();
@@ -113,8 +100,6 @@ export class Connection {
     this.#socket.write(packet.encode());
   }
 
-  /** Build an outbound packet by name and send it. Names and args are typed;
-   * files are checked at startup. */
   reply<N extends OutboundName>(name: N, ...args: OutboundArgs<N>): void {
     this.send(build(name, ...args));
   }
@@ -134,10 +119,8 @@ export class Connection {
     this.channelEntryCompleted = true;
   }
 
-  /** Sent once on connect; it is what makes the client speak first. */
+  /** The greeting makes the client start the matching handshake. */
   greet(): void {
-    // Branch rather than a ternary: each builder takes its own arguments, so a
-    // union of names would leave the call site unable to type them.
     if (this.config.role === "login") this.reply("GL_ACCOUNTCONNSUCC");
     else this.reply("GL_TCPCONNSUCC");
 
@@ -168,48 +151,46 @@ export class Connection {
       return;
     }
 
-    // Handlers are async (argon2), so dispatching concurrently would let a fast
-    // reply overtake a slow one. The client pairs replies to requests by order.
+    // Password verification is async. Chain handlers so replies cannot pass
+    // each other on the wire; the client pairs several replies by arrival order.
     for (const packet of packets) {
       this.#queue = this.#queue.then(() => this.#dispatch(packet));
     }
   }
 
-  async #dispatch(r: Reader): Promise<void> {
-    const name = opcodeName(r.opcode);
+  async #dispatch(reader: Reader): Promise<void> {
+    const name = opcodeName(reader.opcode);
 
     if (this.config.role === "login") {
-      if (r.opcode === GL_LOGIN_REQ && this.authenticated) {
+      if (reader.opcode === LOGIN_REQ && this.authenticated) {
         this.log("repeated GL_LOGIN_REQ after successful login — ignored");
         return;
       }
-      if (r.opcode !== GT_PING_REQ && r.opcode !== GL_LOGIN_REQ) {
+      if (reader.opcode !== PING_REQ && reader.opcode !== LOGIN_REQ) {
         this.log(`rejected ${name} on login listener`);
         return;
       }
-    } else if (r.opcode === GL_LOGIN_REQ) {
+    } else if (reader.opcode === LOGIN_REQ) {
       this.log("rejected GL_LOGIN_REQ on channel listener");
       return;
     } else if (!this.channelEntryCompleted) {
-      if (
-        r.opcode !== GT_PING_REQ &&
-        r.opcode !== PM_UDPSTART_REQ &&
-        r.opcode !== GC_ENTERCHANNEL_REQ
-      ) {
+      const handshake = reader.opcode === PING_REQ ||
+        reader.opcode === HANDOFF_REQ ||
+        reader.opcode === ENTER_CHANNEL_REQ;
+      if (!handshake) {
         this.log(`rejected ${name} before successful channel entry`);
         return;
       }
     }
 
-    const handler = handlerFor(r.opcode);
+    const handler = handlerFor(reader.opcode);
     if (!handler) {
-      // The client's own dispatcher silently ignores unknown opcodes. Mirror
-      // that, but log so coverage gaps stay visible.
-      this.log(`unhandled ${name} (${r.opcode})`);
+      this.log(`unhandled ${name} (${reader.opcode})`);
       return;
     }
+
     try {
-      await handler(r, this);
+      await handler(reader, this);
     } catch (error) {
       this.#fail(name, error);
     }
