@@ -65,7 +65,10 @@ connect → server 發 693 → client 送 143 (String[24] identity + n100/ext_co
 port 佈局: 40200 登入(694) / 40201 頻道(693) / 40202 UDP control endpoint
 
 【UDP evidence boundary】
-The client has a distinct private dispatcher (`sub_595E80`). Its only completed
+The client has a distinct private dispatcher (`sub_595E80`). Its complete native
+receive-case and outbound-builder matrix is documented in
+[`LAYOUTS_REQ.md`](LAYOUTS_REQ.md) Appendices A and B; that matrix is client evidence, not
+an instruction to expose those operations from the server. The only completed
 server behavior here is encrypted private 19 → empty private 20, which prevents
 the native sixth-attempt TCP 139 fallback. P2P/NAT/relay and generic gameplay
 claims for the rest of the private namespace are **UNRESOLVED**.

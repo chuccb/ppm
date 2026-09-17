@@ -147,7 +147,26 @@ UDP_DISPATCHER = "sub_595E80"
 UDP_RECEIVE_CASES = [2, 4, 5, 6, 8, 10, 12, 13, 14, 15, 18, 20, 22, 24, 26, 28,
                      29, 31, 33, 34, 154, 158]
 UDP_SEND_OPCODES = [1, 5, 6, 9, 13, 14, 15, 17, 19, 21, 23, 27, 30, 32, 35]
-UDP_MAX_OPCODE = 40  # separates the UDP band from TCP's 100+
+# Direct branch identity for sub_595E80. The grouped 8/24 branch is intentional:
+# the native dispatcher does not establish separate official names for those two
+# numeric cases. Keep unknown_libname_107 in the map so a decompiler re-export
+# cannot silently turn case 26 into a guessed layout.
+UDP_RECEIVE_HANDLERS = {
+    2: "sub_593A60", 4: "sub_593AB0", 5: "sub_593E60", 6: "sub_5940E0",
+    10: "sub_594460", 12: "sub_5946C0", 13: "sub_594A10", 14: "sub_594CA0",
+    15: "sub_593DF0", 18: "sub_596300", 20: "sub_5968C0", 22: "sub_5964E0",
+    26: "unknown_libname_107", 28: "sub_594E80", 29: "sub_593E20",
+    31: "sub_594EA0", 33: "sub_594EC0", 34: "sub_594F20",
+    154: "sub_5965D0", 158: "sub_596910",
+}
+UDP_SHARED_RECEIVE_HANDLER = (8, 24, "sub_596940")
+UDP_DOC_CASE_MARKERS = [
+    "## Appendix B — `sub_595E80` UDP-private dispatcher / every verified receive case",
+    "`unknown_libname_107`", "explicitly UNRESOLVED",
+    "`154 UDP_ALL_PING_ACK`", "`158 UDP_TCP_DEAD_ACK`",
+    "`sub_595980` is explicit-address AES send",
+]
+UDP_LOW_SEND_MAX_OPCODE = 40  # low private outbound constructors; receive cases also include 154/158
 UDP_SHARED_HEADER_BUILDERS = {1: "sub_593830", 9: "sub_594300", 19: "sub_596670",
                               21: "sub_596330", 23: "sub_744450", 27: "sub_6013E0",
                               30: "sub_6065E0", 32: "sub_96BF70", 35: "sub_7463E0"}
@@ -179,7 +198,7 @@ def check_udp_opcode_space(text: str) -> None:
     received = sorted({int(value) for value in CASE.findall(text[start:index])})
     sent = sorted({int(value) for value in
                    re.findall(r"Packet::possible_ctor_or_dtor_0\([^,]+, (\d+)\)", text)
-                   if int(value) <= UDP_MAX_OPCODE})
+                   if int(value) <= UDP_LOW_SEND_MAX_OPCODE})
     for label, actual, expected in (("receive cases", received, UDP_RECEIVE_CASES),
                                     ("send opcodes", sent, UDP_SEND_OPCODES)):
         if actual != expected:
@@ -223,6 +242,71 @@ def check_udp_opcode_space(text: str) -> None:
             raise SystemExit(1)
 
 
+def _body_after_dispatcher(text: str) -> str:
+    """Return the brace-matched body of sub_595E80."""
+    head = re.search(r"\n[A-Za-z_][^\n]*\b" + UDP_DISPATCHER + r"\([^)]*\)\s*\r?\n\{", text)
+    if head is None:
+        print(f"dispatcher verification failed: cannot locate {UDP_DISPATCHER}")
+        raise SystemExit(1)
+    start = head.end()
+    depth = 1
+    index = start
+    while index < len(text) and depth:
+        if text[index] == "{":
+            depth += 1
+        elif text[index] == "}":
+            depth -= 1
+        index += 1
+    if depth:
+        print(f"dispatcher verification failed: unbalanced body for {UDP_DISPATCHER}")
+        raise SystemExit(1)
+    return text[start:index]
+
+
+def check_udp_dispatcher_handlers(text: str) -> None:
+    """Ensure each documented private receive case still calls its native callee."""
+    body = _body_after_dispatcher(text)
+    for opcode, handler in UDP_RECEIVE_HANDLERS.items():
+        match = re.search(rf"case {opcode}:\s*(.*?)(?=case \d+:|default:)", body, re.S)
+        if match is None or handler not in match.group(1):
+            print(f"dispatcher verification failed: UDP case {opcode} no longer calls {handler}")
+            raise SystemExit(1)
+
+    first, second, handler = UDP_SHARED_RECEIVE_HANDLER
+    grouped = re.search(
+        rf"case {first}:\s*case {second}:\s*(.*?)(?=case \d+:|default:)",
+        body, re.S)
+    if grouped is None or handler not in grouped.group(1):
+        print(f"dispatcher verification failed: UDP cases {first}/{second} no longer share {handler}")
+        raise SystemExit(1)
+
+    documented = LAYOUTS_REQ.read_text(encoding="utf-8")
+    missing = [marker for marker in UDP_DOC_CASE_MARKERS if marker not in documented]
+    if missing:
+        print("dispatcher verification failed: LAYOUTS_REQ UDP appendix lost marker(s)")
+        print(f"  {missing}")
+        raise SystemExit(1)
+
+    appendix_a = documented.split("## Appendix A —", 1)[1].split("## Appendix B —", 1)[0]
+    appendix_b = documented.split("## Appendix B —", 1)[1]
+    missing_sends = [opcode for opcode in UDP_SEND_OPCODES
+                     if f"| {opcode} |" not in appendix_a]
+    if missing_sends:
+        print("dispatcher verification failed: LAYOUTS_REQ Appendix A lost UDP outbound row(s)")
+        print(f"  {missing_sends}")
+        raise SystemExit(1)
+
+    missing_receives = []
+    for opcode in UDP_RECEIVE_CASES:
+        marker = "| 8 / 24 |" if opcode in (8, 24) else f"| {opcode} |"
+        if marker not in appendix_b:
+            missing_receives.append(opcode)
+    if missing_receives:
+        print("dispatcher verification failed: LAYOUTS_REQ Appendix B lost UDP inbound row(s)")
+        print(f"  {missing_receives}")
+        raise SystemExit(1)
+
+
 def main() -> None:
     if not DUMP.is_file():
         print(f"dispatcher check skipped: {DUMP} is not present")
@@ -232,6 +316,7 @@ def main() -> None:
     check_equivalent_handlers(text)
     check_cited_symbols(text)
     check_udp_opcode_space(text)
+    check_udp_dispatcher_handlers(text)
     cases = dispatcher_cases(text)
     documented = table_opcodes(LAYOUTS)
     missing = sorted(cases - documented)

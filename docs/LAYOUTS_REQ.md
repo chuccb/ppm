@@ -10,7 +10,9 @@
 > TCP/C2S 表內。因此標題的 261 是 row/unique-TCP-opcode 口徑，不應解讀成
 > 261 個 constructor variants，也不應解讀成 276 個完整 native forms。表後的
 > **Appendix A** 另收錄這 15 個 private-UDP low-opcode builders；Appendix A 不加入
-> 261/321 的 TCP row/site 計數。
+> 261/321 的 TCP row/site 計數。**Appendix B** 再以 `sub_595E80` 為中心收錄
+> 所有 verified UDP receive cases、reader order、callee/state effect、方向配對與命名
+> 邊界；UDP receive case 也不加入 TCP row/site 計數。
 >
 > **`direct ctor xref` 的意義（Fact）**：欄位列出每一個 direct constructor site
 > 所在的 native function symbol；`×N` 表示同一 symbol 內有 N 個 direct sites。
@@ -356,11 +358,13 @@
 > Packet/framing header、AES ciphertext 或 `sendto` framing。
 >
 > `sub_595E80` 是另一個由 `recvfrom` 進入的 UDP-private dispatcher；其 inbound
-> case/layout 不能因 opcode 數字相鄰而取代 outbound builder。現有 native evidence
-> 證明的 `n → n+1` case pairs、AES/raw send lane、secondary sockaddr 與
-> `UNRESOLVED` server boundary 詳見 [`PACKETS.md`](PACKETS.md) §2.5；這裡保留
-> constructor-level inventory，避免把 UDP evidence 從本文件的完整 native builder
-> audit 中遺漏。
+> case/layout 不能因 opcode 數字相鄰而取代 outbound builder。**Appendix A 的每一列
+> direction 都是 outbound（client → native-selected UDP destination）；Appendix B
+> 的每一列 direction 都是 inbound（UDP source → client）。**同一數字若同時出現在
+> A/B，仍是兩個方向的獨立 native evidence。現有 native evidence 證明的
+> `n → n+1` case pairs、AES/raw send lane、secondary sockaddr 與 `UNRESOLVED`
+> server boundary 詳見 [`PACKETS.md`](PACKETS.md) §2.5；這裡保留 constructor-level
+> inventory，避免把 UDP evidence 從本文件的完整 native builder audit 中遺漏。
 
 | op | direct ctor xref（19 sites） | write order after opcode | native send / caller / boundary |
 |---:|---|---|---|
@@ -388,3 +392,125 @@
 > identical reverse-direction layout. Except for the separately documented 19→20
 > client/server exchange, server behavior remains `UNRESOLVED`; this appendix does not
 > authorize implementing UDP server behavior.
+
+
+## Appendix B — `sub_595E80` UDP-private dispatcher / every verified receive case
+
+> **Dispatcher boundary（Fact / HIGH）**：UDP receive 的唯一已定位主要 dispatcher 是
+> `sub_595E80(CUDPNetworkManager, packet)`。呼叫鏈是
+> `sub_595A60 → sub_596F90(recvfrom, 9600) → sub_591FB0` 填入 Packet buffer，
+> `sub_591D50` framing check，`sub_5930C0` AES decrypt，最後才進
+> `sub_595E80`。dispatcher 額外要求 manager `+52 != 0`、`this_10 != nullptr`
+> 且 `sub_67EAC0()==0`；否則不讀 body、不回覆。switch 使用
+> `sub_591EE0(packet)` 的 UDP Packet opcode；`default` 靜默忽略。這個 opcode
+> 空間和 `sub_58B010` 的 TCP/catalog dispatcher 分離，即使數字或官方 catalog
+> 名稱相同，也不能直接合併 layout 或方向。
+>
+> **Native receive case set（Fact）**：`2,4,5,6,8,10,12,13,14,15,18,20,22,24,26,28,29,31,33,34,154,158`。
+> `8/24` 共用同一 handler；其餘 case 各有直接 branch。這些 inbound rows 都先
+> 經 native Packet 的 8-byte header、`sub_591D50` framing check 與
+> `sub_5930C0` AES receive/decrypt lane；本 dump 沒有證明 inbound private raw-17
+> exception。以下的 `raw2/raw4/raw16` 僅表示 native reader 的固定 byte width；沒有
+> 獨立 signedness/domain evidence 時不升格成 numeric type。`source sockaddr` 是
+> `recvfrom` 的 out-parameter projection（`dword_1326944..dword_1326950`），不是
+> packet body 欄位。凡 row 寫明 response/retry，其 destination、`sub_595980`/
+> `sub_595A10` lane 與次數均是 native send fact；其餘 row 是 no response/send-only
+> 或 local consumer，不添加推測 destination。
+
+### B.1 Dispatcher case matrix
+
+| inbound op | native branch / parser | exact consumed body | directly observed effect / failure boundary | naming status |
+|---:|---|---|---|---|
+| 2 | `sub_593A60` | no body read | If global `n0x3E8==0`, sets it to 1, stores `timeGetTime()-dword_F2563C` in the shared elapsed value, and sets `byte_1324330=2`; later receipts only increment the global counter. No payload-empty validation. | private unnamed; do not call it a generic `PING` without server proof |
+| 4 | `sub_593AB0` | `u8 entryCount`; repeat `u8 memberKey + raw16 addressBlob` | Looks up each key in the 16-entry `dword_F6DCF4` table. Unknown key returns immediately and earlier entries remain mutated. Known entries store raw16 at `unk_F6D584+240780*i`, set `byte_F6D5B0[i]=1`; then builds op 5 (`u8 + raw4 elapsed`) and sends three AES datagrams to every stored non-local address. Sets local state byte to 4. | private unnamed; address distribution/peer role remains UNRESOLVED |
+| 5 | `sub_593E60` | `u8 memberKey + raw4` | The raw4 is read into a 4-byte local and not used in the recovered state transition. For a known key, a repeated receipt only increments `byte_F6D5A4[i]`; first receipt sets `byte_F6D5A4/A5`, stores the current `recvfrom` source sockaddr in `unk_F6D594+240780*i`, builds op 6 (`u8 + raw4 elapsed`) and sends it three times to that source. | private unnamed; not proven a `HOLE` or `PING` field |
+| 6 | `sub_5940E0` | `u8 memberKey + raw4` | Raw4 is read but not consumed. If the known key has `byte_F6D5A5[i]==0`, sets `byte_F6D5A4/A5` and stores the current source sockaddr; no response is built. | private unnamed |
+| 8 / 24 | `sub_596940 → sub_593750` only when `n15==13`; otherwise bug/report path | no field is read by the dispatcher wrapper; `sub_593750` enqueues/copies the Packet under a critical section | The literal error path names the consumer `OnY_UDP_S_MOVE_INF`; the queue/callee path, not this dispatcher wrapper, owns any later parse. If `n15!=13`, it logs `BUGCUDPNetworkManager::OnY_UDP_S_MOVE_INF` and calls local debug/report helpers. | shared handler label `Y_UDP_S_MOVE_INF` is native string evidence; exact op-to-name mapping for 8 versus 24 is not proven |
+| 10 | `sub_594460` | `u8 memberKey + raw16 addressBlob` | Finds the key (the decompiled loop waits until a match), and if `byte_F6D5B0[i]==0` stores the raw16 address and sets the flag. Builds op 13 (`u8 + raw4 elapsed`) and sends it three times to the stored address; sets local state `this+1=2`. | private unnamed |
+| 12 | `sub_5946C0` | `u8 entryCount`; repeat `u8 memberKey + raw16 addressBlob` | Stores every known entry; an unknown key returns with prior entries retained. Sets the shared elapsed value from `timeGetTime()-dword_F2563C`, builds op 13 (`u8 + raw4 elapsed`), and sends it three times to each stored non-local key; sets local state `this+1=4`. | private unnamed |
+| 13 | `sub_594A10` | `u8 memberKey + raw4` | Raw4 is read but unused. Known key: repeated `byte_F6D5A4[i]` increments; first receipt sets `byte_F6D5A4/A5`, stores current source sockaddr, builds op 14 (`u8 + raw4 elapsed`) and sends it three times; sets state `this+1=4`. | private unnamed |
+| 14 | `sub_594CA0` | `u8 memberKey + raw4` | Raw4 is unused. If known key has `byte_F6D5A5[i]==0`, sets `byte_F6D5A4/A5`, stores current source sockaddr, and sets state `this+1=4`; no response. | private unnamed |
+| 15 | `sub_593DF0` | `raw16` | One-shot latch `byte_F25646`: first packet copies raw16 to `unk_F25648`; later packets are ignored. No response. This is distinct from outbound op 15 (`u8,u8`). | private unnamed; do not merge directions |
+| 18 | `sub_596300` | no body read | One-shot latch `n0x3E8_1`; first packet calls `sub_556530`, which constructs and sends catalog/TCP opcode `141 PM_CONNECT_REQ` on the TCP socket; later packets do nothing. No UDP body consumer is recovered. | private UDP trigger remains source-oriented; nested TCP opcode 141 has official `PM_CONNECT_REQ` evidence |
+| 20 | `sub_5968C0` | no body read | Sets `byte_1D0CFE7=1`, clears manager retry/state words `+44,+8,+4`, updates `+24=timeGetTime()`, and clears `byte_1324331` through `sub_594F00`. No identity or gameplay field is read. | private completion for outbound op 19; official name not recovered |
+| 22 | `sub_5964E0` | `u8 updateFlag`; if `==1`: `u8 count`, repeat `u8 memberKey + raw4 value` | Updates the timer/network-manager local state, then writes `raw4 value` to `dword_F6D9E8[i]` for known keys only. No response. Non-1 flag stops after the first byte. | private unnamed |
+| 26 | `unknown_libname_107` | not recoverable from the exported C body | Dispatcher call is verified, but the callee body/name is absent from this dump; no field order or effect may be invented. | explicitly UNRESOLVED |
+| 28 | `sub_594E80 → sub_74D130 → sub_9FA000` | gated reader: `u8×3, u8, u8, raw2, u8 count`; for selected rules, `count×{u8 index, raw4 value, raw2 state}` | Only enters in the recovered gameplay/object gates. Valid records can update an internal object flag/timestamp through `sub_9FA860` and queue insertion; local gate failure can mean no body read. No response. | shared consumer is unnamed; do not reuse outbound op 27 name |
+| 29 | `sub_593E20` | no body read | Closes the TCP socket via `sub_555030(&dword_1321D00)`, loads resource `0xA8`, and calls local notice `sub_9A7DE0(...,37,1)`. No packet-derived field. | private local-notice trigger; unnamed |
+| 31 | `sub_594EA0 → sub_606AD0` | gated header `u8×3, raw4 gateValue, s16 recordCount`; each record starts `u8 active`, with object-dependent tails | Valid object branch consumes object/member keys, status, raw2 state, `f32×3` position-like values, and raw4; fallback branches consume different tails without using the values. Updates client object state only; no response. `recordCount` is native `s16`, not a proven unsigned count. | shared consumer unnamed |
+| 33 | `sub_594EC0 → sub_96C1E0` when global `n2_24!=0` | gated `u8,u8,u8,raw4,u8,u8,s16×3` | When its local gates pass, divides the three signed 16-bit values by 3 and writes object `+60/+64/+68`; writes adjacent state bytes and clears `+84`. If `n2_24==0`, wrapper reads nothing. No response. | shared consumer unnamed |
+| 34 | `sub_594F20` | exactly three records `{u8×4, raw2, u8}` then two `raw2` values | Calls `sub_778BC0` with each record; its consumer uses selected record bytes but not the record raw2. Final two raw2 values write current-member offsets `+156/+160` when lookup succeeds. No response. | shared consumer unnamed |
+| 154 | `sub_5965D0` | `u8 count`; repeat `u8 memberKey + u8 value` | Writes known-key values to `dword_F6D9E8[i]`; unknown keys are ignored; no response. | numeric/catalog overlap with official `UDP_ALL_PING_ACK`; behavior is compatible with that label, but the private dispatcher remains the authoritative xref |
+| 158 | `sub_596910` | no body read | Loads resource `0x127` and calls `sub_9A7DE0(...,65,1)`; no packet-derived state or response. | numeric/catalog overlap with official `UDP_TCP_DEAD_ACK`; native private handler is still `sub_596910` |
+
+> **Evidence-grade reading of the naming column**：direct `case → callee`, native reader
+> helper identity, fixed width, and client state/send call are **HIGH native facts**.
+> `private unnamed` means that this native fact is strong but its protocol purpose/name
+> is still **UNRESOLVED**. `Y_UDP_S_MOVE_INF` is **HIGH** evidence for the shared
+> consumer string but not for assigning 8 or 24 individually. `UDP_ALL_PING_ACK` and
+> `UDP_TCP_DEAD_ACK` are **HIGH catalog-name/value facts** plus private case xrefs, but
+> the dump does not prove that the private handlers are aliases of the catalog
+> protocol. `unknown_libname_107` is a **HIGH unresolved-boundary fact**: the call is
+> present and the callee body is absent, so no layout/name is promoted.
+>
+> **Reader failure boundary**：`sub_592500`/the native Packet reader may fail without
+> rolling back already-mutated caller state. Count loops in cases 4/12/22/28/31/33/34
+> are not a server-side schema or permission check. In particular, raw16 address blobs,
+> member keys, and `recvfrom` source sockaddr are client-side state/selection evidence;
+> they do not prove relay, NAT, authentication, ownership, or server acceptance.
+
+### B.2 Direction pairs and non-pairs
+
+The following are only numeric adjacency and native control-flow relations, not a
+universal request/response contract:
+
+| outbound builder | inbound case | native relation | layout relation |
+|---:|---:|---|---|
+| 1 | 2 | op 1 timer/state path; case 2 updates the same shared retry state | builder `u8×3+s32`; case 2 reads no body |
+| 5 | 6 | case 4 emits 5; case 5 emits 6 | both outbound/inbound use `u8+raw4`, but the raw4 is not proven a common semantic field |
+| 9 | 10 | periodic op 9; case 10 starts op 13 after address distribution | no identical reverse layout |
+| 13 | 14 | case 10/12 emit 13; case 13 emits 14 | both `u8+raw4`, but direction/state roles differ |
+| 14 | 15 | case 13 emits 14; case 15 consumes raw16 | no identical reverse layout |
+| 17 | 18 | op 17 raw-primary send; case 18 one-shot TCP-connect trigger | op 17 is empty or ANSI/NUL string; case 18 empty |
+| 19 | 20 | `sub_596670` builds 19; `sub_5968C0` completes its retry state | exact proven control exchange; case 20 has empty body |
+| 21 | 22 | op 21 carries two raw4 values; case 22 is an update list | no identical reverse layout |
+| 23 | 24 | movement/game state send and shared move handler | case 24 wrapper does not read body; downstream queue parse not proven here |
+| 27 | 28 | native numeric adjacency only | outbound `u8×2` tail is not inbound case 28 header/records |
+| 30 | 31 | native numeric adjacency only | variable bot records versus gated object state reader |
+| 32 | 33 | native numeric adjacency only | different field order and consumer |
+| 6,15,35 | no unique `n+1` proof | send-only or reader-shape conflict | no server response may be inferred |
+
+### B.3 Official/catalog naming cross-check
+
+The shipped catalog (`db/packets.tsv`) and native string-registration table
+(`PaperMan.exe.c` around `674468..674624`) give official names to the separate
+153..164 TCP/catalog band:
+
+`153 UDP_ALL_PING_REQ`, `154 UDP_ALL_PING_ACK`, `155 Y_UDP_C_HOLE_INF`,
+`156 Y_UDP_S_HOLE_INF`, `157 UDP_TCP_DEAD_REQ`, `158 UDP_TCP_DEAD_ACK`,
+`159 TCP_UDP_DEAD_REQ`, `160 TCP_UDP_DEAD_ACK`, `161 UDP_TCP_LIVE_REQ`,
+`162 UDP_TCP_LIVE_ACK`, `163 TCP_UDP_LIVE_REQ`, `164 TCP_UDP_LIVE_ACK`.
+
+Only numeric 154 and 158 also occur as cases in `sub_595E80`; their native private
+handlers and layouts are the rows above. Cases 153,155,156,157,159..164 are **not**
+cases in this dispatcher, so their catalog names must not be pasted onto private
+ops by number alone. The string `OnY_UDP_S_MOVE_INF` is direct native evidence for the
+shared 8/24 consumer label, but it does not prove whether 8 or 24 is the official
+catalog value for that label. All other private values remain unnamed/source-oriented
+until a stronger native name or bidirectional protocol evidence is found.
+
+### B.4 Validation invariants for this appendix
+
+The dispatcher audit is intentionally executable, not prose-only:
+
+- `sub_595E80` cases must remain exactly the 22-value set in B.1.
+- Low outbound constructor opcodes must remain exactly the 15-value set in Appendix A.
+- The nine shared-prefix builders must retain their native identity sources and
+  `u8,u8,u8,s32` prefix; op 19 retains its `s8` third scalar and string tail.
+- `sub_595980` is explicit-address AES send; `sub_595900` is raw primary send;
+  `sub_595A10` uses the secondary sockaddr. The three wrappers are not interchangeable.
+- No official catalog name is promoted for an opcode absent from the private switch.
+
+`python3 tools/verify_dispatcher_coverage.py` checks the opcode sets and shared
+builder prefix. Native helper-body and direct-caller audits remain separate checks;
+passing this appendix does not turn unresolved client-side state into server authority.

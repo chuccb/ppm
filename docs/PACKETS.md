@@ -432,7 +432,9 @@ stay explicitly wire-oriented, not guessed as account or endpoint identities.
 | SECURITY_ | AhnLab HackShield | 2 |
 
 _REQ = client→server, _ACK = server→client, _NOTIFY/_NOTICE = server 推播。
-慣例: `ACK = REQ opcode + 1` (登入例外: GL_LOGIN_ACK=681 < REQ=682)。
+這個命名與 `ACK = REQ opcode + 1` 慣例只適用於已註冊的 TCP/catalog
+packet names；private UDP opcode 不繼承這個命名空間或 direction。登入例外:
+`GL_LOGIN_ACK=681 < REQ=682`。
 
 主 dispatcher (client 端 lobby): `sub_58B010` — `switch(sub_591EE0(pkt))`
 處理 TCP catalog ACK。它先轉發到場景與 `CGameRule`；UDP datagram 則另由
@@ -494,8 +496,10 @@ history or application state; it only records the two observed native send lanes
 ### UDP private opcode 空間全圖（本輪機器掃描）
 
 先前各節只談 19→20，因為那是**唯一已實作**的路徑。本輪把整個 UDP 面掃完，
-確立它是一個**與 TCP 完全分離、自成一格的小 opcode 空間**（值域 1..~158，
-與 TCP 的 100..1010 不重疊，故不會混淆）。
+確立它是一個**與 TCP/catalog 分離的 private dispatcher namespace**（值域約
+1..158）。數值上它和 TCP/catalog 的 100..1010 有重疊（特別是 154/158），
+但 dispatcher、framing lane、reader 與 evidence boundary 不同；不能用數字把兩個
+namespace 合併。
 
 **接收端是 `sub_595E80`，可證為 UDP**：呼叫鏈為
 `sub_595A60` → `sub_596F90` → **`recvfrom()`**（9600 B 緩衝，
@@ -509,11 +513,13 @@ history or application state; it only records the two observed native send lanes
 **送出端**由 `Packet::possible_ctor_or_dtor_0(v, <op>)` 反查，客戶端會建構
 **15 個** UDP opcode：`1 5 6 9 13 14 15 17 19 21 23 27 30 32 35`。
 
-**REQ→ACK 以 `n → n+1` 成對（Fact / HIGH）。** 15 個送出中 **12 個**
-的 `n+1` 確實存在於接收 case 表：
+**數值 adjacency / native control-flow relation（不是 REQ→ACK Fact）。** 15 個
+送出中有 12 個 `n+1` 數值也出現在接收 case 表：
 `1→2 · 5→6 · 9→10 · 13→14 · 14→15 · 17→18 · 19→20 · 21→22 · 23→24 ·
-27→28 · 30→31 · 32→33`。
-這與 TCP 面的奇偶配對慣例一致，可作為推斷未知 UDP opcode 方向的依據。
+27→28 · 30→31 · 32→33`。這只能作為配對線索；不能單憑 `n+1`、builder
+名稱或相鄰的 gameplay-like 欄位證明 request/ack、方向、用途、同一 layout
+或 server acceptance。只有 19→20 另有完整 native retry/completion control-flow
+與現有 server projection evidence。
 
 沒有 `n+1` case 的三個送出 opcode 是 `6`、`15`、`35`。其中 `6` 與 `15`
 確實也出現在接收側，但它們的 inbound reader layout 不必與 outbound builder
@@ -680,16 +686,29 @@ private dispatcher 不執行。dispatcher 沒有 default error/reply。
 | `13` | `u8 memberKey + raw4` | 首次匹配且未完成時，使用已保存的 `unk_F6D594` address 建立 opcode 14 並送三次；重複 receipt 只增加 counter。輸入 raw4 在此 parser 中未被作為 address 或 state value 使用。 |
 | `14` | `u8 memberKey + raw4` | 首次匹配且 `byte_F6D5A5` 未設時，將本次 `recvfrom` source 存入 `unk_F6D594` 並設 flags/state=4；raw4 被讀取但未消費到後續 domain state。 |
 | `15` | `raw16` | `sub_593DF0` 只允許 global one-shot latch 第一次通過，將 raw16 複製到 `unk_F25648`；沒有 opcode 15 response。這個 inbound shape 與 outbound opcode 15 的 `u8,u8` 是兩個方向的不同 builder/reader，不能合併成同一 layout。 |
-| `18` | 不讀 body | one-shot gate 後呼叫 TCP `sub_556530`；沒有 native payload-to-state evidence。 |
+| `18` | 不讀 body | one-shot gate 後呼叫 `sub_556530`，該 native builder 建構並經 TCP socket 送出 catalog opcode `141 PM_CONNECT_REQ`；這不是 UDP body response，也沒有 UDP payload-to-state evidence。 |
 | `20` | 不讀 body | `sub_5968C0` 設 `byte_1D0CFE7=1`，清 manager `+44,+8,+4`，更新 `+24`，並清 `byte_1324331`；沒有 identity、nickname 或 player field read。 |
 | `22` | `u8 flag`；若 flag=1，再 `u8 count` + `count×(u8 memberKey + raw4 value)` | 只對 known key 寫 `dword_F6D9E8[member]`；無 response。count/values 的 domain 未定案。 |
 | `28` | header `u8×3 + u8 + u8 + raw2 + u8 recordCount`；依 header selector 再讀 `recordCount×{u8 index, raw4 value, raw2 state}`，但 rule 3 有額外 gate | `sub_594E80 → sub_74D130 → sub_9FA000` 只在 gameplay mode 10 及多個 local-object gate 通過時讀 body；records 經 `sub_9FA860` 以 local mode/object/state 條件更新 internal flags，最後連入 internal queue。不能將 outbound 27 的兩個 byte 當成 inbound 28 layout。 |
-| `29` | 不讀 body | 觸發 UI/local notice（`sub_593E20`）。 |
+| `29` | 不讀 body | `sub_593E20` 關閉 `dword_1321D00` 的 TCP socket，載入 resource `0xA8`，再呼叫 local notice code 37；不是 packet-derived response。 |
 | `31` | header `u8×3 + raw4 gateValue + s16 recordCount`；每筆先讀 `u8 active`，再依 active/object lookup 選不同 tail | `sub_594EA0 → sub_606AD0` 在 battle object lock 內，以 valid-object branch 更新 object position/state；unknown/dead-object branch 仍消費 fallback tail 但本函式不使用其值。沒有 response。 |
 | `33` | `u8×5 + raw4 + s16×3` | `sub_594EC0 → sub_96C1E0` 只有 `n2_24 != 0` 且 local gate 允許時讀取；raw position 三值除以 3 寫 object `+60/+64/+68`，另寫 `+72`、`+73=1`、`+75`，並清 `+84`。第一、二 u8 與 raw4 在此 callee 未進入 mutation。這是 client object mutation，不證明 server authority。 |
 | `34` | 三筆固定 `{u8×4, raw2, u8}`，最後再 `raw2, raw2` | `sub_594F20` 將每筆交給 `sub_778BC0`；record raw2 被消費但未傳入該 helper。type 1–3 才更新對應 object slot，最後兩個 raw2 寫入 current member `+156/+160`。欄位 domain 未定案。 |
 | `154` | `u8 count` + `count×(u8 memberKey + u8 value)` | 更新 known member 的 `dword_F6D9E8`；無 response。 |
 | `158` | 不讀 body | `sub_596910` 取 UI resource key `0x127`，再呼叫 `sub_9A7DE0(ArgList, 65, 1)`；沒有 packet-derived field 或 network response。 |
+
+#### Private UDP / catalog numeric overlap boundary
+
+The catalog names in `db/packets.tsv` and the native registration strings are a
+separate 153..164 catalog band: `153 UDP_ALL_PING_REQ`, `154 UDP_ALL_PING_ACK`,
+`155 Y_UDP_C_HOLE_INF`, `156 Y_UDP_S_HOLE_INF`, `157 UDP_TCP_DEAD_REQ`,
+`158 UDP_TCP_DEAD_ACK`, `159 TCP_UDP_DEAD_REQ`, `160 TCP_UDP_DEAD_ACK`,
+`161 UDP_TCP_LIVE_REQ`, `162 UDP_TCP_LIVE_ACK`, `163 TCP_UDP_LIVE_REQ`, and
+`164 TCP_UDP_LIVE_ACK`. Only numeric 154 and 158 also occur in `sub_595E80`;
+the table rows above retain their private handler/body as the ground truth. The
+other catalog values are not cases in this switch, so their names cannot be copied
+onto private ops by number. `OnY_UDP_S_MOVE_INF` is a native consumer string for
+the shared 8/24 handler, not proof of which numeric case is its official catalog id.
 
 #### 28/31/33/34/158 consumer re-audit (2026-09-17)
 
