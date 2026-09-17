@@ -332,8 +332,9 @@
 
 ## Appendix A — low private-UDP Packet constructors excluded from the TCP count
 
-> **Scope / count（Fact；current `PaperMan.exe.c`）**：native scan 找到 19 個
-> `Packet::possible_ctor_or_dtor_0(..., N)` low-opcode direct sites、15 個 unique
+> **Scope / count（Fact；current `PaperMan.exe.c`）**：本輪 source snapshot 是
+> 23,357,375 bytes、SHA-256 `e40df3d16efd7340810de8cfed7a46e270f854d04cf1b16b3f6b1d88b1791125`。
+> native scan 找到 19 個 `Packet::possible_ctor_or_dtor_0(..., N)` low-opcode direct sites、15 個 unique
 > opcode：`1,5,6,9,13,14,15,17,19,21,23,27,30,32,35`。它們不屬於上方
 > `101+` TCP/C2S row inventory，也不應被加回成 TCP forms。以下 sequence 是
 > constructor opcode 之後的 native write order；不包含 UDP private 的 8-byte
