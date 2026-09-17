@@ -952,6 +952,59 @@ relay、authentication 與 peer admission 仍是 **UNRESOLVED**。
   client」的終局通知；37/65 為該彈窗的內部錯誤碼編目，其碼表不在
   client 端（不與 lang id 同空間；同 id 的 lang 文字屬巧合）。
 
+### 命名總表（2026-09-18；推定名，比照官方 catalog 風格）
+
+> **性質與邊界**：以下 24 個名稱是**本研究推定命名**（`〔推定〕`），
+> 只賜予**用途已由 client 端 Fact/Strong 證據定案**的 op；**不登錄**
+> `db/packets.tsv`——該表維持 676 官方 catalog 純度（「不在 tsv⇒非官方名」
+> 的既有證據邊界不被本表稀釋）。風格規則比照官方語料：
+> ①成對交換 → `UDP_*_REQ`/`UDP_*_ACK`（153/154、19↔20 之式）；
+> ②單向 NAT 族 → `Y_UDP_{C,S}_*_INF`（155/156 與 native debug
+> `Y_UDP_S_MOVE_INF` 之式；C_＝client-authored，含 C2C 的 5/6/13/14）；
+> ③Y_ 族內明確 ack 語義 → `_ACK` 尾；④會話管理族 plain `UDP_*`。
+> 等級：〔HIGH〕＝行為/配對為 Fact 級；〔SS〕＝語用確定但詞彙選擇屬最自然。
+
+| op（向） | 推定名 | 用途（一句） | 等級＆依據 |
+|---|---|---|---|
+| 1（出） | `Y_UDP_C_AHOLE_INF` | A 通道 hole-punch 註冊宣告（stateA 0→送） | 〔HIGH〕A/B 狀態機表 |
+| 2（入） | `Y_UDP_S_AHOLE_ACK` | A 註冊回執（latch＋elapsed＋stateA=2） | 〔HIGH〕同上 |
+| 4（入） | `Y_UDP_S_AHOLE_LIST_INF` | A 側成員位址清單（觸發 op5×3，stateA=4） | 〔HIGH〕同上 |
+| 5（入；C2C） | `Y_UDP_C_APUNCH_INF` | A 通道打孔試探（client-authored ×3） | 〔HIGH〕同上 |
+| 6（入；C2C） | `Y_UDP_C_APUNCH_ACK` | A 打孔回執（存 source＋旗標，不回覆） | 〔HIGH〕同上 |
+| 9（出） | `Y_UDP_C_BHOLE_INF` | B 通道 hole-punch 註冊宣告（stateB 0→送） | 〔HIGH〕同上 |
+| 10（入） | `Y_UDP_S_BHOLE_ONE_INF` | B 位址單筆分發（→op13×3，stateB=2） | 〔SS〕單筆 vs 清單分派 |
+| 12（入） | `Y_UDP_S_BHOLE_LIST_INF` | B 位址清單分發（→op13×3，stateB=4） | 〔HIGH〕同上 |
+| 13（入；C2C） | `Y_UDP_C_BPUNCH_INF` | B 通道打孔試探（→op14×3） | 〔HIGH〕同上 |
+| 14（入；C2C） | `Y_UDP_C_BPUNCH_ACK` | B 打孔回執（存 source＋旗標，不回覆） | 〔HIGH〕同上 |
+| 17（出） | `UDP_PROBE_REQ` | 空/字串 1 秒聯絡信標（**死鏈**，PE 定案） | 〔HIGH〕C 節＋存活度註記 |
+| 18（入） | `UDP_PROBE_ACK` | 信標回執→觸發 TCP `141 PM_CONNECT_REQ` | 〔SS〕C 節（設計配對） |
+| 19（出） | `UDP_REGISTER_REQ` | UDP 工作階段註冊（identity＋retry×100） | 〔HIGH〕D 節 |
+| 20（入） | `UDP_REGISTER_ACK` | 註冊完成（`byte_1D0CFE7`=1，戰鬥流量總閘） | 〔HIGH〕D 節 |
+| 21（出） | `UDP_KEEPALIVE_REQ` | ≤500ms 會話保活（含 10 秒失速分支） | 〔HIGH〕E 節 |
+| 22（入） | `UDP_MEMBERPING_INF` | 逐成員 ping 值批次更新（`dword_F6D9E8`） | 〔HIGH〕App B；與官方 154 為同目標表之姊妹路徑 |
+| 23（出） | `Y_UDP_C_MOVE_INF` | 本地玩家移動串流（×3.0 打包家族） | 〔SS〕鏡像 native debug `Y_UDP_S_MOVE_INF` |
+| 27（出） | `Y_UDP_C_HIT_INF` | 互動實體首次觸發之一擊事件回報（edge-trigger） | 〔SS〕E 節語義升級 |
+| 29（入） | `UDP_DISCONNECT_INF` | server 終局強制斷線（關 TCP＋notice 37） | 〔SS〕App B＋G 節 |
+| 30（出） | `Y_UDP_C_BOT_INF` | bot/AI 實體狀態串流（≈10Hz 節流） | 〔HIGH〕E 節 30/31 家族 |
+| 31（入） | `Y_UDP_S_BOT_INF` | bot/AI 物件狀態套用（30 之對向） | 〔HIGH〕同上 |
+| 32（出） | `Y_UDP_C_OBJPOS_INF` | 物件位置串流（×3.0 打包） | 〔HIGH〕E 節 32/33 家族 |
+| 33（入） | `Y_UDP_S_OBJPOS_INF` | 物件位置套用（÷3.0 寫 +60/+64/+68） | 〔HIGH〕同上 |
+| 35（出） | `Y_UDP_C_TCPINF_ACK` | 對 TCP `166 Y_TCP_INF_ACK` 戰鬥子令之 UDP 回執 | 〔SS〕E 節 166→UDP 鏈 |
+
+> **刻意不賜名（5 案）**：
+> - **8 / 24**：`Y_UDP_S_MOVE_INF` 僅 handler 家族錨；兩數值歸屬切分鍵
+>   在 server 端（UNRESOLVED），個別賜名會把未證明配對寫成命名事實。
+> - **15**：入方向語義 UNRESOLVED（raw16 latch，零讀者）；出方向 `u8×2`
+>   直入完成態之 mode-2 語理未證——兩向皆不賜名、不合併。
+> - **26**：空 thiscall no-op sink（PE 定案），無語義主體可命名。
+> - **28**：LAYOUTS App B 明記「不得沿用 outbound op 27 之名」——
+>   27/28 配對是 E 節最自然判讀而非證畢，避名以保邊界。
+> - **34**：結構 Fact 完備但語用主體（哪一類物件、尾二 raw2 所指）未證。
+
+> 使用規則：全文與 LAYOUTS 引用上表名稱時一律帶 `〔推定〕` 或註明
+> 「推定名」；不得在未更新本表與 LAYOUTS 的情況下於他處另行改名。
+> server 端投影（19→20）既有不變。
+
 ### 殘留 UNRESOLVED（兩項；另兩項 2026-09-18 PE 直讀後除名）
 
 > 原六項清單中「notice code 37/65 編目空間」與「A/B 雙通道角色分工」

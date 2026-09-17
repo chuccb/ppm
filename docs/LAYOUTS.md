@@ -949,28 +949,30 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 > 的每一列 direction 都是 inbound（UDP source → client）。**同一數字若同時出現在
 > A/B，仍是兩個方向的獨立 native evidence。**2026-09-17 深潛稽核已把每個 op 的
 > 觸發點、state 消費者與生命週期定案，見 `PACKETS.md` §2.6（含 A/B 雙通道
-> hole-punch 狀態機、19↔20 註冊握手、8/24 移動套用鏈與存活度標注）。**現有 native evidence 證明的
+> hole-punch 狀態機、19↔20 註冊握手、8/24 移動套用鏈與存活度標注）。**
+> **2026-09-18：用途定案者已比照官方 catalog 風格賜予推定名，唯一定義處為
+> `PACKETS.md` §2.6〈命名總表〉；本表各列僅記名稱句柄。**現有 native evidence 證明的
 > `n → n+1` case pairs、AES/raw send lane、secondary sockaddr 與 `UNRESOLVED`
 > server boundary 詳見 [`PACKETS.md`](PACKETS.md) §2.5；這裡保留 constructor-level
 > inventory，避免把 UDP evidence 從本文件的完整 native builder audit 中遺漏。
 
 | op | direct ctor xref（19 sites） | opcode 之後的寫入序列 | native send / caller / 邊界 |
 |---:|---|---|---|
-| 1 | `sub_593830`（1 site；shared function 的 `n2!=2` branch） | `u8×3 s32` | `sub_5937D0` timer/state caller；`sub_595A10` secondary AES lane；僅 client 端送出事實 |
-| 5 | `sub_593AB0` | `u8 raw4` | 由 `sub_595E80` case 4 呼叫；經 `sub_595980` 以明確 `raw16` destination 送出；符合之已存 member address 一律重送三次；`raw4` 為 `sub_592AA0` 之 caller-defined elapsed/context 值；server 角色 UNRESOLVED |
-| 6 | `sub_593E60` | `u8 raw4` | 由 `sub_595E80` case 5 呼叫；經 `sub_595980` 以明確 `raw16` destination 送出；第一個符合的 received source 會被儲存並重送三次；`raw4` 為 `sub_592AA0` 之 caller-defined elapsed/context 值；server 角色 UNRESOLVED |
-| 9 | `sub_594300` | `u8×3 s32` | 由 `sub_5942B0` 呼叫；`sub_595A10` secondary AES lane；週期性 client 路徑；不推斷 server 行為 |
-| 13 | `sub_594460`; `sub_5946C0`（2 sites） | 各為 `u8 raw4` | 由 `sub_595E80` cases 10/12 呼叫；經 `sub_595980` 以已存位址送出；兩個 constructor 維持獨立 native call site；`raw4` 為 `sub_592AA0` 之 caller-defined 輸出 |
-| 14 | `sub_594A10` | `u8 raw4` | 由 `sub_595E80` case 13 呼叫；經 `sub_595980` 以已存位址送出；source/本地 state 分支與 13 不同；`raw4` 為 `sub_592AA0` 之 caller-defined 輸出；domain UNRESOLVED |
-| 15 | `sub_593830`（1 site；shared function 的 `n2==2` branch） | `u8×2` | `sub_5937D0` timer/state caller；`sub_595A10` secondary AES lane；與 1 同屬一個 native function，但 wire form 不相同 |
-| 17 | `sub_596180`; `sub_596240`（2 sites） | `sub_596180`：空；`sub_596240`：`str`（ANSI/NUL） | 兩個 global builder 2026-09-18 經 `PaperMan.exe` 三式掃描確證**零進入邊＝死鏈**（詳 PACKETS §2.6 存活度註記）；兩者皆走 primary raw `sub_595900`，繞過 AES；空形式與字串形式必須維持分開 |
-| 19 | `sub_596670` | `u8×2 s8 u8 s32 str` | direct callers：`sub_4070B0`、`sub_407290`、`CLobbyGameStart::sub_43C380`；`sub_595A10` secondary AES lane；offset 2 使用 `sub_5928E0` s8；offset 3 使用 `sub_592920` u8，source 為 `-2` 時送出 `0xFE`；nickname 字串為 native writer 輸出 |
-| 21 | `sub_596330` | `u8×3 s32 raw4 raw4` | `sub_595D80` active-manager caller；經 `sub_595A10`；尾端兩個 `sub_592AA0` 值維持 caller-defined raw4 |
-| 23 | `sub_744450` | `u8×3 s32 raw4 u8 u16×3 u8 u8×8 s32` | direct callers：`sub_600770`、`sub_73E170`；經 `sub_602D70 → sub_596B90 → sub_595A10` gate；`sub_592AA0` n0x64 為 caller-defined raw4；寬度為 Fact，欄位涵義 UNRESOLVED |
-| 27 | `sub_6013E0`; `sub_6036F0`（2 sites） | 各為 `u8×3 s32 u8×2` | direct callers：`sub_73E170`→`sub_6013E0`；`sub_5607C0`／`sub_6013E0`→`sub_6036F0`；`sub_602D70 → sub_596B90 → sub_595A10` gate；尾端兩個 u8 值為 native state byte |
-| 30 | `sub_606340`（空 constructor；此 site 無 send）；`sub_6065E0` | `sub_606340`：空；`sub_6065E0`：`u8×3 s32 u16 count, count×{s8 status,[u16 若 status!=0,[條件式 u16 s8 u16 f32×3 s32]]}` | callers：`sub_73E170`→`sub_606340`；`sub_606340`（2 sites）／`sub_6065D1`→`sub_6065E0`；僅 `sub_6065E0` 呼叫 `sub_595A10`；`sub_761500(...)` 為本地暫存，非 wire 欄位 |
-| 32 | `sub_96BF70` | `u8×3 s32 u8 s8 u16×3` | `sub_967E90` caller；經 `sub_595A10` 之 object/position 路徑；三個 `u16` 值無已證明之 domain 名稱 |
-| 35 | `sub_7463E0` | `u8×3 s32` | `sub_749B90`（2 次 direct call）；`sub_67F380` gate 之後走 `sub_595A10` secondary AES lane；為純送端證據，不推斷接收端或遊戲涵義 |
+| 1 | `sub_593830`（1 site；shared function 的 `n2!=2` branch） | `u8×3 s32` | `sub_5937D0` timer/state caller；`sub_595A10` secondary AES lane；僅 client 端送出事實；推定名 `Y_UDP_C_AHOLE_INF` |
+| 5 | `sub_593AB0` | `u8 raw4` | 由 `sub_595E80` case 4 呼叫；經 `sub_595980` 以明確 `raw16` destination 送出；符合之已存 member address 一律重送三次；`raw4` 為 `sub_592AA0` 之 caller-defined elapsed/context 值；server 角色 UNRESOLVED；推定名 `Y_UDP_C_APUNCH_INF`（client-authored；C2C 半邊） |
+| 6 | `sub_593E60` | `u8 raw4` | 由 `sub_595E80` case 5 呼叫；經 `sub_595980` 以明確 `raw16` destination 送出；第一個符合的 received source 會被儲存並重送三次；`raw4` 為 `sub_592AA0` 之 caller-defined elapsed/context 值；server 角色 UNRESOLVED；推定名 `Y_UDP_C_APUNCH_ACK`（C2C） |
+| 9 | `sub_594300` | `u8×3 s32` | 由 `sub_5942B0` 呼叫；`sub_595A10` secondary AES lane；週期性 client 路徑；不推斷 server 行為；推定名 `Y_UDP_C_BHOLE_INF` |
+| 13 | `sub_594460`; `sub_5946C0`（2 sites） | 各為 `u8 raw4` | 由 `sub_595E80` cases 10/12 呼叫；經 `sub_595980` 以已存位址送出；兩個 constructor 維持獨立 native call site；`raw4` 為 `sub_592AA0` 之 caller-defined 輸出；推定名 `Y_UDP_C_BPUNCH_INF`（C2C） |
+| 14 | `sub_594A10` | `u8 raw4` | 由 `sub_595E80` case 13 呼叫；經 `sub_595980` 以已存位址送出；source/本地 state 分支與 13 不同；`raw4` 為 `sub_592AA0` 之 caller-defined 輸出；domain UNRESOLVED；推定名 `Y_UDP_C_BPUNCH_ACK`（C2C） |
+| 15 | `sub_593830`（1 site；shared function 的 `n2==2` branch） | `u8×2` | `sub_5937D0` timer/state caller；`sub_595A10` secondary AES lane；與 1 同屬一個 native function，但 wire form 不相同；不賜名＝mode-2 語理未證 |
+| 17 | `sub_596180`; `sub_596240`（2 sites） | `sub_596180`：空；`sub_596240`：`str`（ANSI/NUL） | 兩個 global builder 2026-09-18 經 `PaperMan.exe` 三式掃描確證**零進入邊＝死鏈**（詳 PACKETS §2.6 存活度註記）；兩者皆走 primary raw `sub_595900`，繞過 AES；空形式與字串形式必須維持分開；推定名 `UDP_PROBE_REQ`〔推定；死鏈〕 |
+| 19 | `sub_596670` | `u8×2 s8 u8 s32 str` | direct callers：`sub_4070B0`、`sub_407290`、`CLobbyGameStart::sub_43C380`；`sub_595A10` secondary AES lane；offset 2 使用 `sub_5928E0` s8；offset 3 使用 `sub_592920` u8，source 為 `-2` 時送出 `0xFE`；nickname 字串為 native writer 輸出；推定名 `UDP_REGISTER_REQ` |
+| 21 | `sub_596330` | `u8×3 s32 raw4 raw4` | `sub_595D80` active-manager caller；經 `sub_595A10`；尾端兩個 `sub_592AA0` 值維持 caller-defined raw4；推定名 `UDP_KEEPALIVE_REQ` |
+| 23 | `sub_744450` | `u8×3 s32 raw4 u8 u16×3 u8 u8×8 s32` | direct callers：`sub_600770`、`sub_73E170`；經 `sub_602D70 → sub_596B90 → sub_595A10` gate；`sub_592AA0` n0x64 為 caller-defined raw4；寬度為 Fact，欄位涵義 UNRESOLVED；推定名 `Y_UDP_C_MOVE_INF` |
+| 27 | `sub_6013E0`; `sub_6036F0`（2 sites） | 各為 `u8×3 s32 u8×2` | direct callers：`sub_73E170`→`sub_6013E0`；`sub_5607C0`／`sub_6013E0`→`sub_6036F0`；`sub_602D70 → sub_596B90 → sub_595A10` gate；尾端兩個 u8 值為 native state byte；推定名 `Y_UDP_C_HIT_INF` |
+| 30 | `sub_606340`（空 constructor；此 site 無 send）；`sub_6065E0` | `sub_606340`：空；`sub_6065E0`：`u8×3 s32 u16 count, count×{s8 status,[u16 若 status!=0,[條件式 u16 s8 u16 f32×3 s32]]}` | callers：`sub_73E170`→`sub_606340`；`sub_606340`（2 sites）／`sub_6065D1`→`sub_6065E0`；僅 `sub_6065E0` 呼叫 `sub_595A10`；`sub_761500(...)` 為本地暫存，非 wire 欄位；推定名 `Y_UDP_C_BOT_INF` |
+| 32 | `sub_96BF70` | `u8×3 s32 u8 s8 u16×3` | `sub_967E90` caller；經 `sub_595A10` 之 object/position 路徑；三個 `u16` 值無已證明之 domain 名稱；推定名 `Y_UDP_C_OBJPOS_INF` |
+| 35 | `sub_7463E0` | `u8×3 s32` | `sub_749B90`（2 次 direct call）；`sub_67F380` gate 之後走 `sub_595A10` secondary AES lane；為純送端證據，不推斷接收端或遊戲涵義；推定名 `Y_UDP_C_TCPINF_ACK` |
 
 > **UDP framing 邊界（Fact / HIGH）**：除非該 row 另有說明，ops
 > 1/5/6/9/13/14/15/19/21/23/27/30/32/35 使用已觀察到的 AES send lane；op 17
@@ -992,7 +994,8 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 > 且 `sub_67EAC0()==0`；否則不讀 body、不回覆。switch 使用
 > `sub_591EE0(packet)` 的 UDP Packet opcode；`default` 靜默忽略。這個 opcode
 > 空間和 `sub_58B010` 的 TCP/catalog dispatcher 分離，即使數字或官方 catalog
-> 名稱相同，也不能直接合併 layout 或方向。
+> 名稱相同，也不能直接合併 layout 或方向。**命名狀態欄之「推定名」統一定義於
+> `PACKETS.md` §2.6〈命名總表〉（2026-09-18，比照官方風格之推定命名）**。
 >
 > **Native receive case set（Fact）**：`2,4,5,6,8,10,12,13,14,15,18,20,22,24,26,28,29,31,33,34,154,158`。
 > `8/24` 共用同一 handler；其餘 case 各有直接 branch。這些 inbound rows 都先
@@ -1014,24 +1017,24 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 
 | inbound op | native 分支 / parser | 精確消耗的 body | 直接觀察到的效果 / 失敗邊界 | 命名狀態 |
 |---:|---|---|---|---|
-| 2 | `sub_593A60` | 未讀 body | 若 global `n0x3E8==0`，設為 1，將 `timeGetTime()-dword_F2563C` 存入共享 elapsed 值，並設 `byte_1324330=2`；後續收到僅遞增該 global counter。不做 payload-empty 驗證。 | private unnamed；無 server 端證明前不得稱其為泛用 `PING` |
-| 4 | `sub_593AB0` | `u8 entryCount`；重複 `u8 memberKey + raw16 addressBlob` | 於 16 項 `dword_F6DCF4` 表逐一查 key；未知 key 立即 return，先前已修改之 entry 保留。已知 entry 將 raw16 存至 `unk_F6D584+240780*i`、設 `byte_F6D5B0[i]=1`；再構成 op 5（`u8 + raw4 elapsed`），對每個已存非本地 address 送出三個 AES datagram。本地 state byte 設為 4。 | private unnamed；address 分發／peer 角色維持 UNRESOLVED |
-| 5 | `sub_593E60` | `u8 memberKey + raw4` | raw4 被讀入 4-byte 本地變數，但在已回收的狀態轉移中未被使用。已知 key：重複收到僅遞增 `byte_F6D5A4[i]`；首次收到設 `byte_F6D5A4/A5`，將當前 `recvfrom` source sockaddr 存入 `unk_F6D594+240780*i`，構成 op 6（`u8 + raw4 elapsed`）並對該 source 送三次。 | private unnamed；未證明是 `HOLE` 或 `PING` 欄位 |
-| 6 | `sub_5940E0` | `u8 memberKey + raw4` | raw4 被讀但未消費。若已知 key 的 `byte_F6D5A5[i]==0`，設 `byte_F6D5A4/A5` 並存當前 source sockaddr；不構成回應。 | private unnamed |
+| 2 | `sub_593A60` | 未讀 body | 若 global `n0x3E8==0`，設為 1，將 `timeGetTime()-dword_F2563C` 存入共享 elapsed 值，並設 `byte_1324330=2`；後續收到僅遞增該 global counter。不做 payload-empty 驗證。 | 推定名 `Y_UDP_S_AHOLE_ACK`〔推定〕；無 server 端證明前仍不得稱其為泛用 `PING` |
+| 4 | `sub_593AB0` | `u8 entryCount`；重複 `u8 memberKey + raw16 addressBlob` | 於 16 項 `dword_F6DCF4` 表逐一查 key；未知 key 立即 return，先前已修改之 entry 保留。已知 entry 將 raw16 存至 `unk_F6D584+240780*i`、設 `byte_F6D5B0[i]=1`；再構成 op 5（`u8 + raw4 elapsed`），對每個已存非本地 address 送出三個 AES datagram。本地 state byte 設為 4。 | 推定名 `Y_UDP_S_AHOLE_LIST_INF`〔推定〕；address 分發／peer 角色維持 UNRESOLVED |
+| 5 | `sub_593E60` | `u8 memberKey + raw4` | raw4 被讀入 4-byte 本地變數，但在已回收的狀態轉移中未被使用。已知 key：重複收到僅遞增 `byte_F6D5A4[i]`；首次收到設 `byte_F6D5A4/A5`，將當前 `recvfrom` source sockaddr 存入 `unk_F6D594+240780*i`，構成 op 6（`u8 + raw4 elapsed`）並對該 source 送三次。 | 推定名 `Y_UDP_C_APUNCH_INF`〔推定〕（client-authored；C2C 半邊）；raw4 欄位仍未證明是 `HOLE` 或 `PING` 語義 |
+| 6 | `sub_5940E0` | `u8 memberKey + raw4` | raw4 被讀但未消費。若已知 key 的 `byte_F6D5A5[i]==0`，設 `byte_F6D5A4/A5` 並存當前 source sockaddr；不構成回應。 | 推定名 `Y_UDP_C_APUNCH_ACK`〔推定〕（C2C） |
 | 8 / 24 | `sub_596940 → sub_593750`，僅當 `n15==13`；否則走 bug/report 路徑 | dispatcher wrapper 不讀任何欄位；`sub_593750` 在 critical section 內 enqueue／複製 Packet | 字面 error 路徑指名消費者為 `OnY_UDP_S_MOVE_INF`；後續 parse 由 queue/callee 路徑擁有，非本 dispatcher wrapper。若 `n15!=13`，log `BUGCUDPNetworkManager::OnY_UDP_S_MOVE_INF` 並呼叫本地 debug/report helper。 | shared handler 標籤 `Y_UDP_S_MOVE_INF` 為 native 字串證據；8 與 24 各自的精確 op-to-name 對應未被證明 |
-| 10 | `sub_594460` | `u8 memberKey + raw16 addressBlob` | 找 key（decompiler 迴圈呈現等待至符合）；`byte_F6D5B0[i]==0` 時存 raw16 address 並設 flag。構成 op 13（`u8 + raw4 elapsed`），對已存 address 送三次；本地 state `this+1=2`。 | private unnamed |
-| 12 | `sub_5946C0` | `u8 entryCount`；重複 `u8 memberKey + raw16 addressBlob` | 存每一筆已知 entry；未知 key 直接 return、先前 entry 保留。以 `timeGetTime()-dword_F2563C` 設共享 elapsed 值，構成 op 13（`u8 + raw4 elapsed`），對每個已存非本地 key 送三次；本地 state `this+1=4`。 | private unnamed |
-| 13 | `sub_594A10` | `u8 memberKey + raw4` | raw4 被讀但未使用。已知 key：重複收到遞增 `byte_F6D5A4[i]`；首次收到設 `byte_F6D5A4/A5`、存當前 source sockaddr，構成 op 14（`u8 + raw4 elapsed`）送三次；本地 state `this+1=4`。 | private unnamed |
-| 14 | `sub_594CA0` | `u8 memberKey + raw4` | raw4 未使用。若已知 key `byte_F6D5A5[i]==0`，設 `byte_F6D5A4/A5`、存當前 source sockaddr，state `this+1=4`；無回應。 | private unnamed |
+| 10 | `sub_594460` | `u8 memberKey + raw16 addressBlob` | 找 key（decompiler 迴圈呈現等待至符合）；`byte_F6D5B0[i]==0` 時存 raw16 address 並設 flag。構成 op 13（`u8 + raw4 elapsed`），對已存 address 送三次；本地 state `this+1=2`。 | 推定名 `Y_UDP_S_BHOLE_ONE_INF`〔推定〕 |
+| 12 | `sub_5946C0` | `u8 entryCount`；重複 `u8 memberKey + raw16 addressBlob` | 存每一筆已知 entry；未知 key 直接 return、先前 entry 保留。以 `timeGetTime()-dword_F2563C` 設共享 elapsed 值，構成 op 13（`u8 + raw4 elapsed`），對每個已存非本地 key 送三次；本地 state `this+1=4`。 | 推定名 `Y_UDP_S_BHOLE_LIST_INF`〔推定〕 |
+| 13 | `sub_594A10` | `u8 memberKey + raw4` | raw4 被讀但未使用。已知 key：重複收到遞增 `byte_F6D5A4[i]`；首次收到設 `byte_F6D5A4/A5`、存當前 source sockaddr，構成 op 14（`u8 + raw4 elapsed`）送三次；本地 state `this+1=4`。 | 推定名 `Y_UDP_C_BPUNCH_INF`〔推定〕（C2C） |
+| 14 | `sub_594CA0` | `u8 memberKey + raw4` | raw4 未使用。若已知 key `byte_F6D5A5[i]==0`，設 `byte_F6D5A4/A5`、存當前 source sockaddr，state `this+1=4`；無回應。 | 推定名 `Y_UDP_C_BPUNCH_ACK`〔推定〕（C2C） |
 | 15 | `sub_593DF0` | `raw16` | 一次性 latch `byte_F25646`：首個 packet 將 raw16 複製至 `unk_F25648`；後續忽略。無回應。與 outbound op 15（`u8,u8`）為不同形式。 | private unnamed；不得合併方向 |
-| 18 | `sub_596300` | 未讀 body | 一次性 latch `n0x3E8_1`；首個 packet 呼叫 `sub_556530`，於 TCP socket 構成並送出 catalog/TCP opcode `141 PM_CONNECT_REQ`；後續 packet 無作用。未回收任何 UDP body 消費者。 | private UDP trigger 維持 source-oriented 描述；內層 TCP opcode 141 有官方 `PM_CONNECT_REQ` 證據 |
-| 20 | `sub_5968C0` | 未讀 body | 設 `byte_1D0CFE7=1`，清 manager retry/state word `+44,+8,+4`，更新 `+24=timeGetTime()`，並經 `sub_594F00` 清 `byte_1324331`。不讀任何 identity 或 gameplay 欄位。 | 為 outbound op 19 之 private completion；官方名未回收 |
-| 22 | `sub_5964E0` | `u8 updateFlag`；若 `==1`：`u8 count`，重複 `u8 memberKey + raw4 value` | 更新 timer/network-manager 本地 state，再僅對已知 key 將 `raw4 value` 寫入 `dword_F6D9E8[i]`。無回應。flag 非 1 時讀完第一個 byte 即停止。 | private unnamed |
+| 18 | `sub_596300` | 未讀 body | 一次性 latch `n0x3E8_1`；首個 packet 呼叫 `sub_556530`，於 TCP socket 構成並送出 catalog/TCP opcode `141 PM_CONNECT_REQ`；後續 packet 無作用。未回收任何 UDP body 消費者。 | 推定名 `UDP_PROBE_ACK`〔推定〕；private UDP trigger 維持 source-oriented 描述；內層 TCP opcode 141 有官方 `PM_CONNECT_REQ` 證據 |
+| 20 | `sub_5968C0` | 未讀 body | 設 `byte_1D0CFE7=1`，清 manager retry/state word `+44,+8,+4`，更新 `+24=timeGetTime()`，並經 `sub_594F00` 清 `byte_1324331`。不讀任何 identity 或 gameplay 欄位。 | 推定名 `UDP_REGISTER_ACK`〔推定〕（`UDP_REGISTER_REQ` 之完成端）；官方名未回收 |
+| 22 | `sub_5964E0` | `u8 updateFlag`；若 `==1`：`u8 count`，重複 `u8 memberKey + raw4 value` | 更新 timer/network-manager 本地 state，再僅對已知 key 將 `raw4 value` 寫入 `dword_F6D9E8[i]`。無回應。flag 非 1 時讀完第一個 byte 即停止。 | 推定名 `UDP_MEMBERPING_INF`〔推定〕 |
 | 26 | `unknown_libname_107` | 無（不讀 body） | 2026-09-18 由 `PaperMan.exe` 直讀 16-byte 本體（`55 8B EC 51 89 4D FC` `8B E5 5D C2 04 00` + `CC×3`）＝**空 thiscall**：存 this 後即 `ret 4` 吞掉唯一 packet 參數；不讀、不寫、不回應——效果確定為零。原「函式體不在 dump」僅是 IDA 未反編譯 | 行為 Fact（PE 直讀）；名稱因無原生字串仍維持 IDA 標籤；server 端送出理由 UNRESOLVED |
 | 28 | `sub_594E80 → sub_74D130 → sub_9FA000` | gated reader：`u8×3, u8, u8, raw2, u8 count`；選定規則下 `count×{u8 index, raw4 value, raw2 state}` | 僅在已回收之 gameplay/object gate 成立時進入。合法 record 可經 `sub_9FA860` 更新內部 object flag/timestamp 並插入 queue；本地 gate 失敗可能不讀任何 body。無回應。 | shared consumer 無名；不得沿用 outbound op 27 之名 |
-| 29 | `sub_593E20` | 未讀 body | 經 `sub_555030(&dword_1321D00)` 關閉 TCP socket，載入 resource `0xA8`，呼叫本地 notice `sub_9A7DE0(...,37,1)`。無 packet 衍生欄位。 | private 本地 notice 觸發；unnamed |
-| 31 | `sub_594EA0 → sub_606AD0` | gated header `u8×3, raw4 gateValue, s16 recordCount`；每筆 record 以 `u8 active` 起頭，尾段依 object 而異 | 合法 object 分支消費 object/member key、status、raw2 state、`f32×3` position 類值與 raw4；fallback 分支消費不同尾段但不使用其值。僅更新 client object state；無回應。`recordCount` 為 native `s16`，非已證明之 unsigned count。 | shared consumer unnamed |
-| 33 | `sub_594EC0 → sub_96C1E0`，當 global `n2_24!=0` | gated `u8,u8,u8,raw4,u8,u8,s16×3` | 本地 gate 通過時，將三個有號 16-bit 值除以 3 寫入 object `+60/+64/+68`；寫相鄰 state byte 並清 `+84`。若 `n2_24==0`，wrapper 不讀任何內容。無回應。 | shared consumer unnamed |
+| 29 | `sub_593E20` | 未讀 body | 經 `sub_555030(&dword_1321D00)` 關閉 TCP socket，載入 resource `0xA8`，呼叫本地 notice `sub_9A7DE0(...,37,1)`。無 packet 衍生欄位。 | 推定名 `UDP_DISCONNECT_INF`〔推定〕；private 本地 notice 觸發 |
+| 31 | `sub_594EA0 → sub_606AD0` | gated header `u8×3, raw4 gateValue, s16 recordCount`；每筆 record 以 `u8 active` 起頭，尾段依 object 而異 | 合法 object 分支消費 object/member key、status、raw2 state、`f32×3` position 類值與 raw4；fallback 分支消費不同尾段但不使用其值。僅更新 client object state；無回應。`recordCount` 為 native `s16`，非已證明之 unsigned count。 | 推定名 `Y_UDP_S_BOT_INF`〔推定〕（op30 之對向家族） |
+| 33 | `sub_594EC0 → sub_96C1E0`，當 global `n2_24!=0` | gated `u8,u8,u8,raw4,u8,u8,s16×3` | 本地 gate 通過時，將三個有號 16-bit 值除以 3 寫入 object `+60/+64/+68`；寫相鄰 state byte 並清 `+84`。若 `n2_24==0`，wrapper 不讀任何內容。無回應。 | 推定名 `Y_UDP_S_OBJPOS_INF`〔推定〕（op32 之對向家族） |
 | 34 | `sub_594F20` | 恰三筆 record `{u8×4, raw2, u8}`，再接兩個 `raw2` 值 | 對每筆 record 呼叫 `sub_778BC0`；其消費者使用 record 之部分 byte，但不使用 record raw2。查表成功時末尾兩個 raw2 寫入 current-member offset `+156/+160`。無回應。 | shared consumer unnamed |
 | 154 | `sub_5965D0` | `u8 count`；重複 `u8 memberKey + u8 value` | 將已知 key 之值寫入 `dword_F6D9E8[i]`；未知 key 忽略；無回應。 | 與官方 `UDP_ALL_PING_ACK` 在數值／catalog 上重疊；行為與該標籤相容，但 private dispatcher 仍是權威 xref |
 | 158 | `sub_596910` | 未讀 body | 載入 resource `0x127` 並呼叫 `sub_9A7DE0(...,65,1)`；無 packet 衍生 state 或回應。 | 與官方 `UDP_TCP_DEAD_ACK` 在數值／catalog 上重疊；native private handler 仍為 `sub_596910` |
