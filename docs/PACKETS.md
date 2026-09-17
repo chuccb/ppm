@@ -27,7 +27,8 @@
 > 機器掃描發現本文件引用的 673 個 `sub_` 符號中，曾有 **33 個在新舊兩份
 > `PaperMan.exe.c` 皆查無此函式** —— 屬更早期 IDA session 遺留的漂移，
 > **與 2026-09 的新 dump 無關**（兩份都沒有）。
-> `LAYOUTS.md` 兩 Parts（S2C 311 rows＋C2S 261 TCP rows）因為是自動抽取的，
+> `LAYOUTS.md` 兩 Parts（S2C 307 rows——dispatcher 306 case 全數＋dispatch 外
+> 196；C2S 261 TCP rows＋15 private-UDP 送端）因為是自動抽取的，
 > **全部可對應**。
 >
 > 本輪以**追 `Packet(<opcode>)` builder** 重新定位，
@@ -392,7 +393,10 @@ call sites** 把 **670 個唯一** packet 名稱註冊進全域 map `dword_2317F
 > `LAYOUTS.md` Part I〈S2C 推定命名審計（2026-09-17）〉與 Part II
 > 〈推定命名審計（2026-09-17）〉；推定名不登入名稱表，故下方空隙清單
 > 仍屬正確的 Fact。第 46 個是本輪補進的 417，已在下方 MASTER 表具名。
-> 可用 `python3 tools/verify_dispatcher_coverage.py` 隨時複驗這些數字：
+> 可用 `python3 tools/verify_dispatcher_coverage.py` 隨時複驗這些數字
+> （腳本印出的 74 個「有 native reader/writer 但未註冊」＝此處 46＋28 個
+> private-UDP 值 1..35：Appendix A/B 表列、屬另一 namespace，本就故意不
+> 登入 `db/packets.tsv`）：
 >
 > * **29 個落在 100..994 的名稱表空隙**：203, 206, 295, 487, 488, 489, 828,
 >   851, 852, 853, 880, 896, 898, 914, 930, 931, 932, 933, 946, 947, 949,
