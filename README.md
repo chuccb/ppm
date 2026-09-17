@@ -1,7 +1,8 @@
 # PaperMan 私服重建 — 協議逆向 + TypeScript/Bun/SQLite 伺服器
 
-從 `PaperMan.exe.c` (Hex-Rays 9.4 IDA 導出, 81 萬行) 逆向出完整封包協議，
-並據此重建伺服器端 SQLite 資料庫。
+以 `PaperMan.exe.c`（Hex-Rays 9.4 IDA 導出，約 81 萬行）與 `Extracted/` 為證據，
+整理 PaperMan 的 native wire、client state、資源格式與目前唯一的 `server-ts/`
+TypeScript/Bun/SQLite 保守實作。
 
 > **IDA 導出物版本說明（2026-09）。** `main` 分支上傳了一份新的 `PaperMan.exe.c`。
 > 已逐函數比對過：兩份的**函數集合完全相同**（17,830 個具名函數、19,835 個
@@ -16,20 +17,22 @@
 > 均以 `PaperMan.exe.c` 與 `Extracted/` 為準；LST 專屬的資訊（精確指令、段位址、
 > 完整 xref 圖）**尚未納入**，待可下載時再補。
 
-## 目錄
+## 導航與執行
 
 | 路徑 | 內容 |
 |------|------|
 | [`docs/README.md`](docs/README.md) | **文件與證據導覽**：先判斷該讀哪份資料、證據等級、generated boundary 與每次改動的最小交叉驗證流程 |
 | [`docs/RTTI_PYCLASSINFORMER.md`](docs/RTTI_PYCLASSINFORMER.md) | **Client RTTI 索引**：使用者提供的 PyClassInformer class / vftable / inheritance tranche；用於 native xref 定位，明確不等同 server policy 或 wire evidence |
-| `docs/PACKETS.md` | **協議完整分析**: Packet 類佈局、wire 格式、序列化原語、checksum/壓縮/加密層、關鍵 payload 結構 (全部附反編譯函數地址) |
-| `docs/RESOURCES.md` | **客戶端資源地圖**: maplist/物品/任務/訊息表 `msgtableres.lang`、UI 圖像音效盤點、mode 枚舉正名 |
+| `docs/PACKETS.md` | **協議完整分析**：Packet 類佈局、wire 格式、序列化原語、壓縮/加密層、關鍵 payload 結構（附 native 函數地址） |
+| `docs/SERVER_TS_PACKET_FIELDS.md` | **目前 31 個 TS packet 欄位審計**：native meaning、TS use、boundary 與 unresolved projection |
+| `docs/S2C_NATIVE_AUDIT_681.md` / `144.md` / `196.md` | **登入／頻道 handshake 專項審計**：reader、caller、consumer、resource 與 TS boundary |
+| `docs/RESOURCES.md` | **客戶端資源地圖**：maplist/物品/任務/訊息表 `msgtableres.lang`、UI 圖像音效盤點、mode 枚舉正名 |
 | `docs/WIKI_MECHANICS.md` | **Wiki* 歷史機制研究帳本**: 已閱讀主題、版本風險與待由 client/resource/packet 交叉驗證的矩陣；明確不是 service/wire 權威 |
 | `docs/LAYOUTS.md` / `docs/LAYOUTS_REQ.md` | 各封包 dispatcher 讀取序 / REQ builder 寫入序 (欄位級對照) |
 | `docs/ARCHITECTURE.md` | 全景架構: 生命週期、資料層、加密、互證鏈 |
 | `docs/TODO_HANDLERS.md` | 尚未實作的 server handler 清單與下一輪建議 |
 | `db/packets.tsv` | 從 `sub_9D2050` 抽出的 **676 筆 opcode ↔ 名稱** 對照表 (100–994) |
-| `db/schema.sql` | SQLite schema 與離線資料庫工具的完整 schema；server-ts 的目前 runtime projection 在 `src/store.ts`, 每個欄位註明來源封包/函數 |
+| `db/schema.sql` | 離線 SQLite schema；目前 server-ts runtime projection 在 `server-ts/src/store.ts`，每個欄位註明來源封包/函數 |
 | `db/build_db.py` | **可選**離線重建／檢查工具；Bun server 首次啟動會自行建庫，不必先跑它 |
 | `db/smoke_test.py` | 模擬 登入→建角→購物→背包分頁→開房→結算→好友/訊息/任務/公會 全流程的 DB 讀寫測試 |
 | `db/paperman.db` | 開發模式的 SQLite 資料庫；Bun server 使用 `PM_DB` 指定的 SQLite 檔案 |
@@ -52,7 +55,18 @@ bun run typecheck
 bun start
 ```
 
-可選的離線資源／SQLite 工具仍位於根目錄 `tools/`、`db/` 與 `server/`。
+可選的離線資源／SQLite 工具仍位於根目錄 `tools/`、`db/` 與 `server/`：
+
+```bash
+python3 tools/verify_dispatcher_coverage.py
+python3 tools/verify_native_gates.py
+python3 tools/verify_resource_claims.py
+python3 db/build_db.py --db /tmp/paperman-smoke.sqlite --fresh
+python3 db/smoke_test.py /tmp/paperman-smoke.sqlite
+```
+
+上面的 Python 工具只做 native/resource/SQLite offline checks，不是 Bun runtime
+測試；完整 server 檢查以 `cd server-ts && bun test` 與 `bun run typecheck` 為準。
 
 ## 逆向重點摘要
 

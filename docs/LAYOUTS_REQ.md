@@ -1,6 +1,8 @@
-# REQ builder 全 261 opcode 自動寫入序列表 (廿四輪)
+# C2S REQ builder primitive-write inventory（261 opcode forms）
 
-> 對每個 `Packet::ctor(N)` 呼叫點抽出寫入原語序列 (多變體以 || 併列)。
+> 對每個 `Packet::ctor(N)` 呼叫點抽出寫入原語序列（多變體以 `||` 併列）。
+> 本表是 native writer inventory，不是目前 server-ts 的 handler 清單；目前實作
+> 以 `server-ts/src/ops/c2s/` 與 [`TODO_HANDLERS.md`](TODO_HANDLERS.md) 為準。
 > 抽查 682/204/208/210/212/230/585 等與手工版吻合; 並修正 119 (兩變體,
 > 完整版=s32+str+wstr 與 120 ACK 同構) 與 585 (尾欄 s32 非 u8)。
 > 型別: u8=592920, s8=5928E0, u16=5929A0, s16=5929E0, s32=592A20/AA0,

@@ -1,5 +1,6 @@
 # Native audit: `PM_UDPSTART_ACK` (144)
 
+Cross-check date: **2026-09-17**
 Status: **complete for the recovered native path**. This note records the
 native dispatcher entry, the complete reader, every recovered cross-packet
 consumer, and the resource/UI checks for the channel bootstrap acknowledgement.

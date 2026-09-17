@@ -1,21 +1,21 @@
-# PaperMan 網路協議完整分析 (根據 PaperMan.exe.c IDA 導出)
+# PaperMan 網路協議完整分析（native wire evidence）
 
 > **閱讀導覽。** 這份文件保存欄位級、consumer 級與 state 級的手工證據；先由
 > [`docs/README.md`](README.md) 判斷它與 `LAYOUTS*.md`、`RESOURCES.md`、
 > `TODO_HANDLERS.md` 的不同角色。`LAYOUTS*.md` 是自動 primitive inventory，
 > 不能代替此處的 optional branch、count framing 或 service-policy boundary。
 >
-> 本檔長期以「發現／修正發生順序」追加；保留既有 section number 以維持歷史
-> commit 和文件引用可追溯。因此數字標題未必是目錄順序。新增結論應放到對應
-> protocol family，並附 native builder、reader/consumer、field/state data flow、
-> confidence 與未確認限制；不要僅因資源或 opcode 名稱存在就推導 server policy。
+> 本檔保留歷史 section number，因為其他文件與 commit 會引用它；數字標題因此
+> 不一定是閱讀順序。新增結論放到對應 protocol family，並附 native builder、
+> reader/consumer、field/state data flow、confidence 與 unresolved limit；不要
+> 僅因資源或 opcode 名稱存在就推導 server policy。
 >
 > **目前 server-ts 31 個 Packet 的逐欄 implementation audit**：見
 > [`SERVER_TS_PACKET_FIELDS.md`](SERVER_TS_PACKET_FIELDS.md)。該文件把 native
 > wire meaning、TS 實際用途、zero projection 與 `UNRESOLVED` 欄位分開，並記錄
-> 2026-09-16 的 198/247 reserved/stat projection 修正。
+> 2026-09-17 的 198/247 reserved/stat projection 修正。
 
-> **廿六輪終極對賬 (兩方向自動審計)**:
+> **雙向 layout cross-check（native ↔ current TS）**：
 > server-ts ACK 寫入序列 ↔ client 讀取序列: 18/18 ✓;
 > server-ts REQ 讀取序列 ↔ client 寫入序列: 27/27 ✓ (5 個機械標記經人工
 > 複核均為變體混列/raw4≡s32/子函數未展開等誤報)。
@@ -1716,12 +1716,12 @@ sub_44DA70), +110 u16 slot_mask (sub_53FB10 展開 +112..+127 逐槽
 Cy*ModeLobbyUI), +136 time, +144 u16 win, +146 (存而不讀),
 +148 u16 kill, +150 (存而不讀), +185 (bool)。
 
-**目前 server compatibility 實作（不是 original-service battle policy）**：
-`server-ts` join packet modules 完成 260/262/264
-→ 261/263/265；`server-ts` GL_JOINGAME packet module 依 flag 回 267 code；對找到的 process-local
-Room，`server-ts` GL_JOINPLAY packet module 的 flag 0 先加入空 slot 再回 269 code 6 自身快照，flag 1
-回 code 7 全房快照。這只實作 native reader 已定案的 payload shape，**不**證明原始服務的
-進行中戰局 authority、計分、存檔或其他未觀察到的成功 policy。
+**目前 server-ts boundary（不是 original-service battle policy）**：
+目前 `server-ts/src/ops/` 沒有 260/262/264、267/268 或 269 的 packet modules；
+這些 native reader、snapshot shape 與 room-field consumer 只保留在本文件作為
+future implementation evidence。沒有 process-local room state、battle owner、
+計分、存檔與成功 response 的完整鏈以前，`server-ts` 維持未註冊與 fail-closed，
+不把 client snapshot grammar 宣稱成原始服務 policy。
 
 ### 3.15c3 倉庫五連 855-863 (廿二輪 + 卌八輪補完 — n11==19 倉庫場景)
 ```
@@ -1859,14 +1859,13 @@ Room，`server-ts` GL_JOINPLAY packet module 的 flag 0 先加入空 slot 再回
     在 config 提供該 tail 時接受 type 3，未配置時維持保守拒絕。
 ```
 
-**Fact/HIGH — current Bun/TypeScript bootstrap guardrails.** `server-ts` packet
-modules 管 681/682/693/694；channel modules 管 142/144/196
-的完整可表示形狀與 142 日期位元編碼。`server-ts` config 在開 listener 前拒絕
-694 的 `>0x2580`，把 142 的 channel byte 綁定已廣告的唯一 `ChannelIndex`，
-並以可注入時鐘與明確 `ProtocolTimeZone` 建立即時 calendar field。144 不再把
-per-connection session id 偽裝成 daily PG；可選網咖尾段在完整 4×u8+8×raw4
-model 有值時才送出。Bun tests 對 142 bit layout、144 optional shape、196
-success-tail 及 694 ceiling 做 source-level byte-order assertions。
+**Fact/HIGH — current Bun/TypeScript bootstrap guardrails.** `server-ts` 目前的
+runtime modules 覆蓋 681/682/693/694、143/144 與 195/196；`PM_CONNECT_ACK`
+(142) 的 calendar grammar 仍是 native evidence，沒有被冒充成目前 runtime module。
+TS 保留 694 threshold、144 mandatory prefix/optional NetCafe tail、以及 196
+failure-prefix/success-only endpoint tail 的 wire boundary；type-3 只有在完整
+`type3Tail` 存在時才可送出。Bun tests 覆蓋 144 optional shape、196 success-tail
+與 694 ceiling；142 的 native bit layout 仍由 packet/resource audit 維護。
 
 ### 3.15b2 房間管理/戰場雜項 (廿二輪掃畢; 卅八輪補 REQ 端+設定簇)
 ```
@@ -2464,14 +2463,15 @@ subtracting bases `19900000`, `10000000`, `10100000`, `10200000`, `10300000`,
 The tail is read even after a failed `ok`: `account_update_target` changes one
 of three client globals only for values 1, 2, or 3; its concrete business name
 is **UNRESOLVED**.  `target=0, value=0` is the explicit parser no-update path,
-so it is the safe neutral response for the private server.  The old shape
-`ok + slot/exp/cash/gp/durability` is not a 311 layout and must not be emitted.
+so it is the safe neutral candidate for a future module. The current
+`server-ts` runtime does not register 310/311. The old shape `ok +
+slot/exp/cash/gp/durability` is not a 311 layout and must not be emitted.
 
 **Assumption / LOW (bounded malformed-request behavior):** the original server's
 response/disconnect choice for a deliberately truncated 310 request is not
-observable from this client-only corpus. The private server returns the
-parser-valid failed-311 form above (`ok=0`, neutral tail) and performs no state
-mutation; it does not accept, truncate, or turn the request into a success.
+observable from this client-only corpus. The current `server-ts` runtime does
+not register 310/311; the parser-valid failed-311 form above (`ok=0`, neutral
+tail) is a future consumer-safe candidate, not a claim that the runtime emits it.
 
 **Inference / MEDIUM:** combined with the native body-template maps documented
 in `RESOURCES.md §5c-1`, newly created canonical characters should receive the
@@ -2583,8 +2583,8 @@ dispatcher case 102 → `sub_58D6F0` 立即 `ctor(101)` 回送
   profile after reading the packet. **Inference / HIGH:** an ACK to a delta
   220 must therefore return the complete authoritative four-group state;
   returning only the changed records would clear all omitted groups locally.
-  Server now uses that full snapshot after atomically validating/persisting a
-  delta; malformed or unowned input has no invented success response.
+  The current `server-ts` runtime does not register 220/221; this full-snapshot
+  requirement is preserved as future implementation evidence, not emitted policy.
 - **912 GL_WEAPONPARTS_EQUIP_CHANGE_REQ** (sub_95AEF0) — **Fact / HIGH:**
   exact forms are `{u8 operation, s32 weaponId, s32 partId}` for operations
   `0` (remove) and `1` (install into an empty part position), or the 13-byte
@@ -2601,8 +2601,8 @@ dispatcher case 102 → `sub_58D6F0` 立即 `ctor(101)` 回送
   its first `u8 errorRaw` gates the rest: nonzero returns without consuming or
   changing the local parts state; only zero reads the operation/body matching
   912. **UNRESOLVED:** the original server's nonzero error values and its exact
-  ownership/expiry policy. Current server code consequently leaves 912/913
-  unimplemented rather than replying fake success.
+  ownership/expiry policy. The current `server-ts` runtime leaves 912/913
+  unregistered rather than replying fake success.
 - **466 GI_CHANGE_SKILLITEMSLOT_REQ** (sub_5738A0) — **Fact / HIGH:**
   exact body is either 2 bytes `{u8 targetProfile, u8 previousProfileUpdateRaw=0}`
   or 31 bytes `{u8 targetProfile, u8 previousProfileUpdateRaw!=0,
@@ -2618,27 +2618,27 @@ dispatcher case 102 → `sub_58D6F0` 立即 `ctor(101)` 回送
   32 bytes but writes only its final `s32` to that profile's expiry metadata.
   It does not branch on the first two bytes in this receiver. **UNRESOLVED:**
   original-server meanings/error values of those two header bytes and the
-  authoritative operation that grants/extends profile 1..4 expiry. Server code
-  therefore returns an actual persisted record on accepted writes; it must not
-  emit the former fake all-zero raw32 success response.
+  authoritative operation that grants/extends profile 1..4 expiry. The current
+  `server-ts` runtime does not register 466/467; it must not emit a fake all-zero
+  raw32 success response.
 - **NewSkill validity boundary — Fact / HIGH:** `sub_527AF0` accepts only zero
   or a catalog entry in `11010001..11070000`; `sub_4AC8F0` partitions the seven
   ordinals as hair `11010001..11020000`, jacket `11020001..11030000`, pants
   `11030001..11040000`, shoes `11040001..11050000`, set `11050001..11060000`,
   accessory1/2 `11060001..11070000`. The resource text at message 900 says the
   same nonzero accessory puzzle cannot occupy both accessory positions.
-- **Server validation policy — Inference / MEDIUM (not an original-server
-  control-flow fact):** 466 accepts a profile only when its conditional previous
-  record belongs to the active profile, all nonzero IDs fit the native ordinal
-  family, distinct submitted IDs are owned and unexpired, and a target profile
-  1..4 has a positive native packed-minute remainder. Invalid requests cause no
-  state mutation and no invented 467 success. The direct localization evidence
-  proves the duplicate-accessory *rule text*, not the exact native branch.
-- **Persistence migration — implementation / HIGH:** fresh-user bootstrap creates
-  selected profile 0 plus five zero raw32 records. For a pre-profile database,
-  the first profile read atomically creates the five records and imports legacy
-  `skill_slots(slot_kind=1,idx=0..6)` into profile 0 only if profile 0 was absent;
-  later reads and 466 never overwrite expiry or re-import that legacy source.
+- **Future server validation boundary — Inference / MEDIUM (not an
+  original-server control-flow fact):** a future 466 module may accept a profile
+  only when its conditional previous record belongs to the active profile, all
+  nonzero IDs fit the native ordinal family, distinct submitted IDs are owned
+  and unexpired, and a target profile 1..4 has a positive native packed-minute
+  remainder. Invalid requests must not mutate state or invent a 467 success.
+  The direct localization evidence proves the duplicate-accessory *rule text*,
+  not the exact native branch.
+- **Current TS persistence boundary:** `server-ts/src/store.ts` creates selected
+  profile 0 plus five zero raw32 records for a new player. It does not register
+  466/467 and does not import legacy `skill_slots`; expiry/grant migration remains
+  **UNRESOLVED**.
 
 ---
 
@@ -2822,7 +2822,7 @@ pmSlotMachineMovieSequenceTable → 讀 pepachi/pe-pachi_scenario.xml
 
 | Conclusion | Classification | Provenance / limit |
 |---|---|---|
-| `GL_SHOPIN_REQ` (252) is an empty client request. Immediately after its send, `sub_574120` locally transitions the lobby scene to state 3; no recovered primary or secondary consumer compares opcode 253. | **Fact / HIGH** for request/state/absence; **implementation choice / user-directed** for response | `sub_574120`, `sub_537710(byte_EE8968, 3)`, dispatcher cases 174–315, and an inventory of all 19 non-prototype `sub_591EE0` opcode-getter uses. This server accepts only exact-empty 252 and, by explicit project direction, emits the empty 253 interoperability ACK. It carries no catalog, account, entitlement, or scene-success claim. `179/180 GS_STOREOK` semantics remain **UNRESOLVED**. |
+| `GL_SHOPIN_REQ` (252) is an empty client request. Immediately after its send, `sub_574120` locally transitions the lobby scene to state 3; no recovered primary or secondary consumer compares opcode 253. | **Fact / HIGH** for request/state/absence; **implementation choice / user-directed** for response | `sub_574120`, `sub_537710(byte_EE8968, 3)`, dispatcher cases 174–315, and an inventory of all 19 non-prototype `sub_591EE0` opcode-getter uses. The current `server-ts` module accepts only exact-empty 252 and, by explicit project direction, emits the empty 253 interoperability ACK. It carries no catalog, account, entitlement, or scene-success claim. `179/180 GS_STOREOK` semantics remain **UNRESOLVED**. |
 | 468 is the 204 bulk body routed for Hukubukuro IDs. | **Fact / HIGH** | `sub_571100` plus `sub_591EC0` header setter. |
 | 470 and 780 share `{s32 rawContext,s32 itemId,s16 -(variantIndex+1)}` from `sub_57B2E0`; their messages are null in `sub_4D7790`. | **Fact / HIGH for wire; UNRESOLVED for rawContext/entitlement** | Generic sender, both callers, and packet primitives. |
 | `15301001..15302000` and `15310001..15320000` route 468/470; `15302001..15304000` and `15320001..15330000` route 780. Decoded ItemData names corroborate bag versus package catalog families. | **Fact / HIGH for ranges/routing; Inference / MEDIUM for product labels** | `sub_571100`, `sub_4D7790`, and same-hash `main:Extracted/ui/cfg/itemdata.pat`. No price or contents policy follows. |
@@ -2925,23 +2925,27 @@ secondary request proves the original server's 807 contents. This is **Fact /
 HIGH** for the resource/load/request separation; record-production policy is
 **UNRESOLVED**.
 
-### Exact consumer-safe arms and current server behavior
+### Evidence-bounded consumer-safe arms（not current handler registrations）
 
 The following entries are intentionally **fail closed**. “Raw zero” means a
 field whose original error meaning is unproven; it does not mean success.
-Handlers do not decode request-dependent records where the request has multiple
-native forms, and do not mutate wallet, inventory, characters, gifts, bags, or
-reward state.
+They are evidence-bounded candidate responses for future modules, not a list of
+currently registered handlers. The current `server-ts/src/ops/` surface is the
+31 modules listed in `SERVER_TS_PACKET_FIELDS.md`; the shop request families
+below remain unregistered unless explicitly stated elsewhere. Do not mutate
+wallet, inventory, characters, gifts, bags, or reward state from this table.
 
-**Implementation status, not a native-server fact.** For the fully recovered
+**Implementation boundary, not a native-server fact.** For the fully recovered
 request grammars 204/468, 206, 208, 296, 310, 356, 358, 453, 470, 698, 700,
-702, 780, and 900, the direct Shop request-family handlers now suppress even the failure ACK when
-length, count-derived extent, NUL termination, mandatory negative variant, or
-direct opcode-routing range is wrong. These are defensive emulator boundaries;
-they do not claim that the historical server used exactly the same rejection
-transport or error code.
+702, 780, and 900, the rows below record the minimum reader-safe shape if a
+future handler is added. They do not claim that the historical server used the
+same rejection transport or error code.
 
-| flow | current server output / boundary | direct consumer/state gate |
+除 `252→253` shop-entry compatibility projection與本頁另有明確標註者外，
+下表各列目前都不是 `server-ts` runtime 的 registered handler；它們只記錄
+未來實作時不可破壞的 client consumer-safe boundary。
+
+| flow | future consumer-safe candidate / current registration status | direct consumer/state gate |
 |---|---|---|
 | 252→253 shop entry | `(empty)` | User-directed interoperability response only. `sub_574120` already changed the native client to state 3 before any response; no 253 consumer was recovered after checking primary and secondary opcode paths. |
 | 806→807 hidden-item list | `{u8 rawHeader=0,u16 recordCount=0,u16 echoedCategory}` for exact direct-client selectors `1..13`, `15..25` only | `CLobbyShop::sub_46AD00` and `CLobbyPartsUpRoom::sub_9C22F0` read all three fixed fields before their record loops. Zero count prevents record-derived UI/map insertion, item mutation, currency data, or fabricated overrides; shop then re-runs its cached category transition. |
@@ -2961,13 +2965,14 @@ transport or error code.
 | 700→701 Pepachi spin | `{u8=0,u8 rawError=0}` | `sub_84A490`: only first byte 1 opens award/reel decoding. |
 | 702→703 Pepachi list | `{s32 start=0,s32 count=0}` | case 703 builds an empty local signed-16 list, never grants a reward. |
 | 900→901 capsule | `{u8 nonzero,s32 count=0,s32=0,s32=0,s32=0}` | `sub_9A1A30` always consumes count plus three tails; count zero prevents award records and nonzero avoids local wallet/reward updates. |
-| 453→454 delete gift | `{u8 result=0,s32 echoedGiftId,s32 echoedItemId}` | `sub_57BCF0` always consumes the two IDs and only result exactly 1 removes a cached gift. The server validates the exact eight-byte request and returns this non-mutating arm. |
+| 453→454 delete gift | Future candidate: `{u8 result=0,s32 echoedGiftId,s32 echoedItemId}` | `sub_57BCF0` always consumes the two IDs and only result exactly 1 removes a cached gift. Current `server-ts` has no 453/454 module; a future module must validate the exact eight-byte request and keep this non-mutating arm. |
 
 453's wire and client cache key are known, but the original service's pending
 versus claimed state, deletion authority, and interaction with 298/300/315 are
-not. It therefore no longer deletes persisted data merely because its local
-SQLite row happens to match. Truncated or trailing requests receive no synthetic
-echo because the protocol has no safe correlation value to invent.
+not. The current `server-ts` runtime does not register 453/454; a future module
+must not delete persisted data merely because a local SQLite row happens to
+match. Truncated or trailing requests must receive no synthetic echo because
+the protocol has no safe correlation value to invent.
 
 ### Still unresolved—not approximated
 

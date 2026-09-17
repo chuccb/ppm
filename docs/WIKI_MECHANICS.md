@@ -1,7 +1,7 @@
 # PaperMan Wiki* 機制研究帳本（非協定權威）
 
 > **用途。** 這是對 [PaperMan - ペーパーマン - Wiki*](https://wikiwiki.jp/paperman/)
-> 的定向閱讀索引與「待交叉驗證」矩陣，於 2026-09-15 建立。它讓後續的
+> 的定向閱讀索引與「待交叉驗證」矩陣，於 2026-09-17 整理。它讓後續的
 > `PaperMan.exe.c`、封包、實際封包擷取和 `main:Extracted/` 資源分析知道該找
 > 什麼，**不是**用來補造原版 service 規則、價格、掉落率、預設裝備或 response。
 >

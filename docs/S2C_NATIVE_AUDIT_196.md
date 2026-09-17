@@ -1,5 +1,6 @@
 # Native audit: `GC_ENTERCHANNEL_ACK` (196)
 
+Cross-check date: **2026-09-17**
 Status: **complete for the recovered native path**. This note records the
 entire 195/196 channel-selection path that was re-read from `PaperMan.exe.c`,
 including the successful type-3 continuation. It intentionally separates wire

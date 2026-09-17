@@ -1,7 +1,9 @@
-# PaperMan 客戶端資源檔案地圖 (十四輪逆向)
+# PaperMan 客戶端資源檔案地圖
 
-> 這份文件回答:「伺服器/工具還需要哪些客戶端資源檔案?」
-> 以及每個檔案的容器格式 (全部由 PaperMan.exe.c 逐行讀出)。
+> 這份文件回答「哪些 client 資源被讀取、格式是什麼、能支持哪一條結論」。
+> 所有格式與數字都以 `Extracted/` 與 `PaperMan.exe.c` 交叉比對；本檔保留歷史
+> section number 以維持引用，但 client content 不直接授權 server catalog、
+> ownership、grant、價格或交易 policy。
 
 ## 1. 對私服最有價值的檔案 (若能提供, 可完善 DB 目錄)
 
@@ -232,7 +234,7 @@ sub_5359B0 (getter) 證實記憶體 1212..1224/1228..1240 = 兩檔位 4×s32
 但**請勿反過來依賴這一點**：這是本 revision 資料的觀察性質，
 若日後加入新武器造成碰撞就會失效；解析時仍應優先使用明示的段資訊。
 
-## 1z. 2026-09 新 IDA 導出：40 個具名 global 取代原本的 `off_` 位址
+## 2c-0. 2026-09 新 IDA 導出：40 個具名 global 取代原本的 `off_` 位址
 
 `main` 分支新上傳的 `PaperMan.exe.c` 與既有版本**函數內容等價**
 （17,830 具名函數、19,835 function body，集合完全相同），
@@ -431,12 +433,13 @@ already present in the switch-weapon row. A selected primary causes
 parts only with a nonzero primary. This UI filtering is client behavior, not
 historical-server authorization evidence.
 
-**Inference / MEDIUM (server policy).** Server-side 220 accepts only items that
-are actually owned and unexpired and parts that match the exact imported
-`weaponparts.pat` row. A fresh database has an intentionally empty compatibility
-table, so it fails closed until the resource importer supplies it. The native
-client does not reveal the original server's authorization result code; rejected
-220 has no invented success payload or state mutation.
+**Future implementation boundary / Inference / MEDIUM (not native service
+policy).** If a future 220 module is added, it should accept only items that are
+actually owned and unexpired and parts that match the exact imported
+`weaponparts.pat` row. A fresh database should fail closed until the resource
+importer supplies the compatibility table. The native client does not reveal
+the original server's authorization result code; no rejected 220 success payload
+or state mutation may be invented.
 
 **UNRESOLVED.** Neither client initialization, the static resource tables, nor
 any observed packet producer establishes a character-specific starter primary,
@@ -487,7 +490,7 @@ record or a PAV thumbnail is not, by itself, starter-state evidence.
 | The vector is part of the native character-creation visual model, rather than only a shop display. | **Fact / HIGH** | `CLobbyCharMake::sub_41B330` passes body plus all five map results to `sub_4148D0`; `sub_41BDE0` passes mapped face/head offsets with the selected body into `sub_572EB0` (opcode 214). |
 | The vector materializes ordinary character state when normal pieces are absent. | **Fact / HIGH** | `sub_522580(mask, a2)` writes mapped components into `a2[2..6]` from body `a2[1]`. `CPaperCtrl::sub_5B40E0` additionally fills mapped head/face/top/bottom/shoes when its normal appearance record has an absent head/body-template prefix. |
 | All 75 mapped component records are compatible free normal-avatar resources. | **Fact / HIGH** | Decoded `cfg/ItemData.pat`: matching character type, `kind=6`, price `0`; every item has a matching `origin/main:Extracted/item/avatar/%02d_%05d_%02d.pav` asset. This corroborates the native state mapping; it does not establish it alone. |
-| A private server should persist and acknowledge these six values for a newly created canonical character. | **Inference / MEDIUM** | The facts above plus the exact 311 reader establish the client-side canonical creation state and its accepted wire representation. The original server executable that generated historical 311 responses is unavailable. |
+| A future character-creation module may persist and acknowledge these six values for a newly created canonical character. | **Inference / MEDIUM** | The facts above plus the exact 311 reader establish the client-side canonical creation state and its accepted wire representation. The current `server-ts` runtime does not register 310/311; the original server executable that generated historical 311 responses is unavailable. |
 
 ### Raw offset map
 
@@ -2850,11 +2853,11 @@ roommake 結論。
 
 ---
 
-## 9. 客戶端字串解密與 UI 槽位/改裝/倉庫定名對照 (五十四輪更新)
+## 10. 客戶端字串解密與 UI 槽位/改裝/倉庫定名對照
 
 五十四輪對 `PaperMan.exe.c` 進行了反編譯字串修復，揭露了大量先前為 `&off_XXXXXX` 偏移的 UI 標籤、技能槽、改裝件與倉庫頁籤字串：
 
-### 9.1 sub_527550 的 9 個技能/能力槽（Ability Slots）正式名稱
+### 10.1 sub_527550 的 9 個技能/能力槽（Ability Slots）正式名稱
 對應 `sub_4C4990` 與 `sub_4C4E70` 的 9 個槽位陣列：
 1. `Crosshair` (0): 準心自訂
 2. `NAME` (1): 名稱/暱稱卡
@@ -2866,14 +2869,14 @@ roommake 結論。
 8. `EXTRA_ABILITY` (7): 額外能力 2
 9. `VOICE` (8): 角色語音槽
 
-### 9.2 武器零件改裝槽（Weapon Parts Slots）與標記
+### 10.2 武器零件改裝槽（Weapon Parts Slots）與標記
 對應 `sub_4C50A0`、`sub_95B180`：
 - 改裝槽位：`PARTS_01` 至 `PARTS_07` (7 個改裝槽)
 - 零件設定：`PARTS_SET_%d`, `PARTS_SET_MOUSE_%d`, `PARTS_SET_EMPTY_%d`
 - 操作按鈕：`PARTS_EQUIP`, `PARTS_CLEAR`
 - 狀態標籤：`COUPON_MARK`, `ONLY_NETCAFE_MARK`, `RECYCLE_OUTLINE`, `PARTS_WAITING`
 
-### 9.3 倉庫頁籤（Warehouse Tabs）
+### 10.3 倉庫頁籤（Warehouse Tabs）
 對應 `sub_4F0240`：
 - 頁籤 ID：`WAREHOUSE_1` 至 `WAREHOUSE_6`
 - 格式字串：`L"WAREHOUSE_%d"`、`L"WARE_TAB_%d"`

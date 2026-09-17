@@ -19,8 +19,8 @@ runtime.
 
 ```bash
 bun install
-bun test          # 63 tests
-bun run typecheck # tsc --noEmit, clean
+bun test          # run the full Bun test suite
+bun run typecheck # tsc --noEmit
 bun start         # login server on 0.0.0.0:40200
 ```
 

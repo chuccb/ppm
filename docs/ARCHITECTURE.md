@@ -1,7 +1,9 @@
-# PaperMan 私服全景架構 (廿九輪融會貫通版)
+# PaperMan 私服全景架構
 
-> 29 輪逆向的知識總圖 — 每個結論都可在 PACKETS/RESOURCES/LAYOUTS 找到
-> 逐行證據與互證鏈。
+> 這是 server lifecycle、native/client state、wire boundary 與 runtime ownership 的
+> 高層索引。欄位級證據回到 [`PACKETS.md`](PACKETS.md)、[`RESOURCES.md`](RESOURCES.md)、
+> [`LAYOUTS.md`](LAYOUTS.md)、[`SERVER_TS_PACKET_FIELDS.md`](SERVER_TS_PACKET_FIELDS.md)
+> 與三份登入／頻道 native audit；本頁不取代它們。
 
 ## 1. 完整生命週期 (實測定案的因果鏈)
 
@@ -113,7 +115,7 @@ server-side transition 可搜尋、可記錄、可替換；它們不依賴 143 �
 | ⑥ 戰場引擎 | sub_749B90 (1D37560) | TCP catalog 166 subtype 1-9; its relation to UDP is UNRESOLVED |
 | + UDP 層 | sub_595E80 | private UDP dispatcher; private 20 completion is direct evidence, remaining case semantics require per-case proof |
 
-## 3. 資料層 (7 表 37,044 條真實日版)
+## 3. 資源與資料層（native/resource inventory；不等同 runtime schema）
 
 item 21,164 (id=基底+偏移編碼) / quest 844 (cond 雙機制) /
 map 123 (模式bitmask) / weapon_parts 10,648 (8組) /
@@ -126,7 +128,7 @@ parts_ability 413 (31欄彈道) / recommend 3,180 / protocol 676
 3. pmFile per-byte 滾動 (keystream FA5387AD/0F3A94AA/48945DCA/1A68DCCF)
 4. data.pat 容器 (pmFile→ROL混淆→zlib 1.2.3→CRC自帶表)
 
-## 4b. TypeScript / Bun server 結構（2026-09-17 整理）
+## 4.1 TypeScript / Bun server 結構（2026-09-17）
 
 `server-ts/src/main.ts` 負責組態、SQLite bootstrap、login/channel TCP listeners
 與 UDP control server；每個 TCP socket 的 receive loop 按收到順序串接 dispatch，
@@ -157,13 +159,18 @@ dispatcher。Server 使用 cancellation 與 receive-loop 結束後的 socket cle
 
 ## 5. Server 現況
 
-- handlers: 42 個獨立 opcode (19 個經通用轉發器)
-- 覆蓋: 登入/大廳/商店與禮物的 fail-closed wire boundary/好友/信箱/任務/戰隊/戰績/
-  房間全流程/開戰鏈/戰鬥 TCP relay/查人/場景，以及 UDP-private 19→空 20 control
-- UDP 範圍: 只實作 source-proven AES-only 19→20；其餘 private UDP opcode、P2P/
-  NAT/relay 語意均未實作且不宣稱已定性
-- 死協定 ~80 條已定性 (PM 中控/GV 工具/韓版安全) — 無需實作
-- 待辦: docs/TODO_HANDLERS.md (照自動序列施工)
+- Packet modules：15 個 C2S、16 個 S2C；由 `ops/registry.ts` runtime discovery，
+  filename 必須存在於 `db/packets.tsv`，重複或未知 opcode 會在啟動時失敗。
+- 已涵蓋：694/682/681 login handshake、693/143/144/195/196 channel handshake、
+  lobby bootstrap（197/198、199/200、105/106、107/108、425/426、433/434）、
+  250/252/254 compatibility projections、keepalive，以及 private UDP 19→空 20。
+- Wire safety：9600-byte frame、AES-CFB、native field width、fixed-buffer bounds、
+  count/length limits、single-use admission 與 196 success gate 均保留；未知 policy
+  不做成功 mutation。
+- UDP 範圍：只實作 source-proven AES-only 19→20；其餘 private UDP、P2P、NAT、
+  relay 與 gameplay semantics 均未實作且不宣稱已定性。
+- 下一步與未實作 request：[`TODO_HANDLERS.md`](TODO_HANDLERS.md)；native/resource
+  cross-check：[`SERVER_TS_PACKET_FIELDS.md`](SERVER_TS_PACKET_FIELDS.md)。
 
 ## 6. 關鍵互證鏈 (12+ 次資料↔逆向對撞全中)
 

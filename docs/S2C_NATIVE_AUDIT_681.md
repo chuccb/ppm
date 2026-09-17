@@ -1,5 +1,6 @@
 # Native audit: `GL_LOGIN_ACK` (681)
 
+Cross-check date: **2026-09-17**
 Status: **complete for the recovered native path**. This audit re-reads the
 681 receiver, its 694/682 login handshake, the server-list projection and all
 recovered endpoint/UI/resource consumers before changing the TypeScript writer.

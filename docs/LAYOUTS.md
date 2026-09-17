@@ -1,4 +1,4 @@
-# Dispatcher 全 306 case 自動佈局表 (廿三輪；本輪補齊為全覆蓋)
+# Dispatcher S2C primitive-read inventory（306 cases）
 
 > 由自動抽取器產生: 對每個 handler 抽出 sub_592xxx 讀取原語序列。
 > 已與 5 個歷輪手工佈局抽查比對全部吻合 (106/118/120/122/142)。
@@ -23,7 +23,7 @@
 >
 > ⚠ 此表為「讀取序列」非精確佈局: 條件分支/迴圈會使實際 wire 依
 > 內容變化 — 精確語意以 PACKETS.md 手工條目為準; 本表用於快速
-> 查閱與覆蓋保證 (300/306 case, 6 個非 sub 直呼)。
+> 查閱與覆蓋保證（306 個 dispatcher case，另含 6 個非 sub 直呼）。
 
 
 ### Bootstrap fields cross-checked in native source (2026-09)

@@ -1,5 +1,6 @@
 # Server handler 待辦清單
 
+Last reviewed: **2026-09-17**
 `server-ts/` 是唯一的 server implementation。這份文件只描述目前 Bun runtime
 已註冊的 packet modules、尚未實作的高價值 boundary，以及下一步需要補的
 native/resource evidence；它不把 client reader/writer 自動推導成 service policy。
