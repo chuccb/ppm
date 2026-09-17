@@ -30,13 +30,12 @@ TypeScript/Bun/SQLite 保守實作。
 | `docs/WIKI_MECHANICS.md` | **Wiki* 歷史機制研究帳本**: 已閱讀主題、版本風險與待由 client/resource/packet 交叉驗證的矩陣；明確不是 service/wire 權威 |
 | `docs/LAYOUTS.md` | S2C dispatcher 讀取序（Part I）＋ REQ builder 寫入序（Part II，含 private UDP Appendix A/B），欄位級對照 |
 | `docs/ARCHITECTURE.md` | 全景架構: 生命週期、資料層、加密、互證鏈 |
-| `docs/SERVER_TS_EVIDENCE.md` | 尚未實作的 server handler 清單與下一輪建議見其 Part II |
 | `db/packets.tsv` | 從 `sub_9D2050` 抽出的 **676 筆 opcode ↔ 名稱** 對照表 (100–994) |
 | `db/schema.sql` | 離線 SQLite schema；目前 server-ts runtime projection 在 `server-ts/src/store.ts`，兩條路徑刻意分開 |
 | `db/build_db.py` | **可選**離線重建／檢查工具；預設產生 `/tmp/paperman.sqlite`，Bun server 不依賴它 |
 | `db/import_pats.py` | 將解密後的 `.pat` 目錄資料匯入同一個 `PAPERMAN_DB` offline DB |
 | `db/smoke_test.py` | 對 `PAPERMAN_DB` 模擬登入→建角→購物→背包分頁→開房→結算→好友/訊息/任務/公會的 DB 讀寫測試 |
-| `server/packet.py` | wire 協議 Packet 參考實作 (Python, 逐函數對應反編譯), 含自測 |
+| `server/packet.py` | wire 協議 Packet **參考實作** (Python, 逐函數對應反編譯), 含自測 —— `server/` 是參考碼，不是伺服器入口；伺服器只會是 `server-ts/` |
 | `tools/dump_itemdata.py` | 解出 `Extracted/ui/cfg/itemdata.pat` 的 21,164 筆 item id ↔ 名稱 (stride 997B 自證); 支援 `--name` / `--id` / `--band` 查詢 |
 | `tools/dump_maplist.py` | 解出 `Extracted/ui/cfg/maplist.pat` 的 123 張地圖 (id / mode bitmask / .pmm 路徑, stride 836B 自證); `--check` 可驗證 modeIndex→bit 表 |
 | `tools/verify_dispatcher_coverage.py` | 直接從 `PaperMan.exe.c` 重抽主 dispatcher `sub_58B010` 的 306 個 case，比對 `docs/LAYOUTS.md` 是否全覆蓋；並報告「有 native handler 但名稱表未註冊」的 opcode 數 |
@@ -69,6 +68,31 @@ python3 db/smoke_test.py --db /tmp/paperman-smoke.sqlite
 
 上面的 Python 工具只做 native/resource/SQLite offline checks，不是 Bun runtime
 測試；完整 server 檢查以 `cd server-ts && bun test` 與 `bun run typecheck` 為準。
+
+## TypeScript / Bun / SQLite 伺服器 (`server-ts/`)
+
+目前唯一的伺服器實作是 `server-ts/`，固定使用 2026-09-17 的預覽版
+TypeScript/Bun toolchain 與 Bun 內建 SQLite：
+
+- `server-ts/src/packet.ts` — 9600-byte native frame、AES-CFB、reader/writer 與 framing boundary。
+- `server-ts/src/connection.ts`、`src/udp.ts` — login/channel TCP listeners、source-proven private UDP 19→20 control。
+- `server-ts/src/ops/` — 目前實作的 C2S/S2C packet handlers；每個 packet 一檔。
+- `server-ts/src/store.ts` — `bun:sqlite` 帳號、identity、角色與 NewSkill projection。
+- `server-ts/test/` — Bun tests；`tsconfig.json` 啟用 strict、exact optional properties、noUncheckedIndexedAccess 與 erasable syntax。
+
+
+Runtime environment 包含 `PM_HOST`、`PM_PORT`、`PM_CHANNEL_PORT`、
+`PM_ADVERTISE_HOST`、`PM_DB`、`PM_UDP_HOST`、`PM_UDP_PORT` 與
+`PM_ADMISSION_TTL_MS`。opcode catalog 由根目錄的 `db/packets.tsv` 提供；目前 store projection 由
+`server-ts/src/store.ts` 建立；Bun runtime 不依賴任何其他 server
+language 或 external database service。
+
+### 為何選 SQLite (2026-09-17 現況)
+
+單行程私服 + WAL 模式 = 無網路 round-trip；`STRICT` tables、`CHECK` constraints
+與 triggers 把逆向得到的值域直接壓進 schema；一檔即全部狀態、零運維。Bun 的
+`bun:sqlite` 直接開啟 SQLite，server 啟動時建立缺少的 schema，並讓 TypeScript
+Store 與 wire handlers 共用同一個資料來源。
 
 ## 逆向重點摘要
 
@@ -157,34 +181,3 @@ route table / 日誌 / `packet_stats` 監控。
   8→bit9, 9→bit10, 10→bit12, 11→bit13, 12→bit14, 13→bit15, 15→bit11)
   見 `docs/RESOURCES.md` §4b。
 
-## TypeScript / Bun / SQLite 伺服器 (`server-ts/`)
-
-目前唯一的伺服器實作是 `server-ts/`，固定使用 2026-09-17 的預覽版
-TypeScript/Bun toolchain 與 Bun 內建 SQLite：
-
-- `server-ts/src/packet.ts` — 9600-byte native frame、AES-CFB、reader/writer 與 framing boundary。
-- `server-ts/src/connection.ts`、`src/udp.ts` — login/channel TCP listeners、source-proven private UDP 19→20 control。
-- `server-ts/src/ops/` — 目前實作的 C2S/S2C packet handlers；每個 packet 一檔。
-- `server-ts/src/store.ts` — `bun:sqlite` 帳號、identity、角色與 NewSkill projection。
-- `server-ts/test/` — Bun tests；`tsconfig.json` 啟用 strict、exact optional properties、noUncheckedIndexedAccess 與 erasable syntax。
-
-```bash
-cd server-ts
-bun install
-bun test
-bun run typecheck
-bun start
-```
-
-Runtime environment 包含 `PM_HOST`、`PM_PORT`、`PM_CHANNEL_PORT`、
-`PM_ADVERTISE_HOST`、`PM_DB`、`PM_UDP_HOST`、`PM_UDP_PORT` 與
-`PM_ADMISSION_TTL_MS`。opcode catalog 由根目錄的 `db/packets.tsv` 提供；目前 store projection 由
-`server-ts/src/store.ts` 建立；Bun runtime 不依賴任何其他 server
-language 或 external database service。
-
-### 為何選 SQLite (2026-09-17 現況)
-
-單行程私服 + WAL 模式 = 無網路 round-trip；`STRICT` tables、`CHECK` constraints
-與 triggers 把逆向得到的值域直接壓進 schema；一檔即全部狀態、零運維。Bun 的
-`bun:sqlite` 直接開啟 SQLite，server 啟動時建立缺少的 schema，並讓 TypeScript
-Store 與 wire handlers 共用同一個資料來源。
