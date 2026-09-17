@@ -1819,17 +1819,19 @@ Room，`Handlers.GL_JOINPLAY.cs` 的 flag 0 先加入空 slot 再回 269 code 6 
     u8  result
     u8  rank_restricted_server_flag (`==1 && rank>10` 顯示 resource 0x11C:
         「目前的階級不能連線到所選 server」)
-    s32 daily_login_reward_pg (存 dword_1D0D23C；>0 顯示 CP932 table 0xC9:
-        「本日 login confirmed, %d PG awarded」；不是 session id)
-    str channel_name (char[40]，最多 39 ANSI bytes)
-    s32 reserved_after_name_1 (sub_555D50 讀取後未使用)
-    s32 reserved_after_name_2 (同上)
-    s32 channel_restriction_level (result 6/8/9/10 的 %d；8/10 顯示 value-1)
-    f32 channel_restriction_kdr (result 7/8/9/10 的 %.1f)
+    raw4 daily_login_value (存 dword_1D0D23C；native 只在 >0 時以 `%d`
+        顯示 CP932 table 0xC9「本日 login confirmed, %d PG awarded」；
+        UI 文字支持 PG 顯示單位，但 wire helper 是 raw4)
+    str raw_string_v71 (native local char[40]，最多 39 ANSI bytes；reader 後未找到 consumer，不能由欄位位置定名 channel/name)
+    raw4 post_name_raw_0 (sub_555D50 讀取後未找到 consumer)
+    raw4 post_name_raw_1 (同上)
+    raw4 restriction_value (result 6/8/9/10 使用低 byte 作 `%d`；8/10
+        顯示 low byte - 1；不可縮成 u8)
+    f32 restriction_value_float (result 7/8/9/10 的 `%.1f`)
     raw4 client_request_context (sub_592AC0 → dword_F2A684；client 隨後
-        原樣帶入多個 request，但 server-domain 意義尚未證實，非 s32)
+        原樣帶入多個 request，但 server-domain 意義尚未證實，非已證實 s32)
     u8  has_net_cafe_info
-    if nonzero: u8×4 + raw4/s32×8，依序交 `sub_A1C800` 初始化
+    if nonzero: u8×4 + raw4×8，依序交 `sub_A1C800` 初始化
         `sNetCafeInfo`；完整可發送 shape 已在 C# `NetCafeBootstrapInfo`
         建模，四個 byte/八個 slot 的業務域仍未命名。
 
@@ -2349,8 +2351,8 @@ u8+slot 系列)
 ### 3.15pre-1 「補 0/佔位」欄位審計總表 (十二輪)
 | 欄位 | 判定 | 證據 |
 |---|---|---|
-| 198 [34..36] | 保留槽, 0 安全 | 全 exe 無讀取者 (僅複製建構) |
-| 198 [27] (+108) | raw/unknown; task condition 1 threshold input | `sub_9252D0` compares it for condition 1; no Store/stat owner is proven |
+| 198 [34..36] | 保留槽, 0 安全 | 尚未找到 task/stat consumer（目前只見於基本資料複製） |
+| 198 [27] (+108) | raw/unknown; task condition 1 threshold input | `sub_9252D0` 直接把它作 condition 1 的輸入比較；沒有證據可投影為 Store stat |
 | 198 flags u8×3 (+304..306) | 閒置, 0 安全 | 讀入後無引用 (別名斷鏈) |
 | 198 [28][29] (+112/116) | 閒置, 0 安全 | 僅複製建構 |
 | 198 blob [52..60] | 遊玩秒+模式場次 | cond20 + sub_923BF0 |
@@ -2365,7 +2367,7 @@ u8+slot 系列)
 `sub_9252D0` (任務條件) 逐欄引用 CClientData, 加上 GP ACK 的
 `sub_92EF00(事件號)` 對照, 統計欄位語意全部定案:
 ```
-wire 群組2 = [34][35][36] (無任何讀取者 — 保留), [37]=wins(cond5),
+wire 群組2 = [34][35][36] (尚無 task/stat consumer — 保守保留), [37]=wins(cond5),
              [38]=losses(cond6)
 wire 群組3 = [39]=kills(3), [40]=deaths(4), [41]=cond7 + UI HEADSHOT,
              [42]=cond10 + UI AIRCOMBO
@@ -3000,9 +3002,9 @@ byte 偏移 (this 為物件基址):
 +96    s32  [24] exp
 +100   s32  [25] level ← client 由 exp 查表 sub_403360 重算
 +104   s32  [26] cash
-+108   s32  [27] 任務 cond1 計數
++108   s32  [27] raw/unknown（`sub_9252D0` 的 task cond1 輸入；server owner 未定）
 +112/116 s32 [28]/[29] 閒置
-+136..144 s32 [34..36] 保留 (無讀取者)
++136..144 s32 [34..36] 保留（尚無 task/stat consumer）
 +148   s32  [37] wins    (任務 cond5)
 +152   s32  [38] losses  (cond6)
 +156/160 s32 [39]/[40] kills/deaths (cond3/4)

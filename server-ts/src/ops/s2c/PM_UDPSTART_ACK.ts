@@ -30,7 +30,7 @@ export type Result = number;
 
 export interface Admission {
   readonly result: Result;
-  /** Native char[40]; at most 39 ANSI bytes. */
+  /** Native local char[40]; at most 39 ASCII bytes. The reader does not recover a semantic consumer for this string. */
   readonly channelName: string;
   /** With `rank > 10` the client refuses the server. */
   readonly rankRestricted?: boolean;
@@ -42,7 +42,7 @@ export interface Admission {
   readonly restrictionKdr?: number;
 }
 
-/** Native char[40]. */
+/** Native `v71` local char[40]; wire string semantics remain unresolved. */
 export const CHANNEL_NAME_MAX_BYTES = 39;
 
 export default function PM_UDPSTART_ACK(op: number, admission: Admission): Packet {

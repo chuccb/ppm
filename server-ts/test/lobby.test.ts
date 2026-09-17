@@ -100,7 +100,7 @@ describe("lobby bootstrap packets", () => {
     expect(reader.u8()).toBe(0); // selected character-list index
     expect(reader.s32()).toBe(1); // level
     expect(reader.s32()).toBe(0); // exp
-    expect(reader.s32()).toBe(0); // native +108 raw/reserved word
+    expect(reader.s32()).toBe(0); // native +108 raw/unknown task-condition input
     expect(Array.from({ length: 18 }, () => reader.s32())).toEqual([
       0, 0, 0, // native [34..36] reserved words
       101, 102, // wins, losses

@@ -61,7 +61,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 136 | GR_CHANGESLOT_ACK | sub_56EF40 | `u8 u8 u8 f32/s32 s32 u8 u8 s32` |
 | 140 | GG_EXITGAME_ACK | sub_563430 | `u8 u8` |
 | 142 | PM_CONNECT_ACK | sub_5565D0 | `str s32 u8 u32` |
-| 144 | PM_UDPSTART_ACK | sub_555D50 | `u8 u8 s32 str s32 s32 s32 f32 u32 u8 [u8 u8 u8 u8 s32×8]` |
+| 144 | PM_UDPSTART_ACK | sub_555D50 | `u8 u8 raw4 str raw4 raw4 raw4 f32 raw4 u8 [u8 u8 u8 u8 raw4×8]` |
 | 160 | TCP_UDP_DEAD_ACK | sub_58D790 | `(無直接讀取/轉發)` |
 | 166 | Y_TCP_INF_ACK | sub_58D820 | `(無直接讀取/轉發)` |
 | 168 | GR_CHANGEUSER_ACK | sub_56F410 | `u16` |
