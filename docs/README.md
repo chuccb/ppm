@@ -42,12 +42,11 @@
 | 文件 | 角色 | 維護規則 |
 |---|---|---|
 | [`PACKETS.md`](PACKETS.md) | 手工整理的 packet、consumer、state evidence 與 implementation boundary | 新結論附 function、field order、consumer、confidence 與 unresolved limit；歷史 section number 保留以維持引用。 |
-| [`SERVER_TS_EVIDENCE.md`](SERVER_TS_EVIDENCE.md) | 目前 31 個 TS packet 的逐欄 native meaning、TS use、zero projection 與 unresolved audit（Part I）＋handler 待辦與下一步證據順序（Part II） | 只收錄 `server-ts/src/ops` 現有 modules；不要把保守欄位改成未證實業務名稱。 |
+| [`SERVER_TS_EVIDENCE.md`](SERVER_TS_EVIDENCE.md) | 目前 31 個 TS packet 的逐欄 native meaning、TS use、zero projection 與 unresolved audit（Part I）＋handler 待辦與下一步證據順序（Part II） | Part I 只收錄 `server-ts/src/ops` 現有 modules，不把保守欄位改成未證實業務名稱；Part II 只保留 current work queue，歷史 provenance 放回 packet/resource 文件。 |
 | [`S2C_NATIVE_AUDITS.md`](S2C_NATIVE_AUDITS.md) | 登入／頻道 bootstrap 的 reader、caller、consumer、resource 與 TS boundary（681/144/196 三 parts） | 修改 handshake 前先更新相應 audit；不能只改 builder 或 ACK 表。 |
 | [`LAYOUTS.md`](LAYOUTS.md) | S2C dispatcher primitive-read（Part I）＋ C2S builder primitive-write（Part II，含 private UDP Appendix A/B）的自動 inventory | 同 opcode 可有多種 builder form；先回到所有 caller，不可只取第一列；不把線性序列誤讀成完整 payload grammar，重要例外補到 `PACKETS.md`。 |
 | [`RESOURCES.md`](RESOURCES.md) | Extracted format、resource-to-client cross-check 與資源界線 | 每個 ID/資產結論標明 display-only、lookup input 或已證實 authority。 |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | server lifecycle、runtime ownership、layer boundaries 的全景圖 | 保持高層次；欄位細節連回 `PACKETS.md` 或 audit。 |
-| [`SERVER_TS_EVIDENCE.md`](SERVER_TS_EVIDENCE.md) Part II | 目前 evidence gaps、未實作 request inventory、下一步驗證順序 | 只保留 current work queue；歷史 provenance 放回 packet/resource 文件。 |
 | [`WIKI_MECHANICS.md`](WIKI_MECHANICS.md) | 外部歷史資料的搜尋索引與反推禁止清單 | 只記錄歷史觀察與驗證問題，不登錄 server policy。 |
 | [`RTTI_PYCLASSINFORMER.md`](RTTI_PYCLASSINFORMER.md) | PyClassInformer class、vftable、inheritance 搜尋索引 | 保留匯出值與多重繼承 offset；不把 RTTI root 當成 storage 或 service proof。 |
 
