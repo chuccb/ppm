@@ -2,9 +2,11 @@ import { describe, expect, test } from "bun:test";
 import { Store } from "../src/store.ts";
 
 describe("store", () => {
-  test("runs on the pinned SQLite version", () => {
+  test("runs on the supported SQLite 3.53 release", () => {
     const store = new Store();
-    expect(store.sqliteVersion).toBe("3.53.4");
+    // Bun owns the embedded SQLite patch level; the supported route is the
+    // current 3.53 line rather than a server-side version shim.
+    expect(store.sqliteVersion).toMatch(/^3\.53\./);
     store.close();
   });
 

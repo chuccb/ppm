@@ -55,11 +55,11 @@ export default function GL_MYITEM_ACK(op: number, items: readonly InvItem[] = []
     if (!Number.isSafeInteger(item.slot) || item.slot < 0 || item.slot > 0x7fff_ffff) {
       throw new RangeError("200 inventory slot must be a non-negative s32");
     }
-    // itemdata.pat is a client lookup table, not this server's ownership or
-    // grant authority. Keep the native non-negative s32 boundary until an
-    // inventory projection supplies a separate catalog adapter.
-    if (!Number.isSafeInteger(item.itemId) || item.itemId < 0 || item.itemId > 0x7fff_ffff) {
-      throw new RangeError("200 item_id must be a non-negative s32");
+    // sub_535020 rejects zero before consulting itemdata.pat. Membership is
+    // intentionally not enforced here: the catalog proves client lookup only,
+    // not this server's ownership or grant authority.
+    if (!Number.isSafeInteger(item.itemId) || item.itemId <= 0 || item.itemId > 0x7fff_ffff) {
+      throw new RangeError("200 item_id must be a positive s32");
     }
     const f1 = requireF32("f1", item.f1);
     const f2 = requireF32("f2", item.f2);

@@ -898,7 +898,7 @@ bool    success
 s32     start_index          (分頁, 每包最多 100 條, 背包上限 5120)
 repeat until sentinel:
   s32   inv_slot   (負值 = 結束)
-  s32   item_id    (負值/非法 = 中止)
+  s32   item_id    (≤0/非法 = 中止)
   float f1         (native first float; exact item-domain meaning UNRESOLVED)
   float f2         (native second float; exact item-domain meaning UNRESOLVED;
                     NewSkillLevTable is client display/combine data, not authority

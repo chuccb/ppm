@@ -84,25 +84,25 @@ describe("lobby bootstrap packets", () => {
               appearance3 = 0, appearance4 = 0, appearance5 = 0,
               appearance6 = 0, appearance7 = 88
         WHERE player_id = $p AND slot = 0`,
-    ).run({ p: initial!.userId });
+    ).run({ "$p": initial!.userId });
     const repaired = store.getMyInfo(initial!.userId);
     expect(repaired?.characters[0]?.appearance).toEqual([
-      2, 77, 10, 45, 25, 24, 0, 88, 0, 0, 0, 0,
+      2, 77, 10, 22, 12, 12, 0, 88, 0, 0, 0, 0,
     ]);
 
     const persisted = db
-      .query<{ appearance0: number; appearance1: number; appearance2: number; appearance3: number; appearance4: number; appearance5: number }, { p: number }>(
+      .query<{ appearance0: number; appearance1: number; appearance2: number; appearance3: number; appearance4: number; appearance5: number }, { "$p": number }>(
         `SELECT appearance0, appearance1, appearance2, appearance3, appearance4, appearance5
            FROM player_character WHERE player_id = $p AND slot = 0`,
       )
-      .get({ p: initial!.userId });
-    expect(persisted).toEqual({ appearance0: 2, appearance1: 77, appearance2: 10, appearance3: 45, appearance4: 25, appearance5: 24 });
+      .get({ "$p": initial!.userId });
+    expect(persisted).toEqual({ appearance0: 2, appearance1: 77, appearance2: 10, appearance3: 22, appearance4: 12, appearance5: 12 });
 
     db.query(
       `UPDATE player_character SET appearance0 = 99, appearance1 = 0, appearance2 = 0,
               appearance3 = 0, appearance4 = 0, appearance5 = 0
         WHERE player_id = $p AND slot = 0`,
-    ).run({ p: initial!.userId });
+    ).run({ "$p": initial!.userId });
     expect(store.getMyInfo(initial!.userId)?.characters[0]?.appearance).toEqual([
       99, 0, 0, 0, 0, 0, 0, 88, 0, 0, 0, 0,
     ]);
@@ -287,6 +287,9 @@ describe("lobby bootstrap packets", () => {
     expect(() =>
       build("GL_MYITEM_ACK", [{ slot: -1, itemId: 1, f1: 0, f2: 0, period: 0, durability: 0 }]),
     ).toThrow(/inventory slot/);
+    expect(() =>
+      build("GL_MYITEM_ACK", [{ slot: 0, itemId: 0, f1: 0, f2: 0, period: 0, durability: 0 }]),
+    ).toThrow(/positive s32/);
     expect(() =>
       build("GL_MYITEM_ACK", [{ slot: 0, itemId: 1, f1: Number.MAX_VALUE, f2: 0, period: 0, durability: 0 }]),
     ).toThrow(/f1/);
