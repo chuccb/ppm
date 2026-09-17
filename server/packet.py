@@ -99,7 +99,7 @@ class Packet:
     def read_u32(self): return struct.unpack('<I', self._r(4))[0]                 # sub_592A80
     def read_s32(self): return struct.unpack('<i', self._r(4))[0]                 # sub_592A40
     def read_u64(self): return struct.unpack('<Q', self._r(8))[0]                 # sub_592B00
-    def read_f32(self): return struct.unpack('<f', self._r(4))[0]                 # sub_592AC0
+    def read_f32(self): return struct.unpack('<f', self._r(4))[0]                 # sub_592B40; caller-confirmed f32 (sub_592AC0 is generic raw4)
 
     def read_str(self, enc='cp949') -> str:
         """sub_592730: 讀到 NUL 為止。"""

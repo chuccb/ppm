@@ -113,9 +113,14 @@ offset 8   ...  payload (小端, 緊湊, 無對齊)
 > 為準：`592920/592960=u8`、`5928E0=s8`、`5929A0=u16`、`5929E0=s16`、
 > `592A20=s32`、`592A60=u32`、`592B20=f32`、`592AE0/592B60=u64`。
 > `592AA0/592AC0` 保留為 caller-defined `raw4`，因這一組 helper 本身只做
-> 4-byte copy。Hex-Rays 的參數仍普遍顯示為 `char`，所以不能用參數宣告取代
-> alias identity；但也不能因此把已知的 `u8/s8/u16/s16/s32/u32/f32` 全部退回
-> `rawN`。wire width 仍由函數內的 `sub_592500/sub_592580` size 確認。
+> 4-byte copy；`PaperMan.exe.c` 的 native bodies 分別是
+> `sub_592580(this, &a2, 4u)` 與 `sub_592500(this, a2, 4u)`，沒有 signed/unsigned/
+> float cast 或算術。它們和 `592A20/592A40`、`592A60/592A80`、`592B20/592B40`
+> 在 byte-copy 層相同，差別只能由 direct caller 的 consumer type 決定；因此
+> `592AA0/AC0` 這個 helper identity 本身不能升格成 `s32/u32/f32`。Hex-Rays
+> 的 writer parameter 仍顯示為 `char`，所以不能用參數宣告取代 alias identity；
+> 但也不能因此把已知的 `u8/s8/u16/s16/s32/u32/f32` 全部退回 `rawN`。wire
+> width 仍由函數內的 `sub_592500/sub_592580` size 確認。
 
 **primitive implementation boundary（`PaperMan.exe.c` 00592500–00592B80）：**
 `sub_592500` 在 read cursor + requested size 超過 packet payload end 或
