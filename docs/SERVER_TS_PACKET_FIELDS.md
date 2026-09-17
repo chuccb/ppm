@@ -363,13 +363,14 @@ a server result-code meaning or alter any wire width.
 `HEARTBREAK`、`CRITCALSHOT`、`DOUBLEKILL`、`TRIPLEKILL`、`MULTIKILL`、
 `ULTRAKILL`、`GENOCIDE`、`KILLINGMACHINE`、`DIABLO` 消費 native offsets
 `+148..+204`，所以 TS 現在依 native wire order 投影 confirmed counters；
-`disconnects`、`playCount`、`roundCount` 沒有在這條 consumer chain 找到 wire owner，
-保持未投影。
+`+108` 會被 `sub_9252D0` 作為 task condition 1 threshold input 消費，但沒有證據
+可把它等同 Store `playCount`；`disconnects`、`roundCount` 也沒有找到可直接對應的
+wire owner，所以三個 Store 欄位都保持未投影。
 
 後面的 confirmed wire order 是：
 
 ```text
-raw/reserved(+108), reserved(+136,+140,+144),
+raw/unknown(+108; task condition 1 consumer), reserved(+136,+140,+144),
 wins, losses, kills, deaths, headshots, combos, hearts, criticals,
 doubleKill, tripleKill, multiKill, ultraKill, zKill, kKill, ddKill
 ```

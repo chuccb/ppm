@@ -792,7 +792,7 @@ bool    success                 0 時直接顯示 resource 0x70 / code 17
   string  nickname            (this+60,  char[24] / 0x18 bytes including NUL; sub_46F450 copies this run separately from +84)
   u8      selected_char_index (this+88; CHARSLOT list index, not char_type)
   s32   level/experience        (this+92,+96)
-  s32   raw/reserved            (this+108; no proven semantic owner)
+  s32   raw/unknown             (this+108; sub_9252D0 consumes it for task condition 1; server owner unresolved)
   s32   reserved x3             (this+136,+140,+144; no proven task/stat owner)
   s32   wins/losses             (this+148,+152)
   (native +100 is a derived class/level recomputed from exp, not a separately
@@ -1011,7 +1011,7 @@ branch writes `s32 itemId, str, u8 kind, u8 period`; other branches write a
 short `s32` pair or `s32 itemId, u8 kind, u8 period`. Separate callers
 `sub_5115E0` and `sub_8DE9C0` write an eight-byte
 `{s32 itemId,u8 kind,u8 rawPeriod,s16 negativeVariant}` form. Therefore the
-old universal fixed form and the old claim that the apparent string was merely
+old universal fixed form andmerely
 a stack-buffer artefact are both disproven. The request remains deliberately
 unparsed by the server until every accepted item family, its selector source,
 and the matching 696 response tail have been reconciled.
@@ -2350,7 +2350,7 @@ u8+slot 系列)
 | 欄位 | 判定 | 證據 |
 |---|---|---|
 | 198 [34..36] | 保留槽, 0 安全 | 全 exe 無讀取者 (僅複製建構) |
-| 198 [27] | 任務 cond1 計數 | sub_9252D0 cond1 |
+| 198 [27] (+108) | raw/unknown; task condition 1 threshold input | `sub_9252D0` compares it for condition 1; no Store/stat owner is proven |
 | 198 flags u8×3 (+304..306) | 閒置, 0 安全 | 讀入後無引用 (別名斷鏈) |
 | 198 [28][29] (+112/116) | 閒置, 0 安全 | 僅複製建構 |
 | 198 blob [52..60] | 遊玩秒+模式場次 | cond20 + sub_923BF0 |
@@ -2367,14 +2367,19 @@ u8+slot 系列)
 ```
 wire 群組2 = [34][35][36] (無任何讀取者 — 保留), [37]=wins(cond5),
              [38]=losses(cond6)
-wire 群組3 = [39]=kills(3), [40]=deaths(4), [41]=disc(7), [42]=hearts(10)
-wire 群組4 = [43]=headshots(8), [45]=double(11), [46]=triple(12),
-             [44]=combos(9)   ⚠ wire 順序 43,45,46,44 — 亂序!
+wire 群組3 = [39]=kills(3), [40]=deaths(4), [41]=cond7 + UI HEADSHOT,
+             [42]=cond10 + UI AIRCOMBO
+wire 群組4 = [43]=cond8 + UI HEARTBREAK, [45]=double(11), [46]=triple(12),
+             [44]=cond9 + UI CRITCALSHOT   ⚠ wire 順序 43,45,46,44 — 亂序!
 wire 群組5 = [47]=multi(13), [48]=ultra(14), [49]=z(15), [50]=k(16),
              [51]=dd(17)
 其他: [25]=level(cond18, client 由 exp 查表 sub_403360 重算 — wire[23]
-      的 level 僅參考), [27]=cond1 計數, [52]=累計遊玩秒(cond20),
-      [53..60]=各模式完成場次 (sub_923BF0 模式id對照), [61..63] 未引用
+      的 level 僅參考), [27]=cond1 threshold input (Store owner unresolved),
+      [52]=累計遊玩秒(cond20), [53..60]=各模式完成場次
+      (sub_923BF0 模式id對照), [61..63] 未引用。
+`sub_9252D0` proves the task-condition indices; `sub_5206F0` separately proves
+only the UI labels shown above. Neither function proves that Store
+`disconnects`, `playCount`, or `roundCount` owns an unnamed word.
 ```
 → **舊 C# 佈局把 wins 放 [34] 全體錯位 5 欄** — CreateGL_MYINFO_ACK 已重排。
 GP ACK 全域槽 (與 CClientData 分離, 只供大廳 UI):

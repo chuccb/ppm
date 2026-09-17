@@ -161,7 +161,8 @@ export function writeMyInfoBasicData(packet: Packet, myInfo: MyInfo): Packet {
     .s32(myInfo.experience)
     // sub_523BF0 reads this post-exp wire word into native +108. The
     // derived class/level at +100 is recomputed from exp and is not itself
-    // read from this packet; +108 has no proven semantic owner.
+    // read from this packet. Native sub_9252D0 later consumes +108 for its
+    // condition-1 threshold, but its server/stat owner is unresolved.
     .s32(0)
     // sub_523BF0 order: [34..36] are reserved, then the native UI consumers'
     // direct order: wins/losses, kills/deaths, headshots, air-combo, hearts,
