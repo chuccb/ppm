@@ -1243,6 +1243,26 @@ exe 全文中 `D_Item`／`Q_Item`／`P_Item`／`W_Item`／`M_Item`／`DropItem_0
 本輪把三項全部從 (a) 移到 (b)，並各自加上可複驗的檢查 ——
 這比留著模糊的 UNRESOLVED 有用得多。
 
+### 5b-39. 第三十五輪：禮物／贈物 lifecycle 的 native 邊界再縮小（不升格 service policy）
+
+本輪沒有把 Wiki 的「贈物」「present box」敘述當成 server 事實，而是回到
+`PaperMan.exe.c` 追 296/297、298/299、300/301、314/315 的 writer、UI caller、
+reader 與 local cache consumer。完整 wire 及交叉證據記在
+[`PACKETS.md` §3.15c2a](PACKETS.md#315c2a-2026-09-17-native-lifecycle-re-audit-no-policy-upgrade)。
+
+| 可確定的 client 事實 | 分類 | 不能因此宣稱 |
+|---|---|---|
+| present scene 初始化時由 `CLobbyPresent::sub_4D4370` 發送**空的 298**，並在送出後清理／準備本地 `p_p_p_p_p_n1189` 禮物清單。 | Native / HIGH | 298 的 server 分頁、mailbox 類型、session correlation 或 owner 規則。 |
+| 296 有簡短 `s32,u8,u8` writer，也有 gift popup 產生的完整變體：recipient、message-present、可選 message、item、raw class、raw period，以及 class 12/13/17 的額外 `u16`。 | Native / HIGH | client 顯示的 item／period 就是價格、持有權、贈送資格或 delivery mutation。 |
+| 299 每批讀 `s32 start`、最多 50 筆；每筆為 `s32 key`、兩個 NUL 字串、三個 4-byte raw words；`key=-1` 終止，且只接受 index `<1024`。 | Native / HIGH | 三個 raw words 的 item／expiry／count 語意，或「present box」一定是此清單的 server 名稱。 |
+| 300 native writer 為空；本次 decompiled direct-call inventory 沒有找到它的 direct caller。 | Native / HIGH（僅限此 extraction 的 direct search） | 外部／間接 caller 不存在，或 301 沒有其他 correlation。 |
+| 314 不是唯一的 gift action：同一 writer 依 item-ID range 選 314、470 或 780，local cache 先做 capacity／duplicate gate；315 也有依 item family 改變 response tail 的分支。 | Native / HIGH | 314/315 可以安全實作成「收下禮物」、自動 grant、或刪除某一 server gift row。 |
+
+**本輪結論：** Wiki 的歷史描述仍只能作 domain 導航；目前能收窄的是
+「哪一些 client state 與 wire 形狀確實存在」，而不是 ownership／expiry／
+pricing／atomic mutation。298/300/314/315 相關 server handlers 繼續
+fail-closed，`UNRESOLVED` 不因找到 UI 或資源名稱而減少。
+
 ## 6. 本輪瀏覽頁面（來源索引）
 
 本索引記錄已閱讀的主題入口，避免日後把搜尋摘要誤當完整頁面內容；個別頁的 last-modified

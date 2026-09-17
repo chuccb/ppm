@@ -2083,6 +2083,30 @@ u8+slot 系列)
     (對應 weapon_parts_catalog 10,648 條)
 ```
 
+#### 3.15c2a 2026-09-17 native lifecycle re-audit (no policy upgrade)
+
+This pass follows the gift/present UI callers rather than treating the opcode
+names as a service contract. It narrows client behavior but deliberately does
+**not** turn any of 298/300/314 into an ownership or grant implementation.
+
+| Native path | Newly fixed fact | Boundary that remains open |
+|---|---|---|
+| `CLobbyPresent::sub_4D4370 → sub_57AE50` | The present scene constructs **empty 298** during initialization, after creating/loading the local `p_p_p_p_p_n1189` gift-list object. `sub_57AE50` then calls `sub_526690` after the send, so 298 is a list refresh with no client selector or item key in its request. | Server-side pagination/session selection, authentication, and whether the returned list is pending, received, or another mailbox state are not in this client path. |
+| `sub_57A690` | A second native 296 writer is exactly `s32, u8, u8`; its first byte-sized value is derived through `sub_533FF0(dword_EE3E98, item)`, not an arbitrary caller string. A direct call is not present in the decompiled call inventory, so reachability in this revision is not asserted. | The two bytes cannot be safely named `kind`, `period`, `gift_type`, or entitlement without the missing caller/data consumer. |
+| `CpopupShopGift::sub_51ADF0 → sub_57A770` | The complete 296 writer is reached from the gift popup after reading `MESSAGE_EDIT` and `PERIOD`. It writes `C-string recipient`, `u8 message-present`, optional `C-string message`, `s32 item`, `u8 raw item class`, `u8 raw period`, and an additional `u16` value only for native classes 12/13/17. | The UI's selected item and period do not prove price, ownership, recipient validity, or delivery mutation. |
+| `sub_57AEF0` | 299 first feeds `sub_524DB0`: `s32 start`, then at most 50 entries; each nonterminal entry is `s32 key`, two NUL-terminated protocol strings, and three 4-byte raw words. `key == -1` terminates. The parser accepts only `start + ordinal < 1024`. Status values 4 and 6 additionally refresh the present UI. | The three raw words are not independently identified as item, expiry, count, or period; no server list producer is recovered. |
+| `sub_57AF40` | 300's native request writer is empty. The direct decompiled caller inventory contains no call to this helper, unlike the 298 initialization path. | This is an observed client absence, not proof that an external or indirect caller never sends 300. The request-to-selection correlation and 301 authority remain unresolved. |
+| `sub_4D57B0/sub_4D7790 → sub_57B2E0` | The 314-family writer is guarded by the local gift/inventory cache. The emitted body is `u8 rawSlot, s32 itemId, u16 rawVariant`, optionally followed by a NUL-terminated string; the variant is written as `-(sub_5354B0(item, rawPeriod)+1)`. The UI chooses 314, 470, or 780 from item-ID ranges, so the same local action helper is shared across gift/package/shop families. | The guard's capacity/duplicate tests and ID-range dispatch are client presentation/state gates, not proof of server ownership or grant semantics. |
+| `sub_57B500` | 315 always reads `u8 result, u8 rawDetail, s32 rawKey, s32 itemId`. A special item predicate can select a following string; otherwise the success-side continuation is `raw4, raw4, s32, u8, u16`, with another item-family predicate capable of consuming a string. | There is no universal consumer-safe success/error tail. Do not fabricate an ACK by copying only the first four fields. |
+
+The audit therefore changes the evidence ledger in one useful way: **298 is
+now proven to be a client-triggered empty refresh at present-scene entry**, and
+**314 is proven to be a shared local action helper rather than a unique “take
+gift” request**. It does not shrink the server-policy `UNRESOLVED` set for
+pending/claimed state, recipient ownership, expiry, duplicate handling, or
+inventory materialization. See the implementation boundary in
+`docs/TODO_HANDLERS.md` and the fail-closed candidate table below.
+
 ### 3.15c 好友/訊息家族 419-441 (九輪讀畢; 439-442 本輪補完)
 ```
 419 GL_MSG_ADD_REQ → 420 ACK (sub_559810): str to_nick, u8 x, u8 result
