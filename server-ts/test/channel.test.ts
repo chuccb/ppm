@@ -6,7 +6,7 @@ import { build as buildPacket, type OutboundArgs, type OutboundName } from "../s
 import { Store } from "../src/store.ts";
 import { listen } from "../src/connection.ts";
 import { read as readHandoff } from "../src/ops/c2s/PM_UDPSTART_REQ.ts";
-import enterChannel from "../src/ops/c2s/GC_ENTERCHANNEL_REQ.ts";
+import enterChannel, { read as readChannelSelection } from "../src/ops/c2s/GC_ENTERCHANNEL_REQ.ts";
 import { Result as EnterResult, type Type3Tail } from "../src/ops/s2c/GC_ENTERCHANNEL_ACK.ts";
 import { Result } from "../src/ops/s2c/PM_UDPSTART_ACK.ts";
 
@@ -297,6 +297,17 @@ describe("GC_ENTERCHANNEL_ACK", () => {
 });
 
 describe("GC_ENTERCHANNEL_REQ", () => {
+  test("accepts only the native boolean rawFlag domain", () => {
+    expect(readChannelSelection(decode(new Packet(opcodeFor("GC_ENTERCHANNEL_REQ")).u8(7).u8(9).u8(0).encode()))).toEqual({
+      group: 7,
+      channel: 9,
+      rawFlag: 0,
+    });
+    expect(() =>
+      readChannelSelection(decode(new Packet(opcodeFor("GC_ENTERCHANNEL_REQ")).u8(7).u8(9).u8(2).encode())),
+    ).toThrow(/boolean/);
+  });
+
   test("admits type 3 only when config carries the complete raw tail", () => {
     const replies: unknown[] = [];
     let completed = false;

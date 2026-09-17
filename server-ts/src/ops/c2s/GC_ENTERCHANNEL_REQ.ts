@@ -8,9 +8,10 @@
  * complete continuation would be a false-success projection. The TS server
  * therefore admits type 3 only when the complete raw tail is configured.
  *
- * The third byte is kept as a raw flag. Native loads it from the local option
- * block (`sub_7338D0`/`sub_735DE0`), but the recovered code does not establish
- * a replay or other server-domain name for it.
+ * The third byte is a native boolean wire value (`0` or `1`), still kept as a
+ * raw flag. Native loads it from the local option block
+ * (`sub_7338D0`/`sub_735DE0`), but the recovered code does not establish a
+ * replay or other server-domain name for it.
  */
 
 import type { Reader } from "../../packet.ts";
@@ -30,6 +31,9 @@ export function read(r: Reader): Selection {
     rawFlag: r.u8(),
   };
   if (r.remaining !== 0) throw new RangeError(`${r.remaining} trailing bytes`);
+  if (selection.rawFlag > 1) {
+    throw new RangeError(`195 native raw flag is boolean, got ${selection.rawFlag}`);
+  }
   return selection;
 }
 

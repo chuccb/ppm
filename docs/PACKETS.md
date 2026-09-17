@@ -1581,7 +1581,8 @@ GG 戰鬥事件中繼 (server 原樣轉發即可) 與 MASTER_* GM 工具組。
 195 REQ (sub_56FF40; CLobbyChannel 的 144 wrapper 每次收到 144 都會送):
     u8 group    (頻道群組 = 681 清單 3 組之序, CLobbyChannel+129)
     u8 channel  (組內頻道編號, +131)
-    u8 rawFlag  (local option-derived raw flag; domain UNRESOLVED — sub_7338D0/sub_735DE0)
+    u8 rawFlag  (native bool, wire domain 0/1; local option-derived;
+                 business meaning UNRESOLVED — sub_7338D0/sub_735DE0)
 
 196 ACK (CLobbyChannel::sub_4179D0 case 196 — 不在 dispatcher!
          經 vtable 場景層分發):
@@ -1841,7 +1842,7 @@ Room，`Handlers.GL_JOINPLAY.cs` 的 flag 0 先加入空 slot 再回 269 code 6 
     server 即使拒絕 143，也應把未認證的後續 195 回成明確的 non-success
     196，而不可讓它取得任何 authenticated lobby authority。
 
-195 GC_ENTERCHANNEL_REQ (sub_56FF40): `u8 group, u8 channel, u8 rawFlag`; native derives the third byte from the local option block, but its domain is UNRESOLVED.
+195 GC_ENTERCHANNEL_REQ (sub_56FF40): `u8 group, u8 channel, u8 rawFlag`; native writes the third byte from a boolean result of the local option block, so its wire domain is `0/1`; business meaning remains UNRESOLVED.
 196 GC_ENTERCHANNEL_ACK (CLobbyChannel::sub_4179D0，不走主 dispatcher):
     u8 result, s32 channel_id, u8 channel_index
     **只有 result==1** 才續讀 `str endpoint_host, s32 endpoint_port,
