@@ -8,7 +8,9 @@
 > 340 個 sites、276 個 unique opcode，另有 19 個 sites／15 個 low private-UDP
 > opcode（`1,5,6,9,13,14,15,17,19,21,23,27,30,32,35`），它們刻意不在本
 > TCP/C2S 表內。因此標題的 261 是 row/unique-TCP-opcode 口徑，不應解讀成
-> 261 個 constructor variants，也不應解讀成 276 個完整 native forms。
+> 261 個 constructor variants，也不應解讀成 276 個完整 native forms。表後的
+> **Appendix A** 另收錄這 15 個 private-UDP low-opcode builders；Appendix A 不加入
+> 261/321 的 TCP row/site 計數。
 >
 > **`direct ctor xref` 的意義（Fact）**：欄位列出每一個 direct constructor site
 > 所在的 native function symbol；`×N` 表示同一 symbol 內有 N 個 direct sites。
@@ -326,3 +328,47 @@
 | 1004 |  | sub_588420 | `(空)` |
 | 1006 |  | sub_564B70 | `u8` |
 | 1008 |  | sub_564C30 | `u8` |
+
+
+## Appendix A — low private-UDP Packet constructors excluded from the TCP count
+
+> **Scope / count（Fact；current `PaperMan.exe.c`）**：native scan 找到 19 個
+> `Packet::possible_ctor_or_dtor_0(..., N)` low-opcode direct sites、15 個 unique
+> opcode：`1,5,6,9,13,14,15,17,19,21,23,27,30,32,35`。它們不屬於上方
+> `101+` TCP/C2S row inventory，也不應被加回成 TCP forms。以下 sequence 是
+> constructor opcode 之後的 native write order；不包含 UDP private 的 8-byte
+> Packet/framing header、AES ciphertext 或 `sendto` framing。
+>
+> `sub_595E80` 是另一個由 `recvfrom` 進入的 UDP-private dispatcher；其 inbound
+> case/layout 不能因 opcode 數字相鄰而取代 outbound builder。現有 native evidence
+> 證明的 `n → n+1` case pairs、AES/raw send lane、secondary sockaddr 與
+> `UNRESOLVED` server boundary 詳見 [`PACKETS.md`](PACKETS.md) §2.5；這裡保留
+> constructor-level inventory，避免把 UDP evidence 從本文件的完整 native builder
+> audit 中遺漏。
+
+| op | direct ctor xref（19 sites） | write order after opcode | native send / caller / boundary |
+|---:|---|---|---|
+| 1 | `sub_593830`（1 site；shared function 的 `n2!=2` branch） | `raw1×3 raw4` | `sub_5937D0` timer/state caller；`sub_595A10` secondary AES lane；client send fact only |
+| 5 | `sub_593AB0` | `raw1 raw4` | called by `sub_595E80` case 4；explicit `raw16` destination via `sub_595980`；matching stored member addresses are retried three times；server role UNRESOLVED |
+| 6 | `sub_593E60` | `raw1 raw4` | called by `sub_595E80` case 5；explicit `raw16` destination via `sub_595980`；first matching received source is stored and retried three times；server role UNRESOLVED |
+| 9 | `sub_594300` | `raw1×3 raw4` | called by `sub_5942B0`；`sub_595A10` secondary AES lane；periodic client path; no server behavior inferred |
+| 13 | `sub_594460`; `sub_5946C0`（2 sites） | each `raw1 raw4` | called by `sub_595E80` cases 10/12；explicit stored-address sends via `sub_595980`；the two constructors remain separate native call sites |
+| 14 | `sub_594A10` | `raw1 raw4` | called by `sub_595E80` case 13；explicit stored-address sends via `sub_595980`；source/local state branch differs from 13; domain UNRESOLVED |
+| 15 | `sub_593830`（1 site；shared function 的 `n2==2` branch） | `raw1 raw1` | `sub_5937D0` timer/state caller；`sub_595A10` secondary AES lane；same native function as 1, but not the same wire form |
+| 17 | `sub_596180`; `sub_596240`（2 sites） | `sub_596180`: empty; `sub_596240`: `str` (ANSI/NUL) | no named direct caller recovered for either global builder; both use primary raw `sub_595900`, bypass AES; empty and string forms must remain separate |
+| 19 | `sub_596670` | `raw1×4 raw4 str` | direct callers: `sub_4070B0`, `sub_407290`, `CLobbyGameStart::sub_43C380`；`sub_595A10` secondary AES lane；nickname string is native writer output；the extra raw1 before raw4 is source-observed and must not be removed by “common header” flattening |
+| 21 | `sub_596330` | `raw1×3 raw4×3` | `sub_595D80` active-manager caller；via `sub_595A10`; two tail raw4 values remain raw/domain UNRESOLVED |
+| 23 | `sub_744450` | `raw1×3 raw4×2 raw1 raw2×3 raw1×5 raw4` | direct callers: `sub_600770`, `sub_73E170`；gated through `sub_602D70 → sub_596B90 → sub_595A10`; width is Fact, field meaning UNRESOLVED |
+| 27 | `sub_6013E0`; `sub_6036F0`（2 sites） | each `raw1×3 raw4 raw1×2` | direct callers: `sub_73E170`→`sub_6013E0`; `sub_5607C0` / `sub_6013E0`→`sub_6036F0`；`sub_602D70 → sub_596B90 → sub_595A10` gate; two trailing raw1 values are native state bytes |
+| 30 | `sub_606340`（empty constructor; no send at this site）；`sub_6065E0` | `sub_606340`: empty; `sub_6065E0`: `raw1×3 raw4 raw2 count, count×{raw1 status,[raw2 if status!=0,[conditional raw2 raw1 raw2 raw4×4]]}` | callers: `sub_73E170`→`sub_606340`; `sub_606340` (2 sites) / `sub_6065D1`→`sub_6065E0`; only `sub_6065E0` calls `sub_595A10`; `sub_761500(...)` is a local temporary, not a wire field |
+| 32 | `sub_96BF70` | `raw1×3 raw4 raw1×2 raw2×3` | `sub_967E90` caller；object/position path via `sub_595A10`; the three raw2 values have no proven domain names |
+| 35 | `sub_7463E0` | `raw1×3 raw4` | `sub_749B90` (2 direct calls)；`sub_67F380` gate then `sub_595A10` secondary AES lane；send-only evidence, no receiver or gameplay meaning inferred |
+
+> **UDP framing boundary（Fact / HIGH）**：ops 1/5/6/9/13/14/15/19/21/23/27/30/32/35
+> use the observed AES send lane unless the row says otherwise; op 17 uses the separate
+> raw primary lane. `sub_595940` exists as a secondary raw-send wrapper but has no
+> direct caller recovered in this dump, so it is not an additional op-17 variant.
+> The `n+1` inbound cases are reader evidence, not proof of server acceptance or of an
+> identical reverse-direction layout. Except for the separately documented 19→20
+> client/server exchange, server behavior remains `UNRESOLVED`; this appendix does not
+> authorize implementing UDP server behavior.

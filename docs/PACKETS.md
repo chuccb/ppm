@@ -520,7 +520,7 @@ history or application state; it only records the two observed native send lanes
 | 形狀 | opcode | native 寫入序列（不含 Packet 8-byte wire header） |
 |---|---|---|
 | 共用標頭、沒有額外 body | `1 9 35` | `u8 u8 u8 raw4` |
-| 共用標頭 + NUL 字串 | `19` | `u8 u8 u8 raw4 + ANSI/NUL string` |
+| opcode-19 variant（多一個 source byte） | `19` | `raw1×4 raw4 + ANSI/NUL string` |
 | 共用標頭 + 兩個 body byte | `27` | `u8 u8 u8 raw4 + u8 u8` |
 | 共用標頭 + 兩個 raw4 | `21` | `u8 u8 u8 raw4 + raw4 raw4` |
 | 共用標頭 + 變長 bot records | `30` | `u8 u8 u8 raw4 + raw2 count + records` |
@@ -530,7 +530,7 @@ history or application state; it only records the two observed native send lanes
 | 無共用標頭、兩個 byte | `15` | `u8 u8` |
 | 變體 | `17` | 空 payload **或** ANSI/NUL string |
 
-對 `1/9/19/21/23/27/30/32/35` 而言，前四欄的來源型別是：
+對 `1/9/21/23/27/30/32/35` 而言，前四欄的來源型別是：
 `sub_417D00()` 的 channel byte、`byte_EE896D`（`CMyData+5`）的 room-slot
 byte、`sub_592920`／`sub_5928E0` 寫入的 source-dependent byte，以及
 `dword_EE8CB4`（`CMyData+844`）的 raw4。除特殊 `n2==2` 分支寫入 `0xFE`
@@ -549,19 +549,19 @@ byte、`sub_592920`／`sub_5928E0` 寫入的 source-dependent byte，以及
 | `5` | `sub_593AB0` | `u8 sourceDependentSlot, raw4 n0x3E8_3/dword_F25640` | 每個已儲存的 non-local member address 送三次；輸入 `4` 的 member list 後 state 設為 4。 |
 | `6` | `sub_593E60` | `u8 sourceDependentSlot, raw4 n0x3E8_3/dword_F25640` | 第一次匹配 member key 時保存 `recvfrom` sockaddr，對該來源送三次；後續只增加 member counter。 |
 | `9` | `sub_594300` | 共用四欄，無額外 body：`u8 u8 u8 raw4` | periodic send to the secondary sockaddr via `sub_595A10`；此 builder 本身只證明 client-side send gate。 |
-| `13` | `sub_594460` | `u8 sourceDependentSlot, raw4 n0x3E8_3/dword_F25640` | 對儲存 address 送三次；`sub_592C40` 先讀入每個 member 的 raw16 address blob。 |
+| `13` | `sub_594460` / `sub_5946C0`（2 direct ctor sites） | `u8 sourceDependentSlot, raw4 n0x3E8_3/dword_F25640` | 對儲存 address 送三次；`sub_592C40` 先讀入每個 member 的 raw16 address blob；兩個 native constructor sites 保持分列。 |
 | `14` | `sub_594A10` | `u8 sourceDependentSlot, raw4 n0x3E8_3/dword_F25640` | 對儲存 address 送三次；與 opcode 13 使用不同的 local member state byte。 |
 | `15` | `sub_593830`（只在 `n2 == 2`） | `u8 channel, u8 roomSlot` | secondary sockaddr via `sub_595A10` 送三次，然後將 local state byte 設為 7；沒有四欄共用標頭。 |
 | `17` | `sub_596180` / `sub_596240` | 空 payload（raw `word0=0`，送 8-byte Packet）；另一 caller 是 `lstrlenA(String)+1` bytes 的 ANSI/NUL payload | 兩個 caller 都用 primary destination 的 direct `sub_595900` lane，**不經 AES**；不能以 periodic empty variant 代表全部 opcode 17。 |
-| `19` | `sub_596670` | 共用四欄 + ANSI/NUL nickname | secondary sockaddr via `sub_595A10`；完整欄位與 retry/completion 見下節。 |
+| `19` | `sub_596670` | `raw1×4 raw4` + ANSI/NUL nickname | secondary sockaddr via `sub_595A10`；完整欄位與 retry/completion 見下節。第四個 raw1 是 native source-observed，不能套用其他 builder 的三個 byte prefix。 |
 | `21` | `sub_596330` | 共用四欄 + `raw4 manager+4` + `raw4 dword_EE8978` (`CMyData+16`) | `sub_595D80` 的 active-manager periodic path，經 `sub_595A10` 送 secondary sockaddr；兩個 tail raw4 的 semantics 均 unresolved。 |
 | `23` | `sub_744450` | 共用四欄 + `raw4 n0x64` + `u8` + `raw2×3` + flags `u8` + four `u8` + `raw4` | movement/game-state caller；`sub_602D70 → sub_596B90 → sub_595A10` gate/send 到 secondary sockaddr，不追加欄位。 |
 | `27` | `sub_6036F0`（另有 `sub_6013E0` 同序列） | 共用四欄 + `u8 this+406` + `u8 this+404` | 先將 `this+404=0`，再經 `sub_602D70 → sub_596B90 → sub_595A10` gate/send 到 secondary sockaddr；兩 byte 的 domain 尚未定案。 |
-| `30` | `sub_6065E0`（由 `sub_606340` 分段呼叫） | 共用四欄 + `raw2 count` + variable records | `sub_595A10` 送 secondary sockaddr；`v32 = sub_761500(...)` 是計算出的 local temporary，**沒有被寫入 packet**；不可把它列成 wire field。 |
+| `30` | `sub_606340` / `sub_6065E0` | `sub_606340` 先建構 empty op-30 buffer 但在該 site 不 send；`sub_6065E0` 才寫 `raw1×3 raw4` + `raw2 count` + variable records | `sub_606340` 分段呼叫 `sub_6065E0`；只有後者經 `sub_595A10` 送 secondary sockaddr；`v32 = sub_761500(...)` 是 local temporary，**沒有被寫入 packet**。 |
 | `32` | `sub_96BF70` | 共用四欄 + object-derived `u8` + object-derived `u8` + `raw2×3` | `sub_595A10` 送 secondary sockaddr；local object position/state path；三個 `sub_5929A0` 的確切 domain 未證實。 |
 | `35` | `sub_7463E0` | 共用四欄，沒有後續 write primitive | `sub_67F380()` gate 下經 `sub_595A10` 送 secondary sockaddr；不是一般 ready、P2P 或 gameplay authority 的證據。 |
 
-**Opcode 30 的 record framing 特別重要。** `sub_6065E0` 先以
+**Opcode 30 的 record framing 特別重要。** `sub_606340` 的 direct constructor site 只是 empty buffer initialization，沒有對應的 send；真正送出的 `sub_6065E0` 先以
 `sub_5929A0` 寫入 `v33`（`j3-i` 或 bounded range），所以 count 是 **raw2**，
 不是 raw4。每個 record 至少有一個 `u8` status；status non-zero 時再寫一個
 raw2。只有 `CPaperBot` 且 `sub_67E940(...)` 為真時，才追加
