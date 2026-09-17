@@ -824,7 +824,7 @@ exe 中**不存在**任何從 `ui/` 根目錄載入這些檔名的字串。
 這與 §5d-27 `URLList`（`ui/URLList.xml` vs `ui/system/URLList_01.xml`）
 是同一種錯置，只是後者連檔名都改了。累計已是**第四種**
 「資源檔在檔案系統層面誤導分析者」的形態：
-死檔（§5d-26）、錯置舊副本（§5d-27／本節）、死欄位（§5d-25/26/31）、
+死檔（§5d-26）、錯置舊副本（§5d-27／本節）、死欄位（§5d-25、§5d-4b）、
 檔名與內容不符（§5d-4b）。
 
 > **既有檢查已符合此規則。** `verify_resource_claims.py` 讀
@@ -1270,7 +1270,8 @@ AI 協力模式的過關獎勵表，結構為
 **`periodType` 是死欄位（廿三輪，Fact / HIGH）。** parser 只讀
 `itemnumber` 與 `level`（`0x581991` 起），**exe 全文 `L"periodType"` 出現 0 次**。
 故其時效語義**不是「未證實」而是「根本不生效」** ——
-這是繼 §5d-25 `siege_dmg_rate`、§5d-26 `scale`、§5d-27 之後**第四個同類案例**。
+這是繼 §5d-25 `siege_dmg_rate`、§5d-27 之後的又一個同類案例。
+（2026-09-18 覆查：原同列的 §5d-26 `scale` 判決已更正，不再屬於此類。）
 
 **界線。** 這是 client 端的**獎勵顯示表**。實際發放由 server 決定，
 名次判定與是否可重複領取均未證實，維持 UNRESOLVED。
@@ -1587,8 +1588,8 @@ Wiki [各種ゲージ詳細](https://wikiwiki.jp/paperman/各種ゲージ詳細)
 > 但實測 **native 只消費 31 欄中的 26 欄**，最後四欄
 > （`tanpi_pap_type`／`tanpi_mot_type`／`sniperbackimgidx`／`sniperviewimgidx`）
 > **完全沒有被寫入記錄**，且四個欄名在 exe 中出現 **0 次**。
-> 它們是**死欄位**，與 §5d-25/26/27 的 `siege_dmg_rate`／`scale`／`periodType`
-> 同類（本專案第五類）。詳下方位移表。
+> 它們是**死欄位**，與 §5d-25 的 `siege_dmg_rate`、§5d-4b 的 `periodType`
+> 同類（2026-09-18 覆查：原同列的 §5d-26 `scale` 判決已更正，不再屬於此類）。詳下方位移表。
 
 **解析方式（Fact / HIGH）。** native 以具名類別
 `CPartsAbilityListParamCtrl::Load` 載入 `cfg\partsability.pat`：
@@ -2455,7 +2456,7 @@ exe 全文**只出現 `shilddamage_rate`、從未出現 `siege_dmg_rate`**。
 波次推進與 boss 判定、報酬（Wiki 述「称号と福袋、スコア順に選べる」）
 **全無 client 證據**，維持 UNRESOLVED。
 
-## 5d-26. `ui/system/AI/BotEnemy*.xml`：單人模式的怪物表，含**一個死檔**與**一個死欄位**
+## 5d-26. `ui/system/AI/BotEnemy*.xml`：單人模式的怪物表，含**一個死檔**（`scale` 欄位舊判決已於 2026-09-18 覆查更正）
 
 延續 §5d-25 對 `ui/system/AI/` 的清點。`BotEnemy.xml` / `BotEnemy_easy.xml` /
 `BotEnemy_intelligent.xml` / `AiMultiBotEnemy.xml` 四個檔**先前無 md 引用**，
@@ -2490,17 +2491,33 @@ exe 全文**完全找不到** `BotEnemy_intelligent` 字串（0 次），
 所以**即使被載入，主鍵也解析不出來**。它還獨有 `bot_type=8`
 （其餘三檔只有 1..7）。**結論：未使用的開發殘留，不可據以推測 AI 行為。**
 
-### `scale` 是**死欄位**（Fact / HIGH）
+### `scale`：**被解析且存入 bot 定義列；是否生效為 UNRESOLVED**（2026-09-18 覆查更正）
 
-`BotEnemy.xml` 與 `AiMultiBotEnemy.xml` 的每列都有 `scale`，
-但 parser 讀取的 30 個屬性名中**沒有 `scale`**，且 **exe 全文 `L"scale"` 出現 0 次**。
-⇒ 該欄**永遠讀不到**。這是繼 §5d-25 `siege_dmg_rate` 之後
-**第二個同類的資料／程式不一致**，且有一個有趣的旁證：
-normal 與 easy 之間有 **7 列的 `scale` 不同**（1.8 vs 2）——
-美術意圖上想讓 easy 的怪更大，但**實際上沒有任何效果**。
+> ⚠ **更正。** 此節原判決為「死欄位（Fact / HIGH）」，理由是
+> 「parser 讀取的 30 個屬性名中沒有 `scale`」與「exe 全文 `L"scale"` 出現 0 次」——
+> 兩者與倉內 dump（自建庫以來 byte 不變）皆不符：`L"scale"` 實測 **6 次**，
+> 且 bot 解析器確實讀取 `scale`。據實測重寫如下。
 
-parser 實際讀取的 30 個屬性為：
-`bot_type_index bot_type isBullethole isDamageEffect bot_hp siege_dmg
+`BotEnemy.xml` / `BotEnemy_easy.xml` / `AiMultiBotEnemy.xml` 的每列都有 `scale`。
+bot 解析器 `sub_8CCB30`（上述載入器的屬性迴圈）對每個 `TYPE` 元素讀取
+**31 個屬性**，其中第 6 個就是 `sub_7011D0(&v63, L"scale", &v40)`
+（與 f32 屬性 `bot_mot_ch1/2` 同一個 getter family）。
+讀出的值寫入該列結構體欄位 **+0x1C**（以 `&v34` 為 base，ctor `sub_8CDB60`），
+再由 `sub_8CE030(v5, &v34)` 複製進容器、`sub_8CE300(this_1, v24, &v27)`
+合入 bot 管理器。⇒ **解析層（Fact / HIGH）**：`scale` 被正常解析、持久存放。
+
+**但 spawn／render 下游是否讀取該欄位以縮放模型，尚未追蹤——
+「無效果」目前無證據，維持 UNRESOLVED。**
+另五處 `L"scale"` 讀取分屬 `sub_68FA90`、`sub_937870`、`sub_94DEA0`、
+`sub_96D1A0`、`sub_A08BD0`（後四者屬 UI 特效族，`alpha`／`loop`／
+`elapsTime` 屬性組），與 bot 表無關。
+
+舊版「7 列差異」觀察本身成立（見下節受控比較）：normal 與 easy 之間有
+**7 列的 `scale` 不同**（1.8 vs 2），美術意圖想讓 easy 的怪更大——
+但「調了值是否生效」現屬 UNRESOLVED，而非證實無效。
+
+parser 實際讀取的 31 個屬性為：
+`bot_type_index bot_type isBullethole isDamageEffect bot_hp scale siege_dmg
 first_delay shot_delay move_speed instant_pg game_point game_score bot_face
 bot_avatar bot_mot_ch1 bot_mot_ch2 bonus_char bonus_value abnor_state
 bot_weapon camera_action delay_time respawnWaitTime feverpoint
@@ -2519,7 +2536,7 @@ AppearSound DisAppearSound`
 | `game_score` | 34/35 | 混合（15 低 / 19 高）——**非難度軸** |
 | `move_speed` | 15/35 | **easy 一律較慢**（15 低 20 同，0 快） |
 | `game_point` | 10/35 | 9 低 1 高 |
-| `scale` | 7/35 | **死欄位，無效果**（見上） |
+| `scale` | 7/35 | 解析與存放正常；**生效與否 UNRESOLVED**（見上） |
 | `instant_pg` | 4/35 | 4 低 0 高 |
 | `bonus_value` / `bot_type` | 1/35 | 個別調整 |
 
