@@ -461,29 +461,37 @@ packet names；private UDP opcode 不繼承這個命名空間或 direction。登
      ×3 組), **809** (s32)
    - `IVotingNetwork::sub_9BF430`: **719/720/722/723** (投票系統)
 2. `CGameRule::sub_67CF90(n9_0, pkt)` — 遊戲規則層攔截。
-## 2.5 UDP private transport and the only implemented control exchange (2026-09 revalidation)
+## 2.5 UDP private transport：wire-format 基線與 server 投影（2026-09-17 整理版）
+
+> **層級分工**（整理後）：本節只保留三類內容——(a) transport wire-format
+> fact（framing/AES/header word/teardown）；(b) 19→20 的逐 offset 表與
+> retry state machine（server 唯一實作的依據）；(c) server implementation
+> boundary。**逐 op 的觸發點/消費者/語義與生命週期全圖已移至 §2.6**；
+> 15 送/22 收的 wire 矩陣以 `docs/LAYOUTS_REQ.md` Appendix A/B 為權威；
+> 153..164 官方帶對照見 Appendix B.3。舊版「opcode 空間全圖」「receiver
+> cross-check 大表」「adjacent send/address flows」「op21 exact-layout
+> 補丁」四個小節已全數被上述三份文件吸收，故移除（GC_CLAN_PROTOCOL
+> 誤植段落遷至 §3.15d6；165/166 子令文法遷至 §2.6 op35 條目）。
 
 > **Scope boundary — Fact/HIGH unless labelled otherwise.** `sub_595E80` is a
-> separate UDP-private dispatcher. Its numbers are **not** the TCP opcode catalog
-> (`sub_9D2050` / `server-ts/src/opcodes.ts`). Earlier wording in this document calling this
-> layer “P2P”, “NAT hole punching”, “relay”, or a general UDP-ready handshake
-> overstated the available evidence and is withdrawn. The client proof below
-> establishes one control retry and its completion only.
+> separate UDP-private dispatcher. Its numbers are **not** the TCP opcode
+> catalog (`sub_9D2050` / `server-ts/src/opcodes.ts`). Earlier wording calling
+> this layer “P2P”, “NAT hole punching”, “relay”, or a general UDP-ready
+> handshake overstated the evidence and is withdrawn; §2.6 的 A/B 小節以
+> client 端 state/caller 事實重新描述同一機制，不恢復那些舊名。
 
-### Transport lifecycle
+### Wire-format facts（原 Transport lifecycle；Fact/HIGH）
 
-| Conclusion | Native evidence | Confidence |
-|---|---|---|
-| A successful TCP `196 GC_ENTERCHANNEL_ACK` supplies the primary endpoint used to initialise this UDP transport. | `CLobbyChannel::sub_4179D0` reads the ANSI host then `s32` port only in its `result==1` tail; `sub_58ED30 → sub_595C90` passes the host and low `u16` port onward. | HIGH |
-| The same successful-196 host/port is initially copied into a **separate secondary address field**. | Immediately after `sub_58ED30`, `sub_4179D0` calls `sub_596E60(&unk_1326908, cp, hostshort)`. `sub_596E60` writes a distinct sockaddr at offsets `+40..+55`; 142 (`sub_5565D0`) and 371 (`sub_570100`) also overwrite that secondary field. This initial equality does **not** prove that the two destinations remain interchangeable. | HIGH |
-| Client transport is IPv4 UDP and is bound locally to `0.0.0.0:27000`. | `sub_596D60` calls `socket(AF_INET, SOCK_DGRAM, 0)`; `sub_596DA0` calls `bind` with `htonl(0)` and CUDPSocket's constructor default port 27000. It stores the configured remote host with `inet_addr` and `htons(port)`. | HIGH |
-| The native client starts a receive thread before declaring the manager active. | `sub_595C90` opens/configures `dword_1324360`, creates/resumes a suspended `CUDPThread`, then calls `Sleep(1000)` and only then sets manager `+52=1`. The native function does not test the open/bind/thread-create return values before that sequence. | HIGH |
-| Native stop is forceful rather than a join/close handshake. | `sub_58AF90 → sub_595D50 → sub_5957F0` clears active then `sub_597350` calls `TerminateThread`, `CloseHandle`, clears the handle, and only afterwards `sub_597040` calls `closesocket`. The infinite receiver loop has no cooperative stop check. **Inference/HIGH:** this ordering permits a receive/dispatch shutdown race; no join is present. | HIGH |
-| Most UDP private sends use the shared 8-byte `Packet` header and AES-CFB-128, but **without TCP LZ**; opcode 17 is a separate direct-send lane. | `sub_595980` does `sub_591F90 → sub_592F60 → sendto`; it never calls `sub_592CE0`/`sub_592E00`. The opcode-17 callers `sub_596180`/`sub_596240` instead call `sub_595900`, which only sends `Packet+24` and never calls AES. `sub_595A60` does `recvfrom(…,9600) → sub_591FB0/sub_591D50 → sub_5930C0`; it never calls LZ decompression. | HIGH |
-| A logical empty packet on the AES send lane is encrypted to a 16-byte ciphertext. | `sub_592FB0` and `sub_593110` align a zero `word0/word2` to the AES block size before encryption/decryption. The opcode-17 direct-send lane bypasses `sub_592FB0` and sends an 8-byte empty raw Packet instead. | HIGH |
-| The receiver accepts a received datagram at least `word0+8` bytes long; trailing bytes are not passed to the packet parser. | `sub_595A60` tests `received >= sub_591F00(packet)+8`; it does not require equality. | HIGH |
+| Conclusion | Native evidence |
+|---|---|
+| TCP `196 GC_ENTERCHANNEL_ACK` 成功時供給 UDP transport 的初始化端點；且同值隨即被複製到 **AES lane 目標 sockaddr#2**。 | `CLobbyChannel::sub_4179D0` 的 `result==1` 尾段讀 ANSI host + `s32` port → `sub_58ED30 → sub_595C90`；之後 `sub_596E60(&unk_1326908, cp, hostshort)` 寫 socket+40 的 sockaddr#2（142/371 亦覆寫；§2.6-G0 有全鏈）。 |
+| Client 端為 IPv4 UDP，bind 於 `0.0.0.0:27000`；**執行緒先於啟用旗標**。 | `sub_596D60` = `socket(AF_INET, SOCK_DGRAM, 0)`；`sub_596DA0` = `bind(htonl(0), htons(sock+56=27000))`；`sub_595C90` 建/resume `CUDPThread`、`Sleep(1000)` 後才設 mgr `+52=1`（不檢查回傳值）。 |
+| 原生停止是強制而非 handshaked join。 | `sub_58AF90 → sub_595D50 → sub_5957F0` 先清 active，再 `sub_597350` = `TerminateThread`/`CloseHandle`、清 handle，最後才 `sub_597040` = `closesocket`；recv loop 無協作式停止檢查。Inference/HIGH：此順序允許 receive/dispatch 關閉競態。 |
+| 多數 UDP private 送出走 8-byte `Packet` header + AES-CFB-128、**無 TCP LZ**；opcode 17 是獨立的 direct-send lane。 | `sub_595980` = `sub_591F90 → sub_592F60 → sendto`，不呼叫 `sub_592CE0`/`sub_592E00`；op17 的 `sub_596180`/`sub_596240` 走 `sub_595900`（只送 `Packet+24`、無 AES）。`sub_595A60` = `recvfrom(9600) → sub_591FB0/sub_591D50 → sub_5930C0`，無 LZ 解壓。 |
+| AES lane 上的邏輯空封包會加密成 16-byte ciphertext。 | `sub_592FB0`/`sub_593110` 把空的 `word0/word2` 對齊到 AES block；op17 direct lane 繞過 `sub_592FB0`，送 8-byte 空 raw Packet。 |
+| receiver 接受長度 ≥ `word0+8` 的 datagram；多出的尾部位元不交給 packet parser。 | `sub_595A60` 僅檢查 `received >= sub_591F00(packet)+8`。 |
 
-For the AES send lane, UDP header interpretation is:
+AES send lane 的 UDP header：
 
 ```
 u16le word0 = ciphertext byte count (16-byte aligned)
@@ -493,512 +501,72 @@ u16le word3 = original pre-send payload byte count
 byte[word0] = AES-128-CFB-128 ciphertext, zero IV, fixed client key
 ```
 
-`word2` and `word3` are both the uncompressed payload length on the directly
-observed AES sends. Opcode 17 is different: `sub_595900` sends the constructor's
-raw `Packet+24` buffer, so its `word0` is the raw payload byte count, `word2` and
-`word3` remain constructor defaults unless another caller writes them, and its
-payload is not AES ciphertext. The client receive path nevertheless unconditionally
-attempts `sub_5930C0` before private dispatch; no native evidence here proves that
-an opcode-17 raw send is looped back or that the server's receive path is identical.
-This is **not** permission to infer that every possible UDP packet has no additional
-history or application state; it only records the two observed native send lanes.
+`word2`/`word3` 在已觀察的 AES 送出都等於未壓縮 payload 長度。op17 不同：
+`sub_595900` 直接送建構器的 raw `Packet+24` buffer，`word0` 為 raw 長度、
+payload 非密文；client 收端仍一律嘗試 `sub_5930C0`——本 dump 無證據顯示
+op17 raw 送出會被 loopback，也不授權推測 server 收端行為。
 
-### UDP private opcode 空間全圖（本輪機器掃描）
+### Private opcode 19 → 20（server 唯一實作；逐 offset 表）
 
-先前各節只談 19→20，因為那是**唯一已實作**的路徑。本輪把整個 UDP 面掃完，
-確立它是一個**與 TCP/catalog 分離的 private dispatcher namespace**（值域約
-1..158）。數值上它和 TCP/catalog 的 100..1010 有重疊（特別是 154/158），
-但 dispatcher、framing lane、reader 與 evidence boundary 不同；不能用數字把兩個
-namespace 合併。
-
-**接收端是 `sub_595E80`，可證為 UDP**：呼叫鏈為
-`sub_595A60` → `sub_596F90` → **`recvfrom()`**（9600 B 緩衝，
-同 TCP 的 frame 檢查 `sub_591D50` 後才分派）。該 dispatcher 有 **22 個 case**：
-
-```
-2 4 5 6 8 10 12 13 14 15 18 20 22 24 26 28 29 31 33 34 154 158
-```
-（`8` 與 `24` 共用 `sub_596940`；`26` 走 `unknown_libname_107`。）
-
-**送出端**由 `Packet::possible_ctor_or_dtor_0(v, <op>)` 反查，客戶端會建構
-**15 個** UDP opcode：`1 5 6 9 13 14 15 17 19 21 23 27 30 32 35`。
-
-**數值 adjacency / native control-flow relation（不是 REQ→ACK Fact）。** 15 個
-送出中有 12 個 `n+1` 數值也出現在接收 case 表：
-`1→2 · 5→6 · 9→10 · 13→14 · 14→15 · 17→18 · 19→20 · 21→22 · 23→24 ·
-27→28 · 30→31 · 32→33`。這只能作為配對線索；不能單憑 `n+1`、builder
-名稱或相鄰的 gameplay-like 欄位證明 request/ack、方向、用途、同一 layout
-或 server acceptance。只有 19→20 另有完整 native retry/completion control-flow
-與現有 server projection evidence。
-
-沒有 `n+1` case 的三個送出 opcode 是 `6`、`15`、`35`。其中 `6` 與 `15`
-確實也出現在接收側，但它們的 inbound reader layout 不必與 outbound builder
-相同（尤其 `15` 的 inbound reader 讀 raw16）；`35`（`sub_7463E0`，13 個寫入
-原語）目前只證明送出、不證明有 UDP receiver。
-
-#### UDP 送出封包的共用「寄件人標頭」（Fact / HIGH，本輪）
-
-把 15 個送出 opcode 的 builder 逐一抽出寫入原語序列後，可以定案的只有
-**部分 opcode 共用同一個四欄前綴**；不能把所有 UDP builder 的第一欄概括成
-單一 `u8`，也不能把 body 的欄位數由 opcode 配對猜出來。
-
-| 形狀 | opcode | native 寫入序列（不含 Packet 8-byte wire header） |
-|---|---|---|
-| 共用標頭、沒有額外 body | `1 9 35` | `u8 u8 u8 s32` |
-| opcode-19 variant（多一個 source byte） | `19` | `u8 u8 s8 u8 s32 + ANSI/NUL string` |
-| 共用標頭 + 兩個 body byte | `27` | `u8 u8 u8 s32 + u8 u8` |
-| 共用標頭 + 兩個 raw4 | `21` | `u8 u8 u8 s32 + raw4 raw4` |
-| 共用標頭 + 變長 bot records | `30` | `u8 u8 u8 s32 + u16 count + records` |
-| 共用標頭 + movement-like fields | `23` | `u8×3 s32 raw4 u8 u16×3 u8 u8×8 s32` |
-| 共用標頭 + object/position fields | `32` | `u8×3 s32 u8 s8 u16×3` |
-| 無共用標頭、`u8 + raw4` | `5 6 13 14` | `u8 raw4` |
-| 無共用標頭、兩個 byte | `15` | `u8 u8` |
-| 變體 | `17` | 空 payload **或** ANSI/NUL string |
-
-對 `1/9/21/23/27/30/32/35` 而言，前四欄的來源型別是：
-`sub_417D00()` 的 channel byte、`byte_EE896D`（`CMyData+5`）的 room-slot
-byte、`sub_592920` 寫入的 source-dependent `u8`，以及 `dword_EE8CB4`
-（`CMyData+844`）經 `sub_592A20` 寫入的 `s32`。除特殊 `n2==2` 分支寫入
-`0xFE` 外，source-dependent byte 來自 `CMyData+13`。這證明了 wire 形狀
-與 primitive signedness，**不證明第三欄的 domain 語義**；應保留
-source-oriented 名稱，不要把它命名成 team、mode 或 peer id。
-
-#### UDP builder wire audit（本輪逐欄校正）
-
-以下是目前能由 `PaperMan.exe.c` 直接證明的順序與寬度。`raw2/raw4` 表示
-原語實作複製的固定 wire width；signedness 或 domain meaning 仍須回到 caller。
-
-| opcode | builder | payload after opcode | direct send/state evidence |
-|---:|---|---|---|
-| `1` | `sub_593830`（`n2 != 2`） | `u8 channel, u8 roomSlot, u8 sourceDependentSlot, s32 dword_EE8CB4` | secondary sockaddr via `sub_595A10`；elapsed >1000 ms 且 global retry gate 為 0 時送一次，更新 `dword_F2563C`。 |
-| `5` | `sub_593AB0` | `u8 sourceDependentSlot, raw4 n0x3E8_3/dword_F25640` | 每個已儲存的 non-local member address 送三次；輸入 `4` 的 member list 後 state 設為 4。 |
-| `6` | `sub_593E60` | `u8 sourceDependentSlot, raw4 n0x3E8_3/dword_F25640` | 第一次匹配 member key 時保存 `recvfrom` sockaddr，對該來源送三次；後續只增加 member counter。 |
-| `9` | `sub_594300` | `u8 u8 u8 s32` | periodic send to the secondary sockaddr via `sub_595A10`；此 builder 本身只證明 client-side send gate。 |
-| `13` | `sub_594460` / `sub_5946C0`（2 direct ctor sites） | `u8 sourceDependentSlot, raw4 n0x3E8_3/dword_F25640` | 對儲存 address 送三次；`sub_592C40` 先讀入每個 member 的 raw16 address blob；兩個 native constructor sites 保持分列。 |
-| `14` | `sub_594A10` | `u8 sourceDependentSlot, raw4 n0x3E8_3/dword_F25640` | 對儲存 address 送三次；與 opcode 13 使用不同的 local member state byte。 |
-| `15` | `sub_593830`（只在 `n2 == 2`） | `u8 channel, u8 roomSlot` | secondary sockaddr via `sub_595A10` 送三次，然後將 local state byte 設為 7；沒有四欄共用標頭。 |
-| `17` | `sub_596180` / `sub_596240` | 空 payload（raw `word0=0`，送 8-byte Packet）；另一 caller 是 `lstrlenA(String)+1` bytes 的 ANSI/NUL payload | 兩個 caller 都用 primary destination 的 direct `sub_595900` lane，**不經 AES**；不能以 periodic empty variant 代表全部 opcode 17。 |
-| `19` | `sub_596670` | `u8×2 s8 u8 s32` + ANSI/NUL nickname | secondary sockaddr via `sub_595A10`；完整欄位與 retry/completion 見下節。offset 2 使用 `sub_5928E0`；offset 3 的 `-2` 會由 `sub_592920` 以 u8 `0xFE` 寫出。 |
-| `21` | `sub_596330` | `u8×3 s32 raw4 raw4` | `sub_595D80` 的 active-manager periodic path，經 `sub_595A10` 送 secondary sockaddr；兩個 `sub_592AA0` tail 仍是 caller-defined raw4。 |
-| `23` | `sub_744450` | `u8×3 s32 raw4 u8 u16×3 u8 u8×8 s32` | movement/game-state caller；`sub_602D70 → sub_596B90 → sub_595A10` gate/send 到 secondary sockaddr；三個 `u16` 與八個 `u8` 的 domain semantics UNRESOLVED。 |
-| `27` | `sub_6036F0`（另有 `sub_6013E0` 同序列） | `u8×3 s32 u8×2` | 先將 `this+404=0`，再經 `sub_602D70 → sub_596B90 → sub_595A10` gate/send 到 secondary sockaddr；兩 byte 的 domain 尚未定案。 |
-| `30` | `sub_606340` / `sub_6065E0` | `sub_606340` 先建構 empty op-30 buffer 但在該 site 不 send；`sub_6065E0` 寫 `u8×3 s32 u16 count` + variable records | `sub_606340` 分段呼叫 `sub_6065E0`；只有後者經 `sub_595A10` 送 secondary sockaddr；`v32 = sub_761500(...)` 是 local temporary，**沒有被寫入 packet**。 |
-| `32` | `sub_96BF70` | `u8×3 s32 u8 s8 u16×3` | `sub_967E90` caller；object/position path via `sub_595A10`；三個 `u16` 的 domain 未證實。 |
-| `35` | `sub_7463E0` | `u8×3 s32` | `sub_67F380()` gate 下經 `sub_595A10` 送 secondary sockaddr；不是一般 ready、P2P 或 gameplay authority 的證據。 |
-
-**Opcode 30 的 record framing 特別重要。** `sub_606340` 的 direct constructor site 只是 empty buffer initialization，沒有對應的 send；真正送出的 `sub_6065E0` 先以
-`sub_5929A0` 寫入 `v33`（`j3-i` 或 bounded range），所以 count 是 **u16**，
-不是 raw4。每個 record 至少有一個 `s8` status；status non-zero 時再寫一個
-`u16`。只有 `CPaperBot` 且 `sub_67E940(...)` 為真時，才追加
-`u16, s8, u16, f32×3, s32`。這些 conditional tails 不能被壓扁成固定
-record width；`v32` 雖由 `sub_761500` 計算，沒有任何 `sub_592*` writer 使用。
-各 record 欄位的遊戲語義仍是 **UNRESOLVED**。
-
-**Opcode 23 的 width/type 也不能由變數宣告猜測。** Native helper sequence 是
-`u8×3 s32 raw4 u8 u16×3 u8 u8×8 s32`：`sub_5929A0` 是 `u16`、
-`sub_592960` 是 `u8`、`sub_592B20` 沒有出現在這個 builder；`sub_592A20`
-是最後的 `s32`。三組 `u16` 來自同一個 position-like source，八個 `u8` 來自
-movement/flags/height/state-like branches；語意仍不命名。
-
-#### UDP signedness / native type-shape re-audit（2026-09-17）
-
-你不能只看 `rawN` 這個 width label 就說 signedness 無法確認。這批 native
-primitive 已經有 function-identity mapping：`sub_592920`/`sub_592960` 是
-`u8` writer，`sub_5928E0` 是 `s8` writer；`sub_5929A0` 是 `u16`，
-`sub_5929E0` 是 `s16`，`sub_592A20` 是 `s32`，`sub_592A60` 是 `u32`，
-`sub_592B20` 是 `f32`，`sub_592AE0`/`sub_592B60` 是 `u64`。這是 helper
-alias evidence，不是從 Hex-Rays 的 `char` parameter 猜出來；那些 prototypes
-在 1/2/4/8-byte writer 上普遍失真。`sub_592AA0`/`sub_592AC0` 才保留為
-caller-defined `raw4` alias。
-
-套回 low private-UDP builders 後：
-
-- 共用 prefix 是 **`u8 u8 u8 s32`**。第三個 `n0x10` 在 `n2 == 2` 時 source
-  會是 `-2`，但它呼叫的是 `sub_592920`，所以 wire type 仍是 **u8**，實際
-  byte 是 `0xFE`；不能因 source literal 是負數就改成 `s8`。
-- opcode 19 的順序是 **`u8 u8 s8 u8 s32 str`**。offset 2 使用
-  `sub_5928E0`，offset 3 使用 `sub_592920`；兩者不能互換。offset 2 的
-  source value 是 bool-like，但 native serializer identity 仍是 `s8`。
-- opcode 5/6/13/14 是 **`u8 raw4`**：leading byte 是 `sub_592920` 的
-  `u8`，後面的 `sub_592AA0` 是 caller-defined 4-byte alias，不能直接從
-  helper body 命名成 `s32` 或 `u32`。
-- opcode 30 的 count 是 **`u16`**，因為使用 `sub_5929A0`；record status
-  使用 `sub_5928E0` 的 **`s8`**。status non-zero 後的 `sub_5929A0` 是
-  `u16`，conditional tail 依序含 `u16, s8, u16, f32×3, s32`。
-- opcode 23 的完整 helper sequence 是 **`u8×3 s32 raw4 u8 u16×3
-  u8 u8×8 s32`**：`raw4` 是 `sub_592AA0` 的 caller-defined `n0x64`，三個
-  position-like words 是 `u16`，movement/state tail 的八個 writer 都是
-  `sub_592960` 的 `u8`，最後是 `sub_592A20` 的 `s32`。即使某一 branch
-  的 source delta 先 clamp 到 `-127`，serializer identity 仍是 `u8`。
-- opcode 32 是 **`u8×3 s32 u8 s8 u16×3`**；其中單一 `s8` 來自
-  `sub_5928E0`，三個 position-like words 來自 `sub_5929A0` 的 `u16`。
-- opcode 27 是 **`u8×3 s32 u8×2`**；opcode 21 是
-  **`u8×3 s32 raw4 raw4`**；兩者的 `raw4` 仍因使用 `sub_592AA0` 而保持
-  caller-defined，不把 native `int`-shaped source 直接升格成 wire `s32`。
-
-因此需要保留 `raw4` 的地方很少，而且理由是 **該 alias 本身是 generic
-4-byte copy**；不能再把已由 `sub_592920/8E0/960`、`sub_5929A0`、
-`sub_592A20`、`sub_592B20` 證明的 typed writes 退回 raw。
-
-**Opcode 5/6/13/14 的 correction。** 這四個 builder 都不是單一 `u8`：
-它們先寫 source-dependent byte，再用 `sub_592AA0` 寫入 elapsed/context raw4。
-`sub_592AA0` 的 native width 是 4 bytes，即使 Hex-Rays 把參數顯示成 `char`，
-也不能以參數宣告縮窄 wire layout。
-
-**Opcode 17 的 correction。** `sub_596180` 的 timer path 建立完全空 payload，
-但 `sub_596240` 建立相同 opcode 後呼叫 `sub_5926F0(v1, String)`；其 wire
-payload 是含 NUL 的 ANSI string。兩者都經 `sub_595900` 直接送出 raw Packet，
-不經 `sub_592F60` AES；server/parser 不能假設 opcode 17 永遠是 zero-length，
-也不能把它套用 AES lane 的 16-byte ciphertext framing。
-
-#### Native send-helper cross-check
-
-| helper | destination / framing | audited UDP use |
-|---|---|---|
-| `sub_595900` | CUDPSocket primary sockaddr；直接送 `Packet+24`，length=`word0+8`；不呼叫 `sub_591F90`、`sub_592F60` 或 AES | 目前唯一有直接 caller 的是 opcode 17 的 `sub_596180`/`sub_596240`。 |
-| `sub_595940` | CUDPSocket secondary sockaddr；同樣是 raw `Packet+24` direct send | wrapper 存在，但在本 dump 找不到 direct caller；不可把它當成已證明的 opcode-17 secondary emission。 |
-| `sub_595980` | explicit raw16 sockaddr；若 packet send-count 為 0，先寫 `word3=word0`、呼叫 `sub_592F60` AES，再以 `sendto` 發送 | opcode 5/6/13/14 的 address-directed sends，以及 `sub_595A10`/generic explicit callers。 |
-| `sub_595A10` | 從 `CUDPNetworkManager+9680`（CUDPSocket secondary sockaddr `+40..+55`）呼叫 `sub_595980`；`sub_595BD0` 明確讀 manager `+2420` DWORD，即 byte offset `+9680` | secondary-destination AES sends：`1/9/15/19/21/23/27/30/32/35`，其中 `23/27` 先經 `sub_602D70 → sub_596B90` gate。這不是 CUDPSocket primary `+24..+39`。 |
-| `sub_596B90` | 若 `n2 != 2` 且 `sub_67EAC0()==0`，才呼叫 `sub_595A10` secondary AES send；否則不送 | `sub_602D70` 使用的 common send gate；builder 執行不等於 datagram 已送出。 |
-
-因此三次 retry loop 並不代表三次獨立加密：`sub_595980` 第一次把 packet
-轉成 AES ciphertext 並增加 Packet send-count，第二、三次使用同一個已加密
-buffer，只改變 destination argument（若 explicit target 不變，則是同一 ciphertext
-重送）。相反地 opcode 17 兩個 caller 直接送 constructor buffer，沒有這個
-AES/send-count transition。這個 helper-level distinction 是 native transport
-fact，不是 server 是否應接受 raw opcode 17 的證據。
-
-**關鍵界線（不變）。** 以上只證明**客戶端的 UDP 字彙、builder wire width、
-部分 target sockaddr 與 local state mutation**。它不證明 server 是否應參與、
-是否存在 relay/ownership/authentication、或任何 gameplay/reward mutation。
-除 opcode 19→20 外，server behavior 一律維持 **UNRESOLVED**；本節不授權
-擴充 UDP server，也不把 client peer-address reuse 轉成 server admission policy。
-
-### UDP receiver/parser and state cross-check（本輪）
-
-`sub_595A60` 每次只建立一個 Packet，將 `recvfrom` 寫入 CUDPSocket 的
-`+60..+75` source sockaddr，再依 `word0+8`、AES 解密與 native packet framing
-檢查後呼叫 `sub_595E80`。因此 `dword_1326944..dword_1326950` 是目前這次
-`recvfrom` 的 source sockaddr projection；它不是 packet payload，也不是由
-server 發來的 identity 欄位。`sub_595E80` 另外要求 manager `+52 != 0`、
-全域 dispatch object 非 null、且 `sub_67EAC0()==0`；不滿足時整個 UDP
-private dispatcher 不執行。dispatcher 沒有 default error/reply。
-
-| inbound opcode | parser / consumed wire | observed mutation or follow-up |
-|---:|---|---|
-| `2` | 不讀 body | `sub_593A60` 只用 global retry gate；第一次將 local state `byte_1324330=2` 並保存 elapsed，後續只增加 global counter。它不驗證 payload 為空。 |
-| `4` | `u8 count`，再重複 `u8 memberKey + raw16 addressBlob` | 對已知 key 寫入每 member 的 stored address；未知 key 會立即 return，之前的 entries 不回滾。之後 opcode 5 對每個符合的 non-local stored address 送三次，local state 設 4。 |
-| `5` | `u8 memberKey + raw4` | 匹配的 member 第一次收到時，將本次 `recvfrom` source sockaddr 存入其 address slot，再以 opcode 6（同樣 `u8+raw4`）對該 source 送三次；重複 receipt 只增加 counter。輸入 raw4 在此 callee 內被消費但沒有進入該 state mutation。 |
-| `6` | `u8 memberKey + raw4` | `sub_5940E0` 第一次收到尚未完成的 member key 時，從本次 `recvfrom` source 建立 `unk_F6D594` address record 並設 flags；輸入 raw4 被讀取但未被後續使用，也沒有 response。 |
-| `8/24` | 不在 `sub_595E80` 直接讀欄位 | 共用 `sub_596940`；只有 global `n15==13` 才交給 `sub_593750` 的 queue/consumer，否則走 bug/report path。不能用 opcode 24 的名稱推導固定 body。 |
-| `10` | `u8 memberKey + raw16 addressBlob` | 首次匹配且 `byte_F6D5B0` 未設時保存 payload address，建立 opcode 13（`u8+raw4`）並對該 address 送三次，state 設 2；重複 receipt 不重送。 |
-| `12` | `u8 count`，再重複 `u8 memberKey + raw16 addressBlob` | 先為每個已知 key 保存 payload address；之後對所有符合且非本地 source key 的 stored address 送 opcode 13 三次，state 設 4。未知 key 會讓該 parser立即 return，可能留下前面 entries 的 mutation。 |
-| `13` | `u8 memberKey + raw4` | 首次匹配且未完成時，使用已保存的 `unk_F6D594` address 建立 opcode 14 並送三次；重複 receipt 只增加 counter。輸入 raw4 在此 parser 中未被作為 address 或 state value 使用。 |
-| `14` | `u8 memberKey + raw4` | 首次匹配且 `byte_F6D5A5` 未設時，將本次 `recvfrom` source 存入 `unk_F6D594` 並設 flags/state=4；raw4 被讀取但未消費到後續 domain state。 |
-| `15` | `raw16` | `sub_593DF0` 只允許 global one-shot latch 第一次通過，將 raw16 複製到 `unk_F25648`；沒有 opcode 15 response。這個 inbound shape 與 outbound opcode 15 的 `u8,u8` 是兩個方向的不同 builder/reader，不能合併成同一 layout。 |
-| `18` | 不讀 body | one-shot gate 後呼叫 `sub_556530`，該 native builder 建構並經 TCP socket 送出 catalog opcode `141 PM_CONNECT_REQ`；這不是 UDP body response，也沒有 UDP payload-to-state evidence。 |
-| `20` | 不讀 body | `sub_5968C0` 設 `byte_1D0CFE7=1`，清 manager `+44,+8,+4`，更新 `+24`，並清 `byte_1324331`；沒有 identity、nickname 或 player field read。 |
-| `22` | `u8 flag`；若 flag=1，再 `u8 count` + `count×(u8 memberKey + raw4 value)` | 只對 known key 寫 `dword_F6D9E8[member]`；無 response。count/values 的 domain 未定案。 |
-| `28` | header `u8×3 + u8 + u8 + raw2 + u8 recordCount`；依 header selector 再讀 `recordCount×{u8 index, raw4 value, raw2 state}`，但 rule 3 有額外 gate | `sub_594E80 → sub_74D130 → sub_9FA000` 只在 gameplay mode 10 及多個 local-object gate 通過時讀 body；records 經 `sub_9FA860` 以 local mode/object/state 條件更新 internal flags，最後連入 internal queue。不能將 outbound 27 的兩個 byte 當成 inbound 28 layout。 |
-| `29` | 不讀 body | `sub_593E20` 關閉 `dword_1321D00` 的 TCP socket，載入 resource `0xA8`，再呼叫 local notice code 37；不是 packet-derived response。 |
-| `31` | header `u8×3 + raw4 gateValue + s16 recordCount`；每筆先讀 `u8 active`，再依 active/object lookup 選不同 tail | `sub_594EA0 → sub_606AD0` 在 battle object lock 內，以 valid-object branch 更新 object position/state；unknown/dead-object branch 仍消費 fallback tail 但本函式不使用其值。沒有 response。 |
-| `33` | `u8×5 + raw4 + s16×3` | `sub_594EC0 → sub_96C1E0` 只有 `n2_24 != 0` 且 local gate 允許時讀取；raw position 三值除以 3 寫 object `+60/+64/+68`，另寫 `+72`、`+73=1`、`+75`，並清 `+84`。第一、二 u8 與 raw4 在此 callee 未進入 mutation。這是 client object mutation，不證明 server authority。 |
-| `34` | 三筆固定 `{u8×4, raw2, u8}`，最後再 `raw2, raw2` | `sub_594F20` 將每筆交給 `sub_778BC0`；record raw2 被消費但未傳入該 helper。type 1–3 才更新對應 object slot，最後兩個 raw2 寫入 current member `+156/+160`。欄位 domain 未定案。 |
-| `154` | `u8 count` + `count×(u8 memberKey + u8 value)` | 更新 known member 的 `dword_F6D9E8`；無 response。 |
-| `158` | 不讀 body | `sub_596910` 取 UI resource key `0x127`，再呼叫 `sub_9A7DE0(ArgList, 65, 1)`；沒有 packet-derived field 或 network response。 |
-
-#### Private UDP / catalog numeric overlap boundary
-
-The catalog names in `db/packets.tsv` and the native registration strings are a
-separate 153..164 catalog band: `153 UDP_ALL_PING_REQ`, `154 UDP_ALL_PING_ACK`,
-`155 Y_UDP_C_HOLE_INF`, `156 Y_UDP_S_HOLE_INF`, `157 UDP_TCP_DEAD_REQ`,
-`158 UDP_TCP_DEAD_ACK`, `159 TCP_UDP_DEAD_REQ`, `160 TCP_UDP_DEAD_ACK`,
-`161 UDP_TCP_LIVE_REQ`, `162 UDP_TCP_LIVE_ACK`, `163 TCP_UDP_LIVE_REQ`, and
-`164 TCP_UDP_LIVE_ACK`. Only numeric 154 and 158 also occur in `sub_595E80`;
-the table rows above retain their private handler/body as the ground truth. The
-other catalog values are not cases in this switch, so their names cannot be copied
-onto private ops by number. `OnY_UDP_S_MOVE_INF` is a native consumer string for
-the shared 8/24 handler, not proof of which numeric case is its official catalog id.
-
-#### 28/31/33/34/158 consumer re-audit (2026-09-17)
-
-以下把 dispatcher wrapper、reader primitive、caller gate、callee consumer 與相鄰
-state branch 分開記錄；任何未由 native/resource 證明的 mode、team、player、
-position 或 authority 名稱都不升格為 protocol semantics。
-
-- **28 — `sub_594E80 → sub_74D130 → sub_9FA000`:** `sub_9FA000` 先要求
-  `sub_5376F0(byte_EE8968)==10`，再進 `this+84` critical section；不滿足
-  local object chain、`sub_761500(...)+8`、`n0x10_1+56`、`dword_1D0A974`
-  與 `sub_720A40` 等條件時，整個 body 不讀。讀取順序是
-  `u8 p_n16_1, u8 p_n16_2, u8 p_n16_3, u8 v44, u8 n16, raw2 v46,
-  u8 v47[0]`。`v44` 與 `v46` 在此 callee 沒有後續 consumer；`p_n16` 通常來自
-  `sub_67D010()`，但在 `sub_720A40(&dword_1D12428)` 且
-  `sub_7209C0(..., p_n16_2)` 成立時會改用第二 header byte。rule selector
-  `p_n16_1` 為 1、2、4、5 時，各讀 `v47[0]` 筆
-  `{u8 index, raw4 value, raw2 state}`；rule 3 只有 `p_n16_2 != 0` 才讀，且
-  只有 `n16 == p_n16` 才呼叫同一 mutation，否則走 `sub_62DD20` side effect；
-  其他 rule 不讀 records。每筆最後交給 `sub_9FA860`：global `n2==2` 時不更新；
-  否則須有 current `sub_67D1D0()`、`value != 0`、
-  `sub_67D1D0() == sub_67DF00(n16)`，並由 `sub_526E20(..., value)` 找到
-  object。成功時以 `state <= 5` 或等於既有 `object+16` 設 internal flag 0，
-  否則設 1，然後寫 `object+16=state`；flag 1 會記 `this+6=timeGetTime()`。
-  record loop 後的 `sub_9FC9A0` 是 internal queue/list insertion，不是 network
-  response。`v47[0]` 是 u8 loop count；沒有看到本函式對它做額外 upper bound。
-
-- **31 — `sub_594EA0 → sub_606AD0`:** `sub_606AD0` 先由 `sub_67EB70()`
-  gate，鎖 `this+368` 並清 `this+468`。更深一層還要求 gameplay object chain、
-  mode 10、`sub_761500(...)+8`、`n0x10_1+56`、`dword_1D0A974 != 1` 及
-  `sub_720A40` 等條件；失敗時不讀任何 body。成功後讀
-  `u8 n5, u8 v40, u8 n16, raw4 v49, s16 v32[0]`，只有 `v49 > 0` 且
-  `v32[0] > 0` 才 loop（loop bound 是 native signed s16；`v49` 不是 loop
-  count，也未見 upper bound）。每筆先讀 `u8 active`；active=0 就結束該筆。
-  active!=0 時讀 `raw2 objectIndex`，`sub_67E940(objectIndex)` 失敗就不再讀
-  該筆；成功後讀 `raw2 memberKey` 並 lookup object。valid object branch 再讀
-  `u8 status, raw2 rawState, f32×3 positionLike, raw4 value`。它會把
-  `rawState` 寫到 object `+179/+180`（變更則 `+181=1`），把三個 float 寫到
-  `*(object+122)+4/+8/+12`，依舊位置距離是否至少 3 設 `object+1128`，並以
-  `sub_9BDA00/sub_9BDA20` 分支處理 status、`raw4 value` 與
-  `sub_906EE0(object+278,1)`。fallback branch（lookup null 或
-  `sub_9B9910(object)==1`）消費 `u8 status, raw2×3, raw4`，但在這個 callee
-  沒有使用這些 fallback 值。沒有 outbound response；`n70=70`、`n350=350`、
-  `v57` 等只是在此 dump 中沒有後續 wire/state consumer 的 locals。
-
-- **33 — `sub_594EC0 → sub_96C1E0`:** wrapper 在 `n2_24 == 0` 時完全不讀。
-  否則當 `n2==2`，或 `byte_F33120[240780*sub_67D110()+239813] != 1`
-  時才進 reader；順序是 `u8 v9, u8 v16, u8 n16, raw4 v15, u8 v14,
-  u8 object+75, s16×3`。`v9/v16/v15` 在此 consumer 不再使用；三個 signed
-  raw2 轉成除以 3 的 float，寫入 object `+60/+64/+68`，`v14` 寫 `+72`，
-  並寫 `+73=1`、清 `+84`。這個 branch 沒有 packet response，也沒有 native
-  proof that these coordinates are authoritative rather than client state.
-
-- **34 — `sub_594F20`:** 函式固定先初始化三個 8-byte local record，再讀三筆
-  `u8×4, raw2, u8`，最後讀兩個 raw2。`sub_778BC0` 只在 first byte minus 1
-  落在 0..2 時呼叫 `sub_76B250`；它傳入 record byte 1/2/3 與 byte 6，完全不
-  傳 record offset `+4` 的 raw2。`sub_76B250` 將這些 byte 寫入 selected
-  object slot 的 `+8/+12/+16/+44/+48`，並依 byte 2 是否為 0 做 local timer/
-  animation-like branch；這裡仍不替它命名 domain。最後 `sub_407E80(this_15,
-  byte_EE896D)` lookup current member，成功才把 final raw2/raw2 寫到 member
-  `+156/+160`。沒有 outbound response。
-
-- **158 — `sub_596910`:** body 完全不讀；只由 `sub_408140 → sub_408080(...,
-  0x127)` 取得 UI text/argument，接著以 notice code 65、flag 1 呼叫
-  `sub_9A7DE0`。這是 local presentation branch，不是 server acknowledgement
-  或 state mutation evidence。
-
-這個表把 **reader consumed width** 與 **consumer mutation** 分開：native
-`sub_592500` 的 boundary failure 不會自動讓 caller rollback；上述 count loop
-也未全部逐次檢查 helper return。故這些 client reader facts 不足以授權
-server 端接受任意 count、address blob、member key 或 source sockaddr。特別是
-`5/6/13/14` 會把 `recvfrom` source 或 payload raw16 address 寫入不同 local
-storage，這只能證明 client-side address reuse/selection；server ownership、
-relay、authentication 與 peer admission 仍是 **UNRESOLVED**。
-
-### Private opcode 19 → 20
-
-`sub_596670(CUDPNetworkManager)` is the source of the only currently implemented
-server behavior. On a normal retry it builds private opcode **19** in this exact
-order (all scalar values are little-endian because the packet primitives write
-native little-endian scalars):
+`sub_596670(CUDPNetworkManager)` 每次正常 retry 依此精確順序建構 op19
+（純量皆 little-endian）：
 
 | Offset | Wire type | Client source | Meaning / evidence boundary |
 |---:|---|---|---|
-| 0 | `u8` | `*sub_417D00()` via `sub_592920` | active channel index; set by the 142/196 channel paths. |
-| 1 | `u8` | `CMyData + 5` (`byte_EE896D`) | current room-member slot. `sub_537690` writes it from room/join response slot fields and callers use it to select the local room member. |
-| 2 | `s8` | `CMyData + 840 == 2` via `sub_5928E0` | exact boolean comparison only; the domain of `CMyData+840` remains **UNRESOLVED**. Normal client emissions are 0 or 1. |
-| 3 | `u8` | `-2` when `CMyData+840==2`, otherwise `CMyData+13`, via `sub_592920` | source-dependent one-byte value; the special `-2` is emitted as wire byte `0xFE`. Its non-special domain is **UNRESOLVED**; do not rename it team/mode/peer id. |
-| 4 | `s32` | `CMyData + 844` (`dword_EE8CB4`) via `sub_592A20` | client-reported local player identifier. It is compared with player records during room/join processing; no server-side authorization rule is recovered. |
-| 8 | NUL-terminated CP949/ANSI string | `sub_537740(CMyData)` = `CMyData + 896`, via `sub_5926F0` | local nickname. It is copied from character UI data and reused in client chat/name comparisons. No length prefix; emission includes the NUL. |
+| 0 | `u8` | `*sub_417D00()` via `sub_592920` | active channel index；由 142/196 channel 路徑設定（§2.6 溯源）。 |
+| 1 | `u8` | `CMyData + 5` (`byte_EE896D`) | 目前房間成員 slot；`sub_537690` 由 room/join 回應寫入。 |
+| 2 | `s8` | `CMyData + 840 == 2` via `sub_5928E0` | 僅布林比較；`CMyData+840` 的 domain **UNRESOLVED**，正常值 0/1。 |
+| 3 | `u8` | `CMyData+840==2` 時 `-2`，否則 `CMyData+13`，via `sub_592920` | source-dependent byte；特別值 `-2` 上線為 `0xFE`。非特別值 domain **UNRESOLVED**，不得命名為 team/mode/peer id。 |
+| 4 | `s32` | `CMyData + 844` (`dword_EE8CB4`) via `sub_592A20` | client 自報的本地 player identifier；room/join 流程中參與比對，無 server 授權規則證據。 |
+| 8 | NUL 結尾 CP949/ANSI 字串 | `sub_537740(CMyData)` = `CMyData + 896`，via `sub_5926F0` | 本地 nickname；無長度前綴，含結尾 NUL。 |
 
-The object provenance is direct: global `byte_EE8968` is a large `CMyData`, not
-the decompiler's false `char[4]` declaration (`sub_AD91B0` constructs it and
-`sub_ADC240` ⚠符號已漂移 destroys it). Accessors in `00536D70..00537740` establish the
-object-relative offsets. The payload is `9 + encodedNicknameByteCount` bytes,
-where the final one byte is the NUL. Its exact semantic names remain intentionally
-source-oriented where the binary does not prove a domain interpretation.
+物件出處是直接的：全域 `byte_EE8968` 是大型 `CMyData`（非反編譯器
+誤標的 `char[4]`；`sub_AD91B0` 建構之，本 dump 未回收其 destructor
+符號），`00536D70..00537740` 的 accessor 確立物件相對 offset。payload
+長度為 `9 + encodedNicknameByteCount`（末位 NUL）。語義名維持來源導向。
 
-**Retry/completion state machine:**
+**Retry/completion state machine：**
 
-1. `sub_595C90` sets control next-tick (`CUDPNetworkManager+40`) and retry count
-   (`+44`) to zero. The first call to `sub_596670` can consequently send now.
-2. The direct callers are `sub_4070B0`, `sub_407290`, and the game-start screen
-   tick `CLobbyGameStart::sub_43C380`. They poll this routine while their own UI/
-   game transitions wait; it is not a generic always-on UDP heartbeat.
-3. When `timeGetTime() >= manager+40` and retry count is at most 100, a normal
-   call sends opcode 19 through `sub_595A10` to the CUDPSocket secondary
-   sockaddr. That sockaddr is initially copied from the successful TCP `196`
-   endpoint, but later `142`/`371` flows can replace it. The call clears global
-   `byte_1D0CFE7`, records a tick at `+36`, schedules `+40 = now + 500`, then
-   increments `+44`. The increment and schedule happen even if `sendto` failed
-   (its return is merely accumulated into raw global `dword_1D0CFF4`).
-4. Attempt six increments the count from 5 to 6, calls TCP `sub_560720` (catalog
-   opcode `139 GG_EXITGAME_REQ`), then stores 101. Values above 100 suppress
-   further normal sends. This is a client-observable fallback, not a retry policy
-   the server may freely redesign.
-5. Before building 19, `sub_596670` checks `sub_67F120`: it observes whether the
-   current local game-mode object reports internal state **9**. If true, the same
-   completion mutation occurs locally without an opcode-19 send. The label for
-   mode state 9 is **UNRESOLVED**.
-6. UDP opcode **20** reaches `sub_595E80` only while the manager is active, a
-   global dispatch dependency is non-null, and `sub_67EAC0()==0`. Case 20 calls
-   `sub_5968C0`, which reads **zero payload fields**, sets `byte_1D0CFE7=1`,
-   clears manager retry/control fields `+44`, `+8`, and `+4`, timestamps `+24`,
-   and calls `sub_594F00`. The latter only clears `byte_1324331`.
-7. `byte_1D0CFE7` is a broader game-transition gate, not an opcode-20 receipt
-   bit: `CLobbyGameStart::sub_43C2A0` also sets it for internal mode states 6 or
-   15, and several lobby/game transition functions clear it. Those clears do not
-   themselves reset the retry counter. There is therefore no basis for treating
-   op20 as an idempotent, authenticated session admission message.
+1. `sub_595C90` 把 control next-tick（mgr+40）與 retry count（+44）歸零；首次
+   呼叫可即送。
+2. direct callers 是 `sub_4070B0`、`sub_407290` 與開始鈕 tick
+   `CLobbyGameStart::sub_43C380`；它們在自身 UI/轉場等待期輪詢本函式，
+   **不是**常駐心跳。
+3. `timeGetTime() >= mgr+40` 且 retry ≤ 100 時經 `sub_595A10` 對 secondary
+   sockaddr 送 op19；送出前清 `byte_1D0CFE7`、記 `+36`、排 `+40=now+500`、
+   遞增 `+44`——即使 `sendto` 失敗也照樣排程（回傳只累進
+   `dword_1D0CFF4`）。
+4. 第六次把計數 5→6，送 **TCP 139 `GG_EXITGAME_REQ`**（`sub_560720`），
+   再存 101；>100 抑制後續送出。這是 client 可觀測 fallback，非 server 可
+   自由重設的 retry 政策。
+5. 建構前查 `sub_67F120`：本地 game-mode 物件內部狀態為 **9** 時，直接做
+   本地完成 mutation、**不送 op19**；mode state 9 的名稱 **UNRESOLVED**。
+6. op20 只有在 manager active、全域 dispatch 物件非 null 且
+   `sub_67EAC0()==0` 時才進 `sub_595E80`；case 20 `sub_5968C0` **不讀任何
+   欄位**，設 `byte_1D0CFE7=1`、清 mgr `+44/+8/+4`、記 `+24`，呼叫
+   `sub_594F00`（僅清 `byte_1324331`）。
+7. `byte_1D0CFE7` 是更廣的轉場閘、非 op20 收訖位元：
+   `CLobbyGameStart::sub_43C2A0` 在 mode 內部狀態 6 或 15 時也會本地設它
+   （並設 `n15=12`＝g_byGamePlay 過渡態）；多個 lobby/轉場函式會清它。
+   因此不能把 op20 當成幂等、已認證的准入訊息。
 
-`sub_4070B0` additionally compares `timeGetTime()` with an externally maintained
-`dword_1326980`; `sub_407290` stops when external `n0x64 > 100`. The setters and
-units of those outer limits are not fully recovered, so no numeric timeout beyond
-the 500-ms scheduler and sixth-send fallback is claimed here.
+`sub_4070B0` 另與外部維護的 `dword_1326980` 比較逾時、`sub_407290` 以
+`n0x64 > 100` 停止；這些外層上限的設置者與單位未完全回收，除 500ms 排程
+與第六次 fallback 外不宣稱具體數值。
 
 ### Server implementation boundary
 
-`server-ts/src/packet.ts` and `server-ts/src/udp.ts` encode the native UDP AES-only
-framing for the implemented opcode-19/20 control path. The native opcode-17 direct
-send lane is not implemented or assigned a server role here. AES-CFB encryption is
-**not** an authentication/MAC result, and no
-native server admission token is recovered. `server-ts/src/udp.ts` binds the advertised IPv4
-`UdpHost/UdpPort`, parses only the complete opcode-19 shape above, and immediately
-returns an **empty, encrypted private opcode 20** to the datagram source. Empty is
-intentional: `sub_5968C0` does not consume a packet field. The endpoint is
-stateless and does **not** turn the reported channel/slot/player/nickname fields
-into authority, because the original server-side admission/correlation behavior
-has not been recovered.
-
-This minimum exists to prevent the directly evidenced sixth-attempt TCP 139
-fallback. It is not a claim that the remaining private opcode cases are a relay,
-peer-to-peer protocol, NAT traversal, or complete gameplay transport. Unsupported
-private opcodes are logged and ignored. Future work must evidence each case's
-builder, receiver, state dependencies, remote-address usage, and server behavior
-before expanding this endpoint.
-
-### Adjacent send/address flows recovered, deliberately not implemented
-
-The following is recorded because it is necessary counter-evidence against
-turning 19→20 into a made-up general UDP protocol. It is **Fact/HIGH** for the
-listed reads/writes and branches, but not a conclusion about the original
-server's business rules.
-
-| Native path | Directly observed behavior | Server consequence |
-|---|---|---|
-| `sub_595D80 → sub_596330` | The periodic path runs only while manager `+52` is active, `n2 != 2`, `sub_67F120()!=1`, and `sub_67EC20()!=1`. It passes raw manager `+72` into `sub_596330`; that field's provenance remains **UNRESOLVED**. `sub_596330` does nothing when bit `0x08` is set. Otherwise it emits opcode 21 through `sub_595A10` to the secondary sockaddr: `u8 channel, u8 roomSlot, u8 sourceDependentSlot, s32 dword_EE8CB4, s32 manager+4, s32 dword_EE8978`. The two final values retain source-oriented names. | No opcode 21 is emitted or accepted by this server. Its trigger and server correlation are not recovered. |
-| `sub_5937D0 → sub_593830` | State byte zero calls `sub_593830`. For `n2==2`, it sends opcode 15 through `sub_595A10` to the secondary sockaddr (`u8 channel,u8 roomSlot`) three times, stores state 7. Otherwise, if elapsed since `dword_F2563C` exceeds 1000 and global `n0x3E8==0`, it sends opcode 1 through the same secondary sockaddr (`u8 channel,u8 roomSlot,u8 sourceDependentSlot,s32 clientPlayerId`) and refreshes that tick. State 4 delegates to `sub_5941D0`; state 7 returns true. | Do not use this as a “ready” or P2P state name. No 1/15 behavior is implemented. |
-| inbound 4 → `sub_593AB0` | A one-shot global guard admits only its first execution. It reads `u8 count`, then `count×{u8 participantKey,raw16 addressBlob}`; it maps each key through the 16 local member records, returns immediately for an unknown key (after any preceding mutations), stores matching blobs, and sends opcode 5 (`u8 sourceDependentSlot,raw4 dword_F25640`) three times directly to every matching nonlocal stored 16-byte address. It then stores state 4. | A raw16 blob is used as a sockaddr argument in this path, but its server generation/lifetime is not recovered. Do not create, relay, or zero-fill it. |
-| inbound 5 → `sub_593E60` | It reads `u8 participantKey,raw4`. On first receipt for a matching member key it snapshots the `recvfrom` source sockaddr into that member's 16-byte storage, creates opcode 6 (`u8 sourceDependentSlot,raw4 dword_F25640`), and sends it three times directly to that received source; later receives only increment a byte counter. | This proves direct received-address reuse in this client branch, not the identity/authentication or server role. No 5/6 behavior is implemented. |
-| `sub_596E60` versus CUDPSocket's stored primary | `sub_596DA0` sets primary sockaddr at CUDPSocket `+24..+39`; `sub_596E60` sets secondary sockaddr at `unk_1326908 +40..+55`. `sub_595900` is the observed raw-send wrapper used by opcode 17; `sub_595940` is a parallel secondary-send wrapper but has no direct caller in the audited dump; `sub_595980` is the observed explicit-address AES-send primitive. | Endpoint config must remain separate in future design even though successful 196 initially copies the same pair into both fields. |
-
-**Opcode-21 correction / exact layout.** The decompiler names around `sub_596330`
-are misleading and should not be silently converted into player semantics. Its
-payload is exactly:
-
-```
-u8  activeChannelIndex          = *sub_417D00()
-u8  currentRoomSlot             = byte_EE896D
-u8  sourceDependentSlot          = (n2 == 2) ? 0xFE : n0x10
-s32 clientReportedPlayerId       = dword_EE8CB4
-s32 managerOffsetPlus4Raw        = CUDPNetworkManager + 4
-s32 cMyDataOffsetPlus16Raw       = dword_EE8978  (= byte_EE8968 + 0x10)
-```
-
-The sixth field is **not** a second copy of `clientReportedPlayerId`: source
-addresses distinguish `dword_EE8CB4` from `dword_EE8978`. The latter is an
-unresolved `CMyData`-adjacent raw integer; the temporary variable name `v14`
-in the decompile is not evidence of meaning. This table replaces the earlier
-ambiguous prose and is Fact/HIGH for order/width/value source, UNRESOLVED for
-both `manager+4` and `dword_EE8978` semantics.
-
-**Y_TCP_INF 165/166 — TCP catalog packet pair (evidence boundary)**:
-`166` is forwarded by `sub_58D820` to `sub_749B90` on the battle-engine object.
-The client code inspected here does **not** prove that this pair is a fallback for
-private UDP, nor that it is activated by NAT traversal; that older conclusion is
-withdrawn. The field-reader notes below remain a separate TCP parser record:
-```
-166 = u8 slot, u8 subtype:
-  1 = 位置心跳 (u8)          2 = 動作狀態
-  3 = 射擊事件 (f32 tick, u8, u16 wp, u8×3, s32×2 ×2連發...)
-  4 = 移彈/投擲 (f32, u16, s32, 6×f32 = pos+dir 向量!)
-  5 = 技能 (f32, u8, s32, 6×f32)
-  6 = 特殊 (f32, u16, s32, 6×f32, u8, str)
-  7 = 聊天/表情 (str)   8/9 = 狀態
-```
-165 has multiple builder variants. The relationship of those variants to private
-UDP opcode 32 and the original server's routing/admission behavior remains
-**UNRESOLVED**; a relay implementation must not rely on the withdrawn
-TCP-fallback interpretation.
-
-**GC_CLAN_PROTOCOL container grammar (五輪發現)**:
-`GC_CLAN_PROTOCOL_REQ(583)/_ACK(584)` 是**容器封包** — payload 第一個欄位是
-`s32 sub_opcode`，之後才是子協定
-內容。ACK 端 `sub_54D040` (case 584) 依 sub_opcode 分發:
-182/184/185/186/189/192/193/194/198–201/203–207/210–215/218/219/381–383
-(這些數字與頂層 opcode 空間**無關**, 是戰隊系統私有編號)。
-REQ 端 24 個 builder 全部 `ctor(583)` + `WriteS32(sub_op)`:
-182,184–189,191–193,195–197,200,202,203,205,208–212 (196/197 帶
-`s32 count + raw(4*count)` 的成員 id 陣列)。伺服器實作戰隊功能時
-必須解析/產生這層內嵌結構。
-
-**廿四輪自動定案 — 全 24 個 REQ builder 寫入序列**
-(sub 編號後的欄位; s=str, i=s32, R=raw):
-182:(無) 184:str 185:i,i,i,i 186:str 187:i 188:i,i 189:i
-191:i,str 192:i 193:i 195:i,str 196:i,[R] 197:i,[R] 200:i 202:(無)
-203:str 205:str×3 208:(無) 209:(無) 210:str 211:i 212:i
-
-**八輪逐一佈局 (REQ 段 = sub 之後的欄位; ACK 段 = 584 內容):**
-```
-sub  REQ (client→server)          ACK (server→client, sub_54D040 分發)
-182  (無)   邀請入隊確認           s32 clan_id → 顯示歡迎訊息 (sub_54E890)
-184  str clan_name  申請入隊       s32 clan_id, str nick (sub_54E490)
-185  s32 x, s32 uid, s32 11, s32 0 s32 clan_id, s32 reason (sub_54E670)
-186  str nick       踢除           s32 uid, str nick (sub_54E2E0)
-187  s32 clan_id    戰隊資訊       (查表更新)
-188  s32 clan_id, s32 page 成員頁  —
-189  s32 clan_id    公告           s32 clan_id, str notice ×2 (sub_54F9B0,
-                                   兩個 str 都 strncmp 0x18 比對)
-191  s32 n3, str nick  邀請        —
-192  s32 answer     邀請答覆       s32, str ×4, s32 ×5 (sub_54E0F0
-                                   完整戰隊摘要塊)
-193  s32 flag       解散           (this 語境處理 sub_54E020)
-195  s32 id, str    標誌查詢       —
-196  s32 count, raw(4n)  成員id    —
-197  s32 count, raw(4n)  成員id2   —
-200  s32 clan_id    成員清單       s32 count, count×{s32 rank(0..4),
-                                   s32 uid, s32 level, str nick,
-                                   str, s32 status} (sub_54EE70)
-202  (無)           次數查詢       — (sub_54D040 沒有 case 202；配對 ACK
-                                    sub-op / body 是 UNRESOLVED，不可把 201 的
-                                    sub_54F0F0 讀取形狀套過來)
-203  str message    戰隊聊天       str nick, str message (sub_54F2D0;
-                                    client sender 的 rank>1 gate)
-205  str×3          戰隊訊息       str from, str title, str body
-                                   (sub_54F3D0)
-208  (無)           捐獻           — (sub 208 只有 REQ)
-209  (無)           基金           — (同上)
-210  str            設定變更       s32 uid, str (sub_54E770)
-211  s32 uid        升職           s32 clan_id, str nick → rank:=5
-                                   (sub_54FBA0, 過場訊息 0x3E9)
-212  s32 uid        降職           同 211 鏡像 (sub_54FD50)
-198  —              戰爭邀請       s32, s32, str ×2, s32 (sub_54F450)
-199  —              戰爭答覆       (sub_54F5A0)
-201  —              排名           s32, [s32] (sub_54F0F0 同構)
-381..383  —         戰隊戰績       s32 ×2 (sub_54FF00/54FFC0, 帶 sub 參數)
-```
-
-**Fact/HIGH — 202 direction correction.** `sub_550CF0` 確實建 `583 / sub=202`
-且不寫子欄位，但 `sub_54D040` 的完整 584 switch 沒有 `case 202`；不能把唯一
-`case 201 → sub_54F0F0` 的兩個 s32 讀取形狀誤標成 202 ACK。202 的對應 response
-sub-op/body 仍是 **UNRESOLVED**。
-
-**獨立對: 585 GC_CLAN_CREATE_REQ / 586 _ACK (不走隧道!)**:
-REQ (sub_5505F0) = `str name, str slogan, str intro, s32 emblem`
-(廿四輪修正: sub_592A20 = s32 非 u8);
-ACK (sub_54CB90) = `s8 result` — 0=成功 (再讀 `s32 → EE8D18` 扣費後 GP,
-sub_54DD70), 1..7 = 錯誤碼 (重名/GP 不足/等級不夠...)。
-建立成功後 client 自行送 583/187 拉戰隊資訊。
-
----
+`server-ts/src/packet.ts` 與 `server-ts/src/udp.ts` 實作的是上述 op19/20
+控制路徑的原生 UDP AES-only framing。op17 direct lane 未實作亦不賦予
+server 角色。AES-CFB **不是**認證/MAC，client 端也未回收任何 server 准入
+token。`udp.ts` 綁定公告的 IPv4 `UdpHost/UdpPort`，只解析完整 op19 形狀並
+立即把**空的、加密的 private op20**回給 datagram 來源——空是故意的：
+`sub_5968C0` 不讀任何欄位。此端點無狀態，**不**把回報的
+channel/slot/player/nickname 轉化成授權，因原始 server 端准入/關聯行為未
+回收。此最小實作只為避免第六次 TCP 139 fallback；它不宣稱其餘 private
+opcode 是 relay、P2P、NAT 穿透或完整 gameplay transport。未支援的
+private opcode 只記錄並忽略；擴充前必須逐案提出 builder、receiver、state
+相依、遠端位址使用與 server 行為的證據。
 
 ## 2.6 UDP 子系統全 op 語義定案（2026-09-17 深潛稽核）
 
@@ -1113,10 +681,14 @@ secondary lane 中繼」，hole-punch 表在本 build 屬建立後不再使用
 - **17（出，raw primary 無 AES）**：空變體 `sub_596180`：`n0x3E8_1==0`
   期間每 ≥1000ms 送一次空封包；`n0x3E8_1` 正是 op18 的一次性 latch ——
   設計上即「**聯絡信標**：直到 server 回 18 為止每秒 beacon」。
-  字串變體 `sub_596240` 送全域 `String[24]`；該 buffer 經實查為
-  `sub_543B50`（行 143079-143082）的**指令解析暫存**（`sscanf(v547,
-  "%s %s", v542, String)`，v542 與字面 `"ac"` 比對），並非 UDP 專用
-  payload。兩 builder 皆無 direct caller（見上存活度注記）。
+  字串變體 `sub_596240` 送全域 `String[24]`。該 buffer 經全 dump 嚴格
+  掃描（區域變數排除後）**唯一可見 mutator 是 393 `GL_CHANGEID_ACK`
+  handler `sub_58E3B0`**（僅 append 字面 `'_'`）；初始內容為 BSS 空串，
+  其他初始化/填值路徑（如 UI 經計算指標寫入）屬 .c 匯出盲區，無從
+  證明。它同時是 **143 `PM_UDPSTART_REQ` 的 identity 欄**（`sub_555C60`
+  讀取）以及 191、246 `GL_CLIENTINFO_REQ` 的同源字串——op17-str 屬
+  此「identity echo」家族而非獨立 payload。兩 builder 皆無 direct
+  caller（見上存活度注記）。
 - **18（入）**：一次性 latch 後 `sub_556530` 經 TCP 送 **141
   `PM_CONNECT_REQ`**（端點確認）。「UDP raw beacon → server 見活 →
   client TCP 登入」的 bootstrap 鏈完整。
@@ -1125,7 +697,7 @@ secondary lane 中繼」，hole-punch 表在本 build 屬建立後不再使用
 
 **op19（出）＝UDP 工作階段註冊**：`sub_596670` 寫
 `u8（=*sub_417D00()；=CLobbyChannel 全域單例 +0 = 142 PM_CONNECT_ACK
-帶入的 active_channel_index，見「溯源補遺」小節）、u8 roomSlot(CMyData+5)、
+帶入的 active_channel_index；型別由 CLobbyChannel 成員函式以此單例為 this 錨定）、u8 roomSlot(CMyData+5)、
 s8 (n2==2)、u8 depSlot(-2→0xFE)、s32 playerId(CMyData+844)、
 str nickname(CMyData+896)`，
 **每次送出前先清 `byte_1D0CFE7=0`**（嚴格 handshake 語義），500ms 重送、
@@ -1197,7 +769,7 @@ CyAIMultiModeLobbyUI → `sub_4070B0()` busy-wait 重送直到 20 或逾時）�
   `sub_6036F0` 亦觸發）。⇒ 27 是「模式互動實體（objective/interactable）
   首次觸發」的 client→server 事件回報；**28（入）＝伺服器回覆的物件
   旗標/狀態套用**（mode 10＋多 gate，{index,raw4 value,raw2 state} →
-  `sub_9FA860` flag 0/1＋時間戳＋內部佇列，細則見 §2.5 re-audit）。
+  `sub_9FA860` flag 0/1＋時間戳＋內部佇列，細則見下「E 補遺」）。
 - **30（出）/31（入）＝bot/AI 實體狀態串**：30 由 `sub_606340` 驅動——
   **0.1 秒累加器節流**（this+116 > 0.1f 才送，≈10Hz；實體向量
   `sub_761520` 型別 2/4 時整批跳過；gate 67EB70＋dword_1D0A974!=1＋
@@ -1208,7 +780,7 @@ CyAIMultiModeLobbyUI → `sub_4070B0()` busy-wait 重送直到 20 或逾時）�
   （sub_592B20 為 4-byte 寫入）**、s32=sub_8F56B0/8F5710 脈絡]]}
   （向量非 CPaperBot 槽位寫 s8 0 佔位）`；31 `sub_606AD0` 逐筆
   active/object/memberKey 匹配後寫 `object+179/+180`（變更設 +181）與
-  `*(object+122)+4/8/12` 位置（§2.5 re-audit 為準）。
+  `*(object+122)+4/8/12` 位置（細則見下「E 補遺」）。
 - **32（出）/33（入）＝物件位置串**：32 由 `sub_967E90`（67F410 且
   this+1580 時）經 `sub_96BF70` 送 `u8 s8 u16×3`；33 把 `s16×3 ÷3.0`
   寫 object `+60/+64/+68`、`+72`、`+73=1`、清 `+84`（同 8/24 的 ×3.0 打包）。
@@ -1222,6 +794,101 @@ CyAIMultiModeLobbyUI → `sub_4070B0()` busy-wait 重送直到 20 或逾時）�
   （`u8×3 s32` 標頭）。內層另有 case 1/3/0x14/4/5/6/0xA/0xB/0xE/0xF/
   0x13/0x15/0x16/0x17/0x1A/0x1B/0x1D/0x1E/0x1F/0x20 等接既有
   `sub_74xxxx` 戰鬥動作。
+
+**TCP 165/166 子令文法（自原 §2.5 遷入；與 op35 的 166→UDP 回應鏈對讀）**
+
+**Y_TCP_INF 165/166 — TCP catalog packet pair (evidence boundary)**:
+`166` is forwarded by `sub_58D820` to `sub_749B90` on the battle-engine object.
+The client code inspected here does **not** prove that this pair is a fallback for
+private UDP, nor that it is activated by NAT traversal; that older conclusion is
+withdrawn. The field-reader notes below remain a separate TCP parser record:
+```
+166 = u8 slot, u8 subtype:
+  1 = 位置心跳 (u8)          2 = 動作狀態
+  3 = 射擊事件 (f32 tick, u8, u16 wp, u8×3, s32×2 ×2連發...)
+  4 = 移彈/投擲 (f32, u16, s32, 6×f32 = pos+dir 向量!)
+  5 = 技能 (f32, u8, s32, 6×f32)
+  6 = 特殊 (f32, u16, s32, 6×f32, u8, str)
+  7 = 聊天/表情 (str)   8/9 = 狀態
+```
+165 has multiple builder variants. The relationship of those variants to private
+UDP opcode 32 and the original server's routing/admission behavior remains
+**UNRESOLVED**; a relay implementation must not rely on the withdrawn
+TCP-fallback interpretation.
+
+
+### E 補遺 — 28/31/33/34/158 消費者深層細則（自原 §2.5 re-audit 遷入）
+
+以下把 dispatcher wrapper、reader primitive、caller gate、callee consumer 與相鄰
+state branch 分開記錄；任何未由 native/resource 證明的 mode、team、player、
+position 或 authority 名稱都不升格為 protocol semantics。
+
+- **28 — `sub_594E80 → sub_74D130 → sub_9FA000`:** `sub_9FA000` 先要求
+  `sub_5376F0(byte_EE8968)==10`，再進 `this+84` critical section；不滿足
+  local object chain、`sub_761500(...)+8`、`n0x10_1+56`、`dword_1D0A974`
+  與 `sub_720A40` 等條件時，整個 body 不讀。讀取順序是
+  `u8 p_n16_1, u8 p_n16_2, u8 p_n16_3, u8 v44, u8 n16, raw2 v46,
+  u8 v47[0]`。`v44` 與 `v46` 在此 callee 沒有後續 consumer；`p_n16` 通常來自
+  `sub_67D010()`，但在 `sub_720A40(&dword_1D12428)` 且
+  `sub_7209C0(..., p_n16_2)` 成立時會改用第二 header byte。rule selector
+  `p_n16_1` 為 1、2、4、5 時，各讀 `v47[0]` 筆
+  `{u8 index, raw4 value, raw2 state}`；rule 3 只有 `p_n16_2 != 0` 才讀，且
+  只有 `n16 == p_n16` 才呼叫同一 mutation，否則走 `sub_62DD20` side effect；
+  其他 rule 不讀 records。每筆最後交給 `sub_9FA860`：global `n2==2` 時不更新；
+  否則須有 current `sub_67D1D0()`、`value != 0`、
+  `sub_67D1D0() == sub_67DF00(n16)`，並由 `sub_526E20(..., value)` 找到
+  object。成功時以 `state <= 5` 或等於既有 `object+16` 設 internal flag 0，
+  否則設 1，然後寫 `object+16=state`；flag 1 會記 `this+6=timeGetTime()`。
+  record loop 後的 `sub_9FC9A0` 是 internal queue/list insertion，不是 network
+  response。`v47[0]` 是 u8 loop count；沒有看到本函式對它做額外 upper bound。
+
+- **31 — `sub_594EA0 → sub_606AD0`:** `sub_606AD0` 先由 `sub_67EB70()`
+  gate，鎖 `this+368` 並清 `this+468`。更深一層還要求 gameplay object chain、
+  mode 10、`sub_761500(...)+8`、`n0x10_1+56`、`dword_1D0A974 != 1` 及
+  `sub_720A40` 等條件；失敗時不讀任何 body。成功後讀
+  `u8 n5, u8 v40, u8 n16, raw4 v49, s16 v32[0]`，只有 `v49 > 0` 且
+  `v32[0] > 0` 才 loop（loop bound 是 native signed s16；`v49` 不是 loop
+  count，也未見 upper bound）。每筆先讀 `u8 active`；active=0 就結束該筆。
+  active!=0 時讀 `raw2 objectIndex`，`sub_67E940(objectIndex)` 失敗就不再讀
+  該筆；成功後讀 `raw2 memberKey` 並 lookup object。valid object branch 再讀
+  `u8 status, raw2 rawState, f32×3 positionLike, raw4 value`。它會把
+  `rawState` 寫到 object `+179/+180`（變更則 `+181=1`），把三個 float 寫到
+  `*(object+122)+4/+8/+12`，依舊位置距離是否至少 3 設 `object+1128`，並以
+  `sub_9BDA00/sub_9BDA20` 分支處理 status、`raw4 value` 與
+  `sub_906EE0(object+278,1)`。fallback branch（lookup null 或
+  `sub_9B9910(object)==1`）消費 `u8 status, raw2×3, raw4`，但在這個 callee
+  沒有使用這些 fallback 值。沒有 outbound response；`n70=70`、`n350=350`、
+  `v57` 等只是在此 dump 中沒有後續 wire/state consumer 的 locals。
+
+- **33 — `sub_594EC0 → sub_96C1E0`:** wrapper 在 `n2_24 == 0` 時完全不讀。
+  否則當 `n2==2`，或 `byte_F33120[240780*sub_67D110()+239813] != 1`
+  時才進 reader；順序是 `u8 v9, u8 v16, u8 n16, raw4 v15, u8 v14,
+  u8 object+75, s16×3`。`v9/v16/v15` 在此 consumer 不再使用；三個 signed
+  raw2 轉成除以 3 的 float，寫入 object `+60/+64/+68`，`v14` 寫 `+72`，
+  並寫 `+73=1`、清 `+84`。這個 branch 沒有 packet response，也沒有 native
+  proof that these coordinates are authoritative rather than client state.
+
+- **34 — `sub_594F20`:** 函式固定先初始化三個 8-byte local record，再讀三筆
+  `u8×4, raw2, u8`，最後讀兩個 raw2。`sub_778BC0` 只在 first byte minus 1
+  落在 0..2 時呼叫 `sub_76B250`；它傳入 record byte 1/2/3 與 byte 6，完全不
+  傳 record offset `+4` 的 raw2。`sub_76B250` 將這些 byte 寫入 selected
+  object slot 的 `+8/+12/+16/+44/+48`，並依 byte 2 是否為 0 做 local timer/
+  animation-like branch；這裡仍不替它命名 domain。最後 `sub_407E80(this_15,
+  byte_EE896D)` lookup current member，成功才把 final raw2/raw2 寫到 member
+  `+156/+160`。沒有 outbound response。
+
+- **158 — `sub_596910`:** body 完全不讀；只由 `sub_408140 → sub_408080(...,
+  0x127)` 取得 UI text/argument，接著以 notice code 65、flag 1 呼叫
+  `sub_9A7DE0`。這是 local presentation branch，不是 server acknowledgement
+  或 state mutation evidence。
+
+這個表把 **reader consumed width** 與 **consumer mutation** 分開：native
+`sub_592500` 的 boundary failure 不會自動讓 caller rollback；上述 count loop
+也未全部逐次檢查 helper return。故這些 client reader facts 不足以授權
+server 端接受任意 count、address blob、member key 或 source sockaddr。特別是
+`5/6/13/14` 會把 `recvfrom` source 或 payload raw16 address 寫入不同 local
+storage，這只能證明 client-side address reuse/selection；server ownership、
+relay、authentication 與 peer admission 仍是 **UNRESOLVED**。
 
 ### F — 遙測：member ping 廣播（定案；官方名互證）
 
@@ -1256,24 +923,6 @@ CyAIMultiModeLobbyUI → `sub_4070B0()` busy-wait 重送直到 20 或逾時）�
   client」的終局通知；37/65 為該彈窗的內部錯誤碼編目，其碼表不在
   client 端（不與 lang id 同空間；同 id 的 lang 文字屬巧合）。
 
-### 溯源補遺（第二輪深挖新 Fact；已併入上文各節）
-
-- **channel byte 溯源**：19/21/23/27/30 的第一個 payload byte
-  `*sub_417D00()`＝**CLobbyChannel 全域單例 +0**（`CLobbyChannel::
-  sub_4179D0` 成員函式以 `sub_417D00()` 為 this⟹型別錨定）＝142
-  `PM_CONNECT_ACK` 的 **`u8 active_channel_index`**（142 handler
-  `sub_5565D0` 直接寫入）。「op18→TCP 141→142 ACK→channel byte 就位→
-  UDP 註冊回報 channel」的軸線閉合。
-- **op22 ↔ op21 對時**：22 handler `sub_5964E0(this=NetworkManager)`
-  先 `sub_A05D50(mgr+56, now)` 把接收時刻餵進 keepalive 計時器再
-  解析——server 側量測所需的往返節奏由 21（<=500ms tick）供給。
-- **單一 member blob 陣列**：名冊列基底 `unk_F6D584`、stride 240780
-  ×16 列；UDP 相關欄位定案：+0x00 A 族 sockaddr、+0x10 B 族
-  sockaddr、+0x20/0x21 punch 旗標、+0x24 時戳、+0x460 isLocal、
-  +0x464 ping、+0x770 memberKey。戰鬥態平行陣列 `byte_F33120`
-  同 stride（+239813/+239814/+239816/+239823 為本地 streaming/
-  失速相關旗標族）——兩陣列世代不同，不混用。
-
 ### 殘留 UNRESOLVED（四項）
 
 > 原六項清單中「notice code 37/65 編目空間」與「A/B 雙通道角色分工」
@@ -1288,7 +937,10 @@ CyAIMultiModeLobbyUI → `sub_4070B0()` busy-wait 重送直到 20 或逾時）�
 3. **op17 雙變體的送出驅動**：builder 函式本身完整（raw primary lane、
    1 秒節拍、op18 latch 停送語義自洽），但 .c 匯出無 direct caller 亦
    無 data 段 xref 可查；其 sockaddr#1 目標亦從未初始化 → 本 build
-   層面視為殘留設計，觸發條件不可得。
+   層面視為殘留設計。字串變體的 payload 來源已解出（全域 String[24]
+   ＝143/191/246 identity 家族，唯一可見 mutator＝393 GL_CHANGEID_ACK
+   的 `'_'` append），唯 buffer 的初始化/正常填值路徑屬 .c 盲區，
+   觸發條件仍不可得。
 4. **8 與 24 的個別歸屬**：dispatcher 中 `case 8: case 24:` 共用同一
    標籤進 `sub_596940`，client 端完全等價處理；handler 家族已由
    native debug 字串錨定為 `Y_UDP_S_MOVE_INF`（未登錄於 tsv 的
@@ -3437,6 +3089,77 @@ pmSlotMachineMovieSequenceTable → 讀 pepachi/pe-pachi_scenario.xml
 **界線。** 這證明 **701 的 `reelC` 具有結果權威**，因此私服若要實作 701，
 必須自行決定級別並保持與獎品內容一致 —— 但**中獎率、獎池、保底、扣款**
 仍無任何 client 可證事實，維持 UNRESOLVED，現有 fail-closed 回覆不得改動。
+
+### 3.15d6 GC_CLAN_PROTOCOL 583-586 容器文法（自原 §2.5 誤植處遷入）
+
+**GC_CLAN_PROTOCOL container grammar (五輪發現)**:
+`GC_CLAN_PROTOCOL_REQ(583)/_ACK(584)` 是**容器封包** — payload 第一個欄位是
+`s32 sub_opcode`，之後才是子協定
+內容。ACK 端 `sub_54D040` (case 584) 依 sub_opcode 分發:
+182/184/185/186/189/192/193/194/198–201/203–207/210–215/218/219/381–383
+(這些數字與頂層 opcode 空間**無關**, 是戰隊系統私有編號)。
+REQ 端 24 個 builder 全部 `ctor(583)` + `WriteS32(sub_op)`:
+182,184–189,191–193,195–197,200,202,203,205,208–212 (196/197 帶
+`s32 count + raw(4*count)` 的成員 id 陣列)。伺服器實作戰隊功能時
+必須解析/產生這層內嵌結構。
+
+**廿四輪自動定案 — 全 24 個 REQ builder 寫入序列**
+(sub 編號後的欄位; s=str, i=s32, R=raw):
+182:(無) 184:str 185:i,i,i,i 186:str 187:i 188:i,i 189:i
+191:i,str 192:i 193:i 195:i,str 196:i,[R] 197:i,[R] 200:i 202:(無)
+203:str 205:str×3 208:(無) 209:(無) 210:str 211:i 212:i
+
+**八輪逐一佈局 (REQ 段 = sub 之後的欄位; ACK 段 = 584 內容):**
+```
+sub  REQ (client→server)          ACK (server→client, sub_54D040 分發)
+182  (無)   邀請入隊確認           s32 clan_id → 顯示歡迎訊息 (sub_54E890)
+184  str clan_name  申請入隊       s32 clan_id, str nick (sub_54E490)
+185  s32 x, s32 uid, s32 11, s32 0 s32 clan_id, s32 reason (sub_54E670)
+186  str nick       踢除           s32 uid, str nick (sub_54E2E0)
+187  s32 clan_id    戰隊資訊       (查表更新)
+188  s32 clan_id, s32 page 成員頁  —
+189  s32 clan_id    公告           s32 clan_id, str notice ×2 (sub_54F9B0,
+                                   兩個 str 都 strncmp 0x18 比對)
+191  s32 n3, str nick  邀請        —
+192  s32 answer     邀請答覆       s32, str ×4, s32 ×5 (sub_54E0F0
+                                   完整戰隊摘要塊)
+193  s32 flag       解散           (this 語境處理 sub_54E020)
+195  s32 id, str    標誌查詢       —
+196  s32 count, raw(4n)  成員id    —
+197  s32 count, raw(4n)  成員id2   —
+200  s32 clan_id    成員清單       s32 count, count×{s32 rank(0..4),
+                                   s32 uid, s32 level, str nick,
+                                   str, s32 status} (sub_54EE70)
+202  (無)           次數查詢       — (sub_54D040 沒有 case 202；配對 ACK
+                                    sub-op / body 是 UNRESOLVED，不可把 201 的
+                                    sub_54F0F0 讀取形狀套過來)
+203  str message    戰隊聊天       str nick, str message (sub_54F2D0;
+                                    client sender 的 rank>1 gate)
+205  str×3          戰隊訊息       str from, str title, str body
+                                   (sub_54F3D0)
+208  (無)           捐獻           — (sub 208 只有 REQ)
+209  (無)           基金           — (同上)
+210  str            設定變更       s32 uid, str (sub_54E770)
+211  s32 uid        升職           s32 clan_id, str nick → rank:=5
+                                   (sub_54FBA0, 過場訊息 0x3E9)
+212  s32 uid        降職           同 211 鏡像 (sub_54FD50)
+198  —              戰爭邀請       s32, s32, str ×2, s32 (sub_54F450)
+199  —              戰爭答覆       (sub_54F5A0)
+201  —              排名           s32, [s32] (sub_54F0F0 同構)
+381..383  —         戰隊戰績       s32 ×2 (sub_54FF00/54FFC0, 帶 sub 參數)
+```
+
+**Fact/HIGH — 202 direction correction.** `sub_550CF0` 確實建 `583 / sub=202`
+且不寫子欄位，但 `sub_54D040` 的完整 584 switch 沒有 `case 202`；不能把唯一
+`case 201 → sub_54F0F0` 的兩個 s32 讀取形狀誤標成 202 ACK。202 的對應 response
+sub-op/body 仍是 **UNRESOLVED**。
+
+**獨立對: 585 GC_CLAN_CREATE_REQ / 586 _ACK (不走隧道!)**:
+REQ (sub_5505F0) = `str name, str slogan, str intro, s32 emblem`
+(廿四輪修正: sub_592A20 = s32 非 u8);
+ACK (sub_54CB90) = `s8 result` — 0=成功 (再讀 `s32 → EE8D18` 扣費後 GP,
+sub_54DD70), 1..7 = 錯誤碼 (重名/GP 不足/等級不夠...)。
+建立成功後 client 自行送 583/187 拉戰隊資訊。
 
 ## 3.99 廿六輪終極盤點 — 676-entry catalog 全分類收官
 ```

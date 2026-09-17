@@ -28,13 +28,19 @@ width、fixed-buffer、mask/coerce、count limit 或 malformed-input rejection�
 ## Current next evidence
 
 1. **Channel admission 143→144→195→196**：取得一組成功與一組拒絕的同 revision
-   capture，補出 `String[24]` writer、681 extension values、144 raw fields 與
-   196 type-3 continuation。未有 evidence 前，TS 只保留 exact raw shape，不能把
-   raw bytes 命名成 account、rank、billing 或 entitlement。
+   capture，補出 681 extension values、144 raw fields 與
+   196 type-3 continuation。`String[24]` 的來源鏈已由 native 側解到結構極限
+   （全域 identity scratch；唯一可見 mutator＝393 `GL_CHANGEID_ACK` 的 `'_'`
+   append；初始化屬 .c 盲區——PACKETS.md §2.6-C）。未有 capture evidence 前，
+   TS 只保留 exact raw shape，不能把 raw bytes 命名成 account、rank、billing
+   或 entitlement。
 2. **Private UDP**：目前只實作 source-proven encrypted 19→empty-20 control。
-   逐一追 `sub_595E80` cases、secondary socket、send callers、remote address 與
-   correlation data flow 後，才決定是否存在可實作的 relay；不能因 opcode 存在
-   就接受 P2P/NAT/gameplay datagrams。
+   `sub_595E80` 全部 cases、secondary socket、send lanes、remote address 與
+   correlation data flow 的 client-side 追蹤已定案於 [`PACKETS.md`](PACKETS.md)
+   §2.6（33/37 完全定案；A/B=C2P hole-punch、1=任務邀請、17=殘留設計、6=證據
+   上限四項除外）；relay 可實作性由 (B) 位址鏈給出 client-side fact。仍不能因
+   opcode 存在就接受 P2P/NAT/gameplay datagrams；其餘語義的 server 實作決策
+   仍待 runtime evidence。
 3. **Room and battle state**：取得 111–194、730–742、902–963 的可重現 captures，
    先逐欄核對 builder、dispatcher、parser、room/session consumer，再建立 state
    machine。沒有 owner、timer、duplicate/cancel 與 success-tail evidence 時，回

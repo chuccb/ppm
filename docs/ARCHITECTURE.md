@@ -95,7 +95,9 @@ server 實作的宣稱。
 
 這些 boundary 都集中在 `connection.ts`、`admission.ts`、packet handlers，使每一個
 server-side transition 可搜尋、可記錄、可替換；它們不依賴 143 的
-`String[24]` 語意（該 writer 仍是 **UNRESOLVED**）。
+`String[24]` 語意（全域 identity scratch；唯一可見 mutator＝393
+`GL_CHANGEID_ACK` 的 `'_'` append，初始化屬 .c 盲區——見 PACKETS.md
+§2.6-C；非權威身份來源，仍不作 account/nickname 授權依據）。
 
 
 ### 生命週期終章 (卅五輪 — 斷線/登出/房主遷移)
@@ -115,8 +117,8 @@ server-side transition 可搜尋、可記錄、可替換；它們不依賴 143 �
 | ③ 登入層 | 0x43E651 | 681/694/882 |
 | ④ 轉蛋控制器 | 0x84A000 | 701 (11組轉輪) |
 | ⑤ 語音系統 | sub_885D00 (CVCustomizeManager) | 791-796、378/379 及 114/269/765/985 成員負載尾塊 |
-| ⑥ 戰場引擎 | sub_749B90 (1D37560) | TCP catalog 166 subtype 1-9; its relation to UDP is UNRESOLVED |
-| + UDP 層 | sub_595E80 | private UDP dispatcher; private 20 completion is direct evidence, remaining case semantics require per-case proof |
+| ⑥ 戰場引擎 | sub_749B90 (1D37560) | TCP catalog 166 子派送器；case 0x18 內層 2/0x10 觸發 **UDP op35** 回應（PACKETS.md §2.6-E），其餘子令接 sub_74xxxx 戰鬥動作 |
+| + UDP 層 | sub_595E80 | private UDP dispatcher；逐 op 語義已定案於 PACKETS.md §2.6（G0-G 生命週期、A/B hole-punch 狀態機、19↔20、8/24 移動、ping/通知；僅 4 項達證據上限的 UNRESOLVED） |
 
 ## 3. 資源與資料層（native/resource inventory；不等同 runtime schema）
 

@@ -46,7 +46,7 @@
 | `CPopUpCreateRoom` | package/document `0xAEA3D4`, control `0xAEA31C +0x4`, event container `0xAEA314 +0xE0` | 111 builder/caller evidence in `PACKETS.md` | 對照 UI object 的多重繼承與 callback vtable；111 欄位仍以 sender/caller 為準。 |
 | `CClientData` / `CRoomInfo` / `CUserInfo` | `0xAEB274` / `0xAEBA3C` / `0xAEC1A4` | `PACKETS.md` §3.2、§3.15 | 搜尋 client state container；不從 RTTI 反推其 field layout。 |
 | `Packet` | `0xAEE4F8`, 1 method | [`PACKETS.md` §1](PACKETS.md#1-packet-類-0x591ac0-系列-vftable-packetvftable-0xaee4f8) | 驗證既有 `Packet::vftable` anchor 的同一類別。 |
-| `CUDPManager` / `CUDPNetworkManager` | `0xAEE54C` / `0xAEE584` | `PACKETS.md` §2.5、`server-ts/src/udp.ts` | 作為 UDP transport investigation 的 xref anchor；不解除 `sub_596670` scope gate。 |
+| `CUDPManager` / `CUDPNetworkManager` | `0xAEE54C` / `0xAEE584` | `PACKETS.md` §2.5-2.6、`server-ts/src/udp.ts` | 作為 UDP transport investigation 的 xref anchor；不解除 Wiki/動機資料的證據隔離。 |
 | `VoterMgr` / `IVotingNetwork` | `VoterMgr` has `Voter +0x0` and `IVotingNetwork +0x30` records | `PACKETS.md` dispatcher notes; `TODO_HANDLERS.md` | 證明 client-side voting types exist；不證明 original server vote timer/outcome/membership policy。 |
 | `CyGameModes::*` | 15 lobby-UI types and corresponding game-mode/factory family | [`RESOURCES.md` §4b](RESOURCES.md#4b-cfgmaplistpat-格式-十五輪以真實檔案實測修正) | 補強 mode implementation family 的查找入口；mode value mapping 仍以 factory/resource/consumer evidence 為準。 |
 
