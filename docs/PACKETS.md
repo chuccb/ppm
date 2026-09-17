@@ -1000,6 +1000,170 @@ sub_54DD70), 1..7 = 錯誤碼 (重名/GP 不足/等級不夠...)。
 
 ---
 
+## 2.6 UDP 子系統全 op 語義定案（2026-09-17 深潛稽核）
+
+> **方法與分級**（比照兩輪 layout 審計）：每個 op 的 wire 形狀、helper 寬度、
+> caller/callee 鏈是 **Fact**；語義定案須有 caller 觸發情境＋state 消費者＋
+> 字串/UI/lang 錨點至少兩項；推定處一律標級。本節取代 §2.5「只有 19→20
+> 已實作」的舊最小結論：**全部 15 個送出 op 與 22 個接收 case 的用途都已
+> 追到觸發點與消費者**，僅文末六項保留 UNRESOLVED。§2.5 的 transport
+> wire fact（framing、AES、sockaddr、綁定 0.0.0.0:27000 等）不重複。
+>
+> **生命週期總覽**：`G0 transport 初始化 → A/B 雙通道位址交換（hole-punch
+> 狀態機）→ C raw beacon/TCP 觸發 → D 工作階段註冊（19↔20）→ E 戰鬥即時
+> 同步 → F 遙測（ping）→ G 傳輸通知`。官方 153..164 band 的命名慣例
+> （`Y_UDP_C_HOLE_INF`＝client 端 hole 資訊、`Y_UDP_S_HOLE_INF`＝server
+> 端、`*_DEAD/LIVE_REQ/ACK`＝雙傳輸存活管理）與本結構互相印證，但依
+> §2.5/B.3 邊界不替 private op 改掛官方名。
+
+### G0 — Transport 初始化（既有 Fact，僅補觸發）
+
+196 `GC_ENTERCHANNEL_ACK` 成功尾段的 host/port 先灌進 secondary
+sockaddr（`sub_596E60`, mgr+40..55），`sub_58ED30 → sub_595C90` 起
+**執行緒後**才設 mgr+52=1。主執行緒每幀 `sub_58AFD0`：處理兩條 TCP
+socket（`sub_555550`×2）→ UDP manager tick（`sub_595D80`）→ **排空移動
+佇列**（`sub_593510`）。UDP session 物件基底 `&byte_1324330`：+0/+1 為
+A/B 狀態位元組、+8/+12 移動封包 intrusive list、+20 critical section。
+
+### A/B — 雙通道 member 位址交換狀態機（hole-punch；本節最大定案）
+
+| 階段 | op（方向） | 行為（Fact） |
+|---|---|---|
+| A-init | 1（出） | `sub_593830`（n2!=2 分支）：共用標頭 `u8 channel,u8 roomSlot,u8 depSlot,s32 playerId`，送 secondary；elapsed>1000ms 且 retry gate=0 時一次 |
+| A-ack | 2（入） | `sub_593A60`：首次 n0x3E8=1、存 elapsed `timeGetTime()-dword_F2563C`、**stateA=2**；後續只 ++n0x3E8 |
+| A-list | 4（入） | count×{memberKey,raw16 sockaddr}→16 槽成員表填位址；隨即對每個非本地位址送 **op5 ×3**，stateA=4 |
+| A-punch | 5（入） | 首次匹配 key：存本次 `recvfrom` source 為該 member 位址 → 回 **op6 ×3**；重複只 ++counter |
+| A-punch-ack | 6（入） | 首次匹配 key：同樣建位址記錄並設 A4/A5 旗標；不回覆 |
+| A-init(mode2 變體)/A-final | 15（出：n2==2 分支 / 入） | 出：與 op1 同一 `sub_593830`，n2==2 分支送 `u8,u8` ×3 → **stateA=7**（直入完成態）；入：raw16 一次性 latch `unk_F25648`（**全 dump 零讀者**，見 UNRESOLVED） |
+| B-init | 9（出） | `sub_594300`：同 A-init 標頭送 secondary（stateB==0 時） |
+| B-solo/list | 10/12（入） | 單筆或清單 {key,raw16 addr} → 存位址後回 **op13 ×3**，stateB=2/4 |
+| B-punch | 13（入） | 首次匹配：用已存位址 `unk_F6D594` → 回 **op14 ×3**，stateB=4 |
+| B-punch-ack | 14（入） | 首次匹配：存 source、設旗標、stateB=4；不回覆 |
+
+完成/逾時判決（Fact）：`sub_5941D0`＝全 16 槽非本地 member 的 A5 旗標
+齊 → -1，否則任一逾 **3000ms** → -1；`sub_594DA0` 同型但逾時 **5000ms**。
+驅動器 `sub_5937D0`（stateA 0→送 1；4→查 5941D0；7→return 1）與
+`sub_5942B0`（stateB 0→送 9；4→查 594DA0；每輪 `Sleep(1)`）。
+
+> **⚠ 存活度標注（2026-09-17 新 Fact）**：`sub_5937D0`、`sub_5942B0`、
+> `sub_596180`、`sub_596240` 在本 .c dump 中**沒有任何 direct caller**
+> （各僅出現定義一次；op1/15、op9 的 builder 亦僅分別被這兩個死驅動器
+> 呼叫）。不能排除 data-section 函式指標註冊（.c 匯出不含 data xref），
+> 但本 dump 層面 **op1/9/15/17 主動送出鏈未被證明存活**——A/B 交換在
+> client 端只保證「作為回應方」的接收鏈（4/5/6/10/12/13/14 全部 wired）
+
+### C — Raw beacon 與 TCP 觸發（17/18）
+
+- **17（出，raw primary 無 AES）**：空變體 `sub_596180`：`n0x3E8_1==0`
+  期間每 ≥1000ms 送一次空封包；`n0x3E8_1` 正是 op18 的一次性 latch ——
+  設計上即「**聯絡信標**：直到 server 回 18 為止每秒 beacon」。
+  字串變體 `sub_596240` 送全域 `String[24]`；該 buffer 經實查為
+  `sub_543B50`（行 143079-143082）的**指令解析暫存**（`sscanf(v547,
+  "%s %s", v542, String)`，v542 與字面 `"ac"` 比對），並非 UDP 專用
+  payload。兩 builder 皆無 direct caller（見上存活度注記）。
+- **18（入）**：一次性 latch 後 `sub_556530` 經 TCP 送 **141
+  `PM_CONNECT_REQ`**（端點確認）。「UDP raw beacon → server 見活 →
+  client TCP 登入」的 bootstrap 鏈完整。
+
+### D — 工作階段註冊 19↔20（已實作交換，語義升級定案）
+
+**op19（出）＝UDP 工作階段註冊**：`sub_596670` 寫
+`u8（=*sub_417D00() 物件 +0 byte；channel/accessor，來源物件名不升格）、
+u8 roomSlot(CMyData+5)、s8 (n2==2)、
+u8 depSlot(-2→0xFE)、s32 playerId(CMyData+844)、str nickname(CMyData+896)`，
+**每次送出前先清 `byte_1D0CFE7=0`**（嚴格 handshake 語義），500ms 重送、
+>5 次走 `sub_560720` 失敗路徑、計數到 100 停。觸發點（全部 Fact）：
+`CLobbyGameStart::sub_43C380`（開始鈕：已註冊→直開；否則送 19）、
+**四個模式大廳 UI** 的進場/開始（CyTeamMatchModeLobbyUI /
+CyDefuseBombModeLobbyUI / CyPulpnRollModeLobbyUI /
+CyAIMultiModeLobbyUI → `sub_4070B0()` busy-wait 重送直到 20 或逾時）、
+離房/停止 `sub_407290()`（同 busy-wait，最多 100 輪）。
+**op20（入）＝註冊完成**：設 `byte_1D0CFE7=1`、清 mgr 重送列（+44/+8/+4）、
++24=now、清 stateB、`sub_594F00`；其下游閘門（Fact）：
+`sub_4070B0/sub_407290` 設 `n15=13` → `sub_593510` 開始排空移動佇列；
+`sub_595D80` 的 op21 傳送排程以 `byte_1D0CFE7!=0 && !sub_67EAC0()` 為旗標
+（`sub_A05E40` 寫 mgr+56 計時器）。**20 是所有戰鬥 UDP 流量的總閘**。
+
+### E — 戰鬥即時同步（需 mode==10 戰鬥＆已註冊）
+
+- **21（出）＝session keepalive**：每幀 tick（`sub_58AFD0→sub_595D80`）於
+  n2!=2 且 `sub_67F120()`/`sub_67EC20()` 皆為 0、`byte_1D0CFE7` 已設時，
+  經 `sub_A05E40` 以 mgr+56 計時器排程由 `sub_596330` 送；
+  `u8×3 s32 raw4 raw4`（兩 raw4 caller-defined，內容未命名）。
+- **23（出）＝本地玩家移動**：`sub_600770`（←`sub_600290` 移動條件求值：
+  速度 `sub_5EFCE0`/`sub_67F670`、輸入位元 `sub_718F20(ppvOut,7,…)`）
+  與 `sub_73E170` 戰鬥 tick hub 觸發；`raw4 elapsed, u16×3 位置（×3.0
+  打包）, u8×8 移動/旗標/高度, s32`。旗標語義不命名。
+- **8/24（入）＝成員移動批次**：`sub_596940→sub_593750` 入佇（僅 n15==13），
+  主執行緒 `sub_593510` 排空 → **`sub_602E30` 逐筆套用**（Fact 欄位序）：
+  `u8 count`；每筆 `u8 v28, u8 v19, u8 memberKey, raw4, raw4 v16,
+  u8[16] anim/state blob, s16×3 位置, u8 v23, u8, u8, u8, u8 n0x1C, raw4 v29`；
+  位置 ÷3.0 → `sub_9BCB00(obj,v12)` 寫入 member 物件、`sub_548E80`
+  寫移動列（含 `byte_13242D0`）、漂移平滑（∆v16: >+100 收 −10、>+20 加 +10）、
+  `sub_5B3180(obj, blob[0])`、`sub_5B34B0(obj, v29, n0x1C, …)`、
+  `sub_5B71F0(&pos, memberKey)`；碰撞/遮蔽 `sub_5E2570(dword_1D37AB4,…)`。
+  `memberKey!=本地 && 槽位 0..15` 才套用；8 與 24 各自的精確 op-to-name
+  對應仍 UNRESOLVED（共用 handler，官方 token 無從切分）。
+- **27（出）/28（入）＝物件旗標/狀態更新串**：27 每幀 `sub_6013E0`±
+  `sub_6036F0`（離房 124 鏈亦觸發）；28 在 mode 10＋多 gate 下逐筆
+  {index,raw4 value,raw2 state} 經 `sub_9FA860` 更新物件 flag（0/1＋
+  時間戳）並入內部佇列（細則見 §2.5 re-audit）。
+- **30（出）/31（入）＝bot/AI 實體狀態串**：30 由 hub 分段經
+  `sub_606340→sub_6065E0` 送 `u16 count ×{s8 status,[u16],[CPaperBot 專屬
+  u16,s8,u16,f32×3,s32]}`；31 `sub_606AD0` 逐筆 active/object/memberKey
+  匹配後寫 `object+179/+180` 狀態（變更設 +181）與 `*(object+122)+4/8/12`
+  位置（既有 §2.5 re-audit 為準）。
+- **32（出）/33（入）＝物件位置串**：32 由 `sub_967E90`（67F410 且
+  this+1580 時）經 `sub_96BF70` 送 `u8 s8 u16×3`；33 把 `s16×3 ÷3.0`
+  寫 object `+60/+64/+68`、`+72`、`+73=1`、清 `+84`（同 8/24 的 ×3.0 打包）。
+- **34（入）＝三槽物件小狀態**：固定三筆 {u8×4,raw2,u8} → type 1..3 經
+  `sub_76B250` 寫 slot `+8/+12/+16/+44/+48` 與計時/動畫分支；尾二 raw2 →
+  當前 member `+156/+160`。
+- **35（出）＝TCP 166 `Y_TCP_INF_ACK` 的 UDP 回應**：166 子派送器
+  `sub_749B90`（u8 n16、u8 n18=sub-cmd）外層 case 0x18 的內層 switch
+  **case 2** 與 **case 0x10** 兩處 direct call `sub_7463E0`（第 4 參數
+  0/1 分別）；即 client 對該 TCP 戰鬥子令以 UDP lane 回覆
+  （`u8×3 s32` 標頭）。內層另有 case 1/3/0x14/4/5/6/0xA/0xB/0xE/0xF/
+  0x13/0x15/0x16/0x17/0x1A/0x1B/0x1D/0x1E/0x1F/0x20 等接既有
+  `sub_74xxxx` 戰鬥動作。
+
+### F — 遙測：member ping 廣播（定案；官方名互證）
+
+- **22（入）**：flag==1 時 count×{key, **raw4**} → `dword_F6D9E8[key]`
+- **154（入）**：count×{key, **u8**} → 同一表（官方 `UDP_ALL_PING_ACK` 帶 echo）
+- **消費者（Fact）**：`sub_6488B0`（SOLO_RESULT 結算畫面）逐 member
+  `sub_9A8F40(dword_F6D9E8[…])` → 圖示名 **`Ping_%d`**，寫入視窗
+  **`SOLO_RESULT_PING`**。⇒ 兩者皆為「server 收集/廣播全員延遲值」；
+  client 端的度量上報未在本 dump 見到對應送出 op（op21 的 raw4×2 為
+  caller-defined，不命名為 ping）。
+
+### G — 傳輸通知（lang 原文錨定，語義 Fact）
+
+- **29（入）＝強制斷線通知**：關 `dword_1321D00` TCP socket、載入訊息
+  **0xA8＝「サーバーとの接続が切断されました。しばらくしてから再度接続して
+  ください。」（與伺服器的連線已中斷。請稍候重新連線。）**＋notice code 37。
+- **158（入）＝TCP 死亡警示**：訊息 **0x127＝「Sorry! TCP Server Down!」**
+  ＋notice code 65 —— 與官方 `UDP_TCP_DEAD_ACK` 命名完全吻合
+  （「UDP 側通報 TCP 已死」）。notice code 37/65 的編目空間 UNRESOLVED
+  （與 lang id 非同表；37→「15日」、65→「ゲーム接続中…」僅為同 id 之
+  lang 文字，不能斷言為 notice 內容）。
+
+### 殘留 UNRESOLVED（六項；皆附證據邊界）
+
+1. **op15 入方向** raw16 latch `unk_F25648`：全 dump **2 處引用＝宣告＋
+   寫入**，零讀者 → 語義不可得。
+2. **op26** `unknown_libname_107`：函式體不在 dump，不可回收。
+3. **op17 字串變體**的間接呼叫者與排程（只證明 buffer 來源是全域指令暫存）。
+4. **8 與 24 的個別歸屬**（共用 `sub_596940`；語義＝成員移動已確定）。
+5. **notice code 37/65** 的編目空間。
+6. **A/B 雙通道的精確角色分工**：兩族皆為 hole-punch 形狀，但位址存於
+   不同基底（A: 成員列 +240780 尾部；B: `unk_F6D594`），本 dump 無從鎖定
+   各自對應的對端類型（relay/peer 假說不升格）。
+
+> **邊界重申**：以上全是 **client 端**觸發/caller/consumer 事實。server 端
+> 行為（應收什麼、位址所有權、轉發/carrier 角色）除既有 19→20 投影外
+> 一律維持 UNRESOLVED；本節不授權任何 UDP server 行為擴充。
+
 ## 3. 關鍵 payload 結構 (伺服器必須產生/解析)
 
 ### 3.1 GL_LOGIN_REQ (682) — 客戶端 builder (30873 行附近)

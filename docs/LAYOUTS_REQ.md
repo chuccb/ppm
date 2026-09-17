@@ -511,7 +511,9 @@
 > case/layout 不能因 opcode 數字相鄰而取代 outbound builder。**Appendix A 的每一列
 > direction 都是 outbound（client → native-selected UDP destination）；Appendix B
 > 的每一列 direction 都是 inbound（UDP source → client）。**同一數字若同時出現在
-> A/B，仍是兩個方向的獨立 native evidence。現有 native evidence 證明的
+> A/B，仍是兩個方向的獨立 native evidence。**2026-09-17 深潛稽核已把每個 op 的
+> 觸發點、state 消費者與生命週期定案，見 `PACKETS.md` §2.6（含 A/B 雙通道
+> hole-punch 狀態機、19↔20 註冊握手、8/24 移動套用鏈與存活度標注）。**現有 native evidence 證明的
 > `n → n+1` case pairs、AES/raw send lane、secondary sockaddr 與 `UNRESOLVED`
 > server boundary 詳見 [`PACKETS.md`](PACKETS.md) §2.5；這裡保留 constructor-level
 > inventory，避免把 UDP evidence 從本文件的完整 native builder audit 中遺漏。
@@ -566,6 +568,11 @@
 > packet body 欄位。凡 row 寫明 response/retry，其 destination、`sub_595980`/
 > `sub_595A10` lane 與次數均是 native send fact；其餘 row 是 no response/send-only
 > 或 local consumer，不添加推測 destination。
+>
+> **2026-09-17 深潛稽核**：每個 receive case 的 state 用途、消費者與生命週期定位
+> 已在 `PACKETS.md` §2.6 定案（含 A/B 狀態機 state byte 由哪個 case 設為 2/4/7、
+> 8/24 的佇列套用鏈 `sub_593750→sub_593510→sub_602E30`、22/154 的
+> `SOLO_RESULT_PING` 消費者、29/158 的 lang 原文錨）；本 matrix 維持 wire fact 層。
 
 ### B.1 Dispatcher case matrix
 
