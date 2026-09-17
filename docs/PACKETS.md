@@ -574,6 +574,47 @@ record width；`v32` 雖由 `sub_761500` 計算，沒有任何 `sub_592*` writer
 早期筆記中的 `u8 u8 + s8×8 + s32`。其中三組 raw2 來自同一個 position-like
 source，四個 u8 來自 flags/height/state-like values；語義仍不命名。
 
+#### UDP signedness / native type-shape re-audit（2026-09-17）
+
+這裡需要把「wire signedness」和「source expression type」拆開。`raw1/raw2/raw4`
+只表示 writer 寫出的 exact byte width；它不表示 source 完全沒有 signed/unsigned
+證據，也不表示 wire 上存在一個可以驗證 signedness 的標記。native writer 的
+Hex-Rays prototypes 本身不能作為 signedness 終點：`sub_592920` 顯示 `char`
+但寫 1B，`sub_5929A0` 顯示 `char` 但寫 2B，`sub_592A20`/`sub_592AA0`
+顯示 `char` 但寫 4B，`sub_592AE0` 顯示 `char` 但寫 8B。
+
+目前能升格的 source evidence 是：
+
+- 共用 sender prefix 的第三個 byte `n0x10` 在 `n2 == 2` 時明確寫入 `-2`
+  （wire byte `0xFE`）；因此它是 **signed-capable / sentinel-shaped**，不能
+  只寫成純 `u8`。第一個 `sub_417D00()` byte 與第二個 `byte_EE896D`
+  仍是 native `char`/byte-shaped，不能僅憑名稱定成 unsigned。
+- opcode 19 的第三個 byte `v12 = (n2 == 2)` 是 bool/flag-shaped；第四個
+  source byte 仍沿用上述 `-2` branch。其 `raw4` 來自 native `int`-shaped
+  `dword_EE8CB4`，但 player-id/domain 的 protocol signedness 仍未證實。
+- opcode 5/6/13/14 的第一個 byte 同樣使用 `n0x10` 的 `-2` branch；其
+  `raw4` `n0x3E8_3` 是 native `int`-shaped elapsed/context value，而不是
+  可以從 `raw4` 三字面直接命名成 `u32` 的欄位。
+- opcode 30 的 `v33` 在 source 宣告為 `unsigned int`，且是 bounded
+  `j3-i` record count；因此 count 可標作 **unsigned/count-shaped raw2**。
+  每 record 的 status 是 byte/flag-shaped；optional `raw2/raw4` tails 的
+  signedness 仍依 CPaperBot fields and float/int consumers 保留 unresolved。
+- opcode 23 的三個 `raw2` 是 float position-like expression 經 `×3 + 0.5`
+  的 quantization；它們不是由 `sub_5929A0` prototype 證明的 `s16` 或 `u16`。
+  movement tail 的某一 branch 明確把 delta 下限 clamp 到 `-127`，所以該
+  branch 是 signed-capable；其他 mutually-exclusive movement sources 仍不能
+  統一升格。opcode 32 的三個 raw2 同樣來自 position-like values，保持同一
+  邊界。
+- opcode 21 的兩個 tail raw4 來自 native `int`-shaped `this+1` 與
+  `dword_EE8978`；這是 source type-shape evidence，不是 server/parser 已證明
+  的 `s32`/`u32` contract。opcode 27 的兩個 tail byte 則是 object state bytes，
+  目前沒有負值或 unsigned consumer 的直接證據。
+
+因此原表保留 `rawN` 是刻意區分 **wire width Fact** 與 **signedness inference**，
+不是宣稱完全無法從 C evidence 追出 signed-capable、bool-like、unsigned count
+或 int-shaped 部分；沒有直接 consumer/range/negative-value evidence 的欄位，才
+維持 `UNRESOLVED`。
+
 **Opcode 5/6/13/14 的 correction。** 這四個 builder 都不是單一 `u8`：
 它們先寫 source-dependent byte，再用 `sub_592AA0` 寫入 elapsed/context raw4。
 `sub_592AA0` 的 native width 是 4 bytes，即使 Hex-Rays 把參數顯示成 `char`，

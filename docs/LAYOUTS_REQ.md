@@ -28,6 +28,18 @@
 > `str`、`wstr` 是 native string writer call，沒有在此表臆測 encoding、terminator
 > 或最大長度。`||` 代表同一 builder 的互斥或
 > 條件變體，不是把它們串成一個可線性消費的 packet。count-prefixed record、
+>
+> **signedness audit（Fact / boundary）**：`rawN` 是 wire width label，不是宣稱
+> signedness 永遠無法由 source 推出。部分 source expression 可以標成
+> `char/byte-shaped`、`bool/flag-shaped`、`int-shaped`、或 `signed-capable`；
+> 例如 low UDP 的 `n0x10` branch 明確寫入 `-2`，opcode 30 的 `v33` 是
+> `unsigned int` count，opcode 23 的 movement branch 將 delta clamp 到 `-127`。
+> 但 wire writer 本身不能替欄位補上 signed/unsigned：`sub_592920` 的 decompiler
+> prototype 是 `char` 卻寫 1B，`sub_5929A0` 仍顯示 `char` 卻寫 2B，
+> `sub_592A20`/`sub_592AA0` 顯示 `char` 卻寫 4B，`sub_592AE0` 顯示 `char`
+> 卻寫 8B。故本表只在 source 有直接 evidence 時標出 type-shape；其餘保留
+> `rawN`，不把 C decompiler parameter type 冒充 protocol signedness。
+>
 > optional tail、固定 buffer 與 opcode substitution 只在 native branch 已觀察到時
 > 才寫出；`raw24`、`raw36` 等固定值是 source copy/array boundary 的 Fact；常見
 > `_DWORD packet[4817]` 則是 native Packet 暫存容量，不是宣稱 wire 有 4817 個
