@@ -1263,6 +1263,24 @@ reader 與 local cache consumer。完整 wire 及交叉證據記在
 pricing／atomic mutation。298/300/314/315 相關 server handlers 繼續
 fail-closed，`UNRESOLVED` 不因找到 UI 或資源名稱而減少。
 
+### 5b-40. 第三十六輪：任務 ACK 的 local state／completion bitmap 已分離於 reward
+
+本輪再次追 `GQ_QUEST` 的 request writer 與 ACK consumer，而不是以 Wiki 的
+「每日任務」「present box reward」描述補 service policy。完整 native evidence
+記在 [`PACKETS.md` §3.13a](PACKETS.md#313a-2026-09-17-quest-state-transition-re-audit-client-cache-only)。
+
+| native 可證 | 分類 | 仍不能宣稱 |
+|---|---|---|
+| `866` 的 list ACK 若 `count < 3`，client 會自行送空的 `876`；`877` 成功後才讀入 `count × 13B` 任務快照。 | Native / HIGH | 服務端每日任務數量一定是 3、每日重置時間、或有 reward。 |
+| `867` 成功 ACK 寫入一個 13B working snapshot；`869` 成功 ACK 從 working data 移除 quest；`871` 成功只把類別 2/3/4 轉成 local SUCCESS。 | Native / HIGH | accept／cancel／success 的 server authorization、progress 計算與 duplicate policy。 |
+| `873/874` 成功後只更新 category-specific completion bitmaps（honor／mission／category-4），並移除部分 working rows；此 handler 沒有 item、currency、present row 或 reward item reader。 | Native / HIGH | 完成任務必然直接發獎、獎勵必然進 present box，或可由 client 反推獎品內容。 |
+| `873` 送出前 raw local state==3 時，client 改送 `869`；這是 native UI/state gate，不是 server completion policy。 | Native / HIGH | 把 raw state 3 直接當成私服可接受的失敗／取消服務狀態。 |
+
+**本輪結論：** 任務系統現在可以更精確地拆成「client working state」與
+「client completion cache」，而不是一個含 reward 的任務表。Wiki 對每日
+數量、重置、獎勵與 present box 的敘述仍是歷史背景；server lifecycle
+繼續 `UNRESOLVED`，不得因 ACK 有 `SUCCESS`／`COMPLETE` 名稱就新增 grant。
+
 ## 6. 本輪瀏覽頁面（來源索引）
 
 本索引記錄已閱讀的主題入口，避免日後把搜尋摘要誤當完整頁面內容；個別頁的 last-modified

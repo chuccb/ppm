@@ -1337,6 +1337,28 @@ kind 0/1/14 與 12/13/17 (可覆寫類) 走覆寫路徑, 其他 kind 重複購�
     str title, raw(len@239104) 榮譽塊
 881 CURRENTITEMQUEST_ACK (sub_91DC90): s32 item_quest_id
 ```
+
+#### 3.13a 2026-09-17 quest state-transition re-audit (client cache only)
+
+The quest family has now been checked again from the request writers and the
+state-mutating ACK consumers. These are client transitions, not evidence that a
+server should accept a quest, calculate progress, or issue a reward.
+
+| Path | Native-proven transition | Limit |
+|---|---|---|
+| `866 → sub_91C7B0` | The list ACK reads `s32 count`; when `count < 3`, after resetting the local working data it sends **empty 876** (`GQ_QUEST_ACCEPT_DAILY_REQ`). | This proves a client trigger threshold, not that the service always owns exactly three daily quests or that 876 returns a reward. |
+| `867 → sub_91CC70` | `s32 quest_index` is the complete accept request. Result `0` consumes one 13-byte snapshot, writes it to working quest data, marks the local transition flag, and sends empty 864 (`GL_SERVER_DATETIME_REQ`). | No server acceptance rule, duplicate rule, or progress authority follows. |
+| `869 → sub_91D290` | Cancel request is `s32 quest_index`; result `0` removes that quest from local working data and sets the local transition state to 2. | The local state number is not a server result code and does not prove cancellation policy. |
+| `871 → sub_91C6F0` | Success request is `s32 quest_index`. ACK `{u8 result,s32 quest_index}` only changes local state to 2 when `result==0` and the ID category is 2, 3, or 4 (`quest_index / 10000`). | Category filtering is a client display/state rule; it does not prove which quest classes the server accepts. |
+| `873 → sub_91C1E0` | Complete request is `s32 quest_index`. Before sending, `sub_91C060` compares a local raw state; when it equals 3 it sends 869 instead. On ACK result 0, the client sets local completion bits: category 1 goes to the honor bitmap, 2/3 to the mission bitmap, and 4 to the separate category-4 bitmap; categories 2–4 are removed from working data. | These are completion-cache mutations only. No item id, quantity, currency, present row, or reward grant is decoded in this handler. |
+| `876 → sub_91D7E0` | 876 has an empty request writer. ACK result 0 then reads `s32 count` and `count × 13-byte` quest snapshots into local working data; nonzero reads no snapshot array. | The count and status are server-provided inputs, but their daily rotation, limit, and reward policy remain unresolved. |
+
+The useful boundary is now explicit: the native quest client has a local
+**working state** and separate **completion bitmaps**, but the recovered
+quest ACK handlers do not materialize an inventory/present reward. Wiki claims
+about daily reset time, three-slot limits, and rewards therefore remain
+service-policy `UNRESOLVED` rather than becoming server implementation rules.
+
 ### 3.14 GS_GIVEGIFT (296/297) — 七輪修正 (sub_579830 屬 290):
 **REQ 296** 兩變體 (builder @0x57A6xx):
 - 簡短版: `s32, u8, u8`
