@@ -163,14 +163,14 @@ export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Pac
     // These are raw2 fields; native domain/signedness is unresolved.
     requireRaw16(server.serverId, "server_id");
     requireRaw16(server.group, "group");
-    p.s16(server.serverId); // native raw2; signedness remains unresolved
+    p.u16(server.serverId); // native raw2; signedness remains unresolved
     p.str(server.name); // native char[50]
     p.str(server.host); // native char[16]
     // The reader gets raw2, but the selected-server consumer passes these bits
     // to a Winsock u_short endpoint port.
     p.u16(server.port);
     p.u8(server.flag);
-    p.s16(server.group); // native raw2; signedness remains unresolved
+    p.u16(server.group); // native raw2; signedness remains unresolved
 
     for (let index = 0; index < CHANNEL_GROUP_COUNT; index++) {
       const group = server.channelGroups[index];

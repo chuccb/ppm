@@ -360,13 +360,13 @@ describe("681 — login ack", () => {
     });
     for (let i = 0; i < 4; i++) reader.s32();
     reader.s16();
-    expect(reader.s16()).toBe(-1); // native raw2 bits are emitted as s16
+    expect(reader.u16()).toBe(0xffff); // native raw2 server_id
     reader.str();
     reader.str();
-    reader.s16();
+    reader.u16();
     reader.u8();
-    expect(reader.s16()).toBe(-1); // native raw2 bits are emitted as s16
-    expect(reader.s16()).toBe(-1);
+    expect(reader.u16()).toBe(0xffff); // native raw2 group
+    expect(reader.s16()).toBe(-1); // operational max_users remains signed
     expect(reader.s16()).toBe(1);
     expect(reader.u8()).toBe(1);
     expect(reader.str()).toBe("Signed");
