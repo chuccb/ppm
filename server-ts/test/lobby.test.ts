@@ -149,6 +149,12 @@ describe("lobby bootstrap packets", () => {
       build("GL_MYINFO_ACK", { ...wireInfo, nickname: "n".repeat(24) }, selectedSnapshot),
     ).toThrow(/char\[24\]/);
     expect(() =>
+      build("GL_MYINFO_ACK", {
+        ...myInfo!,
+        characters: Array.from({ length: 21 }, (_, slot) => ({ ...myInfo!.characters[0]!, slotNo: slot })),
+      }),
+    ).toThrow(/at most 20/);
+    expect(() =>
       build("GL_MYINFO_ACK", myInfo!, { ...selectedSnapshot, selectedProfile: Number.NaN }),
     ).toThrow(/selected profile/);
     const publicMyInfo = store.getMyInfoByNickname("bob");
@@ -198,6 +204,14 @@ describe("lobby bootstrap packets", () => {
     );
     expect(invalidSelected.u8()).toBe(0);
     expect(invalidSelected.remaining).toBe(0);
+    expect(() =>
+      build("GL_CLIENTINFO_ACK", {
+        ...sparseCharacters,
+        characters: sparseCharacters.characters.map((character, index) =>
+          index === 1 ? { ...character, charType: 0x100 } : character,
+        ),
+      }),
+    ).toThrow(/247 char_type/);
     store.close();
   });
 
@@ -266,11 +280,13 @@ describe("lobby bootstrap packets", () => {
     expect(friends.str()).toBe("alice");
     expect(friends.u8()).toBe(0);
     expect(friends.remaining).toBe(0);
+    expect(() => build("GL_FRIEND_LIST_ACK", "a".repeat(21))).toThrow(/char\[21\]/);
 
     const messages = decode(build("GL_MSG_RECVLIST_ACK", "alice").encode());
     expect(messages.u16()).toBe(0);
     expect(messages.str()).toBe("alice");
     expect(messages.u8()).toBe(0);
     expect(messages.remaining).toBe(0);
+    expect(() => build("GL_MSG_RECVLIST_ACK", "a".repeat(21))).toThrow(/char\[21\]/);
   });
 });

@@ -1113,7 +1113,7 @@ round_type==4] + 2×{s32 uid (+s32)} }; 之後 u8 has_my (≠0 → u8 room,
 u8), f32 → 存 [494]。
 ### 3.10 GL_FRIEND_LIST_ACK (434) — sub_55AFC0:
 ```
-raw2 header, string field_s0, u8 count; repeat: string field_s1, raw4 field_a3
+raw2 header, string field_s0 (native local `char[21]`, at most 20 ANSI bytes), u8 count; repeat: string field_s1, raw4 field_a3
 ```
 `sub_537F60` accepts the full 4-byte record field but assigns it to the
 one-byte table slot `this+61585+index`; only the low byte is visibly retained by
@@ -1121,7 +1121,7 @@ that local consumer. The 21-byte record-string copy loop has no visible per-byte
 
 ### 3.11 GL_MSG_RECVLIST_ACK (426) — sub_55A630:
 ```
-raw2 header, string field_s0, u8 count
+raw2 header, string field_s0 (native local `char[21]`, at most 20 ANSI bytes), u8 count
 repeat: string field_s1, u8 field_a3, string field_s2, raw4 field_a5, string field_s3 (native local 201-byte stride; reader does not visibly clamp), string field_s4 (native 2-byte stride), raw2 field_a8
 ```
 Native `sub_5378C0` keeps at most 10 rows. Its string slots have strides 20/21/201/2

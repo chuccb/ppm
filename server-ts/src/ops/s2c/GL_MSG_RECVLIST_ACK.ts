@@ -11,12 +11,12 @@
 
 import { Packet } from "../../packet.ts";
 
-const CONTEXT_STRING_MAX_BYTES = 23; // native local char[24], including NUL
+const CONTEXT_STRING_MAX_BYTES = 20; // native local char[21], including NUL
 
 export default function GL_MSG_RECVLIST_ACK(op: number, contextString = ""): Packet {
   if (typeof contextString !== "string") throw new TypeError("426 context string must be a string");
   if (contextString.length > CONTEXT_STRING_MAX_BYTES) {
-    throw new RangeError("426 context string must fit native char[24]");
+    throw new RangeError("426 context string must fit native char[21]");
   }
   return new Packet(op).u16(0).str(contextString).u8(0);
 }

@@ -23,9 +23,9 @@ function requireS32(name: string, value: number): void {
   }
 }
 
-function requireU8(name: string, value: number): void {
+export function requireU8(name: string, value: number): void {
   if (!Number.isSafeInteger(value) || value < 0 || value > 0xff) {
-    throw new RangeError(`198 ${name} must fit u8`);
+    throw new RangeError(`${name} must fit u8`);
   }
 }
 
@@ -77,7 +77,10 @@ export default function GL_MYINFO_ACK(
   const p = new Packet(op).u8(1).s32(myInfo.userId);
   writeMyInfoBasicData(p, myInfo);
 
-  const characters = myInfo.characters.slice(0, 20);
+  if (myInfo.characters.length > NATIVE_CHARACTER_SLOT_COUNT) {
+    throw new RangeError("198 supports at most 20 character records");
+  }
+  const characters = myInfo.characters;
   p.u8(characters.length);
   for (const character of characters) {
     requireU8("char_type", character.charType);

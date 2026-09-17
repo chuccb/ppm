@@ -9,5 +9,7 @@ export default function GL_MSG_RECVLIST_REQ(r: Reader, connection: Connection): 
   const myInfo = connection.accountId === null
     ? null
     : connection.config.store.ensurePlayerIdentity(connection.accountId);
-  connection.reply("GL_MSG_RECVLIST_ACK", myInfo?.nickname ?? "");
+  // 426 stores this otherwise-unused compatibility string in native char[21].
+  const context = myInfo?.nickname;
+  connection.reply("GL_MSG_RECVLIST_ACK", context && context.length <= 20 ? context : "");
 }

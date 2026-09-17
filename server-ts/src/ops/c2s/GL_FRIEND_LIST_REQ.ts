@@ -8,5 +8,7 @@ export default function GL_FRIEND_LIST_REQ(r: Reader, connection: Connection): v
   const myInfo = connection.accountId === null
     ? null
     : connection.config.store.ensurePlayerIdentity(connection.accountId);
-  connection.reply("GL_FRIEND_LIST_ACK", myInfo?.nickname ?? "");
+  // 434 stores this otherwise-unused compatibility string in native char[21].
+  const context = myInfo?.nickname;
+  connection.reply("GL_FRIEND_LIST_ACK", context && context.length <= 20 ? context : "");
 }
