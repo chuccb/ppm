@@ -30,7 +30,7 @@ Wiki observation → native sender / native receiver → field layout
 `ItemData.pat` 的類別或一個 UI 名稱，只能證實資源存在，不能單獨證實該物可購、
 可送禮、可回收、預設持有、或在任何特定版本的 pool 中。價格尤其不能以 Wiki
 價目表回填：本 revision 的 `itemdata.pat` 價格區幾乎全為零，詳見
-[`RESOURCES.md` §2c](RESOURCES.md#2c-itemdata-pat-尾部-721b-完整切段-十六輪21164-條統計錨點定位)。
+[`RESOURCES.md` §2c](RESOURCES.md#2c-itemdatapat-尾部-721b-完整切段-十六輪-21164-條統計錨點定位)。
 
 ## 2. 本輪已瀏覽的主題與可確定的分界
 
@@ -301,7 +301,7 @@ NUL-terminated 字串；以此解析 21,164 筆後，總長 `8 + 21164×997 = 21
 **界線。** 這四個 ID 證明的是「試射場把未選武器重設為這組」——一個
 **client-side 場景行為**。它不證明新帳號 inventory、不證明 grant、
 不證明這四件在本 revision 可購買或有價格（本 revision 價格區近乎全零，
-見 [`RESOURCES.md` §2c](RESOURCES.md#2c-itemdata-pat-尾部-721b-完整切段-十六輪21164-條統計錨點定位)）。
+見 [`RESOURCES.md` §2c](RESOURCES.md#2c-itemdatapat-尾部-721b-完整切段-十六輪-21164-條統計錨點定位)）。
 §5-starter grant 的三來源分離結論不因本節改變。
 
 ### 5b-5. 兩項「僅 Wiki、刻意不採用」的記錄
@@ -351,7 +351,7 @@ NUL-terminated 字串；以此解析 21,164 筆後，總長 `8 + 21164×997 = 21
 `ui/system/Tutorial_Data.xml` 這個**完全無關的子系統**中，發現教學關卡
 以 `type0=27 / type1=26 / type2=4 / type3=7` 配置玩家，
 解出來正是同樣那四件。兩個獨立 client 子系統選用同一組基礎裝備，
-該結論不再依賴單一 Wiki 頁面。詳 [`RESOURCES.md` §5d-10](RESOURCES.md#5d-10-tutorial_dataxmltype-欄即武器段選擇器並二度印證基礎四件組)。
+該結論不再依賴單一 Wiki 頁面。詳 [`RESOURCES.md` §5d-10](RESOURCES.md#5d-10-tutorialdataxmltype-欄即武器段選擇器並二度印證基礎四件組)。
 
 ### 5b-8. 第五輪：文件自我稽核（以三來源為權威反查 md）
 
@@ -379,7 +379,7 @@ weaponparts 1,108、partsability 413，以及
 「非官方說明、為推測」的武器儀表，已能對到 `partsability.pat` 的實際欄位；
 連該頁明講「無圖表的隱藏屬性、詳細不明」的**初弾命中**，
 都對應到確實存在的 `first_shot_wide`／`first_shot_angle`。詳
-[`RESOURCES.md` §5d-11](RESOURCES.md#5d-11-武器-ui-儀表--partsabilitypat-引擎欄位對照)。
+[`RESOURCES.md` §5d-11](RESOURCES.md#5d-11-武器-ui-儀表-partsabilitypat-引擎欄位對照)。
 
 ### 5b-9. 第六輪：Pepachi 演出級別，以及兩處 md 更正
 
@@ -1281,6 +1281,57 @@ fail-closed，`UNRESOLVED` 不因找到 UI 或資源名稱而減少。
 數量、重置、獎勵與 present box 的敘述仍是歷史背景；server lifecycle
 繼續 `UNRESOLVED`，不得因 ACK 有 `SUCCESS`／`COMPLETE` 名稱就新增 grant。
 
+### 5b-41. 第三十七輪：Single mode 由三條鏈閉合——Wiki 的玩法、`gamecenter_map_info.xml` 的關卡資料、GameCenter 474/476/477/478/480/483/484 的 native flow
+
+本輪把 [シングルモード](https://wikiwiki.jp/paperman/シングルモード) 的主頁與兩張代表性地圖規則頁，和 `PaperMan.exe.c`、`Extracted/ui/system/AI/`、GameCenter packet family 再做一次受控比對。結論不是「Wiki 所有文字都已被 client 證明」，而是把**可交叉閉合的邊界**與**只停在原服政策層的文字**分開。
+
+#### Wiki 能確定的 Single domain
+
+- 入口列出兩張圖：`ロボットたちの反乱` 與 `記憶の手掛かり`。
+- 玩法敘述是射擊衝向防衛目標的 AI；有時間限制，擊倒 boss 才算 clear；時間到或 shield HP 歸零則 game over。
+- `イージープレイ` 可重試；首次 clear 才給 PG／稱號。`ランキングプレイ` 每局消耗一枚 Single coin；首次 clear 才給 PG／武器／稱號。Wiki 另記 silver coin 每小時補充、上限 5，gold coin 以 CASH 購買及 5/10/20/50 枚價格。
+- 攻略頁的 Fever 無敵場、遠距離敵優先、boss 弱點、score multiplier、support item 與武器建議，是玩家攻略／觀測，不等同 server score、reward 或 anti-cheat policy。
+- Single 主頁把特殊射擊與分數寫成玩家可見規則：Headshot `2.0`、Heartbreak `1.5`、Critical `1.8`、Air combo `2.0`；連續 critical、連續特殊擊殺、Fever、無傷連殺各有 bonus level／倍率，最後以「基本得分 × 特殊射擊倍率 × bonus 倍率」計算並捨去小數。這些數字在目前 native/resource corpus 中尚未找到可安全對應的 server score authority，仍是 Wiki-only。
+- support item 表描述命中強化與無限發射 10 秒、Fever gauge 半格／一次展開、score `+20,000`、時間 `+10 秒`、shield 回復，以及一個帶 `10PG?` 不確定標記的 PG 效果；問號本身就是 Wiki 編者的不確定性，不能轉成 reward policy。
+- 兩張 detail 頁補充的是地圖攻略形狀：`ロボットたちの反乱` 是固定防壁前定點射擊、五個方向（1F 兩端／中央與 2F 兩端）出怪；`記憶の手掛かり` 是中央 monument、周邊 1F 八扇／2F 四扇出怪，另有大型敵人從正面階梯牆出現。`Scenario.xml` 的 `spawnArea`／`bot_type` 只證明 client 有劇本欄位，尚未把每個 Wiki 出怪敘述逐一證成。
+
+這些是 Wiki domain anchor；下面的 native/resource 證據只把其中一部分提升為 client-side fact。
+
+#### Resource parser 與兩張圖的 id/數值閉環（Fact / HIGH）
+
+`sub_411DA0` 以 `ui/system/AI/gamecenter_map_info.xml` 的 `GAMECENTER_MAP_INFO` 為入口，將 `GUNSHOOTING_MAP_INFO` 與 `GUNSHOOTING_MAP_INFO_EASY` 分別載入兩個 local collection。`sub_4124D0` 實際讀的欄位包括 `index`、`time`、`angle`、三個 `lang*ID`、`mapname`、`botlaserTex`、`botplasmaTex`、`shieldhp`、`feverTime`、`startPos`、`shieldPos`，以及 `WARNING_LIGHT_POS`／`SHILD_NAME` 子節點；不是看到 XML 欄位就假定全部有效。
+
+| map id / maplist | `mapname` | normal `time` | easy `time` | `shieldhp` | language ids | `feverTime` |
+|---|---|---:|---:|---:|---|---:|
+| 81 / `AI_01_Monster.pmm` | `ロボットたちの反乱` | 5 | 3 | 1000 | scenario 1085, dialogue 1084, clear 1128 | 3000 |
+| 89 / `AI_02_Monster.pmm` | `記憶の手掛かり` | 5 | 3 | 1100 | scenario 1212, dialogue 1211, clear 1213 | 3000 |
+
+`time` 與 `feverTime` 的單位不能只由欄位名推定；表格保留資源原值。`maplist.pat` 的 mode bitmask、`gamecenter_map_info.xml` 的 `index`、訊息表的 language id、以及 `map_StartIndex.xml` 的 GunShooting modeIndex 9 已在 [`RESOURCES.md` §5d-5/§5d-6](RESOURCES.md#5d-5-maplistpat-全解123-圖-mode-bitmask與既有-bit-表-100-相符) 閉合。`index` 是 map id，不是 modeIndex。
+
+#### UI stage 與 packet flow（Fact / HIGH；語意只採 native 字面）
+
+`CPopupGunShootingStart` 的 UI caller 不是抽象的「購買流程」：`EASY_START` 轉成 `n3=3`，`FREE_START` 轉成 `n3=1`，`CASH_START` 轉成 `n3=2`；popup 完成後由 `sub_457350` 送 `474`，`sub_584DB0` 寫入 `game_id` 加這個一 byte `stage`，並顯示 local message code `0x66`。因此目前最安全的命名是 **stage 3 = Easy、stage 1 = FREE_START、stage 2 = CASH_START**；不要進一步把它改名成未經 server capture 證明的 coin type 或扣款結果。
+
+GameCenter 的 native 證據鏈如下，完整 wire evidence 見 [`PACKETS.md` §3.15j-a](PACKETS.md#315j-a-2026-09-17-gamecenter-472484-direct-writerreadercaller-re-audit)：
+
+- `472` 的 `sub_584850` 只送 `game_id`，並設定 `byte_EA12F4`／`byte_1D0D20B`；`sub_4074A0` 以 flag `1` 呼叫，map selection path 以 flag `0` 呼叫。兩個 flag 是 local flow state，不能直接命名成「已付費」或「已授權」。
+- `476` 的 `sub_76E790` 從 local game state 組出 `24B + 44B`，`sub_564930` 再以 `game_id + raw24 + raw44` 寫線。這證明 client 會提交結算資料，不證明 server 接受 score、PG、EXP 或 first-clear reward。
+- `477` 的 `sub_76E450` 讀取 header、`raw32`、`raw44`、多個 score/rank values 與 flags，接著寫入 `sub_8EE1D0()`、`dword_EE8D18`、`dword_EE8D0C`、`byte_EE8C80` 等 local game state；local variable 名稱如 `reward_gp` 不能升格為 server grant proof。
+- `478` 的 caller `sub_76EA70` 組出 `36B` check block，`sub_564A40` 原樣送出；它是 client check data 的存在證據，不是「反作弊已被 server 驗證」的證據。
+- `480` 的 `sub_585320` 受 `dword_EE3950` local state gate 保護，送 `game_id + mode`；`481` 最多讀兩組 `3` 與 `10` 筆 `0x38B` ranking entries 後更新 local ranking/cache queue。這不能證明 ranking persistence、名次 authority 或 score write-back。
+- `483` 的 caller `sub_8F1A60` 是共用的 mission UI/loading flow：依 `sub_67EB70()` 的模式分支等待約 5 秒或 AIMulti/PvE 分支約 7 秒，再由 `sub_584EC0` 只送 `game_id`；因此不能把 caller 簡化成 Single-only。`484` 的 reader 讀 `2B + 1B + 2B + 4B` 後呼叫 `sub_5392A0`。這證明 start-ok 是 client handshake/state update，不證明 server authorization。
+
+#### 界線與 UNRESOLVED 清單
+
+目前可以很有把握地說明 Single 的 **client mode、兩張 map、normal/easy resource split、UI stage、GameCenter transport shape、local result/ranking consumers**；仍不能僅靠 Wiki 加 client corpus 宣稱：
+
+1. coin 在 `474` 何時扣、扣哪一種、失敗是否退款，以及 hourly refill 的 server clock／cap；
+2. `474`／`483` 是否是不可繞過的 game-start authorization，或僅是 client handshake；
+3. `476` 的 score/stat 如何被 server 驗證，`477` 的 score／rank／`reward_gp`／`reward_exp` 是否實際寫入帳戶；
+4. first-clear 判定、PG／武器／稱號 grant、重複 clear、ranking persistence 與 `478` check policy。
+
+上述四類全部維持 **UNRESOLVED**。特別是 `gamecenter_map_info.xml` 的 `shieldhp`、Wiki 的首次 clear／coin／reward 文字和 `477` 的 local field，都不能單獨替代 server-side capture 或 server implementation evidence。
+
 ## 6. 本輪瀏覽頁面（來源索引）
 
 本索引記錄已閱讀的主題入口，避免日後把搜尋摘要誤當完整頁面內容；個別頁的 last-modified
@@ -1302,6 +1353,8 @@ fail-closed，`UNRESOLVED` 不因找到 UI 或資源名稱而減少。
 - **第三十三輪新增**：[クラン](https://wikiwiki.jp/paperman/クラン)（2016-02-10）—
   設立 20,000PG、三階等級、クランレベル 1–10 的人數上限與経験値表、
   徽章三層與 120/60/60 素材數；對應 583/584 隧道與 585 的 `s32 emblem`（見 §5b-37）。
+- **第三十七輪新增**：[シングルモード](https://wikiwiki.jp/paperman/シングルモード)、[ロボット達の反乱詳細](https://wikiwiki.jp/paperman/シングルモード/ロボット達の反乱詳細)、[記憶の手掛かり詳細](https://wikiwiki.jp/paperman/シングルモード/記憶の手掛かり詳細)、[PvEモード](https://wikiwiki.jp/paperman/PvEモード)、[MAP・ルール詳細](https://wikiwiki.jp/paperman/MAP・ルール詳細)、[武器パーツアップシステム](https://wikiwiki.jp/paperman/武器パーツアップシステム)、[武器耐久値情報](https://wikiwiki.jp/paperman/武器耐久値情報)、[スキル一覧](https://wikiwiki.jp/paperman/スキル一覧)、[階級関連](https://wikiwiki.jp/paperman/階級関連)、[リサイクルシステム](https://wikiwiki.jp/paperman/リサイクルシステム)、[通常ショップ武器一覧](https://wikiwiki.jp/paperman/通常ショップ武器一覧)—
+  本輪以 Single/PvE 與高影響 progression 規則作全面瀏覽；Single 的兩圖與 UI/resource/GameCenter 證據交叉結論見 §5b-41，PvE 結構見 §5b-24/§5b-25，其他頁只把 Wiki policy/玩家觀測留作索引，未將其直接升格為 server authority。
 - 對戰／社交：[MAP・ルール詳細](https://wikiwiki.jp/paperman/MAP・ルール詳細)、[出現アイテム一覧](https://wikiwiki.jp/paperman/出現アイテム一覧)、[名誉ゲージ](https://wikiwiki.jp/paperman/名誉ゲージ)、[クエストシステム](https://wikiwiki.jp/paperman/クエストシステム)、[クラン](https://wikiwiki.jp/paperman/クラン)、[PvEモード](https://wikiwiki.jp/paperman/PvEモード)、[アシストポイント機能](https://wikiwiki.jp/paperman/アシストポイント機能)、[戦闘中のキャラ情報](https://wikiwiki.jp/paperman/戦闘中のキャラ情報)、[武器移動速度](https://wikiwiki.jp/paperman/武器移動速度)
 
 **第二輪（本節 §5b 的來源）。** 服務已於 2016-12-26 12:00 終止（首頁公告），

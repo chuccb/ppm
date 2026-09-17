@@ -189,8 +189,8 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 471 | GS_GET_HUKUBUKURO_ACK | sub_57D210 | `u8 status; status==0 → s32 count, count×{s32 itemId,u8 rawValue}; nonzero → no tail` |
 | 473 | GL_GAMECENTER_REC_ACK | sub_584910 | `u16 s32 u8 u8 u8 u8 u16 s32 u8 u8 u16 u16` |
 | 475 | GG_GAMECENTER_GAME_START_ACK | sub_584E80 | `(無直接讀取/轉發)` |
-| 477 | GG_GAMECENTER_GAME_END_ACK | sub_564A00 | `(無直接讀取/轉發)` |
-| 481 | GG_GAMECENTER_RANKING_ACK | sub_585080 | `u16 u8 u16 s32 u8 u8` |
+| 477 | GG_GAMECENTER_GAME_END_ACK | sub_564A00 (mode gate) → sub_76E450 | `u16, raw32, raw44, raw4, raw24, raw8, 4×raw4, multiple u8 flags` |
+| 481 | GG_GAMECENTER_RANKING_ACK | sub_585080 | `u16 u8 u16 s32, u8 count1 + count1×raw56 (max 3), u8 count2 + count2×raw56 (max 10)` |
 | 482 | GL_GAMECENTER_COIN_CHANGED_ACK | sub_585F50 | `u16 u16` |
 | 484 | GG_GAMECENTER_GAME_START_OK_ACK | sub_584F70 | `u16 u8 u16 s32` |
 | 486 | GL_GET_GAMEROOM_PROGRESSTIME_ACK | sub_56AE30 | `u8 u8 s8/bool u8 s8/bool u16 u8 s32 u8 s8/bool u16 u8 s32 u8 s8/bool u8 s8/bool u8 u8 s8/bool s8/bool u8 s8/bool` |

@@ -2630,6 +2630,74 @@ AppearSound DisAppearSound`
 但同目錄的 `ItemAbilityEffectColorTable.xml`／`ItemAbilityEffectNameTable.xml`
 是明文（§5d-20 已記）。**同一子系統的三張表加密狀態並不一致。**
 
+## 5d-29. Single mode / GunShooting 的 resource parser、兩圖參數與 UI stage 閉環
+
+本節把 Wiki 的 Single domain 與 resource/native 交叉結果集中記錄，避免把 `gamecenter_map_info.xml` 當成一張「看到 XML 就全部生效」的設定表。
+
+### 5d-29a. `gamecenter_map_info.xml` 的實際載入器
+
+`sub_411DA0` 只從固定路徑 `ui/system/AI/gamecenter_map_info.xml` 的 root `GAMECENTER_MAP_INFO` 取兩類節點：
+
+- `GUNSHOOTING_MAP_INFO` → normal collection；
+- `GUNSHOOTING_MAP_INFO_EASY` → `this + 12` 的 easy collection。
+
+`sub_4124D0` 的 parser 實際讀取：
+
+```
+index time angle langScenarioID langDialogueID langClearID
+mapname botlaserTex botplasmaTex shieldhp feverTime
+startPos shieldPos
+```
+
+並另外處理兩個 child collection：第一個 child 讀 `pos0..posN` 的 `WARNING_LIGHT_POS`，第二個 child 以 `shild_%d` 讀 `SHILD_NAME` 的 shield texture names。檔案裡的 `index` 會被放進 map-info object；它不是 modeIndex。
+
+`Extracted/ui/system/AI/gamecenter_map_info.xml` 的兩張圖如下：
+
+| `index` | maplist record | `mapname` | normal | easy | `shieldhp` | language ids | `feverTime` |
+|---:|---|---|---:|---:|---:|---|---:|
+| 81 | `maps\\AI_01_Monster.pmm` | `ロボットたちの反乱` | `time=5` | `time=3` | 1000 | 1085 / 1084 / 1128 | 3000 |
+| 89 | `maps\\AI_02_Monster.pmm` | `記憶の手掛かり` | `time=5` | `time=3` | 1100 | 1212 / 1211 / 1213 | 3000 |
+
+normal/easy 的 `startPos`、`shieldPos`、warning-light positions 與 shield texture names 也各自存在；它們是 client map setup evidence，不是 server clear/reward policy。`time`／`feverTime` 的單位未由此 XML 或本輪 parser trace 安全確定，保留 raw value。
+
+### 5d-29b. map id、mode bit 與 Wiki 名稱的四來源鏈
+
+```
+maplist.pat
+  81 → maps\AI_01_Monster.pmm, GunShooting bit (modeIndex 9)
+  89 → maps\AI_02_Monster.pmm, GunShooting bit (modeIndex 9)
+       ↓ same map id
+ui/system/AI/gamecenter_map_info.xml
+  GUNSHOOTING_MAP_INFO index="81"/"89"
+       ↓ langScenarioID/langDialogueID/langClearID
+msgtableres.lang
+       ↓ same mode index
+map_StartIndex.xml
+  modeName="GunShooting", modeIndex=9, default map id=89
+```
+
+這條鏈的重點是 **id type**：81/89 是 map id，9 是 modeIndex，1084 等是 language id。檔名前綴 `AI_` 不是 parser 的 mode 判定依據；既有 `maplist.pat` 的 bitmask 結果與 [`RESOURCES.md` §5d-5/§5d-6](#5d-5-maplistpat-全解123-圖-mode-bitmask與既有-bit-表-100-相符) 互相驗證。
+
+### 5d-29c. Popup stage 與 GameCenter writers
+
+Single popup 的 native event branch 使用 resource/UI literal，而不是自行推測的 domain enum：
+
+| UI literal | native stage | 後續 writer |
+|---|---:|---|
+| `EASY_START` | 3 | `sub_457350` → `sub_584DB0` → opcode 474 |
+| `FREE_START` | 1 | `sub_457350` → `sub_584DB0` → opcode 474 |
+| `CASH_START` | 2 | `sub_457350` → `sub_584DB0` → opcode 474 |
+
+`sub_584DB0` 只把目前 `game_id` 與 stage 寫入 474，送出後顯示 local message code `0x66`。map selection 的 472 path 則送 `sub_584850(map_id,0)`；另一條 `sub_4074A0` path 送 `sub_584850(game_id,1)`，兩個 flag 同時寫入 `byte_EA12F4`／`byte_1D0D20B`。這些 local flags 不可直接當成 paid/free authorization。
+
+結算與 handshake 的 client/resource 邊界記在 [`PACKETS.md` §3.15j-a](PACKETS.md#315j-a-2026-09-17-gamecenter-472484-direct-writerreadercaller-re-audit)：476 是 `1 primitive + 24B + 44B`，478 是 `36B` check block，480 是 `game_id + mode` 且有 local state gate，483 只有 `game_id`；477/481/484 readers 更新 local state/cache。resource 與 UI 只能說明 client 要送什麼、顯示什麼，不能補 coin 扣除、score authority、reward grant 或 ranking persistence。
+
+### 5d-29d. 與 Wiki 的交叉結論與限制
+
+[シングルモード](https://wikiwiki.jp/paperman/シングルモード) 的兩張地圖、Easy/Ranking 分流、coin 與首次 clear reward 是很好的歷史 domain 導航；其中兩圖、map id、normal/easy `time`、shield HP 與 popup stage 已由本 extraction 的 native/resource 閉合。相反地，Wiki 的 Fever／boss／score multiplier／support item 攻略，以及 coin refill/cap、價格、首次 clear、PG／武器／稱號 grant，不能由這些檔案升格為私服 server policy。
+
+因此本節明確保留以下 `UNRESOLVED`：coin 扣款與補充、game-start authorization、476/477 score/reward mutation、first-clear uniqueness、ranking write/persistence，以及 478 check 的 server decision。`gamecenter_map_info.xml` 的 `shieldhp` 與 `feverTime` 只表示 client 具有這些 map-info 欄位，不代表 client 可以裁決原服的 clear、score 或 grant。
+
 ## 6. 其他已知資源
 
 - `system/map_StartIndex.xml`, `SelectRandomMap.xml`: 地圖選擇

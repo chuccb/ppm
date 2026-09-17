@@ -2336,6 +2336,47 @@ inventory materialization. See the implementation boundary in
 | 485 | `GL_GET_GAMEROOM_PROGRESSTIME_REQ` | `sub_56AD60` | C2S | `u8 room_no` (查詢戰局進行時間) |
 | 486 | `GL_GET_GAMEROOM_PROGRESSTIME_ACK` | `sub_56AE30` | S2C | `u8 n3, s16 room_no, u8 id, s32 elapsed_sec, u8, s8, u8, s8, u8, s8, u8, s8` |
 
+### 3.15j-a. 2026-09-17 GameCenter 472–484 direct writer／reader／caller re-audit
+
+本輪不是按 opcode 名稱補語意，而是把 `Packet::possible_ctor_or_dtor_0` writer、所有目前找到的主要 caller、dispatcher／reader 與 local consumer 放回同一條鏈。raw 長度是 native 直接傳給 `sub_592580`／`sub_592500` 的長度；`s16`／`u8` 等 primitive 的 signedness 仍以各 helper definition 為最後核對點，不能用 caller 形狀取代 wire validation。
+
+| opcode | direct native proof | caller／local consumer | 能證明的範圍 |
+|---:|---|---|---|
+| 472 | `sub_584850(a1,a2)` 建 `Packet(...,472)`，先寫 `byte_EA12F4=a2`、`byte_1D0D20B=a2`，再 `sub_5929E0(a1)`、送 socket。 | `sub_4074A0` 固定以 flag `1` 呼叫；map selection path 以 flag `0` 呼叫。 | `game_id` query 與兩個 local flow flag；flag 的商業意義未定。 |
+| 474 | `sub_584DB0(a1,a2)` 建 `Packet(...,474)`，`sub_5929E0(a1)` + `sub_592920(a2)`，送出後顯示 local message `0x66`。 | `sub_457350(stage)` 從 `sub_411A30()` 取目前 `game_id`；`CPopupGunShootingStart` 的 `EASY_START/FREE_START/CASH_START` 分別傳 `3/1/2`。 | start request 的 `game_id + stage` 與 client UI stage mapping；不證明 coin 扣款或 authorization。 |
+| 476 | `sub_564930(a1,a2,a3)` 建 `Packet(...,476)`，寫 primitive `a1`、`raw[0x18]`、`raw[0x2c]`。 | `sub_76E790` 從 `sub_8EE1D0()` 與 local timer／state 組出 24B 與 44B，再呼叫 writer。 | client 結算提交資料的固定 shape；不證明 score／PG／EXP 的 server grant。 |
+| 477 | dispatcher `sub_564A00` 只在 `sub_67F120()==1` 時轉到 `sub_76E450`。 | `sub_76E450` 為 Single reader，並將資料寫入 `sub_8EE1D0()`、`dword_EE8D18`、`dword_EE8D0C`、`byte_EE8C80` 等 local state。 | 477 僅對 GunShooting local flow 生效；不要把相同 body 當一般 `GR_END_ACK`。 |
+| 478 | `sub_564A40(a1)` 建 `Packet(...,478)`，只 `sub_592580(a1,0x24)` 後送出。 | `sub_76EA70` 組 `36B` check block（含 stage／mode-like bits、時間與 local values）後呼叫。 | check data 的 wire width；不證明 anti-cheat policy 或 accepted/rejected semantics。 |
+| 480 | `sub_585320(a1,mode)` 先檢查 `unknown_libname_51(dword_EE3950)`；state `==1` 時不送，否則建 `Packet(...,480)` 寫 `game_id + mode`。 | lobby GameCenter ranking UI 的 map selection path 會傳 `mode`。 | ranking query 的 local gate 與 request body；不證明 server ranking persistence。 |
+| 481 | `sub_585080` 讀兩個 header values，第一 list count 最多 3、每筆 `0x38`，第二 list count 最多 10、每筆 `0x38`。 | 成功讀完才調整 `dword_EA1260` queue，呼叫 `sub_538E50`／`sub_538BE0` 更新 local lists。 | ranking response 的 bounded framing 與 local cache update；count 上限不是 server policy 的證明。 |
+| 483 | `sub_584EC0(a1,unused,unused)` 建 `Packet(...,483)`，只寫 `game_id` 後送出。 | `sub_8F1A60` 是共用 mission UI/loading flow；依 `sub_67EB70()` 模式分支等待約 5 秒，AIMulti/PvE 分支約 7 秒後呼叫。 | start-ok client handshake 的 request shape；不證明 server authorization。 |
+| 484 | `sub_584F70` 依序讀 `2B`、`1B`、`2B`、`4B`，最後 `sub_5392A0(byte_EE8968,v5,v6)`。 | 只更新 local start-ok state。 | reader framing 與 local state update；status 不是可自行定義的 grant code。 |
+
+#### 476/477 的 exact reader sequence
+
+`sub_76E450` 的讀取順序必須保留，不能被簡化為「score + reward」：
+
+1. 先讀 2-byte value；
+2. `raw[0x20]`、`raw[0x2c]`；
+3. 一個 4-byte value；
+4. `raw[0x18]`、`raw[8]`；
+5. 四個 4-byte values；
+6. 多個 1-byte values／flags；
+7. 將選定欄位寫入 Single local state，更新 `dword_EE8D18`、累加 `dword_EE8D0C`、設定 `byte_EE8C80`，再回到 local result/UI path。
+
+`sub_76E790` 的 44B block 來源包含 `sub_8EE1D0()` 的 local values、timer/score-like state 與常數欄位；目前沒有 server-side code 可將每個 raw offset 命名為正式 score、reward 或 rank authority。`sub_564A00` 的 mode gate 也表示這不是一般對戰結算 reader。
+
+#### 479 與政策邊界
+
+目前 dispatcher 中沒有可安全列名的 direct `479` reader；既有 `u8 status(1)` 只是 layout index／候選 framing，不能據此回一個「成功」 ACK。整個 472–484 family 都只證明 client transport、bounded buffer、local state transition 與部分 UI caller：
+
+- coin 扣款、silver/gold refill、first-clear、reward grant、score submission、ranking persistence、game-start authorization：**UNRESOLVED**；
+- `477` local variable／表格中的 `reward_gp`、`reward_exp`、`rank` 不足以證明帳戶 mutation；
+- `481` local list update 不足以證明原服的 leaderboard write model；
+- `484` 的 `status` 不應在私服 handler 中擴張成未驗證的業務狀態。
+
+因此實作上仍應對 476／478／480／483 與未解析的 479 保持 fail-closed；不要因 Wiki 的 Single policy 或 client UI button 名稱而新增扣款／發獎／排名寫入。
+
 ### 3.15k AI / PVE 防衛戰模式協定 (五十五輪全鏈定案)
 
 | Opcode | 封包名稱 | 來源函數 | 方向 | Wire 格式與行為 |
