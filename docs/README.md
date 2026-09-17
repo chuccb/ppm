@@ -27,14 +27,14 @@
 
 | 目標 | 先讀 | 再讀 | 不可省略的界線 |
 |---|---|---|---|
-| 修改或新增 packet handler | [`PACKETS.md`](PACKETS.md) 的對應 family | [`LAYOUTS_REQ.md`](LAYOUTS_REQ.md) writer、[`LAYOUTS.md`](LAYOUTS.md) reader、現有 `server-ts/src/ops/` module | 必須追 sender → fields → consumer → state/cache/storage → observable behavior；只有 ACK reader 不足以產生成功 server policy。 |
-| 核對目前 TS packet 欄位 | [`SERVER_TS_PACKET_FIELDS.md`](SERVER_TS_PACKET_FIELDS.md) | 對應 native audit、`PACKETS.md`、實際 `server-ts/src/ops/` 檔案 | TS 欄位名稱只是 projection；raw/unknown/flag/extra 不可擅自改成業務語意。 |
+| 修改或新增 packet handler | [`PACKETS.md`](PACKETS.md) 的對應 family | [`LAYOUTS.md`](LAYOUTS.md) Part II writer、Part I reader、現有 `server-ts/src/ops/` module | 必須追 sender → fields → consumer → state/cache/storage → observable behavior；只有 ACK reader 不足以產生成功 server policy。 |
+| 核對目前 TS packet 欄位 | [`SERVER_TS_EVIDENCE.md`](SERVER_TS_EVIDENCE.md) Part I | 對應 native audit、`PACKETS.md`、實際 `server-ts/src/ops/` 檔案 | TS 欄位名稱只是 projection；raw/unknown/flag/extra 不可擅自改成業務語意。 |
 | 釐清一個欄位或條件分支 | [`PACKETS.md`](PACKETS.md) | `PaperMan.exe.c` 的 caller/callee/xref 與兩份 layout | 自動表只有 primitive read/write sequence，不表示 optional branch、count loop 或欄位語意。 |
-| 登入／頻道 handshake | [`S2C_NATIVE_AUDIT_681.md`](S2C_NATIVE_AUDIT_681.md) | [`S2C_NATIVE_AUDIT_144.md`](S2C_NATIVE_AUDIT_144.md)、[`S2C_NATIVE_AUDIT_196.md`](S2C_NATIVE_AUDIT_196.md)、`PACKETS.md` §3.15d | 保留 native width、成功/失敗 framing、single-use admission 與 196 success-only tail。 |
+| 登入／頻道 handshake | [`S2C_NATIVE_AUDITS.md`](S2C_NATIVE_AUDITS.md)（681 part） | 同檔 144、196 parts、`PACKETS.md` §3.15d | 保留 native width、成功/失敗 framing、single-use admission 與 196 success-only tail。 |
 | 理解 server socket、state、DB ownership | [`ARCHITECTURE.md`](ARCHITECTURE.md) | [`../server-ts/README.md`](../server-ts/README.md)、`main.ts` → `connection.ts` / `udp.ts` → `ops/` → `store.ts` | server state guard 是 compatibility inference 時，必須和 native fact 分開記錄。 |
 | 使用角色、物品、地圖、語音、parts 或 UI 資料 | [`RESOURCES.md`](RESOURCES.md) | 原始 `Extracted/`、native lookup 與 packet consumer | resource/XML/asset 只能證明 client content，不證明可購、持有、預設、可見或 entitlement。 |
 | 由 client class、vftable 或 inheritance 定位 native 起點 | [`RTTI_PYCLASSINFORMER.md`](RTTI_PYCLASSINFORMER.md) | `PaperMan.exe.c` xref、`PACKETS.md` / `RESOURCES.md` data flow | RTTI 是 native xref 起點，不是 wire、server policy、ownership 或 storage evidence。 |
-| 選擇下一個未完成 handler | [`TODO_HANDLERS.md`](TODO_HANDLERS.md) | 對應 `PACKETS.md`、layout、resource 與 native chain | inventory 是工作地圖，不是 original-server behavior 的確認。 |
+| 選擇下一個未完成 handler | [`SERVER_TS_EVIDENCE.md`](SERVER_TS_EVIDENCE.md) Part II | 對應 `PACKETS.md`、layout、resource 與 native chain | inventory 是工作地圖，不是 original-server behavior 的確認。 |
 | 查外部歷史玩法 | [`WIKI_MECHANICS.md`](WIKI_MECHANICS.md) | native / resource / packet evidence | Wiki 只能提供搜尋線索，絕不可獨自補價格、掉落、初始裝備或 response。 |
 
 ## 文件地圖
@@ -42,13 +42,12 @@
 | 文件 | 角色 | 維護規則 |
 |---|---|---|
 | [`PACKETS.md`](PACKETS.md) | 手工整理的 packet、consumer、state evidence 與 implementation boundary | 新結論附 function、field order、consumer、confidence 與 unresolved limit；歷史 section number 保留以維持引用。 |
-| [`SERVER_TS_PACKET_FIELDS.md`](SERVER_TS_PACKET_FIELDS.md) | 目前 31 個 TS packet 的逐欄 native meaning、TS use、zero projection 與 unresolved audit | 只收錄 `server-ts/src/ops` 現有 modules；不要把保守欄位改成未證實業務名稱。 |
-| [`S2C_NATIVE_AUDIT_681.md`](S2C_NATIVE_AUDIT_681.md)、[`S2C_NATIVE_AUDIT_144.md`](S2C_NATIVE_AUDIT_144.md)、[`S2C_NATIVE_AUDIT_196.md`](S2C_NATIVE_AUDIT_196.md) | 登入／頻道 bootstrap 的 reader、caller、consumer、resource 與 TS boundary | 修改 handshake 前先更新相應 audit；不能只改 builder 或 ACK 表。 |
-| [`LAYOUTS.md`](LAYOUTS.md) | S2C dispatcher 的自動 primitive-read inventory | 不把線性序列誤讀成完整 payload grammar；重要例外補到 `PACKETS.md`。 |
-| [`LAYOUTS_REQ.md`](LAYOUTS_REQ.md) | C2S builder 的自動 primitive-write inventory | 同 opcode 可有多種 builder form；先回到所有 caller，不可只取第一列。 |
+| [`SERVER_TS_EVIDENCE.md`](SERVER_TS_EVIDENCE.md) | 目前 31 個 TS packet 的逐欄 native meaning、TS use、zero projection 與 unresolved audit（Part I）＋handler 待辦與下一步證據順序（Part II） | 只收錄 `server-ts/src/ops` 現有 modules；不要把保守欄位改成未證實業務名稱。 |
+| [`S2C_NATIVE_AUDITS.md`](S2C_NATIVE_AUDITS.md) | 登入／頻道 bootstrap 的 reader、caller、consumer、resource 與 TS boundary（681/144/196 三 parts） | 修改 handshake 前先更新相應 audit；不能只改 builder 或 ACK 表。 |
+| [`LAYOUTS.md`](LAYOUTS.md) | S2C dispatcher primitive-read（Part I）＋ C2S builder primitive-write（Part II，含 private UDP Appendix A/B）的自動 inventory | 同 opcode 可有多種 builder form；先回到所有 caller，不可只取第一列；不把線性序列誤讀成完整 payload grammar，重要例外補到 `PACKETS.md`。 |
 | [`RESOURCES.md`](RESOURCES.md) | Extracted format、resource-to-client cross-check 與資源界線 | 每個 ID/資產結論標明 display-only、lookup input 或已證實 authority。 |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | server lifecycle、runtime ownership、layer boundaries 的全景圖 | 保持高層次；欄位細節連回 `PACKETS.md` 或 audit。 |
-| [`TODO_HANDLERS.md`](TODO_HANDLERS.md) | 目前 evidence gaps、未實作 request inventory、下一步驗證順序 | 只保留 current work queue；歷史 provenance 放回 packet/resource 文件。 |
+| [`SERVER_TS_EVIDENCE.md`](SERVER_TS_EVIDENCE.md) Part II | 目前 evidence gaps、未實作 request inventory、下一步驗證順序 | 只保留 current work queue；歷史 provenance 放回 packet/resource 文件。 |
 | [`WIKI_MECHANICS.md`](WIKI_MECHANICS.md) | 外部歷史資料的搜尋索引與反推禁止清單 | 只記錄歷史觀察與驗證問題，不登錄 server policy。 |
 | [`RTTI_PYCLASSINFORMER.md`](RTTI_PYCLASSINFORMER.md) | PyClassInformer class、vftable、inheritance 搜尋索引 | 保留匯出值與多重繼承 offset；不把 RTTI root 當成 storage 或 service proof。 |
 

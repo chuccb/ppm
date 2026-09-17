@@ -24,13 +24,13 @@ TypeScript/Bun/SQLite 保守實作。
 | [`docs/README.md`](docs/README.md) | **文件與證據導覽**：先判斷該讀哪份資料、證據等級、generated boundary 與每次改動的最小交叉驗證流程 |
 | [`docs/RTTI_PYCLASSINFORMER.md`](docs/RTTI_PYCLASSINFORMER.md) | **Client RTTI 索引**：使用者提供的 PyClassInformer class / vftable / inheritance tranche；用於 native xref 定位，明確不等同 server policy 或 wire evidence |
 | `docs/PACKETS.md` | **協議完整分析**：Packet 類佈局、wire 格式、序列化原語、壓縮/加密層、關鍵 payload 結構（附 native 函數地址） |
-| `docs/SERVER_TS_PACKET_FIELDS.md` | **目前 31 個 TS packet 欄位審計**：native meaning、TS use、boundary 與 unresolved projection |
-| `docs/S2C_NATIVE_AUDIT_681.md` / `144.md` / `196.md` | **登入／頻道 handshake 專項審計**：reader、caller、consumer、resource 與 TS boundary |
+| `docs/SERVER_TS_EVIDENCE.md` | **目前 31 個 TS packet 欄位審計（Part I）＋ handler 待辦/下一步（Part II）**：native meaning、TS use、boundary 與 unresolved projection |
+| `docs/S2C_NATIVE_AUDITS.md` | **登入／頻道 handshake 專項審計（681/144/196 三 parts）**：reader、caller、consumer、resource 與 TS boundary |
 | `docs/RESOURCES.md` | **客戶端資源地圖**：maplist/物品/任務/訊息表 `msgtableres.lang`、UI 圖像音效盤點、mode 枚舉正名 |
 | `docs/WIKI_MECHANICS.md` | **Wiki* 歷史機制研究帳本**: 已閱讀主題、版本風險與待由 client/resource/packet 交叉驗證的矩陣；明確不是 service/wire 權威 |
-| `docs/LAYOUTS.md` / `docs/LAYOUTS_REQ.md` | 各封包 dispatcher 讀取序 / REQ builder 寫入序 (欄位級對照) |
+| `docs/LAYOUTS.md` | S2C dispatcher 讀取序（Part I）＋ REQ builder 寫入序（Part II，含 private UDP Appendix A/B），欄位級對照 |
 | `docs/ARCHITECTURE.md` | 全景架構: 生命週期、資料層、加密、互證鏈 |
-| `docs/TODO_HANDLERS.md` | 尚未實作的 server handler 清單與下一輪建議 |
+| `docs/SERVER_TS_EVIDENCE.md` | 尚未實作的 server handler 清單與下一輪建議見其 Part II |
 | `db/packets.tsv` | 從 `sub_9D2050` 抽出的 **676 筆 opcode ↔ 名稱** 對照表 (100–994) |
 | `db/schema.sql` | 離線 SQLite schema；目前 server-ts runtime projection 在 `server-ts/src/store.ts`，兩條路徑刻意分開 |
 | `db/build_db.py` | **可選**離線重建／檢查工具；預設產生 `/tmp/paperman.sqlite`，Bun server 不依賴它 |

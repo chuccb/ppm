@@ -51,7 +51,7 @@ make the current runtime surface and typed builder map visible. The module gets
 its opcode injected, so wire code does not carry a second numeric table. To find
 the code for a packet from `docs/PACKETS.md`, open the file with that name. The
 complete field-by-field review of the 31 current packet modules is in
-[`../docs/SERVER_TS_PACKET_FIELDS.md`](../docs/SERVER_TS_PACKET_FIELDS.md):
+[`../docs/SERVER_TS_EVIDENCE.md`](../docs/SERVER_TS_EVIDENCE.md):
 
 ```
 src/ops/c2s/GL_LOGIN_REQ.ts   the client sends it; we read it

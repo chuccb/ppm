@@ -1,8 +1,9 @@
 # PaperMan 網路協議完整分析（native wire evidence）
 
 > **閱讀導覽。** 這份文件保存欄位級、consumer 級與 state 級的手工證據；先由
-> [`docs/README.md`](README.md) 判斷它與 `LAYOUTS*.md`、`RESOURCES.md`、
-> `TODO_HANDLERS.md` 的不同角色。`LAYOUTS*.md` 是自動 primitive inventory，
+> [`docs/README.md`](README.md) 判斷它與 `LAYOUTS.md`、`RESOURCES.md`、
+> `SERVER_TS_EVIDENCE.md` 的不同角色。`LAYOUTS.md` 是自動 primitive
+> inventory（S2C/C2S 兩 Parts），
 > 不能代替此處的 optional branch、count framing 或 service-policy boundary。
 >
 > 本檔保留歷史 section number，因為其他文件與 commit 會引用它；數字標題因此
@@ -11,7 +12,7 @@
 > 僅因資源或 opcode 名稱存在就推導 server policy。
 >
 > **目前 server-ts 31 個 Packet 的逐欄 implementation audit**：見
-> [`SERVER_TS_PACKET_FIELDS.md`](SERVER_TS_PACKET_FIELDS.md)。該文件把 native
+> [`SERVER_TS_EVIDENCE.md`](SERVER_TS_EVIDENCE.md) Part I。該文件把 native
 > wire meaning、TS 實際用途、zero projection 與 `UNRESOLVED` 欄位分開，並記錄
 > 2026-09-17 的 198/247 reserved/stat projection 修正。
 
@@ -26,7 +27,7 @@
 > 機器掃描發現本文件引用的 673 個 `sub_` 符號中，曾有 **33 個在新舊兩份
 > `PaperMan.exe.c` 皆查無此函式** —— 屬更早期 IDA session 遺留的漂移，
 > **與 2026-09 的新 dump 無關**（兩份都沒有）。
-> `LAYOUTS.md`（311 rows）與 `LAYOUTS_REQ.md`（261 TCP rows）因為是自動抽取的，
+> `LAYOUTS.md` 兩 Parts（S2C 311 rows＋C2S 261 TCP rows）因為是自動抽取的，
 > **全部可對應**。
 >
 > 本輪以**追 `Packet(<opcode>)` builder** 重新定位，
@@ -333,7 +334,7 @@ context，不是額外的 132-byte wire field。官方資源 `Extracted/ui/cfg/p
 與 `ch_flag`，而 type-3-only projection `+130` 只在 `sub_416DA0` 的 UI/state
 switch 出現。`flag`、`group` 與 billing fields 仍維持 UNRESOLVED；TS 不重建
 native internal scratch object。完整 caller/callee 與 raw extension audit 見
-`docs/S2C_NATIVE_AUDIT_681.md`。
+`docs/S2C_NATIVE_AUDITS.md`（681 part）。
 
 `user_no` 另外被格式化成字串，和 `billing_first/billing_second`、常數
 `5`、`0` 一起放入 `sub_7092C0` 的 Tricod argument block；這只能證明
@@ -383,12 +384,12 @@ call sites** 把 **670 個唯一** packet 名稱註冊進全域 map `dword_2317F
 與「本地 catalog row count」，避免將補名誤當成反編譯的直接事實。
 
 > **⚠ 676 是「具名 opcode」數，不是 wire 上全部的 opcode 數（本輪實測）。**
-> 交叉比對 `LAYOUTS.md` / `LAYOUTS_REQ.md` 中有 native reader/writer 實證的
+> 交叉比對 `LAYOUTS.md`（Part I/II）中有 native reader/writer 實證的
 > opcode 後，另有 **46 個 opcode 有真實的 native handler 但不在名稱表內**。
 > 這 45 個已於 2026-09-17 完成兩輪用途審計：22 個 C2S 與 17 個 S2C 依
 > native 證據鏈推定命名（名稱欄標 `〔推定〕`）、995 註記錢包/等級推播
 > 語義，僅 489、933、1007、1009、1010 維持 unnamed —— 證據與邊界詳
-> `LAYOUTS.md`〈S2C 推定命名審計（2026-09-17）〉與 `LAYOUTS_REQ.md`
+> `LAYOUTS.md` Part I〈S2C 推定命名審計（2026-09-17）〉與 Part II
 > 〈推定命名審計（2026-09-17）〉；推定名不登入名稱表，故下方空隙清單
 > 仍屬正確的 Fact。第 46 個是本輪補進的 417，已在下方 MASTER 表具名。
 > 可用 `python3 tools/verify_dispatcher_coverage.py` 隨時複驗這些數字：
@@ -467,7 +468,7 @@ packet names；private UDP opcode 不繼承這個命名空間或 direction。登
 > fact（framing/AES/header word/teardown）；(b) 19→20 的逐 offset 表與
 > retry state machine（server 唯一實作的依據）；(c) server implementation
 > boundary。**逐 op 的觸發點/消費者/語義與生命週期全圖已移至 §2.6**；
-> 15 送/22 收的 wire 矩陣以 `docs/LAYOUTS_REQ.md` Appendix A/B 為權威；
+> 15 送/22 收的 wire 矩陣以 `docs/LAYOUTS.md` Appendix A/B（Part II）為權威；
 > 153..164 官方帶對照見 Appendix B.3。舊版「opcode 空間全圖」「receiver
 > cross-check 大表」「adjacent send/address flows」「op21 exact-layout
 > 補丁」四個小節已全數被上述三份文件吸收，故移除（GC_CLAN_PROTOCOL
@@ -1835,7 +1836,7 @@ GG 戰鬥事件中繼 (server 原樣轉發即可) 與 MASTER_* GM 工具組。
       s32  udp_port      (sub_58ED30 存 + sub_596E60 取 low u16 填 sockaddr)
       u8   endpoint_opaque → 1D0CFE4
       u8   channel_type (==3 → 續讀完整 AI/tournament 大塊 sub_875680，詳見
-              docs/S2C_NATIVE_AUDIT_196.md；其四個固定 4-byte 欄位是
+              docs/S2C_NATIVE_AUDITS.md（196 part）；其四個固定 4-byte 欄位是
               raw4，不是 f32，後續含 capped/unbounded count loops；TS 只有
               明確 raw `type3Tail` 才會發送此 continuation)
       raw4 client_flags (sub_592AC0；bit0 → byte_1D0D21B，⚠ 非 f32)
@@ -2341,7 +2342,7 @@ now proven to be a client-triggered empty refresh at present-scene entry**, and
 gift” request**. It does not shrink the server-policy `UNRESOLVED` set for
 pending/claimed state, recipient ownership, expiry, duplicate handling, or
 inventory materialization. See the implementation boundary in
-`docs/TODO_HANDLERS.md` and the fail-closed candidate table below.
+`docs/SERVER_TS_EVIDENCE.md` (Part II) and the fail-closed candidate table below.
 
 ### 3.15c 好友/訊息家族 419-441 (九輪讀畢; 439-442 本輪補完)
 ```
@@ -3164,7 +3165,7 @@ sub_54DD70), 1..7 = 錯誤碼 (重名/GP 不足/等級不夠...)。
 ## 3.99 廿六輪終極盤點 — 676-entry catalog 全分類收官
 ```
 ✔ dispatcher 直讀     306 條 (LAYOUTS.md 自動表)
-✔ REQ builder         261 條 (LAYOUTS_REQ.md 自動表)
+✔ REQ builder         261 條 (LAYOUTS.md Part II 自動表)
 ✔ 場景 vtable 層      699/703/707/807/809 (CLobbyShop), 719-723
                       (IVotingNetwork), 788 (sub_407360)
 ✔ 登入層 0x43E651     681/694/882
@@ -3303,7 +3304,7 @@ The following entries are intentionally **fail closed**. “Raw zero” means a
 field whose original error meaning is unproven; it does not mean success.
 They are evidence-bounded candidate responses for future modules, not a list of
 currently registered handlers. The current `server-ts/src/ops/` surface is the
-31 modules listed in `SERVER_TS_PACKET_FIELDS.md`; the shop request families
+31 modules listed in `SERVER_TS_EVIDENCE.md` (Part I); the shop request families
 below remain unregistered unless explicitly stated elsewhere. Do not mutate
 wallet, inventory, characters, gifts, bags, or reward state from this table.
 

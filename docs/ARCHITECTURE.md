@@ -2,7 +2,7 @@
 
 > 這是 server lifecycle、native/client state、wire boundary 與 runtime ownership 的
 > 高層索引。欄位級證據回到 [`PACKETS.md`](PACKETS.md)、[`RESOURCES.md`](RESOURCES.md)、
-> [`LAYOUTS.md`](LAYOUTS.md)、[`SERVER_TS_PACKET_FIELDS.md`](SERVER_TS_PACKET_FIELDS.md)
+> [`LAYOUTS.md`](LAYOUTS.md)、[`SERVER_TS_EVIDENCE.md`](SERVER_TS_EVIDENCE.md)
 > 與三份登入／頻道 native audit；本頁不取代它們。
 
 ## 1. 完整生命週期 (實測定案的因果鏈)
@@ -67,7 +67,7 @@ port 佈局: 40200 登入(694) / 40201 頻道(693) / 40202 UDP control endpoint
 【UDP evidence boundary】
 The client has a distinct private dispatcher (`sub_595E80`). Its complete native
 receive-case and outbound-builder matrix is documented in
-[`LAYOUTS_REQ.md`](LAYOUTS_REQ.md) Appendices A and B; that matrix is client evidence, not
+[`LAYOUTS.md`](LAYOUTS.md) Part II Appendices A and B; that matrix is client evidence, not
 an instruction to expose those operations from the server. The only completed
 server behavior here is encrypted private 19 → empty private 20, which prevents
 the native sixth-attempt TCP 139 fallback. P2P/NAT/relay and generic gameplay
@@ -175,8 +175,8 @@ dispatcher。Server 使用 cancellation 與 receive-loop 結束後的 socket cle
   不做成功 mutation。
 - UDP 範圍：只實作 source-proven AES-only 19→20；其餘 private UDP、P2P、NAT、
   relay 與 gameplay semantics 均未實作且不宣稱已定性。
-- 下一步與未實作 request：[`TODO_HANDLERS.md`](TODO_HANDLERS.md)；native/resource
-  cross-check：[`SERVER_TS_PACKET_FIELDS.md`](SERVER_TS_PACKET_FIELDS.md)。
+- 下一步與未實作 request：[`SERVER_TS_EVIDENCE.md`](SERVER_TS_EVIDENCE.md) Part II；
+  native/resource cross-check：同檔 Part I。
 
 ## 6. 關鍵互證鏈 (12+ 次資料↔逆向對撞全中)
 

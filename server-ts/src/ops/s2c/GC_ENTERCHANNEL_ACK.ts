@@ -9,7 +9,7 @@
  * header0-only boundary, but this server projection requires the complete tail
  * to avoid advertising a false-success handshake.
  * (docs/PACKETS.md §3.15d5;
- * docs/S2C_NATIVE_AUDIT_196.md)
+ * docs/S2C_NATIVE_AUDITS.md)
  */
 
 import { MAX_PAYLOAD, Packet } from "../../packet.ts";

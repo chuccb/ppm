@@ -1,4 +1,17 @@
-# server-ts 現行 31 個 Packet 欄位審計
+# server-ts 欄位證據與待辦（原 SERVER_TS_PACKET_FIELDS.md＋TODO_HANDLERS.md）
+
+> **合併說明（2026-09-17）**：本檔由 `SERVER_TS_PACKET_FIELDS.md`（31 個
+> TS packet 的逐欄 native meaning／TS use／boundary 審計）與
+> `TODO_HANDLERS.md`（未實作 handler 清單、下一步證據順序）合併——兩者
+> 同屬「server-ts 目前的實作證據現況」，審計（既成）在前、待辦（future
+> work queue）在後，內容逐字保留。歷史 provenance 記錄保留在
+> `PACKETS.md`／`RESOURCES.md`／本文 Part 一節，不重複寄存。
+
+---
+
+## Part I — 現行 Packet 欄位審計（原 SERVER_TS_PACKET_FIELDS.md，31 個 module）
+
+---
 
 日期：2026-09-17（Asia/Taipei）
 
@@ -76,7 +89,7 @@ model 的地方，TS 只輸出已確認可被 client 完整消費的空 projecti
 | 101 ↔ 102 | server 102；client heartbeat dispatcher | client 收 102 後 `sub_58D6F0` builds empty 101；server 101 reader is empty | 101 只更新到達/liveness；不回 102，否則形成 loop | 無；interval/timeout unresolved |
 | 105 → 106 | `sub_56A0F0` emits 105 with one unsigned byte only for `a2==1` and a one-second native rate gate; callers include the WAIT_REFRESH paths, `sub_4FCDB0(1)`, `sub_4FCDF0(0)`, and `CUIWaiterList::sub_6FE180(a2)`. The zero path does not send 105. | `sub_56A250` reads raw2 gate, then optional `flags/count/records`; bit0 clears the common progress object and sets a mode-specific list-state byte, bit2 clears that byte. Each positive-key row enters `sub_588560`, which derives a Class index from exp and inserts the key/name/exp into the waiter-list collection. | first gate is not record count. The first record raw4 is used as a native client-profile/list key; the exp word is consumed by `sub_403360` for the displayed Class index. TS uses zero gate, so optional branch is not entered. | `Extracted/ui/ui.xml` directly contains the `Class` sprite strip and `EMBLEM` custom-sprite table; these corroborate UI destinations only. Gate/status/list authority, exact flag policy, record limit, identity, texture ownership, and exp policy remain unresolved. |
 | 107 → 108 | lobby refresh caller sends empty 107 | `sub_568CE0` reads `mode`; `mode==3` diverts before reading ordinary `count`; otherwise reads `u8 count` and ordinary rows. `sub_580A80` reads its own `u8 n4,u8 i1,u8 flags` header. | ordinary mode 0 + count 0 terminates before room-record consumer；mode 3 stores state `[16],[17],[18],[19],[142],[494]`, builds `CRoomInfo` nodes via `sub_53F9F0`, sends two participant blocks through `sub_875C20`, then selects `sub_47E1B0` or `sub_47E3E0` for tournament UI. | `Extracted/ui/TNMT_Awardproperty.xml` proves only award layout; native UI names `tournamentmatchlist.xml`, `tournamentPlayerInfo.xml`, `tournamentFinalAward.xml` are direct filename references, not available resource contents. Stage/pair semantics remain unresolved. |
-| 143 ↔ 144 | `sub_555C60` builds 143 after channel TCP greeting；144 is server result | `sub_555D50` reads entire fixed prefix before checking result；完整欄位/consumer 另見 `docs/S2C_NATIVE_AUDIT_144.md` | endpoint/admission consumer stores raw4 context for later 834/195 flow；result UI uses rank/PG/level/KDR branches | `msgtableres.lang` only corroborates displayed text；raw string/reserved/context/net-cafe policy unresolved |
+| 143 ↔ 144 | `sub_555C60` builds 143 after channel TCP greeting；144 is server result | `sub_555D50` reads entire fixed prefix before checking result；完整欄位/consumer 另見 [`S2C_NATIVE_AUDITS.md`](S2C_NATIVE_AUDITS.md)（144 part） | endpoint/admission consumer stores raw4 context for later 834/195 flow；result UI uses rank/PG/level/KDR branches | `msgtableres.lang` only corroborates displayed text；raw string/reserved/context/net-cafe policy unresolved |
 | 195 → 196 | `sub_56FF40` builds 195 after 144; group/channel are selected from 681 list and `rawFlag` is the boolean result of the local option path | `sub_4179D0` reads 196 prefix, then success endpoint; type 3 enters `sub_875680` | endpoint passed into UDP setup (`sub_58ED30`/`sub_595C90`); follow-up 195 is not gated by 144 result in native, so TS admission must gate it | no resource proves rawFlag business semantics or type-3 business semantics; native optional type3 gate is preserved, TS server config requires complete tail before emitting success |
 | 197 → 198 | `sub_570550` dispatcher requests self data | `sub_523BF0` basic block → `sub_524010` characters → `sub_524660` loadouts → `sub_527550` UI IDs → `sub_527D00` NewSkill/tail | CClientData is populated; selected char and profile then drive lobby UI/state | avatar assets and NewSkill XML separate appearance/puzzle domains; reserved/basic tail unresolved |
 | 199 → 200 | `sub_570A00` emits empty 199 from the lobby `+1905` and scene `+748` state machines; it shows resource string `0x66` before the send | `sub_570AB0` reads success; nonzero enters `sub_524B70(...,1)`; inventory slots are scanned and `sub_535020` validates catalog lookup; completion calls `sub_41BF20` and sets `byte_EE8C05=1` | 5120-slot local array, max-100 page, negative slot terminator; `sub_534450` receives each item/durability pair and updates native client-side durability state | `itemdata.pat` proves shipped-client membership only; no server ownership/grant authority |
@@ -214,7 +227,7 @@ context 目前均不能因為欄位名稱相似而互換。
 | 106 `GL_USERLIST_ACK` | `raw2 gate`; if nonzero: `u8 flags`, `u8 recordCount`, each `raw4 userKey`, `str nickname`, `s32 exp`, and when `userKey>0`, `raw4 customTexKey`, `str texName` | Native first reads a 2-byte value into `__int16 v23` and only tests zero/nonzero; it is not the record count. The actual loop count is the later `u8 i_1`. `flags` bit0 calls `sub_408270` and sets the mode-specific state byte; `sub_6FF430` returns that byte to gate waiter-list rendering, while bit2 clears it; each positive-key row is inserted by `sub_588560`, which calls `sub_403360(exp)` and the waiter-list UI uses the resulting Class index. Positive keys also look up the client profile table; a found profile receives the texture key and `EMBLEM` texture lookup. Current TS emits the zero gate, so no optional fields follow. | `sub_56A250`, `sub_588560`, `sub_6FF430`, `CUIWaiterList::sub_6FF470`; `Extracted/ui/ui.xml` `Class`/`EMBLEM`; HIGH for order/width/direct consumers, UNRESOLVED gate/status/identity/texture/exp policy |
 | 108 `GL_GAMEROOMINFO_ACK` | `mode!=3`: `u8 mode,u8 count`, then ordinary records. `mode==3`: `u8 mode`, then **no ordinary count**; `sub_580A80` reads `u8 n4,u8 i1,u8 flags`, reverse stage records (`u8,u8,u8,raw4,raw4,u8 pairCount`), pair base (`raw4,u8,u8,u8,u8,raw2`), round-4 extra (`u8` + 4×raw4) or other-round participant blocks (2×raw4), tail `u8 hasMy` + optional 2×u8, then raw4 (native local `int v57`). | Native direct mapping: `sub_53F9F0` receives each node id, current/max bytes, a raw2 mask, stage-derived bytes/word, mode byte, flags, and participant-related bytes; it writes `CRoomInfo` offsets including `+4,+105,+129,+110,+130,+136,+144,+185,+186`, then normalizes max slots from the mask. `sub_875C20` consumes each of the two participant blocks; the first dword of either block is compared with `sub_54B570(dword_131E238)` to select the local/current node. Tail first byte becomes the selected raw node value; final raw4 is stored at client state `[494]` through native `int v57` at state `[494]`. | `sub_568CE0`/`sub_580A80`/`sub_53F9F0`/`sub_875C20`/`sub_47E1B0`/`sub_47E3E0`; `Extracted/ui/TNMT_Awardproperty.xml`; HIGH for framing/width and state writes, UNRESOLVED for business names |
 | 144 `PM_UDPSTART_ACK` | `u8 result`, `u8 flag`, `s32 daily_login_value`, `str raw_string_v71`, `s32 post_name_raw_0`, `s32 post_name_raw_1`, `s32 restriction_value`, `f32 restriction_value_float`, `raw4 client_request_context`, `u8 has_net_cafe_info`, optional `4×u8 + 8×s32` | Client 在所有 result 上先讀完整固定 prefix。result 是 raw u8；TS 保留已知 UI constants，但未知 code 也原樣可發送。flag 只有在 native rank `>10` 的共同條件下直接觸發 restriction UI；daily value 只有正值才進 login-reward notice；restriction s32 的低 byte 與 f32 分別進 restriction message。兩個 name 後欄位無 recovered consumer；`client_request_context` 原樣傳入多個後續 request，但 domain 未證實。`has_net_cafe_info` 會初始化 native NetCafe feature object；optional slots 的業務名未證實。TS 預設 raw/empty、保留 fixed prefix、並 `has_net_cafe_info=0`，所以不發 optional block。 | `sub_555D50`/`sub_555C60`、`sub_58B010`、`sub_592AC0`/`sub_592A40`/`sub_592B40`、`sub_A1C800`/`sub_A1C910`、`Extracted/ui/system/netcafe_contents.xml`；HIGH for order/width and recovered consumers, UNRESOLVED policy and optional slot domains |
-| 196 `GC_ENTERCHANNEL_ACK` | `u8 result`, `s32 channel_id`, `u8 channel_index`; only success: `str udp_host`, `s32 udp_port`, `u8 endpoint_opaque`, `u8 channel_type`, `raw4 client_flags`, `u8 client_default`; `channel_type==3` then enters `sub_875680`, whose native gate may stop after `s32 header0` when `header0<=0` (the four fixed 4-byte fields there are `raw4`, not `f32`) | Failure 只有前三欄。result 是 raw u8；TS 保留已知 UI constants，但未知 non-success code 也只寫前三欄。成功 endpoint 是 client 後續 UDP control address；port wire 是完整 s32，native endpoint consumer 另取其 low u16，TS projection 仍要求可用的 `1..65535` endpoint port。`endpoint_opaque`、`client_flags`（bit0 已知）、`client_default` 保持 raw-oriented。Native type 3 可在 header0 後停止，但 TS server 只有在完整 raw continuation 已配置且 header0 positive 時才輸出 success；不輸出截斷的 false-success tail。channel admission 不允許非 type-3 附帶未消費 tail；完整 native grammar 與 lifecycle 見 `docs/S2C_NATIVE_AUDIT_196.md`。 | `sub_4179D0`、`sub_4177B0`、`sub_58ED30`/`sub_596E60`、`sub_875680`；HIGH |
+| 196 `GC_ENTERCHANNEL_ACK` | `u8 result`, `s32 channel_id`, `u8 channel_index`; only success: `str udp_host`, `s32 udp_port`, `u8 endpoint_opaque`, `u8 channel_type`, `raw4 client_flags`, `u8 client_default`; `channel_type==3` then enters `sub_875680`, whose native gate may stop after `s32 header0` when `header0<=0` (the four fixed 4-byte fields there are `raw4`, not `f32`) | Failure 只有前三欄。result 是 raw u8；TS 保留已知 UI constants，但未知 non-success code 也只寫前三欄。成功 endpoint 是 client 後續 UDP control address；port wire 是完整 s32，native endpoint consumer 另取其 low u16，TS projection 仍要求可用的 `1..65535` endpoint port。`endpoint_opaque`、`client_flags`（bit0 已知）、`client_default` 保持 raw-oriented。Native type 3 可在 header0 後停止，但 TS server 只有在完整 raw continuation 已配置且 header0 positive 時才輸出 success；不輸出截斷的 false-success tail。channel admission 不允許非 type-3 附帶未消費 tail；完整 native grammar 與 lifecycle 見 [`S2C_NATIVE_AUDITS.md`](S2C_NATIVE_AUDITS.md)（196 part）。 | `sub_4179D0`、`sub_4177B0`、`sub_58ED30`/`sub_596E60`、`sub_875680`；HIGH |
 | 681 `GL_LOGIN_ACK` | `s32 result`; only success (`result=1`) continues with `s32 user_no`, `s32 n100`, `s32 ext_count`, `raw2 server_count`, server records (`raw2 server_id`, `str name`, `str host`, `raw2 server_port`, `u8 flag`, `raw2 group`, three groups of `s16 max_users` plus optional channel `{u8 ch_type,str ch_name,raw2 current_users,u8 ch_flag,[u8 extra when type=3]}`), and fixed `s32 billing_first`, `s32 billing_second` | Failure is exactly the result word and the native branch tests its low byte. `user_no` remains the official conservative name; TS supplies verified account row id without claiming it is the later 198 user row. `n100` is opaque charge/billing UI mode and is echoed by 143. `ext_count>0` makes the native reader consume exactly one `{s32,s32,u8}` extension triple and pass it to `sub_A1C870`; TS production still emits 0 by default, while the audited writer can emit an explicitly supplied raw gate plus exactly one raw tuple without assigning semantic names. `server_port` is not duplicated by the channel field: `sub_58AD90` passes server host plus this field to `sub_554810` as a `u_short` TCP endpoint. The channel field is native `USERS` numerator/current-users data; the preceding `max_users` field is the denominator/capacity and positive reader gate. TS retains the existing public `GameServer.port` property for this server-level endpoint, while modeling three `ChannelGroup` objects rather than calling the channel field a port. `flag`, `group`, and billing words remain unresolved. TS validates raw2 server_id/group without assigning signedness, and validates channel/server u8 fields before writing so a masked type cannot accidentally change the type-3 framing. The reader stores a 132-byte internal projection rooted at the local scratch (`sub_58E690`); it is not a second wire field. Positive `maxUsers` without a channel is rejected rather than projected as a zero gate; this preserves the native continuation boundary without silently reinterpreting later groups. | `CLobbyLogin::sub_43E500` (681 branch), `sub_58AD90`/`sub_554810`, `sub_416DA0`/`sub_4176C0`, `sub_4179D0`/`sub_56FF40`, `sub_58E690`/`sub_58F120`/`sub_58E640`/`sub_58E670`, `sub_7092C0`, `PACKETS.md §1.4`; HIGH for order, endpoint/USERS consumer, and the type/channel projection cross-check; wire signedness remains conservative except the endpoint consumer's `u_short`; `flag`/`group`/billing domains UNRESOLVED |
 | 247 `GL_CLIENTINFO_ACK` | `u8 ok`; if ok: shared 198 basic block, then `u8 slot` (native 0..19 character-list index), `u8 char_type`, `12×u16 appearance` | `ok=0` 只有一 byte。成功首段與 198 的 `sub_523BF0` 完全共用；尾端是單一 character appearance，不是 198 的 character list、weapon groups 或 NewSkill tail。`slot` 是 serialized character-list slot/index；`char_type` 才是角色類型。TS 以 selected character-list index 取 serialized array entry，並在 247 尾端回寫同一 index；不把 persistent slot id 或 char_type 當成該欄位，然後寫 12 個 category-relative u16。Store 先將 persistent slot key 映射為 compact serialized-list index。若 index 不在 native 0..19 或沒有對應 serialized entry，TS 回 `ok=0`，不以另一筆 character appearance 靜默 fallback。 | `sub_573EB0`、`sub_523BF0`、`sub_524360`、`sub_524010`；HIGH |
 | 253 `GL_SHOPIN_ACK` | empty | 沒有 recovered native shop success payload。TS 的空 ACK 是明確標成 interoperability response，不把它寫成官方成功資料。 | `PACKETS.md §3.15pre-2`、未找到 253 consumer；HIGH for current boundary |
@@ -401,3 +414,110 @@ frame bytes 的欄位數。
 若未來補上 mailbox/friend/room/inventory/catalog/policy data model，應先在本文件
 把相應 `UNRESOLVED` 轉為 direct evidence，再新增欄位用途；不可先以推測命名
 取代現有保守欄位。
+
+---
+
+## Part II — Server handler 待辦清單（原 TODO_HANDLERS.md）
+
+---
+
+Last reviewed: **2026-09-17**
+`server-ts/` 是唯一的 server implementation。這份文件只描述目前 Bun runtime
+已註冊的 packet modules、尚未實作的高價值 boundary，以及下一步需要補的
+native/resource evidence；它不把 client reader/writer 自動推導成 service policy。
+
+## Current implementation surface
+
+`server-ts/src/ops/registry.ts` 明確列出 packet modules，並以 directory check
+防止新增檔案遺漏；啟動時將每個 filename 對到 `db/packets.tsv`。
+目前有 15 個 C2S modules 與 16 個 S2C modules：
+
+- Login/channel: `GL_LOGIN_REQ`、`PM_UDPSTART_REQ`、`GC_ENTERCHANNEL_REQ`，以及
+  694、681、693、144、196 的 handshake replies。
+- Lobby bootstrap: `GL_LOBBYIN_REQ`、`GL_MYINFO_REQ`、`GL_MYITEM_REQ`、
+  `GL_INVENIN_REQ`、`GL_GAMEROOMINFO_REQ`、`GL_USERLIST_REQ`、
+  `GL_FRIEND_LIST_REQ`、`GL_MSG_RECVLIST_REQ`、`GL_SHOPIN_REQ`、
+  `GL_CLIENTINFO_REQ`、`GL_DATA_RECV_COMPLETED_REQ`。
+- Transport: `GT_PING_REQ` / `GT_PING_ACK`。client 的方向命名與 server 的
+  send/receive 方向不同，請以 `c2s/` 或 `s2c/` 目錄為準。
+
+每個 module 只負責自己的 wire reader 或 builder；connection ordering、admission
+state 與 SQLite projection 分別位於 `connection.ts`、`admission.ts`、`store.ts`。
+TypeScript signatures 是 compile-time contract，不取代 reader 的 runtime
+width、fixed-buffer、mask/coerce、count limit 或 malformed-input rejection。
+
+## Current next evidence
+
+1. **Channel admission 143→144→195→196**：取得一組成功與一組拒絕的同 revision
+   capture，補出 681 extension values、144 raw fields 與
+   196 type-3 continuation。`String[24]` 的來源鏈已由 native 側解到結構極限
+   （全域 identity scratch；唯一可見 mutator＝393 `GL_CHANGEID_ACK` 的 `'_'`
+   append；初始化屬 .c 盲區——PACKETS.md §2.6-C）。未有 capture evidence 前，
+   TS 只保留 exact raw shape，不能把 raw bytes 命名成 account、rank、billing
+   或 entitlement。
+2. **Private UDP**：目前只實作 source-proven encrypted 19→empty-20 control。
+   `sub_595E80` 全部 cases、secondary socket、send lanes、remote address 與
+   correlation data flow 的 client-side 追蹤已定案於 [`PACKETS.md`](PACKETS.md)
+   §2.6（33/37 完全定案；A/B=C2P hole-punch、1=任務邀請、17=殘留設計、6=證據
+   上限四項除外）；relay 可實作性由 (B) 位址鏈給出 client-side fact。仍不能因
+   opcode 存在就接受 P2P/NAT/gameplay datagrams；其餘語義的 server 實作決策
+   仍待 runtime evidence。
+3. **Room and battle state**：取得 111–194、730–742、902–963 的可重現 captures，
+   先逐欄核對 builder、dispatcher、parser、room/session consumer，再建立 state
+   machine。沒有 owner、timer、duplicate/cancel 與 success-tail evidence 時，回
+   fail-closed/no-mutation，不送固定成功 ACK。
+4. **Clan/tournament and matching**：先完成 756–776、718/721、983/988 的
+   caller/callee、membership、queue、timeout 與 result-state audit，再決定是否
+   擴充 `Store`；目前的 schema 或 UI 名稱不能當作 ownership proof。
+5. **Economy and grants**：shop、gift、reward、weapon、skill、drop 與 pricing
+   僅在有 native consumer、resource lookup、持有狀態與 response mutation 的完整
+   evidence chain 後實作。資源存在本身不是 entitlement。
+
+## Unimplemented request inventory
+
+下表是下一輪優先處理的 C2S opcode。其 framing 是 native evidence；response、
+mutation、ownership 與 service policy 仍未獲得授權。
+
+| Opcode | Name | Current safe boundary |
+|---:|---|---|
+| 103 | `GE_LOGOUT_REQ` | 解綁 connection/session；不發未證實 ACK |
+| 298 | `GS_TAKEGIFT_REQ` | 保留 request shape；不刪 gift、不回成功 |
+| 300 | `GS_MOVEGIFT_REQ` | 保留 request shape；不改 inventory |
+| 306 | `GG_JJGET_REQ` | 先補 reward/ownership state |
+| 324 | `GG_BOMBEND_REQ` | 先補 room battle state |
+| 374 | `GR_GETCRYSTAL_REQ` | 先補 room/object owner 與 result policy |
+| 398 | `MASTER_SVRCLASS_REQ` | operator-only boundary 未定義，拒絕 |
+| 400 | `MASTER_CONNTYPE_REQ` | operator-only boundary 未定義，拒絕 |
+| 410 | `MASTER_DISLOGIN_REQ` | operator-only boundary 未定義，拒絕 |
+| 412 | `MASTER_DISGMS_REQ` | operator-only boundary 未定義，拒絕 |
+| 414 | `MASTER_DISLOG_REQ` | operator-only boundary 未定義，拒絕 |
+| 418 | `MASTER_RESETTCPGROUPINFO_REQ` | operator-only boundary 未定義，拒絕 |
+| 443 | `GG_STEALSUCK_REQ` | ACK 是 score state；未有計分狀態機，不轉發 |
+| 445 | `GG_STEALPUSH_REQ` | ACK 是 score state；未有計分狀態機，不轉發 |
+| 718 / 721 | room vote family | 未有 voter、timer、cancel、result owner，不回成功 |
+| 730–742 | Pulp’n’Roll family | 需要 object seed、room state 與可重現 captures |
+| 756–776 | clan/tournament family | 需要 membership、round、entry 與 billing/state evidence |
+| 902–963 | Occupy / ground-object family | 保留已知 raw framing；不虛構 reward、seed 或成功 tail |
+
+新增 module 前，必須在 `docs/PACKETS.md`、`docs/LAYOUTS.md`（Part I/II）與 `PaperMan.exe.c` 中追完：
+
+```text
+request builder → every caller and state gate → exact reader/consumer
+                → field data flow → ownership/source rule
+                → mutation and response → next valid client state
+```
+
+## Verification
+
+```bash
+python3 tools/verify_dispatcher_coverage.py
+python3 tools/verify_native_gates.py
+python3 tools/verify_resource_claims.py
+python3 tools/verify_resource_coverage.py
+cd server-ts
+bun run typecheck
+bun test
+```
+
+若環境沒有 Bun，必須明確記錄 typecheck/test 未執行；不能用離線 Python schema
+smoke test 代替 TypeScript runtime verification。

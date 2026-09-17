@@ -1482,7 +1482,7 @@ anti-cheat、damage authority 與 match admission 仍需 capture 或 server evid
 
 1. 對每個尚未完成的 shop request，先找**所有** `Packet::possible_ctor_or_dtor_0` writers、
    UI caller、state gate、ACK reader及其 cache/inventory/account consumer；將每個候選 frame
-   及版本差異登錄到 `LAYOUTS_REQ.md`／`PACKETS.md`，不先寫 parser。
+   及版本差異登錄到 `LAYOUTS.md`／`PACKETS.md`，不先寫 parser。
 2. 對 `main:Extracted/`，建立可重現的 item-ID proof chain：`ItemData` category、date/flag、
    asset existence、shop/recommend/package XML references、weaponparts compatibility、以及 native
    lookup。這些需逐一標示「display only」或「authority candidate」。

@@ -25,7 +25,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DUMP = ROOT / "PaperMan.exe.c"
 LAYOUTS = ROOT / "docs" / "LAYOUTS.md"
-LAYOUTS_REQ = ROOT / "docs" / "LAYOUTS_REQ.md"
+LAYOUTS_REQ = ROOT / "docs" / "LAYOUTS.md"  # merged: S2C + C2S inventories in one file
 CATALOG = ROOT / "db" / "packets.tsv"
 
 DISPATCHER = "sub_58B010"
@@ -120,9 +120,9 @@ def check_equivalent_handlers(text: str) -> None:
 SYMBOL = re.compile(r"\b(sub_[0-9A-Fa-f]{4,8})\b")
 # PACKETS.md mentions 8 sub_ symbols absent from every dump: 6 genuinely
 # unresolved, plus two kept as before/after examples in the header note. 28 more
-# were resolved by following Packet(opcode) builders. LAYOUTS.md and LAYOUTS_REQ.md are
-# machine-extracted and must stay at zero. See the note at the top of PACKETS.md.
-EXPECTED_STALE = {"docs/PACKETS.md": 8, "docs/LAYOUTS.md": 0, "docs/LAYOUTS_REQ.md": 0}
+# were resolved by following Packet(opcode) builders. LAYOUTS.md (merged S2C+C2S)
+# is machine-extracted and must stay at zero. See the note at the top of PACKETS.md.
+EXPECTED_STALE = {"docs/PACKETS.md": 8, "docs/LAYOUTS.md": 0}
 
 
 def check_cited_symbols(text: str) -> None:
@@ -283,7 +283,7 @@ def check_udp_dispatcher_handlers(text: str) -> None:
     documented = LAYOUTS_REQ.read_text(encoding="utf-8")
     missing = [marker for marker in UDP_DOC_CASE_MARKERS if marker not in documented]
     if missing:
-        print("dispatcher verification failed: LAYOUTS_REQ UDP appendix lost marker(s)")
+        print("dispatcher verification failed: LAYOUTS.md UDP appendix lost marker(s)")
         print(f"  {missing}")
         raise SystemExit(1)
 
@@ -292,7 +292,7 @@ def check_udp_dispatcher_handlers(text: str) -> None:
     missing_sends = [opcode for opcode in UDP_SEND_OPCODES
                      if f"| {opcode} |" not in appendix_a]
     if missing_sends:
-        print("dispatcher verification failed: LAYOUTS_REQ Appendix A lost UDP outbound row(s)")
+        print("dispatcher verification failed: LAYOUTS.md Appendix A lost UDP outbound row(s)")
         print(f"  {missing_sends}")
         raise SystemExit(1)
 
@@ -302,7 +302,7 @@ def check_udp_dispatcher_handlers(text: str) -> None:
         if marker not in appendix_b:
             missing_receives.append(opcode)
     if missing_receives:
-        print("dispatcher verification failed: LAYOUTS_REQ Appendix B lost UDP inbound row(s)")
+        print("dispatcher verification failed: LAYOUTS.md Appendix B lost UDP inbound row(s)")
         print(f"  {missing_receives}")
         raise SystemExit(1)
 
