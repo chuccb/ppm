@@ -14,14 +14,15 @@ itemdata 條目 (載入器 @131262, 檔案序):
 """
 from __future__ import annotations
 
+import argparse
+import os
 import pathlib
 import sqlite3
 import struct
-import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DEC = ROOT / "Extracted" / "decrypted"
-DB = ROOT / "db" / "paperman.db"
+DEFAULT_DB = os.environ.get("PAPERMAN_DB", "/tmp/paperman.sqlite")
 
 TAIL = 721
 
@@ -259,7 +260,17 @@ def import_recommend_sets(con: sqlite3.Connection) -> int:
 
 
 def main() -> int:
-    con = sqlite3.connect(DB)
+    ap = argparse.ArgumentParser(
+        description="Import decrypted .pat resources into an offline SQLite DB"
+    )
+    ap.add_argument(
+        "--db",
+        default=DEFAULT_DB,
+        help="generated SQLite path (default: PAPERMAN_DB or /tmp/paperman.sqlite)",
+    )
+    args = ap.parse_args()
+
+    con = sqlite3.connect(args.db)
     con.execute("PRAGMA foreign_keys=OFF")
 
     # item_catalog 需要新欄位 (req_level/type2/type3)

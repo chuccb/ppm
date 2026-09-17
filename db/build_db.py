@@ -2,7 +2,12 @@
 """
 建立 PaperMan 私服 SQLite DB。
 
-  python3 db/build_db.py [--db db/paperman.db] [--fresh]
+  python3 db/build_db.py [--db /tmp/paperman.sqlite] [--fresh]
+
+DB path:
+  --db overrides the output path; otherwise PAPERMAN_DB is used when set,
+  falling back to /tmp/paperman.sqlite. Generated SQLite files stay outside
+  the repository by default.
 
 步驟:
   1. 執行 db/schema.sql
@@ -12,11 +17,11 @@
 """
 import argparse
 import os
-import re
 import sqlite3
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+DEFAULT_DB = os.environ.get('PAPERMAN_DB', '/tmp/paperman.sqlite')
 
 SUBSYSTEM = {
     'GT': 'transport', 'GE': 'logout', 'GL': 'lobby', 'GR': 'room',
@@ -48,7 +53,11 @@ def migrate_legacy_room_mode_columns(con: sqlite3.Connection) -> None:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument('--db', default=os.path.join(HERE, 'paperman.db'))
+    ap.add_argument(
+        '--db',
+        default=DEFAULT_DB,
+        help='generated SQLite path (default: PAPERMAN_DB or /tmp/paperman.sqlite)',
+    )
     ap.add_argument('--fresh', action='store_true', help='刪掉舊 DB 重建')
     args = ap.parse_args()
 

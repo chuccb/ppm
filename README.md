@@ -32,10 +32,10 @@ TypeScript/Bun/SQLite 保守實作。
 | `docs/ARCHITECTURE.md` | 全景架構: 生命週期、資料層、加密、互證鏈 |
 | `docs/TODO_HANDLERS.md` | 尚未實作的 server handler 清單與下一輪建議 |
 | `db/packets.tsv` | 從 `sub_9D2050` 抽出的 **676 筆 opcode ↔ 名稱** 對照表 (100–994) |
-| `db/schema.sql` | 離線 SQLite schema；目前 server-ts runtime projection 在 `server-ts/src/store.ts`，每個欄位註明來源封包/函數 |
-| `db/build_db.py` | **可選**離線重建／檢查工具；Bun server 首次啟動會自行建庫，不必先跑它 |
-| `db/smoke_test.py` | 模擬 登入→建角→購物→背包分頁→開房→結算→好友/訊息/任務/公會 全流程的 DB 讀寫測試 |
-| `db/paperman.db` | 開發模式的 SQLite 資料庫；Bun server 使用 `PM_DB` 指定的 SQLite 檔案 |
+| `db/schema.sql` | 離線 SQLite schema；目前 server-ts runtime projection 在 `server-ts/src/store.ts`，兩條路徑刻意分開 |
+| `db/build_db.py` | **可選**離線重建／檢查工具；預設產生 `/tmp/paperman.sqlite`，Bun server 不依賴它 |
+| `db/import_pats.py` | 將解密後的 `.pat` 目錄資料匯入同一個 `PAPERMAN_DB` offline DB |
+| `db/smoke_test.py` | 對 `PAPERMAN_DB` 模擬登入→建角→購物→背包分頁→開房→結算→好友/訊息/任務/公會的 DB 讀寫測試 |
 | `server/packet.py` | wire 協議 Packet 參考實作 (Python, 逐函數對應反編譯), 含自測 |
 | `tools/dump_itemdata.py` | 解出 `Extracted/ui/cfg/itemdata.pat` 的 21,164 筆 item id ↔ 名稱 (stride 997B 自證); 支援 `--name` / `--id` / `--band` 查詢 |
 | `tools/dump_maplist.py` | 解出 `Extracted/ui/cfg/maplist.pat` 的 123 張地圖 (id / mode bitmask / .pmm 路徑, stride 836B 自證); `--check` 可驗證 modeIndex→bit 表 |
@@ -62,7 +62,9 @@ python3 tools/verify_dispatcher_coverage.py
 python3 tools/verify_native_gates.py
 python3 tools/verify_resource_claims.py
 python3 db/build_db.py --db /tmp/paperman-smoke.sqlite --fresh
-python3 db/smoke_test.py /tmp/paperman-smoke.sqlite
+python3 db/smoke_test.py --db /tmp/paperman-smoke.sqlite
+# 若已有 Extracted/decrypted/*.pat.dec，再將資源匯入同一個 offline DB：
+# python3 db/import_pats.py --db /tmp/paperman-smoke.sqlite
 ```
 
 上面的 Python 工具只做 native/resource/SQLite offline checks，不是 Bun runtime

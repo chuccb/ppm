@@ -5,3 +5,5 @@ __pycache__/
 db/*.db-wal
 db/*.db-shm
 Extracted/decrypted/
+# Generated offline SQLite databases; keep schema/tools, not local state.
+db/*.db
