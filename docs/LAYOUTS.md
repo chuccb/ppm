@@ -11,8 +11,12 @@
 > `python3 tools/verify_dispatcher_coverage.py` 重驗。
 >
 > 本表另含 dispatcher 以外的 S2C（例如走 vtable 前置轉發器者），
-> 故列數多於 306。名稱欄留空者為**名稱表未註冊**的 opcode，
-> 屬正確標示而非缺漏，詳 `PACKETS.md` 的 676-catalog 說明。
+> 故列數多於 306。名稱欄留空情形經 2026-09-17 S2C 未命名列稽核後：
+> 367/970/991 先前是對 `db/packets.tsv` 的 stale 空白，已回填官方名；
+> 14 列依 native 證據鏈推定命名（標 `〔推定〕`）；933、1007、1009
+> 的 handler 於本 dump 無函式體（`unknown_libname_94/95/105`），
+> 489、1010 語義證據不足 —— 此五列明確保留 unnamed，詳下節，
+> 屬正確標示而非缺漏。
 >
 > 型別對照: u8=sub_592940/592980, s8/bool=592900, u16=592A00,
 > s16=5929C0, s32=592A40, u32=592A80, raw4=592AC0 (caller determines
@@ -39,6 +43,66 @@
 u16 replaces the initial 9600 compression threshold only when `<0x2580`; at or
 above the ceiling it is ignored. `681` result is read as raw4 but its branch
 selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout.
+
+### S2C 推定命名審計（2026-09-17）
+
+> **對象**：2026-09 時點本表 25 個名稱空白列。**方法與規則**比照
+> `LAYOUTS_REQ.md`〈C2S 推定命名審計（2026-09-16）〉節：
+> ① dispatcher `sub_58B010` case 本體 → handler 函式體逐案抽取核對
+> （brace-match）；原自動抽取誤記者已校正（880 誤取 getter
+> `sub_407E00`；203、914、1010 讀取序列見下表與主表）；
+> ② 語意錨點＝dev 標籤（`GameNetwork::On…`）、結果分支字串、音效路徑、
+> RTTI、韓文 log（EUC-KR/cp949；本 dump 已損毀成 `?` 者不復原、不引證）；
+> ③ 對向 C2S 僅引用 `LAYOUTS_REQ.md` 本週已定名之列；
+> ④ `db/packets.tsv`（676-catalog）僅用於回填與鄰接檢查，不作命名來源；
+> ⑤ handler 本體＋語意錨點＋配對鏈三者齊備才命名，否則保留空白
+> （UNRESOLVED 者附行為紀錄）。
+>
+> **結果**：367／970／991 為 tsv Fact 回填（先前 stale 空白）；
+> 14 列推定命名（主表標 `〔推定〕`）；489、933、1007、1009、1010
+> 明確保留 unnamed。
+
+**tsv 回填（Fact）**
+
+| op | 名稱（tsv Fact） | 行為核對 |
+|---:|---|---|
+| 367 | `GR_LOCALROOM_ACK` | handler `sub_586090` 讀 s8/bool 結果 |
+| 970 | `GR_SOCCER_ACK` | `sub_586180` 讀結果；對向 969 `GR_SOCCER_REQ`（tsv） |
+| 991 | `GR_DAMAGEROOM_ACK` | `sub_56FA00` 讀結果；對向 990 `GR_DAMAGEROOM_REQ`（tsv） |
+
+**推定命名對照表**（對向 REQ 之〔推定〕標記沿用 `LAYOUTS_REQ.md` 審計結果）
+
+| op | 推定名 | 等級 | 關鍵證據（摘要） |
+|---:|---|---|---|
+| 946 | `GR_AI_UDPSENDER_CHANGE_START_NOTIFY` | HIGH | handler 內 dev 標籤 ASCII 完好：`GameNetwork::OnGRAiUDPSenderChangeStartNotify`；`u8 key, s32 playno`，切換 UDP host（`sub_75D550`／`sub_764910` flag=1）；KR log 行已損毀不引證 |
+| 947 | `GR_AI_UDPSENDER_CHANGE_END_NOTIFY` | HIGH | dev 標籤 `…EndNotify`；`u8 oldKey, u8 newKey, s32`：舊 sender `sub_548AE0(row,0)`、新 sender `(row,1)`，後接 UDP 重綁 `sub_6054A0`；KR log（UDP SENDER）已損毀不引證 |
+| 949 | `GR_AI_MULTI_SHIELD_NOTIFY` | HIGH | cp949 字串完好 `[%s] AI Multi Shield 무적 %s!!`（무적＝無敵）系統列廣播；u8 旗標 bit0=On/Off、≥2=All_Channel 否則 This_Room；本端無對向 C2S（GM／伺服器觸發）；`AI_MULTI` 詞彙依 941 `MASTER_GO_AI_MULTI_WAVE_DIRECTLY_REQ`（tsv）；全頻道廣播不改 GR 前綴有 911 `GL_SCHEDULED_GM_NOTICE_NOTIFY`（tsv）先例 |
+| 931 | `GR_AI_CONTINUE_FAIL_ACK` | HIGH | u8 結果：==1→再讀 u8 並設 PvE mgr continue 狀態 2；==0→播 `pve_01_sounds\AI3_continue_fail.wav`；handler log「continue 취소 …받음」為接收端用語，名仍鏡像對向 930 `GR_AI_CONTINUE_FAIL_REQ`〔推定〕 |
+| 954 | `MASTER_PVE_ACK` | HIGH | u8→`PVE On Succ!!`／`PVE Off Succ!!`；對向 953 `MASTER_PVE_REQ`〔推定〕（`/pveon`、`/pveoff`） |
+| 976 | `MASTER_SETMULTIPLYDAMAGE_ACK` | HIGH | u8→`SET DAMAGE SUCCESS!!`／`SET DAMAGE FAILED!! INVALID SERVER INDEX!!`；對向 975〔推定〕（`/setmultiplydamage <int> <float>`） |
+| 852 | `MASTER_RELOAD_GAMECENTER_RANKING_ACK` | HIGH | u8==1→`GAME CENTER RANK RELOAD SUCCESS`，否則 FAIL（系統列 `sub_541BF0`）；對向 851〔推定〕（`/reloadgcrank`） |
+| 997 | `GL_BLOCK_ADD_ACK` | HIGH | u8 結果驅動訊息 0x528／0x52B／0x11A／0x52A／0x532；==0 自動重送 1000 刷新黑名單；對向 996〔推定〕 |
+| 999 | `GL_BLOCK_DEL_ACK` | HIGH | `u8 結果, str nick`：0=本地移除+UI 刷新+0x52D，1=0x52E，3=0xB6；對向 998〔推定〕 |
+| 1001 | `GL_BLOCK_LIST_ACK` | HIGH | `u16 str s32 s32 str`（清單迴圈，與 REQ 審計同鏈）；對向 1000〔推定〕 |
+| 1003 | `GL_BLOCKME_LIST_ACK` | MEDIUM-HIGH | 同鏈清單格式；「別人封鎖我」方向語義為 Inference，功能面確定；對向 1002〔推定〕 |
+| 1005 | `GL_RANDOMMAP_LIST_ACK` | HIGH | `u8 count`×{u8 mode, u8 mapId} 隨機地圖清單；對向 1004〔推定〕 |
+| 488 | `GL_MYROOMCHANGE_ACK` | MEDIUM-HIGH | u8 結果：==1→再讀 u8 slot 寫入 `*sub_417D00()`+0（`CLobbyChannel` 狀態位元組）；!=11→大廳 UI 還原 `sub_44C1D0`；對向 487〔推定〕 |
+| 958 | `GR_TIMEOVER_ONGAME_ACK` | HIGH | dev 標籤 `GameNetwork::OnGRTimeOverOnGameACK`（REQ 審計已錄）字尾 ACK；handler 不讀 payload，收到即回送 957 `GR_TIMEOVER_ONGAME_RESPON_REQ`〔推定〕（s8＝剩餘秒數歸零與否） |
+| 203 | `GL_MYAVATARINFO_ACK` | MEDIUM-HIGH | 讀取序列修正：`u8 count(≤4)`，每筆 `{u8 tag, u16, [3×u16 if tag!=3], [8×raw4 if u16!=0]}`，經 `sub_571D50→sub_524660` 灌入全域 4 槽×44B `p_p_p_p_p_n1189`；消費者＝`GAMEROOM_AVATAR` 3D 預覽 `sub_6A9950` 與 `GAMEROOM_MAIN_GUN_%d0` 面板（12 個 accessor）；無 userKey＋自角色情境 → 自身 avatar／裝備資料推送（server push，無對向 REQ） |
+| 880 | `GQ_QUEST_ACCEPT_DAILY_NOTIFY` | MEDIUM-HIGH | handler 更正＝`sub_91DC50`（case 本體為 `sub_407E00(); sub_91DC50(packet);`，原表誤取 getter）；不讀 payload，KR log（已損毀）後立即送出 876 `GQ_QUEST_ACCEPT_DAILY_REQ`（tsv Fact）；876 其他觸發點＝登入大廳流程、任務窗刷新、866 清單 <3 項自動補齊 → server 端每日任務接取提示 |
+| 914 | `GG_MISSILE_INFO_NOTIFY` | MEDIUM-HIGH | 讀取序列修正：`repeat {u8 idx(1..0x4F), raw32}`，idx==0 終止、上限 80 筆；`sub_71FBC0` 對 `MissileObjMgr`（RTTI Fact，容器 `dword_1D12414`）活體物件逐 idx 廣播虛擬更新；後綴仿 961 `GG_DROPWEAPON_INFO_NOTIFY`（tsv）；records 後續用途不透明（stack buffer、caller-defined） |
+
+**明確保留 unnamed（行為紀錄，語義 UNRESOLVED）**
+
+- **489**（`sub_57C230`，`u8`）：bit0→清全域 `this_5`（game-room 武器面板
+  refresh 閘門）；全 dump 僅兩處寫 0、無任何非零寫入 → 死路徑級，證據不足。
+- **933**（`unknown_libname_105`）：本 dump 無函式體，不可回收。
+- **1007／1009**（`unknown_libname_94/95`）：16-byte 微 thunk 落於 decompile
+  空白區，不可回收；僅與 1006／1008 數字相鄰，依「禁止鄰接臆名」規則不命名。
+- **1010**（`sub_5680E0`，`u8 u8 s32`）：count 迴圈 ×{u8 playerKey, s32 v}，
+  經玩家表查詢 `sub_67D8F0(playerKey,0)` 寫入 240780-byte 玩家 row 尾端
+  +240776（鄰近 +240764 為足球進球數、+240761/62 為持球旗標）；全 dump
+  僅初始化與本 handler 寫入、無任何讀取者 → 語義不可得，保留 unnamed。
 
 | op | 名稱 | handler | 讀取序列 |
 |---|---|---|---|
@@ -79,7 +143,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 200 | GL_MYITEM_ACK | sub_570AB0 | `u8 success, s32 start, repeat≤100 {s32 slot, s32 item, raw4 f1, raw4 f2, s32 period, u8 extra, u16 durability}, s32 negative-slot sentinel` |
 | 201 | GL_MYPARTSUP_ACK | sub_95A3B0 | `s32 count, repeat {raw4 raw4 raw1 raw4 raw4}` |
 | 202 | GL_EXPIRE_PARTSUP_ACK | sub_95AE40 | `s32 count, repeat {raw4 raw4 raw1 raw4 raw4}` |
-| 203 |  | sub_571D50 | `(無直接讀取/轉發)` |
+| 203 | GL_MYAVATARINFO_ACK〔推定〕 | sub_571D50→sub_524660 | `u8 count(≤4); repeat {u8 tag, u16, [3×u16 if tag!=3], [8×raw4 if u16!=0]}`（詳審計節） |
 | 205 | GS_BUYITEM_ACK | sub_571910 | `u8 s8/bool s32 f32/s32 f32/s32 s32 u8 u16 s8/bool u8 s32 s32 s32 s32 s32 s32 s32` |
 | 207 | GS_BUY_WEAPONPARTS_ACK | sub_571B60 | `u8 rawResult; rawResult==0 → 21B part record + 6×s32 wallet tail; nonzero → no tail` |
 | 209 | GS_SELLITEM_ACK | sub_572B80 | `s8/bool s32 s32 s32` |
@@ -149,7 +213,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 361 | GG_TSURRESPON_ACK | sub_558DD0 | `u8 u8 s16 s16 s16` |
 | 363 | GP_CHCRITICALC_ACK | sub_556AB0 | `(無直接讀取/轉發)` |
 | 365 | GR_BALANCECHANGE_ACK | sub_56FAE0 | `s8/bool` |
-| 367 |  | sub_586090 | `s8/bool` |
+| 367 | GR_LOCALROOM_ACK | sub_586090 | `s8/bool` |
 | 369 | GR_TEAMSHUFFLECHANGE_ACK | sub_585D90 | `s8/bool` |
 | 371 | GL_CHANGECHANNEL_ACK | sub_570100 | `u8 u8 str s32 u8` |
 | 379 | GR_RADIOMSG_ACK | sub_559510 (sub_74C500) | `u8 u8 u8 u8 wstr` |
@@ -194,8 +258,8 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 482 | GL_GAMECENTER_COIN_CHANGED_ACK | sub_585F50 | `u16 u16` |
 | 484 | GG_GAMECENTER_GAME_START_OK_ACK | sub_584F70 | `u16 u8 u16 s32` |
 | 486 | GL_GET_GAMEROOM_PROGRESSTIME_ACK | sub_56AE30 | `u8 u8 s8/bool u8 s8/bool u16 u8 s32 u8 s8/bool u16 u8 s32 u8 s8/bool u8 s8/bool u8 u8 s8/bool s8/bool u8 s8/bool` |
-| 488 |  | sub_5861C0 | `u8 u8` |
-| 489 |  | sub_57C230 | `u8` |
+| 488 | GL_MYROOMCHANGE_ACK〔推定〕 | sub_5861C0 | `u8 u8` |
+| 489 |  | sub_57C230 | `u8`（bit0→清全域 `this_5`；UNRESOLVED，見審計節） |
 | 572 | GV_TEST_ACK | sub_58E5E0 | `(無直接讀取/轉發)` |
 | 584 | GC_CLAN_PROTOCOL_ACK | sub_54D040 | `s32` |
 | 586 | GC_CLAN_CREATE_ACK | sub_54CB90 | `s8` |
@@ -271,7 +335,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 847 | GR_NETCAFEWEAPONINFO_NOTIFY | sub_584770 | `s32` |
 | 848 | GR_NETCAFEWEAPON_DISABLE_NOTIFY | sub_5847E0 | `u16` |
 | 850 | MASTER_TNMT_VIEW_STATE_ACK | sub_57DDC0 | `s32 s32 f32/s32` |
-| 852 |  | sub_5854C0 | `s8/bool` |
+| 852 | MASTER_RELOAD_GAMECENTER_RANKING_ACK〔推定〕 | sub_5854C0 | `s8/bool` |
 | 856 | GL_MYWAREHOUSEINFO_ACK | sub_585920 | `(無直接讀取/轉發)` |
 | 858 | GL_MYWAREHOUSEITEMLIST_ACK | sub_585950 | `(無直接讀取/轉發)` |
 | 860 | GL_PUSH_TO_WAREHOUSE_ACK | sub_585980 | `(無直接讀取/轉發)` |
@@ -286,7 +350,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 875 | GQ_QUEST_CHANGEDSTATE_ACK | sub_91D690 | `(無直接讀取/轉發)` |
 | 877 | GQ_QUEST_ACCEPT_DAILY_ACK | sub_91D7E0 | `(無直接讀取/轉發)` |
 | 879 | GQ_QUEST_USER_COMPLETE_HONOR_ACK | sub_91CAA0 | `u8 str` |
-| 880 |  | sub_407E00 | `(無直接讀取/轉發)` |
+| 880 | GQ_QUEST_ACCEPT_DAILY_NOTIFY〔推定〕 | sub_91DC50（case 先呼 getter sub_407E00；原表誤記） | `（無讀取；KR log 後立即送出 876）` |
 | 881 | GQ_QUEST_CURRENTITEMQUEST_ACK | sub_407E00 | `(無直接讀取/轉發)` |
 | 882 | GP_CHPLAYTIMEC_ACK | *(dispatcher inline)* | `s32` 總秒數 — 直接 `sub_592A40(a4,&v)`，以差分 `v - dword_EE8D7C` 推進 `sub_92EF00(20, 23, Δ, 0)` 後覆寫累計值 |
 | 884 | MASTER_FIND_USER_ACK | sub_579BC0 | `s8/bool s32 str str s32 u8 u8 u8 u8` |
@@ -302,26 +366,26 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 910 | GG_OCC_RESPON_ACK | sub_559150 | `u8 u8 s16 s16 s16` |
 | 911 | GL_SCHEDULED_GM_NOTICE_NOTIFY | sub_578AC0 | `str` |
 | 913 | GL_WEAPONPARTS_EQUIP_CHANGE_ACK | sub_95B180 | `u8 errorRaw`; only zero → `u8 op,s32 weapon,s32 part,[s32 oldPart for op2]` |
-| 914 |  | sub_565A00 | `u8` |
+| 914 | GG_MISSILE_INFO_NOTIFY〔推定〕 | sub_565A00 | `repeat {u8 idx(1..0x4F), raw32}, idx==0 終止，≤80 筆` |
 | 919 | GR_AI_GET_REWARD_ITEM_ACK | sub_761B20 | `u8 u8 s32 u8 s32 u8 u8 s32 u8 s32` |
 | 921 | GR_AI_APPEARED_BOT_NOTIFY | sub_6061A0 | `u16 u16 u16 u16 u16` |
 | 923 | GR_AI_DAMAGE_SHIELD_ACK | sub_761710 | `u16 u16 u16 f32` |
 | 925 | GR_AI_RECHARGE_MAGAZINE_START_ACK | sub_558550 | `u8 u8 u8 u8 u16 u8 s32` |
 | 927 | GR_AI_RECHARGE_MAGAZINE_END_ACK | sub_558880 | `u8 u8 s8/bool u8 u8 s32` |
 | 929 | GR_AI_CONTINUE_START_ACK | sub_761E90 | `u8 u8 s32 str s32 s32` |
-| 931 |  | sub_762170 | `u8 u8` |
-| 933 |  | unknown_libname_105 | `(非 sub 直呼)` |
+| 931 | GR_AI_CONTINUE_FAIL_ACK〔推定〕 | sub_762170 | `u8 u8` |
+| 933 |  | unknown_libname_105 | `(非 sub 直呼；無函式體，見審計節)` |
 | 934 | GR_AI_TEAMSCORE_NOTIFY | sub_762630 | `s32 u8 s32 u8 s32 s32` |
 | 936 | GR_AI_FEVER_START_ACK | sub_7623A0 | `u8 u8 s32 u8` |
 | 937 | GR_AI_FEVER_END_NOTIFY | sub_762560 | `u8` |
 | 940 | GR_AI_GO_NEXT_WAVE_ACK | sub_7613D0 | `u8 s32` |
 | 942 | GR_AI_REWARDITEM_SELECT_START_NOTIFY | sub_761830 | `u8 s32 u8 u8 s32 s32` |
 | 945 | GR_RESET_GAMEROOMSLOT_ACK | sub_585F30 | `(無直接讀取/轉發)` |
-| 946 |  | sub_565AA0 | `u8 s32` |
-| 947 |  | sub_565BB0 | `u8 u8 s32` |
-| 949 |  | sub_58EF00 | `u8` |
-| 954 |  | sub_57DA20 | `s8/bool` |
-| 958 |  | sub_565E00 | `(無直接讀取/轉發)` |
+| 946 | GR_AI_UDPSENDER_CHANGE_START_NOTIFY〔推定〕 | sub_565AA0 | `u8 s32` |
+| 947 | GR_AI_UDPSENDER_CHANGE_END_NOTIFY〔推定〕 | sub_565BB0 | `u8 u8 s32` |
+| 949 | GR_AI_MULTI_SHIELD_NOTIFY〔推定〕 | sub_58EF00 | `u8`（bit0=On/Off、≥2=All_Channel） |
+| 954 | MASTER_PVE_ACK〔推定〕 | sub_57DA20 | `s8/bool` |
+| 958 | GR_TIMEOVER_ONGAME_ACK〔推定〕 | sub_565E00 | `（無讀取；收到即回送 957 RESPON_REQ）` |
 | 959 | GG_DROPWEAPON_CREATE_NOTIFY | sub_5666D0 | `u16 u8 s32 u16 s16 s16 s16 u16 u16 f32 raw32` |
 | 960 | GG_DROPWEAPON_DESTROY_NOTIFY | sub_566B30 | `u8 count, count×u16` (0 id stops early) |
 | 961 | GG_DROPWEAPON_INFO_NOTIFY | sub_566BF0 | `u8 count, count×(u16 u8 s32 u16 s16 s16 s16 u16 u16 f32 raw32)` (0 id stops early) |
@@ -329,23 +393,23 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 965 | GG_GET_BALL_ACK | sub_566040 | `u8 u8` |
 | 966 | GG_RESPAWN_BALL_ACK | sub_565EF0 | `(無直接讀取/轉發)` |
 | 968 | GG_GET_GOAL_ACK | sub_566200 | `u8 u8` |
-| 970 |  | sub_586180 | `s8/bool` |
+| 970 | GR_SOCCER_ACK | sub_586180 | `s8/bool` |
 | 972 | GG_SOCCER_RESPON_ACK | sub_566400 | `u8 u8 s16 s16 s16` |
 | 974 | GG_SOCCERBALL_HAVE_INCREASE_PG_ACK | sub_566650 | `u8` |
-| 976 |  | sub_57D660 | `s8/bool` |
+| 976 | MASTER_SETMULTIPLYDAMAGE_ACK〔推定〕 | sub_57D660 | `s8/bool` |
 | 984 | GL_MATCHINGROOM_MAKE_ACK | sub_5865A0 | `u8` |
 | 985 | GL_ENTERMATCHINGROOM_ACK | sub_586610 | `u8 s32 u8 str s32 s8/bool s32 s32 str u16 u16 u16 u16 f32/s32 u8 f32/s32 u8 s32 str s32 str u8 u8 f32/s32 ...` |
 | 986 | GR_MATCHINGROOM_START_ACK | sub_5880A0 | `u8 s8/bool f32/s32 u8 u8 u8 u16 u8 u8 u16 u8 s8/bool s8/bool s8/bool u8 s8/bool f32/s32` |
 | 987 | GR_MATCHINGSUCCESS_ACK | unknown_libname_104 | `(非 sub 直呼)` |
 | 989 | GL_MATCHINGROOM_CANCLE_ACK | sub_588020 | `s8/bool` |
-| 991 |  | sub_56FA00 | `s8/bool` |
+| 991 | GR_DAMAGEROOM_ACK | sub_56FA00 | `s8/bool` |
 | 994 | GG_ASSISTPOINT_NOTIFY | sub_5676D0 | `u8 u8 s32 u8 u8 s32 s32 s32` |
 | 995 | (未註冊; 錢包/等級推播 → PACKETS.md §3.15r) | sub_567AE0 | `s32 pg, s32 cash, s32 level` |
-| 997 |  | sub_567F20 | `u8` |
-| 999 |  | sub_568170 | `u8 str` |
-| 1001 |  | sub_567D50 | `u16 str s32 s32 str` |
-| 1003 |  | sub_567BD0 | `u16 str s32 str` |
-| 1005 |  | sub_5884C0 | `u8 u8 u8` |
-| 1007 |  | unknown_libname_94 | `(非 sub 直呼)` |
-| 1009 |  | unknown_libname_95 | `(非 sub 直呼)` |
-| 1010 |  | sub_5680E0 | `u8 u8 s32` |
+| 997 | GL_BLOCK_ADD_ACK〔推定〕 | sub_567F20 | `u8` |
+| 999 | GL_BLOCK_DEL_ACK〔推定〕 | sub_568170 | `u8 str` |
+| 1001 | GL_BLOCK_LIST_ACK〔推定〕 | sub_567D50 | `u16 str s32 s32 str` |
+| 1003 | GL_BLOCKME_LIST_ACK〔推定〕 | sub_567BD0 | `u16 str s32 str` |
+| 1005 | GL_RANDOMMAP_LIST_ACK〔推定〕 | sub_5884C0 | `u8 u8 u8` |
+| 1007 |  | unknown_libname_94 | `(非 sub 直呼；16-byte 微 thunk 無函式體，見審計節)` |
+| 1009 |  | unknown_libname_95 | `(非 sub 直呼；16-byte 微 thunk 無函式體，見審計節)` |
+| 1010 |  | sub_5680E0 | `u8 u8 s32`（count×{u8 playerKey, s32}→玩家 row+240776；無讀者，UNRESOLVED，見審計節） |
