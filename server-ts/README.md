@@ -1,81 +1,76 @@
-# server-ts — PaperMan server on Bun
+# server-ts — Bun 上的 PaperMan 伺服器
 
-A from-scratch server for the PaperMan client, written against the
-reverse-engineering notes in [`../docs/`](../docs/).
+為 PaperMan 客戶端從零撰寫的伺服器，依據 [`../docs/`](../docs/) 中的逆向筆記實作。
 
-## Stack (2026-09-17 preview baseline)
+## 技術棧（2026-09-17 preview 基線）
 
-This is the only server implementation. The runtime and lockfile intentionally target
-this date's preview toolchain; do not reintroduce another server language or database
-runtime.
+這是唯一的 server 實作。runtime 與 lockfile 刻意鎖定當日的 preview 工具鏈；
+不得再引入另一種 server 語言或資料庫 runtime。
 
-| Component | Version | Notes |
+| 元件 | 版本 | 備註 |
 |---|---|---|
-| Bun | 1.4.3-canary | `bun:sqlite`, `Bun.listen`, `Bun.password` — no Node shims |
-| TypeScript | 7.1.0-dev.20260915.1 | strict, plus `exactOptionalPropertyTypes`, `noUncheckedIndexedAccess`, `erasableSyntaxOnly` |
-| SQLite | 3.53.4 | via `bun:sqlite`, asserted at runtime in `test/db.test.ts` |
+| Bun | 1.4.3-canary | `bun:sqlite`、`Bun.listen`、`Bun.password` —— 不用 Node shim |
+| TypeScript | 7.1.0-dev.20260915.1 | strict，另加 `exactOptionalPropertyTypes`、`noUncheckedIndexedAccess`、`erasableSyntaxOnly` |
+| SQLite | 3.53.4 | 經 `bun:sqlite`，並於 `test/db.test.ts` 內做 runtime 斷言 |
 
-## Run
+## 執行
 
 ```bash
 bun install
-bun test          # run the full Bun test suite
+bun test          # 執行完整 Bun 測試
 bun run typecheck # tsc --noEmit
-bun start         # login server on 0.0.0.0:40200
+bun start         # login server 監聽 0.0.0.0:40200
 ```
 
-Environment: `PM_HOST`, `PM_PORT`, `PM_DB`, `PM_ADVERTISE_HOST`,
-`PM_CHANNEL_PORT`, `PM_CHANNEL_NAME`, `PM_UDP_HOST`, `PM_UDP_PORT`,
-`PM_ADMISSION_TTL_MS`.
+環境變數：`PM_HOST`、`PM_PORT`、`PM_DB`、`PM_ADVERTISE_HOST`、
+`PM_CHANNEL_PORT`、`PM_CHANNEL_NAME`、`PM_UDP_HOST`、`PM_UDP_PORT`、
+`PM_ADMISSION_TTL_MS`。
 
-## Layout
+## 目錄結構
 
-See [STYLE.md](STYLE.md) for the conventions.
-
-```
-src/packet.ts        the whole wire format: header, cipher, reader, writer, reassembly
-src/aes.ts           AES-128 + CFB-128, the client's cipher
-src/opcodes.ts       676-opcode catalogue, loaded from db/packets.tsv
-src/store.ts         accounts on bun:sqlite
-src/connection.ts    one TCP connection: reassembly, liveness, dispatch, Bun.listen
-src/udp.ts            source-proven private UDP opcode 19 -> empty 20
-src/ops/registry.ts  filename -> opcode, and the typed build() / handlerFor()
-src/ops/c2s/         packets the client sends us
-src/ops/s2c/         packets we send the client
-src/main.ts          entry point
-```
-
-**One packet, one file, named after the opcode.** The packet implementation
-lives in the file with that name; the small registry repeats the name only to
-make the current runtime surface and typed builder map visible. The module gets
-its opcode injected, so wire code does not carry a second numeric table. To find
-the code for a packet from `docs/PACKETS.md`, open the file with that name. The
-complete field-by-field review of the 31 current packet modules is in
-[`../docs/SERVER_TS_EVIDENCE.md`](../docs/SERVER_TS_EVIDENCE.md):
+慣例細節見 [STYLE.md](STYLE.md)。
 
 ```
-src/ops/c2s/GL_LOGIN_REQ.ts   the client sends it; we read it
-src/ops/s2c/GL_LOGIN_ACK.ts   we send it; we build it
+src/packet.ts        完整 wire 格式：header、cipher、reader、writer、分段重組
+src/aes.ts           AES-128 + CFB-128 —— 客戶端的加密
+src/opcodes.ts       676-opcode 目錄，由 db/packets.tsv 載入
+src/store.ts         bun:sqlite 上的帳號
+src/connection.ts    一條 TCP 連線：分段重組、存活偵測、dispatch、Bun.listen
+src/udp.ts           有 native 來源佐證的 private UDP opcode 19 → 回空 20
+src/ops/registry.ts  檔名 → opcode，以及具型別的 build() / handlerFor()
+src/ops/c2s/         客戶端送給我們的 packet
+src/ops/s2c/         我們送給客戶端的 packet
+src/main.ts          進入點
 ```
 
-Direction is the folder, not the `_REQ`/`_ACK` suffix — those describe the
-client's view, and `GT_PING_ACK` is an `_ACK` the *server* sends. The registry
-imports the 15/16 modules explicitly so the runtime surface is visible to
-TypeScript, then uses Bun's `Glob` only to reject an unregistered packet file.
-`bun run sync` checks the same filename/catalogue boundary.
+**一個 packet 一個檔案，以 opcode 命名。** packet 的實作就在同名檔案內；
+小巧的 registry 只把名字重複一次，讓目前的 runtime surface 與具型別的
+builder map 都可見。module 的 opcode 由外部注入，wire 程式碼不帶第二份數值表。
+要從 `docs/PACKETS.md` 找到 packet 對應的程式碼，開啟同名檔案即可。
+現行 31 個 packet module 的逐欄完整審計見
+[`../docs/SERVER_TS_EVIDENCE.md`](../docs/SERVER_TS_EVIDENCE.md)：
 
-## Protocol facts this implements
+```
+src/ops/c2s/GL_LOGIN_REQ.ts   客戶端送出；我們讀取
+src/ops/s2c/GL_LOGIN_ACK.ts   我們送出；由我們組建
+```
 
-All of these are cited to `../docs/PACKETS.md`:
+方向看資料夾，不是 `_REQ`/`_ACK` 後綴 —— 後綴描述的是客戶端觀點，
+而 `GT_PING_ACK` 正是 *server* 端送出的一個 `_ACK`。registry 明確 import
+這 15/16 個 module，使 runtime surface 對 TypeScript 可見，然後只用 Bun 的
+`Glob` 來拒絕未註冊的 packet 檔案。`bun run sync` 檢查同一條界線（檔名 ↔ opcode 編目）。
 
-- **Frame** — `u16 size, u16 opcode, u16 preEncryptSize, u16 preCompressSize`,
-  then payload. Little-endian, unaligned, no padding between fields.
-- **Cipher** — AES-128-CFB (128-bit feedback, zero IV) over a 16-byte-aligned
-  buffer. An empty payload still costs one block. The key is the EUC-KR literal
-  「트렁크점령전머지」.
-- **Two connections, two handshakes** — the client connects to the login
-  server, then opens a *second* connection to the channel host and port it
-  read from the login reply. In both cases the server speaks first:
+## 本實作涵蓋的協定事實
+
+下列全數引用自 `../docs/PACKETS.md`：
+
+- **Frame** —— `u16 size, u16 opcode, u16 preEncryptSize, u16 preCompressSize`，
+  然後是 payload。Little-endian、未對齊、欄位之間無 padding。
+- **Cipher** —— AES-128-CFB（128-bit feedback、零 IV）作用於 16-byte 對齊的
+  buffer；即使空 payload 也要付一個 block。金鑰為 EUC-KR 字面量
+  「트렁크점령전머지」。
+- **兩條連線、兩次 handshake** —— 客戶端先連 login server，然後開啟*第二條*
+  連線到 login 回覆中讀到的頻道 host 與 port。兩種情況都是 server 先開口：
 
   ```
   login    GL_ACCOUNTCONNSUCC -> GL_LOGIN_REQ    -> GL_LOGIN_ACK
@@ -83,50 +78,41 @@ All of these are cited to `../docs/PACKETS.md`:
                                      -> GC_ENTERCHANNEL_REQ -> GC_ENTERCHANNEL_ACK
   ```
 
-  `GL_ACCOUNTCONNSUCC` must be sent exactly once: it also triggers the client's
-  credential builder, so repeating it after login loops the client forever.
-- **The channel handoff is not an identity** — `PM_UDPSTART_REQ` carries a
-  `String[24]` whose writer has never been located, so it is matched against a
-  recent, single-use login admission by source IP and echoed values rather than
-  trusted as an account key, and it is not a credential. The client's
-  second-level handler ignores the 144 result and sends 195 regardless, so the
-  connection stays gated until a successful 196.
-- **Channel entry is explicit** — `GC_ENTERCHANNEL_ACK` has a three-field
-  failure prefix and a success-only endpoint tail. The server accepts only the
-  one group/channel it advertises and binds lobby authority after the success
-  reply is written. Type-3 admission and emission require an explicit raw
-  `type3Tail`; semantic deployment config and gameplay remain out of scope.
-- **Compression** — the client only lowers its threshold when the value is
-  strictly below `0x2580`, so sending `0x2580` disables LZ in both directions.
-  The TCP LZ stage is therefore not implemented, and `decodeFrame` throws
-  rather than guessing if a peer ever sends a compressed frame. The private UDP
-  endpoint likewise has no LZ stage, matching `sub_595980`/`sub_595A60`.
-- **Strings** — NUL-terminated inside the payload, no length prefix. The Korean
-  client is CP949, whose WHATWG label is `euc-kr` (Bun rejects `cp949`).
-- **Credentials** — the client validates `[0-9A-Za-z@]` before sending, so the
-  store rejects anything else too.
-- **Keepalive runs backwards from its names** — the server sends
-  `GT_PING_ACK(102)` and the client answers `GT_PING_REQ(101)`. The client's
-  dispatcher handles 102 by building 101 (`sub_58D6F0`), has no handler for 101
-  and no builder for 102. Replying to an inbound 101 would loop forever.
-- **Replies keep request order** — handlers are async, so dispatch is chained
-  per connection. The client pairs replies to requests positionally, and
-  concurrent dispatch let a fast reply overtake a slow one.
+  `GL_ACCOUNTCONNSUCC` 必須恰好送一次：它也會觸發客戶端的憑證 builder，
+  登入後重送會讓客戶端無止境循環。
+- **頻道 handoff 不是身分** —— `PM_UDPSTART_REQ` 攜帶一個 `String[24]`，其
+  writer 從未被定位，因此 server 以 source IP 與回聲值對照最近的單次 login
+  admission，而不是把它當帳號 key 信任；它也不是憑證。客戶端的二級 handler
+  無視 144 的 result，一律送出 195，所以連線會被 gating 直到 196 成功為止。
+- **頻道進入是明確的** —— `GC_ENTERCHANNEL_ACK` 有三欄失敗前綴與
+  success-only 的 endpoint 尾巴。server 只接受自己廣告的那一組 group/channel，
+  並在成功回覆寫出之後才綁定 lobby 權限。type-3 admission 與發射需要明確的
+  raw `type3Tail`；語意部署組態與 gameplay 仍不納入範圍。
+- **壓縮** —— 客戶端只在值嚴格低於 `0x2580` 時才降低門檻，因此送出
+  `0x2580` 會在雙向停用 LZ。TCP LZ stage 因此未實作；若對端真的送出壓縮
+  frame，`decodeFrame` 擲出錯誤而不是猜測。private UDP endpoint 同樣無 LZ
+  stage，與 `sub_595980`/`sub_595A60` 相符。
+- **字串** —— payload 內以 NUL 結尾、無長度前綴。韓文客戶端是 CP949，
+  其 WHATWG label 為 `euc-kr`（Bun 拒絕 `cp949`）。
+- **憑證** —— 客戶端送出前會驗證 `[0-9A-Za-z@]`，所以 store 也拒絕其餘字元。
+- **Keepalive 是倒著跑的** —— server 送 `GT_PING_ACK(102)`，客戶端回
+  `GT_PING_REQ(101)`。客戶端的 dispatcher 對 102 催生 101（`sub_58D6F0`），
+  沒有 101 的 handler、也沒有 102 的 builder。回應一個收到的 101 會無限循環。
+- **回覆依 request 順序** —— handler 是 async，所以 dispatch 按連線串鏈。
+  客戶把回覆與請求按位置配對，而併發 dispatch 會讓快的回覆超車慢的回覆。
 
-### A correction made while building this
+### 建置途中修正的一項文件錯誤
 
-`docs/PACKETS.md` previously carried two AES-CFB test vectors that are mutually
-inconsistent: a first-block CFB keystream is `AES(IV)` and cannot depend on the
-plaintext, yet the two implied keystreams agreed on 1 of 16 bytes. This
-implementation passes FIPS-197 C.1 and both documented *ECB* vectors, so the
-cipher and key are right and the CFB expectations were wrong. The doc now
-carries the recomputed values; see `test/aes.test.ts`.
+`docs/PACKETS.md` 過去帶有兩個互相矛盾的 AES-CFB 測試向量：CFB keystream
+第一個 block 是 `AES(IV)`，不可能依賴明文，但那兩個暗示的 keystream 在
+16 byte 中只重合 1 個。本實作通過 FIPS-197 C.1 與兩個文件中記載的 *ECB*
+向量，所以 cipher 與 key 是對的，錯的是 CFB 期望值。文件現已改載重算後的
+數值；見 `test/aes.test.ts`。
 
-## Deliberately not implemented
+## 刻意不實作
 
-The service was shut down in 2016 and much of the game's behaviour lived only
-there. Where the notes say UNRESOLVED, this server does nothing rather than
-invent a rule — no damage calculation, no economy, no quest progression, no
-drop tables, and no private UDP behavior beyond the source-proven 19 to empty
-20 control exchange. `docs/WIKI_MECHANICS.md` explains why each is unknowable
-from the client alone.
+該服務於 2016 年停止營運，許多遊戲行為只存在於原廠 server。凡筆記標示
+UNRESOLVED 之處，本伺服器寧可什麼都不做、也不憑空發明規則 —— 不做傷害
+計算、不做經濟、不做任務進度、不做掉落表；private UDP 也不超出有 native
+來源佐證的 19 → 空 20 控制交換。為何這些行為無法僅從 client 推出，
+見 `docs/WIKI_MECHANICS.md`。
