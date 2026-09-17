@@ -187,8 +187,10 @@ character template 和 weapon-group materialization trace 也沒有把它寫為 
 **跨輪累積的通則**（各輪獨立觀察到、彼此印證）：
 
 1. **資源檔普遍帶有 parser 不讀的欄位**，且多位於記錄末尾 ——
-   五類：`siege_dmg_rate`(5b-24)／`scale`(5b-25)／`name`(5b-26)／
-   `periodType`(5b-27)／partsability 末四欄(5b-31)。
+   已記五類並持續累積：`siege_dmg_rate`(5b-24)／`name`(5b-26)／
+   `periodType`(5b-27)／partsability 末四欄(5b-31)／partsability
+   `move_speed`+72(5b-38)。
+   （2026-09-18 覆查：原列的 §5b-25 `scale` 判決已撤回，見該節更正。）
 2. **鍵是位置或數字 index，人類可讀的名字只是註解**（5b-25/26/27）。
 3. **資源缺席 = 跑硬編碼 fallback，不等於功能不存在**（5d-7／5b-30／5b-34）。
 4. **Wiki 對單人／PvE 內容系統性缺頁**（5b-22/24/25 共三例），
@@ -512,46 +514,9 @@ Wiki 的威力一覧則是歷史社群量測。兩者即使相符也不構成 se
 這是可以完全閉合的，因為 gate 全在 client 端、而且會拿 `msgtableres.lang` 的
 訊息 id 出來顯示 —— 訊息文字本身就是這些常數的語意標籤。
 
-**兩個 caller 的結構完全同構**（各自獨立一份常數，非共用）：
-
-| | Pepachi (700) | Capsule／ペーパーガッチャン (900) |
-|---|---|---|
-| caller | `sub_8459C0` | `sub_99D0A0` |
-| sender | `sub_8458D0` | `sub_99CFA0` |
-| 等級下限 global | `dword_BDBC98` = **10** | `dword_BEAE4C` = **10** |
-| 禮物盒上限 global | `dword_BDBC9C` = **200** | `dword_BEAE50` = **200** |
-
-四個 gate，依 caller 內的求值順序：
-
-| # | 條件 | 失敗顯示 msg id | 訊息原文 |
-|---|---|---|---|
-| 1 | CASH 餘額 `*ArgList > 0` | **264** | `ＣＡＳＨが不足しています。` |
-| 2 | PG 餘額 `*dword_EE8D18 > 0`（PG-ten 另要 `≥ 10000`、CASH-ten 要 `≥ 300`）| **252** | `PGが不足しています。` |
-| 3 | 禮物盒 `i_23 < 200` | **847** | `プレゼントボックスに空きがありません。（…%d個まで保管できます。）` |
-| 4 | **僅 PG 路徑**：等級 `n10_2 >= 10` | **846** | `ペーパチはレベル「%d」以上からご利用できます。` |
-
-> 註（2026-09-18）：`10`／`200` 兩值無法由倉內 dump 重推
-> （該 dump 幾乎無資料段初值行），來源待補；
-> 比較結構、訊息 id 與 995 身分鏈均可由倉內證據重現。
-
-**三個 global 的身分，由 995 的 reader 一次全部定案（Fact / HIGH）。**
-`sub_567AE0`（dispatcher `case 995u`，`LAYOUTS.md` 記為 `s32 s32 s32`）
-就是錢包/等級推播，三個欄位依序寫進：
-
-```
-995 field[0] → *dword_EE8D18   = PG        （§3.2 已知 198 的 GP 欄同樣寫這裡，sub_5392A0）
-995 field[1] → *dword_EE8D0C   = CASH      （= 反編譯器誤命名的 `ArgList`，B0F0xx 非堆疊變數）
-995 field[2] →  n10_2          = 等級      （EE8D10）
-```
-
-`n10_2` 是等級的獨立佐證有三條：① `sub_92EF00(18, 23, n10_2, 0)`；
-② 大廳以 `n10_2 - 1` 索引 `Class` 資源表取階級圖示（`sub_44EB50`）；
-③ 它同時是 `itemdata.pat +644`「需求等級」的比較對象
-（`sub_534FE0(...) > n10_2` → 顯示 msg **922** `レベル制限のあるアイテムです。%dレベル以上、購入可能です。`），
-與 `RESOURCES.md` §2 的欄位定義自洽。
-`i_23` 是禮物盒待領數也有三條：① 198 (`sub_570550`) 尾段的 `u16` 就寫它
-（`PACKETS.md` §3.2 早已記為「禮物盒 pending 數」）；② 299 寫入時 `++i_23`；
-③ 301 收下/刪除時由 `sub_57AFE0` 遞減。
+**完整的 gate 表、caller／常數對照、995 錢包推播的身分定案與 selector 消歧，
+見 [`PACKETS.md` §3.15r](PACKETS.md)（權威所在，勿在此複製）。**
+本節只記 Wiki 對照與本輪的方法論意義：
 
 **這是本專案第一次把一條 Wiki 數值敘述升級為 Fact。**
 [ペーパチ詳細](https://wikiwiki.jp/paperman/ペーパチ詳細) 寫「ペーパチCASHにレベル制限はありませんが、
@@ -559,28 +524,15 @@ Wiki 的威力一覧則是歷史社群量測。兩者即使相符也不構成 se
 且常數就是 `10`。Wiki 的**定性規則與具體數值同時被 client 二進位證實** ——
 注意這仍只是 **client-side gate**：原服是否在伺服端覆核同一條件，依舊無證據。
 
-**同頁的「1回30CASH／1000PG」則仍然 UNRESOLVED。** 本輪找到的
+**同頁的「1回30CASH／1000PG」則仍然 UNRESOLVED。** gate 的
 `>0` / `≥300` / `≥10000` 是**餘額門檻**，不是價格：`≥300` 出現在 CASH-ten、
 `≥10000` 出現在 PG-ten，若 Wiki 的 30CASH／1000PG 為真則十連正好是 300／10,000，
 **數值相容**；但 client 從未把這些常數當作扣款額，扣款一律由 995 推播覆寫本地錢包。
 因此價格不得寫入 server。
 
-**900 的 selector↔draw-count value 配對本輪完全閉合（更正 §2576 的 MEDIUM 標記）。**
-`sub_99CFA0` 的 native wire body 是 **5 bytes**：`u8 raw0` 加 `s32 raw1`；
-`sub_99D0A0` 先依控制項把 `this+148` 設為 1/2/3，再以「控制項不是那三個單抽名」
-決定 raw1 傳 10 還是 1，故實際只可能送出四組：
-`{1,10}` START_TEN_CASH、`{1,1}` START_CASH、`{2,1}` START_PG、`{3,1}` START_CP。
-即 **selector 1=CASH、2=PG、3=CP**，這現在是 **Fact / HIGH**（先前因
-`Source__240/241` 兩個寬字串字面值被反編譯器丟失而只能標 Inference）——
-定案依據是 gate 的掛法：`Source__240` 分支獨佔等級檢查＋`dword_BEAE4C`，
-與 Wiki「只有 PG 有 Lv10 限制」對齊，故 `Source__240` = `START_PG`(selector 2)、
-`Source__241` = `START_CASH`(selector 1)。同理 700 的 `Source__242/243` 對應
-PG-ten/CASH-ten，四個 raw selector 1/2/4/5 的 cash/PG 歸屬也隨之確定。
-
-**對 server 的可操作結論（僅此一項）。** 若日後實作 700/900 的成功路徑，
-**必須先發 995 建立客戶端的 PG/CASH/等級**，否則 client 會在本地 gate 就擋下請求、
-封包根本不會送出。這是 wire ordering 事實，不是獎池政策。獎池、機率、
-保底、扣款金額一律維持 UNRESOLVED，fail-closed 不變。
+（歷程註腳：900 的 selector 定名先前只能標 Inference —— `Source__240/241`
+兩個寬字串字面值被反編譯器丟失；本輪由 gate 的掛法消歧、MEDIUM 標記解除，
+定案過程見 §3.15r「selector 定名」。）
 
 ### 5b-18. 第十四輪副產物：三個先前未登錄的 UI 資源檔
 
@@ -1244,7 +1196,7 @@ exe 全文中 `D_Item`／`Q_Item`／`P_Item`／`W_Item`／`M_Item`／`DropItem_0
 當時由「分布不同步」推斷 `move_speed` 是分類旗標。本輪找到**更直接的證據**：
 追 `partsability` 的唯一查表入口 `sub_956240` → `sub_958320`（24 個呼叫點），
 逐一檢查查表後讀取的偏移，只有 **+36／+92／+96／+100／+104** 被消費。
-**`move_speed`(+72) 從未被讀** —— 第六類死欄位。
+**`move_speed`(+72) 從未被讀** —— 又一類死欄位（2026-09-18 覆查後不再編號）。
 而五個姿勢欄中**只有 `miRun`(+92) 真正進入引擎**，不是五個都用。
 
 **方法論。** 「查不到」有兩種，必須分開寫：
