@@ -965,9 +965,12 @@ relay、authentication 與 peer admission 仍是 **UNRESOLVED**。
    `sub_592500(this, dst, 0x10)`，**他處亦用、非本槽專用**）從 packet
    複入；latch `byte_F25646` 僅由該 handler 自身讀寫自鎖（見活即置 1
    後不再進），零讀者 → 本 build 不可能觀測其語義。
-   （2026-09-18 重新全引址掃，結論不變。另補：本項牽涉全域全數位於
-   .data 之 BSS 尾段（0xBF0000..0x23290A8，PE 無檔案位元組）→ 開機
-   全零，「零初始值」由 .c 推定升為二進位事實。）
+   （2026-09-18 重新全引址掃＋PE 三式掃描：0xF25646 全映像僅 2 處
+   .text 引用（皆在 `sub_593DF0` 內）、0xF25648 恰 1 處（寫入本身）、
+   **F25649..F25657 全映像零引用**（連 blob 子欄位都未被讀）——
+   「不可觀測」於 PE 層封死；相鄰 F25640/44/45/58+ 之大量引用屬
+   A/B 計時族及其他側之不同全域，地址邊界乾淨。另 BSS 尾段確認
+   開機全零，「零初始值」由 .c 推定升為二進位事實。）
 
 2. **op26** `unknown_libname_107`：**已除名**（2026-09-18 PE 直讀）。
    原先「16-byte stub、函式體不在 dump」只是 IDA 未反編譯；本體
@@ -1004,7 +1007,23 @@ relay、authentication 與 peer admission 仍是 **UNRESOLVED**。
    per-record parser `sub_602E30` 與 op23 builder 僅**前 5 欄**
    （u8×3 s32 raw4）對齊，第 6 欄起長度/分段不一致（parser 有
    u8[16] blob；builder 有 u8×8 尾巴）——證據不足，維持原
-   「最自然」不升級。）
+   「最自然」不升級。續補全域 strings 負證據：整份二進位中
+   MOVE_INF 家族字串僅一枚——UTF-16LE `Y_UDP_S_MOVE_INF`
+   （.rdata 0xAEE5BA，BUG 日誌通道，格式 `[g_byGamePlay : %d]`）；
+   **不存在任何 `Y_UDP_C_MOVE_INF` 或 C 側對應命名**——client 端
+   對 8/24 切分鍵之命名線索窮盡，維持原判不變。）
+
+> **PE 數值錨定抽樣（2026-09-18）**：看門狗 2000/10000
+> （`cmp eax,0x7D0`、`push 0x2710`、`mov [row+0x3A8C8],0x2710`——
+> 位元組 offset 0x3A8C8＝前文「+59954」之 dword 計法，算式一致）、
+> A 逾時 3000（`cmp eax,0xBB8`@0x594292，於 `sub_5941D0` 本體內）、
+> B 逾時 5000（`cmp eax,0x1388`@0x594E62，於 `sub_594DA0` 本體內）、
+> bind port 27000（`mov DWORD [edx+0x38],0x6978`@0x596D0D，於
+> **`CUDPSocket::possible_ctor_or_dtor`（0x596CF0）** 建構子內——
+> .c 之 `*(this + 14) = 27000` 其 `this` 是 `_DWORD *`，14×4=0x38，
+> 與 PE 位元組**完全一致**；同建構子設 `*this = &CUDPSocket::vftable`
+> 與 `*(this+1) = -1`（socket handle 初值））——
+> 以上常數自此為 PE-verified。
 
 > **邊界重申**：以上全是 **client 端**觸發/caller/consumer 事實。server 端
 > 行為（應收什麼、位址所有權、轉發/carrier 角色）除既有 19→20 投影外
