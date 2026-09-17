@@ -1,4 +1,8 @@
 import { describe, expect, test } from "bun:test";
+import { Database } from "bun:sqlite";
+import { mkdtempSync, rmSync } from "node:fs";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
 import { decode } from "../src/packet.ts";
 import { build } from "../src/ops/registry.ts";
 import { Store } from "../src/store.ts";
@@ -48,8 +52,64 @@ describe("lobby bootstrap packets", () => {
         ...snapshot,
         profiles: [{ ...snapshot.profiles[0]!, puzzleItemIds: [11_070_001, 0, 0, 0, 0, 0, 0] }, ...snapshot.profiles.slice(1)],
       }),
-    ).toThrow(/resource range/);
+    ).toThrow(/native itemdata/);
+    expect(() =>
+      build("GL_INVENIN_ACK", first!.userId, 7, {
+        ...snapshot,
+        profiles: [{ ...snapshot.profiles[0]!, puzzleItemIds: [11_010_001, 0, 0, 0, 0, 0, 0] }, ...snapshot.profiles.slice(1)],
+      }),
+    ).toThrow(/native itemdata/);
+    expect(() =>
+      build("GL_INVENIN_ACK", first!.userId, 7, {
+        ...snapshot,
+        profiles: [{ ...snapshot.profiles[0]!, puzzleItemIds: [11022201, 0, 0, 0, 0, 0, 0] }, ...snapshot.profiles.slice(1)],
+      }),
+    ).not.toThrow();
     store.close();
+  });
+
+  test("repairs only proven normal appearance defaults", async () => {
+    const directory = mkdtempSync(join(tmpdir(), "paperman-appearance-"));
+    const path = join(directory, "state.sqlite");
+    const store = new Store(path);
+    const account = await store.createAccount("repair", "pw");
+    const initial = store.ensurePlayerIdentity(account.id);
+    expect(initial).not.toBeNull();
+
+    const db = new Database(path);
+    db.query(
+      `UPDATE player_character
+          SET character_type = 2,
+              appearance0 = 2, appearance1 = 77, appearance2 = 0,
+              appearance3 = 0, appearance4 = 0, appearance5 = 0,
+              appearance6 = 0, appearance7 = 88
+        WHERE player_id = $p AND slot = 0`,
+    ).run({ p: initial!.userId });
+    const repaired = store.getMyInfo(initial!.userId);
+    expect(repaired?.characters[0]?.appearance).toEqual([
+      2, 77, 10, 45, 25, 24, 0, 88, 0, 0, 0, 0,
+    ]);
+
+    const persisted = db
+      .query<{ appearance0: number; appearance1: number; appearance2: number; appearance3: number; appearance4: number; appearance5: number }, { p: number }>(
+        `SELECT appearance0, appearance1, appearance2, appearance3, appearance4, appearance5
+           FROM player_character WHERE player_id = $p AND slot = 0`,
+      )
+      .get({ p: initial!.userId });
+    expect(persisted).toEqual({ appearance0: 2, appearance1: 77, appearance2: 10, appearance3: 45, appearance4: 25, appearance5: 24 });
+
+    db.query(
+      `UPDATE player_character SET appearance0 = 99, appearance1 = 0, appearance2 = 0,
+              appearance3 = 0, appearance4 = 0, appearance5 = 0
+        WHERE player_id = $p AND slot = 0`,
+    ).run({ p: initial!.userId });
+    expect(store.getMyInfo(initial!.userId)?.characters[0]?.appearance).toEqual([
+      99, 0, 0, 0, 0, 0, 0, 88, 0, 0, 0, 0,
+    ]);
+
+    db.close();
+    store.close();
+    rmSync(directory, { recursive: true, force: true });
   });
 
   test("198 writes a successful minimal but complete CClientData", async () => {
@@ -63,7 +123,7 @@ describe("lobby bootstrap packets", () => {
       selectedProfile: 1,
       profiles: Array.from({ length: 5 }, (_, profile) => ({
         puzzleItemIds: profile === 1
-          ? [11010001, 11020001, 11030001, 11040001, 11050001, 11060001, 11060002]
+          ? [11012201, 11022201, 11031101, 11041101, 11051101, 11060001, 11060002]
           : [0, 0, 0, 0, 0, 0, 0],
         expiresAtPackedMinute: profile === 1 ? 0x12345678 : 0,
       })),
@@ -130,11 +190,11 @@ describe("lobby bootstrap packets", () => {
     for (let i = 0; i < 9; i++) expect(reader.s32()).toBe(0);
     expect(reader.u8()).toBe(5);
     expect(Array.from({ length: 7 }, () => reader.s32())).toEqual([
-      11010001,
-      11020001,
-      11030001,
-      11040001,
-      11050001,
+      11012201,
+      11022201,
+      11031101,
+      11041101,
+      11051101,
       11060001,
       11060002,
     ]);

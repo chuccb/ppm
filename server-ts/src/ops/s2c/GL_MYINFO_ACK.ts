@@ -9,6 +9,7 @@
  */
 
 import { Packet } from "../../packet.ts";
+import { isNativeNewSkillPuzzleId } from "../../new-skill-catalog.ts";
 import {
   NEW_SKILL_PROFILE_COUNT,
   NEW_SKILL_PUZZLE_SLOT_COUNT,
@@ -46,22 +47,14 @@ function requireU16(name: string, value: number): void {
 
 // sub_46F450 copies exactly 0x18 bytes at +60, then copies +84 separately.
 const NICKNAME_MAX_BYTES = 23; // native CClientData char[24], including NUL
-const NEW_SKILL_RANGES = [
-  [11_010_001, 11_020_000],
-  [11_020_001, 11_030_000],
-  [11_030_001, 11_040_000],
-  [11_040_001, 11_050_000],
-  [11_050_001, 11_060_000],
-  [11_060_001, 11_070_000],
-] as const;
+const NEW_SKILL_RANGE = [11_010_001, 11_070_000] as const;
 
 /** Resource/native ordinal family; zero is the empty puzzle slot. */
 export function requireNewSkillPuzzleId(value: number, slot: number, opcode: 198 | 255): void {
   requireS32(`puzzle[${slot}]`, value);
   if (value === 0) return;
-  const range = NEW_SKILL_RANGES[Math.min(slot, NEW_SKILL_RANGES.length - 1)]!;
-  if (value < range[0] || value > range[1]) {
-    throw new RangeError(`${opcode} puzzle[${slot}] is outside its native resource range`);
+  if (value < NEW_SKILL_RANGE[0] || value > NEW_SKILL_RANGE[1] || !isNativeNewSkillPuzzleId(value)) {
+    throw new RangeError(`${opcode} puzzle[${slot}] is not a native itemdata puzzle id`);
   }
 }
 

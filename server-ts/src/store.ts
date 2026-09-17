@@ -92,6 +92,7 @@ interface PlayerRow {
 }
 
 interface CharacterRow {
+  player_id: number;
   slot: number;
   character_type: number;
   appearance0: number;
@@ -119,6 +120,30 @@ interface ProfileRow {
   puzzle6: number;
   expires_at_packed_minute: number;
 }
+
+/**
+ * Native `sub_522580` maps a body template to these five normal pieces.
+ * `appearance0` is the body offset itself (`char_type` 1..15); the other five
+ * values are the direct outputs of the native resource switch tables. The
+ * optional six appearance slots are intentionally absent from this repair map.
+ */
+const CANONICAL_NORMAL_APPEARANCE: readonly (readonly [number, number, number, number, number, number])[] = [
+  [1, 1, 1, 1, 1, 1],
+  [2, 15, 10, 22, 12, 12],
+  [3, 28, 19, 45, 25, 24],
+  [4, 41, 28, 66, 36, 41],
+  [5, 55, 37, 90, 47, 52],
+  [6, 123, 111, 157, 99, 105],
+  [7, 124, 112, 167, 109, 115],
+  [8, 125, 113, 177, 119, 125],
+  [9, 126, 114, 187, 129, 135],
+  [10, 127, 115, 197, 139, 145],
+  [11, 1096, 839, 1069, 974, 952],
+  [12, 1428, 865, 1205, 1069, 1009],
+  [13, 1600, 866, 1213, 1072, 1012],
+  [14, 792, 385, 428, 376, 360],
+  [15, 30220, 920, 10011, 10011, 10114],
+];
 
 function accountFromRow(row: AccountRow): Account {
   return {
@@ -458,6 +483,63 @@ export class Store {
     }
   }
 
+  /**
+   * Repair only the native-proven six-word normal prefix. A zero body or an
+   * already canonical body is safe to complete; a nonzero noncanonical body
+   * is retained as raw historical state because the native evidence does not
+   * identify the owning server policy. Every nonzero stored word wins over a
+   * missing canonical default, and slots 6..11 are never guessed.
+   */
+  private repairCanonicalCharacter(row: CharacterRow): CharacterRow {
+    const canonical = CANONICAL_NORMAL_APPEARANCE[row.character_type - 1];
+    if (!canonical || (row.appearance0 !== 0 && row.appearance0 !== canonical[0])) return row;
+
+    const appearance: [number, number, number, number, number, number] = [
+      row.appearance0,
+      row.appearance1,
+      row.appearance2,
+      row.appearance3,
+      row.appearance4,
+      row.appearance5,
+    ];
+    let changed = false;
+    for (let index = 0; index < appearance.length; index++) {
+      if (appearance[index] === 0) {
+        appearance[index] = canonical[index]!;
+        changed = true;
+      }
+    }
+    if (!changed) return row;
+
+    this.#db
+      .query(
+        `UPDATE player_character
+            SET appearance0 = $a0, appearance1 = $a1, appearance2 = $a2,
+                appearance3 = $a3, appearance4 = $a4, appearance5 = $a5
+          WHERE player_id = $p AND slot = $s`,
+      )
+      .run({
+        p: row.player_id,
+        s: row.slot,
+        a0: appearance[0],
+        a1: appearance[1],
+        a2: appearance[2],
+        a3: appearance[3],
+        a4: appearance[4],
+        a5: appearance[5],
+      });
+
+    return {
+      ...row,
+      appearance0: appearance[0]!,
+      appearance1: appearance[1]!,
+      appearance2: appearance[2]!,
+      appearance3: appearance[3]!,
+      appearance4: appearance[4]!,
+      appearance5: appearance[5]!,
+    };
+  }
+
   /** Load the native 198 MyInfo projection by its user ID. */
   getMyInfo(userId: number): MyInfo | null {
     const row = this.#db
@@ -476,12 +558,13 @@ export class Store {
 
     const characters = this.#db
       .query<CharacterRow, { p: number }>(
-        `SELECT slot, character_type,
+        `SELECT player_id, slot, character_type,
                 appearance0, appearance1, appearance2, appearance3, appearance4, appearance5,
                 appearance6, appearance7, appearance8, appearance9, appearance10, appearance11
            FROM player_character WHERE player_id = $p ORDER BY slot`,
       )
       .all({ p: row.id })
+      .map((character) => this.repairCanonicalCharacter(character))
       .map(characterFromRow);
     // The DB stores the persistent slot key, while native 198/247 serialize
     // only the ordered character rows. Map the key to that compact wire index;
