@@ -1212,9 +1212,9 @@ stock, currency, duplicate, or grant rules.
 The consumer merely reads both fields; no original status polarity/billing
 policy follows from this client code. A server must not claim a successful
 external-cash balance without that policy.
-### 3.6 GS_SELLITEM (208/209) — ⚠ 廿三輪自動審計重修!
+### 3.6 GS_SELLITEM_REQ (208) — ⚠ 廿三輪自動審計重修!
 **REQ 208** (sub_572AD0): `s32 slot_idx` — 賣出單件 (背包槽序)。
-### GS_SELLITEM_ACK (209) — sub_572B80:
+### 3.6a GS_SELLITEM_ACK (209) — sub_572B80:
 `bool ok; ok → s32 v11, s32 gp_after(→*EE8D18 = PG 顯示), s32 item_id`
 — client 以 item_id 掃背包快取 (EE8FF4, 28B/條) 移除該件並左移
 壓縮陣列, PG 餘額更新。**單件交易, 無 count 迴圈** — 四/六輪的
@@ -2392,9 +2392,10 @@ inventory materialization. See the implementation boundary in
       リトライしてください。」(只讀 status, 不讀後續)
 ```
 
-### 3.15g comm 簇 437/438・378/379・726/727・836/837 (本輪逐函數定案)
-
 ### 3.15h 系統、角色、商城、投票與轉蛋封包簇 (五十三輪全鏈定案)
+
+> （原佔位小節「3.15g comm 簇 437/438・378/379・726/727・836/837」已全數吸收：
+> 437/438 與 726/727 在本節，378/379 見 §3.12e，837 見 §3.15c4。）
 
 | Opcode | 封包名稱 | 來源函數 | 方向 | Wire 格式 |
 |---|---|---|---|---|
