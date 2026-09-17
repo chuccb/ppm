@@ -8,8 +8,7 @@
     "start": "bun run src/main.ts",
     "dev": "bun --watch src/main.ts",
     "test": "bun test",
-    "typecheck": "tsc --noEmit",
-    "sync": "bun run scripts/sync-ops.ts"
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/bun": "latest",

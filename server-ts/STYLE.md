@@ -41,7 +41,8 @@ wire 欄位，這只是機械式的分隔轉換：`user_no` 變 `userNo`，而 `
 
 - registry 明確 import 每個 packet module，使 15 個 C2S 與 16 個 S2C
   operation 全部列在一個短檔內。Bun 的 `Glob` 只用來攔截「加了檔案卻
-  未註冊」的 packet。`bun run sync` 仍是測試前便宜的檔名／編目檢查。
+  未註冊」的 packet。這條界線在 registry module load 時就會驗證——
+  `bun test`、`bun start` 一 import 它就生效，不需另外指令。
 - outbound 物件就是編譯期地圖：`OutboundName` 與 `OutboundArgs<N>` 由實際
   builder 函式推導。`build()` 只做結果是 `Packet` 的輕量 runtime 檢查；
   不需要 `any` 或動態 module 轉接器。

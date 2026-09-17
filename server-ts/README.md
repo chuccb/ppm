@@ -35,30 +35,27 @@ src/packet.ts        完整 wire 格式：header、cipher、reader、writer、�
 src/aes.ts           AES-128 + CFB-128 —— 客戶端的加密
 src/opcodes.ts       676-opcode 目錄，由 db/packets.tsv 載入
 src/store.ts         bun:sqlite 上的帳號
+src/admission.ts     登入連線 → 頻道連線的一次性 handoff（IP＋回聲值比對）
 src/connection.ts    一條 TCP 連線：分段重組、存活偵測、dispatch、Bun.listen
 src/udp.ts           有 native 來源佐證的 private UDP opcode 19 → 回空 20
+src/new-skill-catalog.ts  GL_MYINFO_ACK 用的原生 new-skill 品項目錄成員判定
 src/ops/registry.ts  檔名 → opcode，以及具型別的 build() / handlerFor()
 src/ops/c2s/         客戶端送給我們的 packet
 src/ops/s2c/         我們送給客戶端的 packet
 src/main.ts          進入點
 ```
 
-**一個 packet 一個檔案，以 opcode 命名。** packet 的實作就在同名檔案內；
-小巧的 registry 只把名字重複一次，讓目前的 runtime surface 與具型別的
-builder map 都可見。module 的 opcode 由外部注入，wire 程式碼不帶第二份數值表。
-要從 `docs/PACKETS.md` 找到 packet 對應的程式碼，開啟同名檔案即可。
-現行 31 個 packet module 的逐欄完整審計見
-[`../docs/SERVER_TS_EVIDENCE.md`](../docs/SERVER_TS_EVIDENCE.md)：
+**一個 packet 一個檔案，以 opcode 命名；方向看資料夾。** 要從
+`docs/PACKETS.md` 找到 packet 對應的程式碼，開啟同名檔案即可：
 
 ```
 src/ops/c2s/GL_LOGIN_REQ.ts   客戶端送出；我們讀取
 src/ops/s2c/GL_LOGIN_ACK.ts   我們送出；由我們組建
 ```
 
-方向看資料夾，不是 `_REQ`/`_ACK` 後綴 —— 後綴描述的是客戶端觀點，
-而 `GT_PING_ACK` 正是 *server* 端送出的一個 `_ACK`。registry 明確 import
-這 15/16 個 module，使 runtime surface 對 TypeScript 可見，然後只用 Bun 的
-`Glob` 來拒絕未註冊的 packet 檔案。`bun run sync` 檢查同一條界線（檔名 ↔ opcode 編目）。
+命名、registry 與 module-load 檢查的完整規則見 [STYLE.md](STYLE.md)。
+現行 31 個 packet module 的逐欄完整審計見
+[`../docs/SERVER_TS_EVIDENCE.md`](../docs/SERVER_TS_EVIDENCE.md)。
 
 ## 本實作涵蓋的協定事實
 
