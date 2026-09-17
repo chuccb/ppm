@@ -3005,9 +3005,11 @@ byte 偏移 (this 為物件基址):
 +136..144 s32 [34..36] 保留 (無讀取者)
 +148   s32  [37] wins    (任務 cond5)
 +152   s32  [38] losses  (cond6)
-+156..168 s32 [39..42] kills/deaths/disc/hearts (cond3/4/7/10)
-+172   s32  [43] headshots (cond8)
-+176   s32  [44] combos  (cond9; wire 亂序: 43,45,46,44)
++156/160 s32 [39]/[40] kills/deaths (cond3/4)
++164   s32  [41] cond7 + UI HEADSHOT
++168   s32  [42] cond10 + UI AIRCOMBO
++172   s32  [43] cond8 + UI HEARTBREAK
++176   s32  [44] cond9 + UI CRITCALSHOT (wire 亂序: 43,45,46,44)
 +180/184 s32 [45]/[46] double/triple (cond11/12)
 +188..204 s32 [47..51] multi/ultra/z/k/dd (cond13..17)
 +208   48B  [52..63] 遊玩秒(cond20)+模式場次[53..60]
