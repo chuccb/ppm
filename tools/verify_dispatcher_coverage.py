@@ -162,9 +162,9 @@ UDP_RECEIVE_HANDLERS = {
 UDP_SHARED_RECEIVE_HANDLER = (8, 24, "sub_596940")
 UDP_DOC_CASE_MARKERS = [
     "## Appendix B — `sub_595E80` UDP-private dispatcher / every verified receive case",
-    "`unknown_libname_107`", "explicitly UNRESOLVED",
+    "`unknown_libname_107`", "明確 UNRESOLVED",
     "`154 UDP_ALL_PING_ACK`", "`158 UDP_TCP_DEAD_ACK`",
-    "`sub_595980` is explicit-address AES send",
+    "`sub_595980` 為明確位址 AES 送出",
 ]
 UDP_LOW_SEND_MAX_OPCODE = 40  # low private outbound constructors; receive cases also include 154/158
 UDP_SHARED_HEADER_BUILDERS = {1: "sub_593830", 9: "sub_594300", 19: "sub_596670",

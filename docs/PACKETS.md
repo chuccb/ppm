@@ -371,11 +371,15 @@ stay explicitly wire-oriented, not guessed as account or endpoint identities.
 
 ## 2. Opcode 註冊表 — sub_9D2050
 
-`sub_9D2050` 用 `sub_9EAF50(name, id, ...)` 把 **674 個** packet 名稱註冊進
-全域 map `dword_2317F50` (packet-viewer / debug 名稱表)。ID 即 wire opcode。
-完整清單見 `db/packets.tsv`（**676** 個唯一 ID，100–994；GS_BASE=100）。
-其中 674 筆來自 `sub_9D2050` 的直接 registration；990/991 是本輪以 UI
-字串補名、未在該名稱表註冊的兩筆。此處刻意分開「source registration count」
+`sub_9D2050` 用 `sub_9EAF50(name, id, ...)` 以 **674 個 registration
+call sites** 把 **670 個唯一** packet 名稱註冊進全域 map `dword_2317F50`
+(packet-viewer / debug 名稱表)；485/486（`GL_GET_GAMEROOM_PROGRESSTIME_*`）與
+864/865（`GL_SERVER_DATETIME_*`）四個 id 同名重複註冊各一次，故 674 sites
+對應 670 unique。ID 即 wire opcode。完整清單見 `db/packets.tsv`（**676** 個
+唯一 ID，100–994；GS_BASE=100）＝ 670 筆 binary 直接註冊 ＋ 6 筆 UI 字串
+補名（366/367 `GR_LOCALROOM_*`、969/970 `GR_SOCCER_*`、990/991
+`GR_DAMAGEROOM_*`；其 `L"NAME"` 經 2026-09-17 全檔掃描確認不在 binary）。
+此處刻意分開「source registration count」
 與「本地 catalog row count」，避免將補名誤當成反編譯的直接事實。
 
 > **⚠ 676 是「具名 opcode」數，不是 wire 上全部的 opcode 數（本輪實測）。**
