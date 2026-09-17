@@ -19,8 +19,8 @@ facts from UI labels and from unresolved server policy.
   - `group` comes from `CLobbyChannel` server-list state at `+129`.
   - `channel` comes from the selected server-list channel at `+131`.
   - `rawFlag` is `sub_7338D0()` followed by `sub_735DE0`; the recovered code
-    only proves that it is a local-option/config-derived byte. Its business
-    domain is unresolved.
+    proves that the writer stores the boolean result as wire byte `0` or `1`.
+    Its business domain is unresolved.
 -  196 is not handled by the main packet switch in `sub_58B010`. The scene
   layer dispatches it to `CLobbyChannel::sub_4179D0` through the lobby object
   vtable. The function begins by checking the opcode with `sub_591EE0`.
