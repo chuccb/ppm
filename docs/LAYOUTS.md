@@ -8,7 +8,7 @@
 > **417**（`MASTER_KILLALL_ACK`，dispatcher inline 無獨立 handler）、
 > **803**（`GS_DESTROYITEM_ACK`）、**882**（`GP_CHPLAYTIMEC_ACK`，inline 差分）
 > —— 現為 **306/306 全覆蓋**。可用
-> `python3 server-cs/tools/verify_dispatcher_coverage.py` 重驗。
+> `python3 tools/verify_dispatcher_coverage.py` 重驗。
 >
 > 本表另含 dispatcher 以外的 S2C（例如走 vtable 前置轉發器者），
 > 故列數多於 306。名稱欄留空者為**名稱表未註冊**的 opcode，

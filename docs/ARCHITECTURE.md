@@ -88,7 +88,7 @@ server 實作的宣稱。
 | 195 → successful 196 | **Fact / HIGH**：196 reader 僅在 `result==1` 讀 endpoint tail，並進入 selected channel 的後續場景。 | **Inference / HIGH**：只在成功 196 寫入完成後標記 `ChannelEntryCompleted`；在此之前拒絕 lobby、room、economy 與 gameplay request。 |
 | 143 未通過後的 195 | **Fact / MEDIUM**：native channel wrapper 仍會在收到 144 後送 195；196 有完整非成功形狀。 | 保留 195，回傳沒有 endpoint tail 的非成功 196；不因此授權 socket。 |
 
-這些 boundary 都集中在 `Router`、`Session`、`ChannelHandlers`，使每一個
+這些 boundary 都集中在 `connection.ts`、`admission.ts`、packet handlers，使每一個
 server-side transition 可搜尋、可記錄、可替換；它們不依賴 143 的
 `String[24]` 語意（該 writer 仍是 **UNRESOLVED**）。
 
@@ -126,52 +126,34 @@ parts_ability 413 (31欄彈道) / recommend 3,180 / protocol 676
 3. pmFile per-byte 滾動 (keystream FA5387AD/0F3A94AA/48945DCA/1A68DCCF)
 4. data.pat 容器 (pmFile→ROL混淆→zlib 1.2.3→CRC自帶表)
 
-## 4b. C# Server 結構（2026-09 整理）
+## 4b. TypeScript / Bun server 結構（2026-09-17 整理）
 
-`Program` 只負責建立 DB、固定組態、Router、login/channel TCP listeners，及
-`UdpControlServer`；每個 TCP socket 的 receive loop 按收到順序
-`await Router.DispatchAsync`，不把同一 session 的 stateful request 平行化。
-UDP 端點同樣串列處理收到的 datagram，但它是無 state 的、source-address
-回覆的 19→20 control exchange，不是 TCP session dispatcher。Native client shutdown is
-explicitly *not* copied: it uses `TerminateThread` before `closesocket`; the C# endpoint
-uses cancellation and disposes its socket only after its receive loop exits.
+`server-ts/src/main.ts` 負責組態、SQLite bootstrap、login/channel TCP listeners
+與 UDP control server；每個 TCP socket 的 receive loop 按收到順序串接 dispatch，
+不把同一 connection 的 stateful request 平行化。UDP 端點同樣串列處理 datagram，
+但它是無 state、source-address 回覆的 19→20 control exchange，不是 TCP session
+dispatcher。Server 使用 cancellation 與 receive-loop 結束後的 socket cleanup，
+不複製 client shutdown 的 native thread 行為。
 
-- `Session` 持有單一 TCP socket 的 connection state、account identity、room
-  seat、send gate；`ChannelEntryCompleted` 明確表示 143 handoff 與 195→196
-  channel entry 之間的不同 state。
-- `Router` 是唯一的 listener/state boundary 與 frozen opcode lookup；它不承載
-  gameplay policy。`PaperMan.HandlerGenerator` 在**編譯期**尋找 `PaperMan.Server`
-  中、名稱為已驗證 C2S catalog token（目前為 `*_REQ` 加單向
-  `GL_MYINFO_OPEN`）的 static `ValueTask (Session, Packet, ServerContext)`
-  methods，並產生直接 method-group registration。執行時沒有 type scan、runtime
-  reflection 或人工 `Register` list。
-  唯一無官方 request token 的 206 以顯式 `[RawOpcodeHandler(206)]` 保留 raw boundary，
-  而非臆造 GS 名稱。這只表示 dispatch discovery 是 trim / NativeAOT-friendly，**不**
-  證明含 SQLite 與其他 dependencies 的整個 server 已通過 NativeAOT publish。
-- 各 `Handlers.<TOKEN>.cs` direct source 仍以協定子系統目錄切分（GT、Login、Channel、
-  Lobby、Room、Join、Battle relay/object、Shop、Stats、Clan、Quest、Friend、Voice、
-  Warehouse、Master、GameCenter、AI），因此檔名、entry method 與 packet catalog token
-  可直接對齊。例如 `Handlers.GL_LOGIN.cs` / `GL_LOGIN_REQ`、
-  `Handlers.PM_UDPSTART.cs` / `PM_UDPSTART_REQ`、`Handlers.GL_MYINFO.cs` /
-  `GL_MYINFO_REQ`、`Handlers.GR_MAPCHANGE.cs` / `GR_MAPCHANGE_REQ`、
-  `Handlers.GQ_QUEST_ACCEPT.cs` / `GQ_QUEST_ACCEPT_REQ`。`Handlers.*.Shared.cs` 僅保留
-  明確跨 request 的 wire / authority support，沒有 receive entry；Stats 的
-  `Handlers.GP_CHPLAYTIMEC_ACK.cs` 則是 source-proven server push，不是 C2S handler。
-  分組只是一項本地導航決定，不改 wire/state semantics 或聲稱原服務有相同 subsystem。
-- `Db` 的 connection/bootstrap 與每個 persisted-domain partial 都在 `Database/`；
-  `Db.Connection.cs` 持有共用 connection / lock / command creation，跨表不可分割操作
-  仍在擁有 operation 的 partial 以明確 transaction 包住。完整的 file-to-boundary map
-  維持在 `PaperMan.Server/README.md`，避免將 local partial 分界誤寫成 native-service
-  evidence。
-- `ChannelAdmissionRegistry` 只保存一次性的 681→143 handoff；`RoomManager` /
-  `SessionRegistry` 只持有 process-local live state。SQLite 是 account、inventory、
-  quest 等可持久狀態的唯一來源。
-- `UdpControlServer` 與 `UdpPacketCodec` 是刻意分離的 UDP-private 層：前者只
-  parse source-proven opcode 19 並回覆空 opcode 20，後者只做 native AES framing
-  （不帶 TCP LZ）。client-reported UDP values 不取得 `Session` 或 DB authority。
+- `connection.ts` 持有單一 TCP socket 的 reassembly、connection state、account
+  identity、send gate 與 ordered dispatch；`admission.ts` 明確表示 143 handoff 與
+  195→196 channel entry 之間的不同 state。
+- `ops/registry.ts` 是 opcode lookup、typed packet builder 與 handler boundary；
+  Bun 直接載入 `src/ops/c2s/` 與 `src/ops/s2c/` 的 packet modules。TypeScript
+  compile-time types 不取代 packet reader 的 runtime width、framing、fixed-buffer
+  與 malformed-input checks。
+- 每一個 packet module 以 opcode 命名並依方向分目錄；registry 將 filename 綁定
+  到 `db/packets.tsv`，避免重複的名稱常數。未有足夠 evidence 的 opcode 保留
+  fail-closed/no-op，不臆造 service policy。
+- `store.ts` 是 `bun:sqlite` 的 account、identity、角色與 NewSkill projection
+  邊界；跨表操作在明確 transaction 中完成。`ChannelAdmissionRegistry` 只保存
+  一次性的 681→143 handoff，process-local live state 不冒充 persistent authority。
+- `udp.ts` 與 `packet.ts` 刻意分離：前者只 parse source-proven private opcode 19
+  並回覆 empty opcode 20，後者負責 native AES framing（不帶 TCP LZ）。
+  client-reported UDP values 不取得 account 或 DB authority。
 
 此切分是依 socket lifecycle 與 protocol domain，而非為了套用通用 pattern；
-重要 side effect 仍可從 Router → Handler → Db / RoomManager 直接追蹤。
+重要 side effect 仍可從 connection → ops registry/handler → store 直接追蹤。
 
 ## 5. Server 現況
 

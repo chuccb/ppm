@@ -8,16 +8,16 @@
 
 | 目標 | 先讀 | 再讀 | 不可省略的界線 |
 |---|---|---|---|
-| 修改或新增 packet handler | [`PACKETS.md`](PACKETS.md) 的對應 family | [`LAYOUTS_REQ.md`](LAYOUTS_REQ.md) 的 writer、[`LAYOUTS.md`](LAYOUTS.md) 的 reader、相關 `Handlers.*.cs` | 必須追到 sender → fields → consumer → state/cache/storage → observable behavior；只有 ACK reader 不足以產生成功 server policy。 |
+| 修改或新增 packet handler | [`PACKETS.md`](PACKETS.md) 的對應 family | [`LAYOUTS_REQ.md`](LAYOUTS_REQ.md) 的 writer、[`LAYOUTS.md`](LAYOUTS.md) 的 reader、相關 `server-ts/src/ops/*.ts` | 必須追到 sender → fields → consumer → state/cache/storage → observable behavior；只有 ACK reader 不足以產生成功 server policy。 |
 | 釐清一個欄位或條件分支 | `PACKETS.md` | `PaperMan.exe.c` 的 caller/callee/xref 與 `LAYOUTS*.md` | 自動表只列 primitive read/write sequence；它不表示 optional branch、count loop 或欄位語意。 |
 | 由 client class、vftable 或 inheritance 定位 native 起點 | [`RTTI_PYCLASSINFORMER.md`](RTTI_PYCLASSINFORMER.md) | `PaperMan.exe.c` xref、`PACKETS.md` / `RESOURCES.md` 的 data flow | RTTI 只證明 client type/vftable/base relation；不可由 class 名稱推導 wire、server policy、ownership 或 grant。 |
 | 使用角色、物品、地圖、語音、parts 或 UI 資料 | [`RESOURCES.md`](RESOURCES.md) | 原始 `main:Extracted/` 檔案、native lookup 與 packet consumer | resource / XML / asset 的存在只能證明 client content，不證明可購、持有、預設、可見或有 entitlement。 |
-| 理解 server socket、state、DB ownership | [`ARCHITECTURE.md`](ARCHITECTURE.md) | [`../server-cs/README.md`](../server-cs/README.md)、`Program` → `Router` → `Handlers.*` → `Db.*` | server state guard 是 compatibility inference 時，必須和 native fact 分開記錄。 |
+| 理解 server socket、state、DB ownership | [`ARCHITECTURE.md`](ARCHITECTURE.md) | [`../server-ts/README.md`](../server-ts/README.md)、`server-ts/src/main.ts` → `connection.ts` → `ops/*.ts` → `store.ts` | server state guard 是 compatibility inference 時，必須和 native fact 分開記錄。 |
 | 選擇下一個未完成 handler | [`TODO_HANDLERS.md`](TODO_HANDLERS.md) 的「Current next evidence」與 inventory | 對應 `PACKETS.md` / `LAYOUTS*.md` | inventory 是工作地圖，不是已確認的 original-server behavior。 |
 | 查外部歷史玩法 | [`WIKI_MECHANICS.md`](WIKI_MECHANICS.md) | native / resource / packet evidence | Wiki 只能提供搜尋線索，絕不可獨自補價格、掉落、初始裝備或 response。 |
 
 根目錄 [`README.md`](../README.md) 是首次使用與全專案摘要；
-[`server-cs/README.md`](../server-cs/README.md) 是 C# source topology、build 與 runtime
+[`server-ts/README.md`](../server-ts/README.md) 是 TypeScript/Bun source topology、build 與 runtime
 entry point。兩者都不取代欄位級的證據文件。
 
 ## 證據與可實作性
@@ -46,7 +46,7 @@ request builder → every caller/state gate → exact parser/consumer
 | 檔案 | 角色 | 維護規則 |
 |---|---|---|
 | `PACKETS.md` | 手工整理的 packet / consumer / state evidence 與 implementation boundaries | 新結論要附 function、field order、consumer 與 confidence。歷輪 section number 是穩定引用，勿為美觀大幅重排。 |
-| `SERVER_TS_PACKET_FIELDS.md` | 目前 server-ts 31 個 C2S/S2C Packet 的逐欄 wire meaning、TS use、zero projection 與 unresolved audit | 只收錄 `server-ts/src/ops` 現有 Packet；不要把保守 raw/unknown/flag/extra 欄位改成未證實的業務名稱。 |
+| `SERVER_TS_PACKET_FIELDS.md` | 目前 server-ts 的 C2S/S2C Packet 的逐欄 wire meaning、TS use、zero projection 與 unresolved audit | 只收錄 `server-ts/src/ops` 現有 Packet；不要把保守 raw/unknown/flag/extra 欄位改成未證實的業務名稱。 |
 | `LAYOUTS.md` | S2C dispatcher 的自動 primitive-read inventory | 不把表內線性序列誤讀為完整 payload grammar；重要例外補到 `PACKETS.md`。 |
 | `LAYOUTS_REQ.md` | C2S builder 的自動 primitive-write inventory | 同一 opcode 可有多種 builder form；先回到所有 caller，不可只取第一列。 |
 | `RESOURCES.md` | Extracted resource format、resource-to-client cross-check 與資源界線 | 加入 ID/資產結論時同時標明是 display-only、lookup input 或已證實 authority。 |
@@ -63,13 +63,12 @@ resource snapshot；兩者都應以小範圍、可重現的 search/excerpt 研�
 
 | 區域 | 入口 | Ownership / generated boundary |
 |---|---|---|
-| `server-cs/src/PaperMan.Protocol/` | [`Protocol source guide`](../server-cs/src/PaperMan.Protocol/README.md) → `Core/`, `Codecs/`, `Contracts/`, `Generated/` | wire primitives、named protocol contracts、TCP/UDP codecs 與 generated catalog；不含 socket、DB 或 gameplay policy。 |
-| `server-cs/src/PaperMan.Server/` | [`Server source guide`](../server-cs/src/PaperMan.Server/README.md) → `Host/Program` → `Host/Session` → `Host/Router` → compile-time discovery → `Handlers/<family>/` | TCP/UDP ownership、session state、compile-time discovered canonical handlers 與 SQLite access；詳細導航見 [`server-cs/README.md`](../server-cs/README.md)。 |
-| [`server-cs/src/PaperMan.HandlerGenerator/`](../server-cs/src/PaperMan.HandlerGenerator/README.md) | compiler-only Roslyn generator | canonical static receive entries → direct Router method-group table；沒有 runtime handler reflection。僅此 dispatch path 的 NativeAOT compatibility 可由 source generator 得出，非整個 server publish claim。 |
-| `server-cs/src/PaperMan.SelfTest/Program.cs` | executable, dependency-free wire/bootstrap integration checks | 強化改動過的 wire/state boundary；它不是 original-service capture。 |
-| `db/schema.sql` / `db/packets.tsv` | schema 與 opcode catalog | Server assembly 的 embedded bootstrap inputs；schema 改動需兼顧 `DatabaseBootstrapper` 和 `db/build_db.py` migration。 |
-| `server/packet.py` / `server/pmfile.py` | Python protocol/resource reference tooling | 可用於 codec / pmFile cross-check；C# server 啟動不依賴 Python。 |
-| `server-cs/tools/gen_opcodes.py` / `server-cs/tools/verify_server_layout.py` / `server-cs/tools/verify_server_naming.py` | 前者：`db/packets.tsv` → `PaperMan.Protocol/Generated/Opcode.cs`；中者：catalog → generated discovery → canonical handler static topology；後者：native `GameMode` → resource default map / documented map-bit and two-team tables，並保留 numeric `GC_CLAN_PROTOCOL` sub-op / private-UDP opcode sets、canonical `AI` / `GT` / `Login` handler groupings 和 room `modeIndex` persistence naming | `Opcode.cs` 是 generated output；修改 opcode 名稱或值時由 source TSV / generator 處理，不手改 output。layout / naming checks 不取代 C# build、SelfTest 或 client capture。 |
+| `server-ts/src/` | [`server-ts README`](../server-ts/README.md) → `main.ts` → `connection.ts` / `udp.ts` → `ops/*.ts` → `store.ts` | Bun runtime、TCP/UDP ownership、session state、per-packet handlers 與 SQLite access；wire validation 與 TypeScript compile-time types 彼此分開。 |
+| `server-ts/src/packet.ts` | frame reader/writer、AES-CFB、packet primitives | 保留 native 9600-byte framing、fixed-buffer bounds、field widths、mask/coerce 與 malformed-input rejection。 |
+| `server-ts/test/` | Bun unit/integration tests | 驗證 wire framing、store projection、admission handoff 與 handler boundary；不是 original-service capture。 |
+| `db/schema.sql` / `db/packets.tsv` | 離線 schema、SQLite tooling 與 opcode catalog | `packets.tsv` 是 server-ts runtime input；`schema.sql` 供離線資料庫工具，runtime projection 由 `server-ts/src/store.ts` 建立。 |
+| `server/packet.py` / `server/pmfile.py` | Python protocol/resource reference tooling | 可用於 codec / pmFile cross-check；Bun server 啟動不依賴 Python。 |
+| `tools/` | resource、native gate、coverage 與 catalog 的離線稽核工具 | 只讀取 `PaperMan.exe.c`、`Extracted/` 或文件；不屬於 runtime server。 |
 
 ## 每次改動前後的最小檢查
 
@@ -77,17 +76,14 @@ resource snapshot；兩者都應以小範圍、可重現的 search/excerpt 研�
    Assumption / UNRESOLVED 分類。
 2. 對 packet 變更核對 header、field order、signedness、optional/count framing、client
    state gate、consumer effect、malformed input behavior 和後續合法 state。
-3. 對 C# 變更保留直接的 control flow、具 domain 意義的名稱、nullable invariant、async
-   cancellation/resource ownership 與可診斷的錯誤路徑；不要為了抽象或新語法改寫無關區域。
+3. 對 TypeScript/Bun 變更保留直接的 control flow、具 domain 意義的名稱、strict 型別不變量、
+   async cancellation/resource ownership 與可診斷的錯誤路徑；不要為了抽象或新語法改寫無關區域。
 4. 更新最常被使用且真正承載新結論的 Markdown；避免重複貼相同證據到每份文件。
-5. 修改 Server catalog、handler path 或 direct receive entry 時，先執行
-   `python3 server-cs/tools/verify_server_layout.py`；修改 room `modeIndex`、native mode
-   name、resource default map、maplist bit、two-team predicate、`GC_CLAN_PROTOCOL` sub-op、
-   private-UDP opcode 或 `AI` / `GT` / `Login` handler grouping name/value 時，另執行
-   `python3 server-cs/tools/verify_server_naming.py`。再執行可用的
-   format/whitespace、Python 或 .NET tests。兩者皆只做 static evidence/topology check；若當前
-   環境沒有 .NET SDK，明確記錄 build / `PaperMan.SelfTest` 尚未執行，不能宣稱 compiler-backed
-   success。
+5. 修改 `server-ts/src/ops`、packet boundary 或 store projection 時，先執行
+   `bun run typecheck` 與 `bun test`；修改 native mode name、resource default map、maplist
+   bit、two-team predicate、`GC_CLAN_PROTOCOL` sub-op、private-UDP opcode 或 handler grouping
+   name/value 時，另執行適用的 `tools/verify_*.py`。再執行可用的 format/whitespace 與 Python
+   checks；若當前環境沒有 Bun，明確記錄 typecheck / test 尚未執行，不能宣稱 runtime success。
 
-目前 Arena sandbox 沒有 `dotnet`、`csc` 或 `mcs`；C# runtime verification 必須在具
-.NET 10 SDK 的環境補做。
+目前 server 路線固定是 2026-09-17 預覽版 TypeScript、Bun 與 SQLite；native C 證據與
+`Extracted/` 資源仍保留在 repository，並不隸屬於 runtime implementation。

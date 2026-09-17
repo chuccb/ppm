@@ -1,4 +1,4 @@
-# PaperMan 私服重建 — 協議逆向 + SQLite 伺服器 DB
+# PaperMan 私服重建 — 協議逆向 + TypeScript/Bun/SQLite 伺服器
 
 從 `PaperMan.exe.c` (Hex-Rays 9.4 IDA 導出, 81 萬行) 逆向出完整封包協議，
 並據此重建伺服器端 SQLite 資料庫。
@@ -29,31 +29,30 @@
 | `docs/ARCHITECTURE.md` | 全景架構: 生命週期、資料層、加密、互證鏈 |
 | `docs/TODO_HANDLERS.md` | 尚未實作的 server handler 清單與下一輪建議 |
 | `db/packets.tsv` | 從 `sub_9D2050` 抽出的 **676 筆 opcode ↔ 名稱** 對照表 (100–994) |
-| `db/schema.sql` | SQLite schema (33 個 STRICT tables、3 views、4 triggers；C# migration 另補 legacy guards), 每個欄位註明來源封包/函數 |
-| `db/build_db.py` | **可選**離線重建／檢查工具；C# server 首次啟動會自行建庫，不必先跑它 |
+| `db/schema.sql` | SQLite schema 與離線資料庫工具的完整 schema；server-ts 的目前 runtime projection 在 `src/store.ts`, 每個欄位註明來源封包/函數 |
+| `db/build_db.py` | **可選**離線重建／檢查工具；Bun server 首次啟動會自行建庫，不必先跑它 |
 | `db/smoke_test.py` | 模擬 登入→建角→購物→背包分頁→開房→結算→好友/訊息/任務/公會 全流程的 DB 讀寫測試 |
-| `db/paperman.db` | 開發模式的預設 SQLite 資料庫（不存在時由 C# server 自動建立） |
+| `db/paperman.db` | 開發模式的 SQLite 資料庫；Bun server 使用 `PM_DB` 指定的 SQLite 檔案 |
 | `server/packet.py` | wire 協議 Packet 參考實作 (Python, 逐函數對應反編譯), 含自測 |
-| `server-cs/tools/dump_itemdata.py` | 解出 `Extracted/ui/cfg/itemdata.pat` 的 21,164 筆 item id ↔ 名稱 (stride 997B 自證); 支援 `--name` / `--id` / `--band` 查詢 |
-| `server-cs/tools/dump_maplist.py` | 解出 `Extracted/ui/cfg/maplist.pat` 的 123 張地圖 (id / mode bitmask / .pmm 路徑, stride 836B 自證); `--check` 可驗證 modeIndex→bit 表 |
-| `server-cs/tools/verify_dispatcher_coverage.py` | 直接從 `PaperMan.exe.c` 重抽主 dispatcher `sub_58B010` 的 306 個 case，比對 `docs/LAYOUTS.md` 是否全覆蓋；並報告「有 native handler 但名稱表未註冊」的 opcode 數 |
-| `server-cs/tools/verify_resource_claims.py` | 從 `Extracted/` 重算 `docs/RESOURCES.md` 的可數主張（itemdata 21,164／kind==9 10,914、maplist 123、Quest 844、weaponparts 1,108、partsability 413、msgtable 1,346、convars 14 組…），數字對不上就失敗 |
-| `server-cs/tools/verify_native_gates.py` | 從 `PaperMan.exe.c` + `msgtableres.lang` 重抽：700/900 的四道 client 送出前置 gate（等級下限 10／禮物盒上限 200／CASH／PG）、995 錢包推播寫入的三個 global、失敗訊息 264/252/846/847，以及 763 錦標賽 state 1..6 的權威名稱（受付中／入場中／32→決勝輪次表／入場上限 10）；常數或訊息漂移即失敗 |
-| `server-cs/tools/verify_resource_coverage.py` | 列舉 `PaperMan.exe.c` 中所有資源檔名（170 個），比對 `Extracted/` 是否齊備（162 個，95%）；8 個缺檔皆已分類，出現未分類者即失敗。需完整樹，工作分支會自動跳過 |
-| `server-cs/` | **C# 14 / .NET 10 伺服器** (協定層 + login/channel TCP + source-proven UDP-private 19→20 control + SQLite + 自測), 見 `server-cs/README.md` |
+| `tools/dump_itemdata.py` | 解出 `Extracted/ui/cfg/itemdata.pat` 的 21,164 筆 item id ↔ 名稱 (stride 997B 自證); 支援 `--name` / `--id` / `--band` 查詢 |
+| `tools/dump_maplist.py` | 解出 `Extracted/ui/cfg/maplist.pat` 的 123 張地圖 (id / mode bitmask / .pmm 路徑, stride 836B 自證); `--check` 可驗證 modeIndex→bit 表 |
+| `tools/verify_dispatcher_coverage.py` | 直接從 `PaperMan.exe.c` 重抽主 dispatcher `sub_58B010` 的 306 個 case，比對 `docs/LAYOUTS.md` 是否全覆蓋；並報告「有 native handler 但名稱表未註冊」的 opcode 數 |
+| `tools/verify_resource_claims.py` | 從 `Extracted/` 重算 `docs/RESOURCES.md` 的可數主張（itemdata 21,164／kind==9 10,914、maplist 123、Quest 844、weaponparts 1,108、partsability 413、msgtable 1,346、convars 14 組…），數字對不上就失敗 |
+| `tools/verify_native_gates.py` | 從 `PaperMan.exe.c` + `msgtableres.lang` 重抽：700/900 的四道 client 送出前置 gate（等級下限 10／禮物盒上限 200／CASH／PG）、995 錢包推播寫入的三個 global、失敗訊息 264/252/846/847，以及 763 錦標賽 state 1..6 的權威名稱（受付中／入場中／32→決勝輪次表／入場上限 10）；常數或訊息漂移即失敗 |
+| `tools/verify_resource_coverage.py` | 列舉 `PaperMan.exe.c` 中所有資源檔名（170 個），比對 `Extracted/` 是否齊備（162 個，95%）；8 個缺檔皆已分類，出現未分類者即失敗。需完整樹，工作分支會自動跳過 |
+| `server-ts/` | **TypeScript / Bun / SQLite 伺服器** (協定層 + login/channel TCP + source-proven UDP-private 19→20 control + SQLite + Bun tests), 見 `server-ts/README.md` |
 
 ## 快速開始
 
 ```bash
-# 只要 .NET 10 SDK；不需要 DB 建置命令或任何啟動參數。
-dotnet run --project server-cs/src/PaperMan.Server
-
-# 下列是可選的離線工具：
-python3 db/build_db.py --fresh   # 明確重建 DB
-python3 db/smoke_test.py         # 跑 DB 全流程測試
-python3 server/packet.py         # Packet 編解碼自測
-python3 db/import_pats.py        # 資源目錄灌 DB (需先以 server/pmfile.py 解密 cfg/*.pat)
+cd server-ts
+bun install
+bun test
+bun run typecheck
+bun start
 ```
+
+可選的離線資源／SQLite 工具仍位於根目錄 `tools/`、`db/` 與 `server/`。
 
 ## 逆向重點摘要
 
@@ -142,35 +141,34 @@ route table / 日誌 / `packet_stats` 監控。
   8→bit9, 9→bit10, 10→bit12, 11→bit13, 12→bit14, 13→bit15, 15→bit11)
   見 `docs/RESOURCES.md` §4b。
 
-## C# 14 伺服器 (`server-cs/`)
+## TypeScript / Bun / SQLite 伺服器 (`server-ts/`)
 
-依上述逆向成果重建的可運行伺服端 (net10.0, `LangVersion 14`):
+目前唯一的伺服器實作是 `server-ts/`，固定使用 2026-09-17 的預覽版
+TypeScript/Bun toolchain 與 Bun 內建 SQLite：
 
-- `PaperMan.Protocol` — 純協定層: `Opcode.cs` (676 opcodes, 由
-  `tools/gen_opcodes.py` 從 `db/packets.tsv` 產生)、`Packet.cs` (讀寫原語)、
-  `Contracts/Login/LoginWire.*.cs` (682/681/693/694) 與
-  `Contracts/Channel/ChannelBootstrapWire.*.cs` (142/144/196 + packed calendar)
-  的 opcode-family split、具名 wire contract、`PaperLz.cs` / `PaperAes.cs` /
-  `PacketCodec.cs` (真實 LZ+AES 管線)。
-- `PaperMan.Server` — TCP 伺服器: 9600B 框架 (`Session.cs`)、SQLite 存取層
-  (`Db.cs` + embedded `DatabaseBootstrapper.cs`: 自動建庫、schema migration、opcode/
-  運維預設資料 seed；登入/暱稱/背包分頁)、login/channel 雙 listener、
-  `ChannelAdmissionRegistry` 的 681→143 單次交接，以及封包 handlers
-  (681/694、143/144、195/196、大廳（含使用者許可的空 252→253）、商店/送禮的
-  fail-closed wire 邊界與 zero-record 806→807、`GC_CLAN_PROTOCOL` 583/584 container、GP_CH*C 戰績
-  18 REQ/ACK 對 + 882 推播、房間
-  111–194/340–367/712–728、語音 791–796、倉庫 855–863)。AES 原生金鑰已內建。
-- `PaperMan.SelfTest` — 不需遊戲客戶端的 codec、login/channel wire layout、SQLite first-run bootstrap、credential upgrade/migration 自測。
-- LZ 演算法另以 Python 逐行移植跑過 310 組 round-trip/fuzz 驗證。
+- `server-ts/src/packet.ts` — 9600-byte native frame、AES-CFB、reader/writer 與 framing boundary。
+- `server-ts/src/connection.ts`、`src/udp.ts` — login/channel TCP listeners、source-proven private UDP 19→20 control。
+- `server-ts/src/ops/` — 目前實作的 C2S/S2C packet handlers；每個 packet 一檔。
+- `server-ts/src/store.ts` — `bun:sqlite` 帳號、identity、角色與 NewSkill projection。
+- `server-ts/test/` — Bun tests；`tsconfig.json` 啟用 strict、exact optional properties、noUncheckedIndexedAccess 與 erasable syntax。
 
-本沙箱無法安裝 .NET SDK (所有鏡像被網路封鎖), 原始碼未經編譯 —
-建置/執行方式與 AES 金鑰抽取方法見 `server-cs/README.md`。
+```bash
+cd server-ts
+bun install
+bun test
+bun run typecheck
+bun start
+```
 
-### 為何選 SQLite (2026-09 現況)
+Runtime environment 包含 `PM_HOST`、`PM_PORT`、`PM_CHANNEL_PORT`、
+`PM_ADVERTISE_HOST`、`PM_DB`、`PM_UDP_HOST`、`PM_UDP_PORT` 與
+`PM_ADMISSION_TTL_MS`。opcode catalog 由根目錄的 `db/packets.tsv` 提供；目前 store projection 由
+`server-ts/src/store.ts` 建立；Bun runtime 不依賴任何其他 server
+language 或 external database service。
 
-單行程私服 + WAL 模式 = 每秒數萬寫入輕鬆達標且無網路 round-trip;
-`STRICT` 表 + `CHECK` 約束把逆向得到的值域直接壓進 schema;
-一檔即全部狀態、零運維。server 將 schema.sql 與 packets.tsv 編入 assembly，首次
-啟動自動建立父目錄、schema、opcode catalog 與非破壞性的預設運維設定；
-`Microsoft.Data.Sqlite` 是 .NET 10 第一方支援。
-詳細論證見 `server-cs/README.md` 末節。
+### 為何選 SQLite (2026-09-17 現況)
+
+單行程私服 + WAL 模式 = 無網路 round-trip；`STRICT` tables、`CHECK` constraints
+與 triggers 把逆向得到的值域直接壓進 schema；一檔即全部狀態、零運維。Bun 的
+`bun:sqlite` 直接開啟 SQLite，server 啟動時建立缺少的 schema，並讓 TypeScript
+Store 與 wire handlers 共用同一個資料來源。

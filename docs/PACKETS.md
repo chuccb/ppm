@@ -16,11 +16,11 @@
 > 2026-09-16 的 198/247 reserved/stat projection 修正。
 
 > **廿六輪終極對賬 (兩方向自動審計)**:
-> C# ACK 寫入序列 ↔ client 讀取序列: 18/18 ✓;
-> C# REQ 讀取序列 ↔ client 寫入序列: 27/27 ✓ (5 個機械標記經人工
+> server-ts ACK 寫入序列 ↔ client 讀取序列: 18/18 ✓;
+> server-ts REQ 讀取序列 ↔ client 寫入序列: 27/27 ✓ (5 個機械標記經人工
 > 複核均為變體混列/raw4≡s32/子函數未展開等誤報)。
 > 附帶確認: 199 GL_MYITEM_REQ client 端**不送 start 欄位** —
-> server 恆從 0 開始送背包 (C# Remaining 守門已天然正確)。
+> server 恆從 0 開始送背包 (server-ts remaining guard 已天然正確)。
 
 > **符號漂移清理（本輪）：33 → 6 個真正未解。**
 > 機器掃描發現本文件引用的 673 個 `sub_` 符號中，曾有 **33 個在新舊兩份
@@ -326,9 +326,8 @@ native internal scratch object。完整 caller/callee 與 raw extension audit �
 client-side billing/telemetry consumer，不足以命名兩個 billing words 的
 server business meaning。
 
-**2026-09 login cross-check / server guardrails.** `server-cs` now puts this
-wire contract in `PaperMan.Protocol/Contracts/Login/LoginWire.GL_LOGIN_REQ.cs`, including a self-test that
-mimics the native read order. `GL_LOGIN_REQ(682)` is structurally exact:
+**2026-09 login cross-check / server guardrails.** `server-ts` now keeps this wire contract in its packet builders/readers, with Bun tests that
+mimic the native read order. `GL_LOGIN_REQ(682)` is structurally exact:
 `str account, str password_or_token, u64 packed_data_revision, u8 fingerprint_source,
 raw[24]`; no optional/trailing bytes are accepted. The client builder emits a
 low fixed dword of `0xF1E1AB0E` and high dword
@@ -370,7 +369,7 @@ stay explicitly wire-oriented, not guessed as account or endpoint identities.
 > opcode 後，另有 **46 個 opcode 有真實的 native handler 但不在名稱表內**
 > （45 個在兩份 layout 文件中名稱欄為空或標注 *unnamed*，屬正確標示；
 > 第 46 個是本輪補進的 417，已在下方 MASTER 表具名）。可用
-> `python3 server-cs/tools/verify_dispatcher_coverage.py` 隨時複驗這些數字：
+> `python3 tools/verify_dispatcher_coverage.py` 隨時複驗這些數字：
 >
 > * **29 個落在 100..994 的名稱表空隙**：203, 206, 295, 487, 488, 489, 828,
 >   851, 852, 853, 880, 896, 898, 914, 930, 931, 932, 933, 946, 947, 949,
@@ -442,7 +441,7 @@ _REQ = client→server, _ACK = server→client, _NOTIFY/_NOTICE = server 推播�
 
 > **Scope boundary — Fact/HIGH unless labelled otherwise.** `sub_595E80` is a
 > separate UDP-private dispatcher. Its numbers are **not** the TCP opcode catalog
-> (`sub_9D2050` / `Opcode.cs`). Earlier wording in this document calling this
+> (`sub_9D2050` / `server-ts/src/opcodes.ts`). Earlier wording in this document calling this
 > layer “P2P”, “NAT hole punching”, “relay”, or a general UDP-ready handshake
 > overstated the available evidence and is withdrawn. The client proof below
 > establishes one control retry and its completion only.
@@ -596,9 +595,9 @@ the 500-ms scheduler and sixth-send fallback is claimed here.
 
 ### Server implementation boundary
 
-`PaperMan.Protocol/Codecs/UdpPacketCodec.cs` encodes exactly the native UDP AES-only
+`server-ts/src/packet.ts` and `server-ts/src/udp.ts` encodes exactly the native UDP AES-only
 framing. AES-CFB encryption is **not** an authentication/MAC result, and no
-native server admission token is recovered. `PaperMan.Server/Host/UdpControlServer.cs` binds the advertised IPv4
+native server admission token is recovered. `server-ts/src/udp.ts` binds the advertised IPv4
 `UdpHost/UdpPort`, parses only the complete opcode-19 shape above, and immediately
 returns an **empty, encrypted private opcode 20** to the datagram source. Empty is
 intentional: `sub_5968C0` does not consume a packet field. The endpoint is
@@ -888,7 +887,7 @@ CClientData 的 sub_523A50 (523BF0+524010+524660+524B70(a3=0)) 其實屬於
   index；若未來允許稀疏 slot storage，selection persistence 必須先明確做
   slot-id ↔ sorted-wire-index conversion，不能猜測兩者仍相等。
 
-`PaperMan.SelfTest` 的 198 reader test 會完整消費 basic/stat、四個 weapon
+`server-ts` Bun test 的 198 reader test 會完整消費 basic/stat、四個 weapon
 records、9 UI-item / selected-NewSkill-puzzle / tail，並斷言 selected index `0`、char count `1`、type `1`、
 第一個 body `u16=1` 和其餘十一個 `u16=0`；另含 fresh identity、legacy
 bodyless-row repair、nonzero body preservation、GM/purchase type validation coverage。
@@ -1718,9 +1717,9 @@ Cy*ModeLobbyUI), +136 time, +144 u16 win, +146 (存而不讀),
 +148 u16 kill, +150 (存而不讀), +185 (bool)。
 
 **目前 server compatibility 實作（不是 original-service battle policy）**：
-`Handlers.GL_JOIN.cs` / `GL_JOINPASS.cs` / `GL_JOININFO.cs` 完成 260/262/264
-→ 261/263/265；`Handlers.GL_JOINGAME.cs` 依 flag 回 267 code；對找到的 process-local
-Room，`Handlers.GL_JOINPLAY.cs` 的 flag 0 先加入空 slot 再回 269 code 6 自身快照，flag 1
+`server-ts` join packet modules 完成 260/262/264
+→ 261/263/265；`server-ts` GL_JOINGAME packet module 依 flag 回 267 code；對找到的 process-local
+Room，`server-ts` GL_JOINPLAY packet module 的 flag 0 先加入空 slot 再回 269 code 6 自身快照，flag 1
 回 code 7 全房快照。這只實作 native reader 已定案的 payload shape，**不**證明原始服務的
 進行中戰局 authority、計分、存檔或其他未觀察到的成功 policy。
 
@@ -1832,7 +1831,7 @@ Room，`Handlers.GL_JOINPLAY.cs` 的 flag 0 先加入空 slot 再回 269 code 6 
         原樣帶入多個 request，但 server-domain 意義尚未證實，非已證實 s32)
     u8  has_net_cafe_info
     if nonzero: u8×4 + raw4×8，依序交 `sub_A1C800` 初始化
-        `sNetCafeInfo`；完整可發送 shape 已在 C# `NetCafeBootstrapInfo`
+        `sNetCafeInfo`；完整可發送 shape 已在 TypeScript login ACK builder
         建模，四個 byte/八個 slot 的業務域仍未命名。
 
     result 1=正常成功（state 2, normal path），2=alternate success mode；
@@ -1860,13 +1859,13 @@ Room，`Handlers.GL_JOINPLAY.cs` 的 flag 0 先加入空 slot 再回 269 code 6 
     在 config 提供該 tail 時接受 type 3，未配置時維持保守拒絕。
 ```
 
-**Fact/HIGH — current C# bootstrap guardrails.** `Contracts/Login/LoginWire.*.cs`
-管 681/682/693/694；`Contracts/Channel/ChannelBootstrapWire.*.cs` 管 142/144/196
-的完整可表示形狀與 142 日期位元編碼。`ServerConfig` 在開 listener 前拒絕
+**Fact/HIGH — current Bun/TypeScript bootstrap guardrails.** `server-ts` packet
+modules 管 681/682/693/694；channel modules 管 142/144/196
+的完整可表示形狀與 142 日期位元編碼。`server-ts` config 在開 listener 前拒絕
 694 的 `>0x2580`，把 142 的 channel byte 綁定已廣告的唯一 `ChannelIndex`，
 並以可注入時鐘與明確 `ProtocolTimeZone` 建立即時 calendar field。144 不再把
 per-connection session id 偽裝成 daily PG；可選網咖尾段在完整 4×u8+8×raw4
-model 有值時才送出。SelfTest 對 142 bit layout、144 optional shape、196
+model 有值時才送出。Bun tests 對 142 bit layout、144 optional shape、196
 success-tail 及 694 ceiling 做 source-level byte-order assertions。
 
 ### 3.15b2 房間管理/戰場雜項 (廿二輪掃畢; 卅八輪補 REQ 端+設定簇)
@@ -2383,7 +2382,7 @@ wire 群組5 = [47]=multi(13), [48]=ultra(14), [49]=z(15), [50]=k(16),
 only the UI labels shown above. Neither function proves that Store
 `disconnects`, `playCount`, or `roundCount` owns an unnamed word.
 ```
-→ **舊 C# 佈局把 wins 放 [34] 全體錯位 5 欄** — CreateGL_MYINFO_ACK 已重排。
+→ **舊 server 佈局把 wins 放 [34] 全體錯位 5 欄** — CreateGL_MYINFO_ACK 已重排。
 GP ACK 全域槽 (與 CClientData 分離, 只供大廳 UI):
 223→EE8D34, 225→EE8D38, 227→EE8D3C, 229 winc→EE8D40("WIN"),
 231 lossc→EE8D44("LOSE"), 233 killc→EE8D48+EE8DAC 差分,

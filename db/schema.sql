@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS protocol_packets (
 CREATE TABLE IF NOT EXISTS accounts (
     account_id     INTEGER PRIMARY KEY,
     login_name     TEXT    NOT NULL UNIQUE COLLATE NOCASE,
-    -- 永不存明文：C# server 寫入 PBKDF2-SHA256（salt/iterations/hash）；
+    -- 永不存明文：Bun server 寫入 PBKDF2-SHA256（salt/iterations/hash）；
     -- 第一次成功登入時可安全升級舊版 SHA256(salt+password) row。
     pass_hash      TEXT    NOT NULL,
     pass_salt      TEXT    NOT NULL,

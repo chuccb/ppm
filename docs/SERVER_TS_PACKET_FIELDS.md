@@ -13,7 +13,7 @@ Wiki 觀察只作歷史/語意交叉線索，不單獨決定 wire 或 server pol
 * **TS use**：目前 private server 是否使用該值、只保留/echo，或刻意輸出空
   projection。
 * **UNRESOLVED**：只有欄位存在或被原樣帶過，沒有足夠證據命名其業務語意。
-  這些欄位不因 C# 變數名、猜測或 UI 位置而改名。
+  這些欄位不因 implementation 變數名、猜測或 UI 位置而改名。
 
 `raw`、`unknown`、`flag`、`extra`、`uid`、`user_no`、`requestContextRaw`、
 `ext_count` 等保守名稱是刻意保留的 wire boundary，不代表漏做翻譯。沒有 data

@@ -3,12 +3,16 @@
 A from-scratch server for the PaperMan client, written against the
 reverse-engineering notes in [`../docs/`](../docs/).
 
-## Stack
+## Stack (2026-09-17 preview baseline)
+
+This is the only server implementation. The runtime and lockfile intentionally target
+this date's preview toolchain; do not reintroduce another server language or database
+runtime.
 
 | Component | Version | Notes |
 |---|---|---|
 | Bun | 1.4.3-canary | `bun:sqlite`, `Bun.listen`, `Bun.password` — no Node shims |
-| TypeScript | 7.1.0-dev nightly | strict, plus `exactOptionalPropertyTypes`, `noUncheckedIndexedAccess`, `erasableSyntaxOnly` |
+| TypeScript | 7.1.0-dev.20260915.1 | strict, plus `exactOptionalPropertyTypes`, `noUncheckedIndexedAccess`, `erasableSyntaxOnly` |
 | SQLite | 3.53.4 | via `bun:sqlite`, asserted at runtime in `test/db.test.ts` |
 
 ## Run

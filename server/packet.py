@@ -16,7 +16,7 @@ PaperMan wire-protocol Packet 參考實作 (Python 3)。
     送出 sub_593280: w3=原始大小 → (w0≥門檻時) LZ → 一律 AES
     接收 sub_5930C0: AES 解密 → (條件) LZ 解壓
   本模組保留 seal/unseal 僅作歷史參考, 與真客戶端互通請以
-  server-cs/src/PaperMan.Protocol/Codecs/PacketCodec.cs 為準。
+  server-ts/src/packet.ts 為準。
 """
 from __future__ import annotations
 

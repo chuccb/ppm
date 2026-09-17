@@ -182,9 +182,9 @@ u8 0                   // no optional NetCafe tail
 
 This is a conservative interoperability projection, not a claim to reproduce
 the original service's rank, restriction, billing, or NetCafe policy. It keeps
-the native widths and complete mandatory framing on every result. The C# wire
-contract additionally exposes the optional four-byte/eight-raw4 shape for
-explicit compatibility tests; TS currently leaves that gate disabled because
+the native widths and complete mandatory framing on every result. The TypeScript wire
+builder keeps the optional four-byte/eight-raw4 shape for
+explicit compatibility tests; server-ts currently leaves that gate disabled because
 there is no server-side NetCafe model or evidence-backed value source.
 
 The following remain intentionally unresolved:

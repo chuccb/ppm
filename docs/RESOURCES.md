@@ -443,19 +443,15 @@ any observed packet producer establishes a character-specific starter primary,
 secondary, melee, throw weapon, or part. Empty bootstrap loadout containers are
 not evidence of an equipment grant.
 
-**Implementation status (not native evidence).** `Database/Db.WeaponLoadout.cs` applies
-only the submitted delta in one SQLite transaction, validates the merged
-four-row state, and returns it in order for 221. `PaperMan.SelfTest` contains a
-routed 220→221 63-byte full-snapshot case plus no-mutation negative cases for a
-truncated record, duplicate primary, expired/unowned primary, unowned compatible
-part, owned incompatible part, parts with an empty primary, and group-3
-secondary/melee/throw words. The checked-in C# test has **not been executed in
-this environment** because no `dotnet` SDK/compiler is installed. Separately,
-the Python schema smoke test and an in-memory import of the decoded
-`weaponparts.pat` have run: the latter inserted 10,648 rows and confirmed a
-known `(12100016, grp=0, 15210001)` edge while rejecting its wrong-group and
-wrong-gun variants. This only verifies schema/import data, not C# runtime
-behavior.
+**Implementation status (not native evidence).** The current `server-ts` runtime does
+not register a 220→221 handler. The offline SQLite schema/import path is the only
+local projection for this evidence: it must validate owned, unexpired items and
+exact `weaponparts.pat` compatibility in one transaction, while retaining the
+no-mutation failure boundary. The Python schema smoke test and an in-memory import
+of the decoded `weaponparts.pat` have run: the latter inserted 10,648 rows and
+confirmed a known `(12100016, grp=0, 15210001)` edge while rejecting its
+wrong-group and wrong-gun variants. This verifies schema/import data, not a
+server runtime grant policy.
 
 (RecommandItem 頭兩行: 1030=資料行數, 20=概念類別數)
 
@@ -1293,10 +1289,10 @@ AI 協力模式的過關獎勵表，結構為
 ```
 
 `8 + 123 × 836 = 102,836` 恰等於解密後檔案大小，零剩餘位元組。
-工具：`python3 server-cs/tools/dump_maplist.py [--mode N|--id N|--check]`。
+工具：`python3 tools/dump_maplist.py [--mode N|--id N|--check]`。
 
 **獨立驗證既有的 modeIndex→bit 表。** 用
-`verify_server_naming.py` 的 `MODE_INDEX_MAP_BITS` 去解這 123 張圖的 bitmask，
+the checked-in `MODE_INDEX_MAP_BITS` table in `tools/dump_maplist.py` 去解這 123 張圖的 bitmask，
 **123 張全部至少帶一個已知 mode bit，無一例外**。各模式可用圖數：
 
 | mode | 圖數 | | mode | 圖數 |
@@ -1988,7 +1984,7 @@ extraction 中，因此**試衣間動畫子系統無法從現有資料完整還�
 `hayate` 的 `bEnable=1`」互相呼應：試衣間相關資料本就不完整。
 任何關於試衣間的結論都應停在 UNRESOLVED。
 
-**可重跑。** `python3 server-cs/tools/verify_resource_coverage.py`
+**可重跑。** `python3 tools/verify_resource_coverage.py`
 （需完整 `Extracted/`；工作分支上會自動跳過並說明原因）。
 出現未分類的缺檔即失敗，代表 extraction 或 dump 換版，需要重新確認。
 

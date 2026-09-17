@@ -48,7 +48,7 @@ c.execute("INSERT INTO users(account_id,nickname) VALUES (?, 'PaperBob')", (c.la
 uid2 = c.lastrowid
 
 # 682 raw24 fingerprint: fresh databases enforce its exact native size in SQL,
-# rather than relying on only the C# packet reader to preserve this invariant.
+# rather than relying on only the TypeScript packet reader to preserve this invariant.
 c.execute("UPDATE accounts SET client_fingerprint=? WHERE account_id=?", (bytes(24), aid))
 try:
     c.execute("UPDATE accounts SET client_fingerprint=? WHERE account_id=?", (bytes(23), aid))
