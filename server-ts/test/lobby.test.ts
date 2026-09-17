@@ -100,13 +100,13 @@ describe("lobby bootstrap packets", () => {
     expect(reader.u8()).toBe(0); // selected character-list index
     expect(reader.s32()).toBe(1); // level
     expect(reader.s32()).toBe(0); // exp
-    expect(reader.s32()).toBe(0); // native derived-level slot
+    expect(reader.s32()).toBe(0); // native +108 raw/reserved word
     expect(Array.from({ length: 18 }, () => reader.s32())).toEqual([
       0, 0, 0, // native [34..36] reserved words
       101, 102, // wins, losses
-      103, 104, 105, 108, // kills, deaths, disconnects, hearts
-      106, 109, 110, 107, // headshots, double, triple, combos
-      111, 112, 113, 114, 115, // multi, ultra, z, k, dd
+      103, 104, // kills, deaths
+      106, 107, 108, 116, // headshots, combos, hearts, criticals
+      109, 110, 111, 112, 113, 114, 115, // double..dd
     ]);
     expect(reader.raw(3)).toEqual(new Uint8Array(3));
     expect(reader.s32()).toBe(0); // cash

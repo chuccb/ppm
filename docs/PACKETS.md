@@ -791,12 +791,15 @@ bool    success                 0 時直接顯示 resource 0x70 / code 17
   --- sub_523BF0: 基本資料 ---
   string  nickname            (this+60,  char[24] / 0x18 bytes including NUL; sub_46F450 copies this run separately from +84)
   u8      selected_char_index (this+88; CHARSLOT list index, not char_type)
-  s32   level/exp/derived-level x3 (this+92,+96,+100; client recomputes +100)
+  s32   level/experience        (this+92,+96)
+  s32   raw/reserved            (this+108; no proven semantic owner)
   s32   reserved x3             (this+136,+140,+144; no proven task/stat owner)
   s32   wins/losses             (this+148,+152)
-  s32   kills/deaths/disconnect/hearts (this+156..168)
-  s32   headshots/double/triple/combos (wire order +172,+180,+184,+176)
-  s32   multi/ultra/z/k/dd      (this+188..204)
+  (native +100 is a derived class/level recomputed from exp, not a separately
+   read wire word)
+  s32   kills/deaths            (this+156,+160)
+  s32   headshots/combos/hearts/criticals (wire order +164,+168,+172,+176)
+  s32   double/triple/multi/ultra/z/k/dd (this+180..204)
   u8      flags x3              (this+304,305,306)
   s32     cash                  (this+104)
   s32     raw x2                (this+112,116)
@@ -2473,7 +2476,10 @@ the original server’s historic 311 producer is not available.
 247 ACK (sub_573EB0): `u8 ok(==1)` → **sub_523BF0 完整基本資料塊**
 (與 198 首段完全同構 — 21×欄位 + 48B blob) + **sub_524360 單角色外觀**
 `u8 slot(<20), u8 char_type, 12×u16 equip` (與 198 的 sub_524010 條目
-逐欄位一致, 互為交叉驗證)。n11==9 時再驅動個人資料視窗 UI。
+逐欄位一致, 互為交叉驗證)。`sub_51EFB0` 的 non-self UI lookup temporary 是
+`CHAR[132]`，其 `strlen`-sized copy 不足以證明 246 request 有 20-byte
+boundary；server reader 因此不額外收窄 nickname。n11==9 時再驅動個人資料
+視窗 UI。
 → 伺服器實作 247 時可重用 CreateGL_MYINFO_ACK 的首段 builder。
 
 ### 3.15pre-2 客戶端狀態機 + 官方模式表 (二十輪)

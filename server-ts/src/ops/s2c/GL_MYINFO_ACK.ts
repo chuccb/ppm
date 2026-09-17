@@ -139,12 +139,12 @@ export function writeMyInfoBasicData(packet: Packet, myInfo: MyInfo): Packet {
     ["losses", stats.losses],
     ["kills", stats.kills],
     ["deaths", stats.deaths],
-    ["disconnects", stats.disconnects],
-    ["hearts", stats.hearts],
     ["headshots", stats.headshots],
+    ["combos", stats.combos],
+    ["hearts", stats.hearts],
+    ["criticals", stats.criticals],
     ["doubleKill", stats.doubleKill],
     ["tripleKill", stats.tripleKill],
-    ["combos", stats.combos],
     ["multiKill", stats.multiKill],
     ["ultraKill", stats.ultraKill],
     ["zKill", stats.zKill],
@@ -159,11 +159,14 @@ export function writeMyInfoBasicData(packet: Packet, myInfo: MyInfo): Packet {
     .u8(myInfo.selectedCharIndex)
     .s32(myInfo.level)
     .s32(myInfo.experience)
-    .s32(0) // native derived-level slot; the client recomputes it from exp
-    // sub_523BF0 order: [34..36] are reserved, then wins/losses,
-    // kills/deaths/disconnects/hearts, headshots/double/triple/combos,
-    // and multi/ultra/z/k/dd. Criticals/playCount/roundCount are not
-    // proven owners of the three reserved words, so they stay zero here.
+    // sub_523BF0 reads this post-exp wire word into native +108. The
+    // derived class/level at +100 is recomputed from exp and is not itself
+    // read from this packet; +108 has no proven semantic owner.
+    .s32(0)
+    // sub_523BF0 order: [34..36] are reserved, then the native UI consumers'
+    // direct order: wins/losses, kills/deaths, headshots, air-combo, hearts,
+    // criticals, and the double/triple/multi/ultra/z/k/dd counters.
+    // Store disconnects/playCount/roundCount have no proven wire owner.
     .s32(0)
     .s32(0)
     .s32(0)
@@ -171,12 +174,12 @@ export function writeMyInfoBasicData(packet: Packet, myInfo: MyInfo): Packet {
     .s32(stats.losses)
     .s32(stats.kills)
     .s32(stats.deaths)
-    .s32(stats.disconnects)
-    .s32(stats.hearts)
     .s32(stats.headshots)
+    .s32(stats.combos)
+    .s32(stats.hearts)
+    .s32(stats.criticals)
     .s32(stats.doubleKill)
     .s32(stats.tripleKill)
-    .s32(stats.combos)
     .s32(stats.multiKill)
     .s32(stats.ultraKill)
     .s32(stats.zKill)

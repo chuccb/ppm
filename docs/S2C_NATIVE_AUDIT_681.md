@@ -53,12 +53,22 @@ those choices outside the recovered wire grammar.
 The relevant packet helpers are direct byte-copy wrappers in
 `0x5926F0..0x592AC0`:
 
-| helper | bytes consumed | evidence |
-|---|---:|---|
-| `sub_592940` | 1 | `sub_592500(a2, dst, 1)` |
-| `sub_5929C0` | 2 | `sub_592500(a2, dst, 2)` |
-| `sub_592A40` | 4 | `sub_592500(a2, dst, 4)` |
-| `sub_592730` | NUL-terminated ANSI string | `lstrlenA`/copy of the encoded string including NUL |
+| helper | direction | bytes | evidence |
+|---|---|---:|---|
+| `sub_592920` | write | 1 | `sub_592580(this, &a2, 1)` |
+| `sub_592940` | read | 1 | `sub_592500(this, a2, 1)` |
+| `sub_5929C0` | read | 2 | `sub_592500(this, a2, 2)` |
+| `sub_592A40` | read | 4 | `sub_592500(this, a2, 4)` |
+| `sub_592730` | read string | NUL-terminated ANSI | `lstrlenA`/copy of the encoded string including NUL |
+
+The adjacent wrapper families are not typed serializers: `sub_592940` and
+`sub_592A40` copy bytes into caller-provided storage, while `sub_592920`
+copies the low-level one-byte value out. Their C parameter declarations do
+not prove signedness; signedness below comes only from the destination type,
+subsequent branch, or endpoint API. The 681 reader's `sub_592A40` calls are
+therefore retained as raw four-byte words unless the consumer establishes an
+`s32` interpretation, and the `sub_5929C0` calls remain raw two-byte words
+except where the native `__int16` loop/consumer provides signed evidence.
 
 The helper's destination local type is not used to invent signedness. A
 `sub_5929C0` call proves two wire bytes; it does not by itself prove `s16` or
