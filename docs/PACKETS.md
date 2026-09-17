@@ -177,8 +177,10 @@ caller/consumer 分別驗證。
 **dispatcher 覆蓋範圍 (sub_58B010, 306 個 case)**: 除了註冊表的名字外,
 主 switch 直接處理 **24 個未註冊 opcode**：23 個 S2C case 加上本輪補出的
 417 `MASTER_KILLALL_ACK`；完整空缺／超出 994 的清單與 C2S builder-only
-opcode 見下方交叉表。協定實際延伸到 1010；203 是武器編組同步 ACK
-(sub_571D50 → sub_524660 反序列化)，995..1010 是較新的 room/match 家族。
+opcode 見下方交叉表。協定實際延伸到 1010；203 是自身裝備／avatar
+面板資料推播（2026-09-17 審計推定名 `GL_MYAVATARINFO_ACK`；
+sub_571D50 → sub_524660 反序列化 4 槽×44B 紀錄，詳 `LAYOUTS.md`
+審計節），995..1010 是較新的 room/match 家族。
 未知 opcode → default: return (靜默忽略)。
 
 **Packet 物件其他機制 (伺服器不需要, 記錄供參考):**
@@ -378,10 +380,14 @@ stay explicitly wire-oriented, not guessed as account or endpoint identities.
 
 > **⚠ 676 是「具名 opcode」數，不是 wire 上全部的 opcode 數（本輪實測）。**
 > 交叉比對 `LAYOUTS.md` / `LAYOUTS_REQ.md` 中有 native reader/writer 實證的
-> opcode 後，另有 **46 個 opcode 有真實的 native handler 但不在名稱表內**
-> （45 個在兩份 layout 文件中名稱欄為空或標注 *unnamed*，屬正確標示；
-> 第 46 個是本輪補進的 417，已在下方 MASTER 表具名）。可用
-> `python3 tools/verify_dispatcher_coverage.py` 隨時複驗這些數字：
+> opcode 後，另有 **46 個 opcode 有真實的 native handler 但不在名稱表內**。
+> 這 45 個已於 2026-09-17 完成兩輪用途審計：22 個 C2S 與 17 個 S2C 依
+> native 證據鏈推定命名（名稱欄標 `〔推定〕`）、995 註記錢包/等級推播
+> 語義，僅 489、933、1007、1009、1010 維持 unnamed —— 證據與邊界詳
+> `LAYOUTS.md`〈S2C 推定命名審計（2026-09-17）〉與 `LAYOUTS_REQ.md`
+> 〈推定命名審計（2026-09-17）〉；推定名不登入名稱表，故下方空隙清單
+> 仍屬正確的 Fact。第 46 個是本輪補進的 417，已在下方 MASTER 表具名。
+> 可用 `python3 tools/verify_dispatcher_coverage.py` 隨時複驗這些數字：
 >
 > * **29 個落在 100..994 的名稱表空隙**：203, 206, 295, 487, 488, 489, 828,
 >   851, 852, 853, 880, 896, 898, 914, 930, 931, 932, 933, 946, 947, 949,

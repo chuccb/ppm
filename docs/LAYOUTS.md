@@ -67,9 +67,9 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 
 | op | 名稱（tsv Fact） | 行為核對 |
 |---:|---|---|
-| 367 | `GR_LOCALROOM_ACK` | handler `sub_586090` 讀 s8/bool 結果 |
-| 970 | `GR_SOCCER_ACK` | `sub_586180` 讀結果；對向 969 `GR_SOCCER_REQ`（tsv） |
-| 991 | `GR_DAMAGEROOM_ACK` | `sub_56FA00` 讀結果；對向 990 `GR_DAMAGEROOM_REQ`（tsv） |
+| 367 | `GR_LOCALROOM_ACK` | handler `sub_586090` 讀 u8 → `sub_437B50` 勾選 GAMEROOM_LOCALROOM；對向 366 `GR_LOCALROOM_REQ`（tsv；下游詳 PACKETS.md §3.15b2） |
+| 970 | `GR_SOCCER_ACK` | `sub_586180` → `sub_437D00` 寫 mode rule +14 足球旗標（`sub_74F4D0`）並勾選 GAMEROOM_SOCCER；對向 969 `GR_SOCCER_REQ`（tsv；§3.15b2） |
+| 991 | `GR_DAMAGEROOM_ACK` | `sub_56FA00` → `sub_430FD0` 寫 room+128 double_damage＋GAMEROOM_DAMAGEROOM UI；對向 990 `GR_DAMAGEROOM_REQ`（tsv；§3.15b2） |
 
 **推定命名對照表**（對向 REQ 之〔推定〕標記沿用 `LAYOUTS_REQ.md` 審計結果）
 
@@ -77,7 +77,7 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 |---:|---|---|---|
 | 946 | `GR_AI_UDPSENDER_CHANGE_START_NOTIFY` | HIGH | handler 內 dev 標籤 ASCII 完好：`GameNetwork::OnGRAiUDPSenderChangeStartNotify`；`u8 key, s32 playno`，切換 UDP host（`sub_75D550`／`sub_764910` flag=1）；KR log 行已損毀不引證 |
 | 947 | `GR_AI_UDPSENDER_CHANGE_END_NOTIFY` | HIGH | dev 標籤 `…EndNotify`；`u8 oldKey, u8 newKey, s32`：舊 sender `sub_548AE0(row,0)`、新 sender `(row,1)`，後接 UDP 重綁 `sub_6054A0`；KR log（UDP SENDER）已損毀不引證 |
-| 949 | `GR_AI_MULTI_SHIELD_NOTIFY` | HIGH | cp949 字串完好 `[%s] AI Multi Shield 무적 %s!!`（무적＝無敵）系統列廣播；u8 旗標 bit0=On/Off、≥2=All_Channel 否則 This_Room；本端無對向 C2S（GM／伺服器觸發）；`AI_MULTI` 詞彙依 941 `MASTER_GO_AI_MULTI_WAVE_DIRECTLY_REQ`（tsv）；全頻道廣播不改 GR 前綴有 911 `GL_SCHEDULED_GM_NOTICE_NOTIFY`（tsv）先例 |
+| 949 | `GR_AI_MULTI_SHIELD_NOTIFY` | HIGH | cp949 字串完好 `[%s] AI Multi Shield 무적 %s!!`（무적＝無敵）系統列廣播；u8 旗標 bit0=On/Off、≥2=All_Channel 否則 This_Room；本端無對向 C2S（GM／伺服器觸發）；`AI_MULTI` 詞彙依 941 `MASTER_GO_AI_MULTI_WAVE_DIRECTLY_REQ`（tsv），`GR_AI_…SHIELD` 家族先例 922/923 `GR_AI_DAMAGE_SHIELD_REQ/ACK`（tsv）；全頻道廣播不改 GR 前綴有 911 `GL_SCHEDULED_GM_NOTICE_NOTIFY`（tsv）先例 |
 | 931 | `GR_AI_CONTINUE_FAIL_ACK` | HIGH | u8 結果：==1→再讀 u8 並設 PvE mgr continue 狀態 2；==0→播 `pve_01_sounds\AI3_continue_fail.wav`；handler log「continue 취소 …받음」為接收端用語，名仍鏡像對向 930 `GR_AI_CONTINUE_FAIL_REQ`〔推定〕 |
 | 954 | `MASTER_PVE_ACK` | HIGH | u8→`PVE On Succ!!`／`PVE Off Succ!!`；對向 953 `MASTER_PVE_REQ`〔推定〕（`/pveon`、`/pveoff`） |
 | 976 | `MASTER_SETMULTIPLYDAMAGE_ACK` | HIGH | u8→`SET DAMAGE SUCCESS!!`／`SET DAMAGE FAILED!! INVALID SERVER INDEX!!`；對向 975〔推定〕（`/setmultiplydamage <int> <float>`） |
@@ -86,11 +86,11 @@ selector is the low byte. See `PACKETS.md` §1.4 and §3.15d for the full layout
 | 999 | `GL_BLOCK_DEL_ACK` | HIGH | `u8 結果, str nick`：0=本地移除+UI 刷新+0x52D，1=0x52E，3=0xB6；對向 998〔推定〕 |
 | 1001 | `GL_BLOCK_LIST_ACK` | HIGH | `u16 str s32 s32 str`（清單迴圈，與 REQ 審計同鏈）；對向 1000〔推定〕 |
 | 1003 | `GL_BLOCKME_LIST_ACK` | MEDIUM-HIGH | 同鏈清單格式；「別人封鎖我」方向語義為 Inference，功能面確定；對向 1002〔推定〕 |
-| 1005 | `GL_RANDOMMAP_LIST_ACK` | HIGH | `u8 count`×{u8 mode, u8 mapId} 隨機地圖清單；對向 1004〔推定〕 |
+| 1005 | `GL_RANDOMMAP_LIST_ACK` | HIGH | `u8 count`×{u8 mode, u8 mapId} 隨機地圖清單；對向 1004〔推定〕；官方 RANDOMMAP token 先例 748 `GR_SELECTRANDOMMAP_ACK`（tsv） |
 | 488 | `GL_MYROOMCHANGE_ACK` | MEDIUM-HIGH | u8 結果：==1→再讀 u8 slot 寫入 `*sub_417D00()`+0（`CLobbyChannel` 狀態位元組）；!=11→大廳 UI 還原 `sub_44C1D0`；對向 487〔推定〕 |
 | 958 | `GR_TIMEOVER_ONGAME_ACK` | HIGH | dev 標籤 `GameNetwork::OnGRTimeOverOnGameACK`（REQ 審計已錄）字尾 ACK；handler 不讀 payload，收到即回送 957 `GR_TIMEOVER_ONGAME_RESPON_REQ`〔推定〕（s8＝剩餘秒數歸零與否） |
 | 203 | `GL_MYAVATARINFO_ACK` | MEDIUM-HIGH | 讀取序列修正：`u8 count(≤4)`，每筆 `{u8 tag, u16, [3×u16 if tag!=3], [8×raw4 if u16!=0]}`，經 `sub_571D50→sub_524660` 灌入全域 4 槽×44B `p_p_p_p_p_n1189`；消費者＝`GAMEROOM_AVATAR` 3D 預覽 `sub_6A9950` 與 `GAMEROOM_MAIN_GUN_%d0` 面板（12 個 accessor）；無 userKey＋自角色情境 → 自身 avatar／裝備資料推送（server push，無對向 REQ） |
-| 880 | `GQ_QUEST_ACCEPT_DAILY_NOTIFY` | MEDIUM-HIGH | handler 更正＝`sub_91DC50`（case 本體為 `sub_407E00(); sub_91DC50(packet);`，原表誤取 getter）；不讀 payload，KR log（已損毀）後立即送出 876 `GQ_QUEST_ACCEPT_DAILY_REQ`（tsv Fact）；876 其他觸發點＝登入大廳流程、任務窗刷新、866 清單 <3 項自動補齊 → server 端每日任務接取提示 |
+| 880 | `GQ_QUEST_ACCEPT_DAILY_NOTIFY` | MEDIUM-HIGH | handler 更正＝`sub_91DC50`（case 本體為 `sub_407E00(); sub_91DC50(packet);`，原表誤取 getter）；不讀 payload，KR log（已損毀）後立即送出 876 `GQ_QUEST_ACCEPT_DAILY_REQ`（tsv Fact）；與官方 877 `GQ_QUEST_ACCEPT_DAILY_ACK`（handler `sub_91D7E0`、讀取空）為不同 case／handler，非別名；876 其他觸發點＝登入大廳流程、任務窗刷新、866 清單 <3 項自動補齊 → server 端每日任務接取提示 |
 | 914 | `GG_MISSILE_INFO_NOTIFY` | MEDIUM-HIGH | 讀取序列修正：`repeat {u8 idx(1..0x4F), raw32}`，idx==0 終止、上限 80 筆；`sub_71FBC0` 對 `MissileObjMgr`（RTTI Fact，容器 `dword_1D12414`）活體物件逐 idx 廣播虛擬更新；後綴仿 961 `GG_DROPWEAPON_INFO_NOTIFY`（tsv）；records 後續用途不透明（stack buffer、caller-defined） |
 
 **明確保留 unnamed（行為紀錄，語義 UNRESOLVED）**
