@@ -162,8 +162,9 @@ describe("lobby bootstrap packets", () => {
       0, 0, 0, // native [34..36] reserved words
       101, 102, // wins, losses
       103, 104, // kills, deaths
-      106, 107, 108, 116, // headshots, combos, hearts, criticals
-      109, 110, 111, 112, 113, 114, 115, // double..dd
+      106, 107, 108, // headshots, combos, hearts (+164/+168/+172)
+      109, 110, 116, // doubleKill, tripleKill, criticals (wire slots +180/+184/+176)
+      111, 112, 113, 114, 115, // multi..dd (+188..+204)
     ]);
     expect(reader.raw(3)).toEqual(new Uint8Array(3));
     expect(reader.s32()).toBe(0); // cash

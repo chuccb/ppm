@@ -1188,8 +1188,18 @@ bool    success                 0 時直接顯示 resource 0x70 / code 17
   (native +100 is a derived class/level recomputed from exp, not a separately
    read wire word)
   s32   kills/deaths            (this+156,+160)
-  s32   headshots/combos/hearts/criticals (wire order +164,+168,+172,+176)
-  s32   double/triple/multi/ultra/z/k/dd (this+180..204)
+  s32   headshot/aircombo/heartbreak (wire +164,+168,+172)
+  s32   doublekill/triplekill   ⚠ wire +180,+184 —— 在 +176 之前送出!
+  s32   criticalshot            (wire +176 —— 送在 double/triple 之後)
+  s32   multi/ultra/z/k/dd      (wire +188..+204)
+  ★ wire 位移序 = +164,+168,+172,+180,+184,+176,+188...+204 (reader
+    sub_523BF0 與 mirror writer sub_523E10 一致: 先讀 [45],[46] 再讀 [44]);
+    語意經 sub_5206F0 的 label↔dword 直繫定案 ([44]=CRITCALSHOT,
+    [45]=DOUBLEKILL, [46]=TRIPLEKILL) + sub_9252D0 任務條件對照 — 詳 §3.15pre0
+    與 §3610s 表 (三式互證, 2026-09-18 重驗; TS writer 已對齊此亂序)
+  ※ 旁支變體: `sub_523A90` (696 GS_BUY_ONCEITEM_ACK 子塊 reader, §3.4b)
+    的統計段 wire 序是 +176 在 +172 **之前** (148..168,176,172,180,184...；
+    且跳過 +144 改收 +116) — 與 198/247 主塊不同序; TS 未實作該子塊。
   u8      flags x3              (this+304,305,306)
   s32     cash                  (this+104)
   s32     raw x2                (this+112,116)
@@ -1209,7 +1219,7 @@ bool    success                 0 時直接顯示 resource 0x70 / code 17
     u8    group_no
     u16   primary_offset
     if group_no != 3: u16 secondary_offset, melee_offset, throw_offset
-    if primary_offset != 0: s32 x8 (weapon part IDs)
+    if primary_offset != 0: raw4 x8 (sub_592AC0; weapon part IDs)
   --- sub_527550 (sub_522480): 9×s32 — 無前導 count! (五輪修正)
       每個非零 id 需過 sub_535020 目錄驗證, 失敗 → client 錯誤 10
       ⭐ 五十四輪字串完全揭露 (sub_4C4990 / sub_4C4E70 陣列):

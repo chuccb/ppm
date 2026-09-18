@@ -135,9 +135,9 @@ export function writeMyInfoBasicData(packet: Packet, myInfo: MyInfo): Packet {
     ["headshots", stats.headshots],
     ["combos", stats.combos],
     ["hearts", stats.hearts],
-    ["criticals", stats.criticals],
     ["doubleKill", stats.doubleKill],
     ["tripleKill", stats.tripleKill],
+    ["criticals", stats.criticals],
     ["multiKill", stats.multiKill],
     ["ultraKill", stats.ultraKill],
     ["zKill", stats.zKill],
@@ -159,7 +159,8 @@ export function writeMyInfoBasicData(packet: Packet, myInfo: MyInfo): Packet {
     .s32(0)
     // sub_523BF0 order: [34..36] are reserved, then the native UI consumers'
     // direct order: wins/losses, kills/deaths, headshots, air-combo, hearts,
-    // criticals, and the double/triple/multi/ultra/z/k/dd counters.
+    // then wire slots +180/+184/+176 (double/triple/critical — see below),
+    // and the multi/ultra/z/k/dd counters.
     .s32(0)
     .s32(0)
     .s32(0)
@@ -170,9 +171,15 @@ export function writeMyInfoBasicData(packet: Packet, myInfo: MyInfo): Packet {
     .s32(stats.headshots)
     .s32(stats.combos)
     .s32(stats.hearts)
-    .s32(stats.criticals)
+    // Native wire order is +172, +180, +184, +176 — NOT ascending offsets:
+    // both the reader sub_523BF0 and the mirror writer sub_523E10 read slot
+    // 45 (+180) and slot 46 (+184) before slot 44 (+176). Slot semantics are
+    // pinned by the sub_5206F0 record-window label bindings:
+    //   +44 (+176) = "CRITCALSHOT", +45 (+180) = "DOUBLEKILL",
+    //   +46 (+184) = "TRIPLEKILL".
     .s32(stats.doubleKill)
     .s32(stats.tripleKill)
+    .s32(stats.criticals)
     .s32(stats.multiKill)
     .s32(stats.ultraKill)
     .s32(stats.zKill)
