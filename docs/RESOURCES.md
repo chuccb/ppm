@@ -2962,9 +2962,10 @@ roommake 結論。
 - 狀態標籤：`COUPON_MARK`, `ONLY_NETCAFE_MARK`, `RECYCLE_OUTLINE`, `PARTS_WAITING`
 
 ### 10.3 倉庫頁籤（Warehouse Tabs）
-對應 `sub_4F0240`：
-- 頁籤 ID：`WAREHOUSE_1` 至 `WAREHOUSE_6`
-- 格式字串：`L"WAREHOUSE_%d"`、`L"WARE_TAB_%d"`
+以下原記錯誤符號已於 2026-09-18 依寬字串定位移除；
+現行正確歸屬：
+- 頁籤 ID：`WAREHOUSE_1` 至 `WAREHOUSE_6`（建立站 `sub_4F7760`，攜 `L"WAREHOUSE_%d"`）
+- 格式字串：`L"WAREHOUSE_%d"`（`sub_4F7760`）、`L"WARE_TAB_%d"`（`sub_4FA460`）
 
 ---
 
@@ -3013,13 +3014,54 @@ roommake 結論。
 - **pav 檔名文法（Confirmed，code 直證）**：`PaperMan.exe.c` 兩處
   `L"%s%s%02d_%05d_%02d.pav", L"item\\", L"avatar\\", a2%1000000/100000,
   a2%100000, a3`（行 216759／560335；loader `sub_5D7220`／`sub_8D37A0`）。
-  → **f1＝id 的十萬位、f2＝id 低 5 位、f3＝a3**。20,189 檔對 itemdata%1e6 命中
-  **20,182（99.96%）**。**Strong**：a2＝item id、a3＝avatar 槽位（1..8）——
-  七站 caller（216944..217239）與 560474/560598 的最後直證未做；注意 %1e6
-  截斷會讓 103xxxxx 與 153xxxxx 等高位帶碰上同一 key，逐帶歸屬需 caller 定案。
+  → **f1＝id 的十萬位、f2＝id 低 5 位、f3＝a3＝該 item 的子紋理層索引
+  （1..8）**。20,189 檔對 itemdata%1e6 命中 **20,182（99.96%）**。
+  ⚠ **2026-09-18 模型更正**：先前「f3＝avatar 槽位」為**過早定案**；
+  caller 直證（§6.3a）證明 f3 是**同一 item 的第 n 張子紋理**（eye 僅 1 張、
+  face 固定 8 張、其餘多為 2 張），槽位語義在 a2 的來源欄位（十 accessor），
+  不在檔名第三段。
 - **pav 7 例外**：`00_00408_{02,04}`、`02_00310_{01,02}`、`05_00494_{01,02}`、
   `06_00228_01`——其中 `(6,00228)` 恰與 thumb `10600228.tga` 互證：資產成對
   存在但 itemdata 無 10,600,228（同拇指例外類）。
+
+### 6.3a. Avatar 合成管線直證（`sub_5D8120` 家族；2026-09-18，Confirmed）
+
+- **裝備紀錄＝10 個連續 s32 欄位（this+39..+48）**，各存 **band 相對偏移**
+  （與 198 wire 的 u16 同構）；每欄一個 accessor（`sub_5B81C0..sub_5B86F0`，
+  等距 0x90），內部經 `sub_5B9700(field, bandIdx, 0)` 重建完整 id：
+  `sub_535020(itemdata_mgr, offset + 10,000,000 + 100,000×bandIdx)`。
+  **選擇器與欄位逐一對齊（0..9 ↔ +39..+48 → band 100..109），三方互證**：
+
+| 欄位 | accessor | bandIdx | band | 槽位（鏡像 §5c-1 十二槽序） |
+|---|---|---:|---:|---|
+| +39 | `sub_5B81C0` | 0 | 100 | head（+`10000000` 重建於 loader 內直見） |
+| +40 | `sub_5B8250` | 1 | 101 | face |
+| +41 | `sub_5B8300` | 2 | 102 | top（同上直見） |
+| +42 | `sub_5B8390` | 3 | 103 | bottom（同上直見） |
+| +43 | `sub_5B8420` | 4 | 104 | shoes |
+| +44 | `sub_5B84B0` | 5 | 105 | outer/set |
+| +45 | `sub_5B8540` | 6 | 106 | eye |
+| +46 | `sub_5B85D0` | 7 | 107 | hairAcc |
+| +47 | `sub_5B8660` | 8 | 108 | faceAcc |
+| +48 | `sub_5B86F0` | 9 | 109 | headAcc |
+
+- **band × f3 實證分布**（itemdata id 數｜pav 組數）：100 head 2574｜2546
+  （f3∈{1,2,3,4}）；101 face 520｜519（**每 item 全 8 層**）；102 top 789｜789、
+  103 bottom 632｜632、104 shoes 568｜568、105 outer 2019｜2018（皆 {1,2}）；
+  106 eye 304｜295（**僅層 1**）；107 hairAcc 750｜720、108 faceAcc 249｜241、
+  109 headAcc 155｜148。**110 帶 1296 id 零 pav**（special 槽無 avatar 網格層，
+  語義 UNRESOLVED；不在此合成器）。
+- **合成器**：`sub_5D8120(atlas_mgr, charIdx(0..16), record, variant, flag)`
+  對每位玩家建 **兩張 512×512 A1R5G5B5 atlas**（+136 與第二張；2620B×5
+  composite 層 ×17 槽陣列；`sub_5D7xxx` 系列為純 0x8000-alpha blitter）。
+  face item 的 8 層由 `sub_5B8250` 以常數 1..8 全載；其餘 accessor 依
+  `variant` 分支載入層 1/2（變體語義 UNRESOLVED：分布佐證奇偶色組，
+  待像素級驗證）。overlay 重建 `sub_5D90C0(atlas, off+帶基, …)` 於 head/top/
+  bottom 三帶直接可見。ArgList 0x10＝第 17 槽（預覽/spectator 等；
+  4 個 call site：199019、215583、576622、644071）。
+- **變體解析**：accessor 回傳 `*(field)`（u16 偏移）或經 `sub_535020` 命中
+  的 itemdata record 之 `+4 id2/型號`（§2c）——即「slot 偏移 → catalog 實體
+  → 資產 id」三段式；%1e6 截斷問題由 bandIdx 分段消除（不再高位碰撞）。
 - **武器資產走代號字串，不走 id**：`weapon/models/{fpv/{beast,paper},tpv}/
   <代號> BASE.PAP`、`weapon/sounds/<代號>_{shot1,clipin,…}.wav`、`sprites/
   {cylinder,flame}`；`Rockettan.pap`／`ghostmine.pap`／`knives.pap` 為 code
@@ -3081,10 +3123,12 @@ roommake 結論。
 
 ### 6.8 明列研究議程（下一批 parts）
 
-1. pav a2/a3 caller 直證（七站 216944..217239 ↔ 槽位迴圈；560474/560598）。
+1. ~~pav a2/a3 caller 直證~~ ✅ 2026-09-18 定案於 §6.3a（十 accessor ↔
+   band 100..109、f3＝子紋理層、雙 atlas 合成器）。
 2. thumb/pav 例外集合的時間層證據（資產領先 catalog 之版本考古；§5e 併入）。
 3. 武器代號字串 ↔ itemdata 顯示名 ↔ SpecialWeaponType.xml 的三方文法。
-4. bot type3xx ↔ BotEnemy*.xml monster 表；animations mot 文法 ↔ ani_list.sco 索引。
+4. bot type3xx ↔ BotEnemy*.xml monster 表；animations mot 文法 ↔ ani_list.sco
+   索引；variant 分支的奇偶層語義（像素級驗證）；110 special 帶語義。
 5. sounds01/sounds80 聲包選取器；連殺語音 38 複本之軸。
 6. pepachi scenario native 消費鏈（700/900）、`item/object/` 48 檔、pap 命名。
 

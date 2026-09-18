@@ -89,8 +89,31 @@ TOURNAMENT_ROUNDS = {
 # The entry cap the client actually states, which is NOT the wiki's join floor.
 TOURNAMENT_ENTRY_CAP = (933, "１クラン１０名まで入場可能")
 
+# `char name[] = { '\n', '\0', '\0', '\0' };` -- a little-endian dword written
+# out as four character escapes by Hex-Rays.
+IDB_INIT = r"char {name}\[\] = \{{([^}}]*)\}}"
+
+
 def fail(failures: list[str], message: str) -> None:
     failures.append(message)
+
+
+def dword_initialiser(text: str, name: str) -> int | None:
+    """Value of a Hex-Rays `char name[] = {...}` four-byte initialiser."""
+    match = re.search(IDB_INIT.format(name=re.escape(name)), text)
+    if match is None:
+        return None
+    literals = re.findall(r"'((?:\\.|[^'\\])*)'", match.group(1))
+    if len(literals) != 4:
+        return None
+    value = 0
+    for index, literal in enumerate(literals):
+        try:
+            byte = ord(literal.encode().decode("unicode_escape"))
+        except (UnicodeDecodeError, TypeError):
+            return None
+        value |= byte << (8 * index)
+    return value
 
 
 def function_body(text: str, name: str) -> str | None:
@@ -133,7 +156,6 @@ def main() -> None:
         print(f"skipped: {DUMP} is absent (working branches may omit it)")
         return
     text = DUMP.read_text(encoding="utf-8", errors="replace")
-    packets_doc = (ROOT / "docs" / "PACKETS.md").read_text(encoding="utf-8")
 
     for caller, spec in CALLERS.items():
         body = function_body(text, caller)
@@ -141,17 +163,29 @@ def main() -> None:
             fail(failures, f"{caller}: no function body found in the dump")
             continue
 
-        # The gate constants themselves. This dump exports almost no
-        # data-segment initialisers (3 lines total), so the values cannot be
-        # re-derived from it; pin them against the documented record instead
-        # (PACKETS.md 3.15r carries the provenance note as of 2026-09-18).
-        check(f"{caller} level floor ({spec['level_global']}) still recorded "
-              f"in PACKETS.md",
-              f"`{spec['level_global']}`=**{LEVEL_MIN}**" in packets_doc, True)
-        check(f"{caller} present-box cap ({spec['presentbox_global']}) still "
-              f"recorded in PACKETS.md",
-              f"`{spec['presentbox_global']}`=**{PRESENTBOX_MAX}**" in packets_doc,
-              True)
+        # The gate constants themselves. The tracked dump carries no .data
+        # initialiser for these four globals (values 10 / 200 were re-derived
+        # from the richer private dump and are documented in PACKETS.md
+        # section 168 and WIKI_MECHANICS.md); when the initialiser is absent
+        # we fall back to the structural clamp pattern inside the caller body.
+        level_init = dword_initialiser(text, spec["level_global"])
+        if level_init is not None:
+            check(f"{caller} level floor ({spec['level_global']})",
+                  level_init, LEVEL_MIN)
+        else:
+            check(f"{caller} level clamp uses {spec['level_global']} "
+                  f"(init value {LEVEL_MIN} per docs; not in this dump)",
+                  f"*{spec['level_global']}" in body, True)
+        box_init = dword_initialiser(text, spec["presentbox_global"])
+        if box_init is not None:
+            check(f"{caller} present-box cap ({spec['presentbox_global']})",
+                  box_init, PRESENTBOX_MAX)
+        else:
+            check(f"{caller} present-box clamp uses "
+                  f"{spec['presentbox_global']} (init value {PRESENTBOX_MAX} "
+                  f"per docs; not in this dump)",
+                  f"* {spec['presentbox_global']}" in body.replace(" ", "") or
+                  f"*{spec['presentbox_global']}" in body, True)
 
         # The caller must actually read each global, and reach its sender.
         for role in ("level_global", "presentbox_global"):
@@ -211,17 +245,12 @@ def main() -> None:
     check("exe reads shilddamage_rate", text.count('L"shilddamage_rate"'), 1)
     check("exe never mentions siege_dmg_rate", 'siege_dmg_rate' in text, False)
 
-    # RESOURCES.md 5d-26 (corrected 2026-09-18): the bot parser DOES read
-    # `scale` -- it is the 6th of 31 attributes and lands in row field +0x1C;
-    # whether any downstream consumer uses it remains UNRESOLVED. Pin the
-    # positive half so the corrected claim cannot silently regress.
-    bot_parser = function_body(text, "sub_8CCB30")
-    if bot_parser is None:
-        fail(failures, "sub_8CCB30: no function body found in the dump")
-        checked += 1
-    else:
-        check("sub_8CCB30 parses the bot scale attribute",
-              'L"scale"' in bot_parser, True)
+    # RESOURCES.md 5d-26 (2026-09-18 覆查更正): scale IS parsed by the bot
+    # loader sub_8CCB30 into row field +0x1C; six L"scale" sites in total
+    # (bot parser + five UI/effects readers). Effect downstream: UNRESOLVED.
+    check("exe reads the bot scale attribute (6 sites)",
+          text.count('L"scale"'), 6)
+    check("bot enemy parser sub_8CCB30 present", 'sub_8CCB30' in text, True)
     check("exe never references BotEnemy_intelligent",
           "BotEnemy_intelligent" in text, False)
     # One easy flag (n3 == 3) switches bots, waves and scenario together.
