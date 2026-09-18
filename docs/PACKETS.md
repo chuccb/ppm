@@ -2583,9 +2583,16 @@ TS 無 friend table ⇒ 永不回 success 臂;429 以 self nickname 判定回 st
 否則回 status 5(原生 else 臂 → `0x1EC` 未註冊字串),431 恆回 status 2
 (原生 `0x1EE` failure 字串),key 原樣回送;不造任何其他狀態碼。
 433 GL_FRIEND_LIST_REQ: 無 payload
-435 GL_FRIEND_INFO_REQ: one comma-separated string list assembled from 434
-    row strings → 436 ACK (sub_55B2C0): u8 count, count×{str key, u8 online,
-    [online: str where, u8 channel]} → sub_5382D0(key, online, where, ch+1)
+435 GL_FRIEND_INFO_REQ (builder sub_55B0A0): one comma-separated string list
+    ("nick1,...,nickN" no trailing comma; String[1028] buffer) assembled from
+    the 21-byte-stride friend table rows → 436 ACK (sub_55B2C0): u8 count,
+    count×{str key, u8 online, [online: str where, u8 channel]} →
+    sub_5382D0(key, online, where, ch+1); UI virtual call gets
+    (matchedOnline, count, 1). Empty friend table: client never sends 435.
+**TS 對位 (2026-09-18)**: 435 c2s 解析單一 `str csv`(≤1023B=原生 0x400
+buffer;拒絕 trailing;split(',') 每段非空 ≤20B=table stride;row≤100=table
+容量)→ 回 436 rows`{str key≤20B, u8 statusRaw=0}`(無 friend table →
+「無 extra context」臂是唯一誠實姿態;不造 online/channel 語義)。
 439 GL_FRIEND_CHAT_REQ (sub_55B510): s32 uid(dword_F2A684), str my_nick,
     str friend_nick, str message (ANSI ×3; message ≤180 才送)
 440 GL_FRIEND_CHAT_ACK (sub_55B660): u8 status, str nick1, str nick2,

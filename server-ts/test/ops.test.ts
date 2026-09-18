@@ -14,6 +14,7 @@ import dataRecvCompletedRequest from "../src/ops/c2s/GL_DATA_RECV_COMPLETED_REQ.
 import msgDelRequest from "../src/ops/c2s/GL_MSG_DEL_REQ.ts";
 import friendAddRequest from "../src/ops/c2s/GL_FRIEND_ADD_REQ.ts";
 import friendDelRequest from "../src/ops/c2s/GL_FRIEND_DEL_REQ.ts";
+import friendInfoRequest from "../src/ops/c2s/GL_FRIEND_INFO_REQ.ts";
 import msgReadRequest from "../src/ops/c2s/GL_MSG_READ_REQ.ts";
 import userListRequest from "../src/ops/c2s/GL_USERLIST_REQ.ts";
 
@@ -148,6 +149,46 @@ describe("429/431 — friend key requests", () => {
     expect(() =>
       friendDelRequest(reread(new Packet(opcodeFor("GL_FRIEND_DEL_REQ")).str("n".repeat(24))), mkConnection([], null)),
     ).toThrow(/23-byte/);
+  });
+});
+
+describe("435 — friend-info csv request", () => {
+  const pipeline = (csv: string) => {
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof friendInfoRequest>[1];
+    friendInfoRequest(reread(new Packet(opcodeFor("GL_FRIEND_INFO_REQ")).str(csv)), connection);
+    return replies;
+  };
+
+  test("parses one comma-separated name list and echoes every row with statusRaw 0", () => {
+    expect(pipeline("frndA,frndB")).toEqual([[
+      "GL_FRIEND_INFO_ACK",
+      [
+        { nickname: "frndA", statusRaw: 0 },
+        { nickname: "frndB", statusRaw: 0 },
+      ],
+    ]]);
+    // the native builder never sends an empty list, but an empty string stays shaped
+    expect(pipeline("")).toEqual([["GL_FRIEND_INFO_ACK", []]]);
+  });
+
+  test("refuses trailing bytes, oversized names, and native-capacity violations", () => {
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof friendInfoRequest>[1];
+    expect(() =>
+      friendInfoRequest(
+        reread(new Packet(opcodeFor("GL_FRIEND_INFO_REQ")).str("a,b").u8(0)),
+        connection,
+      ),
+    ).toThrow(/trailing/);
+    expect(() => pipeline(`${"n".repeat(21)}`)).toThrow(/20-byte/);
+    expect(() => pipeline("a,,b")).toThrow(/non-empty/);
+    expect(() => pipeline(Array(101).fill("a").join(","))).toThrow(/100 names/);
+    expect(() => pipeline("x".repeat(1024))).toThrow(/char\[1024\]/);
   });
 });
 
@@ -602,8 +643,8 @@ describe("registry", () => {
   });
 
   test("the registry exposes both operation folders at startup", () => {
-    expect(summary()).toMatch(/^c2s 23 \(/);
-    expect(summary()).toMatch(/\), s2c 26 \(/);
+    expect(summary()).toMatch(/^c2s 24 \(/);
+    expect(summary()).toMatch(/\), s2c 27 \(/);
     expect(summary()).toContain("GL_LOGIN_ACK");
     expect(summary()).toContain("GL_LOGIN_REQ");
   });
