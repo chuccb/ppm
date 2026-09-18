@@ -29,7 +29,7 @@ export function read(r: Reader): Selection {
 function reject(connection: Connection, channelIndex: number): void {
   connection.reply("GC_ENTERCHANNEL_ACK", {
     result: Result.GenericError4,
-    channelId: connection.config.channel.id,
+    channelId: connection.config.channel.channelId,
     channelIndex,
   });
 }
@@ -52,13 +52,13 @@ export default function GC_ENTERCHANNEL_REQ(r: Reader, connection: Connection): 
   }
 
   const channel = connection.config.channel;
-  const type3Ready = channel.type === 3
+  const type3Ready = channel.channelType === 3
     ? channel.type3Tail !== undefined && "header1" in channel.type3Tail
     : channel.type3Tail === undefined;
   const accepted = connection.authenticated &&
     type3Ready &&
     selection.group === channel.group &&
-    selection.channel === channel.index;
+    selection.channel === channel.activeChannelIndex;
 
   if (!accepted) {
     connection.log(`channel selection ${selection.group}/${selection.channel} -> rejected`);
@@ -68,11 +68,11 @@ export default function GC_ENTERCHANNEL_REQ(r: Reader, connection: Connection): 
 
   connection.reply("GC_ENTERCHANNEL_ACK", {
     result: Result.Success,
-    channelId: channel.id,
+    channelId: channel.channelId,
     channelIndex: selection.channel,
     endpoint: channel.endpoint,
     endpointOpaque: channel.endpointOpaque,
-    channelType: channel.type,
+    channelType: channel.channelType,
     type3Tail: channel.type3Tail,
     clientFlags: channel.clientFlags,
     clientDefault: channel.clientDefault,

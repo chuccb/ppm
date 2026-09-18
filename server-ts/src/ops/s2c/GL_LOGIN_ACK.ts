@@ -58,7 +58,7 @@ const CHANNEL_GROUP_COUNT = 3; // native `for (j = 0; j < 3; ++j)`
 
 /** One selectable channel in a group. */
 export interface Channel {
-  readonly type: number;
+  readonly channelType: number;
   readonly name: string;
   /** Native raw2 field shown as the USERS numerator; not a network port. */
   readonly currentUsers: number;
@@ -162,11 +162,11 @@ export default function GL_LOGIN_ACK(op: number, outcome: number | Success): Pac
       p.s16(group.maxUsers);
       if (group.maxUsers <= 0) continue;
       const channel = group.channel!;
-      p.u8(channel.type);
+      p.u8(channel.channelType);
       p.str(channel.name); // native char[50]
       p.s16(channel.currentUsers);
       p.u8(channel.flag); // native `ch_flag`; its domain is not established here
-      if (channel.type === 3) {
+      if (channel.channelType === 3) {
         p.u8(channel.extra ?? 0);
       }
     }

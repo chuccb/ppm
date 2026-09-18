@@ -24,7 +24,7 @@ export default function PM_CONNECT_REQ(r: Reader, connection: Connection): void 
   }
   connection.reply("PM_CONNECT_ACK", {
     endpoint: connection.config.channel.endpoint,
-    activeChannelIndex: connection.config.channel.index,
+    activeChannelIndex: connection.config.channel.activeChannelIndex,
     serverTime: new Date(),
   });
 }

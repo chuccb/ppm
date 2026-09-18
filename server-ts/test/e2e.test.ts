@@ -19,7 +19,7 @@ const servers: readonly GameServer[] = [
     flag: 0,
     group: 0,
     channelGroups: [
-      { maxUsers: 100, channel: { type: 1, name: "Channel 1", currentUsers: 0, flag: 0 } },
+      { maxUsers: 100, channel: { channelType: 1, name: "Channel 1", currentUsers: 0, flag: 0 } },
       { maxUsers: 0 },
       { maxUsers: 0 },
     ],
@@ -47,10 +47,10 @@ beforeAll(async () => {
     channel: {
       name: "Channel 1",
       group: 0,
-      index: 0,
-      id: 1,
+      activeChannelIndex: 0,
+      channelId: 1,
       endpoint: { host: "127.0.0.1", port: 40202 },
-      type: 1,
+      channelType: 1,
       endpointOpaque: 0,
       clientFlags: 0,
       clientDefault: 5,

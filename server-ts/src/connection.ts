@@ -27,13 +27,16 @@ export type Role = "login" | "channel";
 export interface ChannelConfig {
   readonly name: string;
   readonly group: number;
-  readonly index: number;
-  readonly id: number;
+  /** Native wire `active_channel_index` (142/196). */
+  readonly activeChannelIndex: number;
+  /** Native wire `channel_id` (196). */
+  readonly channelId: number;
   readonly endpoint: {
     readonly host: string;
     readonly port: number;
   };
-  readonly type: number;
+  /** Native wire `channel_type` / 681 `ch_type`. */
+  readonly channelType: number;
   readonly type3Tail?: Type3Tail;
   readonly endpointOpaque: number;
   readonly clientFlags: number;

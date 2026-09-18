@@ -1477,7 +1477,7 @@ describe("681 — login ack", () => {
       flag: 0,
       group: 0,
       channelGroups: [
-        { maxUsers: 100, channel: { type: 1, name: "Channel 1", currentUsers: 0, flag: 0 } },
+        { maxUsers: 100, channel: { channelType: 1, name: "Channel 1", currentUsers: 0, flag: 0 } },
         { maxUsers: 0 },
         { maxUsers: 0 },
       ],
@@ -1617,7 +1617,7 @@ describe("681 — login ack", () => {
         {
           ...servers[0]!,
           channelGroups: [
-            { maxUsers: 100, channel: { type: 3, name: "AI", currentUsers: 0, flag: 0, extra: 9 } },
+            { maxUsers: 100, channel: { channelType: 3, name: "AI", currentUsers: 0, flag: 0, extra: 9 } },
             { maxUsers: 0 },
             { maxUsers: 0 },
           ],
@@ -1646,7 +1646,7 @@ describe("681 — login ack", () => {
       servers: [{
         ...servers[0]!,
         channelGroups: [
-          { maxUsers: 100, channel: { type: 3, name: "AI", currentUsers: 0, flag: 0 } },
+          { maxUsers: 100, channel: { channelType: 3, name: "AI", currentUsers: 0, flag: 0 } },
           { maxUsers: 0 },
           { maxUsers: 0 },
         ],
@@ -1672,7 +1672,7 @@ describe("681 — login ack", () => {
       servers: [{
         ...servers[0]!,
         channelGroups: [
-          { maxUsers: 100, channel: { type: 1, name: "Normal", currentUsers: 0, flag: 0, extra: 9 } },
+          { maxUsers: 100, channel: { channelType: 1, name: "Normal", currentUsers: 0, flag: 0, extra: 9 } },
           { maxUsers: 0 },
           { maxUsers: 0 },
         ],
@@ -1703,7 +1703,7 @@ describe("681 — login ack", () => {
           { maxUsers: 0 },
           { maxUsers: 0 },
           { maxUsers: 0 },
-          { maxUsers: 100, channel: { type: 1, name: "ignored", currentUsers: 0, flag: 0 } },
+          { maxUsers: 100, channel: { channelType: 1, name: "ignored", currentUsers: 0, flag: 0 } },
         ],
       }],
     });
@@ -1732,7 +1732,7 @@ describe("681 — login ack", () => {
         group: 0xffff,
         channelGroups: [
           { maxUsers: -1 },
-          { maxUsers: 1, channel: { type: 1, name: "Signed", currentUsers: -2, flag: 0 } },
+          { maxUsers: 1, channel: { channelType: 1, name: "Signed", currentUsers: -2, flag: 0 } },
           { maxUsers: 0 },
         ],
       }],
@@ -1778,7 +1778,7 @@ describe("141 — connect request (endpoint re-confirm)", () => {
   const pipeline = (payload: Packet, replies: unknown[][]) => {
     const connection = {
       reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
-      config: { channel: { endpoint: { host: "192.0.2.7", port: 40_202 }, index: 0 } },
+      config: { channel: { endpoint: { host: "192.0.2.7", port: 40_202 }, activeChannelIndex: 0 } },
     } as unknown as Parameters<typeof connectRequest>[1];
     connectRequest(reread(payload), connection);
   };

@@ -58,7 +58,7 @@ const servers: readonly GameServer[] = [
       {
         maxUsers: env.channelMaxUsers,
         channel: {
-          type: 1,
+          channelType: 1,
           name: env.channelName,
           currentUsers: env.channelCurrentUsers,
           flag: 0,
@@ -78,10 +78,10 @@ const shared = {
   channel: {
     name: env.channelName,
     group: 0,
-    index: 0,
-    id: 1,
+    activeChannelIndex: 0,
+    channelId: 1,
     endpoint: { host: env.udpHost, port: udpServer.port },
-    type: 1,
+    channelType: 1,
     endpointOpaque: 0,
     clientFlags: 0,
     clientDefault: 5,

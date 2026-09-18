@@ -24,7 +24,7 @@ module 內的 default function 也以 opcode 命名：
 export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Packet
 ```
 
-registry 刻意把每個名字重複一次，使完整的 15/16 runtime surface 與 outbound
+registry 刻意把每個名字重複一次，使完整 runtime surface 與 outbound
 參數型別對 TypeScript 可見。builder 以自己的 opcode 作為第一個參數；
 它不再帶第二份數值表。要找一個 packet 的程式碼，開啟同名檔案即可。
 
@@ -39,8 +39,8 @@ wire 欄位，這只是機械式的分隔轉換：`user_no` 變 `userNo`，而 `
 
 兩道守門讓慣例可執行，而非只是期望：
 
-- registry 明確 import 每個 packet module，使 15 個 C2S 與 16 個 S2C
-  operation 全部列在一個短檔內。Bun 的 `Glob` 只用來攔截「加了檔案卻
+- registry 明確 import 每個 packet module，使所有 C2S 與 S2C
+  operation 全部列在一個短檔內（數量由 `summary()` 回報，測試釘住）。Bun 的 `Glob` 只用來攔截「加了檔案卻
   未註冊」的 packet。這條界線在 registry module load 時就會驗證——
   `bun test`、`bun start` 一 import 它就生效，不需另外指令。
 - outbound 物件就是編譯期地圖：`OutboundName` 與 `OutboundArgs<N>` 由實際
