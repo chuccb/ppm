@@ -73,6 +73,7 @@ model 的地方，TS 只輸出已確認可被 client 完整消費的空 projecti
 | 423 `GL_MSG_READ_REQ` | `str key` | `sub_55A3C0` 鏡像 421 兩閘,但 `sub_537E90(...)==0`(未讀才送)。TS 對位與 421 相同。 | `sub_55A3C0`、`sub_55A4F0` ACK consumer；HIGH for wire gate/shape, UNRESOLVED status enum beyond zero/nonzero |
 | 424 `GL_MSG_READ_ACK` | `u8 statusRaw, str key` | `sub_55A4F0`: status 非零→`sub_537D20` 寫 `89` 標記;零→彈 resource `0x1E4`。builder emit `{u8 statusRaw, strMax(key,19)}`;status enum 不造。 | `sub_55A4F0`、`sub_537D20`；HIGH |
 | 783 `GL_NEW_MSG_COUNT_REQ` | (空) | builder `sub_5643E0` ✓。784 `sub_564480`:單 `s32`→`dword_F0C104`,`!=0` 切 UI 新信件指標。TS 信箱恆空 ⇒ 回 `s32(0)`。 | `sub_5643E0`/`sub_564480`；HIGH |
+| 944 `GR_RESET_GAMEROOMSLOT_REQ` | 空(0B) | builder `sub_585E90` @175969 零寫入 ✓。945 真 consumer `sub_435E40`(585F30 跳線):**count 文法**≠0→清註冊群+逐槽重讀、==0→單 B 終止;舊表 status(1) 誤 ⇒ 恆 `count=0`(wire `00`)。 | consumer 追跳線至底;HIGH |
 | 939 `GR_AI_GO_NEXT_WAVE_REQ` | 空(0B) | builder `sub_75CE40` @391020 零寫入 ✓。940 `sub_7613D0` 收 5B 後**無閘**翻波次+播音+定時(唯一無 denial 臂)⇒ parse-and-silence(721 前例),940 永不發、不註冊 s2c。 | 全體行級;HIGH |
 | 935 `GR_AI_FEVER_START_REQ` | 空(0B) | builder `sub_7622C0` 零寫入 ✓。936 `sub_7623A0` 固定 7B:status≠0&&duration==`dword_EE8CB4` 才啟動(否則錯誤日誌);==0=被拒臂(state=2+UI 廣播)⇒ 恆 7B 全零(wire `00000000000000`)。 | 全體行級;HIGH |
 | 928 `GR_AI_CONTINUE_START_REQ` | `s32`(恆0) | builder `sub_761DB0` 字面 0(`sub_592A20`=4B ✓)。929 `sub_761E90`:唯 ==1 走復活體(u8,s32,str,s32,s32),他值終止 ⇒ 恆 `status=0`(wire `00`);舊表 continue_count 列誤。 | 全體行級+accessor 驗寬;HIGH |

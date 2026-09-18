@@ -3053,7 +3053,13 @@ gate 後 ctor+send **零欄位寫入**=空體 ✓。936 `sub_7623A0` 固定讀
 940 幀立即觸發開波。TS 無 PVE 波次編排 ⇒ 採 **parse-and-silence**(同 721
 前例),940 不註冊 s2c——是本系唯一不造件者。
 | 944 | `GR_RESET_GAMEROOMSLOT_REQ` | `sub_585E90` | C2S | `(空)` (重置房間槽位) |
-| 945 | `GR_RESET_GAMEROOMSLOT_ACK` | `sub_585F30` | S2C | `u8 status(1)` |
+| 945 | `GR_RESET_GAMEROOMSLOT_ACK` | `sub_585F30` | S2C | `u8 count`(≠0:清 GAMEROOM_USERSLOTS 群並逐槽重讀) |
+
+**TS 對位 (2026-09-19)**: 944 builder `sub_585E90` @175969 = 空體 ✓。
+945 真 consumer=`sub_435E40`(`sub_585F30` 只是跳線):**count 文法**——
+`u8 count` ≠0 即釋放 GAMEROOM_USERSLOTS 註冊群再逐槽讀 `u8+s32`;
+==0 僅耗單 B 終止。舊表 `u8 status(1)` 誤。TS 無房槽模型 ⇒ 恆回
+`count=0`(wire `00`)——GR_AI/房槽系全段到此完結。
 
 
 ### 3.15b 房間戰鬥流程 GR 家族 (九輪讀畢)

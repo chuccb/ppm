@@ -15,6 +15,7 @@
 | 1 | admission 681 / TCP grooming / login trio | `b9f02d5f` | `SERVER_TS_EVIDENCE.md` 192 行 ledger;681 Result 表; server-list s16 定向;693 區段補正(greeting 型別/ v6 spin-lock) |
 | 2 | channel handshake 143/144/195/196 | `3fad207c` | 144 case 108=0x11D/result 0=0x42/3=0xA4+7082;196 result 6→0x3A6/8→0x3A7;`client_identity` String[24]=AccountName(PaperMan.exe.c:2241) |
 | 3 | 大廳同步序列（本節詳記） | `8e3c66e7` | PACKETS §3.15pre-3;原生命令行 197→199→834 定序 |
+| 45 | **944→945 RESET_GAMEROOMSLOT(count 文法揭穿)——GR 全段完結** | (本次) | 944 空體 ✓;945 consumer=`sub_435E40`:**count≠0 清註冊群+逐槽 u8+s32,==0 單 B 終止**;舊表 status(1) 誤 ⇒ 恆回 `count=0`(wire `00`);pins 2+2;197 測試綠,c2s 62/s2c 60。GR/AI 法定序 912→945 全段完結 |
 | 44 | **939→940 NEXT_WAVE(唯一無脫身臂⇒沉默)** | (本次) | 939 空體 ✓;940 收 5B 即無閘開波(AI3_next.wav+30s timer,無 status 臂)⇒ 無波次編排只能 parse-and-silence,940 不註冊 s2c;pins 2;c2s 61/s2c 59 不動 |
 | 43 | **935→936 FEVER(空體+固定 7B 被拒臂)** | (本次) | 935 builder 零欄位 ✓;936 固定讀 7B,成功唯一件=status≠0+duration==客端基準,==0=指定被拒臂 ⇒ 恆回 7B 全零(wire `00000000000000`);pins 2+1;193 測試綠,c2s 60/s2c 59 |
 | 42 | **928→929 CONTINUE(字面量 0 + 單 B 終止臂)** | (本次) | 928 builder 恆送 0(gate `sub_67EB70`);929 唯 status==1 走 `u8,s32,str,s32,s32` 復活體 ⇒ 無 PVE 接關模型恆回 `status=0`(wire `00`);舊表 continue_count 誤;pins 3+2;191 測試綠,c2s 59/s2c 58 |

@@ -25,6 +25,7 @@ import GR_AI_RECHARGE_MAGAZINE_START_ACK from "../src/ops/s2c/GR_AI_RECHARGE_MAG
 import GR_AI_RECHARGE_MAGAZINE_END_ACK from "../src/ops/s2c/GR_AI_RECHARGE_MAGAZINE_END_ACK.ts";
 import GR_AI_CONTINUE_START_ACK from "../src/ops/s2c/GR_AI_CONTINUE_START_ACK.ts";
 import GR_AI_FEVER_START_ACK from "../src/ops/s2c/GR_AI_FEVER_START_ACK.ts";
+import GR_RESET_GAMEROOMSLOT_ACK from "../src/ops/s2c/GR_RESET_GAMEROOMSLOT_ACK.ts";
 import GG_GAMECENTER_RANKING_ACK from "../src/ops/s2c/GG_GAMECENTER_RANKING_ACK.ts";
 import GL_GAMECENTER_REC_ACK from "../src/ops/s2c/GL_GAMECENTER_REC_ACK.ts";
 import GS_DELETEGIFT_ACK from "../src/ops/s2c/GS_DELETEGIFT_ACK.ts";
@@ -225,6 +226,8 @@ describe("native 198/247/255 payload snapshots", () => {
     expect(hex(GR_AI_CONTINUE_START_ACK(929).payload())).toBe("00");
     expect(() => GR_AI_CONTINUE_START_ACK(929, 1 as never)).toThrow(RangeError);
     expect(hex(GR_AI_FEVER_START_ACK(936).payload())).toBe("00000000000000");
+    expect(hex(GR_RESET_GAMEROOMSLOT_ACK(945).payload())).toBe("00");
+    expect(() => GR_RESET_GAMEROOMSLOT_ACK(945, 1 as never)).toThrow(RangeError);
     expect(hex(GL_NEW_MSG_COUNT_ACK(784, 0).payload())).toBe("00000000");
     expect(hex(GL_VOICEITEMSLOT_ACK(792, 0).payload())).toBe("0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
     expect(hex(GL_FRIEND_WHERE_ACK(442, 0).payload())).toBe("00");
