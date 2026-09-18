@@ -24,6 +24,8 @@ import GL_GAMEROOMINFO_REQ from "./c2s/GL_GAMEROOMINFO_REQ.ts";
 import GL_INVENIN_REQ from "./c2s/GL_INVENIN_REQ.ts";
 import GL_LOBBYIN_REQ from "./c2s/GL_LOBBYIN_REQ.ts";
 import GL_LOGIN_REQ from "./c2s/GL_LOGIN_REQ.ts";
+import GL_MSG_DEL_REQ from "./c2s/GL_MSG_DEL_REQ.ts";
+import GL_MSG_READ_REQ from "./c2s/GL_MSG_READ_REQ.ts";
 import GL_MSG_RECVLIST_REQ from "./c2s/GL_MSG_RECVLIST_REQ.ts";
 import GL_MYINFO_REQ from "./c2s/GL_MYINFO_REQ.ts";
 import GL_MYITEM_REQ from "./c2s/GL_MYITEM_REQ.ts";
@@ -45,6 +47,8 @@ import GL_FRIEND_LIST_ACK from "./s2c/GL_FRIEND_LIST_ACK.ts";
 import GL_GAMEROOMINFO_ACK from "./s2c/GL_GAMEROOMINFO_ACK.ts";
 import GL_INVENIN_ACK from "./s2c/GL_INVENIN_ACK.ts";
 import GL_LOGIN_ACK from "./s2c/GL_LOGIN_ACK.ts";
+import GL_MSG_DEL_ACK from "./s2c/GL_MSG_DEL_ACK.ts";
+import GL_MSG_READ_ACK from "./s2c/GL_MSG_READ_ACK.ts";
 import GL_MSG_RECVLIST_ACK from "./s2c/GL_MSG_RECVLIST_ACK.ts";
 import GL_MYINFO_ACK from "./s2c/GL_MYINFO_ACK.ts";
 import GL_MYITEM_ACK from "./s2c/GL_MYITEM_ACK.ts";
@@ -70,6 +74,8 @@ const inbound = {
   GL_INVENIN_REQ,
   GL_LOBBYIN_REQ,
   GL_LOGIN_REQ,
+  GL_MSG_DEL_REQ,
+  GL_MSG_READ_REQ,
   GL_MSG_RECVLIST_REQ,
   GL_MYINFO_REQ,
   GL_MYITEM_REQ,
@@ -93,6 +99,8 @@ const outbound = {
   GL_GAMEROOMINFO_ACK,
   GL_INVENIN_ACK,
   GL_LOGIN_ACK,
+  GL_MSG_DEL_ACK,
+  GL_MSG_READ_ACK,
   GL_MSG_RECVLIST_ACK,
   GL_MYINFO_ACK,
   GL_MYITEM_ACK,

@@ -11,6 +11,8 @@ import {
 import { Result, type GameServer } from "../src/ops/s2c/GL_LOGIN_ACK.ts";
 import { read as readCredentials } from "../src/ops/c2s/GL_LOGIN_REQ.ts";
 import dataRecvCompletedRequest from "../src/ops/c2s/GL_DATA_RECV_COMPLETED_REQ.ts";
+import msgDelRequest from "../src/ops/c2s/GL_MSG_DEL_REQ.ts";
+import msgReadRequest from "../src/ops/c2s/GL_MSG_READ_REQ.ts";
 import userListRequest from "../src/ops/c2s/GL_USERLIST_REQ.ts";
 
 const build = <N extends OutboundName>(name: N, ...args: OutboundArgs<N>) =>
@@ -52,6 +54,39 @@ describe("694 — compression threshold and login trigger", () => {
     expect(reread(buildPacket("GL_ACCOUNTCONNSUCC", 0)).u16()).toBe(0);
     expect(() => buildPacket("GL_ACCOUNTCONNSUCC", 0x10000)).toThrow(RangeError);
     expect(() => buildPacket("GL_ACCOUNTCONNSUCC", 1.5)).toThrow(RangeError);
+  });
+});
+
+describe("421/423 — mailbox key requests", () => {
+  const pipeline = (handler: typeof msgDelRequest, payload: Packet, replies: unknown[][]) => {
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof msgDelRequest>[1];
+    handler(reread(payload), connection);
+  };
+
+  test("421 parses {str key} and echoes it with the empty-mailbox failure status", () => {
+    const replies: unknown[][] = [];
+    pipeline(msgDelRequest, new Packet(opcodeFor("GL_MSG_DEL_REQ")).str("mail1"), replies);
+    expect(replies).toEqual([["GL_MSG_DEL_ACK", 0, "mail1"]]);
+    expect(() =>
+      pipeline(msgDelRequest, new Packet(opcodeFor("GL_MSG_DEL_REQ")).str("mail1").u8(0), []),
+    ).toThrow(/trailing/);
+    expect(() =>
+      pipeline(msgDelRequest, new Packet(opcodeFor("GL_MSG_DEL_REQ")).str(""), []),
+    ).toThrow(/non-empty/);
+    expect(() =>
+      pipeline(msgDelRequest, new Packet(opcodeFor("GL_MSG_DEL_REQ")).str("k".repeat(20)), []),
+    ).toThrow(/char\[20\]/);
+  });
+
+  test("423 mirrors the same key grammar against its own ACK name", () => {
+    const replies: unknown[][] = [];
+    pipeline(msgReadRequest, new Packet(opcodeFor("GL_MSG_READ_REQ")).str("mail1"), replies);
+    expect(replies).toEqual([["GL_MSG_READ_ACK", 0, "mail1"]]);
+    expect(() =>
+      pipeline(msgReadRequest, new Packet(opcodeFor("GL_MSG_READ_REQ")).str(""), []),
+    ).toThrow(/non-empty/);
   });
 });
 
@@ -506,8 +541,8 @@ describe("registry", () => {
   });
 
   test("the registry exposes both operation folders at startup", () => {
-    expect(summary()).toMatch(/^c2s 19 \(/);
-    expect(summary()).toMatch(/\), s2c 22 \(/);
+    expect(summary()).toMatch(/^c2s 21 \(/);
+    expect(summary()).toMatch(/\), s2c 24 \(/);
     expect(summary()).toContain("GL_LOGIN_ACK");
     expect(summary()).toContain("GL_LOGIN_REQ");
   });

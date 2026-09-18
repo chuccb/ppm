@@ -2560,6 +2560,11 @@ inventory materialization. See the implementation boundary in
 423 GL_MSG_READ_REQ → 424 ACK (sub_55A4F0): str key → `u8 statusRaw, str key`
     The client sends 423 only when the key is not already marked `89`; 424 status
     nonzero invokes the helper that marks the matching 426 entry `89`. The dump/UI
+**TS 對位 (2026-09-18)**: 421/423 c2s 模組解析恰一個非空 `str key`(拒絕
+trailing bytes;cap 為原生 char[20] 信箱 key 槽=19B,TS 永不出 >19B key)、
+空信箱伺服器回 `statusRaw=0`(原生失敗臂,客戶端彈 0x1E3/0x1E4 對話框)並
+回送 key 字串;422/424 s2c builder emit `{u8 statusRaw, strMax(key,19)}`。
+statusRaw 只證零/非零二分,勿造 status enum。
     prove this key/state transition, not a server database column named `msg_id`.
 429 GL_FRIEND_ADD_REQ (builder): str characterName/key
 430 GL_FRIEND_ADD_ACK (sub_55AA90): `u8 statusRaw, str characterName/key`

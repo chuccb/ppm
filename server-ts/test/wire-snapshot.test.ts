@@ -2,6 +2,8 @@ import { describe, expect, test } from "bun:test";
 import GL_CLIENTINFO_ACK from "../src/ops/s2c/GL_CLIENTINFO_ACK.ts";
 import GL_EXPIRE_PARTSUP_ACK from "../src/ops/s2c/GL_EXPIRE_PARTSUP_ACK.ts";
 import GL_FRIEND_LIST_ACK from "../src/ops/s2c/GL_FRIEND_LIST_ACK.ts";
+import GL_MSG_DEL_ACK from "../src/ops/s2c/GL_MSG_DEL_ACK.ts";
+import GL_MSG_READ_ACK from "../src/ops/s2c/GL_MSG_READ_ACK.ts";
 import GL_MSG_RECVLIST_ACK from "../src/ops/s2c/GL_MSG_RECVLIST_ACK.ts";
 import GL_INVENIN_ACK from "../src/ops/s2c/GL_INVENIN_ACK.ts";
 import GL_MYINFO_ACK from "../src/ops/s2c/GL_MYINFO_ACK.ts";
@@ -143,7 +145,16 @@ describe("native 198/247/255 payload snapshots", () => {
     expect(() => GL_MSG_RECVLIST_ACK(426, "", [{ ...base, selector: "FM" }])).toThrow(RangeError);
   });
 
-  test("255 retains the common prefix and five raw 32-byte profiles", () => {
+  test("422/424 emit the exact {u8 statusRaw, str key} frames", () => {
+    expect(hex(GL_MSG_DEL_ACK(422, 1, "mail1").payload())).toBe("016D61696C3100");
+    expect(hex(GL_MSG_DEL_ACK(422, 0, "").payload())).toBe("0000");
+    expect(hex(GL_MSG_READ_ACK(424, 1, "mail1").payload())).toBe("016D61696C3100");
+    expect(hex(GL_MSG_READ_ACK(424, 0, "").payload())).toBe("0000");
+    expect(() => GL_MSG_DEL_ACK(422, 1, "k".repeat(20))).toThrow(RangeError);
+    expect(() => GL_MSG_READ_ACK(424, 1, "k".repeat(20))).toThrow(RangeError);
+  });
+
+test("255 retains the common prefix and five raw 32-byte profiles", () => {
     const payload = GL_INVENIN_ACK(255, info.userId, 0x7a, snapshot).payload();
     expect(hex(payload)).toBe(compact(`
       01403020107A000100000000000000000000000000000000000000000000000000000000000000006908A800792FA8003D52A8004D79A8005DA0A80021C3A80022C3A80078563412000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
