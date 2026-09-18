@@ -2210,14 +2210,28 @@ future implementation evidence。沒有 process-local room state、battle owner�
 ### 3.15c4 訊息/喊話/物品推播 (廿二輪)
 ```
 782 GL_RECEIVE_NEW_MSG (sub_5643C0): 新信推播 → 信箱圖示
+783 GL_NEW_MSG_COUNT_REQ (builder `sub_5643E0`): (空 payload)
 784 GL_NEW_MSG_COUNT_ACK (sub_564480): 未讀數
+**TS 對位 (2026-09-18)**: 783→784:TS 信箱恆空 ⇒ 恆回 `s32(0)`(原生
+`count!=0` 才亮指示器的零臂;wire-check/regression pins 以 86B 未知段
+直接比對見 wire-snapshot.test.ts)。791 `GL_VOICEITEMSLOT_REQ`(builder
+`sub_885590` 空 payload;請求 context `(this+296/+292)` 留在 client
+不走線)→ 792 `GL_VOICEITEMSLOT_ACK`(case→`sub_885D00`→reader
+`CMyVoiceCustomize::sub_876B00`:`u8 page,u16,u16`,27×`{u16 id,u8 flag}`
+固定 86B;id≠0→`unk_EAFC40` 查表):TS 無 voice-item 系統 ⇒ 回全零
+86B 表(page=0)=原生「nothing configured」零臂;slot/flag 語義只證
+零非零不造語意(EVIDENCE 表亦列)。
 837 GL_SHOUTCHAT_ACK (sub_583C20): u8 type(0/1), s32 uid,
     s32 custom_tex, str nick, s32 len, raw[len] message —
     喊話 (シャウトチャット item 15300008 觸發, 全頻廣播)
 691 GL_ITEM_MODIFY_NOTIFIER (sub_55C880): s32 count, f32; count×
     {u32 flags; flags&1 → s32×2; flags&0x10 → s32...} — 物品變動
     差分推播 (期限到期/耐久歸零時 server 主動通知)
-686 GL_TUTORIALINDEX_ACK (sub_55C790): 教學進度
+685 GL_TUTORIALINDEX_REQ (builder sub_55C6F0): (空 payload)
+686 GL_TUTORIALINDEX_ACK (sub_55C790): s32 tutorialIndex (教學進度;讀入全域 n145_0+UI 刷新)
+    **TS 對位 (2026-09-18)**: 無 tutorial 進度模型 ⇒ 恆回 s32(0) 白板。
+689 GL_TUTORIAL_INDEX_SET_REQ (builder sub_55C7D0): s32 tutorialIndex;
+    **TS 對位**: dispatcher 無 case 690(舊 sub_582530 錨點本 dump 不存在)⇒ 解析後刻意沉默。
 ⭐ 693 GL_TCPCONNSUCC (sub_57CAE0) = **直接呼叫 sub_555C60 = 143
     PM_UDPSTART_REQ builder**! **頻道伺服器**握手鏈 (卅一輪正名 —
     使用者釐清 + PM 家族=頻道管理語意):
@@ -2552,8 +2566,13 @@ inventory materialization. See the implementation boundary in
 
 ### 3.15c 好友/訊息家族 419-441 (九輪讀畢; 439-442 本輪補完)
 ```
-419 GL_MSG_ADD_REQ → 420 ACK (sub_559810): str to_nick, u8 x, u8 result
-    (0=成功 1=對方拒收 2=信箱滿; 讀序 str→u8→u8)
+419 GL_MSG_ADD_REQ (builder sub_559550): `u8 raw0, str ownNick, s32
+    uidContextRaw, str toNick, str body, str title, s16 iconRaw, u8 soundRaw`;
+    送件閘: body 1..200B、toNick 1..24B; ownNick 為登入暱稱截 24B。
+420 GL_MSG_ADD_ACK (sub_559810): 讀序 str toNick → u8 xRaw → u8 resultRaw;
+    switch 僅對 xRaw {0,1,2,3,4,5,10} 開臂(0/3 再內部分 resultRaw 支臂,
+    0 加 recipient-store 呼叫 / 3 走 friend-request-accept 樣式);
+    其他 xRaw → default 臂載 generic error 資源(0x1E2)
 421 GL_MSG_DEL_REQ → 422 ACK (sub_55A310): str key → `u8 statusRaw, str key`
     The client sends 421 only when this key exists in the 426 local table; 422 status
     nonzero invokes the local key-removal helper, while zero selects a localized error.
@@ -2611,6 +2630,10 @@ buffer;拒絕 trailing;split(',') 每段非空 ≤20B=table stride;row≤100=tab
     ⚠ nick1/nick2 讀後僅推進游標 (顯示靠全域伙伴名 unk_23193F0
     sub_401B20 + comment); client 不本地顯示己方訊息 → server 需回聲
 441 GL_FRIEND_WHERE_REQ (sub_55B940): str nick (查所在位置)
+    **TS 對位 (2026-09-18)**: c2s 解析 `str nick`(非空,≤20B=朋友表
+    stride 防禦上限,拒絕 trailing)→ 本服務無 friend-presence 模型 ⇒
+    恆回 status 0(原生非-1 臂:0/其他→0x21D,2→0x21D+0x3AF;0 屬
+    合法且最簡誠實臂;non-1 不再讀後續 → ACK 不帶條件三欄)。
 442 GL_FRIEND_WHERE_ACK (sub_55B9F0): u8 status;
     status==1 → u8 where_type, u8 channel, u8 room_no —
       where_type 11=教學(0x314「%sさんはチュートリアル中です」),
@@ -2633,8 +2656,19 @@ buffer;拒絕 trailing;split(',') 每段非空 ≤20B=table stride;row≤100=tab
 | 690 | `GL_TUTORIAL_INDEX_SET_ACK` | *(無可達 handler — 舊記 `sub_582530` 在任一份 dump 皆不存在；dispatcher 無 case 690，`LAYOUTS.md` 亦無此列)* | S2C | **UNRESOLVED** — 名稱有在 `sub_9D2050` 註冊，但本 revision 找不到任何讀取器，欄位無從證實 |
 | 704 | `GL_LEVEL_KILL_LIMIT_REQ` | `sub_582570` | C2S | `(空)` |
 | 705 | `GL_LEVEL_KILL_LIMIT_ACK` | `sub_55C9B0` | S2C | `s32 kill_limit, f32 exp_rate, s32 max_level_limit` (12B) |
+
+**TS 對位 (2026-09-18)**: 704(builder `sub_582570` 空)→ 705 12B 三欄寫入
+`n11_0`/`flt_BEFEE8`/`dword_BEFEE0`;`killLimit==0` 走靜默臂(sub_44B880
+實證:非零才按 mode 彈 notice 資源)→ TS 無限制模型 ⇒ 恆回全零靜默臂。
 | 706 | `GL_BILLTOKEN_REQ` | `sub_460480` | C2S | `(空)` |
 | 707 | `GL_BILLTOKEN_ACK` | `sub_46AD00` | S2C | `str token` |
+
+**TS 對位 (2026-09-18)**: 706 = 商店 CHARGE 鈕觸發(builder 位於 `sub_460480`
+49534:`ctor(v372,706)` 後直接 `sub_555090` 送出、中間無 accessor writer
+⇒ 空 wire);707 consumer `sub_46AD00` @52373 case 707 僅讀一個
+`sub_592730`(NUL-terminated str)`→ this+521173`,之後純 UI(CHARGE_CLOSE
+banner),無驗證臂 ⇒ TS 無 billing 模型恆回 **空字串**(wire `00`),charge
+流程保持惰性。
 | 787 | `GL_RACKINGWEB_TOKEN_REQ` | `sub_581E40` | C2S | `(空)` |
 | 788 | `GL_RACKINGWEB_TOKEN_ACK` | `sub_44BEA0` | S2C | `str token` |
 | 834 | `GL_DATA_RECV_COMPLETED_REQ` | `sub_583120` | C2S | `s32 raw client request context` (原樣取 `dword_F2A684`, 與 144 的 propagated raw4 共用；不可命名為 user_id) |

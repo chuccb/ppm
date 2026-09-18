@@ -12,12 +12,20 @@ import { Result, type GameServer } from "../src/ops/s2c/GL_LOGIN_ACK.ts";
 import { read as readCredentials } from "../src/ops/c2s/GL_LOGIN_REQ.ts";
 import dataRecvCompletedRequest from "../src/ops/c2s/GL_DATA_RECV_COMPLETED_REQ.ts";
 import roomBroadcastRequest from "../src/ops/c2s/GG_ROOMBROADCAST_REQ.ts";
+import msgAddRequest from "../src/ops/c2s/GL_MSG_ADD_REQ.ts";
 import msgDelRequest from "../src/ops/c2s/GL_MSG_DEL_REQ.ts";
+import newMsgCountRequest from "../src/ops/c2s/GL_NEW_MSG_COUNT_REQ.ts";
+import voiceItemSlotRequest from "../src/ops/c2s/GL_VOICEITEMSLOT_REQ.ts";
 import friendAddRequest from "../src/ops/c2s/GL_FRIEND_ADD_REQ.ts";
 import friendChatRequest from "../src/ops/c2s/GL_FRIEND_CHAT_REQ.ts";
 import friendDelRequest from "../src/ops/c2s/GL_FRIEND_DEL_REQ.ts";
 import friendInfoRequest from "../src/ops/c2s/GL_FRIEND_INFO_REQ.ts";
+import friendWhereRequest from "../src/ops/c2s/GL_FRIEND_WHERE_REQ.ts";
 import msgReadRequest from "../src/ops/c2s/GL_MSG_READ_REQ.ts";
+import billTokenRequest from "../src/ops/c2s/GL_BILLTOKEN_REQ.ts";
+import levelKillLimitRequest from "../src/ops/c2s/GL_LEVEL_KILL_LIMIT_REQ.ts";
+import tutorialIndexRequest from "../src/ops/c2s/GL_TUTORIALINDEX_REQ.ts";
+import tutorialIndexSetRequest from "../src/ops/c2s/GL_TUTORIAL_INDEX_SET_REQ.ts";
 import userListRequest from "../src/ops/c2s/GL_USERLIST_REQ.ts";
 
 const build = <N extends OutboundName>(name: N, ...args: OutboundArgs<N>) =>
@@ -59,6 +67,63 @@ describe("694 — compression threshold and login trigger", () => {
     expect(reread(buildPacket("GL_ACCOUNTCONNSUCC", 0)).u16()).toBe(0);
     expect(() => buildPacket("GL_ACCOUNTCONNSUCC", 0x10000)).toThrow(RangeError);
     expect(() => buildPacket("GL_ACCOUNTCONNSUCC", 1.5)).toThrow(RangeError);
+  });
+});
+
+describe("419 — add-message request", () => {
+  const pipeline = (payload: Packet, replies: unknown[][]) => {
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof msgAddRequest>[1];
+    msgAddRequest(reread(payload), connection);
+  };
+  const draft = () => new Packet(opcodeFor("GL_MSG_ADD_REQ"))
+    .u8(1)
+    .str("me")
+    .s32(0x1357)
+    .str("you")
+    .str("hi")
+    .str("t")
+    .u16(0)
+    .u8(0);
+
+  test("parses the 8-field wire grammar and answers via the native default arm", () => {
+    const replies: unknown[][] = [];
+    pipeline(draft(), replies);
+    expect(replies).toEqual([["GL_MSG_ADD_ACK", "you", 6, 0]]);
+  });
+
+  test("refuses trailing bytes and native sender-gate violations", () => {
+    const replies: unknown[][] = [];
+    expect(() => pipeline(draft().u8(0), replies)).toThrow(/trailing/);
+    expect(() =>
+      pipeline(
+        new Packet(opcodeFor("GL_MSG_ADD_REQ"))
+          .u8(1).str("me").s32(0).str("").str("hi").str("t").u16(0).u8(0),
+        replies,
+      ),
+    ).toThrow(/1\.\.24/);
+    expect(() =>
+      pipeline(
+        new Packet(opcodeFor("GL_MSG_ADD_REQ"))
+          .u8(1).str("me").s32(0).str("you".padEnd(25, "x")).str("hi").str("t").u16(0).u8(0),
+        replies,
+      ),
+    ).toThrow(/1\.\.24/);
+    expect(() =>
+      pipeline(
+        new Packet(opcodeFor("GL_MSG_ADD_REQ"))
+          .u8(1).str("me").s32(0).str("you").str("").str("t").u16(0).u8(0),
+        replies,
+      ),
+    ).toThrow(/1\.\.200/);
+    expect(() =>
+      pipeline(
+        new Packet(opcodeFor("GL_MSG_ADD_REQ"))
+          .u8(1).str("me").s32(0).str("you").str("h".repeat(201)).str("t").u16(0).u8(0),
+        replies,
+      ),
+    ).toThrow(/1\.\.200/);
   });
 });
 
@@ -256,6 +321,143 @@ describe("439 — friend-chat request", () => {
         connection,
       ),
     ).toThrow(/trailing/);
+  });
+});
+
+describe("441 — friend-where request", () => {
+  test("always answers the proven status-0 failure arm without the conditional triple", () => {
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof friendWhereRequest>[1];
+    friendWhereRequest(reread(new Packet(opcodeFor("GL_FRIEND_WHERE_REQ")).str("frnd")), connection);
+    expect(replies).toEqual([["GL_FRIEND_WHERE_ACK", 0]]);
+    expect(() =>
+      friendWhereRequest(reread(new Packet(opcodeFor("GL_FRIEND_WHERE_REQ")).str("")), connection),
+    ).toThrow(/non-empty/);
+    expect(() =>
+      friendWhereRequest(
+        reread(new Packet(opcodeFor("GL_FRIEND_WHERE_REQ")).str("n".repeat(21))),
+        connection,
+      ),
+    ).toThrow(/20-byte/);
+    expect(() =>
+      friendWhereRequest(
+        reread(new Packet(opcodeFor("GL_FRIEND_WHERE_REQ")).str("frnd").u8(0)),
+        connection,
+      ),
+    ).toThrow(/trailing/);
+  });
+});
+
+describe("783/791 — mailbox-count and voice-slot requests", () => {
+  const pipeline = (handler: typeof newMsgCountRequest, payload: Packet, replies: unknown[][]) => {
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof newMsgCountRequest>[1];
+    handler(reread(payload), connection);
+  };
+
+  test("783 parses empty and answers with the s32 zero unread count", () => {
+    const replies: unknown[][] = [];
+    pipeline(newMsgCountRequest, new Packet(opcodeFor("GL_NEW_MSG_COUNT_REQ")), replies);
+    expect(replies).toEqual([["GL_NEW_MSG_COUNT_ACK", 0]]);
+    expect(() =>
+      pipeline(newMsgCountRequest, new Packet(opcodeFor("GL_NEW_MSG_COUNT_REQ")).u8(0), []),
+    ).toThrow(/trailing/);
+  });
+
+  test("791 parses empty and answers on the proven page index 0", () => {
+    const replies: unknown[][] = [];
+    pipeline(voiceItemSlotRequest, new Packet(opcodeFor("GL_VOICEITEMSLOT_REQ")), replies);
+    expect(replies).toEqual([["GL_VOICEITEMSLOT_ACK", 0]]);
+    expect(() =>
+      pipeline(voiceItemSlotRequest, new Packet(opcodeFor("GL_VOICEITEMSLOT_REQ")).u8(0), []),
+    ).toThrow(/trailing/);
+  });
+});
+
+describe("685/689 — tutorial index requests", () => {
+  test("685 parses empty and answers s32(0) (blank board)", () => {
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof tutorialIndexRequest>[1];
+    tutorialIndexRequest(reread(new Packet(opcodeFor("GL_TUTORIALINDEX_REQ"))), connection);
+    expect(replies).toEqual([["GL_TUTORIALINDEX_ACK", 0]]);
+    expect(() =>
+      tutorialIndexRequest(
+        reread(new Packet(opcodeFor("GL_TUTORIALINDEX_REQ")).u8(0)),
+        connection,
+      ),
+    ).toThrow(/trailing/);
+  });
+
+  test("689 parses one s32 and deliberately stays silent (no native case 690)", () => {
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof tutorialIndexSetRequest>[1];
+    tutorialIndexSetRequest(
+      reread(new Packet(opcodeFor("GL_TUTORIAL_INDEX_SET_REQ")).s32(7)),
+      connection,
+    );
+    expect(replies).toEqual([]);
+    expect(() =>
+      tutorialIndexSetRequest(
+        reread(new Packet(opcodeFor("GL_TUTORIAL_INDEX_SET_REQ")).s32(7).u8(0)),
+        connection,
+      ),
+    ).toThrow(/trailing/);
+  });
+});
+
+describe("704 — level/kill-limit request", () => {
+  test("704 parses empty and replies the proven silent arm (0, 0.0, 0)", () => {
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof levelKillLimitRequest>[1];
+    levelKillLimitRequest(
+      reread(new Packet(opcodeFor("GL_LEVEL_KILL_LIMIT_REQ"))),
+      connection,
+    );
+    expect(replies).toEqual([["GL_LEVEL_KILL_LIMIT_ACK", 0, 0, 0]]);
+  });
+
+  test("704 refuses trailing bytes", () => {
+    const connection = {
+      reply: () => undefined,
+    } as unknown as Parameters<typeof levelKillLimitRequest>[1];
+    expect(() =>
+      levelKillLimitRequest(
+        reread(new Packet(opcodeFor("GL_LEVEL_KILL_LIMIT_REQ")).u8(0)),
+        connection,
+      ),
+    ).toThrow(/704/);
+  });
+});
+
+describe("706 — bill-token request", () => {
+  test("706 parses empty and replies the inert empty token", () => {
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof billTokenRequest>[1];
+    billTokenRequest(reread(new Packet(opcodeFor("GL_BILLTOKEN_REQ"))), connection);
+    expect(replies).toEqual([["GL_BILLTOKEN_ACK", ""]]);
+  });
+
+  test("706 refuses trailing bytes", () => {
+    const connection = {
+      reply: () => undefined,
+    } as unknown as Parameters<typeof billTokenRequest>[1];
+    expect(() =>
+      billTokenRequest(
+        reread(new Packet(opcodeFor("GL_BILLTOKEN_REQ")).u8(0)),
+        connection,
+      ),
+    ).toThrow(/706/);
   });
 });
 
@@ -710,8 +912,8 @@ describe("registry", () => {
   });
 
   test("the registry exposes both operation folders at startup", () => {
-    expect(summary()).toMatch(/^c2s 26 \(/);
-    expect(summary()).toMatch(/\), s2c 28 \(/);
+    expect(summary()).toMatch(/^c2s 34 \(/);
+    expect(summary()).toMatch(/\), s2c 35 \(/);
     expect(summary()).toContain("GL_LOGIN_ACK");
     expect(summary()).toContain("GL_LOGIN_REQ");
   });

@@ -2,10 +2,17 @@ import { describe, expect, test } from "bun:test";
 import GL_CLIENTINFO_ACK from "../src/ops/s2c/GL_CLIENTINFO_ACK.ts";
 import GL_EXPIRE_PARTSUP_ACK from "../src/ops/s2c/GL_EXPIRE_PARTSUP_ACK.ts";
 import GL_FRIEND_LIST_ACK from "../src/ops/s2c/GL_FRIEND_LIST_ACK.ts";
-import GL_FRIEND_ADD_ACK from "../src/ops/s2c/GL_FRIEND_ADD_ACK.ts";
+import GL_FRIEND_ADD_ACK from "../src/ops/s2c/GL_FRIEND_ADD_ACK.ts" ;
+import GL_MSG_ADD_ACK from "../src/ops/s2c/GL_MSG_ADD_ACK.ts";
+import GL_NEW_MSG_COUNT_ACK from "../src/ops/s2c/GL_NEW_MSG_COUNT_ACK.ts";
+import GL_BILLTOKEN_ACK from "../src/ops/s2c/GL_BILLTOKEN_ACK.ts";
+import GL_LEVEL_KILL_LIMIT_ACK from "../src/ops/s2c/GL_LEVEL_KILL_LIMIT_ACK.ts";
+import GL_TUTORIALINDEX_ACK from "../src/ops/s2c/GL_TUTORIALINDEX_ACK.ts";
+import GL_VOICEITEMSLOT_ACK from "../src/ops/s2c/GL_VOICEITEMSLOT_ACK.ts";
 import GL_FRIEND_CHAT_ACK from "../src/ops/s2c/GL_FRIEND_CHAT_ACK.ts";
 import GL_FRIEND_DEL_ACK from "../src/ops/s2c/GL_FRIEND_DEL_ACK.ts";
 import GL_FRIEND_INFO_ACK from "../src/ops/s2c/GL_FRIEND_INFO_ACK.ts";
+import GL_FRIEND_WHERE_ACK from "../src/ops/s2c/GL_FRIEND_WHERE_ACK.ts";
 import GL_MSG_DEL_ACK from "../src/ops/s2c/GL_MSG_DEL_ACK.ts";
 import GL_MSG_READ_ACK from "../src/ops/s2c/GL_MSG_READ_ACK.ts";
 import GL_MSG_RECVLIST_ACK from "../src/ops/s2c/GL_MSG_RECVLIST_ACK.ts";
@@ -150,6 +157,15 @@ describe("native 198/247/255 payload snapshots", () => {
   });
 
   test("422/424 emit the exact {u8 statusRaw, str key} frames", () => {
+    expect(hex(GL_MSG_ADD_ACK(420, "nick1", 6, 0).payload())).toBe("6E69636B31000600");
+    expect(hex(GL_TUTORIALINDEX_ACK(686, 0).payload())).toBe("00000000");
+    expect(hex(GL_LEVEL_KILL_LIMIT_ACK(705, 0, 0, 0).payload())).toBe("000000000000000000000000");
+    expect(hex(GL_BILLTOKEN_ACK(707, "").payload())).toBe("00");
+    expect(hex(GL_BILLTOKEN_ACK(707, "TOK").payload())).toBe("544F4B00");
+    expect(hex(GL_NEW_MSG_COUNT_ACK(784, 0).payload())).toBe("00000000");
+    expect(hex(GL_VOICEITEMSLOT_ACK(792, 0).payload())).toBe("0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+    expect(hex(GL_FRIEND_WHERE_ACK(442, 0).payload())).toBe("00");
+    expect(hex(GL_FRIEND_WHERE_ACK(442, 1, 10, 2, 5).payload())).toBe("010A0205");
     expect(hex(GL_FRIEND_INFO_ACK(436, [
       { nickname: "frndA", statusRaw: 0 },
       { nickname: "frndB", statusRaw: 0 },
