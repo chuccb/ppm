@@ -2738,6 +2738,14 @@ s32 v29Raw`(v26 錢包 switch 只在 status≠0 觸發)⇒ 舊列漏尾部恆讀
 dialog 經 `sub_4694B0(byte_D70C14, 0)` 收合、錢包不變。
 | 453 | `GS_DELETEGIFT_REQ` | `sub_57BC40` | C2S | `s32 gift_uid, s32 item_id` |
 | 454 | `GS_DELETEGIFT_ACK` | `sub_57BCF0` | S2C | `u8 status` (only exactly 1 mutates the local cached list), `s32 gift_uid, s32 item_id` |
+
+**TS 對位 (2026-09-19)**: 453 builder `sub_57BC40` @171264:2× `sub_592A20`
+(4B 驗證 ⇒ `s32 gift_uid, s32 item_id` =8B)✓。454 consumer
+`sub_57BCF0`:
+**三欄恆讀**;status==1 才去配對刪除本地 gift cache(i_1=-1 時迴圈空
+match 後 **i_23-- 成為 -1 = 計數污染**) + 橫幅 0x309;status≠1 只彈失敗
+橫幅 0x308。TS 無 gift 模型 ⇒ 恆 `status=0` + 兩零(wire 9B)——**status=1
+有 -1 計數污染風險,不可選**。
 | 802 | `GS_DESTROYITEM_REQ` | `sub_895B90`, called by `sub_894070` | C2S | native builder Fact: `s32 raw0,s32 raw1,u8 count,count×raw4 raw2`; each record may append a client-state-bounded run of raw4 values without a separate nested count. Domain meaning and server acceptance remain UNRESOLVED. |
 | 803 | `GS_DESTROYITEM_ACK` | `sub_895EE0` | S2C | `u8 result, u8 raw_code`; if `result!=0`, then `u8 affected_count` + `affected_count×{s32 raw_id,u8 raw_value}`. The success arm instead consumes `s32 raw_value_a, s32 coupon_after, u8 affected_count` + `affected_count×{s32 item_id,s32 remaining_raw}`. Only the failure arm is currently safe to emit. |
 | 423 | `GL_MSG_READ_REQ` | `sub_55A3C0` | C2S | `str key` (native sends only when the 426 local key is not marked `89`) |

@@ -15,6 +15,7 @@
 | 1 | admission 681 / TCP grooming / login trio | `b9f02d5f` | `SERVER_TS_EVIDENCE.md` 192 行 ledger;681 Result 表; server-list s16 定向;693 區段補正(greeting 型別/ v6 spin-lock) |
 | 2 | channel handshake 143/144/195/196 | `3fad207c` | 144 case 108=0x11D/result 0=0x42/3=0xA4+7082;196 result 6→0x3A6/8→0x3A7;`client_identity` String[24]=AccountName(PaperMan.exe.c:2241) |
 | 3 | 大廳同步序列（本節詳記） | `8e3c66e7` | PACKETS §3.15pre-3;原生命令行 197→199→834 定序 |
+| 28 | **453→454 deletegift(status=1 計數污染實證)** | (本次) | 453 `sub_57BC40`:2×s32=8B ✓;454 `sub_57BCF0`:`u8 status,2×s32` **恆讀**;status==1 尋 match 刪 cache——i_1=-1 時 **i_23-- 到 -1 計數污染**⇒ TS 恆 `status=0`(0x308 失敗橫幅,安全誠實);pins 4+2;162 測試綠,c2s 43/s2c 44 |
 | 27 | **370→371 changechannel(status 五臂;文件臂型補完)** | (本次) | 370 `sub_570030`:1B(不同 channel 才送)✓;371 `sub_570100` 五臂:1=`{u8 ch,str ip,s32 port,u8 extra}`→`sub_596E60` 副端點+0x163 橫幅;0/2/3=橫幅 0xDA/0x148/0x328+重置 holder;≥4 靜默重置 ⇒ TS 單 channel 部署(main.ts channelGroups 互證)恆 `status=0`(wire `00`);pins 4+2;160 測試綠,c2s 42/s2c 43 |
 | 26 | **312→313 changeslot(零消費 consumer)** | (本次) | 312 `sub_573270`:1B `u8 slot_no` ✓;313 `sub_573320` **本體完全不讀 body**(只 `sub_538470` UI 刷新)⇒ TS echo 策略;pins 4+2;158 測試綠,c2s 41/s2c 42 |
 | 25 | **310→311 buychar;311 列補正(尾部恆讀)** | (本次) | 310 builder `sub_572790`:6× `sub_592A20`(4B 驗證)=24B ✓。311 `sub_5728A0`:`u8 status`≠0→6×s32 快照(sub_5831F0 混淆表),**無條件再讀 `u8 v26,s32 v33,s32 v29`**(錢包 switch 只在 status≠0)⇒ 舊列漏恆讀尾;TS 恆 `status=0`+三零(wire 10B)= dialog 收合不動錢包;pins 4+2;156 測試綠,c2s 40/s2c 41 |
