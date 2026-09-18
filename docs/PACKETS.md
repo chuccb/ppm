@@ -2918,6 +2918,12 @@ consumer `sub_76E450`(dispatcher `sub_564A00` 只在 GunShooting local flow
 `echo id + 全零雙 0 計數`(wire 11B),合法穿越兩個 guard。
 | 483 | `GG_GAMECENTER_GAME_START_OK_REQ` | `sub_584EC0` | C2S | `s16 game_id` |
 | 484 | `GG_GAMECENTER_GAME_START_OK_ACK` | `sub_584F70` | S2C | `s16, u8 status(1), u16 game_id, s32` |
+
+**TS 對位 (2026-09-19) 483→484**: 483 builder `sub_584EC0` @175469:只寫
+`sub_5929E0`(2B)=game_id ✓。484 consumer `sub_584F70`:**無臂全 9B 恆讀**
+(`u16 raw, u8 status, u16 game_id, s32 resultRaw`;status 讀而不耗)→
+`sub_5392A0(byte_EE8968, id, resultRaw)`。TS 恆 `status=1 + echo id +
+resultRaw=0`(wire 9B)。
 | 485 | `GL_GET_GAMEROOM_PROGRESSTIME_REQ` | `sub_56AD60` | C2S | `u8 room_no` (查詢戰局進行時間) |
 | 486 | `GL_GET_GAMEROOM_PROGRESSTIME_ACK` | `sub_56AE30` | S2C | `u8 n3, s16 room_no, u8 id, s32 elapsed_sec, u8, s8, u8, s8, u8, s8, u8, s8` |
 
