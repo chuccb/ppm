@@ -10,6 +10,7 @@ import {
 } from "../src/ops/registry.ts";
 import { Result, type GameServer } from "../src/ops/s2c/GL_LOGIN_ACK.ts";
 import { read as readCredentials } from "../src/ops/c2s/GL_LOGIN_REQ.ts";
+import { Store } from "../src/store.ts";
 import dataRecvCompletedRequest from "../src/ops/c2s/GL_DATA_RECV_COMPLETED_REQ.ts";
 import roomBroadcastRequest from "../src/ops/c2s/GG_ROOMBROADCAST_REQ.ts";
 import msgAddRequest from "../src/ops/c2s/GL_MSG_ADD_REQ.ts";
@@ -421,6 +422,28 @@ describe("685/689 — tutorial index requests", () => {
     ).toThrow(/trailing/);
   });
 
+  test("685/689 round-trips the per-account tutorial marker through the store", async () => {
+    const store = new Store(":memory:");
+    const account = await store.createAccount("hero", "pa55w");
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+      accountId: account.id,
+      config: { store },
+    } as unknown as Parameters<typeof tutorialIndexRequest>[1];
+    const TUTORIAL_SENTINEL = 145; // sub_4422B0 equality hides TUTO_NEW
+    tutorialIndexSetRequest(
+      reread(new Packet(opcodeFor("GL_TUTORIAL_INDEX_SET_REQ")).s32(TUTORIAL_SENTINEL)),
+      connection,
+    );
+    expect(replies).toEqual([]);
+    tutorialIndexRequest(
+      reread(new Packet(opcodeFor("GL_TUTORIALINDEX_REQ"))),
+      connection,
+    );
+    expect(replies).toEqual([["GL_TUTORIALINDEX_ACK", TUTORIAL_SENTINEL]]);
+  });
+
   test("689 parses one s32 and deliberately stays silent (no native case 690)", () => {
     const replies: unknown[][] = [];
     const connection = {
@@ -600,30 +623,61 @@ describe("131 — forceout request", () => {
   });
 });
 
-describe("218 — changedata request", () => {
-  test("218 parses the native record grammar and replies status=1 (success arm)", () => {
+describe("218 — changedata request (store-backed)", () => {
+  const seed = async () => {
+    const store = new Store(":memory:");
+    const account = await store.createAccount("hero", "pa55w");
     const replies: unknown[][] = [];
     const connection = {
       reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+      accountId: account.id,
+      config: { store },
     } as unknown as Parameters<typeof changeDataRequest>[1];
+    return { store, reps: replies, connection, account };
+  };
+
+  test("218 empty-rows frame applies cleanly (status 1)", async () => {
+    const { reps, connection } = await seed();
     changeDataRequest(
-      reread(new Packet(opcodeFor("GI_CHANGEDATA_REQ")).u8(2).u8(0)),
+      reread(new Packet(opcodeFor("GI_CHANGEDATA_REQ")).u8(0).u8(0)),
       connection,
     );
-    expect(replies).toEqual([["GI_CHANGEDATA_ACK", 1]]);
+    expect(reps).toEqual([["GI_CHANGEDATA_ACK", 1]]);
   });
 
-  test("218 walks count x 26-byte records and rejects the native cap overflow", () => {
+  test("218 persists dirty appearance rows transactionally", async () => {
+    const { store, reps, connection, account } = await seed();
+    const userId = store.ensurePlayerIdentity(account.id)!.userId;
     const rows = new Packet(opcodeFor("GI_CHANGEDATA_REQ")).u8(0).u8(1)
-      .u8(3).u8(9).u16(0x1111).u16(0x2222).u16(0x3333).u16(0x4444)
+      .u8(0).u8(9).u16(0x1111).u16(0x2222).u16(0x3333).u16(0x4444)
       .u16(0x5555).u16(0x6666).u16(0x7777).u16(0x8888)
       .u16(0x9999).u16(0xaaaa).u16(0xbbbb).u16(0xcccc);
-    const replies: unknown[][] = [];
-    const connection = {
-      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
-    } as unknown as Parameters<typeof changeDataRequest>[1];
     changeDataRequest(reread(rows), connection);
-    expect(replies).toEqual([["GI_CHANGEDATA_ACK", 1]]);
+    expect(reps).toEqual([["GI_CHANGEDATA_ACK", 1]]);
+    const after = store.getMyInfo(userId)!;
+    expect(after.characters[0]!.charType).toBe(9);
+    expect(after.characters[0]!.appearance).toEqual([
+      0x1111, 0x2222, 0x3333, 0x4444, 0x5555, 0x6666,
+      0x7777, 0x8888, 0x9999, 0xaaaa, 0xbbbb, 0xcccc,
+    ]);
+  });
+
+  test("218 unknown slot rolls back and reports the failure status", async () => {
+    const { store, reps, connection, account } = await seed();
+    const userId = store.ensurePlayerIdentity(account.id)!.userId;
+    const before = store.getMyInfo(userId)!.characters[0]!;
+    const rows = new Packet(opcodeFor("GI_CHANGEDATA_REQ")).u8(0).u8(1)
+      .u8(3).u8(2).u16(1).u16(2).u16(3).u16(4).u16(5).u16(6)
+      .u16(7).u16(8).u16(9).u16(10).u16(11).u16(12);
+    changeDataRequest(reread(rows), connection);
+    expect(reps).toEqual([["GI_CHANGEDATA_ACK", 0]]);
+    expect(store.getMyInfo(userId)!.characters[0]!).toEqual(before);
+  });
+
+  test("218 rejects the native cap overflow and malformed rows before touching the store", () => {
+    const connection = {
+      reply: () => undefined,
+    } as unknown as Parameters<typeof changeDataRequest>[1];
     expect(() =>
       changeDataRequest(
         reread(new Packet(opcodeFor("GI_CHANGEDATA_REQ")).u8(0).u8(0x15)),
@@ -635,7 +689,7 @@ describe("218 — changedata request", () => {
         reread(new Packet(opcodeFor("GI_CHANGEDATA_REQ")).u8(0).u8(1).u8(0)),
         connection,
       ),
-    ).toThrow(/218/);
+    ).toThrow(/218|exceeds payload/);
   });
 });
 

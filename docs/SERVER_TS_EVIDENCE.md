@@ -74,6 +74,9 @@ model 的地方，TS 只輸出已確認可被 client 完整消費的空 projecti
 | 424 `GL_MSG_READ_ACK` | `u8 statusRaw, str key` | `sub_55A4F0`: status 非零→`sub_537D20` 寫 `89` 標記;零→彈 resource `0x1E4`。builder emit `{u8 statusRaw, strMax(key,19)}`;status enum 不造。 | `sub_55A4F0`、`sub_537D20`；HIGH |
 | 783 `GL_NEW_MSG_COUNT_REQ` | (空) | builder `sub_5643E0` ✓。784 `sub_564480`:單 `s32`→`dword_F0C104`,`!=0` 切 UI 新信件指標。TS 信箱恆空 ⇒ 回 `s32(0)`。 | `sub_5643E0`/`sub_564480`；HIGH |
 | --- **2026-09-19 S2C 零值總審計**(60 件全體,新增 5 件註記) --- | | | |
+| 218 `GI_CHANGEDATA_REQ` 持久化 | `u8 selected_slot, u8 count(≤20), count×{u8 slot,u8 type,12×u16}` | builder `sub_572FC0` dirty-only;第二欄實證 char_type;store `applyCharacterData` 全有或全無事務;`sub_4BCF00` 0/1 二臂 ⇒ 回 1/0 | 解決「假成功」風險;HIGH |
+| 312 `GI_CHANGESLOT_REQ` 更名 | `u8 slot_no` | `sub_884160` 傳 CClientData+88 ⇒ **角色選擇**非背包分頁;persist `current_character`(未擁有槽靜默丟棄,consumer 不讀) | 舊註解「inventory tab」錯名纠正;HIGH |
+| 685/689 tutorial | 686=`s32 marker`回讀 store;689 原樣存入 player.tutorial_index | `sub_4422B0` 哨兵 145=隱藏 TUTO_NEW;689 無 ACK 維持沉默 | 689 擲棄⇒重覆讀回 0 的缺口修復;HIGH |
 | 936 `GR_AI_FEVER_START_ACK` 三零 | flag=0→`sub_67D7D0` [16,76) 無效 ⇒ notify 跳;duration=0→mismatch 只 log;type=0→status 0 臂不讀 | 皆非亂填字;HIGH |
 | 705 `GL_LEVEL_KILL_LIMIT_ACK` 全零 | `n11_0==0` ⇒ `sub_415F90` switch 全跳,rate/cap 是 kind 6..12 專屬死格 | "無防沉迷限制面板"正解;HIGH |
 | 686 `GL_TUTORIALINDEX_ACK`=0 | `sub_4422B0` `*n145==145` ⇒ 145=隱 TUTO_NEW 徽、他值顯示;0=新鮮帳態(誠實);哨兵已具名 `TUTORIAL_COMPLETED` | HIGH |

@@ -2711,8 +2711,20 @@ TS 無 voting-session ⇒ 718→719 恆 `status=0`;721 解析後沉默;720/722/7
 皆 server-initiated push,TS 不發。
 | 214 | `GM_CREATECHAR_REQ` | `sub_572EB0`（舊記 `sub_532AA0` 在任一份 dump 皆不存在，本輪更正） | C2S | `u8 char_type, s16 hair, s16 face, s16 coat`（builder 依序 `sub_592920` + 3×`sub_5929E0`，共 7 B）|
 | 215 | `GM_CREATECHAR_ACK` | `sub_572F80` | S2C | `u8 status(0=成功)` |
-| 218 | `GI_CHANGEDATA_REQ` | `sub_572FC0` | C2S | `u8 char_slot, u8 count(≤0x14), count×26B {u8 slot, u8 flagRaw, 12×u16 rawWords}` |
-| 219 | `GI_CHANGEDATA_ACK` | `sub_573230` | S2C | `u8 status(1=成功)` |
+| 218 | `GI_CHANGEDATA_REQ` | `sub_572FC0` | C2S | `u8 selected_slot(=+88), u8 dirty_count(≤0x14), count×26B {u8 slot, u8 char_type, 12×u16 appearance}` |
+| 219 | `GI_CHANGEDATA_ACK` | `sub_573230` | S2C | `u8 status ∈{0,1}`(`sub_4BCF00` 二臂) |
+
+**TS 對位 (2026-09-19,持久化修正)**: builder `sub_572FC0` 只送
+`sub_525450` 判定的 dirty 槽(+count==0 而槽數變亦送);`sub_5244E0`
+逐行=26B 槽紀錄;**第二欄實證 = char_type**(subsume 198 per-char
+紀錄前綴)。客戶端 on-send 已先行套用 ⇒ server 丟棄+回 1 = 偽造分歧。
+改為行儲存:`applyCharacterData` 全有或全無事務寫回
+`player_character`(任何未知槽 ⇒ ROLLBACK+回 status 0);`sub_4BCF00`
+三元組:0=不轉移、1=狀態遞進(+1160: 2→3/4→5/6→7/8→9) ⇒
+status∈{0,1} 二分。首欄 = CClientData+88 選中索引,與 312 同欄,亦
+持久化。312 註記:`sub_884160` 把 +88(=selected_char_list_index)
+原樣送出 ⇒ **是角色選擇(CHARSLOT)不是背包分頁**,舊註解誤;
+本輪 modules/store 已隨之持久化與更名。586 同豁免外推。
 
 **TS 對位 (2026-09-19)**: 218 為 inventory diff 上傳:builder `sub_572FC0`
 @167338 先寫 `u8 char_slot`、再 `u8 count`(>0x14 中止)、再逐 slot 經

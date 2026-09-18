@@ -43,6 +43,17 @@ export interface Character {
   readonly appearance: readonly number[];
 }
 
+/** One dirty character record carried by 218 GI_CHANGEDATA_REQ (26 bytes on wire). */
+export interface CharacterDataPatch {
+  /** Character-list slot; native builder slot count is `n0x14 <= 0x14`. */
+  readonly slot: number;
+  /** Native character type 1..15 (wire second byte; NOT a participation flag). */
+  readonly characterType: number;
+  /** Exactly twelve category-relative u16 appearance offsets. */
+  readonly appearance: readonly number[];
+}
+
+
 export interface MyInfo {
   readonly userId: number;
   readonly nickname: string;
@@ -228,7 +239,8 @@ CREATE TABLE IF NOT EXISTS player (
   experience      INTEGER NOT NULL DEFAULT 0,
   game_points     INTEGER NOT NULL DEFAULT 0,
   cash            INTEGER NOT NULL DEFAULT 0,
-  current_character INTEGER NOT NULL DEFAULT 0 CHECK (current_character BETWEEN 0 AND 19)
+  current_character INTEGER NOT NULL DEFAULT 0 CHECK (current_character BETWEEN 0 AND 19),
+  tutorial_index  INTEGER NOT NULL DEFAULT 0
 ) STRICT;
 
 CREATE TABLE IF NOT EXISTS player_stats (
@@ -308,6 +320,13 @@ export class Store {
     this.#db.exec("PRAGMA journal_mode = WAL");
     this.#db.exec("PRAGMA foreign_keys = ON");
     this.#db.exec(SCHEMA);
+    // 2026-09-19: tutorial_index was added to the canonical player schema;
+    // databases created earlier receive it once via this guarded ALTER.
+    if (!this.#db.query<{ name: string }, []>(
+      "SELECT name FROM pragma_table_info('player') WHERE name = 'tutorial_index'",
+    ).get()) {
+      this.#db.exec("ALTER TABLE player ADD COLUMN tutorial_index INTEGER NOT NULL DEFAULT 0");
+    }
   }
 
   get sqliteVersion(): string {
@@ -538,6 +557,84 @@ export class Store {
       appearance4: appearance[4]!,
       appearance5: appearance[5]!,
     };
+  }
+
+  /** 686 read-back: per-player tutorial marker (literal 145 hides TUTO_NEW; sub_4422B0). */
+  getTutorialIndex(userId: number): number {
+    const row = this.#db
+      .query<{ tutorial_index: number }, { p: number }>(
+        "SELECT tutorial_index FROM player WHERE id = $p",
+      )
+      .get({ p: userId });
+    return row?.tutorial_index ?? 0;
+  }
+
+  /** 689 persists the client-reported tutorial step verbatim (no native ACK exists). */
+  setTutorialIndex(userId: number, tutorialIndex: number): void {
+    if (!Number.isSafeInteger(userId) || userId <= 0 || !Number.isSafeInteger(tutorialIndex)) {
+      throw new RangeError("tutorial index write needs integer ids");
+    }
+    const result = this.#db
+      .query("UPDATE player SET tutorial_index = $t WHERE id = $p")
+      .run({ t: tutorialIndex, p: userId });
+    if (result.changes !== 1) throw new Error(`player ${userId} missing for tutorial index write`);
+  }
+
+  /** 312 is the CHARSLOT selection (CClientData+88 as-is); persist so 198 reflects it. */
+  setCurrentCharacter(userId: number, slot: number): boolean {
+    const exists = this.#db
+      .query<{ c: number }, { p: number; s: number }>(
+        "SELECT COUNT(*) AS c FROM player_character WHERE player_id = $p AND slot = $s",
+      )
+      .get({ p: userId, s: slot });
+    if (!exists || exists.c !== 1) return false;
+    this.#db
+      .query("UPDATE player SET current_character = $s WHERE id = $p")
+      .run({ s: slot, p: userId });
+    return true;
+  }
+
+  /**
+   * 218 rows were already applied optimistically on the client (sub_525450
+   * sends only dirty records); the server must reach the same state or the
+   * next login would undo the player's appearance change. All-or-nothing:
+   * unknown slots (e.g. unowned character) roll the transaction back so the
+   * handler can honestly answer the failure status.
+   */
+  applyCharacterData(userId: number, rows: readonly CharacterDataPatch[]): boolean {
+    this.#db.exec("BEGIN IMMEDIATE");
+    try {
+      for (const row of rows) {
+        if (!Number.isSafeInteger(row.slot) || row.slot < 0 || row.slot > 19) {
+          throw new Error("bad slot");
+        }
+        if (!Number.isSafeInteger(row.characterType) || row.characterType < 1 || row.characterType > 15) {
+          throw new Error("bad character type");
+        }
+        if (row.appearance.length !== 12 || !row.appearance.every((v) => Number.isSafeInteger(v) && v >= 0 && v <= 0xffff)) {
+          throw new Error("bad appearance");
+        }
+        const params: Record<string, number> = { p: userId, s: row.slot, t: row.characterType };
+        row.appearance.forEach((value, index) => { params[`a${index}`] = value; });
+        const result = this.#db
+          .query(
+            `UPDATE player_character
+                SET character_type = $t,
+                    appearance0 = $a0, appearance1 = $a1, appearance2 = $a2,
+                    appearance3 = $a3, appearance4 = $a4, appearance5 = $a5,
+                    appearance6 = $a6, appearance7 = $a7, appearance8 = $a8,
+                    appearance9 = $a9, appearance10 = $a10, appearance11 = $a11
+              WHERE player_id = $p AND slot = $s`,
+          )
+          .run(params);
+        if (result.changes !== 1) throw new Error("unknown character slot");
+      }
+      this.#db.exec("COMMIT");
+      return true;
+    } catch {
+      this.#db.exec("ROLLBACK");
+      return false;
+    }
   }
 
   /** Load the native 198 MyInfo projection by its user ID. */

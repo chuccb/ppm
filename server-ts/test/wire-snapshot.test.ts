@@ -196,7 +196,7 @@ describe("native 198/247/255 payload snapshots", () => {
     expect(hex(GR_FORCEOUT_ACK(132).payload())).toBe("00");
     expect(() => GR_FORCEOUT_ACK(132, 1 as never)).toThrow(RangeError);
     expect(hex(GI_CHANGEDATA_ACK(219).payload())).toBe("01");
-    expect(() => GI_CHANGEDATA_ACK(219, 0 as never)).toThrow(RangeError);
+    expect(hex(GI_CHANGEDATA_ACK(219, 0).payload())).toBe("00");
     expect(hex(GS_BUYCHAR_ACK(311).payload())).toBe("00000000000000000000");
     expect(() => GS_BUYCHAR_ACK(311, 1 as never)).toThrow(RangeError);
     expect(hex(GI_CHANGESLOT_ACK(313, 7).payload())).toBe("07");

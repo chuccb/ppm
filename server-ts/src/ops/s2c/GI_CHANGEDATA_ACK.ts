@@ -3,17 +3,18 @@
  * state machine sub_4BCF00).
  *
  * Wire: `u8 status`. status == 1 flips the client's inventory-sync
- * pending -> applied transitions (0xC additionally refreshes the UI);
- * status == 0 takes the abort-sync arm; any other value is a no-op.
- * This server has no slot store behind the upload, so it always answers
- * the proven success arm status = 1 (wire "01").
+ * pending -> applied transitions (sub_522440 additionally refreshes the
+ * UI); status == 0 takes the abort-sync arm (no transition, player
+ * simply does not get the applied state). No other value has any
+ * recovered branch, so the domain is exactly {0,1}.
+ *
+ * Since 2026-09-19 the handler behind 218 persists rows into
+ * player_character transactionally: success reports status 1, an
+ * unknown-slot rollback reports status 0.
  */
 
 import { Packet } from "../../packet.ts";
 
-export default function GI_CHANGEDATA_ACK(op: number, status: 1 = 1): Packet {
-  if (status !== 1) {
-    throw new RangeError("219 of this server is always status = 1 (no slot store behind 218)");
-  }
+export default function GI_CHANGEDATA_ACK(op: number, status: 0 | 1 = 1): Packet {
   return new Packet(op).u8(status);
 }

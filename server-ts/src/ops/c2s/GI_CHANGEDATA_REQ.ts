@@ -1,50 +1,53 @@
 /**
- * 218 GI_CHANGEDATA_REQ — client uploads its locally changed inventory
- * slots (builder sub_572FC0 @167338).
+ * 218 GI_CHANGEDATA_REQ — dirty character-record push (builder
+ * sub_572FC0): `u8 selected_slot(from CClientData+88), u8 count(<=0x14),
+ * count x {u8 slot, u8 charType, 12 x u16 appearance}` = slot-record
+ * layout shared with 198 (sub_5244E0 per dirty row; the wire's second
+ * byte is the persistent char_type read position, verified against the
+ * 198 mirror reader).
  *
- * Native wire (builder + per-slot serializer sub_5244E0 both re-read
- * line-level; write widths proven by accessor bodies sub_592920 = 1B,
- * sub_5929E0 = 2B):
+ * The client has ALREADY applied these rows optimistically when it
+ * sends 218 (sub_525450 emits only changed slots); dropping them while
+ * ACKing success would fabricate a divergence — the next login would
+ * undo the appearance change the player already sees. The honest
+ * answer requires persistence, which is exactly what applyCharacterData
+ * now provides transactionally.
  *
- *   u8  char_slot         selected character slot
- *   u8  count             changed-slot count (builder aborts > 0x14)
- *   count x 26B record {
- *     u8    slot,
- *     u8    flagRaw,      gate byte from the paired client table
- *     12 x  u16 rawWords  the 13-word slot-data table diff
- *   }
- *
- * The paired-word table semantices stay unresolved (values table at
- * this+13*slot+158..169 words), so the fields keep raw names — exactly
- * what the .c exposes.
- *
- * Native 219 consumer sub_573230 just forwards `u8 status` into the
- * inventory-sync state machine sub_4BCF00: status == 1 flips the
- * pending -> applied transitions (0xC additionally refreshes the UI),
- * status == 0 takes the abort-sync arm, other values are literal no-ops.
- *
- * TS policy: no per-account inventory-slot store exists, so the upload
- * is structurally parsed (count capped at the native 0x14, trailing
- * rejected) and answered with status = 1 — the proven success arm that
- * lets the client state machine settle.
+ * 219 sub_573230 -> sub_4BCF00 semantics: status == 1 advances the
+ * local state machine (+1160: 2->3 / 4->5 / 6->7 / 8->9); status == 0
+ * simply does not transition. Nothing else is read.
  */
 
 import type { Connection } from "../../connection.ts";
 import type { Reader } from "../../packet.ts";
 
+const NATIVE_CHARACTER_SLOT_COUNT = 20;
+const APPEARANCE_WORD_COUNT = 12;
+
 export default function GI_CHANGEDATA_REQ(r: Reader, connection: Connection): void {
-  r.u8(); // char_slot
+  const selectedSlot = r.u8();
   const count = r.u8();
-  if (count > 0x14) {
-    throw new RangeError(`218 count ${count} exceeds the native 0x14 cap`);
+  if (count > NATIVE_CHARACTER_SLOT_COUNT) {
+    throw new RangeError(`218 native builder caps count at 0x14 (${NATIVE_CHARACTER_SLOT_COUNT}), got ${count}`);
   }
-  if (r.remaining !== count * 26) {
-    throw new RangeError(`218 expects count x 26 byte records (${count * 26} bytes), got ${r.remaining}`);
-  }
+  const rows = [];
   for (let i = 0; i < count; i++) {
-    r.u8(); // slot
-    r.u8(); // flagRaw
-    for (let w = 0; w < 12; w++) r.u16(); // rawWords
+    const slot = r.u8();
+    const characterType = r.u8();
+    const appearance: number[] = [];
+    for (let w = 0; w < APPEARANCE_WORD_COUNT; w++) appearance.push(r.u16());
+    rows.push({ slot, characterType, appearance });
   }
-  connection.reply("GI_CHANGEDATA_ACK", 1);
+  if (r.remaining !== 0) throw new RangeError(`${r.remaining} trailing bytes in 218`);
+
+  if (connection.accountId == null) {
+    throw new RangeError("218 requires a bound account identity");
+  }
+  const myInfo = connection.config.store.ensurePlayerIdentity(connection.accountId);
+  if (!myInfo) throw new RangeError("218 identity bootstrap unexpectedly empty");
+
+  const store = connection.config.store;
+  store.setCurrentCharacter(myInfo.userId, selectedSlot); // CClientData+88 echoes the selection; false = unowned slot, drop silently
+  const applied = store.applyCharacterData(myInfo.userId, rows);
+  connection.reply("GI_CHANGEDATA_ACK", applied ? 1 : 0);
 }
