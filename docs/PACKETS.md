@@ -2670,7 +2670,16 @@ buffer;拒絕 trailing;split(',') 每段非空 ≤20B=table stride;row≤100=tab
 banner),無驗證臂 ⇒ TS 無 billing 模型恆回 **空字串**(wire `00`),charge
 流程保持惰性。
 | 787 | `GL_RACKINGWEB_TOKEN_REQ` | `sub_581E40` | C2S | `(空)` |
-| 788 | `GL_RACKINGWEB_TOKEN_ACK` | `sub_44BEA0` | S2C | `str token` |
+| 788 | `GL_RACKINGWEB_TOKEN_ACK` | `sub_44BEA0` (+`sub_407360`) | S2C | `u8 hasToken, [str token]` — token 僅當 hasToken≠0 存在 |
+
+**TS 對位 (2026-09-19)**: 787 builder `sub_581E40` @174077:ctor→send 無
+writer ⇒ 空 wire。788 有三訂閱點:`sub_407360` @6565 是**唯一讀 payload
+者**:先讀 `u8 hasToken`(`sub_592900`),非零才讀 `str token`
+(`sub_592730`)並 `strncpy(byte_EDDE04, token, 0x10)`——**strlen≥16 丟棄**;
+`sub_44BEA0`(CLobbyMainRoom)只切 ranking tab(`sub_446780(this,2)`)、
+`sub_489AD0`(CLobbyTournamentMainRoom)只動 UI 資源,兩者皆不讀 payload。
+舊列 「str token」補正為上式。TS 無 ranking-web 整合 ⇒ 恆回
+`u8 hasToken=0`(wire `00`),token 欄位不帶。
 | 834 | `GL_DATA_RECV_COMPLETED_REQ` | `sub_583120` | C2S | `s32 raw client request context` (原樣取 `dword_F2A684`, 與 144 的 propagated raw4 共用；不可命名為 user_id) |
 | 835 | `GL_DATA_RECV_COMPLETED_ACK` | `sub_5831D0` | S2C | `(空)` |
 | 370 | `GL_CHANGECHANNEL_REQ` | `sub_570030` | C2S | `u8 channel_id` |

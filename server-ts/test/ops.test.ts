@@ -23,6 +23,7 @@ import friendInfoRequest from "../src/ops/c2s/GL_FRIEND_INFO_REQ.ts";
 import friendWhereRequest from "../src/ops/c2s/GL_FRIEND_WHERE_REQ.ts";
 import msgReadRequest from "../src/ops/c2s/GL_MSG_READ_REQ.ts";
 import billTokenRequest from "../src/ops/c2s/GL_BILLTOKEN_REQ.ts";
+import rackingWebTokenRequest from "../src/ops/c2s/GL_RACKINGWEB_TOKEN_REQ.ts";
 import levelKillLimitRequest from "../src/ops/c2s/GL_LEVEL_KILL_LIMIT_REQ.ts";
 import tutorialIndexRequest from "../src/ops/c2s/GL_TUTORIALINDEX_REQ.ts";
 import tutorialIndexSetRequest from "../src/ops/c2s/GL_TUTORIAL_INDEX_SET_REQ.ts";
@@ -458,6 +459,32 @@ describe("706 — bill-token request", () => {
         connection,
       ),
     ).toThrow(/706/);
+  });
+});
+
+describe("787 — ranking-web token request", () => {
+  test("787 parses empty and replies hasToken=0 (no ranking-web model)", () => {
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof rackingWebTokenRequest>[1];
+    rackingWebTokenRequest(
+      reread(new Packet(opcodeFor("GL_RACKINGWEB_TOKEN_REQ"))),
+      connection,
+    );
+    expect(replies).toEqual([["GL_RACKINGWEB_TOKEN_ACK", 0]]);
+  });
+
+  test("787 refuses trailing bytes", () => {
+    const connection = {
+      reply: () => undefined,
+    } as unknown as Parameters<typeof rackingWebTokenRequest>[1];
+    expect(() =>
+      rackingWebTokenRequest(
+        reread(new Packet(opcodeFor("GL_RACKINGWEB_TOKEN_REQ")).u8(0)),
+        connection,
+      ),
+    ).toThrow(/787/);
   });
 });
 
@@ -912,8 +939,8 @@ describe("registry", () => {
   });
 
   test("the registry exposes both operation folders at startup", () => {
-    expect(summary()).toMatch(/^c2s 34 \(/);
-    expect(summary()).toMatch(/\), s2c 35 \(/);
+    expect(summary()).toMatch(/^c2s 35 \(/);
+    expect(summary()).toMatch(/\), s2c 36 \(/);
     expect(summary()).toContain("GL_LOGIN_ACK");
     expect(summary()).toContain("GL_LOGIN_REQ");
   });
