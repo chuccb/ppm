@@ -3005,6 +3005,13 @@ n3=3 並無條件跳過渲染子**⇒ TS 無房間戰局模型 ⇒ 恆回 `n3=3`
 失敗哨兵臂 `idx echo,1,0xFF`(wire `0201FF` @idx=2)。
 | 922 | `GR_AI_DAMAGE_SHIELD_REQ` | `sub_761580` | C2S | `s16 shield_id, s16 damage, s16 remain, f32 unk` (防衛核心受損) |
 | 923 | `GR_AI_DAMAGE_SHIELD_ACK` | `sub_761710` | S2C | `s16 shield_id, s16 damage, s16 remain, f32 unk` (房間廣播同步) |
+
+**TS 對位 (2026-09-19)**: 922 builder `sub_761580` @393240(多態閘):
+`sub_5929E0`(2B)×3 + `sub_592B20`(4B)接 `SLOBYTE(*a4)`——**只送
+float 低位元組符號延伸成 4B**(兩 accessor 本體驗寬)。923 `sub_761710`
+鏡像 u16×3+f32=10B 零臂,再查 (id,damage) 物件且 remain∈{4,7} 才動作。
+TS 無防衛核心模型 ⇒ 逐位元組恆回聲 = 與原生廣播逐 byte 相同
+(wire `0500FDFF070040000000` @ 5,-3,7,0x40)。
 | 924 | `GR_AI_RECHARGE_MAGAZINE_START_REQ` | `sub_558350` | C2S | `u8 slot, u8 team, u8 unk` (彈藥補給開始) |
 | 925 | `GR_AI_RECHARGE_MAGAZINE_START_ACK` | `sub_558550` | S2C | `u8 slot, u8 team, u8 unk` (房間廣播) |
 | 926 | `GR_AI_RECHARGE_MAGAZINE_END_REQ` | `sub_5586B0` | C2S | `u8 slot, u8 team, s8 status` (彈藥補給完成) |
