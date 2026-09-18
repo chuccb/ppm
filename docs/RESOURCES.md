@@ -458,6 +458,93 @@ server runtime grant policy.
 
 (RecommandItem 頭兩行: 1030=資料行數, 20=概念類別數)
 
+## 5a4. 武器代號資產文法：`IG/TG/im/tm` 四族前綴 ↔ 顯示名 ↔ SpecialWeaponType（本輪定案）
+
+§11.8 議程 #3 的交付。武器有**第二套命名體系**（開發代號 codename），
+與 itemdata 顯示名（＝Wiki 頁面名）平行運作；codename 同時是六個資產族
+的成員鍵，且內建「變體繼承」文法。
+
+### 文法主體（Fact；71,464 檔全樹掃描）
+
+| 族 | 路徑 | 命名形 | 檔數／茎數 |
+|---|---|---|---|
+| FPV 模型 | `item\weapon\models\fpv\{beast,paper}\` | **`IG <code>[ _variant] BASE.PAP`** | **670** 独有茎 × beast/paper 雙材質＝1,340 檔 |
+| TPV 模型 | `item\weapon\models\tpv\` | **`TG <code> BASE.PAP`** | 675 檔 |
+| FPV 動畫 | `character\animations\fpv\`（及 `im\<char>\`）| **`im <code> <event>.mot`** | — |
+| TPV 動畫 | `character\animations\tpv\typeN\` | **`tm <code> <event>.mot`** | — |
+| 音效 | `item\weapon\sounds\` | **`<code>[_variant]_<event>.wav`**（shot1/clipin/open…）| 1,505 wav／299 茎 |
+| 貼圖 | `item\weapon\textures\` | **`<code>[_variant][_cross|_cs_*].dds`** | 840 dds |
+
+  閉算驗證：**1,340＋675＋38 不規則件＝2,052** 與 §11.1 普查全符——38 件
+  為 stray 命名：`dot_circle/square_01..03`（照準_dot 用，×3 位置）、
+  `magic_finger.pap`（×3）、**`im pulp_a/b base.pap`（混入 models 的誤置前綴）**、
+  裸名 `rockettan/arrow/arrow2/botrocket/ghostmine/knives/mine2.pap`
+  （投擲・特殊道具另有裸名模型——anim↔model 代號分叉的正式證據）、
+  `tg thomson tina_base.pap`（底線位變體）。
+
+- **IG / TG / im / tm 前綴＝視角鍵**（大寫＝3D、小寫＝動畫；native 載入器
+  `sub_5F5EA0` 以 `Format[0]=L"paper\\%s"`／`Format[1]`（beast 分支）組
+  子目錄、a4 切換材質——紙/野獸雙材質結構與 §11.3a 的 F/B atlas 呼應）。
+  特判：mode==14 時 literal `IG black_gatling BASE.PAP`（散光體驗館類特例）。
+- **union codename 725 茎**（六族歸一）。存在度矩陣（Fact）：
+  **214 茎＝全五族完備**（模型×2＋動畫×2＋音效）＝完整武器；
+  **318 茎＝僅模型對**＝外觀變體（**繼承母體動畫/音效**，無自屬）；
+  48＝模型＋音效（自有槍聲的變體）；46/26＝模型＋動畫部分組合；
+  21＝僅音效、15＝僅 fpv 動畫（`bomb_air/demo/fire/flashb/mochi/mushbomb/
+  sun_bomb/oni_bomb`／`dagger/hasami_h/mine2/pulp/magic_finger/
+  toy_hammer_new/black_gatling_new`——擲彈・近接・特殊道具；其模型以
+  **裸名或改茎**存在（`mine2.pap`、`im pulp_*` 等 38 不規則件），
+  正式對名需另建別名表（`Tanpi_%d.PAP` formatter（行 194039）
+  今僅 1 檔對應——legacy 滅跡邊緣）。
+- **變體後綴語料**（_gold/_silver 大部分另有金色/銀色獨立 id；
+  ue（≈アルティメイト系——例 evo3_ue、an94_ue）、lem、soul5/6、chess、
+  fate、mado、lucy、cyrus、tina、hood、milly、pmc3、cs_blue/green/pink、
+  xmas/halloween/hal、watermelon、mars、cancer、gemini…）＝營運系列再加
+  聯名印痕；
+
+### codename ↔ 顯示名 語義配對（Fact＋別名表）
+
+2,076 筆武器 id 中 **1,829（88.1%）可在 codename 語料自動命中**；
+distinct 顯示名 856（561 組重名 ×2..4＝期限制複製）。判別：
+- **直譯系 85%**：FN2000、p90、m950、acr_dot、arx160、evo3…
+- **別名系 ~12%**（顯示名用市名、codename 用開發名）：
+  `M3 SUPER90↔m3`、`TOMMY GUN↔thomson`、`WIN 7↔m70_win7`、
+  `Kriss Vector↔kriss_super_v`（Super V＝原廠行名）、
+  `M1014 Benelli↔benelli/m1014 雙名`、`USAS-12↔usas-12/usas12`、
+  `巫師特務裝備系 M9?…` 等——需小別名表（本節不逐一列；編纂難度低）。
+- **聯名/個人專屬錨點（Fact，id↔codename 同時成立）**：
+  `まどかの弓↔bow_mado`、`T/Cコンテンダー(Fate/Zero)↔contender_fate`
+  ＋`contender_guy`、`アルティメイトARX160(ルーシー)↔arx160_lucy_v2`、
+  `アルティメイトSCORPION EVO 3(ルーシー)↔evo3_lucy`、
+  `AN94(らんま1/2)`、`ネギ/ネギの杖/アルティメイトネギ↔negima_sword`、
+  `M14 EBR(ミニイカ娘)`、`魔法少女ショートボウ`、
+  `IG THOMSON TINA_BASE↔ティナ個人 Tommy` ——與 §5e-2 ④ 族的
+  Voice 聯名系列同源（2012–2016 聯名潮）。
+
+### SpecialWeaponType.xml 第三腳（Fact，§5d-8 提升）
+
+全檔僅 8 行：**weapon index＝item id−12100000**——
+`Index 2381–2384→type 1(DUAL_GUN)`＝12102381–84（12102381＝**FMG-9(Dual Gun)**
+20141001 ↔codename `fmg9/fmg9_pmc3`，顯示名、codename、引擎行為類三方全齊）；
+`2377–2380→type 2(EMPTY_RELOAD)`。type 列舉註解自帶
+`NONE=0/DUAL_GUN=1/EMPTY_RELOAD=2…`——**行為枚舉的原始註解層**。
+
+### 執行橋（native，Fact）與**未送橋表（bounded Unknown）**
+
+- 武器描述子 registry：`dword_1CC95A0`，記錄 stride **7,904B**、
+  容量 2,053、以 codename 字串鍵查（engine 內建鍵見
+  `Pulp_A/Pulp_B/magic_finger/Escape/BOMBPLANT`——magic_finger 恰是
+  fpv 模型茎 `ig magic_finger.pap`）；描述子 **+144 ＝模型名 wstring**
+  （由 `sub_5F5450/5F5400` 依裝備槽內部編號取出、交 loader 組
+  `paper\%s/beast\%s` 載入）。
+- ⚠ **填充源未隨附**：已查處——exe 字面（僅 black_gatling/toy_hammer_new
+  兩筆硬編）、ui/cfg 全檔（itemdata/partsability/weaponparts/lobbydata/
+  maplist/quest/recommand）、data.pat、Extracted 全 XML——
+  **皆無 codename 表**。可行假說（Probable）＝引擎於啟動時直接
+  **枚舉 Data\item.dat 之 pmFile 索引**掃描 `IG % BASE.PAP` 自登錄；
+  或伺服器下發設定。私服要裝新武器時，**至少須補齊六族命名＋
+  在任意方式讓 registry 多出條目**——具體注入面列 §11.8 議程 #6。
+
 ## 5b. 十六輪補充實測
 
 - **pm_lobbydata.dat = 明文** (LOBBYMAIN/L_MR.DDS + UI 座標表) — 非加密
@@ -3306,6 +3393,12 @@ roommake 結論。
   預留——catalog-ahead 第三大族；參照 §5e-2 對資產先行現象的考古定案）。
   另證：sounds01 僅收初代 9 角色、sounds80 獨收 devilgirl、
   **レム(robotgirl_12) 與イカ娘聯名同日（2012-02-08）上線**（4gamer）。
+- **patch 清單三交叉（Fact，2026-09-18）**：`Extracted/0.xml`（＝
+  ClientDataList 的 PatchFile 清單）宣告 `Data\soundsNN.dat` 共 90 件，
+  對 0..92 命名空間**恰缺 {32, 41, 87}**——87＝XML 跳缺槽、41＝唯一
+  全空殼槽、**32＝怪盗系孤件槽**。contents.xml 有稿、選取器 XML 有路由、
+  patch 清單卻沒有包——32 未公開・取消說獲獨立第三證（§5e-2 族②同型
+  判定基準可複用：文有稿而包不派＝未上架）。
 
 #### VoiceNN 槽 ↔ Voice 套名映射（本輪解開；Code×Resource×**Wiki ラジオチャット一覧**三交叉）
 
@@ -3456,7 +3549,11 @@ hayate 面純佔位 12（41,62,63,64,82,83,86,88–92；62–64/82 為女 8 專�
    band 100..109、f3＝子紋理層、F/B 雙 atlas、a4＝Cooki 旗標、統一載入器）。
 2. ~~thumb/pav 例外集合的時間層證據~~ ✅ 2026-09-18 定案於 §5e-2（內嵌日期
    981 路線、四族分類、38+7 資產全對號、2009–2016 全營運期）。
-3. 武器代號字串 ↔ itemdata 顯示名 ↔ SpecialWeaponType.xml 的三方文法。
+3. ~~武器代號字串 ↔ itemdata 顯示名 ↔ SpecialWeaponType.xml 的三方文法~~
+   ✅ 2026-09-18 定案於 §5a4（IG/TG/im/tm 四族前綴文法、union 725 茎存在
+   度矩陣、88.1% 顯示名配對＋別名系、聯名錨點、SWT 8 行全解、registry
+   7904B 橋；**填充源未送**列 bounded Unknown）。殘留子項：別名表全編
+   （88%→100%）、擲彈/近接的 anim↔model 代號分叉對名。
 4. bot type3xx ↔ BotEnemy*.xml monster 表；animations mot 文法 ↔ ani_list.sco
    索引；**新子議程**：`*a3 != 0` 守衛語義（頭/身第二層條件）、198-record
    builder 對 special 欄（band 110）的寫入路徑（§11.3b Unknown 收尾）。
