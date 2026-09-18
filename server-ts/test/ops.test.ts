@@ -26,6 +26,7 @@ import billTokenRequest from "../src/ops/c2s/GL_BILLTOKEN_REQ.ts";
 import buyCharRequest from "../src/ops/c2s/GS_BUYCHAR_REQ.ts";
 import changeChannelRequest from "../src/ops/c2s/GL_CHANGECHANNEL_REQ.ts";
 import changeSkillItemSlotRequest from "../src/ops/c2s/GI_CHANGE_SKILLITEMSLOT_REQ.ts";
+import gamecenterGameStartRequest from "../src/ops/c2s/GG_GAMECENTER_GAME_START_REQ.ts";
 import gamecenterRecRequest from "../src/ops/c2s/GL_GAMECENTER_REC_REQ.ts";
 import deleteGiftRequest from "../src/ops/c2s/GS_DELETEGIFT_REQ.ts";
 import changeSlotRequest from "../src/ops/c2s/GI_CHANGESLOT_REQ.ts";
@@ -818,6 +819,38 @@ describe("472 — gamecenter record request", () => {
   });
 });
 
+describe("474 — gamecenter game-start request", () => {
+  test("474 parses {s16 game_id, u8 stage} and echoes with status=1", () => {
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof gamecenterGameStartRequest>[1];
+    gamecenterGameStartRequest(
+      reread(new Packet(opcodeFor("GG_GAMECENTER_GAME_START_REQ")).s16(7).u8(2)),
+      connection,
+    );
+    expect(replies).toEqual([["GG_GAMECENTER_GAME_START_ACK", 7, 2]]);
+  });
+
+  test("474 refuses wrong payload widths", () => {
+    const connection = {
+      reply: () => undefined,
+    } as unknown as Parameters<typeof gamecenterGameStartRequest>[1];
+    expect(() =>
+      gamecenterGameStartRequest(
+        reread(new Packet(opcodeFor("GG_GAMECENTER_GAME_START_REQ")).s16(7)),
+        connection,
+      ),
+    ).toThrow(/474/);
+    expect(() =>
+      gamecenterGameStartRequest(
+        reread(new Packet(opcodeFor("GG_GAMECENTER_GAME_START_REQ")).s16(7).u8(2).u8(0)),
+        connection,
+      ),
+    ).toThrow(/474/);
+  });
+});
+
 describe("834 — data-recv-completed request", () => {
   test("consumes the propagated raw4 context and replies with an empty 835", () => {
     const replies: string[] = [];
@@ -1269,8 +1302,8 @@ describe("registry", () => {
   });
 
   test("the registry exposes both operation folders at startup", () => {
-    expect(summary()).toMatch(/^c2s 45 \(/);
-    expect(summary()).toMatch(/\), s2c 46 \(/);
+    expect(summary()).toMatch(/^c2s 46 \(/);
+    expect(summary()).toMatch(/\), s2c 47 \(/);
     expect(summary()).toContain("GL_LOGIN_ACK");
     expect(summary()).toContain("GL_LOGIN_REQ");
   });

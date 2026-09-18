@@ -2887,6 +2887,11 @@ v35/v23 為 0x20/0x2C 條件 raw、尾段 `u8 v31, u16 v32Raw, u16 v21`——舊
 game_id(wire 38B)。
 | 474 | `GG_GAMECENTER_GAME_START_REQ` | `sub_584DB0` | C2S | `s16 game_id, u8 stage` |
 | 475 | `GG_GAMECENTER_GAME_START_ACK` | `sub_584E80` | S2C | `u8 status(1), s16 game_id, u8 stage` |
+
+**TS 對位 (2026-09-19)**: 474 builder `sub_584DB0` @175429:
+`sub_5929E0`(2B)+`sub_592920`(1B)= `s16 game_id, u8 stage` 3B ✓。475
+consumer `sub_584E80` **本體零讀取**(僅 `sub_457380` 列表刷新)⇒ body
+在解析面之下 → TS echo game_id/stage + status=1(文件記錄形)。
 | 476 | `GG_GAMECENTER_GAME_END_REQ` | `sub_564930` | C2S | `s16 game_id, raw24 score_data, raw44 stats_data` |
 | 477 | `GG_GAMECENTER_GAME_END_ACK` | `sub_564A00` / `sub_76E450` | S2C | `s16 game_id, raw32, raw44, s16, s32 high_score, raw24, raw8, s32 score, s32 reward_gp, s32 reward_exp, s32 rank, s8, u8, u8, s8, s8` |
 | 478 | `GG_GAMECENTER_GAME_PLAY_CHECK_REQ` | `sub_564A40` | C2S | `raw36 check_data` (小遊戲反作弊心跳) |
