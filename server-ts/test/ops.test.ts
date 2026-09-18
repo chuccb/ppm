@@ -12,6 +12,8 @@ import { Result, type GameServer } from "../src/ops/s2c/GL_LOGIN_ACK.ts";
 import { read as readCredentials } from "../src/ops/c2s/GL_LOGIN_REQ.ts";
 import dataRecvCompletedRequest from "../src/ops/c2s/GL_DATA_RECV_COMPLETED_REQ.ts";
 import msgDelRequest from "../src/ops/c2s/GL_MSG_DEL_REQ.ts";
+import friendAddRequest from "../src/ops/c2s/GL_FRIEND_ADD_REQ.ts";
+import friendDelRequest from "../src/ops/c2s/GL_FRIEND_DEL_REQ.ts";
 import msgReadRequest from "../src/ops/c2s/GL_MSG_READ_REQ.ts";
 import userListRequest from "../src/ops/c2s/GL_USERLIST_REQ.ts";
 
@@ -87,6 +89,65 @@ describe("421/423 — mailbox key requests", () => {
     expect(() =>
       pipeline(msgReadRequest, new Packet(opcodeFor("GL_MSG_READ_REQ")).str(""), []),
     ).toThrow(/non-empty/);
+  });
+});
+
+describe("429/431 — friend key requests", () => {
+  const mkConnection = (replies: unknown[][], nickname: string | null) => ({
+    reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    accountId: nickname === null ? null : 42,
+    config: { store: { ensurePlayerIdentity: () => (nickname === null ? null : { nickname }) } },
+  }) as unknown as Parameters<typeof friendAddRequest>[1];
+
+  test("429 answers the native else arm (5), status 1 only for the self nickname", () => {
+    const replies: unknown[][] = [];
+    friendAddRequest(
+      reread(new Packet(opcodeFor("GL_FRIEND_ADD_REQ")).str("frnd")),
+      mkConnection(replies, null),
+    );
+    expect(replies).toEqual([["GL_FRIEND_ADD_ACK", 5, "frnd"]]);
+
+    const selfReplies: unknown[][] = [];
+    friendAddRequest(
+      reread(new Packet(opcodeFor("GL_FRIEND_ADD_REQ")).str("hero")),
+      mkConnection(selfReplies, "hero"),
+    );
+    expect(selfReplies).toEqual([["GL_FRIEND_ADD_ACK", 1, "hero"]]);
+
+    // native send gate: non-empty with strlen <= 23
+    const gateReplies: unknown[][] = [];
+    friendAddRequest(
+      reread(new Packet(opcodeFor("GL_FRIEND_ADD_REQ")).str("n".repeat(23))),
+      mkConnection(gateReplies, null),
+    );
+    expect(gateReplies).toEqual([["GL_FRIEND_ADD_ACK", 5, "n".repeat(23)]]);
+    expect(() =>
+      friendAddRequest(reread(new Packet(opcodeFor("GL_FRIEND_ADD_REQ")).str("n".repeat(24))), mkConnection([], null)),
+    ).toThrow(/23-byte/);
+    expect(() =>
+      friendAddRequest(
+        reread(new Packet(opcodeFor("GL_FRIEND_ADD_REQ")).str("frnd").u8(0)),
+        mkConnection([], null),
+      ),
+    ).toThrow(/trailing/);
+    expect(() =>
+      friendAddRequest(reread(new Packet(opcodeFor("GL_FRIEND_ADD_REQ")).str("")), mkConnection([], null)),
+    ).toThrow(/non-empty/);
+  });
+
+  test("431 always answers the native failure arm (2) with the echoed key", () => {
+    const replies: unknown[][] = [];
+    friendDelRequest(
+      reread(new Packet(opcodeFor("GL_FRIEND_DEL_REQ")).str("frnd")),
+      mkConnection(replies, null),
+    );
+    expect(replies).toEqual([["GL_FRIEND_DEL_ACK", 2, "frnd"]]);
+    expect(() =>
+      friendDelRequest(reread(new Packet(opcodeFor("GL_FRIEND_DEL_REQ")).str("")), mkConnection([], null)),
+    ).toThrow(/non-empty/);
+    expect(() =>
+      friendDelRequest(reread(new Packet(opcodeFor("GL_FRIEND_DEL_REQ")).str("n".repeat(24))), mkConnection([], null)),
+    ).toThrow(/23-byte/);
   });
 });
 
@@ -541,8 +602,8 @@ describe("registry", () => {
   });
 
   test("the registry exposes both operation folders at startup", () => {
-    expect(summary()).toMatch(/^c2s 21 \(/);
-    expect(summary()).toMatch(/\), s2c 24 \(/);
+    expect(summary()).toMatch(/^c2s 23 \(/);
+    expect(summary()).toMatch(/\), s2c 26 \(/);
     expect(summary()).toContain("GL_LOGIN_ACK");
     expect(summary()).toContain("GL_LOGIN_REQ");
   });

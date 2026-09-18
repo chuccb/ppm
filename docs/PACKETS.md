@@ -2566,15 +2566,22 @@ trailing bytes;cap 為原生 char[20] 信箱 key 槽=19B,TS 永不出 >19B key)�
 回送 key 字串;422/424 s2c builder emit `{u8 statusRaw, strMax(key,19)}`。
 statusRaw 只證零/非零二分,勿造 status enum。
     prove this key/state transition, not a server database column named `msg_id`.
-429 GL_FRIEND_ADD_REQ (builder): str characterName/key
+429 GL_FRIEND_ADD_REQ (builder `sub_55A860`): str characterName/key, sent only
+    when non-empty with `strlen <= 23` and the local self (`sub_537740`, note
+    `0x1E5`) / duplicate (`sub_538200`, `0x1E6`) checks pass.
 430 GL_FRIEND_ADD_ACK (sub_55AA90): `u8 statusRaw, str characterName/key`
     Native status branches select resource IDs `0x1E8..0x1EC`, status 0 inserts the
     returned string into the 100-entry local friend table, and every response sends
     an empty 433 refresh request. Do not assign a complete result-code policy from
     the status values alone.
-431 GL_FRIEND_DEL_REQ: str characterName/key → 432 ACK (sub_55AE10):
+431 GL_FRIEND_DEL_REQ (builder `sub_55AD00`): str characterName/key → 432 ACK (sub_55AE10):
     `u8 statusRaw, str characterName/key`; status 0 removes the key from the local
     friend table and sends 433, while nonzero statuses only select localized paths.
+**TS 對位 (2026-09-18)**: 429/431 c2s 模組解析恰一個非空 `str key`(拒絕
+trailing bytes;cap=原生 `strlen <= 23` 送件閘;原生 24B ACK 讀入穩妥)。
+TS 無 friend table ⇒ 永不回 success 臂;429 以 self nickname 判定回 status 1
+否則回 status 5(原生 else 臂 → `0x1EC` 未註冊字串),431 恆回 status 2
+(原生 `0x1EE` failure 字串),key 原樣回送;不造任何其他狀態碼。
 433 GL_FRIEND_LIST_REQ: 無 payload
 435 GL_FRIEND_INFO_REQ: one comma-separated string list assembled from 434
     row strings → 436 ACK (sub_55B2C0): u8 count, count×{str key, u8 online,

@@ -2,6 +2,8 @@ import { describe, expect, test } from "bun:test";
 import GL_CLIENTINFO_ACK from "../src/ops/s2c/GL_CLIENTINFO_ACK.ts";
 import GL_EXPIRE_PARTSUP_ACK from "../src/ops/s2c/GL_EXPIRE_PARTSUP_ACK.ts";
 import GL_FRIEND_LIST_ACK from "../src/ops/s2c/GL_FRIEND_LIST_ACK.ts";
+import GL_FRIEND_ADD_ACK from "../src/ops/s2c/GL_FRIEND_ADD_ACK.ts";
+import GL_FRIEND_DEL_ACK from "../src/ops/s2c/GL_FRIEND_DEL_ACK.ts";
 import GL_MSG_DEL_ACK from "../src/ops/s2c/GL_MSG_DEL_ACK.ts";
 import GL_MSG_READ_ACK from "../src/ops/s2c/GL_MSG_READ_ACK.ts";
 import GL_MSG_RECVLIST_ACK from "../src/ops/s2c/GL_MSG_RECVLIST_ACK.ts";
@@ -146,6 +148,8 @@ describe("native 198/247/255 payload snapshots", () => {
   });
 
   test("422/424 emit the exact {u8 statusRaw, str key} frames", () => {
+    expect(hex(GL_FRIEND_ADD_ACK(430, 1, "frnd").payload())).toBe("0166726E6400");
+    expect(hex(GL_FRIEND_DEL_ACK(432, 2, "frnd").payload())).toBe("0266726E6400");
     expect(hex(GL_MSG_DEL_ACK(422, 1, "mail1").payload())).toBe("016D61696C3100");
     expect(hex(GL_MSG_DEL_ACK(422, 0, "").payload())).toBe("0000");
     expect(hex(GL_MSG_READ_ACK(424, 1, "mail1").payload())).toBe("016D61696C3100");
