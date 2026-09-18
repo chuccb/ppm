@@ -2909,7 +2909,13 @@ consumer `sub_76E450`(dispatcher `sub_564A00` 只在 GunShooting local flow
 4×s32,s8,u8,u8,s8,s8 → 填 `sub_8EE1D0()` 局部統計、`dword_EE8D18` 等;
 全零 ⇒ +=0 惰性。TS 恆零結算(echo id,wire 137B)。
 | 480 | `GG_GAMECENTER_RANKING_REQ` | `sub_585320` | C2S | `s16 game_id, u8 mode` |
-| 481 | `GG_GAMECENTER_RANKING_ACK` | `sub_585080` | S2C | `s16 game_id, u8 v18, s16 v13, s32 v14, u8 count, count×(0x38 排名條目)` |
+| 481 | `GG_GAMECENTER_RANKING_ACK` | `sub_585080` | S2C | `u16 game_id, u8 v18, s16 v13, s32 v14, u8 top3_cnt(≤3), top3_cnt×0x38, u8 top10_cnt(≤0xA), top10_cnt×0x38` |
+
+**TS 對位 (2026-09-19) 480→481**: 480 builder `sub_585320` @175599
+(state==1 gate):`s16 game_id, u8 mode` = 3B ✓。481 consumer
+`sub_585080`:**雙清單**(top3≤3、top10≤0xA,各 0x38B/行,均收在條件判定
+內,超限即略)→ 舊列單 count 補正。TS 無排名持久化 ⇒ 恆
+`echo id + 全零雙 0 計數`(wire 11B),合法穿越兩個 guard。
 | 483 | `GG_GAMECENTER_GAME_START_OK_REQ` | `sub_584EC0` | C2S | `s16 game_id` |
 | 484 | `GG_GAMECENTER_GAME_START_OK_ACK` | `sub_584F70` | S2C | `s16, u8 status(1), u16 game_id, s32` |
 | 485 | `GL_GET_GAMEROOM_PROGRESSTIME_REQ` | `sub_56AD60` | C2S | `u8 room_no` (查詢戰局進行時間) |

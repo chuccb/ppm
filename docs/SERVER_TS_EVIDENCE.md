@@ -73,6 +73,7 @@ model 的地方，TS 只輸出已確認可被 client 完整消費的空 projecti
 | 423 `GL_MSG_READ_REQ` | `str key` | `sub_55A3C0` 鏡像 421 兩閘,但 `sub_537E90(...)==0`(未讀才送)。TS 對位與 421 相同。 | `sub_55A3C0`、`sub_55A4F0` ACK consumer；HIGH for wire gate/shape, UNRESOLVED status enum beyond zero/nonzero |
 | 424 `GL_MSG_READ_ACK` | `u8 statusRaw, str key` | `sub_55A4F0`: status 非零→`sub_537D20` 寫 `89` 標記;零→彈 resource `0x1E4`。builder emit `{u8 statusRaw, strMax(key,19)}`;status enum 不造。 | `sub_55A4F0`、`sub_537D20`；HIGH |
 | 783 `GL_NEW_MSG_COUNT_REQ` | (空) | builder `sub_5643E0` ✓。784 `sub_564480`:單 `s32`→`dword_F0C104`,`!=0` 切 UI 新信件指標。TS 信箱恆空 ⇒ 回 `s32(0)`。 | `sub_5643E0`/`sub_564480`；HIGH |
+| 480 `GG_GAMECENTER_RANKING_REQ` | `s16 game_id, u8 mode` | builder `sub_585320` @175599(state gate;3B 驗證)。481 `sub_585080`:雙清單 top3(≤3)/top10(≤0xA)各 0x38B/行,均收在判定內 ⇒ 舊列補正;TS 恆 echo id+雙 0(wire 11B)。 | 本體行級;HIGH |
 | 478 `GG_GAMECENTER_GAME_PLAY_CHECK_REQ` | `raw36` | builder `sub_564A40` @160362(0x24 驗證);全檔無 479 consumer(無 case/ctor)⇒ TS 解析後刻意沉默(同 689)。 | builder 本體 + 全檔 consumer 掃描;HIGH |
 | 476 `GG_GAMECENTER_GAME_END_REQ` | `s16 game_id, raw24, raw44` | builder `sub_564930` @160332(2B+0x18+0x2C=70B 驗證)。477 `sub_76E450`:無臂 137B 恆讀(u16,raw32,raw44,u16,s32,raw24,raw8,4×s32,s8,u8,u8,s8,s8)→ sub_8EE1D0/錢包 += 全零惰性 ⇒ TS 恆零結算。 | 兩體行級+寬度掃描;HIGH |
 | 474 `GG_GAMECENTER_GAME_START_REQ` | `s16 game_id, u8 stage` | builder `sub_584DB0` @175429(2B+1B 驗證)。475 `sub_584E80` 零讀取(僅 UI 刷新)⇒ TS echo+status=1。 | 本體行級;HIGH |

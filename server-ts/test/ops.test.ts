@@ -28,6 +28,7 @@ import changeChannelRequest from "../src/ops/c2s/GL_CHANGECHANNEL_REQ.ts";
 import changeSkillItemSlotRequest from "../src/ops/c2s/GI_CHANGE_SKILLITEMSLOT_REQ.ts";
 import gamecenterGameEndRequest from "../src/ops/c2s/GG_GAMECENTER_GAME_END_REQ.ts";
 import gamecenterPlayCheckRequest from "../src/ops/c2s/GG_GAMECENTER_GAME_PLAY_CHECK_REQ.ts";
+import gamecenterRankingRequest from "../src/ops/c2s/GG_GAMECENTER_RANKING_REQ.ts";
 import gamecenterGameStartRequest from "../src/ops/c2s/GG_GAMECENTER_GAME_START_REQ.ts";
 import gamecenterRecRequest from "../src/ops/c2s/GL_GAMECENTER_REC_REQ.ts";
 import deleteGiftRequest from "../src/ops/c2s/GS_DELETEGIFT_REQ.ts";
@@ -919,6 +920,38 @@ describe("478 — gamecenter play-check request", () => {
   });
 });
 
+describe("480 — gamecenter ranking request", () => {
+  test("480 parses {s16 game_id, u8 mode} and echoes the zero board", () => {
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof gamecenterRankingRequest>[1];
+    gamecenterRankingRequest(
+      reread(new Packet(opcodeFor("GG_GAMECENTER_RANKING_REQ")).s16(7).u8(1)),
+      connection,
+    );
+    expect(replies).toEqual([["GG_GAMECENTER_RANKING_ACK", 7]]);
+  });
+
+  test("480 refuses wrong payload widths", () => {
+    const connection = {
+      reply: () => undefined,
+    } as unknown as Parameters<typeof gamecenterRankingRequest>[1];
+    expect(() =>
+      gamecenterRankingRequest(
+        reread(new Packet(opcodeFor("GG_GAMECENTER_RANKING_REQ")).s16(7)),
+        connection,
+      ),
+    ).toThrow(/480/);
+    expect(() =>
+      gamecenterRankingRequest(
+        reread(new Packet(opcodeFor("GG_GAMECENTER_RANKING_REQ")).s16(7).u8(1).u8(0)),
+        connection,
+      ),
+    ).toThrow(/480/);
+  });
+});
+
 describe("834 — data-recv-completed request", () => {
   test("consumes the propagated raw4 context and replies with an empty 835", () => {
     const replies: string[] = [];
@@ -1370,8 +1403,8 @@ describe("registry", () => {
   });
 
   test("the registry exposes both operation folders at startup", () => {
-    expect(summary()).toMatch(/^c2s 48 \(/);
-    expect(summary()).toMatch(/\), s2c 48 \(/);
+    expect(summary()).toMatch(/^c2s 49 \(/);
+    expect(summary()).toMatch(/\), s2c 49 \(/);
     expect(summary()).toContain("GL_LOGIN_ACK");
     expect(summary()).toContain("GL_LOGIN_REQ");
   });
