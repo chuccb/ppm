@@ -1,5 +1,5 @@
 /**
- * Process bootstrap: environment, UDP control, SQLite, then the two TCP
+ * Process bootstrap: environment, UDP register listener, SQLite, then the two TCP
  * handshakes. Packet modules own wire fields; this file owns deployment policy.
  */
 
@@ -9,7 +9,7 @@ import { OPCODE_COUNT } from "./opcodes.ts";
 import { summary } from "./ops/registry.ts";
 import type { GameServer } from "./ops/s2c/GL_LOGIN_ACK.ts";
 import { Store } from "./store.ts";
-import { UdpControlServer } from "./udp.ts";
+import { UdpRegisterServer } from "./udp.ts";
 
 function integerEnv(name: string, fallback: number, min: number, max: number): number {
   const raw = Bun.env[name];
@@ -40,7 +40,7 @@ const log = (message: string): void => {
 
 const store = new Store(env.dbPath);
 const admissions = new ChannelAdmissionRegistry();
-const udpServer = await UdpControlServer.listen({
+const udpServer = await UdpRegisterServer.listen({
   hostname: env.host,
   port: env.udpPort,
   log,
@@ -98,7 +98,7 @@ const channelServer = listen({
 });
 
 log(`login on ${env.host}:${env.loginPort}, channel on ${env.host}:${env.channelPort}`);
-log(`udp control on ${env.host}:${udpServer.port} (private 19 -> 20 only)`);
+log(`udp register on ${env.host}:${udpServer.port} (UDP_REGISTER 19 -> 20 only)`);
 log(`${OPCODE_COUNT} opcodes known; ${summary()}`);
 log(`sqlite ${store.sqliteVersion} at ${env.dbPath}`);
 log(`bun ${Bun.version} (${Bun.revision.slice(0, 9)})`);

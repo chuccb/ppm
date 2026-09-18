@@ -11,7 +11,7 @@ import { opcodeFor, opcodeName } from "./opcodes.ts";
 import { build, handlerFor, type OutboundArgs, type OutboundName } from "./ops/registry.ts";
 import type { Store } from "./store.ts";
 import type { GameServer } from "./ops/s2c/GL_LOGIN_ACK.ts";
-import type { Type3Tail } from "./ops/s2c/GC_ENTERCHANNEL_ACK.ts";
+import type { Endpoint, Type3Tail } from "./ops/s2c/GC_ENTERCHANNEL_ACK.ts";
 
 export const PING_INTERVAL_MS = 15_000;
 export const PING_TIMEOUT_MS = 60_000;
@@ -31,10 +31,7 @@ export interface ChannelConfig {
   readonly activeChannelIndex: number;
   /** Native wire `channel_id` (196). */
   readonly channelId: number;
-  readonly endpoint: {
-    readonly host: string;
-    readonly port: number;
-  };
+  readonly endpoint: Endpoint;
   /** Native wire `channel_type` / 681 `ch_type`. */
   readonly channelType: number;
   readonly type3Tail?: Type3Tail;

@@ -1,15 +1,15 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { Packet, decode } from "../src/packet.ts";
-import { UdpControlServer, readUdpControlRequest } from "../src/udp.ts";
+import { UdpRegisterServer, readUdpRegisterRequest } from "../src/udp.ts";
 
-let server: UdpControlServer | undefined;
+let server: UdpRegisterServer | undefined;
 
 afterEach(() => {
   server?.stop();
   server = undefined;
 });
 
-describe("private UDP control", () => {
+describe("UDP_REGISTER 19<->20", () => {
   test("reads the complete source-proven opcode 19 body", () => {
     const reader = decode(
       new Packet(19)
@@ -22,23 +22,23 @@ describe("private UDP control", () => {
         .encode(),
     );
 
-    expect(readUdpControlRequest(reader)).toEqual({
+    expect(readUdpRegisterRequest(reader)).toEqual({
       activeChannelIndex: 0,
-      currentRoomSlot: 4,
-      sourceModeEqualsTwoFlag: 0,
-      sourceDependentSlot: 4,
-      clientReportedPlayerId: 123,
-      localNickname: "alice",
+      roomSlot: 4,
+      modeEqualsTwoFlag: 0,
+      depSlot: 4,
+      playerId: 123,
+      nickname: "alice",
     });
   });
 
   test("requires the observed -2 sentinel on the special branch", () => {
     const reader = decode(new Packet(19).u8(0).u8(0).s8(1).s8(0).s32(1).str("a").encode());
-    expect(() => readUdpControlRequest(reader)).toThrow(/-2/);
+    expect(() => readUdpRegisterRequest(reader)).toThrow(/-2/);
   });
 
   test("answers opcode 19 with an encrypted empty opcode 20", async () => {
-    server = await UdpControlServer.listen({ hostname: "127.0.0.1", port: 0, log: () => {} });
+    server = await UdpRegisterServer.listen({ hostname: "127.0.0.1", port: 0, log: () => {} });
 
     const response = new Promise<Uint8Array>((resolve) => {
       void Bun.udpSocket({

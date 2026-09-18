@@ -19,9 +19,10 @@
  */
 
 import { Packet } from "../../packet.ts";
+import type { Endpoint } from "./GC_ENTERCHANNEL_ACK.ts";
 
 export interface ConnectInfo {
-  readonly endpoint: { readonly host: string; readonly port: number };
+  readonly endpoint: Endpoint;
   readonly activeChannelIndex: number;
   readonly serverTime: Date;
 }
