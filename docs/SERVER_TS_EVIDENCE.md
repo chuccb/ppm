@@ -73,6 +73,8 @@ model 的地方，TS 只輸出已確認可被 client 完整消費的空 projecti
 | 423 `GL_MSG_READ_REQ` | `str key` | `sub_55A3C0` 鏡像 421 兩閘,但 `sub_537E90(...)==0`(未讀才送)。TS 對位與 421 相同。 | `sub_55A3C0`、`sub_55A4F0` ACK consumer；HIGH for wire gate/shape, UNRESOLVED status enum beyond zero/nonzero |
 | 424 `GL_MSG_READ_ACK` | `u8 statusRaw, str key` | `sub_55A4F0`: status 非零→`sub_537D20` 寫 `89` 標記;零→彈 resource `0x1E4`。builder emit `{u8 statusRaw, strMax(key,19)}`;status enum 不造。 | `sub_55A4F0`、`sub_537D20`；HIGH |
 | 783 `GL_NEW_MSG_COUNT_REQ` | (空) | builder `sub_5643E0` ✓。784 `sub_564480`:單 `s32`→`dword_F0C104`,`!=0` 切 UI 新信件指標。TS 信箱恆空 ⇒ 回 `s32(0)`。 | `sub_5643E0`/`sub_564480`；HIGH |
+| 718 `GR_START_VOTING_REQ` | `3×s32`(12B) | builder `sub_A191D0` @701039(state==3 gate;房 socket)。719 consumer = 共用 `sub_9BF430` case 719:`u8 status` vtable+12 無臂 ⇒ TS 恆 `status=0`。720=`4×s32+u8`(sub_592AC0=4B)、722=`s32+s8`、723=`s8+s32`(補記)皆 push,TS 不發。 | builder/consumer/dispatcher 三體行級;HIGH |
+| 721 `GR_DO_VOTING` | `u8 vote` | builder `sub_A192B0` @701061:`sub_5928E0`(1B 驗證)。無 active session ⇒ 解析後沉默不發 722(同 689 政策)。 | 本體行級;HIGH |
 | 485 `GL_GET_GAMEROOM_PROGRESSTIME_REQ` | `u8 room_no` | builder `sub_56AD60` @163685(1B 驗證)。486 `sub_56AE30`:n3==2→4B;n3∈{0,1,4}→9/11B 行+門檻尾;其他 n3→規格化 3 跳渲染 ⇒ TS 恆 `n3=3`(wire 1B)。 | 本體臂型行級;HIGH;PACKETS 列改臂型記法 |
 | 483 `GG_GAMECENTER_GAME_START_OK_REQ` | `s16 game_id` | builder `sub_584EC0` @175469(2B 驗證)。484 `sub_584F70`:無臂 9B 恆讀(status 讀而不耗)⇒ TS echo+status=1+0(wire 9B)。 | 本體行級;HIGH |
 | 480 `GG_GAMECENTER_RANKING_REQ` | `s16 game_id, u8 mode` | builder `sub_585320` @175599(state gate;3B 驗證)。481 `sub_585080`:雙清單 top3(≤3)/top10(≤0xA)各 0x38B/行,均收在判定內 ⇒ 舊列補正;TS 恆 echo id+雙 0(wire 11B)。 | 本體行級;HIGH |

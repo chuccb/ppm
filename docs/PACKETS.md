@@ -2700,6 +2700,15 @@ else** ⇒ status=0 完全沉默;≠0 才再讀 `u8 target_slot`(room-view 時�
 | 720 | `GR_START_VOTING` | `sub_9BF430` | S2C | `s32 target, s32 reason, s32 initiator, s32 duration, u8 team` (廣播) |
 | 721 | `GR_DO_VOTING` | `sub_A192B0` | C2S | `u8 vote` (1=同意, 2=反對) |
 | 722 | `GR_VOTING_RESULT` | `sub_9BF430` | S2C | `s32 target, u8 result` (1=通過踢出, 0=否決) |
+
+**TS 對位 (2026-09-19) 投票系**: 718 builder `sub_A191D0` @701039(local
+state==3 gate;房 socket `sub_58D7D0`):3× `sub_592A20`=12B ✓;721 builder
+`sub_A192B0`:`sub_5928E0` 1B vote ✓。consumer = 共用 dispatcher
+`sub_9BF430`:case 719=`u8 status`→vtable+12(無臂);case 720=
+`3×s32 + sub_592AC0(4B 驗證)s32 duration + u8 team`=17B;case 722=
+`s32 target + s8 result`;**case 723 (GR_END_RESULT)=`s8+s32`**(補記)。
+TS 無 voting-session ⇒ 718→719 恆 `status=0`;721 解析後沉默;720/722/723
+皆 server-initiated push,TS 不發。
 | 214 | `GM_CREATECHAR_REQ` | `sub_572EB0`（舊記 `sub_532AA0` 在任一份 dump 皆不存在，本輪更正） | C2S | `u8 char_type, s16 hair, s16 face, s16 coat`（builder 依序 `sub_592920` + 3×`sub_5929E0`，共 7 B）|
 | 215 | `GM_CREATECHAR_ACK` | `sub_572F80` | S2C | `u8 status(0=成功)` |
 | 218 | `GI_CHANGEDATA_REQ` | `sub_572FC0` | C2S | `u8 char_slot, u8 count(≤0x14), count×26B {u8 slot, u8 flagRaw, 12×u16 rawWords}` |

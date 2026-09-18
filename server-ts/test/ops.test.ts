@@ -30,6 +30,8 @@ import gamecenterGameEndRequest from "../src/ops/c2s/GG_GAMECENTER_GAME_END_REQ.
 import gamecenterPlayCheckRequest from "../src/ops/c2s/GG_GAMECENTER_GAME_PLAY_CHECK_REQ.ts";
 import gamecenterGameStartOkRequest from "../src/ops/c2s/GG_GAMECENTER_GAME_START_OK_REQ.ts";
 import gameRoomProgressTimeRequest from "../src/ops/c2s/GL_GET_GAMEROOM_PROGRESSTIME_REQ.ts";
+import doVotingRequest from "../src/ops/c2s/GR_DO_VOTING.ts";
+import startVotingRequest from "../src/ops/c2s/GR_START_VOTING_REQ.ts";
 import gamecenterRankingRequest from "../src/ops/c2s/GG_GAMECENTER_RANKING_REQ.ts";
 import gamecenterGameStartRequest from "../src/ops/c2s/GG_GAMECENTER_GAME_START_REQ.ts";
 import gamecenterRecRequest from "../src/ops/c2s/GL_GAMECENTER_REC_REQ.ts";
@@ -1012,6 +1014,50 @@ describe("485 — gameroom progress-time request", () => {
   });
 });
 
+describe("718/721 — voting requests", () => {
+  test("718 parses 3 x s32 and replies status=0 (no voting model)", () => {
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof startVotingRequest>[1];
+    startVotingRequest(
+      reread(new Packet(opcodeFor("GR_START_VOTING_REQ")).s32(1).s32(2).s32(3)),
+      connection,
+    );
+    expect(replies).toEqual([["GR_START_VOTING_ACK", 0]]);
+  });
+
+  test("718 refuses wrong payload widths", () => {
+    const connection = {
+      reply: () => undefined,
+    } as unknown as Parameters<typeof startVotingRequest>[1];
+    expect(() =>
+      startVotingRequest(
+        reread(new Packet(opcodeFor("GR_START_VOTING_REQ")).s32(1)),
+        connection,
+      ),
+    ).toThrow(/718/);
+  });
+
+  test("721 parses the u8 vote and stays silent (no active session)", () => {
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof doVotingRequest>[1];
+    doVotingRequest(
+      reread(new Packet(opcodeFor("GR_DO_VOTING")).u8(1)),
+      connection,
+    );
+    expect(replies).toEqual([]);
+    expect(() =>
+      doVotingRequest(
+        reread(new Packet(opcodeFor("GR_DO_VOTING")).u8(1).u8(0)),
+        connection,
+      ),
+    ).toThrow(/721/);
+  });
+});
+
 describe("834 — data-recv-completed request", () => {
   test("consumes the propagated raw4 context and replies with an empty 835", () => {
     const replies: string[] = [];
@@ -1463,8 +1509,8 @@ describe("registry", () => {
   });
 
   test("the registry exposes both operation folders at startup", () => {
-    expect(summary()).toMatch(/^c2s 51 \(/);
-    expect(summary()).toMatch(/\), s2c 51 \(/);
+    expect(summary()).toMatch(/^c2s 53 \(/);
+    expect(summary()).toMatch(/\), s2c 52 \(/);
     expect(summary()).toContain("GL_LOGIN_ACK");
     expect(summary()).toContain("GL_LOGIN_REQ");
   });
