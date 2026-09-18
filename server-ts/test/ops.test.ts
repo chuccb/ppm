@@ -23,6 +23,7 @@ import friendInfoRequest from "../src/ops/c2s/GL_FRIEND_INFO_REQ.ts";
 import friendWhereRequest from "../src/ops/c2s/GL_FRIEND_WHERE_REQ.ts";
 import msgReadRequest from "../src/ops/c2s/GL_MSG_READ_REQ.ts";
 import billTokenRequest from "../src/ops/c2s/GL_BILLTOKEN_REQ.ts";
+import forceoutRequest from "../src/ops/c2s/GR_FORCEOUT_REQ.ts";
 import questAcceptDailyRequest from "../src/ops/c2s/GQ_QUEST_ACCEPT_DAILY_REQ.ts";
 import questUserCompleteHonorRequest from "../src/ops/c2s/GQ_QUEST_USER_COMPLETE_HONOR_REQ.ts";
 import rackingWebTokenRequest from "../src/ops/c2s/GL_RACKINGWEB_TOKEN_REQ.ts";
@@ -546,6 +547,35 @@ describe("876/878 — quest requests", () => {
   });
 });
 
+describe("131 — forceout request", () => {
+  test("131 parses one u8 slot and replies status=0 (silent arm, no room model)", () => {
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof forceoutRequest>[1];
+    forceoutRequest(
+      reread(new Packet(opcodeFor("GR_FORCEOUT_REQ")).u8(3)),
+      connection,
+    );
+    expect(replies).toEqual([["GR_FORCEOUT_ACK", 0]]);
+  });
+
+  test("131 refuses empty or longer payloads", () => {
+    const connection = {
+      reply: () => undefined,
+    } as unknown as Parameters<typeof forceoutRequest>[1];
+    expect(() =>
+      forceoutRequest(reread(new Packet(opcodeFor("GR_FORCEOUT_REQ"))), connection),
+    ).toThrow(/131/);
+    expect(() =>
+      forceoutRequest(
+        reread(new Packet(opcodeFor("GR_FORCEOUT_REQ")).u8(3).u8(0)),
+        connection,
+      ),
+    ).toThrow(/131/);
+  });
+});
+
 describe("834 — data-recv-completed request", () => {
   test("consumes the propagated raw4 context and replies with an empty 835", () => {
     const replies: string[] = [];
@@ -997,8 +1027,8 @@ describe("registry", () => {
   });
 
   test("the registry exposes both operation folders at startup", () => {
-    expect(summary()).toMatch(/^c2s 37 \(/);
-    expect(summary()).toMatch(/\), s2c 38 \(/);
+    expect(summary()).toMatch(/^c2s 38 \(/);
+    expect(summary()).toMatch(/\), s2c 39 \(/);
     expect(summary()).toContain("GL_LOGIN_ACK");
     expect(summary()).toContain("GL_LOGIN_REQ");
   });

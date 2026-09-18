@@ -2686,6 +2686,13 @@ writer ⇒ 空 wire。788 有三訂閱點:`sub_407360` @6565 是**唯一讀 payl
 | 371 | `GL_CHANGECHANNEL_ACK` | `sub_570100` | S2C | `u8 status, u8 channel_id, str host_ip, s32 host_port, u8 extra`; client passes this independently to `sub_596E60` (secondary UDP address field). Its relation to successful-196 primary endpoint is **UNRESOLVED**; do not merge endpoint state. |
 | 131 | `GR_FORCEOUT_REQ` | `sub_56EC10` | C2S | `u8 target_slot` (房主踢人) |
 | 132 | `GR_FORCEOUT_ACK` | `sub_56ECC0` | S2C | `u8 status(1), u8 target_slot` (廣播並移除成員) |
+
+**TS 對位 (2026-09-19)**: 131 builder `sub_56EC10` @165201:ctor→
+`sub_592920`(1B 本體驗證)→send ⇒ wire = 恰 1B `u8 target_slot`。132
+consumer `sub_56ECC0`:先讀 `u8 status`,**全體包在 `if(status!=0)`,無
+else** ⇒ status=0 完全沉默;≠0 才再讀 `u8 target_slot`(room-view 時再
+讀兩組 `{s32, str}` 成員詳情)。TS 無房間成員/房主模型 ⇒ 恆回
+`status=0`(wire `00`),踢人不廣播。
 | 718 | `GR_START_VOTING_REQ` | `sub_A191D0` | C2S | `s32 target_slot, s32 reason, s32 initiator_slot` |
 | 719 | `GR_START_VOTING_ACK` | `sub_9BF430` | S2C | `u8 status(1)` (給發起人) |
 | 720 | `GR_START_VOTING` | `sub_9BF430` | S2C | `s32 target, s32 reason, s32 initiator, s32 duration, u8 team` (廣播) |

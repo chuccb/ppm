@@ -9,6 +9,7 @@ import GL_BILLTOKEN_ACK from "../src/ops/s2c/GL_BILLTOKEN_ACK.ts";
 import GL_RACKINGWEB_TOKEN_ACK from "../src/ops/s2c/GL_RACKINGWEB_TOKEN_ACK.ts";
 import GQ_QUEST_ACCEPT_DAILY_ACK from "../src/ops/s2c/GQ_QUEST_ACCEPT_DAILY_ACK.ts";
 import GQ_QUEST_USER_COMPLETE_HONOR_ACK from "../src/ops/s2c/GQ_QUEST_USER_COMPLETE_HONOR_ACK.ts";
+import GR_FORCEOUT_ACK from "../src/ops/s2c/GR_FORCEOUT_ACK.ts";
 import GL_LEVEL_KILL_LIMIT_ACK from "../src/ops/s2c/GL_LEVEL_KILL_LIMIT_ACK.ts";
 import GL_TUTORIALINDEX_ACK from "../src/ops/s2c/GL_TUTORIALINDEX_ACK.ts";
 import GL_VOICEITEMSLOT_ACK from "../src/ops/s2c/GL_VOICEITEMSLOT_ACK.ts";
@@ -171,6 +172,8 @@ describe("native 198/247/255 payload snapshots", () => {
     expect(() => GQ_QUEST_ACCEPT_DAILY_ACK(877, 1 as never)).toThrow(RangeError);
     expect(hex(GQ_QUEST_USER_COMPLETE_HONOR_ACK(879).payload())).toBe("01");
     expect(() => GQ_QUEST_USER_COMPLETE_HONOR_ACK(879, 0 as never)).toThrow(RangeError);
+    expect(hex(GR_FORCEOUT_ACK(132).payload())).toBe("00");
+    expect(() => GR_FORCEOUT_ACK(132, 1 as never)).toThrow(RangeError);
     expect(hex(GL_NEW_MSG_COUNT_ACK(784, 0).payload())).toBe("00000000");
     expect(hex(GL_VOICEITEMSLOT_ACK(792, 0).payload())).toBe("0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
     expect(hex(GL_FRIEND_WHERE_ACK(442, 0).payload())).toBe("00");
