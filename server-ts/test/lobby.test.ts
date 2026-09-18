@@ -341,6 +341,7 @@ describe("lobby bootstrap packets", () => {
     expect(rooms.remaining).toBe(0);
 
     expect(decode(build("GL_SHOPIN_ACK").encode()).remaining).toBe(0);
+    expect(decode(build("GL_DATA_RECV_COMPLETED_ACK").encode()).remaining).toBe(0);
 
     const friends = decode(build("GL_FRIEND_LIST_ACK", "alice").encode());
     expect(friends.u16()).toBe(0);

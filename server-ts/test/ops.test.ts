@@ -10,6 +10,7 @@ import {
 } from "../src/ops/registry.ts";
 import { Result, type GameServer } from "../src/ops/s2c/GL_LOGIN_ACK.ts";
 import { read as readCredentials } from "../src/ops/c2s/GL_LOGIN_REQ.ts";
+import dataRecvCompletedRequest from "../src/ops/c2s/GL_DATA_RECV_COMPLETED_REQ.ts";
 import userListRequest from "../src/ops/c2s/GL_USERLIST_REQ.ts";
 
 const build = <N extends OutboundName>(name: N, ...args: OutboundArgs<N>) =>
@@ -51,6 +52,27 @@ describe("694 — compression threshold and login trigger", () => {
     expect(reread(buildPacket("GL_ACCOUNTCONNSUCC", 0)).u16()).toBe(0);
     expect(() => buildPacket("GL_ACCOUNTCONNSUCC", 0x10000)).toThrow(RangeError);
     expect(() => buildPacket("GL_ACCOUNTCONNSUCC", 1.5)).toThrow(RangeError);
+  });
+});
+
+describe("834 — data-recv-completed request", () => {
+  test("consumes the propagated raw4 context and replies with an empty 835", () => {
+    const replies: string[] = [];
+    const connection = {
+      reply: (name: string) => replies.push(name),
+    } as unknown as Parameters<typeof dataRecvCompletedRequest>[1];
+
+    dataRecvCompletedRequest(
+      reread(new Packet(opcodeFor("GL_DATA_RECV_COMPLETED_REQ")).s32(0x1122_3344)),
+      connection,
+    );
+    expect(replies).toEqual(["GL_DATA_RECV_COMPLETED_ACK"]);
+    expect(() =>
+      dataRecvCompletedRequest(
+        reread(new Packet(opcodeFor("GL_DATA_RECV_COMPLETED_REQ")).s32(0).u8(1)),
+        connection,
+      ),
+    ).toThrow(/trailing/);
   });
 });
 
