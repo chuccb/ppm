@@ -15,6 +15,7 @@
 | 1 | admission 681 / TCP grooming / login trio | `b9f02d5f` | `SERVER_TS_EVIDENCE.md` 192 行 ledger;681 Result 表; server-list s16 定向;693 區段補正(greeting 型別/ v6 spin-lock) |
 | 2 | channel handshake 143/144/195/196 | `3fad207c` | 144 case 108=0x11D/result 0=0x42/3=0xA4+7082;196 result 6→0x3A6/8→0x3A7;`client_identity` String[24]=AccountName(PaperMan.exe.c:2241) |
 | 3 | 大廳同步序列（本節詳記） | `8e3c66e7` | PACKETS §3.15pre-3;原生命令行 197→199→834 定序 |
+| 32 | **476→477 gamecenter-end(137B 無臂恆讀)** | (本次) | 476 `sub_564930`:70B(2+0x18+0x2C)✓;477 `sub_76E450`:137B **無臂恆讀**(局部統計/錢包 +=0 惰性)⇒ TS 恆零結算 echo id;dispatcher 僅 GunShooting flow 路由;pins 4+1;170 測試綠,c2s 47/s2c 48 |
 | 31 | **474→475 gamecenter-start(零讀取 consumer)** | (本次) | 474 `sub_584DB0`:3B ✓;475 `sub_584E80` 零讀取(同 313 模式)⇒ echo+status=1;pins 3+1;168 測試綠,c2s 46/s2c 47 |
 | 30 | **472→473 gamecenter-rec(473 列補正：行 payload+尾部)** | (本次) | 472 `sub_584850`:2B id ✓;473 `sub_584910` 真文法:top3/top10 **各 0x38 B/行**、v35/v23=0x20/0x2C 條件 raw、尾 `v31,v32Raw,v21`——舊列缺漏 ⇒ 補正;TS 恆全零板 echo id(wire 38B);pins 4+2;166 測試綠,c2s 45/s2c 46 |
 | 29 | **466→467 skill-item-slot(domain UNRESOLVED 保持)** | (本次) | 466 `sub_5738A0`+`sub_527BA0`(0x1C):`u8 raw0,u8 raw1[,u8 raw2,7×s32]`(2B/31B 條件);467 `sub_573A70`:3 header 恆讀、row 32B 只在 dword_E650B0 存在才讀 ⇒ TS 恆 `00 00 00`;header 語義不杜撰;pins 7+2;164 測試綠,c2s 44/s2c 45 |

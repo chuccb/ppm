@@ -13,6 +13,7 @@ import GI_CHANGEDATA_ACK from "../src/ops/s2c/GI_CHANGEDATA_ACK.ts";
 import GI_CHANGESLOT_ACK from "../src/ops/s2c/GI_CHANGESLOT_ACK.ts";
 import GL_CHANGECHANNEL_ACK from "../src/ops/s2c/GL_CHANGECHANNEL_ACK.ts";
 import GI_CHANGE_SKILLITEMSLOT_ACK from "../src/ops/s2c/GI_CHANGE_SKILLITEMSLOT_ACK.ts";
+import GG_GAMECENTER_GAME_END_ACK from "../src/ops/s2c/GG_GAMECENTER_GAME_END_ACK.ts";
 import GG_GAMECENTER_GAME_START_ACK from "../src/ops/s2c/GG_GAMECENTER_GAME_START_ACK.ts";
 import GL_GAMECENTER_REC_ACK from "../src/ops/s2c/GL_GAMECENTER_REC_ACK.ts";
 import GS_DELETEGIFT_ACK from "../src/ops/s2c/GS_DELETEGIFT_ACK.ts";
@@ -197,6 +198,7 @@ describe("native 198/247/255 payload snapshots", () => {
     expect(hex(GL_GAMECENTER_REC_ACK(473, 7).payload())).toBe("0700" + "0".repeat(72));
     expect(() => GL_GAMECENTER_REC_ACK(473, 0x10000)).toThrow(RangeError);
     expect(hex(GG_GAMECENTER_GAME_START_ACK(475, 7, 1).payload())).toBe("01070001");
+    expect(hex(GG_GAMECENTER_GAME_END_ACK(477, 3).payload())).toBe("0300" + "0".repeat(270));
     expect(hex(GL_NEW_MSG_COUNT_ACK(784, 0).payload())).toBe("00000000");
     expect(hex(GL_VOICEITEMSLOT_ACK(792, 0).payload())).toBe("0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
     expect(hex(GL_FRIEND_WHERE_ACK(442, 0).payload())).toBe("00");

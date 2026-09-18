@@ -26,6 +26,7 @@ import billTokenRequest from "../src/ops/c2s/GL_BILLTOKEN_REQ.ts";
 import buyCharRequest from "../src/ops/c2s/GS_BUYCHAR_REQ.ts";
 import changeChannelRequest from "../src/ops/c2s/GL_CHANGECHANNEL_REQ.ts";
 import changeSkillItemSlotRequest from "../src/ops/c2s/GI_CHANGE_SKILLITEMSLOT_REQ.ts";
+import gamecenterGameEndRequest from "../src/ops/c2s/GG_GAMECENTER_GAME_END_REQ.ts";
 import gamecenterGameStartRequest from "../src/ops/c2s/GG_GAMECENTER_GAME_START_REQ.ts";
 import gamecenterRecRequest from "../src/ops/c2s/GL_GAMECENTER_REC_REQ.ts";
 import deleteGiftRequest from "../src/ops/c2s/GS_DELETEGIFT_REQ.ts";
@@ -851,6 +852,41 @@ describe("474 — gamecenter game-start request", () => {
   });
 });
 
+describe("476 — gamecenter game-end request", () => {
+  test("476 parses the 70-byte submission and answers the zero settlement", () => {
+    const payload = new Packet(opcodeFor("GG_GAMECENTER_GAME_END_REQ")).s16(3);
+    for (let i = 0; i < 24; i++) payload.u8(i % 4);
+    for (let i = 0; i < 44; i++) payload.u8(i % 7);
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof gamecenterGameEndRequest>[1];
+    gamecenterGameEndRequest(reread(payload), connection);
+    expect(replies).toEqual([["GG_GAMECENTER_GAME_END_ACK", 3]]);
+  });
+
+  test("476 refuses wrong payload widths", () => {
+    const connection = {
+      reply: () => undefined,
+    } as unknown as Parameters<typeof gamecenterGameEndRequest>[1];
+    expect(() =>
+      gamecenterGameEndRequest(
+        reread(new Packet(opcodeFor("GG_GAMECENTER_GAME_END_REQ")).s16(3)),
+        connection,
+      ),
+    ).toThrow(/476/);
+    expect(() =>
+      gamecenterGameEndRequest(
+        reread(new Packet(opcodeFor("GG_GAMECENTER_GAME_END_REQ")).s16(3)
+          .raw(new Uint8Array(38))
+          .raw(new Uint8Array(44))
+          .raw(new Uint8Array(1))),
+        connection,
+      ),
+    ).toThrow(/476/);
+  });
+});
+
 describe("834 — data-recv-completed request", () => {
   test("consumes the propagated raw4 context and replies with an empty 835", () => {
     const replies: string[] = [];
@@ -1302,8 +1338,8 @@ describe("registry", () => {
   });
 
   test("the registry exposes both operation folders at startup", () => {
-    expect(summary()).toMatch(/^c2s 46 \(/);
-    expect(summary()).toMatch(/\), s2c 47 \(/);
+    expect(summary()).toMatch(/^c2s 47 \(/);
+    expect(summary()).toMatch(/\), s2c 48 \(/);
     expect(summary()).toContain("GL_LOGIN_ACK");
     expect(summary()).toContain("GL_LOGIN_REQ");
   });

@@ -2896,6 +2896,13 @@ consumer `sub_584E80` **本體零讀取**(僅 `sub_457380` 列表刷新)⇒ body
 | 477 | `GG_GAMECENTER_GAME_END_ACK` | `sub_564A00` / `sub_76E450` | S2C | `s16 game_id, raw32, raw44, s16, s32 high_score, raw24, raw8, s32 score, s32 reward_gp, s32 reward_exp, s32 rank, s8, u8, u8, s8, s8` |
 | 478 | `GG_GAMECENTER_GAME_PLAY_CHECK_REQ` | `sub_564A40` | C2S | `raw36 check_data` (小遊戲反作弊心跳) |
 | 479 | `GG_GAMECENTER_GAME_PLAY_CHECK_ACK` | — | S2C | `u8 status(1)` |
+
+**TS 對位 (2026-09-19) 476→477**: 476 builder `sub_564930` @160332:
+`sub_5929E0`(2B)+`sub_592580`(0x18)+`sub_592580`(0x2C)= 70B ✓。477
+consumer `sub_76E450`(dispatcher `sub_564A00` 只在 GunShooting local flow
+==1 才轉):**全 137B 無條件讀取,無臂**:u16 id,raw32,raw44,u16,s32,raw24,raw8,
+4×s32,s8,u8,u8,s8,s8 → 填 `sub_8EE1D0()` 局部統計、`dword_EE8D18` 等;
+全零 ⇒ +=0 惰性。TS 恆零結算(echo id,wire 137B)。
 | 480 | `GG_GAMECENTER_RANKING_REQ` | `sub_585320` | C2S | `s16 game_id, u8 mode` |
 | 481 | `GG_GAMECENTER_RANKING_ACK` | `sub_585080` | S2C | `s16 game_id, u8 v18, s16 v13, s32 v14, u8 count, count×(0x38 排名條目)` |
 | 483 | `GG_GAMECENTER_GAME_START_OK_REQ` | `sub_584EC0` | C2S | `s16 game_id` |
