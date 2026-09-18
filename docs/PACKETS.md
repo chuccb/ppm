@@ -2977,6 +2977,44 @@ boundary；server reader 因此不額外收窄 nickname。n11==9 時再驅動個
 「同一 ACK 在大廳 vs 房內」的不同處理 — 佈局裡的 [n11==9]/[n11==10]
 特判全部對應此狀態機。
 
+### 3.15pre-3 大廳開機序列（lobby scene `+748` 狀態機全解 — 本輪重驗）
+
+**196==1 之後 client 的 C2S 行為（全部 native 直接證, 非推測）**：
+
+1. **250 GL_LOBBYIN_REQ（空 payload）**：由大廳 scene UI 建構函數
+   `sub_541080(-)`（載入 `ui\LOBBYMAIN.XML` + `sub_537710(byte_EE8968, 2)`
+   設狀態 2）的**尾段**送出（builder `sub_574080`，同函數再設 state 2）。
+   建構完成才進 tick 迴圈，故 250 必為本序列第一個 wire 包；251 死協定
+   （無 consumer），server 不回 ✓。
+2. **大廳 tick 引擎 `sub_488C60` 的 `*(this+748)` 狀態機**（每 tick 一個動作、
+   有 UI-ready 閘）：
+   ```
+   748=1: [UI 印 L"MYINFO"]  送 197 GL_MYINFO_REQ（空）          → 748=2
+   748=2: [gate sub_522460] [印 L"MYITEM"] 送 199 GL_MYITEM_REQ（空）→ 748=3
+   748=3: [gate] 戰績快取註冊 dword_EE8D40/44 → sub_417E30()[7..10]；
+          若 [12]>=4 記 ROOMINFO 旗標；sub_57E3F0();              → 748=4
+   748=4: 送 834 GL_DATA_RECV_COMPLETED_REQ（raw4＝dword_F2A684 —
+          **即 144 的 client_request_context 原樣回送**）       → 748=5
+   748=5: sub_407E00() + sub_91D730()（本地刷新，無封包）        → 748=6 閒置
+   ```
+   → **爆發序列 = 197 → 199 → 834**（嚴格依序、每 tick 一包）。
+3. **198 GL_MYINFO_ACK 消費者 `sub_570550` 尾段無條件**送
+   **433 GL_FRIEND_LIST_REQ**（空）；425（信箱）則由 UI/434 回收路徑觸發，
+   非開機鏈。
+4. **on-demand 請求**（使用者動作觸發，不在開機鏈）：
+   246 GL_CLIENTINFO_REQ（str nickname — 看他人資料視窗）、
+   425 GL_MSG_RECVLIST_REQ（s32 — 信箱 UI）、252 GL_SHOPIN_REQ
+   （scene 轉場,state:=3）、254 GL_INVENIN_REQ（u8 requestContextRaw,
+   state:=7）。
+5. **834 的確認鏈**：server 端答 835 `GL_DATA_RECV_COMPLETED_ACK`＝空；
+   consumer `sub_5831D0` 僅呼叫 UI 刷新 `sub_522440(dword_EE3950)`，
+   零欄位。
+
+**server-ts 對位現況**：197/199/433/425/834/246/254 的 c2s 模組線形與本
+表逐一吻合——834 reader 讀且只讀 4 bytes（raw4 通道）並註記其來源為 144；
+250/252 是 consumer-safe 臂（§3.15d3 表）；198/200/247/434/426/835 的
+S2C 投影由既有模組承擔。
+
 **官方遊戲模式表 (map_StartIndex.xml — 二十輪, 正名十七輪的猜測)**:
 ```
 modeIndex 0 = TeamDeath     (TD_, bit2)   ← 建房 111 的 u8 modeIndex 用這套
