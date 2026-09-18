@@ -7,3 +7,7 @@ db/*.db-shm
 Extracted/decrypted/
 # Generated offline SQLite databases; keep schema/tools, not local state.
 db/*.db
+
+# Local RE scratch (original binary + analysis work products)
+PaperMan.exe
+work/

@@ -543,7 +543,7 @@ distinct 顯示名 856（561 組重名 ×2..4＝期限制複製）。判別：
   **皆無 codename 表**。可行假說（Probable）＝引擎於啟動時直接
   **枚舉 Data\item.dat 之 pmFile 索引**掃描 `IG % BASE.PAP` 自登錄；
   或伺服器下發設定。私服要裝新武器時，**至少須補齊六族命名＋
-  在任意方式讓 registry 多出條目**——具體注入面列 §11.8 議程 #6。
+  在任意方式讓 registry 多出條目**——§11.2/§11.3 之 injector 面另文。
 
 ## 5b. 十六輪補充實測
 
@@ -3726,16 +3726,76 @@ hayate 面純佔位 12（41,62,63,64,82,83,86,88–92；62–64/82 為女 8 專�
 ラジオチャット一覧の其他角色頁；ミリィ獨占槽 V88（ルコットは子供ですよ！）
 語境未解（Unknown）。
 
-### 11.7 pepachi（柏青哥小遊戲）
+### 11.7 ペーパチ（pepachi）演出資源與消費鏈全閉（16 輪 — 議程 #6 定案）
 
-- 72 個 `N_N_N.swf`（三格滾輪動畫）＋ `pepachi/sound/` 4 wav（atari/reel/stop）
-  ＋ `datarevision.txt`（值同 root）。
-- **`pe-pachi_scenario.xml`＝滾輪路由表（Confirmed）**：`<Rare>`3 型、
-  `<Atari>`10 型、`<Zannen>`8 型、`<Suka>`…，各 `TypeNN` 以
-  `First/Second/Third` 指名三格 swf——中獎／殘念／落空各走不同 swf 序列。
-- native 對應面：700／900 系列 caller（`sub_8459C0`／`sub_99D0A0`；
-  `tools/verify_native_gates.py` 已錨其送出匣與等級／禮物匣閘）。**agenda**：
-  scenario 的讀取站、swf root tag 消費者、與 packet 回應的對齊。
+**命名定案（Fact）**：`pepachi/` = 官方商店「**ペーパチ**」（柏青哥式 slot 小遊戲）。
+判定證據＝三向交叉缺一便不立：①msgtableres **0x34E** 訊息「ペーパチはレベル
+「%d」以上からご利用できます。」（`tools/verify_native_gates.py` 已錨）——客户
+端唯一提及此機能的顯示字串即名「ペーパチ」；②Wiki shop 索引頁
+「販売：ペーパチ ┣CASH(金) ┗PG(銀)」——與 gates 檔『700 匣 CASH/PG 雙閘』
+對位；③`pepachi/` 企劃組頭上加 `pe-pachi` 字串於所有檔名。三者同指一物。
+
+**資產面（Fact — 77 檔）**：72 個 `N_N_N.swf`（Flash 6/FWS 未壓縮 sample
+5_3_4.swf＝1,093,791 B；三格滾輪演出片段，`0_`..`6_` 七族群）＋
+`c_Produce.swf`（「完成演出」單檔，由 scenario `ProduceSet` 特例引用）＋
+`sound/` 4 wav（reel＝滾動、stop＝停格、reel_atari＝中獎停、atari＝中獎）＋
+`datarevision.txt`＝`811034967`（與 root 相同＝同一次發版戳記）＋
+`pe-pachi_scenario.xml`。
+
+**scenario＝演出路由表（Fact）**：`<Rare>`3（00_x 群）、`<Atari>`10（主力
+5_x_x 群）、`<Zannen>`8（惜敗）、`<Suka>`28×（落空/スカ）；每 `TypeNN` 以
+`First/Second/Third` 串指三格 swf 滾輪序列（部分兩格）。**中／殘／空的「分
+級」權在伺服器判定，client 僅依 Type 播表**——與下方 native wire 閘完全互補，
+即「開獎判定 server-side、演出 client-side」的標準分工。特例：
+`<Atari Type04>` 雙例（`0_4_1`＋`5_4_1` 雙首格）、多 `ProduceSet` 變體指名
+`PM_Puzzle_c_2` 類 swf（拼圖符號滾子/「c」系＝symbol 素材）——證滾輪面額
+即紙拼圖（PaperPuzzle）零件，演出與商品綁一體。
+
+**native 消費鏈（Fact — 三錨點同一面板譜系）**：
+
+| 錨 | 函數 | 線框 | 內容 |
+|----|------|------|------|
+| 700 | `sub_8459C0` @845xxx 塊 | **ペーパチ**（PG/CASH 雙錢閘＋level≥10＋禮物匣<200）| SWF 事件處理：前綴比對四支判別串後，`STOP_N` 事件（N=滾輪停格位）→ `sub_847BD0(this, n)` 落格；PG>300 闕如另一軸 |
+| 900 | `sub_99D0A0` @99D0xx 塊 | capsule/ガチャ（同 gates 閘組）| 同名骨架：事件串判別 `SKIP`、`START_CP`、`START_TEN_CASH`（10連 CASH）→ `sub_99B050` SKIP；`ui/gaccha/0_1.swf` 存在檢查 @646439（`sub_99B0F0`）|
+| 第三 | 2 Exec @131262 | **itemdata.pat 載入器譜系** | 同一對 124/129 hint 對＋`dword_10004CD0` 引用——禮物/注入管線共用 |
+
+- **SWF↔C++ API 面**：`sub_7DF3F0`（921 行 CompleteImageTable 同構列舉體的分
+  支構造器）= flash 事件 pump；opcode n5==2 → caller。事件名棧取
+  `*(p_n2+4)+32`（std::wstring 表示器 SSO 分支跳脫碼與 §11.5 一致）。
+- **界線**：解析`STOP_N`、`SKIP`、`START_*` 之類「使用者操作事件名」的
+ SWF caller 判別串值（Source__240..243）在 dump 的 .data 區僅具位址、Hex-Rays
+ 略去初始器——四支鍵名未還原（bounded Unknown：僅缺字面值、不影響協定面）。
+ - **700/900 wire 端已定**（`tools/verify_native_gates.py` 全文）：送出匣
+ `sub_8458D0`/`sub_99CFA0`、四閘常數 10/200、MSG 0x108/0xFC/0x34E/0x34F
+ 全配對、995=錢包/等級寫入器——即冪等對端 §11.3「匣送收」範式。
+
+### 11.7b `item/object/` 48 檔＝雜項桶（16 輪 — 議程 #6 附帶全定性）
+
+`Extracted/item/object/`（48 檔，5 族 + AI 道具音效 7 + 其他）：
+
+1. **Tanpi 寵物族（Fact 資產 + Infer 用途）**：`tanpi.nao/tga`＋
+   `tanpi_0..9.nao`（10 模型）＋ 10 個 `tanpi_N.pap`（大小寫混：
+   0.PAP/1.pap/2..8.PAP/9.pap）＋唯一 shipped 動作 `tanpi_0.mot`＋
+   `newtanpi.tga`。native：**@194039 `item/object/models/Tanpi_%d.PAP` 迴圈
+   ×10（sub_5BF050）＋@194053 `Tanpi_%d.MOT` 迴圈 ×8（sub_5C0FE0/
+   `sub_5C11A0(...,"tanpi",1)`）**，伴 `item/object/models/CM_RUN/
+   CM_CLOSE/CM_OPEN/CM_JUMP/CM_IDLE.CMV`（CM_*＝五動作庫）。
+2. **武器造型皮貼圖（Infer — 伴寵物軸）**：`dracula_tanpi.dds`、
+   `gatling_tanpi.dds`、`keyboardguntanpi.dds`、`shotguntanpi.tga`、
+   `star_tanpi.dds`、`negima.dds`（蔥）、`newtanpi.tga`。itemdata 存在
+   `15301422 武器袋ペットスキン`、`15310305 ライト武器袋(ペットスキン)`
+   → **ペット＝武器造型的寵物**，皮由福袋取得；「Tanpi」為內部代號
+   （Wiki 用語集全9行0命中，bounded Unknown＝日語對名）。
+3. **AI drop 撿起音效（Fact — 對位 §5d-26g type41/42）**：`get_grenade/
+   hp/infinite/invincible/item/power/questevent/speed.wav` 8 支——與 AI_Bonus
+   prop 的項目清單一一對應（§5d-26g 同節）。
+4. **狙擊鏡貼圖**：`sniperview_000/001.tga`＋`sniperback_000.tga`（§5d-26g
+   圖標表 Face6=t2 狙擊同題）＋ `boom_3.tga`。
+5. **教學箭頭物體**：`Yajirushi.nao/dds`、`Yajirushi2.dds/nao/`、
+   `NewTutoYaji.dds/Hika.dds`＋`yajirushi.dds`（TUT/GunShooting 場景導引
+   箭頭，「yajirushi」＝矢印；對應 §5d-30 GunShooting stage 面）。
+6. 全桶組成（Fact）：nao×13（tanpi 11＋Yajirushi×2）、pap×10（大小寫混，同
+   `Data\item.dat` 打包容器下不分）、mot×1、tga×7、dds×9、wav×8＝48。
 
 ### 11.8 明列研究議程（下一批 parts）
 
@@ -3766,6 +3826,13 @@ hayate 面純佔位 12（41,62,63,64,82,83,86,88–92；62–64/82 為女 8 專�
    54／コホート 26／純佔位 12／跳缺 87——見 §11.6 コホート構造）；殘留＝
    男 6 系・女 8 系・14 群系之套名（ハヤテ Wiki 頁未收，需讀ラジオチャット
    一覧の其他角色頁）、ミリィ獨占 V88 語境、其餘 14 角色塊の槽↔套對位。
-6. pepachi scenario native 消費鏈（700/900）、`item/object/` 48 檔、pap 命名。
+6. ~~pepachi scenario native 消費鏈（700/900）、`item/object/` 48 檔、pap 命名~~
+   ✅ 2026-09-18 定案於 §11.7（命名＝官方「ペーパチ」0x34E 消息串＋Wiki shop
+   CASH/PG 雙閘三方互證；scenario=演出路由表、開獎判定 server-side；native
+   700 sub_8459C0 STOP_N 滾輪落格、900 sub_99D0A0 SKIP/START_CP/START_
+   TEN_CASH、ui/gaccha/0_1.swf 存在檢查；Source__240..243 判別串字面值
+   未還原為 bounded Unknown）與 §11.7b（item/object 48 檔＝Tanpi 寵物族 10
+   pap/8 mot/武器皮＋武器袋ペットスキン兩證物、get_*.wav 8＝AI bonus 對位、
+   狙擊鏡貼圖、教學矢印族）。
 
 
