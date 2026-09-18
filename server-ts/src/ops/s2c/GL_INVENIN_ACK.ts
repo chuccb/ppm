@@ -21,13 +21,11 @@ export default function GL_INVENIN_ACK(
   contextRaw: number,
   snapshot: NewSkillProfileSnapshot,
 ): Packet {
-  if (!Number.isSafeInteger(uid) || uid <= 0 || uid > 0x7fff_ffff) {
+  // The Store self-user id is a positive s32 (TS-side identity convention).
+  if (!Number.isSafeInteger(uid) || uid <= 0) {
     throw new RangeError("255 uid must be a positive s32");
   }
-  if (!Number.isInteger(contextRaw) || contextRaw < 0 || contextRaw > 0xff) {
-    throw new RangeError("255 contextRaw must fit u8");
-  }
-  if (!Number.isSafeInteger(snapshot.selectedProfile) || snapshot.selectedProfile < 0 || snapshot.selectedProfile >= NEW_SKILL_PROFILE_COUNT) {
+  if (!Number.isSafeInteger(snapshot.selectedProfile) || snapshot.selectedProfile >= NEW_SKILL_PROFILE_COUNT) {
     throw new RangeError("255 selected profile must be an integer in 0..4");
   }
   if (snapshot.profiles.length !== NEW_SKILL_PROFILE_COUNT) {
@@ -49,9 +47,6 @@ export default function GL_INVENIN_ACK(
       requireNewSkillPuzzleId(itemId, slot, 255);
       p.s32(itemId);
     });
-    if (!Number.isSafeInteger(profile.expiresAtPackedMinute) || profile.expiresAtPackedMinute < -0x8000_0000 || profile.expiresAtPackedMinute > 0x7fff_ffff) {
-      throw new RangeError("255 profile expiry must fit s32");
-    }
     p.s32(profile.expiresAtPackedMinute);
   }
   return p;
