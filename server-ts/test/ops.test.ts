@@ -37,6 +37,7 @@ import damageShieldRequest from "../src/ops/c2s/GR_AI_DAMAGE_SHIELD_REQ.ts";
 import magazineStartRequest from "../src/ops/c2s/GR_AI_RECHARGE_MAGAZINE_START_REQ.ts";
 import magazineEndRequest from "../src/ops/c2s/GR_AI_RECHARGE_MAGAZINE_END_REQ.ts";
 import continueStartRequest from "../src/ops/c2s/GR_AI_CONTINUE_START_REQ.ts";
+import feverStartRequest from "../src/ops/c2s/GR_AI_FEVER_START_REQ.ts";
 import startVotingRequest from "../src/ops/c2s/GR_START_VOTING_REQ.ts";
 import gamecenterRankingRequest from "../src/ops/c2s/GG_GAMECENTER_RANKING_REQ.ts";
 import gamecenterGameStartRequest from "../src/ops/c2s/GG_GAMECENTER_GAME_START_REQ.ts";
@@ -1064,6 +1065,32 @@ describe("718/721 — voting requests", () => {
   });
 });
 
+describe("935 — fever-start request", () => {
+  test("935 empty body -> dormant declined frame", () => {
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof feverStartRequest>[1];
+    feverStartRequest(
+      reread(new Packet(opcodeFor("GR_AI_FEVER_START_REQ"))),
+      connection,
+    );
+    expect(replies.pop()).toEqual(["GR_AI_FEVER_START_ACK"]);
+  });
+
+  test("935 rejects any stray bytes", () => {
+    const connection = {
+      reply: () => undefined,
+    } as unknown as Parameters<typeof feverStartRequest>[1];
+    expect(() =>
+      feverStartRequest(
+        reread(new Packet(opcodeFor("GR_AI_FEVER_START_REQ")).u8(1)),
+        connection,
+      ),
+    ).toThrow(/935/);
+  });
+});
+
 describe("928 — PVE continue request", () => {
   test("928 accepts the builder-literal zero count and answers the dormant arm", () => {
     const replies: unknown[][] = [];
@@ -1680,8 +1707,8 @@ describe("registry", () => {
   });
 
   test("the registry exposes both operation folders at startup", () => {
-    expect(summary()).toMatch(/^c2s 59 \(/);
-    expect(summary()).toMatch(/\), s2c 58 \(/);
+    expect(summary()).toMatch(/^c2s 60 \(/);
+    expect(summary()).toMatch(/\), s2c 59 \(/);
     expect(summary()).toContain("GL_LOGIN_ACK");
     expect(summary()).toContain("GL_LOGIN_REQ");
   });

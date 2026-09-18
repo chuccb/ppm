@@ -3035,7 +3035,15 @@ TS 無防衛核心模型 ⇒ 逐位元組恆回聲 = 與原生廣播逐 byte 相
 終止臂**——舊表 "`s32 continue_count`" 誤置。TS 無 PVE 接關模型 ⇒
 恆回 `status=0` 單位元組(wire `00`)。
 | 935 | `GR_AI_FEVER_START_REQ` | `sub_7622C0` | C2S | `(空)` (啟動 Fever 狂暴狀態) |
-| 936 | `GR_AI_FEVER_START_ACK` | `sub_7623A0` | S2C | `u8 status(1), u8 flag(0), s32 duration_ms(10000), u8 type(1)` |
+| 936 | `GR_AI_FEVER_START_ACK` | `sub_7623A0` | S2C | `u8 status, u8 flag, s32 duration_ms, u8 type`(固定 7B) |
+
+**TS 對位 (2026-09-19)**: 935 builder `sub_7622C0` @393717 多重
+gate 後 ctor+send **零欄位寫入**=空體 ✓。936 `sub_7623A0` 固定讀
+7B 無條件;`status!=0` 且 `duration==`客端基準 `dword_EE8CB4` 才
+真的啟動 fever(否則只錯誤日誌);`status==0`=指定被拒臂(state=2
++UI 廣播帶 flag,零續讀)。TS 無 fever 模型 ⇒ 恆 7B 全零被拒幀
+(wire `00000000000000`);舊表 status(1)/duration(10000) 是成功臂
+快照而非唯一形。
 | 939 | `GR_AI_GO_NEXT_WAVE_REQ` | `sub_75CE40` | C2S | `(空)` (波次切換推進) |
 | 940 | `GR_AI_GO_NEXT_WAVE_ACK` | `sub_7613D0` | S2C | `u8 next_wave, s32 wave_time` |
 | 944 | `GR_RESET_GAMEROOMSLOT_REQ` | `sub_585E90` | C2S | `(空)` (重置房間槽位) |
