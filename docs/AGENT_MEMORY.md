@@ -15,6 +15,7 @@
 | 1 | admission 681 / TCP grooming / login trio | `b9f02d5f` | `SERVER_TS_EVIDENCE.md` 192 行 ledger;681 Result 表; server-list s16 定向;693 區段補正(greeting 型別/ v6 spin-lock) |
 | 2 | channel handshake 143/144/195/196 | `3fad207c` | 144 case 108=0x11D/result 0=0x42/3=0xA4+7082;196 result 6→0x3A6/8→0x3A7;`client_identity` String[24]=AccountName(PaperMan.exe.c:2241) |
 | 3 | 大廳同步序列（本節詳記） | `8e3c66e7` | PACKETS §3.15pre-3;原生命令行 197→199→834 定序 |
+| 41 | **924→925/926→927 magazine(docs 三欄錯置抓到)** | (本次) | 924 真 wire=2B(switch 只改 kind 值);925 三臂=0→+u8+s32/1→+u8+u16/其他=denial 零讀 ⇒ 恆 `status=2`(wire `010002`);926=3B;927 頭 4B≠0 終止 ⇒ 恆 `status=1`(wire `01000001`);pins 2+2 各 + wire 2;189 測試綠,c2s 58/s2c 57 |
 | 40 | **922→923 DAMAGE_SHIELD(SLOBYTE 陷阱)** | (本次) | 922 builder:`sub_592B20`(4B)+`SLOBYTE(*a4)`⇒ 只送 float 低 byte;923 鏡像零臂+remain∈{4,7} 才動作 ⇒ TS 逐 byte 恆回聲(wire `0500FDFF070040000000`);pins 3+1;187 測試綠,c2s 56/s2c 55 |
 | 39 | **918→919 PVE 結算抽獎(sentinel 終止臂)** | (本次) | 918=無臂 1B;919 `sub_761B20`:status==0=戰利品鏈(slot 型別檢)、!=0 讀 `u8 code` 且**僅 0xFF 哨兵終止**(否則再讀 9B)⇒ 無結算模型恆走 `idx,1,0xFF`(wire `0201FF`);pins 3+2;185 測試綠,c2s 55/s2c 54 |
 | 38 | **912→913 weaponparts(errorRaw=0 危險臂實證)** | (本次) | 912 builder 三臂(0/1→9B、2→13B),`sub_592AA0`=4B ✓;913 `sub_95B180`:errorRaw==0 續讀後對末 s32 做 **item 表 bounds-check** ⇒ 無模型不可回 id ⇒ 恆 `errorRaw=1`(wire `01`);非零語義 UNRESOLVED 保持;pins 6+2;183 測試綠,c2s 54/s2c 53 |

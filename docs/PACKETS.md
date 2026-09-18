@@ -3012,10 +3012,19 @@ float 低位元組符號延伸成 4B**(兩 accessor 本體驗寬)。923 `sub_761
 鏡像 u16×3+f32=10B 零臂,再查 (id,damage) 物件且 remain∈{4,7} 才動作。
 TS 無防衛核心模型 ⇒ 逐位元組恆回聲 = 與原生廣播逐 byte 相同
 (wire `0500FDFF070040000000` @ 5,-3,7,0x40)。
-| 924 | `GR_AI_RECHARGE_MAGAZINE_START_REQ` | `sub_558350` | C2S | `u8 slot, u8 team, u8 unk` (彈藥補給開始) |
-| 925 | `GR_AI_RECHARGE_MAGAZINE_START_ACK` | `sub_558550` | S2C | `u8 slot, u8 team, u8 unk` (房間廣播) |
-| 926 | `GR_AI_RECHARGE_MAGAZINE_END_REQ` | `sub_5586B0` | C2S | `u8 slot, u8 team, s8 status` (彈藥補給完成) |
-| 927 | `GR_AI_RECHARGE_MAGAZINE_END_ACK` | `sub_558880` | S2C | `u8 slot, u8 team, u8 status` (房間廣播) |
+| 924 | `GR_AI_RECHARGE_MAGAZINE_START_REQ` | `sub_558350` | C2S | `u8 slot, u8 kind` (彈藥補給開始;舊三列錯置) |
+| 925 | `GR_AI_RECHARGE_MAGAZINE_START_ACK` | `sub_558550` | S2C | `u8 slot, u8 team, u8 status`;0→+u8+s32;1→+u8+u16;他→終止 |
+| 926 | `GR_AI_RECHARGE_MAGAZINE_END_REQ` | `sub_5586B0` | C2S | `u8 slot, u8 kind, s8 status` (彈藥補給完成) |
+| 927 | `GR_AI_RECHARGE_MAGAZINE_END_ACK` | `sub_558880` | S2C | `u8 slot, u8 team, u8 unk, u8 status`;0→+u8+s32;≠0→終止 |
+
+**TS 對位 (2026-09-19)**: 四函數全體行級重讀。924 builder
+`sub_558350` @153683 只有兩位元組寫入(`sub_592920`×2;switch 修正
+只是改 kind 值,不加位元)——舊表第三欄誤載。925 有三臂:**status==0
+補給鏈(+u8+s32)、==1 進 `sub_764170` 尾(+u8+u16)並置態、其他位=
+三重 denail `sub_763510` 零收讀**——TS 恆 `status=2`(wire `010002`)。
+926 builder 3B 三 1B accessor ✓。927 `sub_592900`=1B 驗寬;頭 4B
+之後 status==0 才續 +u8+s32,≠0 終止 ⇒ TS 恆 `status=1`(wire
+`01000001`)。
 | 928 | `GR_AI_CONTINUE_START_REQ` | `sub_761DB0` | C2S | `s32 continue_count` (PVE 接關復活) |
 | 929 | `GR_AI_CONTINUE_START_ACK` | `sub_761E90` | S2C | `u8 status(1=成功), s32 continue_count` |
 | 935 | `GR_AI_FEVER_START_REQ` | `sub_7622C0` | C2S | `(空)` (啟動 Fever 狂暴狀態) |

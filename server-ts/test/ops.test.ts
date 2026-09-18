@@ -34,6 +34,8 @@ import doVotingRequest from "../src/ops/c2s/GR_DO_VOTING.ts";
 import weaponpartsEquipChangeRequest from "../src/ops/c2s/GL_WEAPONPARTS_EQUIP_CHANGE_REQ.ts";
 import aiRewardItemRequest from "../src/ops/c2s/GR_AI_GET_REWARD_ITEM_REQ.ts";
 import damageShieldRequest from "../src/ops/c2s/GR_AI_DAMAGE_SHIELD_REQ.ts";
+import magazineStartRequest from "../src/ops/c2s/GR_AI_RECHARGE_MAGAZINE_START_REQ.ts";
+import magazineEndRequest from "../src/ops/c2s/GR_AI_RECHARGE_MAGAZINE_END_REQ.ts";
 import startVotingRequest from "../src/ops/c2s/GR_START_VOTING_REQ.ts";
 import gamecenterRankingRequest from "../src/ops/c2s/GG_GAMECENTER_RANKING_REQ.ts";
 import gamecenterGameStartRequest from "../src/ops/c2s/GG_GAMECENTER_GAME_START_REQ.ts";
@@ -1061,6 +1063,44 @@ describe("718/721 — voting requests", () => {
   });
 });
 
+describe("924/926 — magazine refuel start/end requests", () => {
+  test("924 parses the 2-byte wire and answers the triple denial arm", () => {
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof magazineStartRequest>[1];
+    magazineStartRequest(
+      reread(new Packet(opcodeFor("GR_AI_RECHARGE_MAGAZINE_START_REQ")).u8(1).u8(0)),
+      connection,
+    );
+    expect(replies.pop()).toEqual(["GR_AI_RECHARGE_MAGAZINE_START_ACK", 1, 0]);
+    expect(() =>
+      magazineStartRequest(
+        reread(new Packet(opcodeFor("GR_AI_RECHARGE_MAGAZINE_START_REQ")).u8(1).u8(0).u8(0)),
+        connection,
+      ),
+    ).toThrow(/924/);
+  });
+
+  test("926 parses the 3-byte wire and answers the nonzero-status denial", () => {
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof magazineEndRequest>[1];
+    magazineEndRequest(
+      reread(new Packet(opcodeFor("GR_AI_RECHARGE_MAGAZINE_END_REQ")).u8(1).u8(0).s8(-1)),
+      connection,
+    );
+    expect(replies.pop()).toEqual(["GR_AI_RECHARGE_MAGAZINE_END_ACK", 1, 0]);
+    expect(() =>
+      magazineEndRequest(
+        reread(new Packet(opcodeFor("GR_AI_RECHARGE_MAGAZINE_END_REQ")).u8(1).u8(0)),
+        connection,
+      ),
+    ).toThrow(/926/);
+  });
+});
+
 describe("922 — defence-core damage report", () => {
   test("922 parses 10-byte wire and echoes verbatim into the broadcast", () => {
     const replies: unknown[][] = [];
@@ -1607,8 +1647,8 @@ describe("registry", () => {
   });
 
   test("the registry exposes both operation folders at startup", () => {
-    expect(summary()).toMatch(/^c2s 56 \(/);
-    expect(summary()).toMatch(/\), s2c 55 \(/);
+    expect(summary()).toMatch(/^c2s 58 \(/);
+    expect(summary()).toMatch(/\), s2c 57 \(/);
     expect(summary()).toContain("GL_LOGIN_ACK");
     expect(summary()).toContain("GL_LOGIN_REQ");
   });
