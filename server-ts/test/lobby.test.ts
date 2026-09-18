@@ -205,7 +205,7 @@ describe("lobby bootstrap packets", () => {
     expect(reader.remaining).toBe(0);
     expect(() =>
       build("GL_MYINFO_ACK", { ...wireInfo, nickname: "n".repeat(24) }, selectedSnapshot),
-    ).toThrow(/char\[24\]/);
+    ).toThrow(/native char\[24\]/);
     expect(() =>
       build("GL_MYINFO_ACK", {
         ...myInfo!,
@@ -275,7 +275,7 @@ describe("lobby bootstrap packets", () => {
           index === 1 ? { ...character, charType: 0x100 } : character,
         ),
       }),
-    ).toThrow(/247 char_type/);
+    ).toThrow(/247 char_type expected/);
     store.close();
   });
 
@@ -293,7 +293,7 @@ describe("lobby bootstrap packets", () => {
     ).toThrow(/positive s32/);
     expect(() =>
       build("GL_MYITEM_ACK", [{ slot: 0, itemId: 1, f1: Number.MAX_VALUE, f2: 0, period: 0, durability: 0 }]),
-    ).toThrow(/f1/);
+    ).toThrow(/raw4 f32 projection out of range/);
 
     const item = decode(build("GL_MYITEM_ACK", [{
       slot: 12,

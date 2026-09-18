@@ -118,24 +118,6 @@ export interface SuccessEntry {
 
 export type Entry = FailureEntry | SuccessEntry;
 
-function requireU8(name: string, value: number): void {
-  if (!Number.isSafeInteger(value) || value < 0 || value > 0xff) {
-    throw new RangeError(`196 ${name} must fit u8`);
-  }
-}
-
-function requireS32(name: string, value: number, min = -0x8000_0000): void {
-  if (!Number.isSafeInteger(value) || value < min || value > 0x7fff_ffff) {
-    throw new RangeError(`196 ${name} must fit s32`);
-  }
-}
-
-function requireRaw4(name: string, value: number): void {
-  if (!Number.isSafeInteger(value) || value < 0 || value > 0xffff_ffff) {
-    throw new RangeError(`196 ${name} must fit raw4`);
-  }
-}
-
 function isFullType3Tail(tail: Type3Tail): tail is Type3TailFull {
   return "header1" in tail;
 }
@@ -144,23 +126,9 @@ function writeType3Tail(p: Packet, tail: Type3Tail): void {
   if (!isFullType3Tail(tail)) {
     throw new RangeError("196 channel type 3 requires its native continuation");
   }
-  requireS32("type3.header0", tail.header0, 1);
+  if (tail.header0 < 1) throw new RangeError("196 type3.header0 must be at least 1");
   p.s32(tail.header0);
 
-  if (tail.name.length > 67) throw new RangeError("196 type3.name must fit native 68-byte storage");
-  for (const [name, value] of [
-    ["type3.raw4_0", tail.raw4_0],
-    ["type3.raw4_1", tail.raw4_1],
-    ["type3.raw4_2", tail.raw4_2],
-    ["type3.raw4_3", tail.raw4_3],
-  ] as const) requireRaw4(name, value);
-  for (const [name, value] of [
-    ["type3.u8_0", tail.u8_0],
-    ["type3.u8_1", tail.u8_1],
-    ["type3.u8_2", tail.u8_2],
-  ] as const) requireU8(name, value);
-  requireS32("type3.header1", tail.header1);
-  requireS32("type3.listCount", tail.listCount);
   if (tail.listCount >= 0) {
     // Native has no upper bound for this loop. The server still needs a
     // framing bound that cannot exceed Packet's fixed payload budget; this is
@@ -178,49 +146,19 @@ function writeType3Tail(p: Packet, tail: Type3Tail): void {
   } else if (tail.listValues.length !== tail.listCount) {
     throw new RangeError("196 type3 listCount must match listValues");
   }
-  tail.listValues.forEach((value, index) => requireS32(`type3.listValues[${index}]`, value));
-  requireU8("type3.smallRecordCount", tail.smallRecordCount);
   if (tail.smallRecordCount > 5 || tail.smallRecords.length !== tail.smallRecordCount) {
     throw new RangeError("196 type3 smallRecordCount must match at most 5 smallRecords");
   }
-  requireU8("type3.smallRecordMode", tail.smallRecordMode);
-  tail.smallRecords.forEach((record, index) => {
-    for (const [name, value] of [
-      ["u8_0", record.u8_0],
-      ["u8_1", record.u8_1],
-      ["u8_2", record.u8_2],
-      ["u8_3", record.u8_3],
-      ["u8_4", record.u8_4],
-    ] as const) requireU8(`type3.smallRecords[${index}].${name}`, value);
-    requireS32(`type3.smallRecords[${index}].s32_0`, record.s32_0);
-    requireS32(`type3.smallRecords[${index}].s32_1`, record.s32_1);
-    requireRaw4(`type3.smallRecords[${index}].raw4_0`, record.raw4_0);
-    requireRaw4(`type3.smallRecords[${index}].raw4_1`, record.raw4_1);
-  });
-  requireU8("type3.u8_3", tail.u8_3);
-  requireU8("type3.stageCount", tail.stageCount);
   if (tail.stageCount > 32 || tail.stageRecords.length !== tail.stageCount) {
     throw new RangeError("196 type3 stageCount must match at most 32 stageRecords");
   }
   tail.stageRecords.forEach((record, index) => {
-    requireS32(`type3.stageRecords[${index}].s32_0`, record.s32_0);
-    requireRaw4(`type3.stageRecords[${index}].raw4_0`, record.raw4_0);
-    requireU8(`type3.stageRecords[${index}].hasName0`, record.hasName0);
     if (record.hasName0 !== 0 && record.name0 === undefined) {
       throw new RangeError(`196 type3.stageRecords[${index}].name0 is required`);
     }
     if (record.name0 !== undefined && record.name0.length > 31) {
       throw new RangeError(`196 type3.stageRecords[${index}].name0 must fit native 32-byte copy`);
     }
-    for (const [name, value] of [
-      ["s32_1", record.s32_1],
-      ["s32_2", record.s32_2],
-      ["s32_3", record.s32_3],
-      ["s32_4", record.s32_4],
-      ["s32_5", record.s32_5],
-      ["s32_6", record.s32_6],
-    ] as const) requireS32(`type3.stageRecords[${index}].${name}`, value);
-    requireU8(`type3.stageRecords[${index}].hasName1`, record.hasName1);
     if (record.hasName1 !== 0 && record.name1 === undefined) {
       throw new RangeError(`196 type3.stageRecords[${index}].name1 is required`);
     }
@@ -228,9 +166,9 @@ function writeType3Tail(p: Packet, tail: Type3Tail): void {
       throw new RangeError(`196 type3.stageRecords[${index}].name1 must fit native 26-byte copy`);
     }
   });
-  requireRaw4("type3.raw4Final", tail.raw4Final);
 
-  p.s32(tail.header1).str(tail.name)
+  p.s32(tail.header1)
+    .label("196 type3.name expected as per the native 68-byte storage").strMax(tail.name, 67)
     .u32(tail.raw4_0).u32(tail.raw4_1).u32(tail.raw4_2).u32(tail.raw4_3)
     .u8(tail.u8_0).u8(tail.u8_1).u8(tail.u8_2).s32(tail.listCount);
   for (const value of tail.listValues) p.s32(value);
@@ -251,20 +189,9 @@ function writeType3Tail(p: Packet, tail: Type3Tail): void {
 }
 
 export default function GC_ENTERCHANNEL_ACK(op: number, entry: Entry): Packet {
-  if (!Number.isSafeInteger(entry.result) || entry.result < 0 || entry.result > 0xff) {
-    throw new RangeError("196 result must fit u8");
-  }
-
-  if (!Number.isSafeInteger(entry.channelId) || entry.channelId < -0x8000_0000 || entry.channelId > 0x7fff_ffff) {
-    throw new RangeError("196 channel_id must fit s32");
-  }
-  if (!Number.isSafeInteger(entry.channelIndex) || entry.channelIndex < 0 || entry.channelIndex > 0xff) {
-    throw new RangeError("196 channel_index must fit u8");
-  }
-
   const p = new Packet(op)
     .u8(entry.result)
-    .s32(entry.channelId)
+    .label("196 channel_id expected as a native s32").s32(entry.channelId)
     .u8(entry.channelIndex);
 
   if (entry.result !== Result.Success) return p;
@@ -276,38 +203,30 @@ export default function GC_ENTERCHANNEL_ACK(op: number, entry: Entry): Packet {
   const channelType = entry.channelType ?? 0;
   const clientFlags = entry.clientFlags ?? 0;
   const clientDefault = entry.clientDefault ?? 5;
-  if (!Number.isSafeInteger(endpointOpaque) || endpointOpaque < 0 || endpointOpaque > 0xff) {
-    throw new RangeError("196 endpoint_opaque must fit u8");
-  }
-  if (!Number.isSafeInteger(channelType) || channelType < 0 || channelType > 0xff) {
-    throw new RangeError("196 channel_type must fit u8");
-  }
   if (channelType === 3 && entry.type3Tail === undefined) {
     throw new RangeError("196 channel type 3 requires its native continuation");
   }
   if (channelType !== 3 && entry.type3Tail !== undefined) {
     throw new RangeError("196 type3Tail requires channel type 3");
   }
-  if (!Number.isSafeInteger(clientFlags) || clientFlags < 0 || clientFlags > 0xffff_ffff) {
-    throw new RangeError("196 client_flags must fit raw4");
-  }
-  if (!Number.isSafeInteger(clientDefault) || clientDefault < 0 || clientDefault > 0xff) {
-    throw new RangeError("196 client_default must fit u8");
-  }
 
-  if (entry.endpoint.host.length === 0 || entry.endpoint.host.length > 19) {
-    throw new RangeError("196 endpoint host must fit the native char[20]");
+  // The endpoint host must be a non-empty native char[20]-compatible string;
+  // the port is written as a full s32 but only a real endpoint port is a
+  // meaningful continuation.
+  if (entry.endpoint.host.length === 0) {
+    throw new RangeError("196 endpoint host must be non-empty");
   }
   if (!Number.isSafeInteger(entry.endpoint.port) || entry.endpoint.port < 1 || entry.endpoint.port > 0xffff) {
-    throw new RangeError("196 endpoint port must fit an unsigned 16-bit value");
+    throw new RangeError("196 endpoint port must be a real unsigned 16-bit port");
   }
 
   const success = p
-    .str(entry.endpoint.host)
+    .label("196 endpoint host expected as per the native char[20]")
+    .strMax(entry.endpoint.host, 19) // native char[20]
     .s32(entry.endpoint.port)
     .u8(endpointOpaque)
     .u8(channelType)
-    .u32(clientFlags)
+    .label("196 client_flags expected as a native raw4").u32(clientFlags)
     .u8(clientDefault);
   if (channelType === 3) writeType3Tail(success, entry.type3Tail!);
   return success;

@@ -18,30 +18,11 @@ import {
   type MyInfo,
 } from "../../store.ts";
 
-function requireS32(name: string, value: number): void {
-  if (!Number.isSafeInteger(value) || value < -0x8000_0000 || value > 0x7fff_ffff) {
-    throw new RangeError(`198 ${name} must fit s32`);
-  }
-}
-
-export function requireU8(name: string, value: number): void {
-  if (!Number.isSafeInteger(value) || value < 0 || value > 0xff) {
-    throw new RangeError(`${name} must fit u8`);
-  }
-}
-
 const NATIVE_CHARACTER_SLOT_COUNT = 20;
 
 function requireCharacterIndex(name: string, value: number): void {
-  requireU8(name, value);
-  if (value >= NATIVE_CHARACTER_SLOT_COUNT) {
+  if (!Number.isSafeInteger(value) || value < 0 || value >= NATIVE_CHARACTER_SLOT_COUNT) {
     throw new RangeError(`198 ${name} must be a native character-list index in 0..19`);
-  }
-}
-
-function requireU16(name: string, value: number): void {
-  if (!Number.isSafeInteger(value) || value < 0 || value > 0xffff) {
-    throw new RangeError(`198 ${name} must fit u16`);
   }
 }
 
@@ -51,8 +32,8 @@ const NEW_SKILL_RANGE = [11_010_001, 11_070_000] as const;
 
 /** Resource/native ordinal family; zero is the empty puzzle slot. */
 export function requireNewSkillPuzzleId(value: number, slot: number, opcode: 198 | 255): void {
-  requireS32(`puzzle[${slot}]`, value);
-  if (value === 0) return;
+  if (!Number.isSafeInteger(value)) throw new RangeError(`${opcode} puzzle[${slot}] must be an integer`);
+  if (value === 0) return; // the empty puzzle slot
   if (value < NEW_SKILL_RANGE[0] || value > NEW_SKILL_RANGE[1] || !isNativeNewSkillPuzzleId(value)) {
     throw new RangeError(`${opcode} puzzle[${slot}] is not a native itemdata puzzle id`);
   }
@@ -64,9 +45,6 @@ export default function GL_MYINFO_ACK(
   snapshot?: NewSkillProfileSnapshot,
 ): Packet {
   if (!myInfo) return new Packet(op).u8(0);
-  requireS32("user_id", myInfo.userId);
-  requireS32("game_point", myInfo.gamePoints);
-
   const p = new Packet(op).u8(1).s32(myInfo.userId);
   writeMyInfoBasicData(p, myInfo);
 
@@ -76,7 +54,6 @@ export default function GL_MYINFO_ACK(
   const characters = myInfo.characters;
   p.u8(characters.length);
   for (const character of characters) {
-    requireU8("char_type", character.charType);
     p.u8(character.charType);
     writeCharacterAppearance(p, character.appearance);
   }
@@ -119,36 +96,12 @@ export default function GL_MYINFO_ACK(
 
 /** The shared sub_523BF0 basic-data block used by 198 and 247. */
 export function writeMyInfoBasicData(packet: Packet, myInfo: MyInfo): Packet {
-  if (typeof myInfo.nickname !== "string") throw new TypeError("198 nickname must be a string");
-  if (myInfo.nickname.length > NICKNAME_MAX_BYTES) {
-    throw new RangeError(`198 nickname must fit native char[24]`);
-  }
   requireCharacterIndex("selected_char_index", myInfo.selectedCharIndex);
   const { stats } = myInfo;
-  const words: readonly [string, number][] = [
-    ["level", myInfo.level],
-    ["experience", myInfo.experience],
-    ["wins", stats.wins],
-    ["losses", stats.losses],
-    ["kills", stats.kills],
-    ["deaths", stats.deaths],
-    ["headshots", stats.headshots],
-    ["combos", stats.combos],
-    ["hearts", stats.hearts],
-    ["doubleKill", stats.doubleKill],
-    ["tripleKill", stats.tripleKill],
-    ["criticals", stats.criticals],
-    ["multiKill", stats.multiKill],
-    ["ultraKill", stats.ultraKill],
-    ["zKill", stats.zKill],
-    ["kKill", stats.kKill],
-    ["ddKill", stats.ddKill],
-    ["cash", myInfo.cash],
-    ["playTimeSeconds", stats.playTimeSeconds],
-  ];
-  for (const [name, value] of words) requireS32(name, value);
   return packet
-    .str(myInfo.nickname)
+    .label("198 stats nickname must fit the native char[24] at CClientData+60")
+    .strMax(myInfo.nickname, NICKNAME_MAX_BYTES)
+
     .u8(myInfo.selectedCharIndex)
     .s32(myInfo.level)
     .s32(myInfo.experience)
@@ -201,9 +154,7 @@ export function writeMyInfoBasicData(packet: Packet, myInfo: MyInfo): Packet {
 export function writeCharacterAppearance(packet: Packet, appearance: readonly number[]): Packet {
   if (appearance.length > 12) throw new RangeError("appearance must have at most 12 values");
   for (let i = 0; i < 12; i++) {
-    const value = appearance[i] ?? 0;
-    requireU16(`appearance[${i}]`, value);
-    packet.u16(value);
+    packet.u16(appearance[i] ?? 0);
   }
   return packet;
 }

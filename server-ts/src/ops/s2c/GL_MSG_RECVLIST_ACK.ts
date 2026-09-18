@@ -45,59 +45,27 @@ export interface MsgListEntry {
   readonly flagRaw: number;
 }
 
-function requireS32(name: string, value: number): void {
-  if (!Number.isSafeInteger(value) || value < -0x8000_0000 || value > 0x7fff_ffff) {
-    throw new RangeError(`426 ${name} must fit s32`);
-  }
-}
-
-function requireS16(name: string, value: number): void {
-  if (!Number.isSafeInteger(value) || value < -0x8000 || value > 0x7fff) {
-    throw new RangeError(`426 ${name} must fit s16`);
-  }
-}
-
 export default function GL_MSG_RECVLIST_ACK(
   op: number,
   contextString = "",
   entries: readonly MsgListEntry[] = [],
 ): Packet {
-  if (typeof contextString !== "string") throw new TypeError("426 context string must be a string");
-  if (contextString.length > CONTEXT_STRING_MAX_BYTES) {
-    throw new RangeError("426 context string must fit native char[21]");
-  }
   if (entries.length > MSG_LIST_MAX_ENTRIES) {
     throw new RangeError("426 message list exceeds the native 10-row table");
   }
   const p = new Packet(op)
     .u16(0) // native header; semantics unresolved
-    .str(contextString) // bounded compatibility string; no recovered consumer
+    .label("426 context string expected as per the native char[21] local")
+    .strMax(contextString, CONTEXT_STRING_MAX_BYTES) // bounded compatibility string; no recovered consumer
     .u8(entries.length);
   for (const entry of entries) {
-    const strings: readonly [string, string, number][] = [
-      ["key", entry.key, MSG_KEY_MAX_BYTES],
-      ["name", entry.name, MSG_NAME_MAX_BYTES],
-      ["body", entry.body, MSG_BODY_MAX_BYTES],
-      ["selector", entry.selector, MSG_SELECTOR_MAX_BYTES],
-    ];
-    for (const [field, value, cap] of strings) {
-      if (typeof value !== "string") throw new TypeError(`426 ${field} must be a string`);
-      if (value.length > cap) {
-        throw new RangeError(`426 ${field} must fit its native store stride (${cap} bytes max)`);
-      }
-    }
-    if (!Number.isSafeInteger(entry.kind) || entry.kind < 0 || entry.kind > 0xff) {
-      throw new RangeError("426 kind must fit u8");
-    }
-    requireS32("extraRaw", entry.extraRaw);
-    requireS16("flagRaw", entry.flagRaw);
-    p.str(entry.key)
-      .u8(entry.kind)
-      .str(entry.name)
-      .s32(entry.extraRaw)
-      .str(entry.body)
-      .str(entry.selector)
-      .s16(entry.flagRaw);
+    p.strMax(entry.key, MSG_KEY_MAX_BYTES) // native stride-20 key slot
+      .u8(entry.kind) // semantics unresolved
+      .strMax(entry.name, MSG_NAME_MAX_BYTES) // native stride-21 MSG_NAME slot
+      .s32(entry.extraRaw) // raw4 wire; the native table keeps the low byte
+      .strMax(entry.body, MSG_BODY_MAX_BYTES) // native stride-201 slot
+      .strMax(entry.selector, MSG_SELECTOR_MAX_BYTES) // native stride-2 F/M selector
+      .s16(entry.flagRaw); // raw2 wire; the native table keeps the low byte
   }
   return p;
 }

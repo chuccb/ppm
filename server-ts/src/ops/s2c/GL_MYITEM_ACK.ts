@@ -8,30 +8,6 @@
 
 import { Packet } from "../../packet.ts";
 
-function requireS32(name: string, value: number): void {
-  if (!Number.isSafeInteger(value) || value < -0x8000_0000 || value > 0x7fff_ffff) {
-    throw new RangeError(`200 ${name} must fit s32`);
-  }
-}
-
-function requireU8(name: string, value: number): void {
-  if (!Number.isSafeInteger(value) || value < 0 || value > 0xff) {
-    throw new RangeError(`200 ${name} must fit u8`);
-  }
-}
-
-function requireU16(name: string, value: number): void {
-  if (!Number.isSafeInteger(value) || value < 0 || value > 0xffff) {
-    throw new RangeError(`200 ${name} must fit u16`);
-  }
-}
-
-function requireF32Projection(name: string, value: number): number {
-  const wire = Math.fround(value);
-  if (!Number.isFinite(wire)) throw new RangeError(`200 ${name} must be a finite f32 projection`);
-  return wire;
-}
-
 export interface InvItem {
   readonly slot: number;
   readonly itemId: number;
@@ -61,22 +37,16 @@ export default function GL_MYITEM_ACK(op: number, items: readonly InvItem[] = []
     if (!Number.isSafeInteger(item.itemId) || item.itemId <= 0 || item.itemId > 0x7fff_ffff) {
       throw new RangeError("200 item_id must be a positive s32");
     }
-    const f1 = requireF32Projection("f1", item.f1);
-    const f2 = requireF32Projection("f2", item.f2);
-    requireS32("period", item.period);
-    const extra = item.extra ?? 0;
-    requireU8("extra", extra);
-    requireU16("durability", item.durability);
     // Native 200 reads both slots with sub_592AC0 (generic raw4), not the
     // typed sub_592B40 f32 reader. f32() here is only a byte-compatible
     // projection for the current number-based API.
     p.s32(item.slot)
       .s32(item.itemId)
-      .f32(f1)
-      .f32(f2)
+      .label("200 raw4 f32 projection out of range").f32(item.f1)
+      .label("200 raw4 f32 projection out of range").f32(item.f2)
       .s32(item.period)
-      .u8(extra)
-      .u16(item.durability);
+      .u8(item.extra ?? 0) // native u8 after the period; domain unresolved
+      .u16(item.durability); // native u16 current/max durability word
   }
   return p.s32(-1);
 }

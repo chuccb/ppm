@@ -134,6 +134,37 @@ describe("stream reassembly", () => {
   });
 });
 
+describe("scalar domains", () => {
+  test("every scalar primitive rejects values outside its C width", () => {
+    expect(() => new Packet(1).u8(0x100)).toThrow(/u8 expects/);
+    expect(() => new Packet(1).u8(-1)).toThrow(/u8 expects/);
+    expect(() => new Packet(1).s8(0x80)).toThrow(/s8 expects/);
+    expect(() => new Packet(1).u16(0x1_0000)).toThrow(/u16 expects/);
+    expect(() => new Packet(1).s16(0x8000)).toThrow(/s16 expects/);
+    expect(() => new Packet(1).s16(-0x8001)).toThrow(/s16 expects/);
+    expect(() => new Packet(1).u32(-1)).toThrow(/u32 expects/);
+    expect(() => new Packet(1).s32(0x8000_0000)).toThrow(/s32 expects/);
+    expect(() => new Packet(1).s32(1.5)).toThrow(/s32 expects/);
+    expect(() => new Packet(1).u64(-1n)).toThrow(/u64 expects/);
+    expect(() => new Packet(1).u64(1n << 64n)).toThrow(/u64 expects/);
+    expect(() => new Packet(1).f32(Number.NaN)).toThrow(/f32 expects/);
+    expect(() => new Packet(1).f32(Number.MAX_VALUE)).toThrow(/f32 expects/);
+  });
+
+  test("strMax enforces the native byte cap before the NUL", () => {
+    const p = new Packet(1).strMax("abcde", 5);
+    expect(p.length).toBe(6);
+    expect(() => new Packet(1).strMax("abcdef", 5)).toThrow(/native-buffer cap/);
+    expect(() => new Packet(1).strMax("日本語", 5)).toThrow(/native-buffer cap|non-ASCII/);
+  });
+
+  test("label annotates only the next failing write and resets", () => {
+    expect(() => new Packet(1).label("example field").u8(300)).toThrow(/^example field: u8/);
+    // The label does not leak into the next write's error.
+    expect(() => new Packet(1).label("example field").u8(1).u8(300)).toThrow(/^u8 expects/);
+  });
+});
+
 describe("validation", () => {
   const corrupt = (mutate: (view: DataView) => void): Uint8Array => {
     const frame = new Packet(200).s32(1).encode();

@@ -27,35 +27,22 @@ export interface FriendListEntry {
   readonly stateRaw: number;
 }
 
-function requireS32(name: string, value: number): void {
-  if (!Number.isSafeInteger(value) || value < -0x8000_0000 || value > 0x7fff_ffff) {
-    throw new RangeError(`434 ${name} must fit s32`);
-  }
-}
-
 export default function GL_FRIEND_LIST_ACK(
   op: number,
   contextString = "",
   entries: readonly FriendListEntry[] = [],
 ): Packet {
-  if (typeof contextString !== "string") throw new TypeError("434 context string must be a string");
-  if (contextString.length > CONTEXT_STRING_MAX_BYTES) {
-    throw new RangeError("434 context string must fit native char[21]");
-  }
   if (entries.length > FRIEND_LIST_MAX_ENTRIES) {
     throw new RangeError("434 friend list exceeds the native 100-row table");
   }
   const p = new Packet(op)
     .u16(0) // native header; semantics unresolved
-    .str(contextString) // bounded compatibility string; no recovered consumer
+    .label("434 context string expected as per the native char[21] local")
+    .strMax(contextString, CONTEXT_STRING_MAX_BYTES) // bounded compatibility string; no recovered consumer
     .u8(entries.length);
   for (const entry of entries) {
-    if (typeof entry.nickname !== "string") throw new TypeError("434 nickname must be a string");
-    if (entry.nickname.length > FRIEND_NICKNAME_MAX_BYTES) {
-      throw new RangeError("434 nickname must fit the native char[21] friend slot");
-    }
-    requireS32("stateRaw", entry.stateRaw);
-    p.str(entry.nickname).s32(entry.stateRaw);
+    p.strMax(entry.nickname, FRIEND_NICKNAME_MAX_BYTES) // native char[21] friend slot
+      .s32(entry.stateRaw); // the native table retains only the low byte
   }
   return p;
 }

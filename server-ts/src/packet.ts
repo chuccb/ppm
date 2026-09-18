@@ -40,6 +40,33 @@ export class Packet {
   /** Grows on demand; most packets are far smaller than one block. */
   #buf = new Uint8Array(64);
   #len = 0;
+  /**
+   * Field label consumed by the very next scalar/string write: on a domain
+   * error the label prefixes the message; on success it silently resets.
+   * This keeps the wire write stream free of side-band validation while
+   * still letting ops diagnostics name the field on failure.
+   */
+  #label: string | null = null;
+
+  /** Set the field label consumed by the next scalar/string write. */
+  label(message: string): this {
+    this.#label = message;
+    return this;
+  }
+
+  #labelPrefix(): string {
+    const value = this.#label;
+    this.#label = null;
+    return value ? `${value}: ` : "";
+  }
+
+  #checkInt(kind: string, v: number, min: number, max: number): void {
+    if (!Number.isSafeInteger(v) || v < min || v > max) {
+      throw new RangeError(
+        this.#labelPrefix() + `${kind} expects an integer in ${min}..${max}, got ${v}`,
+      );
+    }
+  }
 
   constructor(opcode: number) {
     this.opcode = opcode & 0xffff;
@@ -77,42 +104,66 @@ export class Packet {
   }
 
   u8(v: number): this {
+    this.#checkInt("u8", v, 0, 0xff);
     // #at may reallocate, so resolve the offset before touching #buf.
+    this.#labelPrefix();
     const at = this.#at(1);
-    this.#buf[at] = v & 0xff;
+    this.#buf[at] = v;
     return this;
   }
   s8(v: number): this {
+    this.#checkInt("s8", v, -0x80, 0x7f);
+    this.#labelPrefix();
     const at = this.#at(1);
     this.#view().setInt8(at, v);
     return this;
   }
   u16(v: number): this {
+    this.#checkInt("u16", v, 0, 0xffff);
+    this.#labelPrefix();
     const at = this.#at(2);
-    this.#view().setUint16(at, v & 0xffff, true);
+    this.#view().setUint16(at, v, true);
     return this;
   }
   s16(v: number): this {
+    this.#checkInt("s16", v, -0x8000, 0x7fff);
+    this.#labelPrefix();
     const at = this.#at(2);
     this.#view().setInt16(at, v, true);
     return this;
   }
   u32(v: number): this {
+    this.#checkInt("u32", v, 0, 0xffff_ffff);
+    this.#labelPrefix();
     const at = this.#at(4);
-    this.#view().setUint32(at, v >>> 0, true);
+    this.#view().setUint32(at, v, true);
     return this;
   }
   s32(v: number): this {
+    this.#checkInt("s32", v, -0x8000_0000, 0x7fff_ffff);
+    this.#labelPrefix();
     const at = this.#at(4);
-    this.#view().setInt32(at, v | 0, true);
+    this.#view().setInt32(at, v, true);
     return this;
   }
   u64(v: bigint): this {
+    if (v < 0n || v > 0xffff_ffff_ffff_ffffn) {
+      throw new RangeError(
+        this.#labelPrefix() + `u64 expects an integer in 0..18446744073709551615, got ${v}`,
+      );
+    }
+    this.#labelPrefix();
     const at = this.#at(8);
     this.#view().setBigUint64(at, v, true);
     return this;
   }
   f32(v: number): this {
+    if (!Number.isFinite(v) || !Number.isFinite(Math.fround(v))) {
+      throw new RangeError(
+        this.#labelPrefix() + `f32 expects a finite f32-representable number, got ${v}`,
+      );
+    }
+    this.#labelPrefix();
     const at = this.#at(4);
     this.#view().setFloat32(at, v, true);
     return this;
@@ -130,6 +181,22 @@ export class Packet {
     for (let i = 0; i < text.length; i++) this.#buf[at + i] = text.charCodeAt(i);
     this.#buf[at + text.length] = 0;
     return this;
+  }
+
+  /**
+   * `str` capped to a native fixed buffer: `maxBytes` counts the bytes
+   * before the NUL, so a native `char[50]` field writes `strMax(text, 49)`.
+   * The cap is a consumer-safety fact owned by the native scratch/store
+   * scratch area the field eventually lands in, not a wire framing rule.
+   */
+  strMax(text: string, maxBytes: number): this {
+    if (text.length > maxBytes) {
+      throw new RangeError(
+        this.#labelPrefix() + `ANSI string exceeds its ${maxBytes}-byte native-buffer cap`,
+      );
+    }
+    this.#labelPrefix();
+    return this.str(text);
   }
 
   /** UTF-16LE + 16-bit NUL (`sub_592770`). */

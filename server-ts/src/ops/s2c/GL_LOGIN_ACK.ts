@@ -120,124 +120,61 @@ export interface Success {
   readonly rawExtension?: RawExtension;
 }
 
-function requireS32(value: number, field: string): void {
-  if (!Number.isInteger(value) || value < -0x8000_0000 || value > 0x7fff_ffff) {
-    throw new RangeError(`681 ${field} must fit s32`);
-  }
-}
-
-function requireU8(value: number, field: string): void {
-  if (!Number.isInteger(value) || value < 0 || value > 0xff) {
-    throw new RangeError(`681 ${field} must fit u8`);
-  }
-}
-
-function requireS16(value: number, field: string): void {
-  if (!Number.isInteger(value) || value < -0x8000 || value > 0x7fff) {
-    throw new RangeError(`681 ${field} must fit s16`);
-  }
-}
-
-/** Raw16 accepts either signed notation or the full unsigned bit pattern. */
-function requireRaw16(value: number, field: string): void {
-  if (!Number.isInteger(value) || value < -0x8000 || value > 0xffff) {
-    throw new RangeError(`681 ${field} must fit raw2`);
-  }
-}
-
-/**
- * Two forms, distinguished by what you pass:
- *
- *   build("GL_LOGIN_ACK", Result.BadCredentials)          just the result word
- *   build("GL_LOGIN_ACK", { userNo, servers })            the full payload
- *
- * A failure really is only that word on the wire — the client branches on its
- * low byte before reading anything else.
- */
-// Signature spells `number` out: with a value and a type both named `Result`,
-// some checkers resolve the parameter position to the value table instead of
-// the alias, which would refuse arbitrary raw result words the wire permits.
 export default function GL_LOGIN_ACK(op: number, outcome: number | Success): Packet {
   if (typeof outcome === "number") {
-    requireS32(outcome, "result");
-    return new Packet(op).s32(outcome);
+    return new Packet(op).label("681 result expected as a native s32 low-byte code").s32(outcome);
   }
 
   const { userNo, servers, n100 = 0, rawExtension } = outcome;
-  requireS32(userNo, "user_no");
-  requireS32(n100, "n100");
   if (servers.length > 0x7fff) throw new RangeError("681 server_count must fit s16");
-  const p = new Packet(op);
-  p.s32(Result.Success).s32(userNo).s32(n100);
 
+  const p = new Packet(op)
+    .s32(Result.Success)
+    .label("681 user_no expected as a native s32").s32(userNo)
+    .label("681 n100 charge-mode expected as a native s32").s32(n100);
   if (!rawExtension) {
     p.s32(0); // ext_count: safe default, no extension tuple follows
   } else {
-    requireS32(rawExtension.gate, "raw extension gate");
     p.s32(rawExtension.gate);
     if (rawExtension.gate > 0) {
-      requireS32(rawExtension.s32First, "raw extension s32First");
-      requireS32(rawExtension.s32Second, "raw extension s32Second");
-      requireU8(rawExtension.featureFlag, "raw extension featureFlag");
-      p.s32(rawExtension.s32First).s32(rawExtension.s32Second).u8(rawExtension.featureFlag);
+      p.label("681 raw extension s32First expected as a native s32").s32(rawExtension.s32First)
+        .label("681 raw extension s32Second expected as a native s32").s32(rawExtension.s32Second)
+        .label("681 raw extension featureFlag expected as a native u8").u8(rawExtension.featureFlag);
     }
   }
 
   p.s16(servers.length);
   for (const server of servers) {
-    if (server.name.length > MAX_SERVER_NAME_BYTES) {
-      throw new RangeError("681 server name must fit native char[50]");
-    }
-    if (server.host.length > MAX_SERVER_HOST_BYTES) {
-      throw new RangeError("681 server host must fit native char[16]");
-    }
-    if (!Number.isInteger(server.port) || server.port < 0 || server.port > 0xffff) {
-      throw new RangeError("681 server_port must fit u16");
-    }
-    requireU8(server.flag, "server flag");
-    // The native reader consumes exactly three group records. Extra caller
-    // entries are outside the wire contract and are intentionally ignored.
-
     // These are raw2 fields; native domain/signedness is unresolved.
-    requireRaw16(server.serverId, "server_id");
-    requireRaw16(server.group, "group");
-    p.u16(server.serverId); // native raw2; signedness remains unresolved
-    p.str(server.name); // native char[50]
-    p.str(server.host); // native char[16]
+    p.label("681 server_id expected as a native raw2").u16(server.serverId); // signedness unresolved
+    p.label("681 server name expected as per the native char[50]").strMax(server.name, MAX_SERVER_NAME_BYTES);
+    p.strMax(server.host, MAX_SERVER_HOST_BYTES); // native char[16]
     // The reader gets raw2, but the selected-server consumer passes these bits
     // to a Winsock u_short endpoint port.
     p.u16(server.port);
-    p.u8(server.flag);
+    p.u8(server.flag); // native `flag`; its domain is not established here
     p.u16(server.group); // native raw2; signedness remains unresolved
 
+    // The native reader consumes exactly three group records. Extra caller
+    // entries are outside the wire contract and are intentionally ignored.
     for (let index = 0; index < CHANNEL_GROUP_COUNT; index++) {
       const group = server.channelGroups[index];
       if (group === undefined) {
         p.s16(0);
         continue;
       }
-
-      requireS16(group.maxUsers, "channel max_users");
       p.s16(group.maxUsers);
       if (group.maxUsers <= 0) continue;
       const channel = group.channel;
       if (channel === undefined) {
         throw new RangeError("681 positive channel group needs a channel body");
       }
-      if (channel.name.length > MAX_CHANNEL_NAME_BYTES) {
-        throw new RangeError("681 channel name must fit native char[50]");
-      }
-      requireU8(channel.type, "channel type");
-      requireU8(channel.flag, "channel flag");
-      requireS16(channel.currentUsers, "channel current_users");
       p.u8(channel.type);
-      p.str(channel.name);
+      p.label("681 channel name expected as per the native char[50]").strMax(channel.name, MAX_CHANNEL_NAME_BYTES);
       p.s16(channel.currentUsers);
-      p.u8(channel.flag);
+      p.u8(channel.flag); // native `ch_flag`; its domain is not established here
       if (channel.type === 3) {
-        const extra = channel.extra ?? 0;
-        requireU8(extra, "channel extra");
-        p.u8(extra);
+        p.u8(channel.extra ?? 0);
       }
     }
   }

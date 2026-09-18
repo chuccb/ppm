@@ -150,7 +150,7 @@ describe("GC_ENTERCHANNEL_ACK", () => {
         channelId: Number.NaN,
         channelIndex: 0,
       }),
-    ).toThrow(/channel_id/);
+    ).toThrow(/196 channel_id expected/);
   });
 
   test("writes the complete type-3 continuation as an explicit raw projection", () => {

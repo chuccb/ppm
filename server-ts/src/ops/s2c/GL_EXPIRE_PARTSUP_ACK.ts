@@ -15,9 +15,6 @@ import { Packet } from "../../packet.ts";
 import { type PartsUpEntry, writePartsUpEntry } from "./GL_MYPARTSUP_ACK.ts";
 
 export default function GL_EXPIRE_PARTSUP_ACK(op: number, entries: readonly PartsUpEntry[] = []): Packet {
-  if (!Number.isSafeInteger(entries.length) || entries.length > 0x7fff_ffff) {
-    throw new RangeError("count must fit s32");
-  }
   const p = new Packet(op).s32(entries.length);
   for (const entry of entries) writePartsUpEntry(p, entry);
   return p;

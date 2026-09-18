@@ -24,24 +24,8 @@ export interface PartsUpEntry {
   readonly period: number;
 }
 
-function requireS32(name: string, value: number): void {
-  if (!Number.isSafeInteger(value) || value < -0x8000_0000 || value > 0x7fff_ffff) {
-    throw new RangeError(`${name} must fit s32`);
-  }
-}
-
-function requireU8(name: string, value: number): void {
-  if (!Number.isSafeInteger(value) || value < 0 || value > 0xff) {
-    throw new RangeError(`${name} must fit u8`);
-  }
-}
 
 export function writePartsUpEntry(packet: Packet, entry: PartsUpEntry): Packet {
-  requireS32("key0", entry.key0);
-  requireS32("key1", entry.key1);
-  requireU8("kind", entry.kind);
-  requireS32("value", entry.value);
-  requireS32("period", entry.period);
   return packet
     .s32(entry.key0)
     .s32(entry.key1)
@@ -51,7 +35,6 @@ export function writePartsUpEntry(packet: Packet, entry: PartsUpEntry): Packet {
 }
 
 export default function GL_MYPARTSUP_ACK(op: number, entries: readonly PartsUpEntry[] = []): Packet {
-  requireS32("count", entries.length);
   const p = new Packet(op).s32(entries.length);
   for (const entry of entries) writePartsUpEntry(p, entry);
   return p;
