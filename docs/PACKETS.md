@@ -2997,6 +2997,15 @@ boundary；server reader 因此不額外收窄 nickname。n11==9 時再驅動個
 視窗 UI。
 → 伺服器實作 247 時可重用 CreateGL_MYINFO_ACK 的首段 builder。
 
+**2026-09-18 重驗 (246/247 leg)**: 246 builder `sub_573DE0` 本體=
+`Packet(246)+sub_5926F0(str nickname)` 後送 resource `0xA2`(查詢進行訊息)
+——wire 恰為一個 str, TS reader 吻合。247 reader `sub_573EB0`:
+`u8 ok; ok==1 → sub_523BF0 + sub_524360`; **`sub_524360` 首個 u8 是
+character-list index 且 `>=0x14(20) 直接早退不再讀`** — TS 寫入端
+同樣以 index<20 為成功護欄(否則回 `u8(0)` 單 byte 投影), 逐欄吻合。
+`sub_524360` 是被 247 與房間快照(105/108 條目, 見 §3.15 系列)共用的
+索引式外觀讀取器;reader/dispatch/TS 三式零漂移。
+
 ### 3.15pre-2 客戶端狀態機 + 官方模式表 (二十輪)
 **客戶端狀態 (sub_537710 set / sub_5376F0 get, byte_EE8968+24)**:
 2=帳號伺服器已連(250 GL_LOBBYIN 前後), 3=商店(252), 9=大廳(198 後),
