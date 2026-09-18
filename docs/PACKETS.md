@@ -2996,7 +2996,13 @@ n3=3 並無條件跳過渲染子**⇒ TS 無房間戰局模型 ⇒ 恆回 `n3=3`
 | Opcode | 封包名稱 | 來源函數 | 方向 | Wire 格式與行為 |
 |---|---|---|---|---|
 | 918 | `GR_AI_GET_REWARD_ITEM_REQ` | `sub_761A70` | C2S | `u8 reward_idx` (PVE 結算抽獎) |
-| 919 | `GR_AI_GET_REWARD_ITEM_ACK` | `sub_761B20` | S2C | `u8 idx, u8 status(0=成功), s32 item_id, u8 slot, s32 count, u8 flag` |
+| 919 | `GR_AI_GET_REWARD_ITEM_ACK` | `sub_761B20` | S2C | `u8 idx, u8 statusRaw`;==0:`s32 item_id[,!=0:u8 slot],s32 count,u8 flag`;!=0:`u8 code`,`0xFF` 才終止 |
+
+**TS 對位 (2026-09-19)**: 918 builder `sub_761A70` @393375 = 無臂 1B。
+919 consumer `sub_761B20` 行級:`statusRaw==0` 才走戰利品鏈(item_id≠0
+還對 u8 slot 做 `sub_67DF00` 型別檢);!=0 讀 `u8 code`,**只有 sentinel
+0xFF 乾淨終止**——否則再讀 s32+u8+s32。TS 無 PVE 結算模型 ⇒ 恆走
+失敗哨兵臂 `idx echo,1,0xFF`(wire `0201FF` @idx=2)。
 | 922 | `GR_AI_DAMAGE_SHIELD_REQ` | `sub_761580` | C2S | `s16 shield_id, s16 damage, s16 remain, f32 unk` (防衛核心受損) |
 | 923 | `GR_AI_DAMAGE_SHIELD_ACK` | `sub_761710` | S2C | `s16 shield_id, s16 damage, s16 remain, f32 unk` (房間廣播同步) |
 | 924 | `GR_AI_RECHARGE_MAGAZINE_START_REQ` | `sub_558350` | C2S | `u8 slot, u8 team, u8 unk` (彈藥補給開始) |
