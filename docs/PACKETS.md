@@ -2680,8 +2680,11 @@ buffer;拒絕 trailing;split(',') 每段非空 ≤20B=table stride;row≤100=tab
 437 GG_ROOMBROADCAST_REQ (sub_55B430): u8 flag + s32 len + raw[len]。
     ⚠ flag/blob 語意無從確認 — builder 無直接呼叫者 (經函式指標/訊息表),
     且 dispatcher 與房訊息表皆無 438 case (client 從不解析 438), 屬
-    遺留/特殊工具 opcode。server 依 REQ→ACK 慣例原樣轉播全房 (438 同構),
-    不硬編欄位。
+    遺留/特殊工具 opcode。
+    **TS 對位 (2026-09-18)**: c2s 模組解析 `{u8 flag, s32 len, raw[len]}`
+    (primitive 原生拒絕負/逾長 len;拒絕 trailing bytes) 後**刻意不回覆**:
+    本服務無房間轉播目標、client 又不解析 438,回聲或自造 ACK 都是
+    編造雙方都不消費的行為。
 
 378 GR_RADIOMSG_REQ (sub_5593A0): u8 team(*(player+320) 0/1), u8 face
     (頁*9+項目, 0..26 無線電選單), u8 slot(發話者自身 sub_67D010),

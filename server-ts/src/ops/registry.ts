@@ -36,6 +36,7 @@ import GL_SHOPIN_REQ from "./c2s/GL_SHOPIN_REQ.ts";
 import GL_USERLIST_REQ from "./c2s/GL_USERLIST_REQ.ts";
 import GP_ENTER_PEPACHI_REQ from "./c2s/GP_ENTER_PEPACHI_REQ.ts";
 import GP_PEPACHI_LIST_REQ from "./c2s/GP_PEPACHI_LIST_REQ.ts";
+import GG_ROOMBROADCAST_REQ from "./c2s/GG_ROOMBROADCAST_REQ.ts";
 import GP_START_GAME_REQ from "./c2s/GP_START_GAME_REQ.ts";
 import GS_CAPSULEMACHINE_START_REQ from "./c2s/GS_CAPSULEMACHINE_START_REQ.ts";
 import GT_PING_REQ from "./c2s/GT_PING_REQ.ts";
@@ -94,6 +95,7 @@ const inbound = {
   GP_PEPACHI_LIST_REQ,
   GP_START_GAME_REQ,
   GS_CAPSULEMACHINE_START_REQ,
+  GG_ROOMBROADCAST_REQ,
   GT_PING_REQ,
   PM_UDPSTART_REQ,
 } satisfies Record<string, Handler>;

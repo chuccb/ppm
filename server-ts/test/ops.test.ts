@@ -11,6 +11,7 @@ import {
 import { Result, type GameServer } from "../src/ops/s2c/GL_LOGIN_ACK.ts";
 import { read as readCredentials } from "../src/ops/c2s/GL_LOGIN_REQ.ts";
 import dataRecvCompletedRequest from "../src/ops/c2s/GL_DATA_RECV_COMPLETED_REQ.ts";
+import roomBroadcastRequest from "../src/ops/c2s/GG_ROOMBROADCAST_REQ.ts";
 import msgDelRequest from "../src/ops/c2s/GL_MSG_DEL_REQ.ts";
 import friendAddRequest from "../src/ops/c2s/GL_FRIEND_ADD_REQ.ts";
 import friendDelRequest from "../src/ops/c2s/GL_FRIEND_DEL_REQ.ts";
@@ -189,6 +190,38 @@ describe("435 — friend-info csv request", () => {
     expect(() => pipeline("a,,b")).toThrow(/non-empty/);
     expect(() => pipeline(Array(101).fill("a").join(","))).toThrow(/100 names/);
     expect(() => pipeline("x".repeat(1024))).toThrow(/char\[1024\]/);
+  });
+});
+
+describe("437 — room broadcast request", () => {
+  test("parses {u8 flag, s32 len, raw[len]} and deliberately stays silent", () => {
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof roomBroadcastRequest>[1];
+    roomBroadcastRequest(
+      reread(new Packet(opcodeFor("GG_ROOMBROADCAST_REQ")).u8(7).s32(3).raw(new Uint8Array([1, 2, 3]))),
+      connection,
+    );
+    expect(replies).toEqual([]);
+    expect(() =>
+      roomBroadcastRequest(
+        reread(new Packet(opcodeFor("GG_ROOMBROADCAST_REQ")).u8(7).s32(3).raw(new Uint8Array([1, 2]))),
+        connection,
+      ),
+    ).toThrow(); // s32 len lies about the blob: raw() bounds-check fires
+    expect(() =>
+      roomBroadcastRequest(
+        reread(new Packet(opcodeFor("GG_ROOMBROADCAST_REQ")).u8(7).s32(-1)),
+        connection,
+      ),
+    ).toThrow(/non-negative/);
+    expect(() =>
+      roomBroadcastRequest(
+        reread(new Packet(opcodeFor("GG_ROOMBROADCAST_REQ")).u8(7).s32(0).u8(0)),
+        connection,
+      ),
+    ).toThrow(/trailing/);
   });
 });
 
@@ -643,7 +676,7 @@ describe("registry", () => {
   });
 
   test("the registry exposes both operation folders at startup", () => {
-    expect(summary()).toMatch(/^c2s 24 \(/);
+    expect(summary()).toMatch(/^c2s 25 \(/);
     expect(summary()).toMatch(/\), s2c 27 \(/);
     expect(summary()).toContain("GL_LOGIN_ACK");
     expect(summary()).toContain("GL_LOGIN_REQ");
