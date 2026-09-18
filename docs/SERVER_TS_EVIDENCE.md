@@ -74,6 +74,7 @@ model 的地方，TS 只輸出已確認可被 client 完整消費的空 projecti
 | 424 `GL_MSG_READ_ACK` | `u8 statusRaw, str key` | `sub_55A4F0`: status 非零→`sub_537D20` 寫 `89` 標記;零→彈 resource `0x1E4`。builder emit `{u8 statusRaw, strMax(key,19)}`;status enum 不造。 | `sub_55A4F0`、`sub_537D20`；HIGH |
 | 783 `GL_NEW_MSG_COUNT_REQ` | (空) | builder `sub_5643E0` ✓。784 `sub_564480`:單 `s32`→`dword_F0C104`,`!=0` 切 UI 新信件指標。TS 信箱恆空 ⇒ 回 `s32(0)`。 | `sub_5643E0`/`sub_564480`；HIGH |
 | --- **2026-09-19 S2C 零值總審計**(60 件全體,新增 5 件註記) --- | | | |
+| 141↔142 `PM_CONNECT` 握手落地 | 141 空體;142=`str host(≤19B), s32 port(low u16), u8 active_channel_index, u32 packed_calendar` | builder `sub_556530` 空體實證、consumer `sub_5565D0` 行級(142 進 `sub_596E60` 次 UDP 地址族)、`sub_534F20` 解碼 mask 對拍;TS 回 config.channel.endpoint/index + process-local wall clock(wire 無時區,zone 明確文件化) | 全值有 live 來源,零亂填;HIGH |
 | 218 `GI_CHANGEDATA_REQ` 持久化 | `u8 selected_slot, u8 count(≤20), count×{u8 slot,u8 type,12×u16}` | builder `sub_572FC0` dirty-only;第二欄實證 char_type;store `applyCharacterData` 全有或全無事務;`sub_4BCF00` 0/1 二臂 ⇒ 回 1/0 | 解決「假成功」風險;HIGH |
 | 312 `GI_CHANGESLOT_REQ` 更名 | `u8 slot_no` | `sub_884160` 傳 CClientData+88 ⇒ **角色選擇**非背包分頁;persist `current_character`(未擁有槽靜默丟棄,consumer 不讀) | 舊註解「inventory tab」錯名纠正;HIGH |
 | 685/689 tutorial | 686=`s32 marker`回讀 store;689 原樣存入 player.tutorial_index | `sub_4422B0` 哨兵 145=隱藏 TUTO_NEW;689 無 ACK 維持沉默 | 689 擲棄⇒重覆讀回 0 的缺口修復;HIGH |

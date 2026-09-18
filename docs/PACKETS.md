@@ -2317,12 +2317,15 @@ future implementation evidence。沒有 process-local room state、battle owner�
 ```
 
 **Fact/HIGH — current Bun/TypeScript bootstrap guardrails.** `server-ts` 目前的
-runtime modules 覆蓋 681/682/693/694、143/144 與 195/196；`PM_CONNECT_ACK`
-(142) 的 calendar grammar 仍是 native evidence，沒有被冒充成目前 runtime module。
-TS 保留 694 threshold、144 mandatory prefix/optional NetCafe tail、以及 196
-failure-prefix/success-only endpoint tail 的 wire boundary；type-3 只有在完整
-`type3Tail` 存在時才可送出。Bun tests 覆蓋 144 optional shape、196 success-tail
-與 694 ceiling；142 的 native bit layout 仍由 packet/resource audit 維護。
+runtime modules 覆蓋 681/682/693/694、143/144、195/196 與 **141/142**
+（PM_CONNECT 握手，2026-09-19 落地：141 空體嚴格拒絕、142 由
+`config.channel.endpoint`/`index` 與 process-local wall clock 供值，
+packed_calendar 依 `sub_534F20` 反式編碼；wire 無時區，zone 選擇已在
+模組註解明示）。TS 保留 694 threshold、144 mandatory prefix/optional
+NetCafe tail、以及 196 failure-prefix/success-only endpoint tail 的 wire
+boundary；type-3 只有在完整 `type3Tail` 存在時才可送出。Bun tests 覆蓋
+144 optional shape、196 success-tail、694 ceiling，以及 142 的固定時刻
+byte-exact wire pin 與 `packCalendar` decode-mask 對拍。
 
 ### 3.15b2 房間管理/戰場雜項 (廿二輪掃畢; 卅八輪補 REQ 端+設定簇)
 ```

@@ -77,6 +77,7 @@ import GS_BUYCHAR_REQ from "./c2s/GS_BUYCHAR_REQ.ts";
 import GS_DELETEGIFT_REQ from "./c2s/GS_DELETEGIFT_REQ.ts";
 import GS_CAPSULEMACHINE_START_REQ from "./c2s/GS_CAPSULEMACHINE_START_REQ.ts";
 import GT_PING_REQ from "./c2s/GT_PING_REQ.ts";
+import PM_CONNECT_REQ from "./c2s/PM_CONNECT_REQ.ts";
 import PM_UDPSTART_REQ from "./c2s/PM_UDPSTART_REQ.ts";
 
 import GC_ENTERCHANNEL_ACK from "./s2c/GC_ENTERCHANNEL_ACK.ts";
@@ -138,6 +139,7 @@ import GR_START_VOTING_ACK from "./s2c/GR_START_VOTING_ACK.ts";
 import GS_BUYCHAR_ACK from "./s2c/GS_BUYCHAR_ACK.ts";
 import GS_DELETEGIFT_ACK from "./s2c/GS_DELETEGIFT_ACK.ts";
 import GS_CAPSULEMACHINE_START_ACK from "./s2c/GS_CAPSULEMACHINE_START_ACK.ts";
+import PM_CONNECT_ACK from "./s2c/PM_CONNECT_ACK.ts";
 import PM_UDPSTART_ACK from "./s2c/PM_UDPSTART_ACK.ts";
 
 export type Handler = (reader: Reader, connection: Connection) => void | Promise<void>;
@@ -204,6 +206,7 @@ const inbound = {
   GG_GAMECENTER_GAME_START_REQ,
   GG_ROOMBROADCAST_REQ,
   GT_PING_REQ,
+  PM_CONNECT_REQ,
   PM_UDPSTART_REQ,
 } satisfies Record<string, Handler>;
 
@@ -267,6 +270,7 @@ const outbound = {
   GS_DELETEGIFT_ACK,
   GS_CAPSULEMACHINE_START_ACK,
   GT_PING_ACK,
+  PM_CONNECT_ACK,
   PM_UDPSTART_ACK,
 } as const;
 

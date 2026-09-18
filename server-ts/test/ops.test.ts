@@ -56,6 +56,7 @@ import levelKillLimitRequest from "../src/ops/c2s/GL_LEVEL_KILL_LIMIT_REQ.ts";
 import tutorialIndexRequest from "../src/ops/c2s/GL_TUTORIALINDEX_REQ.ts";
 import tutorialIndexSetRequest from "../src/ops/c2s/GL_TUTORIAL_INDEX_SET_REQ.ts";
 import userListRequest from "../src/ops/c2s/GL_USERLIST_REQ.ts";
+import connectRequest from "../src/ops/c2s/PM_CONNECT_REQ.ts";
 
 const build = <N extends OutboundName>(name: N, ...args: OutboundArgs<N>) =>
   decode(buildPacket(name, ...args).encode());
@@ -1805,6 +1806,35 @@ describe("681 — login ack", () => {
 
 });
 
+describe("141 — connect request (endpoint re-confirm)", () => {
+  const pipeline = (payload: Packet, replies: unknown[][]) => {
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+      config: { channel: { endpoint: { host: "192.0.2.7", port: 40_202 }, index: 0 } },
+    } as unknown as Parameters<typeof connectRequest>[1];
+    connectRequest(reread(payload), connection);
+  };
+
+  test("bare opcode answers with the live endpoint, channel index, and clock", () => {
+    const replies: unknown[][] = [];
+    pipeline(new Packet(opcodeFor("PM_CONNECT_REQ")), replies);
+    expect(replies).toHaveLength(1);
+    const [name, info] = replies[0]! as [string, {
+      endpoint: { host: string; port: number };
+      activeChannelIndex: number;
+      serverTime: Date;
+    }];
+    expect(name).toBe("PM_CONNECT_ACK");
+    expect(info.endpoint).toEqual({ host: "192.0.2.7", port: 40_202 });
+    expect(info.activeChannelIndex).toBe(0);
+    expect(Date.now() - info.serverTime.getTime()).toBeLessThan(5_000);
+  });
+
+  test("any payload byte is refused", () => {
+    expect(() => pipeline(new Packet(opcodeFor("PM_CONNECT_REQ")).u8(0), [])).toThrow(/empty payload/);
+  });
+});
+
 describe("registry", () => {
   test("direction comes from the folder, not the REQ/ACK suffix", () => {
     // GT_PING_ACK is an _ACK the server sends; GT_PING_REQ is a _REQ it
@@ -1815,8 +1845,8 @@ describe("registry", () => {
   });
 
   test("the registry exposes both operation folders at startup", () => {
-    expect(summary()).toMatch(/^c2s 62 \(/);
-    expect(summary()).toMatch(/\), s2c 60 \(/);
+    expect(summary()).toMatch(/^c2s 63 \(/);
+    expect(summary()).toMatch(/\), s2c 61 \(/);
     expect(summary()).toContain("GL_LOGIN_ACK");
     expect(summary()).toContain("GL_LOGIN_REQ");
   });

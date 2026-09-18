@@ -44,6 +44,7 @@ import GL_MSG_RECVLIST_ACK from "../src/ops/s2c/GL_MSG_RECVLIST_ACK.ts";
 import GL_INVENIN_ACK from "../src/ops/s2c/GL_INVENIN_ACK.ts";
 import GL_MYINFO_ACK from "../src/ops/s2c/GL_MYINFO_ACK.ts";
 import GL_MYPARTSUP_ACK from "../src/ops/s2c/GL_MYPARTSUP_ACK.ts";
+import PM_CONNECT_ACK, { packCalendar } from "../src/ops/s2c/PM_CONNECT_ACK.ts";
 import type { MyInfo, NewSkillProfileSnapshot } from "../src/store.ts";
 
 const hex = (bytes: Uint8Array): string => Buffer.from(bytes).toString("hex").toUpperCase();
@@ -93,6 +94,43 @@ const snapshot = {
     expiresAtPackedMinute: index === 1 ? 0x1234_5678 : 0,
   })),
 } satisfies NewSkillProfileSnapshot;
+
+
+describe("142 connect-ack payload snapshot", () => {
+  // Fixed wall clock: 2026-09-19 21:30 local.
+  // packed = 26<<24 | 9<<19 | 19<<13 | 21<<7 | 30 = 0x1A4A6A9E (sub_534F20 inverse).
+  const wire = PM_CONNECT_ACK(142, {
+    endpoint: { host: "127.0.0.1", port: 40_202 },
+    activeChannelIndex: 0,
+    serverTime: new Date(2026, 8, 19, 21, 30),
+  }).payload();
+
+  test("grammar str/s32/u8/u32 with the packed calendar word", () => {
+    expect(hex(wire)).toBe(compact(`
+      31 32 37 2E 30 2E 30 2E 31 00
+      0A 9D 00 00
+      00
+      9E 6A 4A 1A
+    `));
+  });
+
+  test("packCalendar round-trips through the sub_534F20 decode masks", () => {
+    const packed = packCalendar(new Date(2026, 0, 1, 0, 0));
+    expect((packed >>> 24) + 2000).toBe(2026);
+    expect((packed & 0xf8_0000) >>> 19).toBe(1);
+    expect((packed & 0x7_e000) >>> 13).toBe(1);
+    expect((packed & 0x1f_80) >>> 7).toBe(0);
+    expect(packed & 0x7f).toBe(0);
+    expect(() => packCalendar(new Date(2300, 0, 1))).toThrow(/2000..2255/);
+  });
+
+  test("validation: host length, port range, index range", () => {
+    const base = { endpoint: { host: "h", port: 1 }, activeChannelIndex: 1, serverTime: new Date(2026, 0, 2, 3, 4) };
+    expect(() => PM_CONNECT_ACK(142, { ...base, endpoint: { host: "x".repeat(20), port: 1 } })).toThrow(/19 bytes/);
+    expect(() => PM_CONNECT_ACK(142, { ...base, endpoint: { host: "h", port: 65_536 } })).toThrow(/u16/);
+    expect(() => PM_CONNECT_ACK(142, { ...base, activeChannelIndex: 256 })).toThrow(/u8/);
+  });
+});
 
 describe("native 198/247/255 payload snapshots", () => {
   test("198 keeps the shared basic block and private tail byte-for-byte", () => {
