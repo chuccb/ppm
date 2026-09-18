@@ -2966,3 +2966,126 @@ roommake 結論。
 - 頁籤 ID：`WAREHOUSE_1` 至 `WAREHOUSE_6`
 - 格式字串：`L"WAREHOUSE_%d"`、`L"WARE_TAB_%d"`
 
+---
+
+## 6. origin/main 全樹普查與資產命名全圖（71,464 檔／5,501,729,379 B；2026-09-18）
+
+> **方法（零下載可複查）**：命名層結論全部來自 `git ls-tree -rl origin/main Extracted`
+> 的完整路徑＋大小清單；內容級結論只對點取的少量檔案（`git archive origin/main
+> <path>`）。§2..§5d 已解析的 `cfg\*.pat` 在 main 樹位於 `Extracted/ui/cfg/`
+> （itemdata/Quest/maplist/partsability/weaponparts/RecommandItem 六 pat＋
+> `Map.dat`、`pm_lobbydata.dat`）；本節起引用一律以此路徑為準。
+> 等級標記：**Confirmed**＝code 格式串或雙向零差集；**Strong**＝多來源一致但缺
+> 最後 caller/consumer 直證；**Probable**；**Unknown**。
+
+### 6.1 普查總表（目錄 ↔ patch pack）
+
+| 頂層 | 檔數 | 主要格式 | 對應 patch pack | 狀態 |
+|---|---:|---|---|---|
+| `item/` | 40,258 | avatar pav 20,190；thumb tga 13,647；weapon pap/wav/sprites 4,497；object 48 | `Data\item.dat` | §6.3 |
+| `character/` | 21,016 | mot 20,465；ani_list.sco×94；base.pdt×94；pap 101 | `Data\character.dat` | §6.5 |
+| `map/` | 6,484 | maps/ 131（pmm 123＋ini＋aas）；textures dds 5,003；models md3 179；minimaps 123；portraits 122 | `Data\map.dat` | §6.4 |
+| `sound/` | 2,904 | wav：sounds 1,101／sounds01 676／sounds80 1,127 | `Data\sounds.dat`、`sounds01.dat` | §6.6 |
+| `ui/` | 650 | xml 203；swf 6；sounds 175；cfg/*.pat；lang/ | （unpacked share；不入 pack） | 多節已析 |
+| `pepachi/` | 78 | swf 72；scenario xml；wav 4 | `Data\pepachi.dat` | §6.7 |
+| `BulletHole/`、`effect/` | 38、31 | dds/tga | （unpacked share） | 未排程 |
+| root | 5 | 0.xml、ClientDataList.xml、convars.pat、data.pat、datarevision.txt | （unpacked share） | §6.2 |
+
+### 6.2 控制檔層（Fact）
+
+- **`0.xml`**＝`<patch>` PackFile 清單：`character/item/map/pepachi/pmClient/
+  sounds/sounds01/sounds02(→Data\*.dat)`。**Confirmed**：Extracted 頂層目錄＝
+  patch pack 的 1:1 展開。**異常對（UNRESOLVED）**：pack 列 `sounds02` 但樹內無
+  `sound/sounds02/`；樹內有 `sound/sounds80/` 但無對應 pack 列——版本 drift 或
+  更名遺留，未判決。
+- **`ClientDataList.xml`**＝`<List>` unpacked share 清單：BulletHole／effect／ui／
+  ui_temp／0.xml／convars.pat／data.pat／datarevision.txt／ClientDataList.xml。
+- **`datarevision.txt`（root 與 pepachi 各一）**＝十進位字串 `811034967`（兩份
+  相同；語義 Unknown，疑似 build/patch revision，待 native 讀取站定案）。
+
+### 6.3 item 資產命名全圖（本節最大定案）
+
+- **thumb（Confirmed）**：`item/thumb/N.tga` 的純數字名＝**完整 item id**。
+  13,644 個數字檔對 `ui/cfg/itemdata.pat` 21,164 id 命中 **13,606（99.7%）**。
+  38 個例外（如 `12100145/12100276/12100597/12100605/12100800..02`、
+  `12202962..65`、`10600228` 等）＝資產存在但 catalog 無此 id（**Probable**：
+  資產領先 catalog；時間層證據待查）。
+- **pav 檔名文法（Confirmed，code 直證）**：`PaperMan.exe.c` 兩處
+  `L"%s%s%02d_%05d_%02d.pav", L"item\\", L"avatar\\", a2%1000000/100000,
+  a2%100000, a3`（行 216759／560335；loader `sub_5D7220`／`sub_8D37A0`）。
+  → **f1＝id 的十萬位、f2＝id 低 5 位、f3＝a3**。20,189 檔對 itemdata%1e6 命中
+  **20,182（99.96%）**。**Strong**：a2＝item id、a3＝avatar 槽位（1..8）——
+  七站 caller（216944..217239）與 560474/560598 的最後直證未做；注意 %1e6
+  截斷會讓 103xxxxx 與 153xxxxx 等高位帶碰上同一 key，逐帶歸屬需 caller 定案。
+- **pav 7 例外**：`00_00408_{02,04}`、`02_00310_{01,02}`、`05_00494_{01,02}`、
+  `06_00228_01`——其中 `(6,00228)` 恰與 thumb `10600228.tga` 互證：資產成對
+  存在但 itemdata 無 10,600,228（同拇指例外類）。
+- **武器資產走代號字串，不走 id**：`weapon/models/{fpv/{beast,paper},tpv}/
+  <代號> BASE.PAP`、`weapon/sounds/<代號>_{shot1,clipin,…}.wav`、`sprites/
+  {cylinder,flame}`；`Rockettan.pap`／`ghostmine.pap`／`knives.pap` 為 code
+  字面量（362059/362067/362075）。**Strong**：代號 ↔ itemdata 顯示名 ↔
+  §5d-8 SpecialWeaponType.xml index（id−12100000）的三方綁定文法未排程。
+- `item/object/` 48 檔、`item/thumb/{LargeWeapon,QuestOfMedalHonor,
+  QuestOfMission}/`（honor_fN/honor_bN dds）未排程。
+
+### 6.4 map 資產 ↔ maplist 全對應（Confirmed）
+
+- `ui/cfg/maplist.pat`＝`<f` 版本（1.03）＋count 123＋836B row
+  （`s32 mask, s32 map_id, UTF-16LE 路徑`）；其 123 個路徑與
+  `map/maps/*.pmm` **雙向零差集**。
+- **前綴 → mode bit 文法（Confirmed，mask 逐圖驗算）**：
+
+| 前綴 | 圖數 | modebit | 前綴 | 圖數 | modebit |
+|---|---:|---|---|---:|---|
+| TD | 29 | TeamMatch | PS | 12 | IndividualSurvival(+Tutorial) |
+| TS | 38 | TeamSoccer(+TeamSurvival) | PNR | 7 | PulpnRoll |
+| TH | 14 | DefuseBomb | TU | 3 | Tutorial |
+| TW | 13 | Steal(+Tutorial) | AI | 2 | GunShooting |
+| OCC | 2 | Occupy(+TeamSurvival) | OCC2 | 1 | OccupyRenewal |
+| PVE | 1 | AIMulti | ECT | 1 | Tutorial+WeaponTest |
+
+- `AI_01_Monster.aas`＝全樹唯一 .aas（PvE 導航網格；**Probable**）。
+- OCC 兩圖各有 `*.ini`（出生點／水晶槽；§5d-13）。
+- minimaps 123＝pmm 1:1；portraits 122：**ECT_01_weaponpreview 無對應人像**
+  （**Probable**：預覽圖不需人像，待驗）。
+
+### 6.5 character 資產
+
+- `character/models/{tpv/bot}/typeN/` 各配 **`ani_list.sco`＋`base.pdt`**，共 94 組：
+  tpv type1..15（玩家角色）；bot type0..34 與 type300..342（**Probable**：PvE
+  怪物 cast——與 §5d-26 `BotEnemy*.xml` 的 monster 表交叉未做）。
+- `character/animations/`：**mot 20,465**（`tm mN {base,close,open,shot,reload}`
+  等 per-weapon-class 文法，90×4 整齊組）；camera 10 個 `.cmv`（走位鏡頭動畫）。
+- `base.pap` 系列 101（名含空白如「s base.pap」，placeholder 語義 Unknown）。
+
+### 6.6 sound 資產
+
+- 三聲包目錄：`sounds/`（1,101）、`sounds01/`（676）、`sounds80/`（1,127）。
+- code 寬字串僅直接引用 `sounds\` 前綴（buy.wav、click1/2、dialog、error、
+  msg_incomming…）；**sounds01／sounds80 無字面引用** → 聲包路徑由變數組成
+  （**Unknown**：選取器格式串／caller 未定位）。
+- 命名觀察：`emotionN.wav`×380；連殺語音（Airshot/Criticalshot/Doublekill/
+  Genocide/Headshot/Heartbreak…）每名恰 38 複本（**Unknown**：複本=三目錄
+  重複或 per-語音槽，待證；§10.1 VOICE 槽交叉待做）。
+
+### 6.7 pepachi（柏青哥小遊戲）
+
+- 72 個 `N_N_N.swf`（三格滾輪動畫）＋ `pepachi/sound/` 4 wav（atari/reel/stop）
+  ＋ `datarevision.txt`（值同 root）。
+- **`pe-pachi_scenario.xml`＝滾輪路由表（Confirmed）**：`<Rare>`3 型、
+  `<Atari>`10 型、`<Zannen>`8 型、`<Suka>`…，各 `TypeNN` 以
+  `First/Second/Third` 指名三格 swf——中獎／殘念／落空各走不同 swf 序列。
+- native 對應面：700／900 系列 caller（`sub_8459C0`／`sub_99D0A0`；
+  `tools/verify_native_gates.py` 已錨其送出匣與等級／禮物匣閘）。**agenda**：
+  scenario 的讀取站、swf root tag 消費者、與 packet 回應的對齊。
+
+### 6.8 明列研究議程（下一批 parts）
+
+1. pav a2/a3 caller 直證（七站 216944..217239 ↔ 槽位迴圈；560474/560598）。
+2. thumb/pav 例外集合的時間層證據（資產領先 catalog 之版本考古；§5e 併入）。
+3. 武器代號字串 ↔ itemdata 顯示名 ↔ SpecialWeaponType.xml 的三方文法。
+4. bot type3xx ↔ BotEnemy*.xml monster 表；animations mot 文法 ↔ ani_list.sco 索引。
+5. sounds01/sounds80 聲包選取器；連殺語音 38 複本之軸。
+6. pepachi scenario native 消費鏈（700/900）、`item/object/` 48 檔、pap 命名。
+
+
