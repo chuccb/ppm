@@ -2247,11 +2247,13 @@ future implementation evidence。沒有 process-local room state、battle owner�
         建模，四個 byte/八個 slot 的業務域仍未命名。
 
     result 1=正常成功（state 2, normal path），2=alternate success mode；
-    3=版本不符(0xA4), 4=已連線(0xCF), 5=未授權 ID(0x11B),
+    3=版本不符(0xA4 格式化，參數固定 7082), 4=已連線(0xCF), 5=未授權 ID
+    (0x11B),
     6=中級 channel level 限制(0x31B), 7=中級 channel K/D 限制(0x31C),
     8=light server 限制(0x32D), 9=beginner server 限制(0x321),
     10=intermediate server 限制(0x334), 101..108=帳號/認證失敗資源
-    0xB6/0x10B/0x98/0xDB/0x11E/0x3F/0xC8/default。
+    0xB6/0x10B/0x98/0xDB/0x11E/0x3F/0xC8/0x11D；**result 0**（switch 外
+    else 臂）= 通用失敗 0x42。
 
     第二層 `CLobbyChannel::sub_4179D0` 的 case 144 **不再檢查 result**
     就呼叫 `sub_56FF40(group@this+129, channel@this+131)` 送出 195；因此
@@ -2265,7 +2267,8 @@ future implementation evidence。沒有 process-local room state、battle owner�
     u8 endpoint_opaque, u8 channel_type, raw4 client_flags, u8 client_default`。
     result 1 會把第三欄寫成 active channel index；0=channel full (0xDA),
     2=rank restricted (0x148), 3=clan required (0x328), 4/5/7/9=generic
-    error (0x1A5), 6/8 有各自 resource。`client_flags & 1` 是已證實的
+    error (0x1A5), 6=0x3A6, 8=0x3A7（皆 `sub_4177B0` switch 直讀；
+    default 臂靜默無訊息）。`client_flags & 1` 是已證實的
     native flag；`channel_type==3` 還要求完整 `sub_875680` continuation。
     TS builder 只在明確提供 raw `type3Tail` 時發送；channel admission 也只有
     在 config 提供該 tail 時接受 type 3，未配置時維持保守拒絕。
