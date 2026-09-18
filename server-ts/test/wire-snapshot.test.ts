@@ -1,7 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import GL_CLIENTINFO_ACK from "../src/ops/s2c/GL_CLIENTINFO_ACK.ts";
+import GL_EXPIRE_PARTSUP_ACK from "../src/ops/s2c/GL_EXPIRE_PARTSUP_ACK.ts";
 import GL_INVENIN_ACK from "../src/ops/s2c/GL_INVENIN_ACK.ts";
 import GL_MYINFO_ACK from "../src/ops/s2c/GL_MYINFO_ACK.ts";
+import GL_MYPARTSUP_ACK from "../src/ops/s2c/GL_MYPARTSUP_ACK.ts";
 import type { MyInfo, NewSkillProfileSnapshot } from "../src/store.ts";
 
 const hex = (bytes: Uint8Array): string => Buffer.from(bytes).toString("hex").toUpperCase();
@@ -65,6 +67,33 @@ describe("native 198/247/255 payload snapshots", () => {
     expect(hex(payload)).toBe(compact(`
       01746172676574000144332211FEFFFFFF000000000000000000000000000000000A0000000B0000000C0000000D0000000E0000000F00000010000000120000001300000011000000140000001500000016000000170000001800000000000008000000000000000000000019000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001012A0100341203000400050006000700080009000A000B00FFFF
     `));
+  });
+
+  test("201 PartsUp push emits the exact 17-wire-byte record frame", () => {
+    expect(hex(GL_MYPARTSUP_ACK(201).payload())).toBe("00000000");
+    const entries = [
+      { key0: 0x0102_0304, key1: -2, kind: 0x80, value: 0x7fff_ffff, period: 86_400 },
+      { key0: -1, key1: 0, kind: 0, value: 0, period: 0 },
+    ];
+    expect(hex(GL_MYPARTSUP_ACK(201, entries).payload())).toBe(compact(`
+      02000000
+      04030201 FEFFFFFF 80 FFFFFF7F 80510100
+      FFFFFFFF 00000000 00 00000000 00000000
+    `));
+  });
+
+  test("202 expiry shares the 201 frame and 17-byte records", () => {
+    expect(hex(GL_EXPIRE_PARTSUP_ACK(202).payload())).toBe("00000000");
+    expect(
+      hex(GL_EXPIRE_PARTSUP_ACK(202, [{ key0: 0x0102_0304, key1: -2, kind: 0x80, value: 0x7fff_ffff, period: 86_400 }]).payload()),
+    ).toBe(compact("01000000 04030201 FEFFFFFF 80 FFFFFF7F 80510100"));
+  });
+
+  test("PartsUp builders reject out-of-domain wire values", () => {
+    const bad = (kind: number) => () =>
+      GL_MYPARTSUP_ACK(201, [{ key0: 0, key1: 0, kind, value: 0, period: 0 }]);
+    expect(bad(0x100)).toThrow(RangeError);
+    expect(bad(-1)).toThrow(RangeError);
   });
 
   test("255 retains the common prefix and five raw 32-byte profiles", () => {

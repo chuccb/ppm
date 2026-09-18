@@ -1296,10 +1296,12 @@ bodyless-row repair、nonzero body preservation、GM/purchase type validation co
 ### 3.3 GL_MYITEM_ACK (200) — handler sub_570AB0 → sub_524B70 (分頁背包)
 ```
 bool    success
-s32     start_index          (分頁, 每包最多 100 條, 背包上限 5120)
+s32     start_index          (n5020; ≤0 → slot-count:=0, ≥5020 → clamp 5020;
+                               分頁, 每包最多 100 條, 背包上限 5120)
 repeat until sentinel:
-  s32   inv_slot   (負值 = 結束)
-  s32   item_id    (≤0/非法 = 中止)
+  s32   inv_slot   (v9 < 0 = 乾淨結束)
+  s32   item_id    (v8 < 0 或 sub_535020 目錄 miss → sub_528960 錯誤 6 後
+                    中止; item_id==0 走目錄 miss arm 中止, i>=5120 亦錯誤 6)
   raw4 f1         (native first 4-byte word via sub_592AC0; numeric/domain meaning UNRESOLVED)
   raw4 f2         (native second 4-byte word via sub_592AC0; numeric/domain meaning UNRESOLVED;
                     NewSkillLevTable is client display/combine data, not authority
@@ -1309,9 +1311,14 @@ repeat until sentinel:
                    無-extra 版 (a3=0) 屬 290/294 MASTER_USERINFO 系
   u16   durability (寫入 *2 個 word: current=max)
 ```
+另 (native-only, 非 wire): `sub_524B70` 對一個 itemdata 靜態記錄位址做等值
+比較 (`v8 == &unk_E975C0` → 置 `this_5=1` 的 client 旗標) — 該記錄身份
+未考證, 但只影響 client 本地 UI 狀態, wire 契約不變。
 相鄰 opcode (卅六輪型別定案 — 六輪的 f32 標註更正為 s32 鍵):
-- **201 GL_MYPARTSUP_ACK** (sub_95A3B0): `s32 count` + count×20B
-  `{raw4 key0, raw4 key1, raw1 kind, raw4 value, raw4 period}`;
+- **201 GL_MYPARTSUP_ACK** (sub_95A3B0): `s32 count` + count×**17B(wire)**
+  `{raw4 key0, raw4 key1, raw1 kind, raw4 value, raw4 period}` ⚠ 2026-09-18
+  重驗: native heap node 是 `operator new(0x14)`=20B, 但 kind(u8) 後的
+  3 bytes pad 不上線——**wire 每筆 = 4+4+1+4+4 = 17B**;
   native `sub_95A4A0` uses `(key0,key1)` as the duplicate/update key and
   stores all five wire fields. The pair is consistent with the weapon/part
   catalog projection, but the value/period policy is not established by this
@@ -1628,8 +1635,9 @@ kind 0/1/14 與 12/13/17 (可覆寫類) 走覆寫路徑, 其他 kind 重複購�
   `INFORMATION`/`MYINFO` completion before the request, and client displays
   resource string `0x66`「載入中」. Server projection may send success 200 from
   start 0 — 199 has no start field; 200 見 §3.3
-【201 GL_MYPARTSUP_ACK】(sub_95A3B0): s32 count × 20B 條目
-  `{raw4 key0, raw4 key1, raw1 kind, raw4 value, raw4 period}`。
+【201 GL_MYPARTSUP_ACK】(sub_95A3B0): s32 count + count×17B(wire) 條目
+  `{raw4 key0, raw4 key1, raw1 kind, raw4 value, raw4 period}`；
+  heap node 0x14=20B 的 3B pad 不上線(2026-09-18 重驗)。
   `sub_95A4A0` 的 duplicate/update key 是 wire 前兩欄；weapon/part catalog
   projection 與 pair shape 相容，但 value/period 與兩 key 的 wire 命名仍分開保留。
 【202 GL_EXPIRE_PARTSUP_ACK】(sub_95AE40): 同構；每筆 wire 前兩欄

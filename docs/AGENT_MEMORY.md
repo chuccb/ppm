@@ -15,7 +15,8 @@
 | 1 | admission 681 / TCP grooming / login trio | `b9f02d5f` | `SERVER_TS_EVIDENCE.md` 192 行 ledger;681 Result 表; server-list s16 定向;693 區段補正(greeting 型別/ v6 spin-lock) |
 | 2 | channel handshake 143/144/195/196 | `3fad207c` | 144 case 108=0x11D/result 0=0x42/3=0xA4+7082;196 result 6→0x3A6/8→0x3A7;`client_identity` String[24]=AccountName(PaperMan.exe.c:2241) |
 | 3 | 大廳同步序列（本節詳記） | `8e3c66e7` | PACKETS §3.15pre-3;原生命令行 197→199→834 定序 |
-| 4 | **198 GL_MYINFO_ACK 逐欄重驗** | (本次) | sub_570550 主體+523BF0/524010/524660/527550/527D00+尾段全函式重讀;語意三式互證(sub_9252D0 條件器/sub_5206F0 標籤直繫/523BF0+523E10 序列化鏡像);**TS 修掉 criticals/doubleKill/tripleKill 三欄亂序**(wire=+180,+184,+176 非遞增;原寫錯序受舊 §3.2 升冪誤表影響);PACKETS §3.2+EVIDENCE 對齊;另注 696 `sub_523A90` 變體序(176 在 172 前,跳 +144 收 +116)TS 未實作 |
+| 5 | **200/201/202 分頁背包×PartsUp** | (本次) | `sub_570AB0`+`sub_524B70` 逐欄重驗 (u8 success→[s32 start; 直到 sentinel 的 100/5120 分頁; slot/id/raw4×2/period/u8/u16 每筆]);200 clamp/錯誤 6 arm 補注;**201/202 wire 是 17B/record 非「×20B」**(heap 0x14 的 3B pad 不上線)doc 雙處修正;新增 `GL_MYPARTSUP_ACK`/`GL_EXPIRE_PARTSUP_ACK` s2c builder 共用 `writePartsUpEntry`(s2c 20→22),wire-snapshot 17B 精確 pin;116 測試綠 |
+| 4 | **198 GL_MYINFO_ACK 逐欄重驗** | `e658b579` | sub_570550 主體+523BF0/524010/524660/527550/527D00+尾段全函式重讀;語意三式互證(sub_9252D0 條件器/sub_5206F0 標籤直繫/523BF0+523E10 序列化鏡像);**TS 修掉 criticals/doubleKill/tripleKill 三欄亂序**(wire=+180,+184,+176 非遞增;原寫錯序受舊 §3.2 升冪誤表影響);PACKETS §3.2+EVIDENCE 對齊;另注 696 `sub_523A90` 變體序(176 在 172 前,跳 +144 收 +116)TS 未實作 |
 
 ### Phase 3 native 錨點（+748 scene 狀態機）
 
