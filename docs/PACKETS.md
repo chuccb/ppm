@@ -3497,9 +3497,11 @@ request grammars 204/468, 206, 208, 296, 310, 356, 358, 453, 470, 698, 700,
 future handler is added. They do not claim that the historical server used the
 same rejection transport or error code.
 
-除 `252→253` shop-entry compatibility projection與本頁另有明確標註者外，
-下表各列目前都不是 `server-ts` runtime 的 registered handler；它們只記錄
-未來實作時不可破壞的 client consumer-safe boundary。
+除 `252→253` shop-entry compatibility projection、以及 2026-09-18 註冊為
+consumer-safe denial arm 的四條ガチャ鏈（`698→699`、`700→701`、`702→703`、
+`900→901`，見下列註記）之外，下表各列目前都不是 `server-ts` runtime 的
+registered handler；它們只記錄未來實作時不可破壞的 client consumer-safe
+boundary。
 
 | flow | future consumer-safe candidate / current registration status | direct consumer/state gate |
 |---|---|---|
@@ -3517,10 +3519,10 @@ same rejection transport or error code.
 | 695→696 once item | `{u8=0,s32=0,s32=0}` | `sub_571D70` consumes the conditional zero-result s32; no success-only tail is reached for item ID zero. |
 | 780→781 PresentPackage detail | `{u8=1}` | `sub_57D6B0`: nonzero status has no item list. |
 | 802→803 destroy | `{u8 nonzero,u8 rawCode=0,u8 affectedCount=0}` | `sub_895EE0`; the 802 native request writer is now known (`sub_895B90`), but raw field/domain meaning and server acceptance remain **UNRESOLVED**, so no item is read/deleted. |
-| 698→699 Pepachi entry | `{u8 status=0,s32=0,s32=0}` | case 699 reads all fields; only status 1 enters its success UI path. |
-| 700→701 Pepachi spin | `{u8=0,u8 rawError=0}` | `sub_84A490`: only first byte 1 opens award/reel decoding. |
-| 702→703 Pepachi list | `{s32 start=0,s32 count=0}` | case 703 builds an empty local signed-16 list, never grants a reward. |
-| 900→901 capsule | `{u8 nonzero,s32 count=0,s32=0,s32=0,s32=0}` | `sub_9A1A30` always consumes count plus three tails; count zero prevents award records and nonzero avoids local wallet/reward updates. |
+| 698→699 Pepachi entry | **註冊中（2026-09-18）**：`GP_ENTER_PEPACHI_ACK` 恒為 `{u8 status=0,s32=0,s32=0}`；無 success-arm builder | case 699 reads all fields; only status 1 enters its success UI path. |
+| 700→701 Pepachi spin | **註冊中（2026-09-18）**：REQ 嚴格消費 `{u8 machine,s32 coinType}`；`GP_START_GAME_ACK` 恒為 `{u8=0,u8 rawError=0}` 兩 bytes | `sub_84A490`: only first byte 1 opens award/reel decoding. |
+| 702→703 Pepachi list | **註冊中（2026-09-18）**：`GP_PEPACHI_LIST_ACK` 恒為雙零 count `{s32 normal=0,s32 rare=0}`，無 item 記錄 | case 703 builds an empty local signed-16 list, never grants a reward. |
+| 900→901 capsule | **註冊中（2026-09-18）**：REQ payload 未定名（builder 未回收）故不消費欄位；`GS_CAPSULEMACHINE_START_ACK` 恒為 `{u8 status=1,s32 count=0,3×s32=0}` 17 bytes | `sub_9A1A30` always consumes count plus three tails; count zero prevents award records and nonzero avoids local wallet/reward updates. |
 | 453→454 delete gift | Future candidate: `{u8 result=0,s32 echoedGiftId,s32 echoedItemId}` | `sub_57BCF0` always consumes the two IDs and only result exactly 1 removes a cached gift. Current `server-ts` has no 453/454 module; a future module must validate the exact eight-byte request and keep this non-mutating arm. |
 
 453's wire and client cache key are known, but the original service's pending

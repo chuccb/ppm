@@ -29,6 +29,10 @@ import GL_MYINFO_REQ from "./c2s/GL_MYINFO_REQ.ts";
 import GL_MYITEM_REQ from "./c2s/GL_MYITEM_REQ.ts";
 import GL_SHOPIN_REQ from "./c2s/GL_SHOPIN_REQ.ts";
 import GL_USERLIST_REQ from "./c2s/GL_USERLIST_REQ.ts";
+import GP_ENTER_PEPACHI_REQ from "./c2s/GP_ENTER_PEPACHI_REQ.ts";
+import GP_PEPACHI_LIST_REQ from "./c2s/GP_PEPACHI_LIST_REQ.ts";
+import GP_START_GAME_REQ from "./c2s/GP_START_GAME_REQ.ts";
+import GS_CAPSULEMACHINE_START_REQ from "./c2s/GS_CAPSULEMACHINE_START_REQ.ts";
 import GT_PING_REQ from "./c2s/GT_PING_REQ.ts";
 import PM_UDPSTART_REQ from "./c2s/PM_UDPSTART_REQ.ts";
 
@@ -47,6 +51,10 @@ import GL_SHOPIN_ACK from "./s2c/GL_SHOPIN_ACK.ts";
 import GL_TCPCONNSUCC from "./s2c/GL_TCPCONNSUCC.ts";
 import GL_USERLIST_ACK from "./s2c/GL_USERLIST_ACK.ts";
 import GT_PING_ACK from "./s2c/GT_PING_ACK.ts";
+import GP_ENTER_PEPACHI_ACK from "./s2c/GP_ENTER_PEPACHI_ACK.ts";
+import GP_PEPACHI_LIST_ACK from "./s2c/GP_PEPACHI_LIST_ACK.ts";
+import GP_START_GAME_ACK from "./s2c/GP_START_GAME_ACK.ts";
+import GS_CAPSULEMACHINE_START_ACK from "./s2c/GS_CAPSULEMACHINE_START_ACK.ts";
 import PM_UDPSTART_ACK from "./s2c/PM_UDPSTART_ACK.ts";
 
 export type Handler = (reader: Reader, connection: Connection) => void | Promise<void>;
@@ -65,6 +73,10 @@ const inbound = {
   GL_MYITEM_REQ,
   GL_SHOPIN_REQ,
   GL_USERLIST_REQ,
+  GP_ENTER_PEPACHI_REQ,
+  GP_PEPACHI_LIST_REQ,
+  GP_START_GAME_REQ,
+  GS_CAPSULEMACHINE_START_REQ,
   GT_PING_REQ,
   PM_UDPSTART_REQ,
 } satisfies Record<string, Handler>;
@@ -84,6 +96,10 @@ const outbound = {
   GL_SHOPIN_ACK,
   GL_TCPCONNSUCC,
   GL_USERLIST_ACK,
+  GP_ENTER_PEPACHI_ACK,
+  GP_PEPACHI_LIST_ACK,
+  GP_START_GAME_ACK,
+  GS_CAPSULEMACHINE_START_ACK,
   GT_PING_ACK,
   PM_UDPSTART_ACK,
 } as const;

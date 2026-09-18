@@ -452,8 +452,8 @@ describe("registry", () => {
   });
 
   test("the registry exposes both operation folders at startup", () => {
-    expect(summary()).toMatch(/^c2s 15 \(/);
-    expect(summary()).toMatch(/\), s2c 16 \(/);
+    expect(summary()).toMatch(/^c2s 19 \(/);
+    expect(summary()).toMatch(/\), s2c 20 \(/);
     expect(summary()).toContain("GL_LOGIN_ACK");
     expect(summary()).toContain("GL_LOGIN_REQ");
   });
