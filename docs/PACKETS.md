@@ -2925,7 +2925,13 @@ consumer `sub_76E450`(dispatcher `sub_564A00` 只在 GunShooting local flow
 `sub_5392A0(byte_EE8968, id, resultRaw)`。TS 恆 `status=1 + echo id +
 resultRaw=0`(wire 9B)。
 | 485 | `GL_GET_GAMEROOM_PROGRESSTIME_REQ` | `sub_56AD60` | C2S | `u8 room_no` (查詢戰局進行時間) |
-| 486 | `GL_GET_GAMEROOM_PROGRESSTIME_ACK` | `sub_56AE30` | S2C | `u8 n3, s16 room_no, u8 id, s32 elapsed_sec, u8, s8, u8, s8, u8, s8, u8, s8` |
+| 486 | `GL_GET_GAMEROOM_PROGRESSTIME_ACK` | `sub_56AE30` | S2C | `u8 n3, [n3=2: 4B] [n3∈{0,1,4}: row 9/11B + n11 門檻尾 1~4B + 2B]; 其他 n3⇒規格化 3 & 渲染全跳` |
+
+**TS 對位 (2026-09-19) 485→486**: 485 builder `sub_56AD60` @163685:
+1B `u8 room_no` ✓。486 consumer `sub_56AE30` 行級臂:`n3==2` 再讀 4B;
+`n3∈{0,1,4}` 依 game-mode 讀 9/11B 行+n11 門檻尾+2B 再渲染;**其他 n3⇒
+n3=3 並無條件跳過渲染子**⇒ TS 無房間戰局模型 ⇒ 恆回 `n3=3`(wire 1B
+`03`),舊單列補正為臂型。
 
 ### 3.15j-a. 2026-09-17 GameCenter 472–484 direct writer／reader／caller re-audit
 

@@ -29,6 +29,7 @@ import changeSkillItemSlotRequest from "../src/ops/c2s/GI_CHANGE_SKILLITEMSLOT_R
 import gamecenterGameEndRequest from "../src/ops/c2s/GG_GAMECENTER_GAME_END_REQ.ts";
 import gamecenterPlayCheckRequest from "../src/ops/c2s/GG_GAMECENTER_GAME_PLAY_CHECK_REQ.ts";
 import gamecenterGameStartOkRequest from "../src/ops/c2s/GG_GAMECENTER_GAME_START_OK_REQ.ts";
+import gameRoomProgressTimeRequest from "../src/ops/c2s/GL_GET_GAMEROOM_PROGRESSTIME_REQ.ts";
 import gamecenterRankingRequest from "../src/ops/c2s/GG_GAMECENTER_RANKING_REQ.ts";
 import gamecenterGameStartRequest from "../src/ops/c2s/GG_GAMECENTER_GAME_START_REQ.ts";
 import gamecenterRecRequest from "../src/ops/c2s/GL_GAMECENTER_REC_REQ.ts";
@@ -982,6 +983,35 @@ describe("483 — gamecenter game-start-ok request", () => {
   });
 });
 
+describe("485 — gameroom progress-time request", () => {
+  test("485 parses the u8 room byte and answers n3=3 (silent unknown arm)", () => {
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof gameRoomProgressTimeRequest>[1];
+    gameRoomProgressTimeRequest(
+      reread(new Packet(opcodeFor("GL_GET_GAMEROOM_PROGRESSTIME_REQ")).u8(9)),
+      connection,
+    );
+    expect(replies).toEqual([["GL_GET_GAMEROOM_PROGRESSTIME_ACK", 3]]);
+  });
+
+  test("485 refuses wrong payload widths", () => {
+    const connection = {
+      reply: () => undefined,
+    } as unknown as Parameters<typeof gameRoomProgressTimeRequest>[1];
+    expect(() =>
+      gameRoomProgressTimeRequest(reread(new Packet(opcodeFor("GL_GET_GAMEROOM_PROGRESSTIME_REQ"))), connection),
+    ).toThrow(/485/);
+    expect(() =>
+      gameRoomProgressTimeRequest(
+        reread(new Packet(opcodeFor("GL_GET_GAMEROOM_PROGRESSTIME_REQ")).u8(9).u8(0)),
+        connection,
+      ),
+    ).toThrow(/485/);
+  });
+});
+
 describe("834 — data-recv-completed request", () => {
   test("consumes the propagated raw4 context and replies with an empty 835", () => {
     const replies: string[] = [];
@@ -1433,8 +1463,8 @@ describe("registry", () => {
   });
 
   test("the registry exposes both operation folders at startup", () => {
-    expect(summary()).toMatch(/^c2s 50 \(/);
-    expect(summary()).toMatch(/\), s2c 50 \(/);
+    expect(summary()).toMatch(/^c2s 51 \(/);
+    expect(summary()).toMatch(/\), s2c 51 \(/);
     expect(summary()).toContain("GL_LOGIN_ACK");
     expect(summary()).toContain("GL_LOGIN_REQ");
   });
