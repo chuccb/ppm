@@ -2897,6 +2897,11 @@ consumer `sub_584E80` **本體零讀取**(僅 `sub_457380` 列表刷新)⇒ body
 | 478 | `GG_GAMECENTER_GAME_PLAY_CHECK_REQ` | `sub_564A40` | C2S | `raw36 check_data` (小遊戲反作弊心跳) |
 | 479 | `GG_GAMECENTER_GAME_PLAY_CHECK_ACK` | — | S2C | `u8 status(1)` |
 
+**TS 對位 (2026-09-19) 478(→479)**: 478 builder `sub_564A40` @160362:
+`sub_592580`(0x24)= 36B ✓(`sub_76EA70` 組檢查塊)。**全檔無 `case 479`/
+`== 479`/ctor 479** ⇒ 心跳 fire-and-forget ⇒ TS 解析 36B 後**刻意沉默**
+(同 689 先憲);479 wire 不杜撰。
+
 **TS 對位 (2026-09-19) 476→477**: 476 builder `sub_564930` @160332:
 `sub_5929E0`(2B)+`sub_592580`(0x18)+`sub_592580`(0x2C)= 70B ✓。477
 consumer `sub_76E450`(dispatcher `sub_564A00` 只在 GunShooting local flow

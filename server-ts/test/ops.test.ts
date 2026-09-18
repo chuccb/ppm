@@ -27,6 +27,7 @@ import buyCharRequest from "../src/ops/c2s/GS_BUYCHAR_REQ.ts";
 import changeChannelRequest from "../src/ops/c2s/GL_CHANGECHANNEL_REQ.ts";
 import changeSkillItemSlotRequest from "../src/ops/c2s/GI_CHANGE_SKILLITEMSLOT_REQ.ts";
 import gamecenterGameEndRequest from "../src/ops/c2s/GG_GAMECENTER_GAME_END_REQ.ts";
+import gamecenterPlayCheckRequest from "../src/ops/c2s/GG_GAMECENTER_GAME_PLAY_CHECK_REQ.ts";
 import gamecenterGameStartRequest from "../src/ops/c2s/GG_GAMECENTER_GAME_START_REQ.ts";
 import gamecenterRecRequest from "../src/ops/c2s/GL_GAMECENTER_REC_REQ.ts";
 import deleteGiftRequest from "../src/ops/c2s/GS_DELETEGIFT_REQ.ts";
@@ -887,6 +888,37 @@ describe("476 — gamecenter game-end request", () => {
   });
 });
 
+describe("478 — gamecenter play-check request", () => {
+  test("478 parses exactly 36 bytes and deliberately stays silent (no native 479)", () => {
+    const payload = new Packet(opcodeFor("GG_GAMECENTER_GAME_PLAY_CHECK_REQ"));
+    for (let i = 0; i < 36; i++) payload.u8(i % 5);
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof gamecenterPlayCheckRequest>[1];
+    gamecenterPlayCheckRequest(reread(payload), connection);
+    expect(replies).toEqual([]);
+  });
+
+  test("478 refuses wrong payload widths", () => {
+    const connection = {
+      reply: () => undefined,
+    } as unknown as Parameters<typeof gamecenterPlayCheckRequest>[1];
+    expect(() =>
+      gamecenterPlayCheckRequest(
+        reread(new Packet(opcodeFor("GG_GAMECENTER_GAME_PLAY_CHECK_REQ")).raw(new Uint8Array(35))),
+        connection,
+      ),
+    ).toThrow(/478/);
+    expect(() =>
+      gamecenterPlayCheckRequest(
+        reread(new Packet(opcodeFor("GG_GAMECENTER_GAME_PLAY_CHECK_REQ")).raw(new Uint8Array(37))),
+        connection,
+      ),
+    ).toThrow(/478/);
+  });
+});
+
 describe("834 — data-recv-completed request", () => {
   test("consumes the propagated raw4 context and replies with an empty 835", () => {
     const replies: string[] = [];
@@ -1338,7 +1370,7 @@ describe("registry", () => {
   });
 
   test("the registry exposes both operation folders at startup", () => {
-    expect(summary()).toMatch(/^c2s 47 \(/);
+    expect(summary()).toMatch(/^c2s 48 \(/);
     expect(summary()).toMatch(/\), s2c 48 \(/);
     expect(summary()).toContain("GL_LOGIN_ACK");
     expect(summary()).toContain("GL_LOGIN_REQ");
