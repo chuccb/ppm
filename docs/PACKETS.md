@@ -2719,7 +2719,15 @@ else** ⇒ status=0 完全沉默;≠0 才再讀 `u8 target_slot`(room-view 時�
 | 912 | `GL_WEAPONPARTS_EQUIP_CHANGE_REQ`| `sub_95AEF0`×3 | C2S | `u8 raw0,s32 raw1,s32 raw2`; raw0==2 appends `s32 raw3`; branch/domain meanings remain UNRESOLVED. |
 | 913 | `GL_WEAPONPARTS_EQUIP_CHANGE_ACK`| `sub_95B180` | S2C | `u8 errorRaw`; only `0` continues with the matching 912 body; nonzero error values unresolved |
 | 310 | `GS_BUYCHAR_REQ` | `sub_572790` | C2S | `s32 char_type, 5×s32 items` |
-| 311 | `GS_BUYCHAR_ACK` | `sub_5728A0` | S2C | `u8 status(1), s32 slot, s32 char_type, s32 exp, s32 cash, s32 gp, s32 dura` |
+| 311 | `GS_BUYCHAR_ACK` | `sub_5728A0` | S2C | `u8 status(1), [6×s32 快照 status≠0 才有], u8 v26Raw, s32 v33Raw, s32 v29Raw` — 尾部三欄恆讀 |
+
+**TS 對位 (2026-09-19)**: 310 builder `sub_572790` @167049:ctor→6×
+`sub_592A20`(4B 本體驗證)= `6×s32`(24B)✓。311 consumer
+`sub_5728A0`:`u8 status`≠0 先讀 6×s32 快照(經 sub_5831F0+混淆寫入
+unk_EE8DE6+13×i_13 表);**之後無條件再讀** `u8 v26Raw, s32 v33Raw,
+s32 v29Raw`(v26 錢包 switch 只在 status≠0 觸發)⇒ 舊列漏尾部恆讀區
+⇒ 補正。TS 無購買/商品目錄模型 ⇒ 恆 `status=0` + 尾部三零(wire 10B),
+dialog 經 `sub_4694B0(byte_D70C14, 0)` 收合、錢包不變。
 | 453 | `GS_DELETEGIFT_REQ` | `sub_57BC40` | C2S | `s32 gift_uid, s32 item_id` |
 | 454 | `GS_DELETEGIFT_ACK` | `sub_57BCF0` | S2C | `u8 status` (only exactly 1 mutates the local cached list), `s32 gift_uid, s32 item_id` |
 | 802 | `GS_DESTROYITEM_REQ` | `sub_895B90`, called by `sub_894070` | C2S | native builder Fact: `s32 raw0,s32 raw1,u8 count,count×raw4 raw2`; each record may append a client-state-bounded run of raw4 values without a separate nested count. Domain meaning and server acceptance remain UNRESOLVED. |
