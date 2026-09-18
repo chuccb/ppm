@@ -1,6 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import GL_CLIENTINFO_ACK from "../src/ops/s2c/GL_CLIENTINFO_ACK.ts";
 import GL_EXPIRE_PARTSUP_ACK from "../src/ops/s2c/GL_EXPIRE_PARTSUP_ACK.ts";
+import GL_FRIEND_LIST_ACK from "../src/ops/s2c/GL_FRIEND_LIST_ACK.ts";
+import GL_MSG_RECVLIST_ACK from "../src/ops/s2c/GL_MSG_RECVLIST_ACK.ts";
 import GL_INVENIN_ACK from "../src/ops/s2c/GL_INVENIN_ACK.ts";
 import GL_MYINFO_ACK from "../src/ops/s2c/GL_MYINFO_ACK.ts";
 import GL_MYPARTSUP_ACK from "../src/ops/s2c/GL_MYPARTSUP_ACK.ts";
@@ -94,6 +96,51 @@ describe("native 198/247/255 payload snapshots", () => {
       GL_MYPARTSUP_ACK(201, [{ key0: 0, key1: 0, kind, value: 0, period: 0 }]);
     expect(bad(0x100)).toThrow(RangeError);
     expect(bad(-1)).toThrow(RangeError);
+  });
+
+  test("434 emits context plus the native {str nickname, s32 stateRaw} rows", () => {
+    expect(hex(GL_FRIEND_LIST_ACK(434).payload())).toBe(compact("0000 00 00"));
+    const rows = [
+      { nickname: "alice", stateRaw: 0x010203 },
+      { nickname: "bob", stateRaw: -1 },
+    ];
+    expect(hex(GL_FRIEND_LIST_ACK(434, "ctx", rows).payload())).toBe(compact(`
+      0000 63747800
+      02
+      616C69636500 03020100
+      626F6200 FFFFFFFF
+    `));
+  });
+
+  test("434 caps rows at the native 100-entry friend table", () => {
+    const rows = Array.from({ length: 101 }, () => ({ nickname: "a", stateRaw: 0 }));
+    expect(() => GL_FRIEND_LIST_ACK(434, "", rows)).toThrow(RangeError);
+    expect(() => GL_FRIEND_LIST_ACK(434, "", [{ nickname: "a".repeat(21), stateRaw: 0 }])).toThrow(
+      RangeError,
+    );
+  });
+
+  test("426 emits the full native message row in wire order", () => {
+    expect(hex(GL_MSG_RECVLIST_ACK(426).payload())).toBe(compact("0000 00 00"));
+    const rows = [
+      { key: "sender", kind: 2, name: "subj", extraRaw: 0x12345678, body: "hello", selector: "F", flagRaw: -2 },
+    ];
+    expect(hex(GL_MSG_RECVLIST_ACK(426, "ctx", rows).payload())).toBe(compact(`
+      0000 63747800
+      01
+      73656E64657200 02 7375626A00 78563412 68656C6C6F00 4600 FEFF
+    `));
+  });
+
+  test("426 caps rows at 10 and strings at their native strides", () => {
+    const base = { key: "k", kind: 0, name: "n", extraRaw: 0, body: "b", selector: "", flagRaw: 0 };
+    expect(() => GL_MSG_RECVLIST_ACK(426, "", Array.from({ length: 11 }, () => base))).toThrow(
+      RangeError,
+    );
+    expect(() => GL_MSG_RECVLIST_ACK(426, "", [{ ...base, key: "k".repeat(20) }])).toThrow(RangeError);
+    expect(() => GL_MSG_RECVLIST_ACK(426, "", [{ ...base, name: "n".repeat(21) }])).toThrow(RangeError);
+    expect(() => GL_MSG_RECVLIST_ACK(426, "", [{ ...base, body: "b".repeat(201) }])).toThrow(RangeError);
+    expect(() => GL_MSG_RECVLIST_ACK(426, "", [{ ...base, selector: "FM" }])).toThrow(RangeError);
   });
 
   test("255 retains the common prefix and five raw 32-byte profiles", () => {

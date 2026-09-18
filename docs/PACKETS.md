@@ -1528,6 +1528,11 @@ raw2 header, string field_s0 (native local `char[21]`, at most 20 ANSI bytes), u
 one-byte table slot `this+61585+index`; only the low byte is visibly retained by
 that local consumer. The 21-byte record-string copy loop has no visible per-byte clamp.
 
+**2026-09-18 重驗 (432/434 leg)**: reader `sub_55AFC0` + store `sub_537F60`
+三式一致 (reader/store/既有節錄);TS builder 已升級為全語法投影
+(可送 `{str nickname(20B cap), s32 stateRaw}` 記錄, count cap=原生表上限
+100), 預設仍回零筆 boot 投影,低 byte 保留屬 client 儲存事實不窄化 wire。
+
 ### 3.11 GL_MSG_RECVLIST_ACK (426) — sub_55A630:
 ```
 raw2 header, string field_s0 (native local `char[21]`, at most 20 ANSI bytes), u8 count
@@ -1556,6 +1561,11 @@ reply controls; and a separate local dword array is formatted as `MSG_TIME`.
 The dump does not show the wire raw4 being written to that dword array, so
 raw4 must not be renamed timestamp. The 201-byte string has no recovered direct
 address join to the `MESSAGE` control, and raw2/header/context remain raw.
+
+**2026-09-18 重驗 (425/426 leg)**: reader `sub_55A630` + store `sub_5378C0`
+三式一致;TS builder 已升級為全語法投影, 逐欄對齊原生表 stride 安全上限
+(key 19B / name 20B / body 200B / selector 1B / count 10), raw4/raw2 低 byte
+保留不窄化 wire; 預設仍回零筆投影。
 
 The adjacent 421/422 and 423/424 readers consume `u8 statusRaw, str key`;
 nonzero 422 removes the matching key and nonzero 424 writes marker `89`.
