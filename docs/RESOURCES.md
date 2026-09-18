@@ -2647,11 +2647,11 @@ AppearSound DisAppearSound`
 但同目錄的 `ItemAbilityEffectColorTable.xml`／`ItemAbilityEffectNameTable.xml`
 是明文（§5d-20 已記）。**同一子系統的三張表加密狀態並不一致。**
 
-## 5d-29. Single mode / GunShooting 的 resource parser、兩圖參數與 UI stage 閉環
+## 5d-30. Single mode / GunShooting 的 resource parser、兩圖參數與 UI stage 閉環
 
 本節把 Wiki 的 Single domain 與 resource/native 交叉結果集中記錄，避免把 `gamecenter_map_info.xml` 當成一張「看到 XML 就全部生效」的設定表。
 
-### 5d-29a. `gamecenter_map_info.xml` 的實際載入器
+### 5d-30a. `gamecenter_map_info.xml` 的實際載入器
 
 `sub_411DA0` 只從固定路徑 `ui/system/AI/gamecenter_map_info.xml` 的 root `GAMECENTER_MAP_INFO` 取兩類節點：
 
@@ -2677,7 +2677,7 @@ startPos shieldPos
 
 normal/easy 的 `startPos`、`shieldPos`、warning-light positions 與 shield texture names 也各自存在；它們是 client map setup evidence，不是 server clear/reward policy。`time`／`feverTime` 的單位未由此 XML 或本輪 parser trace 安全確定，保留 raw value。
 
-### 5d-29b. map id、mode bit 與 Wiki 名稱的四來源鏈
+### 5d-30b. map id、mode bit 與 Wiki 名稱的四來源鏈
 
 ```
 maplist.pat
@@ -2695,7 +2695,7 @@ map_StartIndex.xml
 
 這條鏈的重點是 **id type**：81/89 是 map id，9 是 modeIndex，1084 等是 language id。檔名前綴 `AI_` 不是 parser 的 mode 判定依據；既有 `maplist.pat` 的 bitmask 結果與 [`RESOURCES.md` §5d-5/§5d-6](#5d-5-maplistpat-全解123-圖-mode-bitmask與既有-bit-表-100-相符) 互相驗證。
 
-### 5d-29c. Popup stage 與 GameCenter writers
+### 5d-30c. Popup stage 與 GameCenter writers
 
 Single popup 的 native event branch 使用 resource/UI literal，而不是自行推測的 domain enum：
 
@@ -2709,7 +2709,7 @@ Single popup 的 native event branch 使用 resource/UI literal，而不是自�
 
 結算與 handshake 的 client/resource 邊界記在 [`PACKETS.md` §3.15j-a](PACKETS.md#315j-a-2026-09-17-gamecenter-472484-direct-writerreadercaller-re-audit)：476 是 `1 primitive + 24B + 44B`，478 是 `36B` check block，480 是 `game_id + mode` 且有 local state gate，483 只有 `game_id`；477/481/484 readers 更新 local state/cache。resource 與 UI 只能說明 client 要送什麼、顯示什麼，不能補 coin 扣除、score authority、reward grant 或 ranking persistence。
 
-### 5d-29d. 與 Wiki 的交叉結論與限制
+### 5d-30d. 與 Wiki 的交叉結論與限制
 
 [シングルモード](https://wikiwiki.jp/paperman/シングルモード) 的兩張地圖、Easy/Ranking 分流、coin 與首次 clear reward 是很好的歷史 domain 導航；其中兩圖、map id、normal/easy `time`、shield HP 與 popup stage 已由本 extraction 的 native/resource 閉合。相反地，Wiki 的 Fever／boss／score multiplier／support item 攻略，以及 coin refill/cap、價格、首次 clear、PG／武器／稱號 grant，不能由這些檔案升格為私服 server policy。
 
@@ -2969,7 +2969,7 @@ roommake 結論。
 
 ---
 
-## 6. origin/main 全樹普查與資產命名全圖（71,464 檔／5,501,729,379 B；2026-09-18）
+## 11. origin/main 全樹普查與資產命名全圖（71,464 檔／5,501,729,379 B；2026-09-18）
 
 > **方法（零下載可複查）**：命名層結論全部來自 `git ls-tree -rl origin/main Extracted`
 > 的完整路徑＋大小清單；內容級結論只對點取的少量檔案（`git archive origin/main
@@ -2979,20 +2979,20 @@ roommake 結論。
 > 等級標記：**Confirmed**＝code 格式串或雙向零差集；**Strong**＝多來源一致但缺
 > 最後 caller/consumer 直證；**Probable**；**Unknown**。
 
-### 6.1 普查總表（目錄 ↔ patch pack）
+### 11.1 普查總表（目錄 ↔ patch pack）
 
 | 頂層 | 檔數 | 主要格式 | 對應 patch pack | 狀態 |
 |---|---:|---|---|---|
-| `item/` | 40,258 | avatar pav 20,190；thumb tga 13,647；weapon pap/wav/sprites 4,497；object 48 | `Data\item.dat` | §6.3 |
-| `character/` | 21,016 | mot 20,465；ani_list.sco×94；base.pdt×94；pap 101 | `Data\character.dat` | §6.5 |
-| `map/` | 6,484 | maps/ 131（pmm 123＋ini＋aas）；textures dds 5,003；models md3 179；minimaps 123；portraits 122 | `Data\map.dat` | §6.4 |
-| `sound/` | 2,904 | wav：sounds 1,101／sounds01 676／sounds80 1,127 | `Data\sounds.dat`、`sounds01.dat` | §6.6 |
+| `item/` | 40,258 | avatar pav 20,190；thumb tga 13,647；weapon pap/wav/sprites 4,497；object 48 | `Data\item.dat` | §11.3 |
+| `character/` | 21,016 | mot 20,465；ani_list.sco×94；base.pdt×94；pap 101 | `Data\character.dat` | §11.5 |
+| `map/` | 6,484 | maps/ 131（pmm 123＋ini＋aas）；textures dds 5,003；models md3 179；minimaps 123；portraits 122 | `Data\map.dat` | §11.4 |
+| `sound/` | 2,904 | wav：sounds 1,101／sounds01 676／sounds80 1,127 | `Data\sounds.dat`、`sounds01.dat` | §11.6 |
 | `ui/` | 650 | xml 203；swf 6；sounds 175；cfg/*.pat；lang/ | （unpacked share；不入 pack） | 多節已析 |
-| `pepachi/` | 78 | swf 72；scenario xml；wav 4 | `Data\pepachi.dat` | §6.7 |
+| `pepachi/` | 78 | swf 72；scenario xml；wav 4 | `Data\pepachi.dat` | §11.7 |
 | `BulletHole/`、`effect/` | 38、31 | dds/tga | （unpacked share） | 未排程 |
-| root | 5 | 0.xml、ClientDataList.xml、convars.pat、data.pat、datarevision.txt | （unpacked share） | §6.2 |
+| root | 5 | 0.xml、ClientDataList.xml、convars.pat、data.pat、datarevision.txt | （unpacked share） | §11.2 |
 
-### 6.2 控制檔層（Fact）
+### 11.2 控制檔層（Fact）
 
 - **`0.xml`**＝`<patch>` PackFile 清單：`character/item/map/pepachi/pmClient/
   sounds/sounds01/sounds02(→Data\*.dat)`。**Confirmed**：Extracted 頂層目錄＝
@@ -3004,7 +3004,7 @@ roommake 結論。
 - **`datarevision.txt`（root 與 pepachi 各一）**＝十進位字串 `811034967`（兩份
   相同；語義 Unknown，疑似 build/patch revision，待 native 讀取站定案）。
 
-### 6.3 item 資產命名全圖（本節最大定案）
+### 11.3 item 資產命名全圖（本節最大定案）
 
 - **thumb（Confirmed）**：`item/thumb/N.tga` 的純數字名＝**完整 item id**。
   13,644 個數字檔對 `ui/cfg/itemdata.pat` 21,164 id 命中 **13,606（99.7%）**。
@@ -3017,14 +3017,14 @@ roommake 結論。
   → **f1＝id 的十萬位、f2＝id 低 5 位、f3＝a3＝該 item 的子紋理層索引
   （1..8）**。20,189 檔對 itemdata%1e6 命中 **20,182（99.96%）**。
   ⚠ **2026-09-18 模型更正**：先前「f3＝avatar 槽位」為**過早定案**；
-  caller 直證（§6.3a）證明 f3 是**同一 item 的第 n 張子紋理**（eye 僅 1 張、
+  caller 直證（§11.3a）證明 f3 是**同一 item 的第 n 張子紋理**（eye 僅 1 張、
   face 固定 8 張、其餘多為 2 張），槽位語義在 a2 的來源欄位（十 accessor），
   不在檔名第三段。
 - **pav 7 例外**：`00_00408_{02,04}`、`02_00310_{01,02}`、`05_00494_{01,02}`、
   `06_00228_01`——其中 `(6,00228)` 恰與 thumb `10600228.tga` 互證：資產成對
   存在但 itemdata 無 10,600,228（同拇指例外類）。
 
-### 6.3a. Avatar 合成管線直證（`sub_5D8120` 家族；2026-09-18，Confirmed）
+### 11.3a. Avatar 合成管線直證（`sub_5D8120` 家族；2026-09-18，Confirmed）
 
 - **裝備紀錄＝10 個連續 s32 欄位（this+39..+48）**，各存 **band 相對偏移**
   （與 198 wire 的 u16 同構）；每欄一個 accessor（`sub_5B81C0..sub_5B86F0`，
@@ -3049,7 +3049,7 @@ roommake 結論。
   （f3∈{1,2,3,4}）；101 face 520｜519（**每 item 全 8 層**）；102 top 789｜789、
   103 bottom 632｜632、104 shoes 568｜568、105 outer 2019｜2018（皆 {1,2}）；
   106 eye 304｜295（**僅層 1**）；107 hairAcc 750｜720、108 faceAcc 249｜241、
-  109 headAcc 155｜148。**110 帶 1296 id 零 pav**（語意已於 §6.3b 定案為
+  109 headAcc 155｜148。**110 帶 1296 id 零 pav**（語意已於 §11.3b 定案為
   拼圖・特殊道具帶；本就不屬紙娃娃合成器）。
 - **合成器 `sub_5D8120(atlas_mgr, charIdx(0..16), record, a4, thisa)`**：
   每位玩家建 **兩張 256×512、16bpp（0x40000B）atlas**，尾段 `sub_5D8CE0`
@@ -3094,7 +3094,7 @@ roommake 結論。
   的 itemdata record 之 `+4 id2/型號`（§2c）——即「slot 偏移 → catalog 實體
   → 資產 id」三段式；%1e6 截斷問題由 bandIdx 分段消除（不再高位碰撞）。
 
-### 6.3b. band 110（198/247 record 第 12 欄 `special`）＝拼圖・特殊道具帶（2026-09-18，新）
+### 11.3b. band 110（198/247 record 第 12 欄 `special`）＝拼圖・特殊道具帶（2026-09-18，新）
 
 - **資產語意（Confirmed，命名×圖×批次三成）**：itemdata 中 110 帶 **1296 筆**
   （低 5 位 12201..72003，`+4 id2` **全零**；檔內日期戳同批 `20100818`）。
@@ -3112,6 +3112,12 @@ roommake 結論。
   110 帶正是第 12 級、十 accessor 開關之外唯一遺缺帶——`special ↔ band 110`
   無反證。線上裝備/渲染消費者路徑：**Unknown（0 直引，待日後 198-record
   builder 側補證）**。
+- **交叉（Strongly Supported）**：110 帶拼圖道具屬 §5d-4／§5d-20 的
+  「ペーパズル合成系統」族——`セパズル(敏捷+1)`（根性/防衛/集中同族）
+  的屬性詞與該系統五軸同名，`ルベンダー Rare.1` 成套裝扮同帶共存
+  （原料パズル→合成成品同 inventory），NewSkillLevTable／
+  ItemAbilityLevTable 為其門檻與效果表；**合成器本體的線上路徑與
+  110↔special 寫入端點仍 Unknown**。
 - **武器資產走代號字串，不走 id**：`weapon/models/{fpv/{beast,paper},tpv}/
   <代號> BASE.PAP`、`weapon/sounds/<代號>_{shot1,clipin,…}.wav`、`sprites/
   {cylinder,flame}`；`Rockettan.pap`／`ghostmine.pap`／`knives.pap` 為 code
@@ -3120,7 +3126,7 @@ roommake 結論。
 - `item/object/` 48 檔、`item/thumb/{LargeWeapon,QuestOfMedalHonor,
   QuestOfMission}/`（honor_fN/honor_bN dds）未排程。
 
-### 6.4 map 資產 ↔ maplist 全對應（Confirmed）
+### 11.4 map 資產 ↔ maplist 全對應（Confirmed）
 
 - `ui/cfg/maplist.pat`＝`<f` 版本（1.03）＋count 123＋836B row
   （`s32 mask, s32 map_id, UTF-16LE 路徑`）；其 123 個路徑與
@@ -3141,7 +3147,7 @@ roommake 結論。
 - minimaps 123＝pmm 1:1；portraits 122：**ECT_01_weaponpreview 無對應人像**
   （**Probable**：預覽圖不需人像，待驗）。
 
-### 6.5 character 資產
+### 11.5 character 資產
 
 - `character/models/{tpv/bot}/typeN/` 各配 **`ani_list.sco`＋`base.pdt`**，共 94 組：
   tpv type1..15（玩家角色）；bot type0..34 與 type300..342（**Probable**：PvE
@@ -3150,17 +3156,73 @@ roommake 結論。
   等 per-weapon-class 文法，90×4 整齊組）；camera 10 個 `.cmv`（走位鏡頭動畫）。
 - `base.pap` 系列 101（名含空白如「s base.pap」，placeholder 語義 Unknown）。
 
-### 6.6 sound 資產
+### 11.6 sound 資產（2026-09-18 聲包選取器定案）
 
-- 三聲包目錄：`sounds/`（1,101）、`sounds01/`（676）、`sounds80/`（1,127）。
-- code 寬字串僅直接引用 `sounds\` 前綴（buy.wav、click1/2、dialog、error、
-  msg_incomming…）；**sounds01／sounds80 無字面引用** → 聲包路徑由變數組成
-  （**Unknown**：選取器格式串／caller 未定位）。
-- 命名觀察：`emotionN.wav`×380；連殺語音（Airshot/Criticalshot/Doublekill/
-  Genocide/Headshot/Heartbreak…）每名恰 38 複本（**Unknown**：複本=三目錄
-  重複或 per-語音槽，待證；§10.1 VOICE 槽交叉待做）。
+#### 目錄架構（Confirmed，71,464 檔普查直出）
 
-### 6.7 pepachi（柏青哥小遊戲）
+- 根目錄 `sound/` 三聲包：`sounds/`（預設包，14 角色目錄；1,101 檔）、
+  `sounds01/`（初代 9 角色；676 檔）、`sounds80/`（全 15 角色，唯一收
+  devilgirl；1,127 檔）。`Material/`（84 檔材質命中音）與 1,600+ root
+  層 WAV（腳步/武器/UI 共用）只在預設包。
+- 每角色目錄固定四子層＋一件：`Voice/<char>_{start5,kill6,die4,drop3,
+  remain3,cry3,jump2}`（26 檔）、`Radio_Message/<char>_{command,
+  information,tactics}_01..09`（27 檔＝§5c-2d 的 3×9 無線格線）、
+  `emotion/emotion1..10.wav`、`kill_message/`11 檔（Airshot、Criticalshot、
+  Diablo_Death_Touch、Doublekill、Genocide、Headshot、Heartbreak、
+  Multikill、Triplekill、Ultrakill、killingmachine）、
+  `<char>_he_throw_01.wav`。
+- **「每名 38 複本」之軸定案（Confirmed）**：kill_message 目錄＝
+  14（sounds）＋9（sounds01）＋15（sounds80）＝**38 個 per-character
+  語音目錄**；複本不是同一檔重複，是同一句台詞在三個聲包各有錄音。
+
+#### 角色代號 canonical 對照（Confirmed，雙獨立 switch 表）
+
+`sub_59FB60`／`sub_888220` 後段的 15-case switch 把 char index 對到
+資料夾名；`_11/_12` 尾碼即 1-based 角色型別本身（§5d-6 ↔ 此表逐項齊）：
+
+| case | 資料夾 | 角色（§5d-6 型別） | case | 資料夾 | 角色 |
+|---:|---|---|---:|---|---|
+| 0 | maru | ハヤテ(1) | 8 | wooka | ヴァン(9) |
+| 1 | nari | ティナ(2) | 9 | pero | フッド(10) |
+| 2 | dallae | ミリィ(3) | 10 | **spy_11** | リカ(11) |
+| 3 | lich | サイラス(4) | 11 | **robotgirl_12** | レム(12) |
+| 4 | cacao | ドッドン(5) | 12 | tsunderegirl | エリス(13) |
+| 5 | loki | ガイ(6) | 13 | magicgirl | ルコット(14) |
+| 6 | hana | テリシア(7) | 14 | devilgirl | ルーシー(15) |
+| 7 | momo | アルル(8) | | | |
+
+#### 聲包選取器（Confirmed；取代舊「sounds01/80 無字面引用 → Unknown」）
+
+- **選取表＝`ui/system/voice_customize_path.xml`**（plain ASCII；root
+  `vcustomizepathTable`；native 以 `L"vcustomizepathTable"` 讀取、`L"sounds%02d"`
+  組段名比對、`sub_886910` 註冊每段 15 個 `sub_path_<char>`）：
+  **索引空間 0..92（僅 87 跳缺，共 92 槽）**，每槽 `first_path
+  speech="sound\soundsNN"`，0 槽特判 `sounds`（無尾碼）；全 92 槽
+  **目錄先行**預留全部 15 個 `sub_path_<char>`。
+- **文本鏡像＝`ui/system/voice_customize_contents.xml`**（UTF-16LE BOM；
+  root `vcustomizelistTable`）：11 個角色塊（hayate/tina/milly/alulu/
+  van/hood 用顯名標籤；spy_11/robotgirl_12/tsunderegirl/magicgirl/
+  devilgirl 用代號標籤——新舊命名習慣混存）× **同空間 Voice00..92** ×
+  27 條自訂無線台詞（command/tactics/information_1..9）。
+- **路徑組裝**：Voice 事件走 `sub_59FB60` 的
+  `L"sound\sounds\%s\Voice\%s_%s"`（依上表填入）；emotion/kill_message
+  走 `sub_888220` 的 `%s\%s\%s\%s.wav`（包根目錄來自物件 this+208/236/
+  264 已註冊串；`n8==11` 分支在自訂缺失時回退 `sound\sounds` 字面）；
+  Radio 走 `%s\%s\<char>_radio\<char>_<名>_%02d.wav` 同型。
+- **`killmsg="1"` 全表唯一出現在 `sounds26`（Confirmed）**：該段全部
+  15 列 `sub_path_*` 皆 alias 至 cacao——統一聲優單一資料夾；文本
+  Voice26 為 `侵略開始でゲソ／助太刀するでゲソ／ありがとうでゲソ`
+  **侵略！イカ娘聯名語音**（4gamer 2012-02-08 報導：イカ娘袋大獎含
+  金元寿子錄製之イカ娘ボイス，三向閉合）。26 槽＝聯名/單一聲優包對
+  全角色的播放路由。
+- **磁碟實際只有 {0, 01, 80} 三槽有資料夾**（其餘 89 槽資產缺席而表
+  預留——catalog-ahead 第三大族）。與 §5c-2b 十一套販售包（Voice F/A/S/
+  Shuffle/Cafe/Action/school/A2/A3/F2/F3）的**槽位對應未逐一定案
+  （UNRESOLVED）**：可證者僅 sounds01 僅收初代 9 角色（與 Voice F 的
+  同構 9 人集一致）與 sounds80 獨收 devilgirl 兩事實；4gamer 另證
+  **レム(robotgirl_12) 與イカ娘聯名同日（2012-02-08）上線**。
+
+### 11.7 pepachi（柏青哥小遊戲）
 
 - 72 個 `N_N_N.swf`（三格滾輪動畫）＋ `pepachi/sound/` 4 wav（atari/reel/stop）
   ＋ `datarevision.txt`（值同 root）。
@@ -3171,16 +3233,18 @@ roommake 結論。
   `tools/verify_native_gates.py` 已錨其送出匣與等級／禮物匣閘）。**agenda**：
   scenario 的讀取站、swf root tag 消費者、與 packet 回應的對齊。
 
-### 6.8 明列研究議程（下一批 parts）
+### 11.8 明列研究議程（下一批 parts）
 
-1. ~~pav a2/a3 caller 直證~~ ✅ 2026-09-18 定案於 §6.3a（十 accessor ↔
+1. ~~pav a2/a3 caller 直證~~ ✅ 2026-09-18 定案於 §11.3a（十 accessor ↔
    band 100..109、f3＝子紋理層、F/B 雙 atlas、a4＝Cooki 旗標、統一載入器）。
 2. thumb/pav 例外集合的時間層證據（資產領先 catalog 之版本考古；§5e 併入）。
 3. 武器代號字串 ↔ itemdata 顯示名 ↔ SpecialWeaponType.xml 的三方文法。
 4. bot type3xx ↔ BotEnemy*.xml monster 表；animations mot 文法 ↔ ani_list.sco
    索引；**新子議程**：`*a3 != 0` 守衛語義（頭/身第二層條件）、198-record
-   builder 對 special 欄（band 110）的寫入路徑（§6.3b Unknown 收尾）。
-5. sounds01/sounds80 聲包選取器；連殺語音 38 複本之軸。
+   builder 對 special 欄（band 110）的寫入路徑（§11.3b Unknown 收尾）。
+5. ~~sounds01/sounds80 聲包選取器；連殺語音 38 複本之軸~~ ✅ 2026-09-18
+   定案於 §11.6（vcustomizepathTable 0..92 選取空間、38=14+9+15 語音目錄、
+   26=イカ娘聯名、角色代號表）。
 6. pepachi scenario native 消費鏈（700/900）、`item/object/` 48 檔、pap 命名。
 
 
