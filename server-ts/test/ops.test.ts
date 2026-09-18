@@ -32,6 +32,7 @@ import gamecenterGameStartOkRequest from "../src/ops/c2s/GG_GAMECENTER_GAME_STAR
 import gameRoomProgressTimeRequest from "../src/ops/c2s/GL_GET_GAMEROOM_PROGRESSTIME_REQ.ts";
 import doVotingRequest from "../src/ops/c2s/GR_DO_VOTING.ts";
 import weaponpartsEquipChangeRequest from "../src/ops/c2s/GL_WEAPONPARTS_EQUIP_CHANGE_REQ.ts";
+import aiRewardItemRequest from "../src/ops/c2s/GR_AI_GET_REWARD_ITEM_REQ.ts";
 import startVotingRequest from "../src/ops/c2s/GR_START_VOTING_REQ.ts";
 import gamecenterRankingRequest from "../src/ops/c2s/GG_GAMECENTER_RANKING_REQ.ts";
 import gamecenterGameStartRequest from "../src/ops/c2s/GG_GAMECENTER_GAME_START_REQ.ts";
@@ -1059,6 +1060,32 @@ describe("718/721 — voting requests", () => {
   });
 });
 
+describe("918 — PVE reward-draw request", () => {
+  test("918 echoes idx; empty stage always answers the sentinel failure arm", () => {
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof aiRewardItemRequest>[1];
+    aiRewardItemRequest(
+      reread(new Packet(opcodeFor("GR_AI_GET_REWARD_ITEM_REQ")).u8(2)),
+      connection,
+    );
+    expect(replies.pop()).toEqual(["GR_AI_GET_REWARD_ITEM_ACK", 2]);
+  });
+
+  test("918 enforces the single-byte wire", () => {
+    const connection = {
+      reply: () => undefined,
+    } as unknown as Parameters<typeof aiRewardItemRequest>[1];
+    expect(() =>
+      aiRewardItemRequest(
+        reread(new Packet(opcodeFor("GR_AI_GET_REWARD_ITEM_REQ")).u8(2).u8(0)),
+        connection,
+      ),
+    ).toThrow(/918/);
+  });
+});
+
 describe("912 — weapon-parts equip-change request", () => {
   test("912 parses both native arms and replies errorRaw=1", () => {
     const replies: unknown[][] = [];
@@ -1553,8 +1580,8 @@ describe("registry", () => {
   });
 
   test("the registry exposes both operation folders at startup", () => {
-    expect(summary()).toMatch(/^c2s 54 \(/);
-    expect(summary()).toMatch(/\), s2c 53 \(/);
+    expect(summary()).toMatch(/^c2s 55 \(/);
+    expect(summary()).toMatch(/\), s2c 54 \(/);
     expect(summary()).toContain("GL_LOGIN_ACK");
     expect(summary()).toContain("GL_LOGIN_REQ");
   });

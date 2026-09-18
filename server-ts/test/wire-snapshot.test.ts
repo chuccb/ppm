@@ -19,6 +19,7 @@ import GG_GAMECENTER_GAME_START_OK_ACK from "../src/ops/s2c/GG_GAMECENTER_GAME_S
 import GL_GET_GAMEROOM_PROGRESSTIME_ACK from "../src/ops/s2c/GL_GET_GAMEROOM_PROGRESSTIME_ACK.ts";
 import GR_START_VOTING_ACK from "../src/ops/s2c/GR_START_VOTING_ACK.ts";
 import GL_WEAPONPARTS_EQUIP_CHANGE_ACK from "../src/ops/s2c/GL_WEAPONPARTS_EQUIP_CHANGE_ACK.ts";
+import GR_AI_GET_REWARD_ITEM_ACK from "../src/ops/s2c/GR_AI_GET_REWARD_ITEM_ACK.ts";
 import GG_GAMECENTER_RANKING_ACK from "../src/ops/s2c/GG_GAMECENTER_RANKING_ACK.ts";
 import GL_GAMECENTER_REC_ACK from "../src/ops/s2c/GL_GAMECENTER_REC_ACK.ts";
 import GS_DELETEGIFT_ACK from "../src/ops/s2c/GS_DELETEGIFT_ACK.ts";
@@ -211,6 +212,8 @@ describe("native 198/247/255 payload snapshots", () => {
     expect(hex(GR_START_VOTING_ACK(719).payload())).toBe("00");
     expect(hex(GL_WEAPONPARTS_EQUIP_CHANGE_ACK(913).payload())).toBe("01");
     expect(() => GL_WEAPONPARTS_EQUIP_CHANGE_ACK(913, 0 as never)).toThrow(RangeError);
+    expect(hex(GR_AI_GET_REWARD_ITEM_ACK(919, 2).payload())).toBe("0201FF");
+    expect(() => GR_AI_GET_REWARD_ITEM_ACK(919, 0x200)).toThrow(RangeError);
     expect(hex(GL_NEW_MSG_COUNT_ACK(784, 0).payload())).toBe("00000000");
     expect(hex(GL_VOICEITEMSLOT_ACK(792, 0).payload())).toBe("0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
     expect(hex(GL_FRIEND_WHERE_ACK(442, 0).payload())).toBe("00");
