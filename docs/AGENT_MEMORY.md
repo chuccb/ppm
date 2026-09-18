@@ -15,6 +15,7 @@
 | 1 | admission 681 / TCP grooming / login trio | `b9f02d5f` | `SERVER_TS_EVIDENCE.md` 192 行 ledger;681 Result 表; server-list s16 定向;693 區段補正(greeting 型別/ v6 spin-lock) |
 | 2 | channel handshake 143/144/195/196 | `3fad207c` | 144 case 108=0x11D/result 0=0x42/3=0xA4+7082;196 result 6→0x3A6/8→0x3A7;`client_identity` String[24]=AccountName(PaperMan.exe.c:2241) |
 | 3 | 大廳同步序列（本節詳記） | `8e3c66e7` | PACKETS §3.15pre-3;原生命令行 197→199→834 定序 |
+| 38 | **912→913 weaponparts(errorRaw=0 危險臂實證)** | (本次) | 912 builder 三臂(0/1→9B、2→13B),`sub_592AA0`=4B ✓;913 `sub_95B180`:errorRaw==0 續讀後對末 s32 做 **item 表 bounds-check** ⇒ 無模型不可回 id ⇒ 恆 `errorRaw=1`(wire `01`);非零語義 UNRESOLVED 保持;pins 6+2;183 測試綠,c2s 54/s2c 53 |
 | 37 | **718→719 / 721 投票系(+723 補記)** | (本次) | 718 `sub_A191D0`:12B(state==3 gate;房 socket);721 `sub_A192B0`:1B;consumer=共用 `sub_9BF430`:719=`u8`(無臂),720=`4×s32+u8`(`sub_592AC0`=4B 驗證),722=`s32+s8`,**723=`s8+s32` 此前無列→補記**;TS 719 恆 0、721 沉默、720/722/723 push 不發;pins 5+1;181 測試綠,c2s 53/s2c 52 |
 | 36 | **485→486 progresstime(n3 臂 + 靜默臂)** | (本次) | 485 `sub_56AD60`:1B ✓;486 `sub_56AE30`:n3∈{0,1,2,4} 才有資料,其他⇒n3=3 全跳渲染 ⇒ TS 恆回 `n3=3`(wire `03`);PACKETS 486 列改臂型記法;pins 4+2;178 測試綠,c2s 51/s2c 51 |
 | 35 | **483→484 start-ok(無臂 9B 恆讀)** | (本次) | 483 `sub_584EC0`:2B ✓;484 `sub_584F70` 無臂 9B 恆讀(status 讀而不耗)⇒ TS echo id+status=1+0(wire 9B);pins 3+1;176 測試綠,c2s 50/s2c 50 |

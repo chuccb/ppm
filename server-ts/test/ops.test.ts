@@ -31,6 +31,7 @@ import gamecenterPlayCheckRequest from "../src/ops/c2s/GG_GAMECENTER_GAME_PLAY_C
 import gamecenterGameStartOkRequest from "../src/ops/c2s/GG_GAMECENTER_GAME_START_OK_REQ.ts";
 import gameRoomProgressTimeRequest from "../src/ops/c2s/GL_GET_GAMEROOM_PROGRESSTIME_REQ.ts";
 import doVotingRequest from "../src/ops/c2s/GR_DO_VOTING.ts";
+import weaponpartsEquipChangeRequest from "../src/ops/c2s/GL_WEAPONPARTS_EQUIP_CHANGE_REQ.ts";
 import startVotingRequest from "../src/ops/c2s/GR_START_VOTING_REQ.ts";
 import gamecenterRankingRequest from "../src/ops/c2s/GG_GAMECENTER_RANKING_REQ.ts";
 import gamecenterGameStartRequest from "../src/ops/c2s/GG_GAMECENTER_GAME_START_REQ.ts";
@@ -1058,6 +1059,49 @@ describe("718/721 — voting requests", () => {
   });
 });
 
+describe("912 — weapon-parts equip-change request", () => {
+  test("912 parses both native arms and replies errorRaw=1", () => {
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof weaponpartsEquipChangeRequest>[1];
+    weaponpartsEquipChangeRequest(
+      reread(new Packet(opcodeFor("GL_WEAPONPARTS_EQUIP_CHANGE_REQ")).u8(1).s32(7).s32(8)),
+      connection,
+    );
+    expect(replies.pop()).toEqual(["GL_WEAPONPARTS_EQUIP_CHANGE_ACK", 1]);
+    weaponpartsEquipChangeRequest(
+      reread(new Packet(opcodeFor("GL_WEAPONPARTS_EQUIP_CHANGE_REQ")).u8(2).s32(7).s32(8).s32(9)),
+      connection,
+    );
+    expect(replies.pop()).toEqual(["GL_WEAPONPARTS_EQUIP_CHANGE_ACK", 1]);
+  });
+
+  test("912 refuses unknown raw0 arms and wrong tails", () => {
+    const connection = {
+      reply: () => undefined,
+    } as unknown as Parameters<typeof weaponpartsEquipChangeRequest>[1];
+    expect(() =>
+      weaponpartsEquipChangeRequest(
+        reread(new Packet(opcodeFor("GL_WEAPONPARTS_EQUIP_CHANGE_REQ")).u8(3).s32(7).s32(8)),
+        connection,
+      ),
+    ).toThrow(/912/);
+    expect(() =>
+      weaponpartsEquipChangeRequest(
+        reread(new Packet(opcodeFor("GL_WEAPONPARTS_EQUIP_CHANGE_REQ")).u8(0).s32(7)),
+        connection,
+      ),
+    ).toThrow(/912/);
+    expect(() =>
+      weaponpartsEquipChangeRequest(
+        reread(new Packet(opcodeFor("GL_WEAPONPARTS_EQUIP_CHANGE_REQ")).u8(2).s32(7).s32(8)),
+        connection,
+      ),
+    ).toThrow(/912/);
+  });
+});
+
 describe("834 — data-recv-completed request", () => {
   test("consumes the propagated raw4 context and replies with an empty 835", () => {
     const replies: string[] = [];
@@ -1509,8 +1553,8 @@ describe("registry", () => {
   });
 
   test("the registry exposes both operation folders at startup", () => {
-    expect(summary()).toMatch(/^c2s 53 \(/);
-    expect(summary()).toMatch(/\), s2c 52 \(/);
+    expect(summary()).toMatch(/^c2s 54 \(/);
+    expect(summary()).toMatch(/\), s2c 53 \(/);
     expect(summary()).toContain("GL_LOGIN_ACK");
     expect(summary()).toContain("GL_LOGIN_REQ");
   });

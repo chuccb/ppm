@@ -2744,6 +2744,14 @@ domain 語義維持 UNRESOLVED(尺寸已知、名稱不杜撰)。467 consumer
 store ⇒ 恆回 `00 00 00`(resultRaw=0,unknown=0,count=0)。
 | 912 | `GL_WEAPONPARTS_EQUIP_CHANGE_REQ`| `sub_95AEF0`×3 | C2S | `u8 raw0,s32 raw1,s32 raw2`; raw0==2 appends `s32 raw3`; branch/domain meanings remain UNRESOLVED. |
 | 913 | `GL_WEAPONPARTS_EQUIP_CHANGE_ACK`| `sub_95B180` | S2C | `u8 errorRaw`; only `0` continues with the matching 912 body; nonzero error values unresolved |
+
+**TS 對位 (2026-09-19)**: 912 builder `sub_95AEF0` @619208 三臂全構:
+`raw0=0/1`→`u8,2×s32`=9B;`raw0=2`→再加 `s32 v9`=13B(`sub_592AA0`=4B
+本體驗證)。913 consumer `sub_95B180`:`u8 errorRaw`==0 才續讀 912 同型身
+並對最後 s32 做 **native item 表範圍檢查**(&unk_E83D20/&unk_E86430);≠0
+只耗 1B 即止。TS 無 parts 模型 ⇒ **errorRaw=0 會把 id 回灌進 bounds-check
+管線,不可選** ⇒ 恆回 `errorRaw=1`(wire `01`),非零值語義維持
+UNRESOLVED。
 | 310 | `GS_BUYCHAR_REQ` | `sub_572790` | C2S | `s32 char_type, 5×s32 items` |
 | 311 | `GS_BUYCHAR_ACK` | `sub_5728A0` | S2C | `u8 status(1), [6×s32 快照 status≠0 才有], u8 v26Raw, s32 v33Raw, s32 v29Raw` — 尾部三欄恆讀 |
 
