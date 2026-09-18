@@ -2728,6 +2728,92 @@ AppearSound DisAppearSound`
 尤其 `instant_pg`／`game_point`／`game_score` 看似經濟欄位，
 **不得據此推導伺服器的獎勵計算**。
 
+### 5d-26b. Bot 模型庫：80 目錄 → 僅 22 個獨立 blob 群（全量 hash 普查）
+
+`Extracted/character/models/bot/` 共 **80 個 type 目錄**＝
+{0..34、41、42、300..342}，標配三件套 `ani_list.sco`＋`base.pdt`＋`s base.pap`。
+例外：**type41/42 僅有 `s base.pap` 一件**（任何 XML 均未引用 41/42，
+屬無法對號的孤立檔）；**type23 為巢狀結構**——自身三件套之外另有
+`type23/type19/` 子目錄三件，其中 `s base.pap` 與外層 type19 同 blob、
+`ani_list.sco` 不同 blob ⇒ **同模型、不同動作時序**（見 5d-26e）。
+
+以三件套 blob 三元組全量分群，80 目錄**只有 22 個獨立內容群**（Fact）：
+最大的兩群各 14 個——{10..16, 323..329}、{24..30, 330..336}；
+{0, 300, 341, 342} 四件完全同料；{3, 19, 302, 303, 304}、
+{4, 305, 306, 307}、… {8, 317, 318, 319}、{9, 320..322}、{21, 22, 33, 34}
+大致呈「300+k ↔ k」但**配對非線性**（3↔19、{21,22,33,34} 四連也抄同料）。
+**{337, 338, 339} 群在 0..34 無對應本體**；**{301}、{340} 各為獨立群唯一成員**
+—— 301=最大規模 boss（scale 10、hp 9500、持 `AI3 ボス武器`），
+340=唯一帶專屬動畫集（`animations/bot/{b,l}_340_*`）的紅利攜帶者。
+
+動畫資產側獨立成軸：`character/animations/bot/` 僅 **26 個索引**
+＝{0..19, 21, 23, 24, 25, **39**, **340**}（議程俗稱「3xx 動畫」實際只有 340 一套），
+每索引 15 事件檔 {air, attack, base, cheer, die, idle_a/b/c, ready, run_a/b/c,
+walk_a/b/c} × `{b,l}_` 雙前綴（兩前綴目錄集合完全相同，語義 UNRESOLVED）。
+**模型 {26..34, 41, 42, 300..339} 無專屬動畫** ⇒ 引擎必有 fallback
+（哪一套目前 UNRESOLVED，候選 b_000）。
+
+### 5d-26c. Scenario 的 `bot_type` 屬性實為**行索引**：FLOW id 空間閉算
+
+（屬性名誤導陷阱，本輪以全容取值閉合）
+- `Scenario.xml`（單人用；**166 個 SCENARIO**，index 4..324）的 `<FLOW bot_type=… spawnTime spawnArea quickTime/>` **取值全集 = {0, 3..34}**（1、2 為 `bot_weapon=0` 的行為型 6/7 boss 行，不經情景 FLOW 產生）—— 落在 `BotEnemy.xml` 的 `bot_type_index` 域內。
+- `AiMultiScenario.xml`（**56 個 SCENARIO**，index 10..83；easy 版 48 個）的 FLOW **取值全集 = {300..342}** —— 恰為 `AiMultiBotEnemy.xml` 的 3xx 行域。
+⇒ **FLOW 直接引用怪物表的行索引，與 1..8 的 `bot_type` 行為型別無關**。
+
+波次/劇本骨架（Fact）：
+- `BotWave.xml`（easy 同構）：MODE index **0**（15 waves，wave_time 20000，僅 wave15=80000＝boss 波）與 MODE index **1**（12 waves，wave5/8/11=40000、wave12=80000）；每 WAVE 由 `SCENARIO_RATIO` 抽樣權重組成，故 **wave → scenario（集） → FLOW → bot_type_index** 四層指標完整閉合。
+- `AiMultiWave.xml`：**僅 MODE=95**，內建 EASY/NORMAL/HARD 三組 `{wave_time=720000, con_wv2_min=480000, con_wv3_min=360000, con_wv4_min=210000}`，shield 位置/HP、WARNING_LIGHT 六點、與 `shiled{1,2,3}_PVE1.dds` 貼圖名 —— exe 側同時存在 `L"textures/common/shiled1_PVE1"`（@390857）✓ 資源/native 互證此 MODE=95 即 PvE「ロボットセンター」場。
+- `AiMultiBotEnemy.xml` **78 行 = 0..34 + 300..342**；3xx 各行沿用同料 0..34 行的 `bot_face/bot_weapon`（外觀=item 引用故可複用模型），僅調難度軸：例 `300 vs 0`：hp 4000→**11700**、game_point 1000→100、instant_pg 80→10、scale 3.3→3.5。
+- 3xx 並非全部「強化版」：row 340（bonus_char=**8**、bonus_value=4000、face=10130024、siege_dmg=0）是 PvE 特有紅利怪（見下 Wiki 交叉）。
+- 此結構使 §5d-26 的 `BotEnemy_intelligent` 死檔判決更堅固：其主鍵 `index` 語法與 FLOW 的「行索引」引用互不相容。
+
+### 5d-26d. `bot_face`／`bot_weapon` = item id 引用，名稱由解密後 itemdata 直出；Wiki 三代編年互證
+
+`ui/cfg/itemdata.pat` 為 pmFile 加密（§5d-28）。解密後 header 8B
+（`01 00 00 00 | 52AC = 21164 筆`）、stride 997、name @ +20 UTF-16LE。
+
+- **`bot_face` = 完整 item id**（band 1013xxxx）：連續 26 件
+  `Aiモードキャラ0 .. Aiモードキャラ25`（BotEnemy 用 0..22、AiMulti 用至 25）。
+  名稱皆流水號，**無`短剣`等別名內嵌**。
+- **`bot_weapon` = 武器索引用法**（item id = 12100000+offset，§5d-8/§2c-2 文法）。
+  itemdata 內**僅 5 個** 18xx 條目、且全部自帶 AI 世代名：
+
+  | offset | item id | 名稱 | 對應行 |
+  |---:|---:|---|---|
+  | 1801 | 12101801 | `AI ボス武器1` | B0/M300 巨體 boss（hp 4000/11700）|
+  | 1807 | 12101807 | `AI 狙い撃ち爆武器1` | B9（bot_type 2 狙擊支援）|
+  | 1817 | 12101817 | `AI2 ボス武器2` | B18（`ai2_boss_emergence2.wav`）|
+  | 1819 | 12101819 | `AI2 狙い撃ち爆武器` | B23 等中距型 |
+  | 1823 | 12101823 | `AI3 ボス武器` | M301（scale 10，PvE 最大 boss）|
+
+  ⇒ **AI → AI2 → AI3 三代編年直接刻在資產名上**（對映 minimap `BOT_Enemy_`/`BOT_Enemy2_` 兩批與 `ai2_boss_emergence[2].wav`）。
+  **但使用頻次最高的 1820（single rows 24..30／multi 其 3xx 對映共 14 行——全部為 bonus 攜帶者，即 Wiki「運び屋」的配槍）以及 1810/1818 等在 itemdata 無條目** ⇒ 其餘 18xx 非 item 段內條目（殘段 UNRESOLVED：另表引用或 parser 容忍缺項；命名五件已三來源互證）。
+
+Wiki 交叉（[シングルモード](https://wikiwiki.jp/paperman/シングルモード)、[PvEモード](https://wikiwiki.jp/paperman/PvEモード)）：
+- **編年**：PMC2011 發表「**AIモード**」（2012/3 公開測試）→ PMF2012 改名「**シングルモード**」；**台服 2012/4/5 先行實装**，日服其後 —— 與本台版客戶端沿用 `ui/system/AI/` 路徑、`ai2_boss_*` 資產名一致。PvE（＝AiMulti 路線）日服 **2013/11/27** 實装，圖＝「ロボットセンター」 ↔ `AiMultiWave MODE=95` 的 `shiled*_PVE1.dds`。
+- **bonus_char 1..7 ↔「運び屋」サポート効果 7 種**（`BotEnemy` rows 10..16 與 24..30 兩套重複攜帶者；`respawnWaitTime=1500`）。`bonus_value` **語義隨 char 而異**，已鎖兩個零歧義錨點：char 2 = **20000 ↔ スコアUP「+20,000 点」數字全等**；char 3 = 10000 若放行時間單位即 **制限時間延長 10 秒**。其餘 char {1=20, 4=100, 5=100, 6=10000, 7=10000} 逐項語義**UNRESOLVED**（Wiki 表序與 char 序不一致，不外推）。
+- AiMulti 的 **bonus_char=8**（row 340，value 4000）超出 Wiki 七格表 —— PvE 新增第八種回饋，名稱為 Unknown（已查 Wiki 兩頁、無對應描述）。
+- Wiki 敵人別名「短剣ロボット／自爆ロボット」（情境「ロボットたちの反乱」）**無法對號到行索引**：itemdata 名稱為流水名、客戶端無別名表，行→世界觀名稱映射維持 UNRESOLVED。
+
+### 5d-26e. `ani_list.sco`：容器已解（8B 頭 + zlib → 256KB），索引語法殘段 Unknown
+
+type0 的 9,332B 檔案 = `[00 00 04 00][6C 24 00 00]` 8B 頭＋zlib 串流，
+兩個 u32 LE 欄位＝**展開長 262,144** 與**壓縮長 9,324**（＝檔案−8）。
+展開為固定 262,144B 稀疏 u16 表
+（首個非零位元組 @8248，連續 22 個 `01 00`；947/1024 個 256B 區塊含非零）。
+複製目錄間 blob 大同（見 5d-26b）而巢狀 `type23/type19/` 的 .sco 與
+外層 type19 的 .sco 不同 blob ⇒ **sco 承載動作時序/索引而非貼圖/造型數據**。
+15 事件 `.mot` 與 sco 內 256KB 表的對應文法目前**殘段 Unknown**：
+exe 全文無 `ani_list` 字面值（載入走目錄枚舉器 `sub_717670` 家族，
+native 錨點 bot 動畫掃描 `L"character\\animations\\bot"` @554188；
+剩餘路徑：xref 該枚舉器回呼的 per-file handler）——**mot↔sco 議題自議程標記為「界線已標、未完」**。
+
+### 5d-26f. 界線（延續）
+
+`BotPath.xml`／`AiMultiBotPath.xml`（spawnArea 座標）與
+`AI_Animation/AiMultiAnimation` 兩檔本輪未解剖，scope 外；
+敵體行為裁決（行為型 1..8 的執行語意）屬伺服端/runtime 腳手架，維持 UNRESOLVED。
+
 ## 5d-27. `URLList`：**全部外部端點皆由資源驅動**，以及一個路徑錯置的舊副本
 
 §5d 檔案表雖有 `URLList_01.xml` 一行，但未記錄本節的三項事實。
@@ -3554,9 +3640,15 @@ hayate 面純佔位 12（41,62,63,64,82,83,86,88–92；62–64/82 為女 8 專�
    度矩陣、88.1% 顯示名配對＋別名系、聯名錨點、SWT 8 行全解、registry
    7904B 橋；**填充源未送**列 bounded Unknown）。殘留子項：別名表全編
    （88%→100%）、擲彈/近接的 anim↔model 代號分叉對名。
-4. bot type3xx ↔ BotEnemy*.xml monster 表；animations mot 文法 ↔ ani_list.sco
-   索引；**新子議程**：`*a3 != 0` 守衛語義（頭/身第二層條件）、198-record
-   builder 對 special 欄（band 110）的寫入路徑（§11.3b Unknown 收尾）。
+4. ~~bot type3xx ↔ BotEnemy*.xml monster 表；animations mot 文法 ↔ ani_list.sco
+   索引~~ ✅ 2026-09-18 主線定案於 §5d-26b..f（80 目錄→22 blob 群普查、
+   300+k 複製陣列、Scenario FLOW「bot_type」實為行索引、bonus_char↔
+   Wiki 運び屋對號、bot_face/bot_weapon＝item id 直出 AI→AI2→AI3 三代名、
+   ani_list.sco 8B 容器已解）。**殘留**：mot↔sco 256KB 表語法（界線已標 §5d-26e）、
+   `b_/l_` 前綴語義、type41/42 孤檔、BotPath/AI_Animation 兩檔解剖、
+   bonus_char {1,4,5,6,7} 逐項語義與 char=8 命名。▼ 另線未動子議程（pav 系）：
+   `*a3 != 0` 守衛語義（頭/身第二層條件）、198-record builder 對 special 欄
+   （band 110）的寫入路徑（§11.3b Unknown 收尾）。
 5. ~~sounds01/sounds80 聲包選取器；連殺語音 38 複本之軸~~ ✅ 2026-09-18
    定案於 §11.6（vcustomizepathTable 0..92 選取空間、38=14+9+15 語音目錄、
    26=イカ娘聯名、角色代號表）。**後續**：hayate 92 槽已全數定性（已定名
