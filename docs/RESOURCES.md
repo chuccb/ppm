@@ -3049,19 +3049,69 @@ roommake 結論。
   （f3∈{1,2,3,4}）；101 face 520｜519（**每 item 全 8 層**）；102 top 789｜789、
   103 bottom 632｜632、104 shoes 568｜568、105 outer 2019｜2018（皆 {1,2}）；
   106 eye 304｜295（**僅層 1**）；107 hairAcc 750｜720、108 faceAcc 249｜241、
-  109 headAcc 155｜148。**110 帶 1296 id 零 pav**（special 槽無 avatar 網格層，
-  語義 UNRESOLVED；不在此合成器）。
-- **合成器**：`sub_5D8120(atlas_mgr, charIdx(0..16), record, variant, flag)`
-  對每位玩家建 **兩張 512×512 A1R5G5B5 atlas**（+136 與第二張；2620B×5
-  composite 層 ×17 槽陣列；`sub_5D7xxx` 系列為純 0x8000-alpha blitter）。
-  face item 的 8 層由 `sub_5B8250` 以常數 1..8 全載；其餘 accessor 依
-  `variant` 分支載入層 1/2（變體語義 UNRESOLVED：分布佐證奇偶色組，
-  待像素級驗證）。overlay 重建 `sub_5D90C0(atlas, off+帶基, …)` 於 head/top/
-  bottom 三帶直接可見。ArgList 0x10＝第 17 槽（預覽/spectator 等；
-  4 個 call site：199019、215583、576622、644071）。
+  109 headAcc 155｜148。**110 帶 1296 id 零 pav**（語意已於 §6.3b 定案為
+  拼圖・特殊道具帶；本就不屬紙娃娃合成器）。
+- **合成器 `sub_5D8120(atlas_mgr, charIdx(0..16), record, a4, thisa)`**：
+  每位玩家建 **兩張 256×512、16bpp（0x40000B）atlas**，尾段 `sub_5D8CE0`
+  以具名 `L"CSpriteCtrl::CopyFromSprite::F_Textures[%d]"`／`…::B_Textures[%d]`
+  建立 `sub_9A9110(·, 256, 512, …)` 貼圖、`sub_5D8E10` 逐張
+  lock→`memcpy(0x40000)`→unlock 上傳——**主 atlas（+136）＝Front 視圖、
+  副 atlas（`loc_440088`＝4456584）＝Back 視圖（Confirmed，資產名自證）**。
+  `sub_5D8E70` 為全 17 槽（F/B ×16＋預覽槽 16）批次初始化；合成完清除
+  髒旗 `*(record+96)=0` 與 `*(this+4·i+&loc_895243+1)=0`。
+- **變體旗標 a4 定案（Confirmed，替 2026-09-18 舊 UNRESOLVED）**：a4 **不是**
+  性別/隊色，是 **Cooki 變身進行旗標**。三個遊戲內 call site 直接傳
+  **`byte_F6DD98[240780·player]`**（199019、644071）或其大廳側孿生
+  **`byte_F33120[240780·i+240760]`**（預覽站 215583）；此 byte 由
+  `sub_993E40`（Char→Cooki 轉換）置 1、由 `sub_9942D0`＝
+  **`CCharToCookiProperty::DefaultCookiToChar`**（韓文錯誤串自證類名）消費歸零，
+  消費時把 10 個 u16 加成快照還原回 `word_F33262..` 十陣列——正是
+  `CharacterToCooki.xml`（`CHANGE_AVATAR_TO_COOKI_PROPERTY`，§5e 532 行）
+  所述的**快照式餅乾化變身**機制；576622 站（非 PvE 分流）字面傳 1 屬特例。
+  `*a3 != 0` 守衛（head/top/bottom 第二層）語義仍 UNRESOLVED。
+- **a4 在合成器內的效應矩陣**（Confirmed，逐行讀出）：
+  face 子圖入 scratch（stride 524B×5）：`_01` 無條件、`_02.._05` 僅
+  `a4==0 || !sub_67EB70()`（即 AIMulti 下遇 Cooki 則略）；**a4==0 時**
+  F 圖全量疊層：hairAcc L1、head L2（`*a3`）、eye L1、top/bottom L1（`*a3`）、
+  shoes L1、outer L1、faceAcc L1、headAcc L1，plus 5 條 `sub_5D7CD0` scratch
+  回填＋無條件 face L7、head L1、`sub_5D7BB0` 基底；B 圖：hairAcc L2、
+  head L4(`*a3`)、eye L2、top/bottom L2(`*a3`)、shoes/outer/faceAcc/headAcc L2、
+  top/outer/head L3，plus 無條件 face L6、face L8。**a4==1 時**只保留
+  hairAcc F-L1／B-L2（PvE 模式下連這也略）——**變身中不畫常規頭身服飾**。
+- **載入器統一模型（Confirmed）**：`sub_5D7910(atlas, id, k)` 配一個
+  **0x20C（524B）scratch 物件**（ctor `sub_5D7140`），內呼叫
+  `sub_5D7220(scratch, id, k, 0)`——**呼叫端第三參數 k 直通 pav 後綴**；
+  檔案成功載入（scratch+8 像素指標非零）後逐行 blit 進 atlas，長寬/位移
+  取 scratch 頭。⇒ **f3 後綴＝atlas 疊層槽暨檔名後綴，一物兩用**。
+- **各帶 f3 角色對照（Confirmed，code 矩陣 × 資產分布雙向閉合）**：
+  face（101，全 8 檔）：`_01.._05`＝F 正面五段 scratch（心情/表情疊層）、
+  `_06/_08`＝B、`_07`＝F 基底；head（100，4 檔）：`_01`→F-L1、`_02`→F-L2、
+  `_03`→B-L3、`_04`→B-L4；top/bottom/shoes/outer（102..105，2 檔）：
+  `_01`→F、`_02`→B；eye（106，僅 `_01`）：B-L2 路徑存在但資產全數無 `_02`，
+  載入器靜默略過（295 組全 `_01` 即反向證據）；hairAcc/faceAcc/headAcc
+  （107..109）：`_01`→F、`_02`→B。
 - **變體解析**：accessor 回傳 `*(field)`（u16 偏移）或經 `sub_535020` 命中
   的 itemdata record 之 `+4 id2/型號`（§2c）——即「slot 偏移 → catalog 實體
   → 資產 id」三段式；%1e6 截斷問題由 bandIdx 分段消除（不再高位碰撞）。
+
+### 6.3b. band 110（198/247 record 第 12 欄 `special`）＝拼圖・特殊道具帶（2026-09-18，新）
+
+- **資產語意（Confirmed，命名×圖×批次三成）**：itemdata 中 110 帶 **1296 筆**
+  （低 5 位 12201..72003，`+4 id2` **全零**；檔內日期戳同批 `20100818`）。
+  record +24 的 UTF-16 內建名：**1250+ 筆為「Xパズル - NNNN」／「ズル - N」**
+  拼圖卡命名；23 筆 `セパズル相殺`／`セパズル(敏捷+1)`（同族含根性/防衛/集中）
+  屬性拼圖；11 筆 `ルベンダー(ヘア/トップ/ボトム/靴/セット/アクセ) Rare.1`
+  稀有裝扮套；`確率5% UP` 票券、`ピース Lv.1..Lv.3` 升級碎片各少量。
+  **30 枚 64×64 shop thumb 全為拼圖剪影圖**（蝙蝠翼形、天使翼形、冰晶形
+  三族；其餘 1211 筆無圖——catalog-ahead 又一大族）。
+- **code 側（Confirmed 的「無」）**：dump 全文 `11000000` 字面量 0 命中、
+  `L"パズル"`／`相殺` 0 命中——**本客戶端無 110 帶專用解析器**；itemdata 內建
+  UTF-16 名應為 catalog 編輯期留名，非此 build 之執行期路徑。
+- **槽位鏡像（Strongly Supported）**：PACKETS 527 行 198/247 十二欄序列
+  以 `special` 收尾，與 §5c-1「199, 100..109, special」鏡像一一對齊；
+  110 帶正是第 12 級、十 accessor 開關之外唯一遺缺帶——`special ↔ band 110`
+  無反證。線上裝備/渲染消費者路徑：**Unknown（0 直引，待日後 198-record
+  builder 側補證）**。
 - **武器資產走代號字串，不走 id**：`weapon/models/{fpv/{beast,paper},tpv}/
   <代號> BASE.PAP`、`weapon/sounds/<代號>_{shot1,clipin,…}.wav`、`sprites/
   {cylinder,flame}`；`Rockettan.pap`／`ghostmine.pap`／`knives.pap` 為 code
@@ -3124,11 +3174,12 @@ roommake 結論。
 ### 6.8 明列研究議程（下一批 parts）
 
 1. ~~pav a2/a3 caller 直證~~ ✅ 2026-09-18 定案於 §6.3a（十 accessor ↔
-   band 100..109、f3＝子紋理層、雙 atlas 合成器）。
+   band 100..109、f3＝子紋理層、F/B 雙 atlas、a4＝Cooki 旗標、統一載入器）。
 2. thumb/pav 例外集合的時間層證據（資產領先 catalog 之版本考古；§5e 併入）。
 3. 武器代號字串 ↔ itemdata 顯示名 ↔ SpecialWeaponType.xml 的三方文法。
 4. bot type3xx ↔ BotEnemy*.xml monster 表；animations mot 文法 ↔ ani_list.sco
-   索引；variant 分支的奇偶層語義（像素級驗證）；110 special 帶語義。
+   索引；**新子議程**：`*a3 != 0` 守衛語義（頭/身第二層條件）、198-record
+   builder 對 special 欄（band 110）的寫入路徑（§6.3b Unknown 收尾）。
 5. sounds01/sounds80 聲包選取器；連殺語音 38 複本之軸。
 6. pepachi scenario native 消費鏈（700/900）、`item/object/` 48 檔、pap 命名。
 
