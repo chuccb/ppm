@@ -165,6 +165,38 @@ describe("681 — login ack", () => {
     expect(reader.remaining).toBe(0);
   });
 
+  test("the Result table mirrors the native failure switch one-to-one", () => {
+    // Recovered 0x43E651 switch, including the 0xC8..0xD6 message routing.
+    const native: ReadonlyArray<[keyof typeof Result, number]> = [
+      ["GeneralFailure", 0],
+      ["Success", 1],
+      ["BadCredentials", 2],
+      ["Banned", 200],
+      ["Maintenance", 201],
+      ["Maintenance2", 202],
+      ["AlreadyOnline", 203],
+      ["AntiAddiction", 204],
+      ["Failure317", 205],
+      ["Failure318", 206],
+      ["Failure319", 207],
+      ["Failure31E", 208],
+      ["Failure31F", 209],
+      ["AlreadyOnline2", 210],
+      ["FailureFormat211", 211],
+      ["FailureFormat212", 212],
+      ["Failure3C4", 213],
+      ["GmIpDenied", 214],
+    ];
+    for (const [name, code] of native) {
+      // Pin the value as number: bun's matcher generic narrows T to the
+      // indexed-const literal union and would then reject a plain number.
+      expect(Result[name] as number).toBe(code);
+      const reader = decode(new Packet(681).s32(Result[name]).encode());
+      expect(reader.s32()).toBe(code);
+      expect(reader.remaining).toBe(0);
+    }
+  });
+
   test("rejects a result outside native s32", () => {
     expect(() => buildPacket("GL_LOGIN_ACK", 0x8000_0000)).toThrow(/result/);
     expect(() => buildPacket("GL_LOGIN_ACK", -0x8000_0001)).toThrow(/result/);

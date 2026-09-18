@@ -8,14 +8,47 @@
 
 import { Packet } from "../../packet.ts";
 
-/** Named low-byte codes observed in the native UI branch. */
+/**
+ * Named low-byte codes observed in the native UI branch. The table mirrors
+ * the recovered 0x43E651 failure switch one-to-one; names carry the client-
+ * side message each code triggers, with the resource id when that is the
+ * only thing native proves. Codes the docs leave semantically unknown keep
+ * their message id as the name instead of inventing a business meaning.
+ */
 export const Result = {
   GeneralFailure: 0,
   Success: 1,
   BadCredentials: 2,
+  /** 0xC8: account-suspension popup (resource 0x70 via dialog helper). */
   Banned: 200,
+  /** 0xC9: maintenance (0x23E). */
   Maintenance: 201,
-  AlreadyOnline: 210,
+  /** 0xCA: maintenance, second id (0x23E). */
+  Maintenance2: 202,
+  /** 0xCB: duplicate login (0xA4), same message as 210. */
+  AlreadyOnline: 203,
+  /** 0xCC: anti-addiction / play-time restriction (0x316). */
+  AntiAddiction: 204,
+  /** 0xCD: unnamed in native evidence; displays resource 0x317. */
+  Failure317: 205,
+  /** 0xCE: displays resource 0x318. */
+  Failure318: 206,
+  /** 0xCF: displays resource 0x319. */
+  Failure319: 207,
+  /** 0xD0: displays resource 0x31E via the popup helper. */
+  Failure31E: 208,
+  /** 0xD1: displays resource 0x31F via the popup helper. */
+  Failure31F: 209,
+  /** 0xD2: duplicate login (0xA4). */
+  AlreadyOnline2: 210,
+  /** 0xD3: formatted resource 0x387 with the code as %d argument. */
+  FailureFormat211: 211,
+  /** 0xD4: formatted resource 0x388 with the code as %d argument. */
+  FailureFormat212: 212,
+  /** 0xD5: displays resource 0x3C4. */
+  Failure3C4: 213,
+  /** 0xD6: GM account, IP not permitted (hardcoded English dialog). */
+  GmIpDenied: 214,
 } as const;
 
 /** The native result is a raw s32; the client branches on its low byte only. */
@@ -121,7 +154,10 @@ function requireRaw16(value: number, field: string): void {
  * A failure really is only that word on the wire — the client branches on its
  * low byte before reading anything else.
  */
-export default function GL_LOGIN_ACK(op: number, outcome: Result | Success): Packet {
+// Signature spells `number` out: with a value and a type both named `Result`,
+// some checkers resolve the parameter position to the value table instead of
+// the alias, which would refuse arbitrary raw result words the wire permits.
+export default function GL_LOGIN_ACK(op: number, outcome: number | Success): Packet {
   if (typeof outcome === "number") {
     requireS32(outcome, "result");
     return new Packet(op).s32(outcome);
