@@ -14,5 +14,8 @@ export default function GI_CHANGE_SKILLITEMSLOT_ACK(op: number, count: 0 = 0): P
   if (count !== 0) {
     throw new RangeError("467 rows require an accessory model this server does not provide");
   }
+  // sub_573A70 reads the three head bytes unconditionally but never
+  // branches on the first two — only the count drives the row loop;
+  // with count = 0 the frame is exactly this dormant head.
   return new Packet(op).u8(0).u8(0).u8(0);
 }

@@ -1,20 +1,27 @@
 /**
- * 704 -> 705 level/kill-limit configuration (sub_55C9B0 consumer).
+ * 705 GL_LEVEL_KILL_LIMIT_ACK — anti-addiction restriction panel
+ * (consumer sub_55C9B0: pure global hydration `n11_0 / flt_BEFEE8 /
+ * dword_BEFEE0`, then CLobbyChannel::sub_415F90 switches on n11_0).
  *
- * Wire (native Fact): `{s32 killLimit, f32 expRate, s32 maxLevelLimit}`
- * (12 bytes). killLimit == 0 is the proven silent arm — the client
- * skips the notice-text branch entirely. Nonzero values select
- * localized notices the server cannot substantiate here, so only the
- * all-zero frame is emitted.
+ * Audit 2026-09-19 of the switch arms:
+ * - kind 0   -> the switch never runs; NO warning panel is shown. The
+ *   exp-rate/level-cap locals are only read inside kinds 6..12, so
+ *   zero values there are dead cells under this frame, not fabrications.
+ * - kind 6..12 -> lobby shows resource 795/796/813/801/820/828/827
+ *   populated with the cap/rate fields.
+ * This server: unrestricted play -> kind = 0 with dead 0.0/0 tails.
  */
 
 import { Packet } from "../../packet.ts";
 
+/** n11_0 == 0: sub_415F90 skips the switch; no restriction panel. */
+export const NO_RESTRICTION = 0;
+
 export default function GL_LEVEL_KILL_LIMIT_ACK(
   op: number,
-  killLimit: number,
-  expRate: number,
-  maxLevelLimit: number,
+  restrictionKind = NO_RESTRICTION,
+  expRate = 0,
+  maxLevelLimit = 0,
 ): Packet {
-  return new Packet(op).s32(killLimit).f32(expRate).s32(maxLevelLimit);
+  return new Packet(op).s32(restrictionKind).f32(expRate).s32(maxLevelLimit);
 }

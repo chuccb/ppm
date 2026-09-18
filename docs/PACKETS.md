@@ -3037,13 +3037,12 @@ TS 無防衛核心模型 ⇒ 逐位元組恆回聲 = 與原生廣播逐 byte 相
 | 935 | `GR_AI_FEVER_START_REQ` | `sub_7622C0` | C2S | `(空)` (啟動 Fever 狂暴狀態) |
 | 936 | `GR_AI_FEVER_START_ACK` | `sub_7623A0` | S2C | `u8 status, u8 flag, s32 duration_ms, u8 type`(固定 7B) |
 
-**TS 對位 (2026-09-19)**: 935 builder `sub_7622C0` @393717 多重
-gate 後 ctor+send **零欄位寫入**=空體 ✓。936 `sub_7623A0` 固定讀
-7B 無條件;`status!=0` 且 `duration==`客端基準 `dword_EE8CB4` 才
-真的啟動 fever(否則只錯誤日誌);`status==0`=指定被拒臂(state=2
-+UI 廣播帶 flag,零續讀)。TS 無 fever 模型 ⇒ 恆 7B 全零被拒幀
-(wire `00000000000000`);舊表 status(1)/duration(10000) 是成功臂
-快照而非唯一形。
+**TS 對位 (2026-09-19,二輪審計強化)**: 935 builder `sub_7622C0`
+@393717 零欄位空體 ✓。936 `sub_7623A0` 固定讀 7B;status==0 臂的
+每欄已逐項證實惰性:`flag` 走 `sub_61FC50`→`sub_67D7D0` **嚴格驗
+[16,76)**,0 無效 ⇒ notify 全跳 = "no event";`duration` 只與客端
+基準 `dword_EE8CB4` 比對,不合只錯誤日誌;`type` 唯 status≠0 且
+基準相符才讀 ⇒ 恆回 7B 全零(0 皆非亂填,是驗證過的惰性選擇)。
 | 939 | `GR_AI_GO_NEXT_WAVE_REQ` | `sub_75CE40` | C2S | `(空)` (波次切換推進) |
 | 940 | `GR_AI_GO_NEXT_WAVE_ACK` | `sub_7613D0` | S2C | `u8 next_wave, s32 wave_time`;無 status 閘,收即開波 |
 

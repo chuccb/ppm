@@ -36,7 +36,7 @@ export default function GL_INVENIN_ACK(
     .u8(1) // mode 1: local user snapshot
     .s32(uid)
     .u8(contextRaw)
-    .u8(0) // unknownHeaderRaw: read by the client, semantic unresolved
+    .u8(0) // unknownHeaderRaw (v11): audited — parked under mode 1, only the room-relay (mode 0) arm consumes it
     .u8(snapshot.selectedProfile);
 
   for (const profile of snapshot.profiles) {
