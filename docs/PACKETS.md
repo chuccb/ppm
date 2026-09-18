@@ -3045,7 +3045,13 @@ gate 後 ctor+send **零欄位寫入**=空體 ✓。936 `sub_7623A0` 固定讀
 (wire `00000000000000`);舊表 status(1)/duration(10000) 是成功臂
 快照而非唯一形。
 | 939 | `GR_AI_GO_NEXT_WAVE_REQ` | `sub_75CE40` | C2S | `(空)` (波次切換推進) |
-| 940 | `GR_AI_GO_NEXT_WAVE_ACK` | `sub_7613D0` | S2C | `u8 next_wave, s32 wave_time` |
+| 940 | `GR_AI_GO_NEXT_WAVE_ACK` | `sub_7613D0` | S2C | `u8 next_wave, s32 wave_time`;無 status 閘,收即開波 |
+
+**TS 對位 (2026-09-19)**: 939 builder `sub_75CE40` @391020 = ctor+送
+零欄位空體 ✓(七層 gate)。940 `sub_7613D0` 僅讀 5B 就**無條件**翻波次
+狀態+播 `AI3_next.wav`+武解 30s 定時器——**無 status/deny 臂**,任何
+940 幀立即觸發開波。TS 無 PVE 波次編排 ⇒ 採 **parse-and-silence**(同 721
+前例),940 不註冊 s2c——是本系唯一不造件者。
 | 944 | `GR_RESET_GAMEROOMSLOT_REQ` | `sub_585E90` | C2S | `(空)` (重置房間槽位) |
 | 945 | `GR_RESET_GAMEROOMSLOT_ACK` | `sub_585F30` | S2C | `u8 status(1)` |
 

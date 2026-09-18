@@ -38,6 +38,7 @@ import magazineStartRequest from "../src/ops/c2s/GR_AI_RECHARGE_MAGAZINE_START_R
 import magazineEndRequest from "../src/ops/c2s/GR_AI_RECHARGE_MAGAZINE_END_REQ.ts";
 import continueStartRequest from "../src/ops/c2s/GR_AI_CONTINUE_START_REQ.ts";
 import feverStartRequest from "../src/ops/c2s/GR_AI_FEVER_START_REQ.ts";
+import nextWaveRequest from "../src/ops/c2s/GR_AI_GO_NEXT_WAVE_REQ.ts";
 import startVotingRequest from "../src/ops/c2s/GR_START_VOTING_REQ.ts";
 import gamecenterRankingRequest from "../src/ops/c2s/GG_GAMECENTER_RANKING_REQ.ts";
 import gamecenterGameStartRequest from "../src/ops/c2s/GG_GAMECENTER_GAME_START_REQ.ts";
@@ -1065,6 +1066,32 @@ describe("718/721 — voting requests", () => {
   });
 });
 
+describe("939 — next-wave request", () => {
+  test("939 empty body -> parse-and-silence (no 940 fabrication)", () => {
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof nextWaveRequest>[1];
+    nextWaveRequest(
+      reread(new Packet(opcodeFor("GR_AI_GO_NEXT_WAVE_REQ"))),
+      connection,
+    );
+    expect(replies).toHaveLength(0);
+  });
+
+  test("939 rejects any stray bytes", () => {
+    const connection = {
+      reply: () => undefined,
+    } as unknown as Parameters<typeof nextWaveRequest>[1];
+    expect(() =>
+      nextWaveRequest(
+        reread(new Packet(opcodeFor("GR_AI_GO_NEXT_WAVE_REQ")).u8(1)),
+        connection,
+      ),
+    ).toThrow(/939/);
+  });
+});
+
 describe("935 — fever-start request", () => {
   test("935 empty body -> dormant declined frame", () => {
     const replies: unknown[][] = [];
@@ -1707,7 +1734,7 @@ describe("registry", () => {
   });
 
   test("the registry exposes both operation folders at startup", () => {
-    expect(summary()).toMatch(/^c2s 60 \(/);
+    expect(summary()).toMatch(/^c2s 61 \(/);
     expect(summary()).toMatch(/\), s2c 59 \(/);
     expect(summary()).toContain("GL_LOGIN_ACK");
     expect(summary()).toContain("GL_LOGIN_REQ");
