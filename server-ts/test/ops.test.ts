@@ -14,6 +14,7 @@ import dataRecvCompletedRequest from "../src/ops/c2s/GL_DATA_RECV_COMPLETED_REQ.
 import roomBroadcastRequest from "../src/ops/c2s/GG_ROOMBROADCAST_REQ.ts";
 import msgDelRequest from "../src/ops/c2s/GL_MSG_DEL_REQ.ts";
 import friendAddRequest from "../src/ops/c2s/GL_FRIEND_ADD_REQ.ts";
+import friendChatRequest from "../src/ops/c2s/GL_FRIEND_CHAT_REQ.ts";
 import friendDelRequest from "../src/ops/c2s/GL_FRIEND_DEL_REQ.ts";
 import friendInfoRequest from "../src/ops/c2s/GL_FRIEND_INFO_REQ.ts";
 import msgReadRequest from "../src/ops/c2s/GL_MSG_READ_REQ.ts";
@@ -219,6 +220,39 @@ describe("437 — room broadcast request", () => {
     expect(() =>
       roomBroadcastRequest(
         reread(new Packet(opcodeFor("GG_ROOMBROADCAST_REQ")).u8(7).s32(0).u8(0)),
+        connection,
+      ),
+    ).toThrow(/trailing/);
+  });
+});
+
+describe("439 — friend-chat request", () => {
+  test("parses {s32 context, str, str, str} and always answers the proven status-3 arm", () => {
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof friendChatRequest>[1];
+    friendChatRequest(
+      reread(new Packet(opcodeFor("GL_FRIEND_CHAT_REQ")).s32(0x1234).str("me").str("you").str("hi")),
+      connection,
+    );
+    expect(replies).toEqual([["GL_FRIEND_CHAT_ACK", 3, "me", "you"]]);
+
+    // native gate: strlen(message) <= 180
+    friendChatRequest(
+      reread(new Packet(opcodeFor("GL_FRIEND_CHAT_REQ")).s32(0).str("a").str("b").str("m".repeat(180))),
+      connection,
+    );
+    expect(replies).toHaveLength(2);
+    expect(() =>
+      friendChatRequest(
+        reread(new Packet(opcodeFor("GL_FRIEND_CHAT_REQ")).s32(0).str("a").str("b").str("m".repeat(181))),
+        connection,
+      ),
+    ).toThrow(/180-byte/);
+    expect(() =>
+      friendChatRequest(
+        reread(new Packet(opcodeFor("GL_FRIEND_CHAT_REQ")).s32(0).str("a").str("b").str("c").u8(0)),
         connection,
       ),
     ).toThrow(/trailing/);
@@ -676,8 +710,8 @@ describe("registry", () => {
   });
 
   test("the registry exposes both operation folders at startup", () => {
-    expect(summary()).toMatch(/^c2s 25 \(/);
-    expect(summary()).toMatch(/\), s2c 27 \(/);
+    expect(summary()).toMatch(/^c2s 26 \(/);
+    expect(summary()).toMatch(/\), s2c 28 \(/);
     expect(summary()).toContain("GL_LOGIN_ACK");
     expect(summary()).toContain("GL_LOGIN_REQ");
   });

@@ -3,6 +3,7 @@ import GL_CLIENTINFO_ACK from "../src/ops/s2c/GL_CLIENTINFO_ACK.ts";
 import GL_EXPIRE_PARTSUP_ACK from "../src/ops/s2c/GL_EXPIRE_PARTSUP_ACK.ts";
 import GL_FRIEND_LIST_ACK from "../src/ops/s2c/GL_FRIEND_LIST_ACK.ts";
 import GL_FRIEND_ADD_ACK from "../src/ops/s2c/GL_FRIEND_ADD_ACK.ts";
+import GL_FRIEND_CHAT_ACK from "../src/ops/s2c/GL_FRIEND_CHAT_ACK.ts";
 import GL_FRIEND_DEL_ACK from "../src/ops/s2c/GL_FRIEND_DEL_ACK.ts";
 import GL_FRIEND_INFO_ACK from "../src/ops/s2c/GL_FRIEND_INFO_ACK.ts";
 import GL_MSG_DEL_ACK from "../src/ops/s2c/GL_MSG_DEL_ACK.ts";
@@ -157,6 +158,12 @@ describe("native 198/247/255 payload snapshots", () => {
       { nickname: "hero", statusRaw: 1, channelText: "ch1", raw: 3 },
     ]).payload())).toBe("016865726F00016368310003");
     expect(hex(GL_FRIEND_INFO_ACK(436, []).payload())).toBe("00");
+    expect(hex(GL_FRIEND_CHAT_ACK(440, 3, "me", "you").payload())).toBe(
+      "036D6500796F7500",
+    );
+    expect(hex(GL_FRIEND_CHAT_ACK(440, 2, "me", "you", "hi").payload())).toBe(
+      "026D6500796F7500686900",
+    );
     expect(hex(GL_FRIEND_ADD_ACK(430, 1, "frnd").payload())).toBe("0166726E6400");
     expect(hex(GL_FRIEND_DEL_ACK(432, 2, "frnd").payload())).toBe("0266726E6400");
     expect(hex(GL_MSG_DEL_ACK(422, 1, "mail1").payload())).toBe("016D61696C3100");

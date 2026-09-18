@@ -2595,6 +2595,13 @@ buffer;拒絕 trailing;split(',') 每段非空 ≤20B=table stride;row≤100=tab
 「無 extra context」臂是唯一誠實姿態;不造 online/channel 語義)。
 439 GL_FRIEND_CHAT_REQ (sub_55B510): s32 uid(dword_F2A684), str my_nick,
     str friend_nick, str message (ANSI ×3; message ≤180 才送)
+**TS 對位 (2026-09-18)**: 439 c2s 解析四欄(trailing 拒絕;message cap=180B
+原生閘;s32 context 沿用 834 結論=parse-only 不命名 user_id)→ 恆回
+440 status 3(0x1D8「見つけることが出来ませんでした」,本服務無 friend
+系統的唯一誠實通用失敗臂)並回送 (my_nick, friend_nick);status 0/1
+(not-exist/offline) 承載本服務無從證實之主張 ⇒ 不送。440 builder:
+`{u8 statusRaw, str(23), str(23), [==2: str comment(199)]}`=原生 24B/
+24B/200B 讀入本地槽。
 440 GL_FRIEND_CHAT_ACK (sub_55B660): u8 status, str nick1, str nick2,
     [status==2: str comment] — status:
       0=0x1EF「%s というキャラクター名は存在しません」
