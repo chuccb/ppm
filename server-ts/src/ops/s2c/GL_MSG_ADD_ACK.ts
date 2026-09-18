@@ -11,7 +11,6 @@
 import { Packet } from "../../packet.ts";
 
 /** Native 419 sender-side recipient-name bound (n24 <= 24 bytes). */
-export const MSG_ADD_TARGET_MAX_BYTES = 24;
 
 export default function GL_MSG_ADD_ACK(
   op: number,
@@ -20,7 +19,7 @@ export default function GL_MSG_ADD_ACK(
   resultRaw: number,
 ): Packet {
   return new Packet(op)
-    .strMax(toNick, MSG_ADD_TARGET_MAX_BYTES)
+    .str(toNick)
     .u8(xRaw)
     .u8(resultRaw);
 }

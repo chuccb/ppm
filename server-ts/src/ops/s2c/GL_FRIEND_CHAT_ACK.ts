@@ -24,10 +24,10 @@ export default function GL_FRIEND_CHAT_ACK(
 ): Packet {
   const p = new Packet(op)
     .u8(statusRaw)
-    .strMax(nick1, 23) // native v19[6] 24-byte read local
-    .strMax(nick2, 23); // native v17[6] 24-byte read local
+    .str(nick1) // native v19[6] 24-byte read local
+    .str(nick2); // native v17[6] 24-byte read local
   if (statusRaw === 2) {
-    p.strMax(comment ?? "", 199); // native v20[200] comment read local
+    p.str(comment ?? ""); // native v20[200] comment read local
   }
   return p;
 }

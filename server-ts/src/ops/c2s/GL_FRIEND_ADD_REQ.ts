@@ -15,7 +15,7 @@
 
 import type { Connection } from "../../connection.ts";
 import type { Reader } from "../../packet.ts";
-import { FRIEND_OP_KEY_MAX_BYTES } from "../s2c/GL_FRIEND_ADD_ACK.ts";
+const FRIEND_OP_KEY_MAX_BYTES = 23; // native 24-byte ACK read local
 
 export default function GL_FRIEND_ADD_REQ(r: Reader, connection: Connection): void {
   const key = r.str();

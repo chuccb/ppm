@@ -125,7 +125,7 @@ function writeType3Tail(p: Packet, tail: Type3Tail): void {
   p.s32(tail.header0);
   if (!isFullType3Tail(tail)) return; // native allows the header0-only gate arm
   p.s32(tail.header1)
-    .label("196 type3.name expected as per the native 68-byte storage").strMax(tail.name, 67)
+    .str(tail.name) // native 68-byte storage
     .u32(tail.raw4_0).u32(tail.raw4_1).u32(tail.raw4_2).u32(tail.raw4_3)
     .u8(tail.u8_0).u8(tail.u8_1).u8(tail.u8_2).s32(tail.listCount);
   for (const value of tail.listValues) p.s32(value);
@@ -137,10 +137,10 @@ function writeType3Tail(p: Packet, tail: Type3Tail): void {
   p.u8(tail.u8_3).u8(tail.stageCount);
   for (const record of tail.stageRecords) {
     p.s32(record.s32_0).u32(record.raw4_0).u8(record.hasName0);
-    if (record.hasName0 !== 0) p.strMax(record.name0, 31); // native 32-byte copy
+    if (record.hasName0 !== 0) p.str(record.name0); // native 32-byte copy
     p.s32(record.s32_1).s32(record.s32_2).s32(record.s32_3).s32(record.s32_4)
       .s32(record.s32_5).s32(record.s32_6).u8(record.hasName1);
-    if (record.hasName1 !== 0) p.strMax(record.name1, 25); // native 26-byte copy
+    if (record.hasName1 !== 0) p.str(record.name1); // native 26-byte copy
   }
   p.u32(tail.raw4Final);
 }
@@ -148,7 +148,7 @@ function writeType3Tail(p: Packet, tail: Type3Tail): void {
 export default function GC_ENTERCHANNEL_ACK(op: number, entry: Entry): Packet {
   const p = new Packet(op)
     .u8(entry.result)
-    .label("196 channel_id expected as a native s32").s32(entry.channelId)
+    .s32(entry.channelId)
     .u8(entry.channelIndex);
 
   if (entry.result !== Result.Success) return p;
@@ -159,12 +159,11 @@ export default function GC_ENTERCHANNEL_ACK(op: number, entry: Entry): Packet {
   const clientFlags = successEntry.clientFlags ?? 0;
   const clientDefault = successEntry.clientDefault ?? 5;
 
-  p.label("196 endpoint host expected as per the native char[20]")
-    .strMax(successEntry.endpoint.host, 19) // native char[20]
+  p.str(successEntry.endpoint.host) // native char[20]
     .s32(successEntry.endpoint.port)
     .u8(endpointOpaque)
     .u8(channelType)
-    .label("196 client_flags expected as a native raw4").u32(clientFlags)
+    .u32(clientFlags) // native raw4
     .u8(clientDefault);
   if (channelType === 3 && successEntry.type3Tail !== undefined) {
     writeType3Tail(p, successEntry.type3Tail);

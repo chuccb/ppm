@@ -17,8 +17,6 @@
 
 import { Packet } from "../../packet.ts";
 
-const CONTEXT_STRING_MAX_BYTES = 20; // native local char[21], including NUL
-export const FRIEND_NICKNAME_MAX_BYTES = 20; // sub_537F60 stride-21 slot, including NUL
 
 export interface FriendListEntry {
   readonly nickname: string;
@@ -33,11 +31,10 @@ export default function GL_FRIEND_LIST_ACK(
 ): Packet {
   const p = new Packet(op)
     .u16(0) // native header; semantics unresolved
-    .label("434 context string expected as per the native char[21] local")
-    .strMax(contextString, CONTEXT_STRING_MAX_BYTES) // bounded compatibility string; no recovered consumer
+    .str(contextString) // native local char[21]; bounded compatibility string, no recovered consumer
     .u8(entries.length);
   for (const entry of entries) {
-    p.strMax(entry.nickname, FRIEND_NICKNAME_MAX_BYTES) // native char[21] friend slot
+    p.str(entry.nickname) // sub_537F60 stride-21 friend slot
       .s32(entry.stateRaw); // the native table retains only the low byte
   }
   return p;

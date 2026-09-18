@@ -54,9 +54,6 @@ export const Result = {
 /** The native result is a raw s32; the client branches on its low byte only. */
 export type Result = number;
 
-const MAX_SERVER_NAME_BYTES = 49; // native char[50], including NUL
-const MAX_SERVER_HOST_BYTES = 15; // native char[16], including NUL
-const MAX_CHANNEL_NAME_BYTES = 49; // native char[50], including NUL
 const CHANNEL_GROUP_COUNT = 3; // native `for (j = 0; j < 3; ++j)`
 
 /** One selectable channel in a group. */
@@ -122,32 +119,32 @@ export interface Success {
 
 export default function GL_LOGIN_ACK(op: number, outcome: number | Success): Packet {
   if (typeof outcome === "number") {
-    return new Packet(op).label("681 result expected as a native s32 low-byte code").s32(outcome);
+    return new Packet(op).s32(outcome); // result: native low-byte code as s32
   }
 
   const { userNo, servers, n100 = 0, rawExtension } = outcome;
 
   const p = new Packet(op)
     .s32(Result.Success)
-    .label("681 user_no expected as a native s32").s32(userNo)
-    .label("681 n100 charge-mode expected as a native s32").s32(n100);
+    .s32(userNo)
+    .s32(n100);
   if (!rawExtension) {
     p.s32(0); // ext_count: safe default, no extension tuple follows
   } else {
     p.s32(rawExtension.gate);
     if (rawExtension.gate > 0) {
-      p.label("681 raw extension s32First expected as a native s32").s32(rawExtension.s32First)
-        .label("681 raw extension s32Second expected as a native s32").s32(rawExtension.s32Second)
-        .label("681 raw extension featureFlag expected as a native u8").u8(rawExtension.featureFlag);
+      p.s32(rawExtension.s32First)
+        .s32(rawExtension.s32Second)
+        .u8(rawExtension.featureFlag);
     }
   }
 
   p.s16(servers.length);
   for (const server of servers) {
     // These are raw2 fields; native domain/signedness is unresolved.
-    p.label("681 server_id expected as a native raw2").u16(server.serverId); // signedness unresolved
-    p.label("681 server name expected as per the native char[50]").strMax(server.name, MAX_SERVER_NAME_BYTES);
-    p.strMax(server.host, MAX_SERVER_HOST_BYTES); // native char[16]
+    p.u16(server.serverId); // signedness unresolved
+    p.str(server.name); // native char[50]
+    p.str(server.host); // native char[16]
     // The reader gets raw2, but the selected-server consumer passes these bits
     // to a Winsock u_short endpoint port.
     p.u16(server.port);
@@ -166,7 +163,7 @@ export default function GL_LOGIN_ACK(op: number, outcome: number | Success): Pac
       if (group.maxUsers <= 0) continue;
       const channel = group.channel!;
       p.u8(channel.type);
-      p.label("681 channel name expected as per the native char[50]").strMax(channel.name, MAX_CHANNEL_NAME_BYTES);
+      p.str(channel.name); // native char[50]
       p.s16(channel.currentUsers);
       p.u8(channel.flag); // native `ch_flag`; its domain is not established here
       if (channel.type === 3) {

@@ -17,10 +17,9 @@
 import { Packet } from "../../packet.ts";
 
 /** Native 429/431 send-side gate: non-empty key with `strlen <= 23`. */
-export const FRIEND_OP_KEY_MAX_BYTES = 23;
 
 export default function GL_FRIEND_ADD_ACK(op: number, statusRaw: number, key: string): Packet {
   return new Packet(op)
     .u8(statusRaw)
-    .strMax(key, FRIEND_OP_KEY_MAX_BYTES); // native 24-byte ACK read local
+    .str(key); // native 24-byte ACK read local
 }

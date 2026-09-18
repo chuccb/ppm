@@ -13,10 +13,9 @@
  */
 
 import { Packet } from "../../packet.ts";
-import { FRIEND_OP_KEY_MAX_BYTES } from "./GL_FRIEND_ADD_ACK.ts";
 
 export default function GL_FRIEND_DEL_ACK(op: number, statusRaw: number, key: string): Packet {
   return new Packet(op)
     .u8(statusRaw)
-    .strMax(key, FRIEND_OP_KEY_MAX_BYTES); // native 24-byte ACK read local
+    .str(key); // native 24-byte ACK read local
 }

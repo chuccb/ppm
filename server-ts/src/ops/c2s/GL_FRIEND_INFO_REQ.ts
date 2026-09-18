@@ -17,7 +17,7 @@
 
 import type { Connection } from "../../connection.ts";
 import type { Reader } from "../../packet.ts";
-import { FRIEND_NICKNAME_MAX_BYTES } from "../s2c/GL_FRIEND_LIST_ACK.ts";
+const FRIEND_NICKNAME_MAX_BYTES = 20; // sub_537F60 stride-21 slot, including NUL
 
 /** Native sub_55B0A0 assembles the comma-separated list into String[1028] (0x400 bytes used). */
 const FRIEND_INFO_NAMES_MAX_BYTES = 1023;

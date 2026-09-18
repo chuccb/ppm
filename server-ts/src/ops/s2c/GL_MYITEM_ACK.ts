@@ -31,8 +31,8 @@ export default function GL_MYITEM_ACK(op: number, items: readonly InvItem[] = []
     // projection for the current number-based API.
     p.s32(item.slot)
       .s32(item.itemId)
-      .label("200 raw4 f32 projection out of range").f32(item.f1)
-      .label("200 raw4 f32 projection out of range").f32(item.f2)
+      .f32(item.f1)
+      .f32(item.f2)
       .s32(item.period)
       .u8(item.extra ?? 0) // native u8 after the period; domain unresolved
       .u16(item.durability); // native u16 current/max durability word

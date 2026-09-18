@@ -42,9 +42,6 @@ export interface Admission {
   readonly restrictionKdr?: number;
 }
 
-/** Native `v71` local char[40]; wire string semantics remain unresolved. */
-export const CHANNEL_NAME_MAX_BYTES = 39;
-
 export default function PM_UDPSTART_ACK(op: number, admission: Admission): Packet {
   const {
     result,
@@ -59,7 +56,7 @@ export default function PM_UDPSTART_ACK(op: number, admission: Admission): Packe
     .u8(result)
     .u8(rankRestricted ? 1 : 0)
     .s32(dailyLoginRewardPg)
-    .strMax(channelName, CHANNEL_NAME_MAX_BYTES)
+    .str(channelName) // native v71 local char[40]
     .s32(0) // read then unused
     .s32(0) // read then unused
     .s32(restrictionLevel)

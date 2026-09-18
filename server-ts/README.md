@@ -43,10 +43,11 @@ src/ops/registry.ts  檔名 → opcode，以及具型別的 build() / handlerFor
 src/ops/c2s/         客戶端送給我們的 packet
 src/ops/s2c/         我們送給客戶端的 packet
 
-分層準則（2026-09-19 定案）：s2c 模組【只負責序列化】——零 throw、零驗證，
-值域由 packet.ts 的 typed writer（u8/s16/s32/f32/strMax…）在寫入點把關，
-其餘一律由上游（c2s handler／store／config）保證；native 文法上限以
-strMax 常數或常數本體（固定 arm）呈現，不殘留 require 式守衛。
+分層準則（2026-09-19 定案）：s2c 模組【只負責序列化】——貼齊 client 的
+反序列化行為（str 讀到 NUL 即止），零 throw、零驗證、零 label：值域由
+packet.ts 的 typed writer（u8/s16/s32/f32…）在寫入點把關，native buffer
+尺寸一律寫在註釋（wire 本身不承載），其餘由上游（c2s handler／store／
+config）保證；固定 arm 直接寫常數本體，不殘留 require 式守衛。
 src/main.ts          進入點
 ```
 

@@ -20,8 +20,6 @@
 
 import { Packet } from "../../packet.ts";
 
-export const ENDPOINT_HOST_MAX_BYTES = 19;
-
 export interface ConnectInfo {
   readonly endpoint: { readonly host: string; readonly port: number };
   readonly activeChannelIndex: number;
@@ -41,7 +39,7 @@ export function packCalendar(date: Date): number {
 
 export default function PM_CONNECT_ACK(op: number, info: ConnectInfo): Packet {
   return new Packet(op)
-    .strMax(info.endpoint.host, ENDPOINT_HOST_MAX_BYTES)
+    .str(info.endpoint.host)
     .s32(info.endpoint.port)
     .u8(info.activeChannelIndex)
     .u32(packCalendar(info.serverTime));

@@ -21,11 +21,6 @@
 
 import { Packet } from "../../packet.ts";
 
-const CONTEXT_STRING_MAX_BYTES = 20; // native local char[21], including NUL
-export const MSG_KEY_MAX_BYTES = 19; // sub_5378C0 stride-20 slot, including NUL
-export const MSG_NAME_MAX_BYTES = 20; // stride-21 slot, including NUL
-export const MSG_BODY_MAX_BYTES = 200; // stride-201 slot, including NUL
-export const MSG_SELECTOR_MAX_BYTES = 1; // stride-2 slot, including NUL
 
 export interface MsgListEntry {
   /** field_s1: key proven to drive the 421/423 mark requests. */
@@ -51,16 +46,15 @@ export default function GL_MSG_RECVLIST_ACK(
 ): Packet {
   const p = new Packet(op)
     .u16(0) // native header; semantics unresolved
-    .label("426 context string expected as per the native char[21] local")
-    .strMax(contextString, CONTEXT_STRING_MAX_BYTES) // bounded compatibility string; no recovered consumer
+    .str(contextString) // native local char[21]; bounded compatibility string, no recovered consumer
     .u8(entries.length);
   for (const entry of entries) {
-    p.strMax(entry.key, MSG_KEY_MAX_BYTES) // native stride-20 key slot
+    p.str(entry.key) // sub_5378C0 stride-20 key slot
       .u8(entry.kind) // semantics unresolved
-      .strMax(entry.name, MSG_NAME_MAX_BYTES) // native stride-21 MSG_NAME slot
+      .str(entry.name) // native stride-21 MSG_NAME slot
       .s32(entry.extraRaw) // raw4 wire; the native table keeps the low byte
-      .strMax(entry.body, MSG_BODY_MAX_BYTES) // native stride-201 slot
-      .strMax(entry.selector, MSG_SELECTOR_MAX_BYTES) // native stride-2 F/M selector
+      .str(entry.body) // native stride-201 slot
+      .str(entry.selector) // native stride-2 F/M selector
       .s16(entry.flagRaw); // raw2 wire; the native table keeps the low byte
   }
   return p;

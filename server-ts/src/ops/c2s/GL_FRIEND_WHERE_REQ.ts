@@ -14,7 +14,7 @@
 
 import type { Connection } from "../../connection.ts";
 import type { Reader } from "../../packet.ts";
-import { FRIEND_NICKNAME_MAX_BYTES } from "../s2c/GL_FRIEND_LIST_ACK.ts";
+const FRIEND_NICKNAME_MAX_BYTES = 20; // sub_537F60 stride-21 slot, including NUL
 
 export default function GL_FRIEND_WHERE_REQ(r: Reader, connection: Connection): void {
   const nick = r.str();

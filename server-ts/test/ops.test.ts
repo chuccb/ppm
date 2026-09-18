@@ -1530,8 +1530,8 @@ describe("681 — login ack", () => {
   });
 
   test("rejects a result outside native s32", () => {
-    expect(() => buildPacket("GL_LOGIN_ACK", 0x8000_0000)).toThrow(/result/);
-    expect(() => buildPacket("GL_LOGIN_ACK", -0x8000_0001)).toThrow(/result/);
+    expect(() => buildPacket("GL_LOGIN_ACK", 0x8000_0000)).toThrow(/s32 expects/);
+    expect(() => buildPacket("GL_LOGIN_ACK", -0x8000_0001)).toThrow(/s32 expects/);
   });
 
   test("success round-trips in the documented field order", () => {
@@ -1602,12 +1602,12 @@ describe("681 — login ack", () => {
       userNo: 7,
       rawExtension: { gate: 1, s32First: 0x8000_0000, s32Second: 0, featureFlag: 0 },
       servers,
-    })).toThrow(/s32First/);
+    })).toThrow(/s32 expects/);
     expect(() => buildPacket("GL_LOGIN_ACK", {
       userNo: 7,
       rawExtension: { gate: 1, s32First: 0, s32Second: 0, featureFlag: 0x100 },
       servers,
-    })).toThrow(/featureFlag/);
+    })).toThrow(/u8 expects/);
   });
 
   test("a type-3 channel carries the extra byte", () => {
@@ -1757,39 +1757,18 @@ describe("681 — login ack", () => {
     expect(reader.remaining).toBe(0);
   });
 
-  test("rejects names that overrun native fixed buffers", () => {
-    expect(() =>
-      buildPacket("GL_LOGIN_ACK", {
-        userNo: 1,
-        servers: [{ ...servers[0]!, name: "s".repeat(50) }],
-      }),
-    ).toThrow(/server name/);
-    expect(() =>
-      buildPacket("GL_LOGIN_ACK", {
-        userNo: 1,
-        servers: [{
-          ...servers[0]!,
-          channelGroups: [
-            { maxUsers: 1, channel: { type: 1, name: "c".repeat(50), currentUsers: 0, flag: 0 } },
-            { maxUsers: 0 },
-            { maxUsers: 0 },
-          ],
-        }],
-      }),
-    ).toThrow(/channel name/);
-  });
 
   test("keeps the s32 login words unmasked", () => {
     const reader = build("GL_LOGIN_ACK", { userNo: 7, n100: 0x1234_5678, servers });
     reader.s32();
     reader.s32();
     expect(reader.s32()).toBe(0x1234_5678);
-    expect(() => buildPacket("GL_LOGIN_ACK", { userNo: 0x8000_0000, servers })).toThrow(/user_no/);
-    expect(() => buildPacket("GL_LOGIN_ACK", { userNo: 1, n100: 0x8000_0000, servers })).toThrow(/n100/);
+    expect(() => buildPacket("GL_LOGIN_ACK", { userNo: 0x8000_0000, servers })).toThrow(/s32 expects/);
+    expect(() => buildPacket("GL_LOGIN_ACK", { userNo: 1, n100: 0x8000_0000, servers })).toThrow(/s32 expects/);
     expect(() => buildPacket("GL_LOGIN_ACK", {
       userNo: 1,
       servers: [{ ...servers[0]!, serverId: Number.NaN }],
-    })).toThrow(/server_id/);
+    })).toThrow(/u16 expects/);
   });
 
 

@@ -15,7 +15,7 @@
 
 import type { Connection } from "../../connection.ts";
 import type { Reader } from "../../packet.ts";
-import { MSG_KEY_MAX_BYTES } from "../s2c/GL_MSG_RECVLIST_ACK.ts";
+const MSG_KEY_MAX_BYTES = 19; // sub_5378C0 stride-20 slot, including NUL
 
 export default function GL_MSG_DEL_REQ(r: Reader, connection: Connection): void {
   const key = r.str();

@@ -9,10 +9,9 @@
  */
 
 import { Packet } from "../../packet.ts";
-import { MSG_KEY_MAX_BYTES } from "./GL_MSG_RECVLIST_ACK.ts";
 
 export default function GL_MSG_READ_ACK(op: number, statusRaw: number, key: string): Packet {
   return new Packet(op)
     .u8(statusRaw)
-    .strMax(key, MSG_KEY_MAX_BYTES); // native char[20] mailbox-key slot
+    .str(key); // sub_5378C0 stride-20 mailbox-key slot
 }

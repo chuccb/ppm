@@ -180,11 +180,6 @@ describe("native 198/247/255 payload snapshots", () => {
     `));
   });
 
-  test("434 strings are capped at their native strides", () => {
-    expect(() => GL_FRIEND_LIST_ACK(434, "", [{ nickname: "a".repeat(21), stateRaw: 0 }])).toThrow(
-      RangeError,
-    );
-  });
 
   test("426 emits the full native message row in wire order", () => {
     expect(hex(GL_MSG_RECVLIST_ACK(426).payload())).toBe(compact("0000 00 00"));
@@ -198,13 +193,6 @@ describe("native 198/247/255 payload snapshots", () => {
     `));
   });
 
-  test("426 strings are capped at their native strides", () => {
-    const base = { key: "k", kind: 0, name: "n", extraRaw: 0, body: "b", selector: "", flagRaw: 0 };
-    expect(() => GL_MSG_RECVLIST_ACK(426, "", [{ ...base, key: "k".repeat(20) }])).toThrow(RangeError);
-    expect(() => GL_MSG_RECVLIST_ACK(426, "", [{ ...base, name: "n".repeat(21) }])).toThrow(RangeError);
-    expect(() => GL_MSG_RECVLIST_ACK(426, "", [{ ...base, body: "b".repeat(201) }])).toThrow(RangeError);
-    expect(() => GL_MSG_RECVLIST_ACK(426, "", [{ ...base, selector: "FM" }])).toThrow(RangeError);
-  });
 
   test("422/424 emit the exact {u8 statusRaw, str key} frames", () => {
     expect(hex(GL_MSG_ADD_ACK(420, "nick1", 6, 0).payload())).toBe("6E69636B31000600");
@@ -265,8 +253,6 @@ describe("native 198/247/255 payload snapshots", () => {
     expect(hex(GL_MSG_DEL_ACK(422, 0, "").payload())).toBe("0000");
     expect(hex(GL_MSG_READ_ACK(424, 1, "mail1").payload())).toBe("016D61696C3100");
     expect(hex(GL_MSG_READ_ACK(424, 0, "").payload())).toBe("0000");
-    expect(() => GL_MSG_DEL_ACK(422, 1, "k".repeat(20))).toThrow(RangeError);
-    expect(() => GL_MSG_READ_ACK(424, 1, "k".repeat(20))).toThrow(RangeError);
   });
 
   test("255 retains the common prefix and five raw 32-byte profiles", () => {

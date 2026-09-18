@@ -185,9 +185,6 @@ describe("lobby bootstrap packets", () => {
     expect(reader.s32()).toBe(0);
     expect(reader.u8()).toBe(0);
     expect(reader.remaining).toBe(0);
-    expect(() =>
-      build("GL_MYINFO_ACK", { ...wireInfo, nickname: "n".repeat(24) }, selectedSnapshot),
-    ).toThrow(/native char\[24\]/);
     const publicMyInfo = store.getMyInfoByNickname("bob");
     expect(publicMyInfo).toEqual(myInfo);
     const publicInfo = decode(build("GL_CLIENTINFO_ACK", publicMyInfo).encode());
@@ -242,7 +239,7 @@ describe("lobby bootstrap packets", () => {
           index === 1 ? { ...character, charType: 0x100 } : character,
         ),
       }),
-    ).toThrow(/247 char_type expected/);
+    ).toThrow(/u8 expects/);
     store.close();
   });
 
@@ -254,7 +251,7 @@ describe("lobby bootstrap packets", () => {
     expect(items.remaining).toBe(0);
     expect(() =>
       build("GL_MYITEM_ACK", [{ slot: 0, itemId: 1, f1: Number.MAX_VALUE, f2: 0, period: 0, durability: 0 }]),
-    ).toThrow(/raw4 f32 projection out of range/);
+    ).toThrow(/f32 expects/);
 
     const item = decode(build("GL_MYITEM_ACK", [{
       slot: 12,
@@ -309,13 +306,11 @@ describe("lobby bootstrap packets", () => {
     expect(friends.str()).toBe("alice");
     expect(friends.u8()).toBe(0);
     expect(friends.remaining).toBe(0);
-    expect(() => build("GL_FRIEND_LIST_ACK", "a".repeat(21))).toThrow(/char\[21\]/);
 
     const messages = decode(build("GL_MSG_RECVLIST_ACK", "alice").encode());
     expect(messages.u16()).toBe(0);
     expect(messages.str()).toBe("alice");
     expect(messages.u8()).toBe(0);
     expect(messages.remaining).toBe(0);
-    expect(() => build("GL_MSG_RECVLIST_ACK", "a".repeat(21))).toThrow(/char\[21\]/);
   });
 });

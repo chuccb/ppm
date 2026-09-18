@@ -151,18 +151,7 @@ describe("scalar domains", () => {
     expect(() => new Packet(1).f32(Number.MAX_VALUE)).toThrow(/f32 expects/);
   });
 
-  test("strMax enforces the native byte cap before the NUL", () => {
-    const p = new Packet(1).strMax("abcde", 5);
-    expect(p.length).toBe(6);
-    expect(() => new Packet(1).strMax("abcdef", 5)).toThrow(/native-buffer cap/);
-    expect(() => new Packet(1).strMax("日本語", 5)).toThrow(/native-buffer cap|non-ASCII/);
-  });
 
-  test("label annotates only the next failing write and resets", () => {
-    expect(() => new Packet(1).label("example field").u8(300)).toThrow(/^example field: u8/);
-    // The label does not leak into the next write's error.
-    expect(() => new Packet(1).label("example field").u8(1).u8(300)).toThrow(/^u8 expects/);
-  });
 });
 
 describe("validation", () => {

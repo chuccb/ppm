@@ -13,7 +13,6 @@
  */
 
 import { Packet } from "../../packet.ts";
-import { FRIEND_NICKNAME_MAX_BYTES } from "./GL_FRIEND_LIST_ACK.ts";
 
 export interface FriendInfoRow {
   nickname: string;
@@ -27,9 +26,9 @@ export interface FriendInfoRow {
 export default function GL_FRIEND_INFO_ACK(op: number, rows: FriendInfoRow[]): Packet {
   const p = new Packet(op).u8(rows.length);
   rows.forEach(({ nickname, statusRaw, channelText, raw }) => {
-    p.strMax(nickname, FRIEND_NICKNAME_MAX_BYTES).u8(statusRaw);
+    p.str(nickname).u8(statusRaw);
     if (statusRaw === 1) {
-      p.strMax(channelText ?? "", 19).u8(raw ?? 0); // native locals: v5[5]=20B text + raw
+      p.str(channelText ?? "").u8(raw ?? 0); // native locals: v5[5]=20B text + raw
     }
   });
   return p;

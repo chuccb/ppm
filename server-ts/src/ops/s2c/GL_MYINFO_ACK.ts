@@ -11,7 +11,6 @@
 import { Packet } from "../../packet.ts";
 import { type NewSkillProfileSnapshot, type MyInfo } from "../../store.ts";
 
-const NICKNAME_MAX_BYTES = 23; // sub_46F450 copies exactly 0x18 bytes at +60, then copies +84 separately; native CClientData char[24], including NUL
 
 export default function GL_MYINFO_ACK(
   op: number,
@@ -56,8 +55,8 @@ export default function GL_MYINFO_ACK(
 export function writeMyInfoBasicData(packet: Packet, myInfo: MyInfo): Packet {
   const { stats } = myInfo;
   return packet
-    .label("198 stats nickname must fit the native char[24] at CClientData+60")
-    .strMax(myInfo.nickname, NICKNAME_MAX_BYTES)
+    // sub_46F450 copies exactly 0x18 bytes at +60, then copies +84 separately; native CClientData char[24]
+    .str(myInfo.nickname)
 
     .u8(myInfo.selectedCharIndex)
     .s32(myInfo.level)
