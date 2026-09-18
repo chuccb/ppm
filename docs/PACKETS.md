@@ -2877,7 +2877,14 @@ log 即還;==0 ⇒ 讀 `str title` + client 定長 raw blob(長度=this+239104,
 | Opcode | 封包名稱 | 來源函數 | 方向 | Wire 格式與行為 |
 |---|---|---|---|---|
 | 472 | `GL_GAMECENTER_REC_REQ` | `sub_584850` | C2S | `s16 game_id` (查詢小遊戲紀錄) |
-| 473 | `GL_GAMECENTER_REC_ACK` | `sub_584910` | S2C | `s16 game_id, s32 high_score, u8 top3_cnt, u8 top10_cnt, u8 v24, u8 v35, s16 v28, s32 v30, raw16, u8 v23` |
+| 473 | `GL_GAMECENTER_REC_ACK` | `sub_584910` | S2C | `u16 game_id, s32 high_score, u8 top3_cnt, top3_cnt×0x38, u8 top10_cnt, top10_cnt×0x38, u8 v24, u8 v35, [v35≠0: raw 0x20], s16 v28, s32 v30, raw 0x10, u8 v23, [v23≠0: raw 0x2C], u8 v31, u16 v32Raw, u16 v21` |
+
+**TS 對位 (2026-09-19)**: 472 builder `sub_584850` @175275:
+`sub_5929E0`(2B 驗證)= `u16 game_id` ✓(0x66-EA12F4 旗標語義未定保持)。
+473 consumer `sub_584910` 行級重讀:**top3/top10 各 0x38(56B)/行**、
+v35/v23 為 0x20/0x2C 條件 raw、尾段 `u8 v31, u16 v32Raw, u16 v21`——舊列
+漏行 payload 與尾部 ⇒ 補正。TS 無迷你遊戲紀錄 ⇒ 恆全零板、僅 echo
+game_id(wire 38B)。
 | 474 | `GG_GAMECENTER_GAME_START_REQ` | `sub_584DB0` | C2S | `s16 game_id, u8 stage` |
 | 475 | `GG_GAMECENTER_GAME_START_ACK` | `sub_584E80` | S2C | `u8 status(1), s16 game_id, u8 stage` |
 | 476 | `GG_GAMECENTER_GAME_END_REQ` | `sub_564930` | C2S | `s16 game_id, raw24 score_data, raw44 stats_data` |
