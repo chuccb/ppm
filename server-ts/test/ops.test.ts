@@ -23,6 +23,8 @@ import friendInfoRequest from "../src/ops/c2s/GL_FRIEND_INFO_REQ.ts";
 import friendWhereRequest from "../src/ops/c2s/GL_FRIEND_WHERE_REQ.ts";
 import msgReadRequest from "../src/ops/c2s/GL_MSG_READ_REQ.ts";
 import billTokenRequest from "../src/ops/c2s/GL_BILLTOKEN_REQ.ts";
+import questAcceptDailyRequest from "../src/ops/c2s/GQ_QUEST_ACCEPT_DAILY_REQ.ts";
+import questUserCompleteHonorRequest from "../src/ops/c2s/GQ_QUEST_USER_COMPLETE_HONOR_REQ.ts";
 import rackingWebTokenRequest from "../src/ops/c2s/GL_RACKINGWEB_TOKEN_REQ.ts";
 import levelKillLimitRequest from "../src/ops/c2s/GL_LEVEL_KILL_LIMIT_REQ.ts";
 import tutorialIndexRequest from "../src/ops/c2s/GL_TUTORIALINDEX_REQ.ts";
@@ -488,6 +490,62 @@ describe("787 — ranking-web token request", () => {
   });
 });
 
+describe("876/878 — quest requests", () => {
+  test("876 parses empty and replies the empty accept list (err 0, count 0)", () => {
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof questAcceptDailyRequest>[1];
+    questAcceptDailyRequest(
+      reread(new Packet(opcodeFor("GQ_QUEST_ACCEPT_DAILY_REQ"))),
+      connection,
+    );
+    expect(replies).toEqual([["GQ_QUEST_ACCEPT_DAILY_ACK", 0]]);
+  });
+
+  test("876 refuses trailing bytes", () => {
+    const connection = {
+      reply: () => undefined,
+    } as unknown as Parameters<typeof questAcceptDailyRequest>[1];
+    expect(() =>
+      questAcceptDailyRequest(
+        reread(new Packet(opcodeFor("GQ_QUEST_ACCEPT_DAILY_REQ")).u8(0)),
+        connection,
+      ),
+    ).toThrow(/876/);
+  });
+
+  test("878 parses exactly one u8 flag and replies err=1 (no honor model)", () => {
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof questUserCompleteHonorRequest>[1];
+    questUserCompleteHonorRequest(
+      reread(new Packet(opcodeFor("GQ_QUEST_USER_COMPLETE_HONOR_REQ")).u8(1)),
+      connection,
+    );
+    expect(replies).toEqual([["GQ_QUEST_USER_COMPLETE_HONOR_ACK", 1]]);
+  });
+
+  test("878 refuses empty or longer payloads", () => {
+    const connection = {
+      reply: () => undefined,
+    } as unknown as Parameters<typeof questUserCompleteHonorRequest>[1];
+    expect(() =>
+      questUserCompleteHonorRequest(
+        reread(new Packet(opcodeFor("GQ_QUEST_USER_COMPLETE_HONOR_REQ"))),
+        connection,
+      ),
+    ).toThrow(/878/);
+    expect(() =>
+      questUserCompleteHonorRequest(
+        reread(new Packet(opcodeFor("GQ_QUEST_USER_COMPLETE_HONOR_REQ")).u8(1).u8(0)),
+        connection,
+      ),
+    ).toThrow(/878/);
+  });
+});
+
 describe("834 — data-recv-completed request", () => {
   test("consumes the propagated raw4 context and replies with an empty 835", () => {
     const replies: string[] = [];
@@ -939,8 +997,8 @@ describe("registry", () => {
   });
 
   test("the registry exposes both operation folders at startup", () => {
-    expect(summary()).toMatch(/^c2s 35 \(/);
-    expect(summary()).toMatch(/\), s2c 36 \(/);
+    expect(summary()).toMatch(/^c2s 37 \(/);
+    expect(summary()).toMatch(/\), s2c 38 \(/);
     expect(summary()).toContain("GL_LOGIN_ACK");
     expect(summary()).toContain("GL_LOGIN_REQ");
   });

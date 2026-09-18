@@ -2713,8 +2713,21 @@ writer ⇒ 空 wire。788 有三訂閱點:`sub_407360` @6565 是**唯一讀 payl
 | 424 | `GL_MSG_READ_ACK` | `sub_55A4F0` | S2C | `u8 statusRaw, str key`; nonzero invokes the local `89` marker helper |
 | 876 | `GQ_QUEST_ACCEPT_DAILY_REQ` | `sub_91D730` | C2S | `(空)` |
 | 877 | `GQ_QUEST_ACCEPT_DAILY_ACK` | `sub_91D7E0` | S2C | `u8 err(0), s32 count(0), count×13B snapshot` |
+
+**TS 對位 (2026-09-19)**: 876 builder `sub_91D730` @594466:ctor→send 無
+writer ⇒ 空 wire(send log 亦正式署名 GQ_QUEST_ACCEPT_DAILY_REQ)。877
+consumer `sub_91D7E0`:1B err(raw 直讀),err≠0 只 log;err==0 先清空
+固定 3×13B 表,再讀 `s32 count` + 恰 `13×count` B(count 實質上限 3)。
+TS 無每日任務模型 ⇒ 恆回 `err=0, count=0`(wire `00 00000000`)。
 | 878 | `GQ_QUEST_USER_COMPLETE_HONOR_REQ` | `sub_91C9D0` | C2S | `s8 flag` |
 | 879 | `GQ_QUEST_USER_COMPLETE_HONOR_ACK` | `sub_91CAA0` | S2C | `u8 err(0), str title, raw blob` |
+
+**TS 對位 (2026-09-19)**: 878 builder `sub_91C9D0` @594069:ctor→
+`sub_5928E0(v4, a2!=0)`(1B 驗證)→send ⇒ wire = 恰 1B `u8 flag`(0/1);
+送出後清 *(this+239676)=0。879 consumer `sub_91CAA0`:`u8 err`≠0 ⇒ 只
+log 即還;==0 ⇒ 讀 `str title` + client 定長 raw blob(長度=this+239104,
+全檔僅此處讀取)→ 置被動 latch =1。TS 無 honor 任務模型 ⇒ 恆回
+`err=1`(wire `01`),無 title/無 blob,latch 維持 0。
 | 698 | `GP_ENTER_PEPACHI_REQ` | `sub_46E080` | C2S | `(空)` |
 | 699 | `GP_ENTER_PEPACHI_ACK` | `CLobbyShop::sub_46AD00` case 699 | S2C | `u8 status, s32 rawA, s32 rawB`; only status 1 enters the Pepachi scene. The two words are not proven currency fields. |
 | 700 | `GP_START_GAME_REQ` | `sub_8458D0`, called by `sub_8459C0` | C2S | `u8 raw0,s32 raw1`; exact 5-byte body. Native computes raw1 as `19,900,000 + (sub_525790(activeCharacter) % 100000)`; field/domain meaning remains UNRESOLVED. |
