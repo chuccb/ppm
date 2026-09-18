@@ -10,10 +10,7 @@
 
 import { Packet } from "../../packet.ts";
 
-export default function GI_CHANGE_SKILLITEMSLOT_ACK(op: number, count: 0 = 0): Packet {
-  if (count !== 0) {
-    throw new RangeError("467 rows require an accessory model this server does not provide");
-  }
+export default function GI_CHANGE_SKILLITEMSLOT_ACK(op: number): Packet {
   // sub_573A70 reads the three head bytes unconditionally but never
   // branches on the first two — only the count drives the row loop;
   // with count = 0 the frame is exactly this dormant head.

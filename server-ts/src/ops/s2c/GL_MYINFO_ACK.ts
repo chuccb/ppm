@@ -9,35 +9,9 @@
  */
 
 import { Packet } from "../../packet.ts";
-import { isNativeNewSkillPuzzleId } from "../../new-skill-catalog.ts";
-import {
-  NEW_SKILL_PROFILE_COUNT,
-  NEW_SKILL_PUZZLE_SLOT_COUNT,
-  type NewSkillProfile,
-  type NewSkillProfileSnapshot,
-  type MyInfo,
-} from "../../store.ts";
+import { type NewSkillProfileSnapshot, type MyInfo } from "../../store.ts";
 
-const NATIVE_CHARACTER_SLOT_COUNT = 20;
-
-function requireCharacterIndex(name: string, value: number): void {
-  if (!Number.isSafeInteger(value) || value < 0 || value >= NATIVE_CHARACTER_SLOT_COUNT) {
-    throw new RangeError(`198 ${name} must be a native character-list index in 0..19`);
-  }
-}
-
-// sub_46F450 copies exactly 0x18 bytes at +60, then copies +84 separately.
-const NICKNAME_MAX_BYTES = 23; // native CClientData char[24], including NUL
-const NEW_SKILL_RANGE = [11_010_001, 11_070_000] as const;
-
-/** Resource/native ordinal family; zero is the empty puzzle slot. */
-export function requireNewSkillPuzzleId(value: number, slot: number, opcode: 198 | 255): void {
-  if (!Number.isSafeInteger(value)) throw new RangeError(`${opcode} puzzle[${slot}] must be an integer`);
-  if (value === 0) return; // the empty puzzle slot
-  if (value < NEW_SKILL_RANGE[0] || value > NEW_SKILL_RANGE[1] || !isNativeNewSkillPuzzleId(value)) {
-    throw new RangeError(`${opcode} puzzle[${slot}] is not a native itemdata puzzle id`);
-  }
-}
+const NICKNAME_MAX_BYTES = 23; // sub_46F450 copies exactly 0x18 bytes at +60, then copies +84 separately; native CClientData char[24], including NUL
 
 export default function GL_MYINFO_ACK(
   op: number,
@@ -48,9 +22,6 @@ export default function GL_MYINFO_ACK(
   const p = new Packet(op).u8(1).s32(myInfo.userId);
   writeMyInfoBasicData(p, myInfo);
 
-  if (myInfo.characters.length > NATIVE_CHARACTER_SLOT_COUNT) {
-    throw new RangeError("198 supports at most 20 character records");
-  }
   const characters = myInfo.characters;
   p.u8(characters.length);
   for (const character of characters) {
@@ -70,25 +41,12 @@ export default function GL_MYINFO_ACK(
 
   // NewSkill profile selector and the selected profile's seven puzzle IDs.
   // `n5=5` is the recovered native-compatible raw convention; its semantic is
-  // unresolved. A missing snapshot is kept useful for packet-only callers.
-  let selectedProfile: NewSkillProfile | undefined;
-  if (snapshot) {
-    if (!Number.isSafeInteger(snapshot.selectedProfile) || snapshot.selectedProfile < 0 || snapshot.selectedProfile >= NEW_SKILL_PROFILE_COUNT) {
-      throw new RangeError("198 selected profile must be an integer in 0..4");
-    }
-    if (snapshot.profiles.length !== NEW_SKILL_PROFILE_COUNT) {
-      throw new RangeError("198 requires exactly five NewSkill profiles");
-    }
-    selectedProfile = snapshot.profiles[snapshot.selectedProfile];
-    if (!selectedProfile || selectedProfile.puzzleItemIds.length !== NEW_SKILL_PUZZLE_SLOT_COUNT) {
-      throw new RangeError("198 selected profile requires exactly seven puzzle item ids");
-    }
-  }
+  // unresolved. A missing snapshot writes seven empty puzzle slots, which
+  // keeps packet-only callers useful.
+  const selectedProfile = snapshot?.profiles[snapshot.selectedProfile];
   p.u8(5);
   for (let i = 0; i < 7; i++) {
-    const itemId = selectedProfile?.puzzleItemIds[i] ?? 0;
-    requireNewSkillPuzzleId(itemId, i, 198);
-    p.s32(itemId);
+    p.s32(selectedProfile?.puzzleItemIds[i] ?? 0);
   }
 
   return p.u16(0).s32(myInfo.gamePoints).u8(0);
@@ -96,7 +54,6 @@ export default function GL_MYINFO_ACK(
 
 /** The shared sub_523BF0 basic-data block used by 198 and 247. */
 export function writeMyInfoBasicData(packet: Packet, myInfo: MyInfo): Packet {
-  requireCharacterIndex("selected_char_index", myInfo.selectedCharIndex);
   const { stats } = myInfo;
   return packet
     .label("198 stats nickname must fit the native char[24] at CClientData+60")
@@ -152,7 +109,6 @@ export function writeMyInfoBasicData(packet: Packet, myInfo: MyInfo): Packet {
 }
 
 export function writeCharacterAppearance(packet: Packet, appearance: readonly number[]): Packet {
-  if (appearance.length > 12) throw new RangeError("appearance must have at most 12 values");
   for (let i = 0; i < 12; i++) {
     packet.u16(appearance[i] ?? 0);
   }

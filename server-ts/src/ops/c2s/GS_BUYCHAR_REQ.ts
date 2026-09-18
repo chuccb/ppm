@@ -23,5 +23,5 @@ export default function GS_BUYCHAR_REQ(r: Reader, connection: Connection): void 
     throw new RangeError(`310 expects exactly 6 x s32 (24 bytes), got ${r.remaining}`);
   }
   for (let i = 0; i < 6; i++) r.s32();
-  connection.reply("GS_BUYCHAR_ACK", 0);
+  connection.reply("GS_BUYCHAR_ACK");
 }

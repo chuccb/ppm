@@ -19,7 +19,6 @@ import { Packet } from "../../packet.ts";
 
 const CONTEXT_STRING_MAX_BYTES = 20; // native local char[21], including NUL
 export const FRIEND_NICKNAME_MAX_BYTES = 20; // sub_537F60 stride-21 slot, including NUL
-export const FRIEND_LIST_MAX_ENTRIES = 100; // native table cap 0x64
 
 export interface FriendListEntry {
   readonly nickname: string;
@@ -32,9 +31,6 @@ export default function GL_FRIEND_LIST_ACK(
   contextString = "",
   entries: readonly FriendListEntry[] = [],
 ): Packet {
-  if (entries.length > FRIEND_LIST_MAX_ENTRIES) {
-    throw new RangeError("434 friend list exceeds the native 100-row table");
-  }
   const p = new Packet(op)
     .u16(0) // native header; semantics unresolved
     .label("434 context string expected as per the native char[21] local")

@@ -12,9 +12,6 @@ export default function GG_GAMECENTER_GAME_START_OK_ACK(
   op: number,
   gameId: number,
 ): Packet {
-  if (!Number.isSafeInteger(gameId) || gameId < 0 || gameId > 0xffff) {
-    throw new RangeError("484 game_id must be a u16 raw value");
-  }
   return new Packet(op)
     .u16(gameId)
     .u8(1)

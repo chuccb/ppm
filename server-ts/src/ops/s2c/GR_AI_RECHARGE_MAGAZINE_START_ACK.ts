@@ -14,9 +14,5 @@ export default function GR_AI_RECHARGE_MAGAZINE_START_ACK(
   slot: number,
   team: number,
 ): Packet {
-  if (!Number.isSafeInteger(slot) || slot < 0 || slot > 0xff ||
-      !Number.isSafeInteger(team) || team < 0 || team > 0xff) {
-    throw new RangeError("925 slot/team must be u8");
-  }
   return new Packet(op).u8(slot).u8(team).u8(2);
 }

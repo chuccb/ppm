@@ -11,9 +11,6 @@
 
 import { Packet } from "../../packet.ts";
 
-export default function GS_BUYCHAR_ACK(op: number, status: 0 = 0): Packet {
-  if (status !== 0) {
-    throw new RangeError("311 status != 0 requires a purchase model this server does not provide");
-  }
-  return new Packet(op).u8(status).u8(0).s32(0).s32(0);
+export default function GS_BUYCHAR_ACK(op: number): Packet {
+  return new Packet(op).u8(0).u8(0).s32(0).s32(0);
 }

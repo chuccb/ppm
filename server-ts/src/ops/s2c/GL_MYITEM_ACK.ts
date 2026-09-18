@@ -23,20 +23,9 @@ export interface InvItem {
 }
 
 export default function GL_MYITEM_ACK(op: number, items: readonly InvItem[] = []): Packet {
-  if (items.length > 100) throw new RangeError("200 page cannot contain more than 100 items");
-
   const p = new Packet(op).u8(1).s32(0);
   for (const item of items) {
     // A negative slot is the native end-of-page sentinel, not a record value.
-    if (!Number.isSafeInteger(item.slot) || item.slot < 0 || item.slot > 0x7fff_ffff) {
-      throw new RangeError("200 inventory slot must be a non-negative s32");
-    }
-    // sub_535020 rejects zero before consulting itemdata.pat. Membership is
-    // intentionally not enforced here: the catalog proves client lookup only,
-    // not this server's ownership or grant authority.
-    if (!Number.isSafeInteger(item.itemId) || item.itemId <= 0 || item.itemId > 0x7fff_ffff) {
-      throw new RangeError("200 item_id must be a positive s32");
-    }
     // Native 200 reads both slots with sub_592AC0 (generic raw4), not the
     // typed sub_592B40 f32 reader. f32() here is only a byte-compatible
     // projection for the current number-based API.

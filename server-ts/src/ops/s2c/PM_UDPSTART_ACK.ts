@@ -55,38 +55,15 @@ export default function PM_UDPSTART_ACK(op: number, admission: Admission): Packe
     restrictionKdr = 0,
   } = admission;
 
-  if (!Number.isSafeInteger(result) || result < 0 || result > 0xff) {
-    throw new RangeError("144 result must fit u8");
-  }
-  if (typeof channelName !== "string") {
-    throw new TypeError("144 channel_name must be a string");
-  }
-  if (typeof rankRestricted !== "boolean") {
-    throw new TypeError("144 rank_restricted_server_flag must be boolean");
-  }
-  if (channelName.length > CHANNEL_NAME_MAX_BYTES) {
-    throw new RangeError(`channel name longer than ${CHANNEL_NAME_MAX_BYTES} bytes`);
-  }
-  if (!Number.isSafeInteger(dailyLoginRewardPg) || dailyLoginRewardPg < -0x8000_0000 || dailyLoginRewardPg > 0x7fff_ffff) {
-    throw new RangeError("144 daily_login_reward_pg must fit s32");
-  }
-  if (!Number.isSafeInteger(restrictionLevel) || restrictionLevel < -0x8000_0000 || restrictionLevel > 0x7fff_ffff) {
-    throw new RangeError("144 channel_restriction_level must fit s32");
-  }
-  const wireRestrictionKdr = Math.fround(restrictionKdr);
-  if (!Number.isFinite(wireRestrictionKdr)) {
-    throw new RangeError("144 channel_restriction_kdr must be finite f32");
-  }
-
   return new Packet(op)
     .u8(result)
     .u8(rankRestricted ? 1 : 0)
     .s32(dailyLoginRewardPg)
-    .str(channelName)
+    .strMax(channelName, CHANNEL_NAME_MAX_BYTES)
     .s32(0) // read then unused
     .s32(0) // read then unused
     .s32(restrictionLevel)
-    .f32(wireRestrictionKdr)
+    .f32(restrictionKdr)
     .u32(0) // client_request_context: echoed into later requests, meaning unproven
     .u8(0); // has_net_cafe_info: 0 = omit the trailing block
 }

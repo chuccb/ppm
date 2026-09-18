@@ -24,5 +24,5 @@ export default function GR_START_VOTING_REQ(r: Reader, connection: Connection): 
   r.s32(); // target_slot
   r.s32(); // reason
   r.s32(); // initiator_slot
-  connection.reply("GR_START_VOTING_ACK", 0);
+  connection.reply("GR_START_VOTING_ACK");
 }

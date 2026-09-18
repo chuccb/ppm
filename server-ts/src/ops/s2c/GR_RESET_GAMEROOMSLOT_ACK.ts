@@ -12,9 +12,6 @@
 
 import { Packet } from "../../packet.ts";
 
-export default function GR_RESET_GAMEROOMSLOT_ACK(op: number, count: 0 = 0): Packet {
-  if (count !== 0) {
-    throw new RangeError("945 with count > 0 needs slot entries this server cannot fabricate");
-  }
-  return new Packet(op).u8(count);
+export default function GR_RESET_GAMEROOMSLOT_ACK(op: number): Packet {
+  return new Packet(op).u8(0);
 }

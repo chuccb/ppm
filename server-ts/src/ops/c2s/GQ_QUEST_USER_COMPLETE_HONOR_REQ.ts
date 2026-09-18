@@ -21,5 +21,5 @@ export default function GQ_QUEST_USER_COMPLETE_HONOR_REQ(r: Reader, connection: 
     throw new RangeError(`878 expects exactly 1 byte (u8 flag), got ${r.remaining}`);
   }
   r.u8();
-  connection.reply("GQ_QUEST_USER_COMPLETE_HONOR_ACK", 1);
+  connection.reply("GQ_QUEST_USER_COMPLETE_HONOR_ACK");
 }

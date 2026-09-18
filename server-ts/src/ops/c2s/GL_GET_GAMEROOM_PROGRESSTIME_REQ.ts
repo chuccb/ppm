@@ -24,5 +24,5 @@ export default function GL_GET_GAMEROOM_PROGRESSTIME_REQ(r: Reader, connection: 
     throw new RangeError(`485 expects exactly 1 byte (u8 room_no), got ${r.remaining}`);
   }
   r.u8(); // room_no
-  connection.reply("GL_GET_GAMEROOM_PROGRESSTIME_ACK", 3);
+  connection.reply("GL_GET_GAMEROOM_PROGRESSTIME_ACK");
 }

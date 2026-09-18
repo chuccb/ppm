@@ -11,9 +11,6 @@
 
 import { Packet } from "../../packet.ts";
 
-export default function GL_RACKINGWEB_TOKEN_ACK(op: number, hasToken: 0 = 0): Packet {
-  if (hasToken !== 0) {
-    throw new RangeError("788 non-zero hasToken requires a token model this server does not provide");
-  }
-  return new Packet(op).u8(hasToken);
+export default function GL_RACKINGWEB_TOKEN_ACK(op: number): Packet {
+  return new Packet(op).u8(0);
 }

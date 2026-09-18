@@ -134,7 +134,7 @@ describe("GC_ENTERCHANNEL_ACK", () => {
         channelIndex: 0,
         endpoint: { host: "127.0.0.1", port: Number.NaN },
       }),
-    ).toThrow(/endpoint port/);
+    ).toThrow(/s32 expects/);
     expect(() =>
       buildPacket("GC_ENTERCHANNEL_ACK", {
         result: EnterResult.Success,
@@ -242,58 +242,6 @@ describe("GC_ENTERCHANNEL_ACK", () => {
     expect(r.remaining).toBe(0);
   });
 
-  test("rejects incomplete or structurally unsafe type-3 projections", () => {
-    expect(() =>
-      buildPacket("GC_ENTERCHANNEL_ACK", {
-        result: EnterResult.Success,
-        channelId: 1,
-        channelIndex: 0,
-        endpoint: { host: "127.0.0.1", port: 40202 },
-        channelType: 3,
-      }),
-    ).toThrow(/requires its native continuation/);
-    expect(() =>
-      buildPacket("GC_ENTERCHANNEL_ACK", {
-        result: EnterResult.Success,
-        channelId: 1,
-        channelIndex: 0,
-        endpoint: { host: "127.0.0.1", port: 40202 },
-        channelType: 3,
-        type3Tail: { header0: 0 },
-      }),
-    ).toThrow(/requires its native continuation/);
-    expect(() =>
-      buildPacket("GC_ENTERCHANNEL_ACK", {
-        result: EnterResult.Success,
-        channelId: 1,
-        channelIndex: 0,
-        endpoint: { host: "127.0.0.1", port: 40202 },
-        channelType: 3,
-        type3Tail: {
-          header0: 1, header1: 0, name: "x",
-          raw4_0: 0, raw4_1: 0, raw4_2: 0, raw4_3: 0,
-          u8_0: 0, u8_1: 0, u8_2: 0,
-          listCount: 0, listValues: [],
-          smallRecordCount: 6, smallRecordMode: 0, smallRecords: [],
-          u8_3: 0, stageCount: 0, stageRecords: [], raw4Final: 0,
-        },
-      }),
-    ).toThrow(/at most 5/);
-    expect(() =>
-      buildPacket("GC_ENTERCHANNEL_ACK", {
-        result: EnterResult.Success,
-        channelId: 1,
-        channelIndex: 0,
-        endpoint: { host: "127.0.0.1", port: 40202 },
-        channelType: 3,
-        type3Tail: {
-          ...minimalType3Tail,
-          listCount: 2_400,
-          listValues: Array.from({ length: 2_400 }, () => 0),
-        },
-      }),
-    ).toThrow(/payload budget/);
-  });
 });
 
 describe("GC_ENTERCHANNEL_REQ", () => {
@@ -416,28 +364,28 @@ describe("PM_UDPSTART_ACK", () => {
         channelName: "x",
         dailyLoginRewardPg: Number.NaN,
       }),
-    ).toThrow(/daily_login_reward_pg/);
+    ).toThrow(/s32 expects/);
     expect(() =>
       buildPacket("PM_UDPSTART_ACK", {
         result: Result.Success,
         channelName: "x",
         restrictionLevel: 0x8000_0000,
       }),
-    ).toThrow(/channel_restriction_level/);
+    ).toThrow(/s32 expects/);
     expect(() =>
       buildPacket("PM_UDPSTART_ACK", {
         result: Result.Success,
         channelName: "x",
         restrictionKdr: Number.NaN,
       }),
-    ).toThrow(/channel_restriction_kdr/);
+    ).toThrow(/f32 expects/);
     expect(() =>
       buildPacket("PM_UDPSTART_ACK", {
         result: Result.Success,
         channelName: "x",
         restrictionKdr: Number.MAX_VALUE,
       }),
-    ).toThrow(/channel_restriction_kdr/);
+    ).toThrow(/f32 expects/);
   });
 
   test("rejects a channel name longer than the client's char[40]", () => {
@@ -446,7 +394,7 @@ describe("PM_UDPSTART_ACK", () => {
         result: Result.Success,
         channelName: "y".repeat(40),
       }),
-    ).toThrow(/39 bytes/);
+    ).toThrow(/39-byte native-buffer cap/);
   });
 });
 

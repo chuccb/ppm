@@ -126,7 +126,6 @@ export default function GL_LOGIN_ACK(op: number, outcome: number | Success): Pac
   }
 
   const { userNo, servers, n100 = 0, rawExtension } = outcome;
-  if (servers.length > 0x7fff) throw new RangeError("681 server_count must fit s16");
 
   const p = new Packet(op)
     .s32(Result.Success)
@@ -165,10 +164,7 @@ export default function GL_LOGIN_ACK(op: number, outcome: number | Success): Pac
       }
       p.s16(group.maxUsers);
       if (group.maxUsers <= 0) continue;
-      const channel = group.channel;
-      if (channel === undefined) {
-        throw new RangeError("681 positive channel group needs a channel body");
-      }
+      const channel = group.channel!;
       p.u8(channel.type);
       p.label("681 channel name expected as per the native char[50]").strMax(channel.name, MAX_CHANNEL_NAME_BYTES);
       p.s16(channel.currentUsers);

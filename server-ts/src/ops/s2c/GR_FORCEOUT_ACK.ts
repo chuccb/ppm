@@ -11,9 +11,6 @@
 
 import { Packet } from "../../packet.ts";
 
-export default function GR_FORCEOUT_ACK(op: number, status: 0 = 0): Packet {
-  if (status !== 0) {
-    throw new RangeError("132 status != 0 requires a room model this server does not provide");
-  }
-  return new Packet(op).u8(status);
+export default function GR_FORCEOUT_ACK(op: number): Packet {
+  return new Packet(op).u8(0);
 }

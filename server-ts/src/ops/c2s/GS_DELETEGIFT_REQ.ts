@@ -23,5 +23,5 @@ export default function GS_DELETEGIFT_REQ(r: Reader, connection: Connection): vo
   }
   r.s32(); // gift_uid
   r.s32(); // item_id
-  connection.reply("GS_DELETEGIFT_ACK", 0);
+  connection.reply("GS_DELETEGIFT_ACK");
 }

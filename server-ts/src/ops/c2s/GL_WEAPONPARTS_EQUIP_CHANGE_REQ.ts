@@ -32,5 +32,5 @@ export default function GL_WEAPONPARTS_EQUIP_CHANGE_REQ(r: Reader, connection: C
   r.s32(); // raw1
   r.s32(); // raw2
   if (raw0 === 2) r.s32(); // raw3
-  connection.reply("GL_WEAPONPARTS_EQUIP_CHANGE_ACK", 1);
+  connection.reply("GL_WEAPONPARTS_EQUIP_CHANGE_ACK");
 }

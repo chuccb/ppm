@@ -20,18 +20,6 @@
 
 import { Packet } from "../../packet.ts";
 
-/** sub_67D7D0 low bound: nothing below 16 can ever be a UI consent event. */
-const FEVER_EVENT_NONE = 0;
-
-export default function GR_AI_FEVER_START_ACK(
-  op: number,
-  status: 0 = 0,
-  flag = FEVER_EVENT_NONE,
-  durationMs = 0,
-  type = 0,
-): Packet {
-  if (status !== 0 || flag !== FEVER_EVENT_NONE || durationMs !== 0 || type !== 0) {
-    throw new RangeError("936 only the dormant declined frame (7 x 0) is safe without a fever model");
-  }
+export default function GR_AI_FEVER_START_ACK(op: number): Packet {
   return new Packet(op).u8(0).u8(0).s32(0).u8(0);
 }

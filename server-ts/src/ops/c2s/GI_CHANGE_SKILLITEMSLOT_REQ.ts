@@ -37,5 +37,5 @@ export default function GI_CHANGE_SKILLITEMSLOT_REQ(r: Reader, connection: Conne
     r.u8(); // raw2
     for (let i = 0; i < 7; i++) r.s32(); // accessory ids bulk
   }
-  connection.reply("GI_CHANGE_SKILLITEMSLOT_ACK", 0);
+  connection.reply("GI_CHANGE_SKILLITEMSLOT_ACK");
 }

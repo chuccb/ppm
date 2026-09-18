@@ -15,9 +15,6 @@ export default function GL_GAMECENTER_REC_ACK(
   op: number,
   gameId: number,
 ): Packet {
-  if (!Number.isSafeInteger(gameId) || gameId < 0 || gameId > 0xffff) {
-    throw new RangeError("473 game_id must be a u16 raw value");
-  }
   const p = new Packet(op)
     .u16(gameId)
     .s32(0)      // high_score

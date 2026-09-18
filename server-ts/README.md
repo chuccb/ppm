@@ -38,10 +38,15 @@ src/store.ts         bun:sqlite 上的帳號
 src/admission.ts     登入連線 → 頻道連線的一次性 handoff（IP＋回聲值比對）
 src/connection.ts    一條 TCP 連線：分段重組、存活偵測、dispatch、Bun.listen
 src/udp.ts           有 native 來源佐證的 private UDP opcode 19 → 回空 20
-src/new-skill-catalog.ts  GL_MYINFO_ACK 用的原生 new-skill 品項目錄成員判定
+src/new-skill-catalog.ts  itemdata.pat 生成的原生 new-skill 品項目錄（資料模組；未來 store/quest 層的檢核來源）
 src/ops/registry.ts  檔名 → opcode，以及具型別的 build() / handlerFor()
 src/ops/c2s/         客戶端送給我們的 packet
 src/ops/s2c/         我們送給客戶端的 packet
+
+分層準則（2026-09-19 定案）：s2c 模組【只負責序列化】——零 throw、零驗證，
+值域由 packet.ts 的 typed writer（u8/s16/s32/f32/strMax…）在寫入點把關，
+其餘一律由上游（c2s handler／store／config）保證；native 文法上限以
+strMax 常數或常數本體（固定 arm）呈現，不殘留 require 式守衛。
 src/main.ts          進入點
 ```
 

@@ -21,5 +21,5 @@ export default function GR_FORCEOUT_REQ(r: Reader, connection: Connection): void
     throw new RangeError(`131 expects exactly 1 byte (u8 target_slot), got ${r.remaining}`);
   }
   r.u8(); // target_slot echoes nowhere: status 0 never re-reads it
-  connection.reply("GR_FORCEOUT_ACK", 0);
+  connection.reply("GR_FORCEOUT_ACK");
 }

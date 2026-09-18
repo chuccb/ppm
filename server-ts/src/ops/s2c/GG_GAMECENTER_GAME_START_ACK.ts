@@ -13,11 +13,5 @@ export default function GG_GAMECENTER_GAME_START_ACK(
   gameId: number,
   stage: number,
 ): Packet {
-  if (!Number.isSafeInteger(gameId) || gameId < -0x8000 || gameId > 0x7fff) {
-    throw new RangeError("475 game_id must fit s16");
-  }
-  if (!Number.isSafeInteger(stage) || stage < 0 || stage > 0xff) {
-    throw new RangeError("475 stage must be a u8");
-  }
   return new Packet(op).u8(1).s16(gameId).u8(stage);
 }

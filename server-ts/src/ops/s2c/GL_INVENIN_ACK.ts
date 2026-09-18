@@ -8,12 +8,7 @@
  */
 
 import { Packet } from "../../packet.ts";
-import { requireNewSkillPuzzleId } from "./GL_MYINFO_ACK.ts";
-import {
-  NEW_SKILL_PROFILE_COUNT,
-  NEW_SKILL_PUZZLE_SLOT_COUNT,
-  type NewSkillProfileSnapshot,
-} from "../../store.ts";
+import { type NewSkillProfileSnapshot } from "../../store.ts";
 
 export default function GL_INVENIN_ACK(
   op: number,
@@ -21,17 +16,6 @@ export default function GL_INVENIN_ACK(
   contextRaw: number,
   snapshot: NewSkillProfileSnapshot,
 ): Packet {
-  // The Store self-user id is a positive s32 (TS-side identity convention).
-  if (!Number.isSafeInteger(uid) || uid <= 0) {
-    throw new RangeError("255 uid must be a positive s32");
-  }
-  if (!Number.isSafeInteger(snapshot.selectedProfile) || snapshot.selectedProfile >= NEW_SKILL_PROFILE_COUNT) {
-    throw new RangeError("255 selected profile must be an integer in 0..4");
-  }
-  if (snapshot.profiles.length !== NEW_SKILL_PROFILE_COUNT) {
-    throw new RangeError("255 requires exactly five NewSkill profiles");
-  }
-
   const p = new Packet(op)
     .u8(1) // mode 1: local user snapshot
     .s32(uid)
@@ -40,13 +24,9 @@ export default function GL_INVENIN_ACK(
     .u8(snapshot.selectedProfile);
 
   for (const profile of snapshot.profiles) {
-    if (profile.puzzleItemIds.length !== NEW_SKILL_PUZZLE_SLOT_COUNT) {
-      throw new RangeError("255 profile requires exactly seven puzzle item ids");
-    }
-    profile.puzzleItemIds.forEach((itemId, slot) => {
-      requireNewSkillPuzzleId(itemId, slot, 255);
+    for (const itemId of profile.puzzleItemIds) {
       p.s32(itemId);
-    });
+    }
     p.s32(profile.expiresAtPackedMinute);
   }
   return p;

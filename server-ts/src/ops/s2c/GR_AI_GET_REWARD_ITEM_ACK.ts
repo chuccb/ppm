@@ -13,8 +13,5 @@ export default function GR_AI_GET_REWARD_ITEM_ACK(
   op: number,
   idx: number,
 ): Packet {
-  if (!Number.isSafeInteger(idx) || idx < 0 || idx > 0xff) {
-    throw new RangeError("919 idx must be a u8");
-  }
   return new Packet(op).u8(idx).u8(1).u8(0xff);
 }

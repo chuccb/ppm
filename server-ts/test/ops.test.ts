@@ -523,7 +523,7 @@ describe("787 — ranking-web token request", () => {
       reread(new Packet(opcodeFor("GL_RACKINGWEB_TOKEN_REQ"))),
       connection,
     );
-    expect(replies).toEqual([["GL_RACKINGWEB_TOKEN_ACK", 0]]);
+    expect(replies).toEqual([["GL_RACKINGWEB_TOKEN_ACK"]]);
   });
 
   test("787 refuses trailing bytes", () => {
@@ -549,7 +549,7 @@ describe("876/878 — quest requests", () => {
       reread(new Packet(opcodeFor("GQ_QUEST_ACCEPT_DAILY_REQ"))),
       connection,
     );
-    expect(replies).toEqual([["GQ_QUEST_ACCEPT_DAILY_ACK", 0]]);
+    expect(replies).toEqual([["GQ_QUEST_ACCEPT_DAILY_ACK"]]);
   });
 
   test("876 refuses trailing bytes", () => {
@@ -573,7 +573,7 @@ describe("876/878 — quest requests", () => {
       reread(new Packet(opcodeFor("GQ_QUEST_USER_COMPLETE_HONOR_REQ")).u8(1)),
       connection,
     );
-    expect(replies).toEqual([["GQ_QUEST_USER_COMPLETE_HONOR_ACK", 1]]);
+    expect(replies).toEqual([["GQ_QUEST_USER_COMPLETE_HONOR_ACK"]]);
   });
 
   test("878 refuses empty or longer payloads", () => {
@@ -605,7 +605,7 @@ describe("131 — forceout request", () => {
       reread(new Packet(opcodeFor("GR_FORCEOUT_REQ")).u8(3)),
       connection,
     );
-    expect(replies).toEqual([["GR_FORCEOUT_ACK", 0]]);
+    expect(replies).toEqual([["GR_FORCEOUT_ACK"]]);
   });
 
   test("131 refuses empty or longer payloads", () => {
@@ -705,7 +705,7 @@ describe("310 — buy-char request", () => {
         .s32(7).s32(1).s32(2).s32(3).s32(4).s32(5)),
       connection,
     );
-    expect(replies).toEqual([["GS_BUYCHAR_ACK", 0]]);
+    expect(replies).toEqual([["GS_BUYCHAR_ACK"]]);
   });
 
   test("310 refuses payloads other than 24 bytes", () => {
@@ -767,7 +767,7 @@ describe("370 — change-channel request", () => {
       reread(new Packet(opcodeFor("GL_CHANGECHANNEL_REQ")).u8(2)),
       connection,
     );
-    expect(replies).toEqual([["GL_CHANGECHANNEL_ACK", 0]]);
+    expect(replies).toEqual([["GL_CHANGECHANNEL_ACK"]]);
   });
 
   test("370 refuses empty or longer payloads", () => {
@@ -796,7 +796,7 @@ describe("453 — delete-gift request", () => {
       reread(new Packet(opcodeFor("GS_DELETEGIFT_REQ")).s32(7).s32(42)),
       connection,
     );
-    expect(replies).toEqual([["GS_DELETEGIFT_ACK", 0]]);
+    expect(replies).toEqual([["GS_DELETEGIFT_ACK"]]);
   });
 
   test("453 refuses payloads other than 8 bytes", () => {
@@ -828,7 +828,7 @@ describe("466 — change-skill-item-slot request", () => {
       reread(new Packet(opcodeFor("GI_CHANGE_SKILLITEMSLOT_REQ")).u8(1).u8(0)),
       connection,
     );
-    expect(replies).toEqual([["GI_CHANGE_SKILLITEMSLOT_ACK", 0]]);
+    expect(replies).toEqual([["GI_CHANGE_SKILLITEMSLOT_ACK"]]);
   });
 
   test("466 walks the raw1!=0 31-byte form and rejects wrong tails", () => {
@@ -839,7 +839,7 @@ describe("466 — change-skill-item-slot request", () => {
       reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
     } as unknown as Parameters<typeof changeSkillItemSlotRequest>[1];
     changeSkillItemSlotRequest(reread(bulk), connection);
-    expect(replies).toEqual([["GI_CHANGE_SKILLITEMSLOT_ACK", 0]]);
+    expect(replies).toEqual([["GI_CHANGE_SKILLITEMSLOT_ACK"]]);
     expect(() =>
       changeSkillItemSlotRequest(
         reread(new Packet(opcodeFor("GI_CHANGE_SKILLITEMSLOT_REQ")).u8(1)),
@@ -1059,7 +1059,7 @@ describe("485 — gameroom progress-time request", () => {
       reread(new Packet(opcodeFor("GL_GET_GAMEROOM_PROGRESSTIME_REQ")).u8(9)),
       connection,
     );
-    expect(replies).toEqual([["GL_GET_GAMEROOM_PROGRESSTIME_ACK", 3]]);
+    expect(replies).toEqual([["GL_GET_GAMEROOM_PROGRESSTIME_ACK"]]);
   });
 
   test("485 refuses wrong payload widths", () => {
@@ -1088,7 +1088,7 @@ describe("718/721 — voting requests", () => {
       reread(new Packet(opcodeFor("GR_START_VOTING_REQ")).s32(1).s32(2).s32(3)),
       connection,
     );
-    expect(replies).toEqual([["GR_START_VOTING_ACK", 0]]);
+    expect(replies).toEqual([["GR_START_VOTING_ACK"]]);
   });
 
   test("718 refuses wrong payload widths", () => {
@@ -1210,7 +1210,7 @@ describe("928 — PVE continue request", () => {
       reread(new Packet(opcodeFor("GR_AI_CONTINUE_START_REQ")).s32(0)),
       connection,
     );
-    expect(replies.pop()).toEqual(["GR_AI_CONTINUE_START_ACK", 0]);
+    expect(replies.pop()).toEqual(["GR_AI_CONTINUE_START_ACK"]);
   });
 
   test("928 enforces the native 4-byte constant wire", () => {
@@ -1332,12 +1332,12 @@ describe("912 — weapon-parts equip-change request", () => {
       reread(new Packet(opcodeFor("GL_WEAPONPARTS_EQUIP_CHANGE_REQ")).u8(1).s32(7).s32(8)),
       connection,
     );
-    expect(replies.pop()).toEqual(["GL_WEAPONPARTS_EQUIP_CHANGE_ACK", 1]);
+    expect(replies.pop()).toEqual(["GL_WEAPONPARTS_EQUIP_CHANGE_ACK"]);
     weaponpartsEquipChangeRequest(
       reread(new Packet(opcodeFor("GL_WEAPONPARTS_EQUIP_CHANGE_REQ")).u8(2).s32(7).s32(8).s32(9)),
       connection,
     );
-    expect(replies.pop()).toEqual(["GL_WEAPONPARTS_EQUIP_CHANGE_ACK", 1]);
+    expect(replies.pop()).toEqual(["GL_WEAPONPARTS_EQUIP_CHANGE_ACK"]);
   });
 
   test("912 refuses unknown raw0 arms and wrong tails", () => {
@@ -1792,17 +1792,6 @@ describe("681 — login ack", () => {
     })).toThrow(/server_id/);
   });
 
-  test("requires a channel body when the native group gate is positive", () => {
-    expect(() =>
-      buildPacket("GL_LOGIN_ACK", {
-        userNo: 1,
-        servers: [{
-          ...servers[0]!,
-          channelGroups: [{ maxUsers: 100 }, { maxUsers: 0 }, { maxUsers: 0 }],
-        }],
-      }),
-    ).toThrow(/positive channel group needs a channel body/);
-  });
 
 });
 

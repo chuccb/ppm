@@ -22,5 +22,5 @@ import type { Reader } from "../../packet.ts";
 
 export default function GL_RACKINGWEB_TOKEN_REQ(r: Reader, connection: Connection): void {
   if (r.remaining !== 0) throw new RangeError(`${r.remaining} trailing bytes in 787`);
-  connection.reply("GL_RACKINGWEB_TOKEN_ACK", 0);
+  connection.reply("GL_RACKINGWEB_TOKEN_ACK");
 }

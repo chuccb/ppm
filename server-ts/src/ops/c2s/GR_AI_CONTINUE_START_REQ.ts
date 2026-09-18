@@ -23,5 +23,5 @@ export default function GR_AI_CONTINUE_START_REQ(r: Reader, connection: Connecti
   if (continueCount !== 0) {
     throw new RangeError(`928 native builder always sends continue_count 0, got ${continueCount}`);
   }
-  connection.reply("GR_AI_CONTINUE_START_ACK", 0);
+  connection.reply("GR_AI_CONTINUE_START_ACK");
 }

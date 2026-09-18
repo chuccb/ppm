@@ -26,7 +26,6 @@ export const MSG_KEY_MAX_BYTES = 19; // sub_5378C0 stride-20 slot, including NUL
 export const MSG_NAME_MAX_BYTES = 20; // stride-21 slot, including NUL
 export const MSG_BODY_MAX_BYTES = 200; // stride-201 slot, including NUL
 export const MSG_SELECTOR_MAX_BYTES = 1; // stride-2 slot, including NUL
-export const MSG_LIST_MAX_ENTRIES = 10; // native table cap 0xA
 
 export interface MsgListEntry {
   /** field_s1: key proven to drive the 421/423 mark requests. */
@@ -50,9 +49,6 @@ export default function GL_MSG_RECVLIST_ACK(
   contextString = "",
   entries: readonly MsgListEntry[] = [],
 ): Packet {
-  if (entries.length > MSG_LIST_MAX_ENTRIES) {
-    throw new RangeError("426 message list exceeds the native 10-row table");
-  }
   const p = new Packet(op)
     .u16(0) // native header; semantics unresolved
     .label("426 context string expected as per the native char[21] local")

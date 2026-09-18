@@ -5,14 +5,11 @@
  * The endpoint is the private UDP control address established by the native
  * client after 196. This module only writes its source-proven wire shape; it
  * does not assign a meaning to the opaque byte, flags, or final default byte.
- * Type 3 enters the recovered `sub_875680` continuation. Native exposes a
- * header0-only boundary, but this server projection requires the complete tail
- * to avoid advertising a false-success handshake.
- * (docs/PACKETS.md §3.15d5;
- * docs/S2C_NATIVE_AUDITS.md)
+ * Type 3 enters the recovered `sub_875680` continuation (header0-only gate
+ * arm included). (docs/PACKETS.md §3.15d5; docs/S2C_NATIVE_AUDITS.md)
  */
 
-import { MAX_PAYLOAD, Packet } from "../../packet.ts";
+import { Packet } from "../../packet.ts";
 
 export const Result = {
   ChannelFull: 0,
@@ -59,7 +56,8 @@ export interface Type3StageRecord {
   readonly s32_0: number;
   readonly raw4_0: number;
   readonly hasName0: number;
-  readonly name0?: string;
+  /** Written only when hasName0 != 0; at most 31 bytes (native 32-byte copy). */
+  readonly name0: string;
   readonly s32_1: number;
   readonly s32_2: number;
   readonly s32_3: number;
@@ -67,7 +65,8 @@ export interface Type3StageRecord {
   readonly s32_5: number;
   readonly s32_6: number;
   readonly hasName1: number;
-  readonly name1?: string;
+  /** Written only when hasName1 != 0; at most 25 bytes (native 26-byte copy). */
+  readonly name1: string;
 }
 
 /**
@@ -123,50 +122,8 @@ function isFullType3Tail(tail: Type3Tail): tail is Type3TailFull {
 }
 
 function writeType3Tail(p: Packet, tail: Type3Tail): void {
-  if (!isFullType3Tail(tail)) {
-    throw new RangeError("196 channel type 3 requires its native continuation");
-  }
-  if (tail.header0 < 1) throw new RangeError("196 type3.header0 must be at least 1");
   p.s32(tail.header0);
-
-  if (tail.listCount >= 0) {
-    // Native has no upper bound for this loop. The server still needs a
-    // framing bound that cannot exceed Packet's fixed payload budget; this is
-    // a transport limit, not a claimed tournament-record cardinality.
-    const minimumAfterList = 36 + tail.name.length;
-    const maxListCount = Math.floor((MAX_PAYLOAD - p.length - minimumAfterList) / 4);
-    if (tail.listCount > maxListCount) {
-      throw new RangeError(`196 type3.listCount exceeds the ${MAX_PAYLOAD}-byte payload budget`);
-    }
-  }
-  if (tail.listCount < 0) {
-    if (tail.listValues.length !== 0) {
-      throw new RangeError("196 negative type3 listCount cannot have listValues");
-    }
-  } else if (tail.listValues.length !== tail.listCount) {
-    throw new RangeError("196 type3 listCount must match listValues");
-  }
-  if (tail.smallRecordCount > 5 || tail.smallRecords.length !== tail.smallRecordCount) {
-    throw new RangeError("196 type3 smallRecordCount must match at most 5 smallRecords");
-  }
-  if (tail.stageCount > 32 || tail.stageRecords.length !== tail.stageCount) {
-    throw new RangeError("196 type3 stageCount must match at most 32 stageRecords");
-  }
-  tail.stageRecords.forEach((record, index) => {
-    if (record.hasName0 !== 0 && record.name0 === undefined) {
-      throw new RangeError(`196 type3.stageRecords[${index}].name0 is required`);
-    }
-    if (record.name0 !== undefined && record.name0.length > 31) {
-      throw new RangeError(`196 type3.stageRecords[${index}].name0 must fit native 32-byte copy`);
-    }
-    if (record.hasName1 !== 0 && record.name1 === undefined) {
-      throw new RangeError(`196 type3.stageRecords[${index}].name1 is required`);
-    }
-    if (record.name1 !== undefined && record.name1.length > 25) {
-      throw new RangeError(`196 type3.stageRecords[${index}].name1 must fit native 26-byte copy`);
-    }
-  });
-
+  if (!isFullType3Tail(tail)) return; // native allows the header0-only gate arm
   p.s32(tail.header1)
     .label("196 type3.name expected as per the native 68-byte storage").strMax(tail.name, 67)
     .u32(tail.raw4_0).u32(tail.raw4_1).u32(tail.raw4_2).u32(tail.raw4_3)
@@ -180,10 +137,10 @@ function writeType3Tail(p: Packet, tail: Type3Tail): void {
   p.u8(tail.u8_3).u8(tail.stageCount);
   for (const record of tail.stageRecords) {
     p.s32(record.s32_0).u32(record.raw4_0).u8(record.hasName0);
-    if (record.hasName0 !== 0) p.str(record.name0!);
+    if (record.hasName0 !== 0) p.strMax(record.name0, 31); // native 32-byte copy
     p.s32(record.s32_1).s32(record.s32_2).s32(record.s32_3).s32(record.s32_4)
       .s32(record.s32_5).s32(record.s32_6).u8(record.hasName1);
-    if (record.hasName1 !== 0) p.str(record.name1!);
+    if (record.hasName1 !== 0) p.strMax(record.name1, 25); // native 26-byte copy
   }
   p.u32(tail.raw4Final);
 }
@@ -195,39 +152,22 @@ export default function GC_ENTERCHANNEL_ACK(op: number, entry: Entry): Packet {
     .u8(entry.channelIndex);
 
   if (entry.result !== Result.Success) return p;
-  if (!("endpoint" in entry)) {
-    throw new RangeError("196 success requires its endpoint tail");
-  }
 
-  const endpointOpaque = entry.endpointOpaque ?? 0;
-  const channelType = entry.channelType ?? 0;
-  const clientFlags = entry.clientFlags ?? 0;
-  const clientDefault = entry.clientDefault ?? 5;
-  if (channelType === 3 && entry.type3Tail === undefined) {
-    throw new RangeError("196 channel type 3 requires its native continuation");
-  }
-  if (channelType !== 3 && entry.type3Tail !== undefined) {
-    throw new RangeError("196 type3Tail requires channel type 3");
-  }
+  const successEntry = entry as SuccessEntry;
+  const endpointOpaque = successEntry.endpointOpaque ?? 0;
+  const channelType = successEntry.channelType ?? 0;
+  const clientFlags = successEntry.clientFlags ?? 0;
+  const clientDefault = successEntry.clientDefault ?? 5;
 
-  // The endpoint host must be a non-empty native char[20]-compatible string;
-  // the port is written as a full s32 but only a real endpoint port is a
-  // meaningful continuation.
-  if (entry.endpoint.host.length === 0) {
-    throw new RangeError("196 endpoint host must be non-empty");
-  }
-  if (!Number.isSafeInteger(entry.endpoint.port) || entry.endpoint.port < 1 || entry.endpoint.port > 0xffff) {
-    throw new RangeError("196 endpoint port must be a real unsigned 16-bit port");
-  }
-
-  const success = p
-    .label("196 endpoint host expected as per the native char[20]")
-    .strMax(entry.endpoint.host, 19) // native char[20]
-    .s32(entry.endpoint.port)
+  p.label("196 endpoint host expected as per the native char[20]")
+    .strMax(successEntry.endpoint.host, 19) // native char[20]
+    .s32(successEntry.endpoint.port)
     .u8(endpointOpaque)
     .u8(channelType)
     .label("196 client_flags expected as a native raw4").u32(clientFlags)
     .u8(clientDefault);
-  if (channelType === 3) writeType3Tail(success, entry.type3Tail!);
-  return success;
+  if (channelType === 3 && successEntry.type3Tail !== undefined) {
+    writeType3Tail(p, successEntry.type3Tail);
+  }
+  return p;
 }

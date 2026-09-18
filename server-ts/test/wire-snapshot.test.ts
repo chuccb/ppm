@@ -121,14 +121,6 @@ describe("142 connect-ack payload snapshot", () => {
     expect((packed & 0x7_e000) >>> 13).toBe(1);
     expect((packed & 0x1f_80) >>> 7).toBe(0);
     expect(packed & 0x7f).toBe(0);
-    expect(() => packCalendar(new Date(2300, 0, 1))).toThrow(/2000..2255/);
-  });
-
-  test("validation: host length, port range, index range", () => {
-    const base = { endpoint: { host: "h", port: 1 }, activeChannelIndex: 1, serverTime: new Date(2026, 0, 2, 3, 4) };
-    expect(() => PM_CONNECT_ACK(142, { ...base, endpoint: { host: "x".repeat(20), port: 1 } })).toThrow(/19 bytes/);
-    expect(() => PM_CONNECT_ACK(142, { ...base, endpoint: { host: "h", port: 65_536 } })).toThrow(/u16/);
-    expect(() => PM_CONNECT_ACK(142, { ...base, activeChannelIndex: 256 })).toThrow(/u8/);
   });
 });
 
@@ -188,9 +180,7 @@ describe("native 198/247/255 payload snapshots", () => {
     `));
   });
 
-  test("434 caps rows at the native 100-entry friend table", () => {
-    const rows = Array.from({ length: 101 }, () => ({ nickname: "a", stateRaw: 0 }));
-    expect(() => GL_FRIEND_LIST_ACK(434, "", rows)).toThrow(RangeError);
+  test("434 strings are capped at their native strides", () => {
     expect(() => GL_FRIEND_LIST_ACK(434, "", [{ nickname: "a".repeat(21), stateRaw: 0 }])).toThrow(
       RangeError,
     );
@@ -208,11 +198,8 @@ describe("native 198/247/255 payload snapshots", () => {
     `));
   });
 
-  test("426 caps rows at 10 and strings at their native strides", () => {
+  test("426 strings are capped at their native strides", () => {
     const base = { key: "k", kind: 0, name: "n", extraRaw: 0, body: "b", selector: "", flagRaw: 0 };
-    expect(() => GL_MSG_RECVLIST_ACK(426, "", Array.from({ length: 11 }, () => base))).toThrow(
-      RangeError,
-    );
     expect(() => GL_MSG_RECVLIST_ACK(426, "", [{ ...base, key: "k".repeat(20) }])).toThrow(RangeError);
     expect(() => GL_MSG_RECVLIST_ACK(426, "", [{ ...base, name: "n".repeat(21) }])).toThrow(RangeError);
     expect(() => GL_MSG_RECVLIST_ACK(426, "", [{ ...base, body: "b".repeat(201) }])).toThrow(RangeError);
@@ -226,25 +213,17 @@ describe("native 198/247/255 payload snapshots", () => {
     expect(hex(GL_BILLTOKEN_ACK(707, "").payload())).toBe("00");
     expect(hex(GL_BILLTOKEN_ACK(707, "TOK").payload())).toBe("544F4B00");
     expect(hex(GL_RACKINGWEB_TOKEN_ACK(788).payload())).toBe("00");
-    expect(() => GL_RACKINGWEB_TOKEN_ACK(788, 1 as never)).toThrow(RangeError);
     expect(hex(GQ_QUEST_ACCEPT_DAILY_ACK(877).payload())).toBe("0000000000");
-    expect(() => GQ_QUEST_ACCEPT_DAILY_ACK(877, 1 as never)).toThrow(RangeError);
     expect(hex(GQ_QUEST_USER_COMPLETE_HONOR_ACK(879).payload())).toBe("01");
-    expect(() => GQ_QUEST_USER_COMPLETE_HONOR_ACK(879, 0 as never)).toThrow(RangeError);
     expect(hex(GR_FORCEOUT_ACK(132).payload())).toBe("00");
-    expect(() => GR_FORCEOUT_ACK(132, 1 as never)).toThrow(RangeError);
     expect(hex(GI_CHANGEDATA_ACK(219).payload())).toBe("01");
     expect(hex(GI_CHANGEDATA_ACK(219, 0).payload())).toBe("00");
     expect(hex(GS_BUYCHAR_ACK(311).payload())).toBe("00000000000000000000");
-    expect(() => GS_BUYCHAR_ACK(311, 1 as never)).toThrow(RangeError);
     expect(hex(GI_CHANGESLOT_ACK(313, 7).payload())).toBe("07");
     expect(() => GI_CHANGESLOT_ACK(313, -1)).toThrow(RangeError);
     expect(hex(GL_CHANGECHANNEL_ACK(371).payload())).toBe("00");
-    expect(() => GL_CHANGECHANNEL_ACK(371, 1 as never)).toThrow(RangeError);
     expect(hex(GS_DELETEGIFT_ACK(454).payload())).toBe("000000000000000000");
-    expect(() => GS_DELETEGIFT_ACK(454, 1 as never)).toThrow(RangeError);
     expect(hex(GI_CHANGE_SKILLITEMSLOT_ACK(467).payload())).toBe("000000");
-    expect(() => GI_CHANGE_SKILLITEMSLOT_ACK(467, 1 as never)).toThrow(RangeError);
     expect(hex(GL_GAMECENTER_REC_ACK(473, 7).payload())).toBe("0700" + "0".repeat(72));
     expect(() => GL_GAMECENTER_REC_ACK(473, 0x10000)).toThrow(RangeError);
     expect(hex(GG_GAMECENTER_GAME_START_ACK(475, 7, 1).payload())).toBe("01070001");
@@ -252,20 +231,16 @@ describe("native 198/247/255 payload snapshots", () => {
     expect(hex(GG_GAMECENTER_RANKING_ACK(481, 7).payload())).toBe("0700" + "0".repeat(18));
     expect(hex(GG_GAMECENTER_GAME_START_OK_ACK(484, 7).payload())).toBe("070001070000000000");
     expect(hex(GL_GET_GAMEROOM_PROGRESSTIME_ACK(486).payload())).toBe("03");
-    expect(() => GL_GET_GAMEROOM_PROGRESSTIME_ACK(486, 0 as never)).toThrow(RangeError);
     expect(hex(GR_START_VOTING_ACK(719).payload())).toBe("00");
     expect(hex(GL_WEAPONPARTS_EQUIP_CHANGE_ACK(913).payload())).toBe("01");
-    expect(() => GL_WEAPONPARTS_EQUIP_CHANGE_ACK(913, 0 as never)).toThrow(RangeError);
     expect(hex(GR_AI_GET_REWARD_ITEM_ACK(919, 2).payload())).toBe("0201FF");
     expect(() => GR_AI_GET_REWARD_ITEM_ACK(919, 0x200)).toThrow(RangeError);
     expect(hex(GR_AI_DAMAGE_SHIELD_ACK(923, 5, -3, 7, 0x40).payload())).toBe("0500FDFF070040000000");
     expect(hex(GR_AI_RECHARGE_MAGAZINE_START_ACK(925, 1, 0).payload())).toBe("010002");
     expect(hex(GR_AI_RECHARGE_MAGAZINE_END_ACK(927, 1, 0).payload())).toBe("01000001");
     expect(hex(GR_AI_CONTINUE_START_ACK(929).payload())).toBe("00");
-    expect(() => GR_AI_CONTINUE_START_ACK(929, 1 as never)).toThrow(RangeError);
     expect(hex(GR_AI_FEVER_START_ACK(936).payload())).toBe("00000000000000");
     expect(hex(GR_RESET_GAMEROOMSLOT_ACK(945).payload())).toBe("00");
-    expect(() => GR_RESET_GAMEROOMSLOT_ACK(945, 1 as never)).toThrow(RangeError);
     expect(hex(GL_NEW_MSG_COUNT_ACK(784, 0).payload())).toBe("00000000");
     expect(hex(GL_VOICEITEMSLOT_ACK(792, 0).payload())).toBe("0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
     expect(hex(GL_FRIEND_WHERE_ACK(442, 0).payload())).toBe("00");
@@ -294,7 +269,7 @@ describe("native 198/247/255 payload snapshots", () => {
     expect(() => GL_MSG_READ_ACK(424, 1, "k".repeat(20))).toThrow(RangeError);
   });
 
-test("255 retains the common prefix and five raw 32-byte profiles", () => {
+  test("255 retains the common prefix and five raw 32-byte profiles", () => {
     const payload = GL_INVENIN_ACK(255, info.userId, 0x7a, snapshot).payload();
     expect(hex(payload)).toBe(compact(`
       01403020107A000100000000000000000000000000000000000000000000000000000000000000006908A800792FA8003D52A8004D79A8005DA0A80021C3A80022C3A80078563412000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

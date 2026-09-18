@@ -26,5 +26,5 @@ export default function GL_CHANGECHANNEL_REQ(r: Reader, connection: Connection):
     throw new RangeError(`370 expects exactly 1 byte (u8 channel_id), got ${r.remaining}`);
   }
   r.u8(); // channel_id: no alternative channel exists in this deployment
-  connection.reply("GL_CHANGECHANNEL_ACK", 0);
+  connection.reply("GL_CHANGECHANNEL_ACK");
 }

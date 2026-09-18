@@ -14,9 +14,6 @@ export default function GG_GAMECENTER_GAME_END_ACK(
   op: number,
   gameId: number,
 ): Packet {
-  if (!Number.isSafeInteger(gameId) || gameId < -0x8000 || gameId > 0x7fff) {
-    throw new RangeError("477 game_id must fit s16");
-  }
   const p = new Packet(op).u16(gameId);
   for (let i = 0; i < 32; i++) p.u8(0); // raw32
   for (let i = 0; i < 44; i++) p.u8(0); // raw44

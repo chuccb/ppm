@@ -10,9 +10,6 @@
 
 import { Packet } from "../../packet.ts";
 
-export default function GS_DELETEGIFT_ACK(op: number, status: 0 = 0): Packet {
-  if (status !== 0) {
-    throw new RangeError("454 status = 1 requires a gift model this server does not provide");
-  }
-  return new Packet(op).u8(status).s32(0).s32(0);
+export default function GS_DELETEGIFT_ACK(op: number): Packet {
+  return new Packet(op).u8(0).s32(0).s32(0);
 }

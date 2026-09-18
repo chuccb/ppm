@@ -10,9 +10,6 @@
 
 import { Packet } from "../../packet.ts";
 
-export default function GL_WEAPONPARTS_EQUIP_CHANGE_ACK(op: number, errorRaw: 1 = 1): Packet {
-  if (errorRaw !== 1) {
-    throw new RangeError("913 errorRaw != 1 would enter the bounds-checked echo body this server cannot provide");
-  }
-  return new Packet(op).u8(errorRaw);
+export default function GL_WEAPONPARTS_EQUIP_CHANGE_ACK(op: number): Packet {
+  return new Packet(op).u8(1);
 }

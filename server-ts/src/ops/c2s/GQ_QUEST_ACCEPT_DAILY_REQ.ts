@@ -17,5 +17,5 @@ import type { Reader } from "../../packet.ts";
 
 export default function GQ_QUEST_ACCEPT_DAILY_REQ(r: Reader, connection: Connection): void {
   if (r.remaining !== 0) throw new RangeError(`${r.remaining} trailing bytes in 876`);
-  connection.reply("GQ_QUEST_ACCEPT_DAILY_ACK", 0);
+  connection.reply("GQ_QUEST_ACCEPT_DAILY_ACK");
 }

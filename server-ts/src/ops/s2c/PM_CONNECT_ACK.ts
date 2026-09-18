@@ -30,12 +30,8 @@ export interface ConnectInfo {
 
 /** `(year-2000)<<24 | month<<19 | day<<13 | hour<<7 | minute` — inverse of sub_534F20. */
 export function packCalendar(date: Date): number {
-  const yearDelta = date.getFullYear() - 2000;
-  if (yearDelta < 0 || yearDelta > 0xff) {
-    throw new RangeError(`142 packed_calendar year must be 2000..2255, got ${date.getFullYear()}`);
-  }
   return (
-    (yearDelta << 24) |
+    ((date.getFullYear() - 2000) << 24) |
     ((date.getMonth() + 1) << 19) |
     (date.getDate() << 13) |
     (date.getHours() << 7) |
@@ -44,26 +40,9 @@ export function packCalendar(date: Date): number {
 }
 
 export default function PM_CONNECT_ACK(op: number, info: ConnectInfo): Packet {
-  const { endpoint, activeChannelIndex, serverTime } = info;
-  if (typeof endpoint.host !== "string") {
-    throw new TypeError("142 endpoint_host must be a string");
-  }
-  if (endpoint.host.length > ENDPOINT_HOST_MAX_BYTES) {
-    throw new RangeError(`endpoint host longer than ${ENDPOINT_HOST_MAX_BYTES} bytes`);
-  }
-  if (!Number.isSafeInteger(endpoint.port) || endpoint.port < 0 || endpoint.port > 0xffff) {
-    throw new RangeError("142 endpoint_port must fit u16 (consumer keeps the low 16 bits)");
-  }
-  if (!Number.isSafeInteger(activeChannelIndex) || activeChannelIndex < 0 || activeChannelIndex > 0xff) {
-    throw new RangeError("142 active_channel_index must fit u8");
-  }
-  if (!(serverTime instanceof Date)) {
-    throw new TypeError("142 server_time must be a Date");
-  }
-
   return new Packet(op)
-    .str(endpoint.host)
-    .s32(endpoint.port)
-    .u8(activeChannelIndex)
-    .u32(packCalendar(serverTime));
+    .strMax(info.endpoint.host, ENDPOINT_HOST_MAX_BYTES)
+    .s32(info.endpoint.port)
+    .u8(info.activeChannelIndex)
+    .u32(packCalendar(info.serverTime));
 }
