@@ -1,0 +1,47 @@
+# AGENT_MEMORY.md — 原生審計記憶檔
+
+> **重建說明（2026-09-18）**：本檔前身累積 4253 行、但因從未被追蹤進 git
+> 而在 sandbox 重整時遺失；其實質內容早已逐日鏡像進 tracked docs
+> （S2C_NATIVE_AUDITS / SERVER_TS_EVIDENCE / WIKI_MECHANICS / PACKETS 各節）。
+> 本檔自此**納入 version control**，僅記「登入起逐步實作 walkthrough」的
+> 階段錨點與原生定位，詳表一律以 tracked 專項文件為準。
+
+## Walkthrough: Login 起逐步實作（2026-09-18）
+
+每 phase = 原生直接證據 → TS 模組/測試對位 → docs 記錄 → commit。
+
+| Phase | 範疇 | commit | 交付物 |
+|---|---|---|---|
+| 1 | admission 681 / TCP grooming / login trio | `b9f02d5f` | `SERVER_TS_EVIDENCE.md` 192 行 ledger;681 Result 表; server-list s16 定向;693 區段補正(greeting 型別/ v6 spin-lock) |
+| 2 | channel handshake 143/144/195/196 | `3fad207c` | 144 case 108=0x11D/result 0=0x42/3=0xA4+7082;196 result 6→0x3A6/8→0x3A7;`client_identity` String[24]=AccountName(PaperMan.exe.c:2241) |
+| 3 | 大廳同步序列（本節詳記） | `8e3c66e7` | PACKETS §3.15pre-3;原生命令行 197→199→834 定序 |
+
+### Phase 3 native 錨點（+748 scene 狀態機）
+
+- 十個 boot/on-demand C2S builder→fn 對照:
+  250=`sub_574080`、252=`sub_574120`、254=`sub_5741C0`、197=`sub_5704B0`、
+  199=`sub_570A00`、246=`sub_573DE0`、425=`sub_55A580`、433=`sub_55AF20`、
+  834=`sub_583120`。
+- caller 反查出土 **`sub_488C60` = lobby scene `*(this+748)` 狀態機**
+  (每 tick 一動作、UI-ready gate `sub_522460(dword_EE3950)` at 748∈{2,3}):
+  748=1 印 L"MYINFO"→**197**; 748=2 印 L"MYITEM"→**199**; 748=3 戰績快取
+  (`dword_EE8D40/44`→`sub_417E30()[7..10]`; [12]>=4 記 ROOMINFO 旗標)+
+  `sub_57E3F0()`; 748=4 →**834**; 748=5 `sub_407E00()`+`sub_91D730()`
+  (本地、無封包)→748=6 idle。**另路徑 `sub_49F90` 也送 834+199**
+  (資料重拉分支)。
+- 250 由 lobby scene UI 建構函數 (載 `ui\LOBBYMAIN.XML`、
+  `sub_537710(byte_EE8968, 2)`) 尾段送出 → 必為序列第一 wire 包;
+  251 死協定。198 consumer `sub_570550` 尾段**無條件送 433**。
+- 834 payload = raw4 `dword_F2A684` (144 之 client_request_context 原樣);
+  835 空 ACK,consumer `sub_5831D0` 僅 `sub_522440` UI 刷新。
+- on-demand (非 boot 鏈): 246(str 看他人)、425(s32 信箱)、252(scene 轉場
+  state:=3)、254(u8 requestContextRaw, state:=7)。
+- server-ts 對位: 七個 c2s + ACK 模組線形全部吻合,113 測試綠。
+
+### Phase 3.5 git 事故教訓
+
+sandbox 一度把分支 anchor 回 `fcbe08f4`(起點)而 worktree 保有 sprint
+內容 → commit 掛錯親代被拒。救援:`git reset --hard <remote tip>` 由遠端
+重建基線(先用 `git diff <tip> --name-status` 驗證差異=僅遺失檔案)、
+重放單一編輯再推。**開工先 `git log origin/<branch> -1` 核對親代鏈**;
+`node_modules` 在 reset 後要 `bun install` 才跑得動 tsc。
