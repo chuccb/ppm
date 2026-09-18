@@ -2684,6 +2684,8 @@ writer ⇒ 空 wire。788 有三訂閱點:`sub_407360` @6565 是**唯一讀 payl
 | 835 | `GL_DATA_RECV_COMPLETED_ACK` | `sub_5831D0` | S2C | `(空)` |
 | 370 | `GL_CHANGECHANNEL_REQ` | `sub_570030` | C2S | `u8 channel_id` |
 | 371 | `GL_CHANGECHANNEL_ACK` | `sub_570100` | S2C | `u8 status, u8 channel_id, str host_ip, s32 host_port, u8 extra`; client passes this independently to `sub_596E60` (secondary UDP address field). Its relation to successful-196 primary endpoint is **UNRESOLVED**; do not merge endpoint state. |
+
+**TS 對位 (2026-09-19)**: 370 builder `sub_570030` @165825(目標=現況不同才送):ctor→1B ⇒ wire=恰 `u8 channel_id`。371 consumer `sub_570100`:`u8 status`;**status==1** 才讀 `u8 channel_id, str host_ip, s32 host_port, u8 extra` → `sub_596E60` 副端點 + 橫幅 0x163;**0/2/3** = 橫幅 0xDA/0x148/0x328 + 重置待接 holder(wire 只 1B);**≥4** = 只靜默重置。TS 現行部署僅一個 channel(其餘 maxUsers=0)⇒ 無合法替代端點 ⇒ 恆回 `status=0`(wire `00`)。
 | 131 | `GR_FORCEOUT_REQ` | `sub_56EC10` | C2S | `u8 target_slot` (房主踢人) |
 | 132 | `GR_FORCEOUT_ACK` | `sub_56ECC0` | S2C | `u8 status(1), u8 target_slot` (廣播並移除成員) |
 

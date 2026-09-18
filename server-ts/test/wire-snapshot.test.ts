@@ -11,6 +11,7 @@ import GQ_QUEST_ACCEPT_DAILY_ACK from "../src/ops/s2c/GQ_QUEST_ACCEPT_DAILY_ACK.
 import GQ_QUEST_USER_COMPLETE_HONOR_ACK from "../src/ops/s2c/GQ_QUEST_USER_COMPLETE_HONOR_ACK.ts";
 import GI_CHANGEDATA_ACK from "../src/ops/s2c/GI_CHANGEDATA_ACK.ts";
 import GI_CHANGESLOT_ACK from "../src/ops/s2c/GI_CHANGESLOT_ACK.ts";
+import GL_CHANGECHANNEL_ACK from "../src/ops/s2c/GL_CHANGECHANNEL_ACK.ts";
 import GS_BUYCHAR_ACK from "../src/ops/s2c/GS_BUYCHAR_ACK.ts";
 import GR_FORCEOUT_ACK from "../src/ops/s2c/GR_FORCEOUT_ACK.ts";
 import GL_LEVEL_KILL_LIMIT_ACK from "../src/ops/s2c/GL_LEVEL_KILL_LIMIT_ACK.ts";
@@ -183,6 +184,8 @@ describe("native 198/247/255 payload snapshots", () => {
     expect(() => GS_BUYCHAR_ACK(311, 1 as never)).toThrow(RangeError);
     expect(hex(GI_CHANGESLOT_ACK(313, 7).payload())).toBe("07");
     expect(() => GI_CHANGESLOT_ACK(313, -1)).toThrow(RangeError);
+    expect(hex(GL_CHANGECHANNEL_ACK(371).payload())).toBe("00");
+    expect(() => GL_CHANGECHANNEL_ACK(371, 1 as never)).toThrow(RangeError);
     expect(hex(GL_NEW_MSG_COUNT_ACK(784, 0).payload())).toBe("00000000");
     expect(hex(GL_VOICEITEMSLOT_ACK(792, 0).payload())).toBe("0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
     expect(hex(GL_FRIEND_WHERE_ACK(442, 0).payload())).toBe("00");

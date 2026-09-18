@@ -24,6 +24,7 @@ import friendWhereRequest from "../src/ops/c2s/GL_FRIEND_WHERE_REQ.ts";
 import msgReadRequest from "../src/ops/c2s/GL_MSG_READ_REQ.ts";
 import billTokenRequest from "../src/ops/c2s/GL_BILLTOKEN_REQ.ts";
 import buyCharRequest from "../src/ops/c2s/GS_BUYCHAR_REQ.ts";
+import changeChannelRequest from "../src/ops/c2s/GL_CHANGECHANNEL_REQ.ts";
 import changeSlotRequest from "../src/ops/c2s/GI_CHANGESLOT_REQ.ts";
 import changeDataRequest from "../src/ops/c2s/GI_CHANGEDATA_REQ.ts";
 import forceoutRequest from "../src/ops/c2s/GR_FORCEOUT_REQ.ts";
@@ -681,6 +682,35 @@ describe("312 — change-slot request", () => {
   });
 });
 
+describe("370 — change-channel request", () => {
+  test("370 parses the u8 channel byte and replies status=0 (single-channel deployment)", () => {
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof changeChannelRequest>[1];
+    changeChannelRequest(
+      reread(new Packet(opcodeFor("GL_CHANGECHANNEL_REQ")).u8(2)),
+      connection,
+    );
+    expect(replies).toEqual([["GL_CHANGECHANNEL_ACK", 0]]);
+  });
+
+  test("370 refuses empty or longer payloads", () => {
+    const connection = {
+      reply: () => undefined,
+    } as unknown as Parameters<typeof changeChannelRequest>[1];
+    expect(() =>
+      changeChannelRequest(reread(new Packet(opcodeFor("GL_CHANGECHANNEL_REQ"))), connection),
+    ).toThrow(/370/);
+    expect(() =>
+      changeChannelRequest(
+        reread(new Packet(opcodeFor("GL_CHANGECHANNEL_REQ")).u8(2).u8(0)),
+        connection,
+      ),
+    ).toThrow(/370/);
+  });
+});
+
 describe("834 — data-recv-completed request", () => {
   test("consumes the propagated raw4 context and replies with an empty 835", () => {
     const replies: string[] = [];
@@ -1132,8 +1162,8 @@ describe("registry", () => {
   });
 
   test("the registry exposes both operation folders at startup", () => {
-    expect(summary()).toMatch(/^c2s 41 \(/);
-    expect(summary()).toMatch(/\), s2c 42 \(/);
+    expect(summary()).toMatch(/^c2s 42 \(/);
+    expect(summary()).toMatch(/\), s2c 43 \(/);
     expect(summary()).toContain("GL_LOGIN_ACK");
     expect(summary()).toContain("GL_LOGIN_REQ");
   });
