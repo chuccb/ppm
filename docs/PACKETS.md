@@ -2714,6 +2714,12 @@ else** ⇒ status=0 完全沉默;≠0 才再讀 `u8 target_slot`(room-view 時�
 | 221 | `GI_CHANGEWP_ACK` | `sub_5735F0` | S2C | `u8 count(4), 4×weapon_group` |
 | 312 | `GI_CHANGESLOT_REQ` | `sub_573270` | C2S | `u8 slot_no` |
 | 313 | `GI_CHANGESLOT_ACK` | `sub_573320` | S2C | `u8 slot_no` |
+
+**TS 對位 (2026-09-19)**: 312 builder `sub_573270` @167410:ctor→
+`sub_592920`(1B)→send ⇒ wire=恰 1B `u8 slot_no`。313 consumer
+`sub_573320` @167426 **完全不讀 body**(本體僅回傳 UI 刷新
+`sub_538470(byte_EE8968,a2,0)`)⇒ body 在解析面之下,TS 採 echo
+策略回同值。無 slot-store 模型。
 | 466 | `GI_CHANGE_SKILLITEMSLOT_REQ` | `sub_5738A0` | C2S | `u8 raw0,u8 raw1,[u8 raw2,7×raw4]`; raw1==0→2B, nonzero→31B; domain meanings remain UNRESOLVED. |
 | 467 | `GI_CHANGE_SKILLITEMSLOT_ACK` | `sub_573A70` | S2C | `u8 resultRaw, u8 unknownHeaderRaw, u8 count, count×{u8 profile, raw32}` |
 | 912 | `GL_WEAPONPARTS_EQUIP_CHANGE_REQ`| `sub_95AEF0`×3 | C2S | `u8 raw0,s32 raw1,s32 raw2`; raw0==2 appends `s32 raw3`; branch/domain meanings remain UNRESOLVED. |
