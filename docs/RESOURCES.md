@@ -2795,24 +2795,132 @@ Wiki 交叉（[シングルモード](https://wikiwiki.jp/paperman/シングル�
 - AiMulti 的 **bonus_char=8**（row 340，value 4000）超出 Wiki 七格表 —— PvE 新增第八種回饋，名稱為 Unknown（已查 Wiki 兩頁、無對應描述）。
 - Wiki 敵人別名「短剣ロボット／自爆ロボット」（情境「ロボットたちの反乱」）**無法對號到行索引**：itemdata 名稱為流水名、客戶端無別名表，行→世界觀名稱映射維持 UNRESOLVED。
 
-### 5d-26e. `ani_list.sco`：容器已解（8B 頭 + zlib → 256KB），索引語法殘段 Unknown
+### 5d-26e. `.mot` 格式與 `ani_list.sco`：b/l = 上下半身二半骨格（Fact）
 
-type0 的 9,332B 檔案 = `[00 00 04 00][6C 24 00 00]` 8B 頭＋zlib 串流，
-兩個 u32 LE 欄位＝**展開長 262,144** 與**壓縮長 9,324**（＝檔案−8）。
-展開為固定 262,144B 稀疏 u16 表
-（首個非零位元組 @8248，連續 22 個 `01 00`；947/1024 個 256B 區塊含非零）。
-複製目錄間 blob 大同（見 5d-26b）而巢狀 `type23/type19/` 的 .sco 與
-外層 type19 的 .sco 不同 blob ⇒ **sco 承載動作時序/索引而非貼圖/造型數據**。
-15 事件 `.mot` 與 sco 內 256KB 表的對應文法目前**殘段 Unknown**：
-exe 全文無 `ani_list` 字面值（載入走目錄枚舉器 `sub_717670` 家族，
-native 錨點 bot 動畫掃描 `L"character\\animations\\bot"` @554188；
-剩餘路徑：xref 該枚舉器回呼的 per-file handler）——**mot↔sco 議題自議程標記為「界線已標、未完」**。
+**`{b,l}_NNN_<event>.mot`**（3ds Max Biped 半身動畫）二進格式已定位主結構：
+
+```
+檔頭: [u32 幀數][u32 節點數]；後接逐節點通道塊
+（每塊前綴 [u32][FFFFFFFF 哨兵] + "Bip01…" 樹節點名 + 鍵列）
+例 b_000_die = 162f×19 節點、l_000_die = 265f×12 節點、
+b_000_base = 2f（T-pose 供 blend）、l_000_run_a = 35f 環狀。
+```
+
+**前綴語義定案（Fact）**：`b_` rig = **上半身 18 骨**（Bip01/Pelvis/Spine1-3/
+Neck/Head + L/R Clavicle·UpperArm·ForeArm·Hand·Finger0，**無腿**）；
+`l_` rig = **下半身 12 骨**（Bip01 + Footsteps 標記/Pelvis/Spine +
+L/R Thigh·Calf·Foot·Toe0，**無腕**）——與 `AI_Animation.xml` 的
+`<UP>`（→b_ 檔）／`<DOWN>`（→l_ 檔）兩段**完全對應**。
+每索引 15 事件 {base、idle_a-c、run_a-c、walk_a-c、ready、attack、
+die、air、cheer} × 2 半 = 30 檔；檔名大小寫 `.mot/.MOT` 於各索引目錄
+混寫（存量殘留），ANI 表所列名一律小寫，實檔存在性已全數核對。
+
+**bot↔mot 綁定的權威在 XML，不在 sco**：`AI_Animation.xml`（35 行 ×2 段）
+與 `AIMultiAnimation.xml`（78 行 ×2 段）的
+`<ANI index bot_index base idle1..3 run1..3 walk1..3 readyattack attack
+die crashjump victory/>` 把每個 `bot_type_index` 指到某套 b_/l_NNN 前綴。
+**回退全圖與 §5d-26b 普查完全同構**：
+anim 19 ← bot {19,20,31,32}（Boss2 紅忍者組）、anim 21 ← {21,22,33,34}、
+anim 24 ← {24..30, 330..336}（兩代運び屋共 14 行）、anim 3 ← {3,302..304}、
+anim 0 ← {0,300,341,342}、anim **25 ← {337,338,339}**（自爆三人組——
+其模型 blob 在 0..34 無本體正是因此）、anim **340 ← {340}**、
+anim 17/18 ← {17}/{18}（雙 Boss）。
+**死檔確認：`b_039_/l_039_` 30 檔無任何 ANI 引用**（本事料僅見於
+`b_000/…/b_025/…/b_340`）。
+⇒ `ani_list.sco`（8B 頭 = u32 展開長 262,144 + zlib）**不承載綁定**
+——同 blob 模型的 bot 可綁不同 anim 集（{1,2}、{3,19} 皆例證）——
+為模型本地查表；其 256KB 稀疏 u16 塊語法仍為 bounded Unknown
+（已查：exe 無 `ani_list` 字面值；枚舉器 `sub_717670` 家族 @554188。
+**.mot 本身骨架 `[u32 幀數][u32 節點數]` + Bip01 通道名已立**，
+sco 內容則保留 Unknown）。
 
 ### 5d-26f. 界線（延續）
 
-`BotPath.xml`／`AiMultiBotPath.xml`（spawnArea 座標）與
-`AI_Animation/AiMultiAnimation` 兩檔本輪未解剖，scope 外；
-敵體行為裁決（行為型 1..8 的執行語意）屬伺服端/runtime 腳手架，維持 UNRESOLVED。
+`AI_Animation` 兩檔本輪已解剖（見 5d-26e）；敵體行為裁決
+（行為型 1..8 的執行語意）屬伺服端/runtime 腳手架，維持 UNRESOLVED。
+`bonus_value` 單位語義僅 char2/char3 兩枚錨點（下節），char {1,4,5,6,7}
+逐項語義仍未解。
+
+### 5d-26g. 全行編戶完成（Fact）：observer.xml 圖標 ↔ 世界觀識別 ↔ 行為型語法
+
+#### minimap 圖標註冊鏈（三檔閉合）
+
+`BotEnemy.xml` 等檔的 `minimap_live_name`／`minimap_dead_name` 指向
+**`ui/observer.xml` 的 `<sprite>` 註冊表**（atlas＝`Extracted/ui/game/observer_01.dds`，
+1024×1024，每格 32×32）；native 以 `<image name filename>` →
+`<sprite name x y w h texture>` 兩段註冊（讀取 `L"name"`/`L"filename"` @294458）。
+**共用格**（多 name 同 x,y）：`BOT_Enemy_Face10..16` 全指向 (265,426)、
+`BOT_Enemy2_Face10..16` 同格，即**兩代運び屋各共用一張臉**；
+`Dead*` 為灰化版同位格。全格已裁出目視表（工作檔 `work/observer/faces_sheet.png`）。
+
+#### 行為型語法（78 行 roster 全掃 → Fact）
+
+| `bot_type` | 行數 | 全容語法（無反例） |
+|---:|---:|---|
+| 1 | 29 | **bonus 攜帶者**：`siege_dmg=0`、respawn 1500、hp 20/30、bc 1..8 |
+| 2 | 5 | **狙擊/中距支援**：weap 屬「狙い撃ち爆武器」系（1807/1819）、first/shot_delay 長 |
+| 3 | 16 | **一般銃兵**：weap 1802/1803/1804/1818 系、hp 32..400 |
+| 4 | 19 | **白兵突擊**（weap=0 近戰）：hp 5..350——含全表最輕 hp=5 者（B8） |
+| 5 | 4 | **持銃 Boss**（weap=1801 ボス武器1）：hp 4000/9500/11700/13500、scale 3.3..10 |
+| 6 | 2 | **素体巨 Boss**（weap=0、scale 3.3/8、hp 5000/4000） |
+| 7 | 2 | 同上家族第三型（scale 3.3/6.6、hp 3000/2000、ai2_boss 音檔） |
+| 8 | — | 僅死檔 `BotEnemy_intelligent.xml` 使用（§5d-26） |
+
+#### 世界觀對號（目視 × Wiki × XML 三軸）
+
+**編年三幕**（資產名直接刻印）：AI1＝行 0..16（minimap `BOT_Enemy_` 批、boss 音檔無）；
+**AI2＝行 17..30**（`BOT_Enemy2_` 批、`ai2_boss_emergence[2].wav`，
+2012 台服先行シングルモード）；**AI3/PvE＝行 300..342**
+（2013/11/27 ロボットセンター；新模型僅 {337..339}、301、340 三組，
+餘皆 0..34 同料複製）。
+
+| minimap 名 | 行 | 目視識別 | 級別 |
+|---|---|---|---|
+| `BOT_Enemy_Face0` | 0/1/2 | 白角仮面＝**AI1 Boss 三人組**（共用一 icon） | Fact |
+| `BOT_Enemy_Face3` | 3 | 丸胴ドーム砲兵 | 圖標目視 |
+| `BOT_Enemy_Face4` | 4 | 赤角メカ砲兵 | 同上 |
+| `BOT_Enemy_Face5` | 5 | V字 visor 砲兵 | 同上 |
+| `BOT_Enemy_Face6/7/8` | 6/7/8 | 重裝甲・岩塊顏・猿顏（無銃白兵三型；末者 hp=5） | 同上 |
+| `BOT_Enemy_Face9` | 9 | 複眼狙撃虫（weap＝「狙い撃ち爆武器1」） | 同上 |
+| `BOT_Enemy_Face10..16` | 10..16 | **運び屋 A 系共用**（帶角少女）；char 1..7 | Fact |
+| `BOT_Enemy2_Face0` | 17 | 黒金字塔巨兵（音檔 `ai2_boss_emergence.wav`）↔ 地圖 `Minimap_AI_02_Pyramid` | 互證推定 |
+| `BOT_Enemy2_Face1` | 18 | 金色怪獸 Boss（`ai2_boss_emergence2.wav`；Wiki PVE 2WAVE「ボスは二体出現」即本對） | 互證推定 |
+| `BOT_Enemy2_Face2` | 19/20 | 紅面忍者砲兵（weap 1818） | 圖標目視 |
+| `BOT_Enemy2_Face3` | 31/32 | 紅忍者大・特大（hp 180/400） | 同上 |
+| `BOT_Enemy2_Face4` | 33/34 | 金兜將軍 | 同上 |
+| `BOT_Enemy2_Face5` | 21/22 | 青 kabuto 兜（無銃） | 同上 |
+| `BOT_Enemy2_Face6` | 23 | 翼頭メカ狙撃手（weap 1819） | 同上 |
+| `BOT_Enemy2_Face10..16` | 24..30 | **運び屋 B 系共用**（軍服少女）；char 1..7 | Fact |
+| `BOT_Enemy_Face19` | **337..339** | **赤玉爆弾 → Wiki「自爆ロボット」**（PvE 獨有三階 hp 110/125/150、weap 0、專用動畫集 25） | **三軸互證** |
+| `BOT_Enemy_Face21` | **301** | **青鯊メカ → Wiki PVE 4WAVE Boss「戦闘機」「鮫の顔」**（scale 10 唯一、hp 9500、weap `AI3 ボス武器`、移速 200） | **三軸互證** |
+| `BOT_Enemy_Face17` | **340** | **砂時計 → PvE「砂時計を取ると時間が止まる」**（bonus_char=**8**、value 4000、face 10130024、專用動畫集 340） | **三軸互證** |
+
+- **bonus_char=8 定名＝時止（砂時計）**——圖標 × Wiki 4WAVE 攻略文 × 專用動畫集
+  三線收束，為 Wiki 七格支援表之外的第八種回饋。
+- Wiki「短剣ロボット」仍**無法確定行指**（候選＝行 6/7/8 白兵組或行 31/32 紅忍者；
+  圖標未見刃物確證），維持 UNRESOLVED。單人側「自爆」候補＝行 8
+  （hp=5 全表最輕），Inference/MEDIUM。
+- Face10（帶角少女）並非怪獸：運び屋是全表唯一人形敵，與 Wiki
+  「運び屋…頭上にアイテムを掲げた敵」一致。
+
+#### `type41`／`type42` 孤檔定名
+
+兩檔僅 `s base.pap` 一件，內嵌貼圖名：
+**type41＝`AI_Bonus_heart.tga`、type42＝`AI_Bonus_scroll.tga`** ——
+運び屋「頭上に掲げるアイテム」的立體 prop；攜帶者本體模型
+（type24..30 同 blob）內則嵌共通貼圖 `AI_Bonus_01.tif`。
+**但 native 無 `AI_Bonus` 字面值**（exe 0 命中）、各 XML 表無 41/42 引用
+⇒ 載入路徑殘段 Unknown（候選：spawn 時 runtime 擇 prop）。
+heart→体力回復、scroll→スコア系僅為 Wiki 支援表的直觀候補
+（證據僅貼圖名；Inference/MEDIUM）。
+
+#### `BotPath`／`AiMultiBotPath`
+
+骨架：`BotPath.xml` 231 條 `<PATH><INDEX/>…<POSITION x,y,z/>…</PATH>`
+（INDEX 連續 1..231），`AiMultiBotPath.xml` 410 條同構。
+Scenario 的 `spawnArea` 全域 {1..97, 跳 35/36} ⊂ PATH index 域
+⇒ **spawnArea ⇒ PATH 折線**引用關係成立（兵種入場經路）；quickTime 後的行為細節未解剖。
+
 
 ## 5d-27. `URLList`：**全部外部端點皆由資源驅動**，以及一個路徑錯置的舊副本
 
@@ -3641,14 +3749,17 @@ hayate 面純佔位 12（41,62,63,64,82,83,86,88–92；62–64/82 為女 8 專�
    7904B 橋；**填充源未送**列 bounded Unknown）。殘留子項：別名表全編
    （88%→100%）、擲彈/近接的 anim↔model 代號分叉對名。
 4. ~~bot type3xx ↔ BotEnemy*.xml monster 表；animations mot 文法 ↔ ani_list.sco
-   索引~~ ✅ 2026-09-18 主線定案於 §5d-26b..f（80 目錄→22 blob 群普查、
+   索引~~ ✅ 2026-09-18 兩階段全線定案於 §5d-26b..g（80 目錄→22 blob 群普查、
    300+k 複製陣列、Scenario FLOW「bot_type」實為行索引、bonus_char↔
    Wiki 運び屋對號、bot_face/bot_weapon＝item id 直出 AI→AI2→AI3 三代名、
-   ani_list.sco 8B 容器已解）。**殘留**：mot↔sco 256KB 表語法（界線已標 §5d-26e）、
-   `b_/l_` 前綴語義、type41/42 孤檔、BotPath/AI_Animation 兩檔解剖、
-   bonus_char {1,4,5,6,7} 逐項語義與 char=8 命名。▼ 另線未動子議程（pav 系）：
-   `*a3 != 0` 守衛語義（頭/身第二層條件）、198-record builder 對 special 欄
-   （band 110）的寫入路徑（§11.3b Unknown 收尾）。
+   `.mot`＝Biped 半身格式檔頭已解＋**b_/l_＝上/下半身 18/12 骨**、
+   AI_Animation bot↔mot 綁定表全解＋死檔 b_039 確認、roster 圖標全對位
+   （自爆＝337..339/Face19、戰鬥機 Boss＝301/Face21、砂時計＝340 char=8）、
+   type41/42＝AI_Bonus 抬舉 prop、BotPath 骨架）。**殘留**：ani_list.sco
+   256KB 稀疏表語法（bounded Unknown §5d-26e）、bonus_char {1,4,5,6,7}
+   單位語義、Wiki「短剣ロボット」行指、type41/42 的 native 載入路徑。▼ 另線未動子議程
+   （pav 系）：`*a3 != 0` 守衛語義（頭/身第二層條件)、198-record builder 對
+   special 欄（band 110）的寫入路徑（§11.3b Unknown 收尾）。
 5. ~~sounds01/sounds80 聲包選取器；連殺語音 38 複本之軸~~ ✅ 2026-09-18
    定案於 §11.6（vcustomizepathTable 0..92 選取空間、38=14+9+15 語音目錄、
    26=イカ娘聯名、角色代號表）。**後續**：hayate 92 槽已全數定性（已定名
