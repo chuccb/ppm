@@ -2724,6 +2724,15 @@ else** ⇒ status=0 完全沉默;≠0 才再讀 `u8 target_slot`(room-view 時�
 策略回同值。無 slot-store 模型。
 | 466 | `GI_CHANGE_SKILLITEMSLOT_REQ` | `sub_5738A0` | C2S | `u8 raw0,u8 raw1,[u8 raw2,7×raw4]`; raw1==0→2B, nonzero→31B; domain meanings remain UNRESOLVED. |
 | 467 | `GI_CHANGE_SKILLITEMSLOT_ACK` | `sub_573A70` | S2C | `u8 resultRaw, u8 unknownHeaderRaw, u8 count, count×{u8 profile, raw32}` |
+
+**TS 對位 (2026-09-19)**: 466 builder `sub_5738A0` @167578(唯一 wrapper
+`sub_4AA480` @77877 由 NEWSKILL_ACCESSORY UI 叫用):`u8 raw0, u8 raw1`,
+raw1≠0 再加 `u8 raw2` + `sub_527BA0`(=0x1C 本體驗證 ⇒ 7×s32 bulk)=31B;
+domain 語義維持 UNRESOLVED(尺寸已知、名稱不杜撰)。467 consumer
+`sub_573A70`:三 header 恆讀、**resultRaw/unknownHeaderRaw 亦不耗用**;每行
+`u8 profile`,row 32B payload **只在客戶端 accessory store(dword_E650B0)
+存在時才讀**(v2+28 存最後 4B)⇒ 行內容對 TS 惰性。TS 無 accessory
+store ⇒ 恆回 `00 00 00`(resultRaw=0,unknown=0,count=0)。
 | 912 | `GL_WEAPONPARTS_EQUIP_CHANGE_REQ`| `sub_95AEF0`×3 | C2S | `u8 raw0,s32 raw1,s32 raw2`; raw0==2 appends `s32 raw3`; branch/domain meanings remain UNRESOLVED. |
 | 913 | `GL_WEAPONPARTS_EQUIP_CHANGE_ACK`| `sub_95B180` | S2C | `u8 errorRaw`; only `0` continues with the matching 912 body; nonzero error values unresolved |
 | 310 | `GS_BUYCHAR_REQ` | `sub_572790` | C2S | `s32 char_type, 5×s32 items` |

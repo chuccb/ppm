@@ -25,6 +25,7 @@ import msgReadRequest from "../src/ops/c2s/GL_MSG_READ_REQ.ts";
 import billTokenRequest from "../src/ops/c2s/GL_BILLTOKEN_REQ.ts";
 import buyCharRequest from "../src/ops/c2s/GS_BUYCHAR_REQ.ts";
 import changeChannelRequest from "../src/ops/c2s/GL_CHANGECHANNEL_REQ.ts";
+import changeSkillItemSlotRequest from "../src/ops/c2s/GI_CHANGE_SKILLITEMSLOT_REQ.ts";
 import deleteGiftRequest from "../src/ops/c2s/GS_DELETEGIFT_REQ.ts";
 import changeSlotRequest from "../src/ops/c2s/GI_CHANGESLOT_REQ.ts";
 import changeDataRequest from "../src/ops/c2s/GI_CHANGEDATA_REQ.ts";
@@ -744,6 +745,49 @@ describe("453 — delete-gift request", () => {
   });
 });
 
+describe("466 — change-skill-item-slot request", () => {
+  test("466 parses the raw1==0 short form and replies the empty board", () => {
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof changeSkillItemSlotRequest>[1];
+    changeSkillItemSlotRequest(
+      reread(new Packet(opcodeFor("GI_CHANGE_SKILLITEMSLOT_REQ")).u8(1).u8(0)),
+      connection,
+    );
+    expect(replies).toEqual([["GI_CHANGE_SKILLITEMSLOT_ACK", 0]]);
+  });
+
+  test("466 walks the raw1!=0 31-byte form and rejects wrong tails", () => {
+    const bulk = new Packet(opcodeFor("GI_CHANGE_SKILLITEMSLOT_REQ")).u8(1).u8(1).u8(2);
+    for (let i = 0; i < 7; i++) bulk.s32(100 + i);
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof changeSkillItemSlotRequest>[1];
+    changeSkillItemSlotRequest(reread(bulk), connection);
+    expect(replies).toEqual([["GI_CHANGE_SKILLITEMSLOT_ACK", 0]]);
+    expect(() =>
+      changeSkillItemSlotRequest(
+        reread(new Packet(opcodeFor("GI_CHANGE_SKILLITEMSLOT_REQ")).u8(1)),
+        connection,
+      ),
+    ).toThrow(/466/);
+    expect(() =>
+      changeSkillItemSlotRequest(
+        reread(new Packet(opcodeFor("GI_CHANGE_SKILLITEMSLOT_REQ")).u8(1).u8(0).u8(0)),
+        connection,
+      ),
+    ).toThrow(/466/);
+    expect(() =>
+      changeSkillItemSlotRequest(
+        reread(new Packet(opcodeFor("GI_CHANGE_SKILLITEMSLOT_REQ")).u8(1).u8(1).u8(2)),
+        connection,
+      ),
+    ).toThrow(/466/);
+  });
+});
+
 describe("834 — data-recv-completed request", () => {
   test("consumes the propagated raw4 context and replies with an empty 835", () => {
     const replies: string[] = [];
@@ -1195,8 +1239,8 @@ describe("registry", () => {
   });
 
   test("the registry exposes both operation folders at startup", () => {
-    expect(summary()).toMatch(/^c2s 43 \(/);
-    expect(summary()).toMatch(/\), s2c 44 \(/);
+    expect(summary()).toMatch(/^c2s 44 \(/);
+    expect(summary()).toMatch(/\), s2c 45 \(/);
     expect(summary()).toContain("GL_LOGIN_ACK");
     expect(summary()).toContain("GL_LOGIN_REQ");
   });
