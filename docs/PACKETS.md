@@ -2700,8 +2700,16 @@ else** ⇒ status=0 完全沉默;≠0 才再讀 `u8 target_slot`(room-view 時�
 | 722 | `GR_VOTING_RESULT` | `sub_9BF430` | S2C | `s32 target, u8 result` (1=通過踢出, 0=否決) |
 | 214 | `GM_CREATECHAR_REQ` | `sub_572EB0`（舊記 `sub_532AA0` 在任一份 dump 皆不存在，本輪更正） | C2S | `u8 char_type, s16 hair, s16 face, s16 coat`（builder 依序 `sub_592920` + 3×`sub_5929E0`，共 7 B）|
 | 215 | `GM_CREATECHAR_ACK` | `sub_572F80` | S2C | `u8 status(0=成功)` |
-| 218 | `GI_CHANGEDATA_REQ` | `sub_572FC0` | C2S | `u8 char_slot` |
+| 218 | `GI_CHANGEDATA_REQ` | `sub_572FC0` | C2S | `u8 char_slot, u8 count(≤0x14), count×26B {u8 slot, u8 flagRaw, 12×u16 rawWords}` |
 | 219 | `GI_CHANGEDATA_ACK` | `sub_573230` | S2C | `u8 status(1=成功)` |
+
+**TS 對位 (2026-09-19)**: 218 為 inventory diff 上傳:builder `sub_572FC0`
+@167338 先寫 `u8 char_slot`、再 `u8 count`(>0x14 中止)、再逐 slot 經
+`sub_5244E0` 寫 `{u8 slot, u8 flagRaw, u16×12}`=26B(accessor
+`sub_592920`=1B、`sub_5929E0`=2B 本體驗證)。219 consumer
+`sub_573230`→狀態機 `sub_4BCF00`:**status=1 ⇒ pending→applied 遷移**(+0xC UI
+刷新);**status=0 ⇒ abort-sync 臂**;其他值全域 no-op。TS 無 slot store ⇒
+恆回 `status=1`(wire `01`),client 狀態機落定。
 | 220 | `GI_CHANGEWP_REQ` | `sub_47AA40` / `sub_573340` / `sub_57C270` | C2S | `u8 count, count×{u8 raw0,raw2 raw1,[3×raw2 when raw0!=3],[8×raw4 when raw1!=0]}`; exact predicates and field/domain meanings remain UNRESOLVED. |
 | 221 | `GI_CHANGEWP_ACK` | `sub_5735F0` | S2C | `u8 count(4), 4×weapon_group` |
 | 312 | `GI_CHANGESLOT_REQ` | `sub_573270` | C2S | `u8 slot_no` |

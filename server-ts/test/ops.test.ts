@@ -23,6 +23,7 @@ import friendInfoRequest from "../src/ops/c2s/GL_FRIEND_INFO_REQ.ts";
 import friendWhereRequest from "../src/ops/c2s/GL_FRIEND_WHERE_REQ.ts";
 import msgReadRequest from "../src/ops/c2s/GL_MSG_READ_REQ.ts";
 import billTokenRequest from "../src/ops/c2s/GL_BILLTOKEN_REQ.ts";
+import changeDataRequest from "../src/ops/c2s/GI_CHANGEDATA_REQ.ts";
 import forceoutRequest from "../src/ops/c2s/GR_FORCEOUT_REQ.ts";
 import questAcceptDailyRequest from "../src/ops/c2s/GQ_QUEST_ACCEPT_DAILY_REQ.ts";
 import questUserCompleteHonorRequest from "../src/ops/c2s/GQ_QUEST_USER_COMPLETE_HONOR_REQ.ts";
@@ -576,6 +577,45 @@ describe("131 — forceout request", () => {
   });
 });
 
+describe("218 — changedata request", () => {
+  test("218 parses the native record grammar and replies status=1 (success arm)", () => {
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof changeDataRequest>[1];
+    changeDataRequest(
+      reread(new Packet(opcodeFor("GI_CHANGEDATA_REQ")).u8(2).u8(0)),
+      connection,
+    );
+    expect(replies).toEqual([["GI_CHANGEDATA_ACK", 1]]);
+  });
+
+  test("218 walks count x 26-byte records and rejects the native cap overflow", () => {
+    const rows = new Packet(opcodeFor("GI_CHANGEDATA_REQ")).u8(0).u8(1)
+      .u8(3).u8(9).u16(0x1111).u16(0x2222).u16(0x3333).u16(0x4444)
+      .u16(0x5555).u16(0x6666).u16(0x7777).u16(0x8888)
+      .u16(0x9999).u16(0xaaaa).u16(0xbbbb).u16(0xcccc);
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof changeDataRequest>[1];
+    changeDataRequest(reread(rows), connection);
+    expect(replies).toEqual([["GI_CHANGEDATA_ACK", 1]]);
+    expect(() =>
+      changeDataRequest(
+        reread(new Packet(opcodeFor("GI_CHANGEDATA_REQ")).u8(0).u8(0x15)),
+        connection,
+      ),
+    ).toThrow(/0x14/);
+    expect(() =>
+      changeDataRequest(
+        reread(new Packet(opcodeFor("GI_CHANGEDATA_REQ")).u8(0).u8(1).u8(0)),
+        connection,
+      ),
+    ).toThrow(/218/);
+  });
+});
+
 describe("834 — data-recv-completed request", () => {
   test("consumes the propagated raw4 context and replies with an empty 835", () => {
     const replies: string[] = [];
@@ -1027,8 +1067,8 @@ describe("registry", () => {
   });
 
   test("the registry exposes both operation folders at startup", () => {
-    expect(summary()).toMatch(/^c2s 38 \(/);
-    expect(summary()).toMatch(/\), s2c 39 \(/);
+    expect(summary()).toMatch(/^c2s 39 \(/);
+    expect(summary()).toMatch(/\), s2c 40 \(/);
     expect(summary()).toContain("GL_LOGIN_ACK");
     expect(summary()).toContain("GL_LOGIN_REQ");
   });

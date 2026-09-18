@@ -17,6 +17,7 @@ import { opcodeFor, opcodeName } from "../opcodes.ts";
 import type { Connection } from "../connection.ts";
 
 import GC_ENTERCHANNEL_REQ from "./c2s/GC_ENTERCHANNEL_REQ.ts";
+import GI_CHANGEDATA_REQ from "./c2s/GI_CHANGEDATA_REQ.ts";
 import GL_BILLTOKEN_REQ from "./c2s/GL_BILLTOKEN_REQ.ts";
 import GL_CLIENTINFO_REQ from "./c2s/GL_CLIENTINFO_REQ.ts";
 import GL_DATA_RECV_COMPLETED_REQ from "./c2s/GL_DATA_RECV_COMPLETED_REQ.ts";
@@ -56,6 +57,7 @@ import GT_PING_REQ from "./c2s/GT_PING_REQ.ts";
 import PM_UDPSTART_REQ from "./c2s/PM_UDPSTART_REQ.ts";
 
 import GC_ENTERCHANNEL_ACK from "./s2c/GC_ENTERCHANNEL_ACK.ts";
+import GI_CHANGEDATA_ACK from "./s2c/GI_CHANGEDATA_ACK.ts";
 import GL_ACCOUNTCONNSUCC from "./s2c/GL_ACCOUNTCONNSUCC.ts";
 import GL_BILLTOKEN_ACK from "./s2c/GL_BILLTOKEN_ACK.ts";
 import GL_CLIENTINFO_ACK from "./s2c/GL_CLIENTINFO_ACK.ts";
@@ -99,6 +101,7 @@ export type Handler = (reader: Reader, connection: Connection) => void | Promise
 
 const inbound = {
   GC_ENTERCHANNEL_REQ,
+  GI_CHANGEDATA_REQ,
   GL_BILLTOKEN_REQ,
   GL_CLIENTINFO_REQ,
   GL_DATA_RECV_COMPLETED_REQ,
@@ -140,6 +143,7 @@ const inbound = {
 
 const outbound = {
   GC_ENTERCHANNEL_ACK,
+  GI_CHANGEDATA_ACK,
   GL_ACCOUNTCONNSUCC,
   GL_BILLTOKEN_ACK,
   GL_CLIENTINFO_ACK,
