@@ -3025,8 +3025,15 @@ TS 無防衛核心模型 ⇒ 逐位元組恆回聲 = 與原生廣播逐 byte 相
 926 builder 3B 三 1B accessor ✓。927 `sub_592900`=1B 驗寬;頭 4B
 之後 status==0 才續 +u8+s32,≠0 終止 ⇒ TS 恆 `status=1`(wire
 `01000001`)。
-| 928 | `GR_AI_CONTINUE_START_REQ` | `sub_761DB0` | C2S | `s32 continue_count` (PVE 接關復活) |
-| 929 | `GR_AI_CONTINUE_START_ACK` | `sub_761E90` | S2C | `u8 status(1=成功), s32 continue_count` |
+| 928 | `GR_AI_CONTINUE_START_REQ` | `sub_761DB0` | C2S | `s32 continue_count` 恆 0(builder 寫字面量) |
+| 929 | `GR_AI_CONTINUE_START_ACK` | `sub_761E90` | S2C | `u8 statusRaw`;唯 1 續 `u8,s32,str,s32,s32`;他值終止 |
+
+**TS 對位 (2026-09-19)**: 928 builder `sub_761DB0` 送出欄位是字面 0
+(`sub_592A20`=4B 驗寬;UI 端另有關卡進度記憶,線上不再夾帶)。
+929 `sub_761E90`:statusRaw==1 才走 `u8 slot, s32, string
+(sub_592730), s32 ×2` 完整復活體(子系彈幕+30s 定時);**他值皆
+終止臂**——舊表 "`s32 continue_count`" 誤置。TS 無 PVE 接關模型 ⇒
+恆回 `status=0` 單位元組(wire `00`)。
 | 935 | `GR_AI_FEVER_START_REQ` | `sub_7622C0` | C2S | `(空)` (啟動 Fever 狂暴狀態) |
 | 936 | `GR_AI_FEVER_START_ACK` | `sub_7623A0` | S2C | `u8 status(1), u8 flag(0), s32 duration_ms(10000), u8 type(1)` |
 | 939 | `GR_AI_GO_NEXT_WAVE_REQ` | `sub_75CE40` | C2S | `(空)` (波次切換推進) |

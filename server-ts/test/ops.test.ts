@@ -36,6 +36,7 @@ import aiRewardItemRequest from "../src/ops/c2s/GR_AI_GET_REWARD_ITEM_REQ.ts";
 import damageShieldRequest from "../src/ops/c2s/GR_AI_DAMAGE_SHIELD_REQ.ts";
 import magazineStartRequest from "../src/ops/c2s/GR_AI_RECHARGE_MAGAZINE_START_REQ.ts";
 import magazineEndRequest from "../src/ops/c2s/GR_AI_RECHARGE_MAGAZINE_END_REQ.ts";
+import continueStartRequest from "../src/ops/c2s/GR_AI_CONTINUE_START_REQ.ts";
 import startVotingRequest from "../src/ops/c2s/GR_START_VOTING_REQ.ts";
 import gamecenterRankingRequest from "../src/ops/c2s/GG_GAMECENTER_RANKING_REQ.ts";
 import gamecenterGameStartRequest from "../src/ops/c2s/GG_GAMECENTER_GAME_START_REQ.ts";
@@ -1063,6 +1064,38 @@ describe("718/721 — voting requests", () => {
   });
 });
 
+describe("928 — PVE continue request", () => {
+  test("928 accepts the builder-literal zero count and answers the dormant arm", () => {
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof continueStartRequest>[1];
+    continueStartRequest(
+      reread(new Packet(opcodeFor("GR_AI_CONTINUE_START_REQ")).s32(0)),
+      connection,
+    );
+    expect(replies.pop()).toEqual(["GR_AI_CONTINUE_START_ACK", 0]);
+  });
+
+  test("928 enforces the native 4-byte constant wire", () => {
+    const connection = {
+      reply: () => undefined,
+    } as unknown as Parameters<typeof continueStartRequest>[1];
+    expect(() =>
+      continueStartRequest(
+        reread(new Packet(opcodeFor("GR_AI_CONTINUE_START_REQ")).s32(1)),
+        connection,
+      ),
+    ).toThrow(/928/);
+    expect(() =>
+      continueStartRequest(
+        reread(new Packet(opcodeFor("GR_AI_CONTINUE_START_REQ")).u8(0)),
+        connection,
+      ),
+    ).toThrow(/928/);
+  });
+});
+
 describe("924/926 — magazine refuel start/end requests", () => {
   test("924 parses the 2-byte wire and answers the triple denial arm", () => {
     const replies: unknown[][] = [];
@@ -1647,8 +1680,8 @@ describe("registry", () => {
   });
 
   test("the registry exposes both operation folders at startup", () => {
-    expect(summary()).toMatch(/^c2s 58 \(/);
-    expect(summary()).toMatch(/\), s2c 57 \(/);
+    expect(summary()).toMatch(/^c2s 59 \(/);
+    expect(summary()).toMatch(/\), s2c 58 \(/);
     expect(summary()).toContain("GL_LOGIN_ACK");
     expect(summary()).toContain("GL_LOGIN_REQ");
   });
