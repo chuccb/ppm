@@ -7,7 +7,9 @@
  * sub_592920 = 1 byte, sub_527BA0 = 0x1C bytes):
  *   u8 raw0
  *   u8 raw1
- *   [raw1 != 0 only] u8 raw2, 28-byte bulk (7 x s32 accessory ids)
+ *   [raw1 != 0 only] u8 raw2, 28-byte bulk — verbatim single
+ *     `sub_527BA0` 0x1C-byte blob (7 x raw4 accessory ids; the dump
+ *     matches width-wise but native never splits it into typed words)
  * Domain semantics of raw0/raw1/raw2 stay UNRESOLVED on purpose — the
  * .c exposes only their structure, so the fields keep these raw names.
  *

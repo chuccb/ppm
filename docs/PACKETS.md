@@ -2756,7 +2756,7 @@ status∈{0,1} 二分。首欄 = CClientData+88 選中索引,與 312 同欄,亦
 `sub_573230`→狀態機 `sub_4BCF00`:**status=1 ⇒ pending→applied 遷移**(+0xC UI
 刷新);**status=0 ⇒ abort-sync 臂**;其他值全域 no-op。TS 無 slot store ⇒
 恆回 `status=1`(wire `01`),client 狀態機落定。
-| 220 | `GI_CHANGEWP_REQ` | `sub_47AA40` / `sub_573340` / `sub_57C270` | C2S | `u8 count, count×{u8 raw0,raw2 raw1,[3×raw2 when raw0!=3],[8×raw4 when raw1!=0]}`; exact predicates and field/domain meanings remain UNRESOLVED. |
+| 220 | `GI_CHANGEWP_REQ` | `sub_573340` writer / `sub_57C270` ACK consumer (221 reader) | C2S | 行級定案 2026-09-19:**empty arm=裸 opcode frame 無 payload**；否則 `u8 count`(≤4),每槽 `u8 slot(<4 守衛) → u16 raw0(roster+72103,原生 s8 符號擴展成 raw2) → [slot!=3] 3×u16 extras(+72104/72105/72106) → [raw0!=0] 8×raw4(roster+36054 dword 表)`。**writer 與 consumer(sub_5735F0→sub_524880）的規則一致到逐位元**(Level-1 自我審查結論見模組註）;raw0 的 `!=0` 是 8×raw4 的唯一閘。221=`u8 count, count×s32 actionId, s8 snapshot 閘→4 條共享 snapshot 鏈`,並可觸發遞迴 220 再廣播。slot 位元組 domain 0..3=武器/模型槽，3=特別槽（無 extras)。 |
 | 221 | `GI_CHANGEWP_ACK` | `sub_5735F0` | S2C | `u8 count(4), 4×weapon_group` |
 | 312 | `GI_CHANGESLOT_REQ` | `sub_573270` | C2S | `u8 slot_no` |
 | 313 | `GI_CHANGESLOT_ACK` | `sub_573320` | S2C | `u8 slot_no` |
