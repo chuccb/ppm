@@ -10,8 +10,6 @@
 
 import { Packet } from "../../packet.ts";
 
-/** Native 419 sender-side recipient-name bound (n24 <= 24 bytes). */
-
 export default function GL_MSG_ADD_ACK(
   op: number,
   toNick: string,

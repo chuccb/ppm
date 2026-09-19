@@ -8,7 +8,8 @@
  * != 0 the consumer stops there and runs the denial sub_763510;
  * statusRaw == 0 continues +u8+s32 into the refuel-end logic.
  * TS: no ammo model -> always the 4-byte terminating denial arm
- * `u8 slot, u8 team, u8 unk echo, u8 status = 1`.
+ * `u8 slot, u8 team, u8 unk = 0 (no request counterpart; unread on the
+ * denial arm), u8 statusRaw = 1`.
  */
 
 import type { Connection } from "../../connection.ts";

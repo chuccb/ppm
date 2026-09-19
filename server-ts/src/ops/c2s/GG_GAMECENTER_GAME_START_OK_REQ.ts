@@ -4,7 +4,7 @@
  * -> send; wire = exactly 2 bytes).
  *
  * Native 484 consumer sub_584F70 reads all nine bytes with no arms:
- * `s16, u8 status, u16 game_id, s32 resultRaw` (the status byte is
+ * `u16 gameIdRaw, u8 status, u16 game_id, s32 resultRaw` (the status byte is
  * read but never used) and then fires the UI probe
  * sub_5392A0(byte_EE8968, game_id, resultRaw).
  *

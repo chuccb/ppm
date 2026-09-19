@@ -16,8 +16,6 @@
 
 import { Packet } from "../../packet.ts";
 
-/** Native 429/431 send-side gate: non-empty key with `strlen <= 23`. */
-
 export default function GL_FRIEND_ADD_ACK(op: number, statusRaw: number, key: string): Packet {
   return new Packet(op)
     .u8(statusRaw)

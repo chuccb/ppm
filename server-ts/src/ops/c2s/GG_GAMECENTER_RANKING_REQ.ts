@@ -5,7 +5,7 @@
  * sub_592920 1-byte mode -> send; wire = exactly 3 bytes.
  *
  * Native 481 consumer sub_585080 read order:
- *   u16 game_id, u8 v18, s16 v13, s32 v14,
+ *   u16 game_id, u8 v18, u16 v13, s32 v14,
  *   u8 top3_cnt (only processed while <= 3), top3_cnt x 0x38-byte rows,
  *   u8 top10_cnt (only processed while <= 0xA), top10_cnt x 0x38 rows
  *

@@ -5,8 +5,9 @@
  * purchase snapshot {slot, char_type, exp, cash, gp, dura}; afterwards
  * the client UNCONDITIONALLY reads `u8 v26Raw, s32 v33Raw, s32 v29Raw`
  * (the v26Raw wallet switch only fires under status != 0). With no
- * purchase model this server always emits status = 0 with zero trailing
- * fields — 10 bytes — which closes the dialog and mutates nothing.
+ * purchase model this server always emits status = 0 plus the
+ * unconditional 9-byte trailer zeroed (wire 10 bytes) — the dialog
+ * closes and nothing mutates.
  */
 
 import { Packet } from "../../packet.ts";

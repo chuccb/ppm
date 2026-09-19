@@ -10,8 +10,9 @@
  * s32 v29Raw` (the v26Raw wallet switch only fires under status != 0).
  *
  * TS policy: no purchase/catalogue model exists, so the request is
- * parsed structurally and answered status = 0 with zero trailing
- * fields (wire 10 bytes) — the client closes the purchase dialog via
+ * parsed structurally and answered status = 0 plus the unconditional
+ * 9-byte trailer zeroed (wire 10 bytes) — the client closes the
+ * purchase dialog via
  * sub_4694B0(byte_D70C14, status) with no wallet mutation.
  */
 
