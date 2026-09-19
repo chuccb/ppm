@@ -414,6 +414,14 @@ call sites** 把 **670 個唯一** packet 名稱註冊進全域 map `dword_2317F
 > **22 個是 C2S**，只有 request builder、不在 dispatcher
 > （206, 295, 487, 828, 851, 853, 896, 898, 930, 932, 953, 957, 973, 975,
 > 992, 996, 998, 1000, 1002, 1004, 1006, 1008）。
+
+**GM `/r` 命令族行級定案 (2026-09-19, dispatcher grep**:命令列解析於
+`~L144060-144260`):
+`/reloadtnmt`→`sub_57D8D0`=**773 `MASTER_RELOAD_TNMT_REQ`**(裸 op 送),
+`/reloadgcrank`→`sub_57DA90`=**851**(裸 op),`/printgcrank`→`sub_57DB30`=
+**853**(裸 op),`/rshufflewt`→`sub_57DBD0`=**896**(`j__atol` 參數→非零
+gate 之 raw4),`/rshufflevt`→`sub_57DC80`=**898**(同形),`/print_tnmt_state`
+不送 wire(單純 local print)。852(=**真死 op**,全檔 `ctor(852)` 零匹配)。
 > dispatcher 共 **306** 個 case，其中 **24** 個不在名稱表內：
 > 即上列 23 個 S2C，再加 **417**。417 已於下方 MASTER 表以
 > `MASTER_KILLALL_ACK` 立項（416 的配對 ACK），但**未收進 `db/packets.tsv`**，
@@ -2712,7 +2720,7 @@ buffer;拒絕 trailing;split(',') 每段非空 ≤20B=table stride;row≤100=tab
 | 685 | `GL_TUTORIALINDEX_REQ` | `sub_55C6F0` | C2S | `(空)` |
 | 686 | `GL_TUTORIALINDEX_ACK` | `sub_55C790` | S2C | `s32 tutorial_index` (旗標/步驟) |
 | 689 | `GL_TUTORIAL_INDEX_SET_REQ` | `sub_55C7D0` | C2S | `s32 tutorial_index` |
-| 690 | `GL_TUTORIAL_INDEX_SET_ACK` | *(無可達 handler — 舊記 `sub_582530` 在任一份 dump 皆不存在；dispatcher 無 case 690，`LAYOUTS.md` 亦無此列)* | S2C | **UNRESOLVED** — 名稱有在 `sub_9D2050` 註冊，但本 revision 找不到任何讀取器，欄位無從證實 |
+| 690 | `GL_TUTORIAL_INDEX_SET_ACK` | *(無可達 handler)* | S2C | **2026-09-19 再驗**:690 的註冊是 `sub_9EAF50(map, 690, "GL_TUTORIAL_INDEX_SET_ACK")` — 純名錄 insert，與 689 同模；dispatcher 無 case 690、LAYOUTS 無列、無 ctor ⇒ **名錄限定 op，本 revision 無 wire endpoint，結案**（非 UNRESOLVED) |
 | 704 | `GL_LEVEL_KILL_LIMIT_REQ` | `sub_582570` | C2S | `(空)` |
 | 705 | `GL_LEVEL_KILL_LIMIT_ACK` | `sub_55C9B0` | S2C | `s32 kill_limit, f32 exp_rate, s32 max_level_limit` (12B) |
 

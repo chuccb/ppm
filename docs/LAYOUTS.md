@@ -676,7 +676,15 @@ raw4 讀取，但分支選擇器取其低位元組。完整佈局見 `PACKETS.md
 ### 殘留 UNRESOLVED（命名後仍不升格者）
 
 - 896/898 之 `WT`／`VT` 縮寫涵義（wait-time? vote/victory? 無 native 字串
-  可鎖定）— 保留命令 token。
+  可鎖定）— 保留命令 token。**2026-09-19 補錨**:896(=`sub_57DBD0`)/898(=`sub_57DC80`)
+  皆 `/r` 前綴 GM 命令族——命令實錘為 `/rshufflewt`→896、
+  `/rshufflevt`→898，皆 `j__atol` 參數→非零才送的 raw4;`/r` = reshuffle
+  命令首碼（同群 `/reloadtnmt`→**773 MASTER_RELOAD_TNMT_REQ(sub_57D8D0)**、
+  `/reloadgcrank`→**851(sub_57DA90，裸 opcode 請求）**、`/printgcrank`→
+  **853(sub_57DB30)**、`/print_tnmt_state`=無 wire(local only));852=**純名錄
+  空隙**(全檔 `ctor(852)` 零匹配,真死 op)。**852/853 之 `GCRANK` 推定
+  = GAMECENTER_RANKING(與 892/480 平行案一致)。WT/VT 之字母仍屬
+  server-policy(reshuffle wire 語義已定,字母擴展 server 保留)。
 - 1002 方向語義（block-ME 模型）Inference/HIGH，見上。
 - 851/853 之 GCRANK 縮寫：依 892／480 平行案推定為 `GAMECENTER_RANKING`；
   命令 token 原型為 `/reloadgcrank`、`/printgcrank`。
