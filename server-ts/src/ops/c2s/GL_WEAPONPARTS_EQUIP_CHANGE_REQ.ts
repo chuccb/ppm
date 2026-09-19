@@ -1,14 +1,14 @@
 /**
  * 912 GL_WEAPONPARTS_EQUIP_CHANGE_REQ — change equipped weapon parts
- * (builder sub_95AEF0 @619208; three send arms, sub_592AA0 = 4-byte
- * writes verified on its body):
- *   raw0 = 0 or 1: `u8 raw0, s32 raw1, s32 raw2`  (9 bytes)
- *   raw0 = 2:      extra trailing s32 raw3        (13 bytes)
+ * (builder sub_95AEF0 @619208; three send arms; the payload words go
+ * through sub_592AA0, the generic 4-byte caller-defined writer):
+ *   raw0 = 0 or 1: `u8 raw0, raw4 raw1, raw4 raw2`  (9 bytes)
+ *   raw0 = 2:      extra trailing raw4 raw3          (13 bytes)
  * Domain meanings of the branches stay UNRESOLVED per documentation.
  *
  * Native 913 consumer sub_95B180: reads `u8 errorRaw`; when 0 it goes
- * on reading the 912-shaped body (u8 raw0, 2-3 x s32) and BOUNDS-CHECKS
- * the final s32 against the native item tables; nonzero errorRaw ends
+ * on reading the 912-shaped body (u8 raw0, 2-3 x raw4) and BOUNDS-CHECKS
+ * the final word against the native item tables; nonzero errorRaw ends
  * consumption after the single byte.
  *
  * TS policy: no weapon-parts model exists, so echoing ids into the
@@ -29,8 +29,8 @@ export default function GL_WEAPONPARTS_EQUIP_CHANGE_REQ(r: Reader, connection: C
   if (r.remaining !== want) {
     throw new RangeError(`912 raw0=${raw0} expects ${1 + want} total bytes, tail mismatch (${r.remaining})`);
   }
-  r.s32(); // raw1
-  r.s32(); // raw2
-  if (raw0 === 2) r.s32(); // raw3
+  r.s32(); // raw4 raw1 (sub_592AA0 caller-defined 4-byte word)
+  r.s32(); // raw4 raw2
+  if (raw0 === 2) r.s32(); // raw4 raw3
   connection.reply("GL_WEAPONPARTS_EQUIP_CHANGE_ACK");
 }

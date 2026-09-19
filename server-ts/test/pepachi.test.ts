@@ -86,17 +86,15 @@ describe("702 -> 703 Pepachi catalog, consumer-safe arm", () => {
 });
 
 describe("900 -> 901 capsule start, consumer-safe arm", () => {
-  test("tolerates any request length and answers the denial arm", () => {
+  test("parses the native five-byte body and answers the denial arm", () => {
     const { connection, replies } = stubConnection();
-    capsuleStart(reread(new Packet(opcodeFor("GS_CAPSULEMACHINE_START_REQ"))), connection);
+    // sub_99CFA0/sub_99D0A0 line-level: {u8 raw0, s32 raw1}; observed native
+    // pairs include {3,1} and {1,10} (docs/PACKETS.md section 3.15d2).
     capsuleStart(
-      reread(new Packet(opcodeFor("GS_CAPSULEMACHINE_START_REQ")).u8(2).s32(0)),
+      reread(new Packet(opcodeFor("GS_CAPSULEMACHINE_START_REQ")).u8(3).s32(1)),
       connection,
     );
-    expect(replies).toEqual([
-      "GS_CAPSULEMACHINE_START_ACK",
-      "GS_CAPSULEMACHINE_START_ACK",
-    ]);
+    expect(replies).toEqual(["GS_CAPSULEMACHINE_START_ACK"]);
 
     const ack = build("GS_CAPSULEMACHINE_START_ACK");
     expect(ack.remaining).toBe(17);
@@ -106,6 +104,19 @@ describe("900 -> 901 capsule start, consumer-safe arm", () => {
     expect(ack.s32()).toBe(0);
     expect(ack.s32()).toBe(0);
     expect(ack.remaining).toBe(0);
+  });
+
+  test("rejects frames that do not match the native five-byte body", () => {
+    const { connection } = stubConnection();
+    expect(() =>
+      capsuleStart(reread(new Packet(opcodeFor("GS_CAPSULEMACHINE_START_REQ"))), connection)
+    ).toThrow(/exceeds payload/);
+    expect(() =>
+      capsuleStart(
+        reread(new Packet(opcodeFor("GS_CAPSULEMACHINE_START_REQ")).u8(3).s32(1).u8(0)),
+        connection,
+      )
+    ).toThrow(/trailing bytes in 900/);
   });
 });
 

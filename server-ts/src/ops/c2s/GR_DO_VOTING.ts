@@ -1,7 +1,7 @@
 /**
  * 721 GR_DO_VOTING — cast a vote (builder IVotingNetwork::sub_A192B0
- * @701061: ctor(721) -> sub_5928E0 one byte (1 = yes, 2 = no) ->
- * room-socket send; wire = exactly 1 byte).
+ * @701061: ctor(721) -> sub_5928E0 one byte via the s8 write accessor
+ * (1 = yes, 2 = no) -> room-socket send; wire = exactly 1 byte).
  *
  * The vote-result push 722 (shared dispatcher case 722 in
  * sub_9BF430, `s32 target, s8 result`) is server-initiated. Since this
@@ -18,7 +18,7 @@ import type { Reader } from "../../packet.ts";
 
 export default function GR_DO_VOTING(r: Reader, _connection: Connection): void {
   if (r.remaining !== 1) {
-    throw new RangeError(`721 expects exactly 1 byte (u8 vote), got ${r.remaining}`);
+    throw new RangeError(`721 expects exactly 1 byte (s8 vote), got ${r.remaining}`);
   }
-  r.u8(); // vote: silently dropped, there is no active session
+  r.s8(); // vote: silently dropped, there is no active session
 }

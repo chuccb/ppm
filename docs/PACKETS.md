@@ -2762,7 +2762,7 @@ domain 語義維持 UNRESOLVED(尺寸已知、名稱不杜撰)。467 consumer
 `u8 profile`,row 32B payload **只在客戶端 accessory store(dword_E650B0)
 存在時才讀**(v2+28 存最後 4B)⇒ 行內容對 TS 惰性。TS 無 accessory
 store ⇒ 恆回 `00 00 00`(resultRaw=0,unknown=0,count=0)。
-| 912 | `GL_WEAPONPARTS_EQUIP_CHANGE_REQ`| `sub_95AEF0`×3 | C2S | `u8 raw0,s32 raw1,s32 raw2`; raw0==2 appends `s32 raw3`; branch/domain meanings remain UNRESOLVED. |
+| 912 | `GL_WEAPONPARTS_EQUIP_CHANGE_REQ`| `sub_95AEF0`×3 | C2S | `u8 raw0,raw4 raw1,raw4 raw2`(payload words經 `sub_592AA0` 4B caller-defined writer); raw0==2 appends `raw4 raw3`; branch/domain meanings remain UNRESOLVED. |
 | 913 | `GL_WEAPONPARTS_EQUIP_CHANGE_ACK`| `sub_95B180` | S2C | `u8 errorRaw`; only `0` continues with the matching 912 body; nonzero error values unresolved |
 
 **TS 對位 (2026-09-19)**: 912 builder `sub_95AEF0` @619208 三臂全構:

@@ -1,7 +1,9 @@
 /**
  * Claims the short-lived login admission on the second TCP connection.
  *
- * Native sends `str identity, s32 n100, u8 1, s32 extCount`. The identity
+ * Native sends `str identity, s32 n100, s8 1, s32 extCount` (builder
+ * sub_555C60: sub_5926F0, sub_592A20 x2, and sub_5928E0 for the literal;
+ * verified line-level). The identity
  * writer is unresolved, so it is logged but never used as an account key.
  */
 
@@ -20,7 +22,7 @@ export interface Handoff {
 export function read(r: Reader): Handoff {
   const identity = r.str(IDENTITY_MAX_BYTES);
   const n100 = r.s32();
-  const literal = r.u8();
+  const literal = r.s8(); // sub_5928E0 write accessor: 1-byte signed literal
   const extCount = r.s32();
 
   if (r.remaining !== 0) throw new RangeError(`${r.remaining} trailing bytes`);
