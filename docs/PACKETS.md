@@ -2050,8 +2050,12 @@ GG 戰鬥事件中繼 (server 原樣轉發即可) 與 MASTER_* GM 工具組。
 195 REQ (sub_56FF40; CLobbyChannel 的 144 wrapper 每次收到 144 都會送):
     u8 group    (頻道群組 = 681 清單 3 組之序, CLobbyChannel+129)
     u8 channel  (組內頻道編號, +131)
-    u8 rawFlag  (native bool, wire domain 0/1; local option-derived;
-                 business meaning UNRESOLVED — sub_7338D0/sub_735DE0)
+    u8 infoOpen (2026-09-19 行級定案: 非原生 bool — 複製 **Options.cfg
+                config object 的 +2636 欄** (getter sub_735DE0/setter
+                sub_735E00); setter 唯二呼叫點 = OPEN_INFO(→1)/CLOSE_INFO(→0)
+                UI 處理器(INFORMATION panel 鍵階層, 35338/35375);.cfg 載入器
+                (sub_735520) 不初始化此欄 ⇒ session 內 UI 態;伺服器端語義
+                = 伺服器政策 (UNRESOLVED 正解, 非 client 可查)
 
 196 ACK (CLobbyChannel::sub_4179D0 case 196 — 不在 dispatcher!
          經 vtable 場景層分發):
@@ -2071,6 +2075,21 @@ GG 戰鬥事件中繼 (server 原樣轉發即可) 與 MASTER_* GM 工具組。
               明確 raw `type3Tail` 才會發送此 continuation)
       raw4 client_flags (sub_592AC0；bit0 → byte_1D0D21B，⚠ 非 f32)
       u8   client_default → sub_417D00()[8] (native read target 預設 5)
+
+**type3 tail 全偏移圖 (sub_875680 行級, 2026-09-19)**:
+```
+head0→+44(s32 閘≤0 即收尾)  head1→+48  name(68B)→+52
+4×raw4→+120..+132          3×u8→+140,+564,+568   listCount→+152(無上限迴圈)→+156+i
+u8 tail→+572                smallCount→+144(ptr→+548 入口,內部迴圈 j<5 硬帽)
+smallRecord/row(24B 模,6 條 dword view): +172 + 6*j + {0=u8_a,24j+174/175/173=3×u8,4/5=2×s32,6/7=2×raw4,8=u8_e}
+u8 gate→+580(long-arm 開關;預清 *(this+1964) 哨兵)  longCount→view+25,<32 hardcap
+longStage/row(34 DWORD=136B) v25=34k+751: v25[0]=1 標記
+  s32→v25+25  raw4→v25+26  u8 gate1→name0(strncpy 32B→v25+1)
+  6×s32→v25+27..32        u8 gate2→name1(strncpy 26B→v25+65)
+raw4Final→+1976
+sentinel  *(this+1964)=0 永寫,與 +1976 終值分居,不互動
+名下硬帽巧合:小組 j<5、大組 k<32、名字 32/26B — 皆 native cap
+```
 ```
 **196 成功後的閉環 (卅四輪)**: state 119:=2 → CLobbyChannel tick
 (sub_415F90) 清 CClientData + 場景切換 sub_405EB0(9=大廳/8=AI 頻道
@@ -2308,8 +2327,13 @@ future implementation evidence。沒有 process-local room state、battle owner�
     s32 restriction_value (result 6/8/9/10 使用低 byte 作 `%d`；8/10
         顯示 low byte - 1；不可縮成 u8)
     f32 restriction_value_float (result 7/8/9/10 的 `%.1f`)
-    raw4 client_request_context (sub_592AC0 → dword_F2A684；client 隨後
-        原樣帶入多個 request，但 server-domain 意義尚未證實)
+    raw4 client_request_context (sub_592AC0 → dword_F2A684；2026-09-19 定案:
+        **全檔 5 個權威讀點全部成功** — 只有 **142 PM_CONNECT_ACK** (sub_555D50)
+        寫入；讀 = **419 GL_MSG_ADD_REQ、439 GL_FRIEND_CHAT_REQ、
+        119 GL_CHATTING_REQ (sub_56DB90), 125 GR_CHATTING_REQ (sub_56E6C0 +
+        變體 sub_56E860)** — 全數把該 dword **原樣發回伺服器** ⇒ 它是
+        **chat-correlation token**: client 每次 PM finalize 拿新值，之後
+        所有聊天類送出都附帶；server-domain 語義 = 伺服器自行配對 campaign
     u8  has_net_cafe_info
     if nonzero: u8×4 + s32×8，依序交 `sub_A1C800` 初始化
         `sNetCafeInfo`；完整可發送 shape 已在 TypeScript login ACK builder
@@ -2329,7 +2353,7 @@ future implementation evidence。沒有 process-local room state、battle owner�
     server 即使拒絕 143，也應把未認證的後續 195 回成明確的 non-success
     196，而不可讓它取得任何 authenticated lobby authority。
 
-195 GC_ENTERCHANNEL_REQ (sub_56FF40): `u8 group, u8 channel, u8 rawFlag`; native writes the third byte from a boolean result of the local option block, so its wire domain is `0/1`; business meaning remains UNRESOLVED.
+195 GC_ENTERCHANNEL_REQ (sub_56FF40): `u8 group, u8 channel, u8 infoOpen`; third byte = Options.cfg config object +2636 (OPEN_INFO=1 / CLOSE_INFO=0 UI handlers; .cfg loader leaves it untouched — session-only UI state). Server-side semantics stay UNRESOLVED (server policy, unrecoverable from the client image).
 196 GC_ENTERCHANNEL_ACK (CLobbyChannel::sub_4179D0，不走主 dispatcher):
     u8 result, s32 channel_id, u8 channel_index
     **只有 result==1** 才續讀 `str endpoint_host, s32 endpoint_port,

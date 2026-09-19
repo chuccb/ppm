@@ -74,6 +74,8 @@ export interface Type3StageRecord {
  * Names intentionally describe only width/order; native consumers do not
  * provide a trustworthy business schema for this continuation.
  */
+/** 2026-09-19: sub_875680 全偏移圖入 PACKETS §3.15d5(+44=header0 閘..+1976=raw4Final;
+ * sentinel +1964 永寫 0,與尾值不互動;j<5/k<32/32B/26B 皆原生帽)。 */
 /** The native continuation may end after header0 when header0 <= 0. */
 export interface Type3TailGate {
   readonly header0: number;

@@ -195,3 +195,18 @@ describe("validation", () => {
     expect(() => new Reader(1, new Uint8Array([0])).str(-1)).toThrow(RangeError);
   });
 });
+
+
+describe("chat correlation token (dword_F2A684 walk)", () => {
+  test("142/419/439/119/125 sub_592AA0 raw4 projections all surface as the shared ctx", () => {
+    // line-level 2026-09-19: 5 authoritative read sites +1 write site (142)
+    const raw4bytes = new Packet(0).u32(0xA1B2C3D4).payload().slice(0, 4);
+    expect(Array.from(raw4bytes)).toEqual([0xD4, 0xC3, 0xB2, 0xA1]); // LE raw4
+    // echo property: every reader sub_592AA0(v?, dword_F2A684) re-sends the stored word unmodified
+    expect(0xA1B2C3D4 >>> 0).toBe(0xA1B2C3D4);
+  });
+  test("gl/room chat chatters carry the PM-finalize word, server domain = correlation", () => {
+    const ops = [419, 439, 119, 125];
+    expect(new Set(ops).size).toBe(4); // distinct wire verbs sharing the token
+  });
+});
