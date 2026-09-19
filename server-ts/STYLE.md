@@ -105,7 +105,10 @@ strict，另加 `exactOptionalPropertyTypes`、`noUncheckedIndexedAccess` 與
 
 1. **資源面板字串**（`sub_6A8D80` 系列標籤、msgtable / uidatatable 資源 id、
    UI 類名與視窗名）
-2. **`db/packets.tsv`** 註冊的 opcode 官方名（唯一 Fact 來源）
+2. **`db/packets.tsv`** 註冊的 opcode 官方名（唯一 Fact 來源；
+   **2026-09-19 機驗坐實**：binary `sub_9EAF50` 名錄 670 對全數 ∈ tsv 且
+   零衝突，即 tsv = 官方名錄轉儲；另行 6 對 ROOM 模式名 366/367/969/970/
+   990/991 屬 tsv 獨有（第二權威通道）。`tools/verify_tsv_registry.py`）
 3. **wire 欄名**（`active_channel_index`、`channel_id`、`channel_type`、
    `client_flags`、`client_default`、`endpoint_opaque` 等已回收的讀寫位名）
 4. **`docs/RESOURCES.md`** schema 欄名
