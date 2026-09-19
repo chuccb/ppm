@@ -8,8 +8,10 @@
  * widths are native Fact. The older "no builder recovered" note was wrong:
  * the pair is consumed structurally and stays UNRESOLVED by domain.
  *
- * The reply is the denial arm: sub_9A1A30 only touches local wallet/reward
- * state when the status byte is zero.
+ * The reply is the failure arm: sub_9A1A30 switches on the first u8 — a
+ * nonzero value shows the native 0x4B4 banner and closes the gacha
+ * compound (no wallet/award touches), while zero is the success arm that
+ * would need real award rows and fresh wallet words.
  */
 
 import type { Connection } from "../../connection.ts";

@@ -66,7 +66,9 @@ export default function GL_MSG_RECVLIST_ACK(
   entries: readonly MsgListEntry[] = [],
 ): Packet {
   const p = new Packet(op)
-    .u16(0) // native header; semantics unresolved
+    // native v38: 2-byte read via sub_592A00, line-proven never referenced
+    // again anywhere in sub_55A630 (re-verified 2026-09-19) — 0 honest
+    .u16(0)
     .str(contextString) // native local char[21]; bounded compatibility string, no recovered consumer
     .u8(entries.length);
   for (const entry of entries) {

@@ -65,9 +65,12 @@ export default function PM_UDPSTART_ACK(op: number, admission: Admission): Packe
     .s32(0)
     .s32(restrictionLevel)
     .f32(restrictionKdr)
-    // Native reads this word via sub_592AC0 (raw4), stores it into the
-    // request-context global dword_F2A684; the echo semantics upstream
-    // stay unproven, so 0 is the only non-fabricated value.
+    // Native reads this word via sub_592AC0 and stores it into the
+    // session-context global dword_F2A684 (sole write-site), which the
+    // 834/119/125/419/439 request builders echo back verbatim
+    // (sub_592AA0 writes; line-level 2026-09-19). It is a server-owned
+    // session correlation token: this server correlates nothing, so
+    // 0 = no token is the honest emission.
     .u32(0)
     // has_net_cafe_info: non-zero makes the client read the trailing
     // block {4 x u8, 8 x s32} into sub_A1C800 — not emittable without a

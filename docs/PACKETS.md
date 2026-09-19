@@ -2914,7 +2914,7 @@ log 即還;==0 ⇒ 讀 `str title` + client 定長 raw blob(長度=this+239104,
 | 702 | `GP_PEPACHI_LIST_REQ` | `sub_45C9B0` | C2S | `(空)` |
 | 703 | `GP_PEPACHI_LIST_ACK` | `CLobbyShop::sub_46AD00` case 703 | S2C | `s32 countA, s32 countB, (countA+countB)×raw4 entry`（行級：2×`sub_592A40`＋`sub_592AC0` 迴圈；舊「`s16 signedEntry`」為並行路徑誤記，2026-09-19 訂正）; `{0,0}` is a structural empty list only—not a probability-table assertion. |
 | 900 | `GS_CAPSULEMACHINE_START_REQ` | `sub_99CFA0`, called by `sub_99D0A0` | C2S | `u8 raw0,s32 raw1`; exact 5-byte body, not a two-byte body or an `s32 machine_id`; observed raw pairs include `{3,1}` and `{1,10}`. |
-| 901 | `GS_CAPSULEMACHINE_START_ACK` | `sub_9A1A30` | S2C | `u8 result, s32 prizeCount, prizeCount×{u8 rawClass,s32 rawA,s32 rawB}, s32 rawTailA,s32 rawTailB,s32 rawTailC`; `result==0` performs local state/reward processing, nonzero shows failure UI. |
+| 901 | `GS_CAPSULEMACHINE_START_ACK` | `sub_9A1A30` | S2C | `u8 result, s32 prizeCount, prizeCount×{u8 rawClass,s32 rawA,s32 rawB}, s32 rawTailA,s32 rawTailB,s32 rawTailC`; `result==0` performs local state/reward processing, nonzero shows failure UI. **2026-09-19 行級加錨**：三尾即 `s32 cash, s32 pg, s32 coupon`(wire 序），success 臂鏡入大廳錢包格 `byte_D7AC88[+104]CASH/[+108]PG/[+112]COUPON`（顯示器 `sub_45FD80=CASH`/`sub_45FCA0=PG`/`sub_45FE60=COUPON`);`prizeCount==10` 置 `*(this+38)=1`（十連旗標）；fail 臂 banner = msg `0x4B4`(AFK 退回文本，dev 重用）+`sub_9A1C90(this,1)` 關閉 compound;success 臂在 count 0 也會解引用首列 class byte(`sub_9A1C30`),故空列成功不可偽造——server fail-closed。 |
 
 
 

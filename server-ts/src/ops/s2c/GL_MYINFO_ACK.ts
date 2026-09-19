@@ -62,8 +62,11 @@ export function writeMyInfoBasicData(packet: Packet, myInfo: MyInfo): Packet {
     .s32(myInfo.experience)
     // sub_523BF0 reads this post-exp wire word into native +108. The
     // derived class/level at +100 is recomputed from exp and is not itself
-    // read from this packet. Native sub_9252D0 later consumes +108 for its
-    // condition-1 input, but its server/stat owner is unresolved.
+    // read from this packet. Line-level 2026-09-19: +108 is stat cell 27,
+    // which sub_9252D0's achievement-condition evaluator compares as the
+    // condition-type-1 minimum-stat threshold (p_index27 >= v16); the
+    // server/stat owner stays unresolved, so 0 = no recorded stat is the
+    // only non-fabricated value.
     .s32(0)
     // sub_523BF0 order: [34..36] are reserved, then the native UI consumers'
     // direct order: wins/losses, kills/deaths, headshots, air-combo, hearts,

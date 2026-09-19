@@ -52,6 +52,8 @@ export default function GG_GAMECENTER_GAME_END_ACK(
     .s32(settlement.expTotalDelta ?? 0) // v22 -> dword_EE8D0C += (class-indexed total)
     .s32(settlement.walletSet ?? 0)     // v28 -> dword_EE8D18 assign
     .s32(settlement.unused44 ?? 0);     // v44: stored-only
-  p.s8(0).u8(0).u8(0).s8(0).s8(0); // v23, v25 bytes, v38, v29 (byte_EE8C80), v43 (sub_996140)
+  // v23, v25 bytes, v38, v29 (byte_EE8C80), v43: v43 is stored by
+  // sub_996140 into *(this+182) only (line-level 2026-09-19) — inert at 0
+  p.s8(0).u8(0).u8(0).s8(0).s8(0);
   return p;
 }

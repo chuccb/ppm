@@ -117,6 +117,13 @@ export interface Success {
    * official extension configuration may provide the exact raw tuple.
    */
   readonly rawExtension?: RawExtension;
+  /**
+   * Native trailing pair (`v142`, `v137`). Line-proven consumer: bundled
+   * with `userNo` into the Tricod telemetry argument block
+   * (`sub_440420` → `sub_7092C0`), whose original service semantics stay
+   * unresolved. Absent = the honest zero pair (no Tricod context).
+   */
+  readonly billing?: { readonly first: number; readonly second: number };
 }
 
 export default function GL_LOGIN_ACK(op: number, outcome: number | Success): Packet {
@@ -124,7 +131,7 @@ export default function GL_LOGIN_ACK(op: number, outcome: number | Success): Pac
     return new Packet(op).s32(outcome); // result: native low-byte code as s32
   }
 
-  const { userNo, servers, n100 = 0, rawExtension } = outcome;
+  const { userNo, servers, n100 = 0, rawExtension, billing } = outcome;
 
   const p = new Packet(op)
     .s32(Result.Success)
@@ -174,5 +181,6 @@ export default function GL_LOGIN_ACK(op: number, outcome: number | Success): Pac
     }
   }
 
-  return p.s32(0).s32(0); // billing_first, billing_second
+  // billing pair: Tricod telemetry context (sub_440420 arg block); zero = no context
+  return p.s32(billing?.first ?? 0).s32(billing?.second ?? 0);
 }

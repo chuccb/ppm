@@ -1933,7 +1933,7 @@ builder 前綴。native helper 函式體與 direct-caller 稽核仍為獨立檢�
 | op | 名稱 | 名稱狀態 | S2C | C2S | UDP出 | UDP入 | 備註 |
 |---:|---|---|:-:|:-:|:-:|:-:|---|
 | 900 | `GS_CAPSULEMACHINE_START_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
-| 901 | `GS_CAPSULEMACHINE_START_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 901 | `GS_CAPSULEMACHINE_START_ACK` | 官方 catalog | ✗ | ✗ | — | — | **2026-09-19 訂正（非 registry-only)**:consumer=`sub_9A1A30`,由 lobby switch default(LABEL_107)→`sub_9A1A30` 自篩 `sub_591EE0==901`;grammar/臂位見 PACKETS 901 行加錨（fail=banner `0x4B4`+關 compound;success=三尾入 `byte_D7AC88` CASH/PG/COUPON 顯示器） |
 | 902 | `GG_OCC_START_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
 | 903 | `GG_OCC_START_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
 | 904 | `GG_OCC_SUCC_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |

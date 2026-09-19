@@ -82,6 +82,9 @@ const shared = {
     channelId: 1,
     endpoint: { host: env.udpHost, port: udpServer.port },
     channelType: 1,
+    // Written into the client's unk_1D0CFE4 by the 142/196/371 readers —
+    // a write-only global with zero read sites in the whole client image
+    // (line-level 2026-09-19), so 0 is the honest projection.
     endpointOpaque: 0,
     clientFlags: 0,
     clientDefault: 5,

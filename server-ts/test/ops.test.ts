@@ -1708,6 +1708,29 @@ describe("681 — login ack", () => {
     expect(reader.remaining).toBe(0);
   });
 
+  test("explicit Tricod billing pair round-trips at the native tail", () => {
+    const reader = build("GL_LOGIN_ACK", {
+      userNo: 1,
+      servers: [{
+        ...servers[0]!,
+        channelGroups: [{ maxUsers: 0 }, { maxUsers: 0 }, { maxUsers: 0 }],
+      }],
+      billing: { first: -12, second: 0x7fff_ffff },
+    });
+    for (let i = 0; i < 4; i++) reader.s32(); // result/user_no/n100/ext_count
+    reader.s16(); // server_count
+    reader.u16(); // server id
+    reader.str(); // name
+    reader.str(); // host
+    reader.u16(); // port
+    reader.u8(); // flag
+    reader.u16(); // group
+    for (let i = 0; i < 3; i++) reader.s16(); // three group gates
+    expect(reader.s32()).toBe(-12); // billing_first
+    expect(reader.s32()).toBe(0x7fff_ffff); // billing_second
+    expect(reader.remaining).toBe(0);
+  });
+
   test("writes exactly one raw extension tuple when its positive gate is explicit", () => {
     const reader = build("GL_LOGIN_ACK", {
       userNo: 7,

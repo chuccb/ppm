@@ -98,7 +98,7 @@ describe("900 -> 901 capsule start, consumer-safe arm", () => {
 
     const ack = build("GS_CAPSULEMACHINE_START_ACK");
     expect(ack.remaining).toBe(17);
-    expect(ack.u8()).toBe(1); // nonzero status: no wallet/reward mutation in sub_9A1A30
+    expect(ack.u8()).toBe(1); // v11 result switch: nonzero = native failure banner arm (no rows/wallets read)
     expect(ack.s32()).toBe(0); // count 0: no award records
     expect(ack.s32()).toBe(0);
     expect(ack.s32()).toBe(0);
