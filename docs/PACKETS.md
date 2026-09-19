@@ -334,8 +334,8 @@ context，不是額外的 132-byte wire field。官方資源 `Extracted/ui/cfg/p
 本段的 endpoint/USERS 命名以 native producer/consumer 為準；後續 144→195 的
 `sub_4179D0`→`sub_56FF40` 另以 projection `+129/+131` 交叉確認 `ch_type`
 與 `ch_flag`，而 type-3-only projection `+130` 只在 `sub_416DA0` 的 UI/state
-switch 出現。`flag`、`group` 與 billing fields 仍維持 UNRESOLVED；TS 不重建
-native internal scratch object。完整 caller/callee 與 raw extension audit 見
+switch 出現。`flag`、`group` 與 billing fields 維持 UNRESOLVED（**2026-09-19 標終局**：屬 server-政委托管理語義；TS 不重建
+native internal scratch object）。完整 caller/callee 與 raw extension audit 見
 `docs/S2C_NATIVE_AUDITS.md`（681 part）。
 
 `user_no` 另外被格式化成字串，和 `billing_first/billing_second`、常數
@@ -546,8 +546,8 @@ op17 raw 送出會被 loopback，也不授權推測 server 收端行為。
 |---:|---|---|---|
 | 0 | `u8` | `*sub_417D00()` via `sub_592920` | active channel index；由 142/196 channel 路徑設定（§2.6 溯源）。 |
 | 1 | `u8` | `CMyData + 5` (`byte_EE896D`) | 目前房間成員 slot；`sub_537690` 由 room/join 回應寫入。 |
-| 2 | `s8` | `CMyData + 840 == 2` via `sub_5928E0` | 僅布林比較；`CMyData+840` 的 domain **UNRESOLVED**，正常值 0/1。 |
-| 3 | `u8` | `CMyData+840==2` 時 `-2`，否則 `CMyData+13`，via `sub_592920` | source-dependent byte；特別值 `-2` 上線為 `0xFE`。非特別值 domain **UNRESOLVED**，不得命名為 team/mode/peer id。 |
+| 2 | `s8` | `CMyData + 840 == 2` via `sub_5928E0`（**地址別名坐實：全域 `n2`@0xEE8CB0 = EE8968+840**）| 布林 `n2==2`；+840 全域直指寫點 **2026-09-19 窮查為零**(all `n2 =`、`&n2` packet-read sites 皆屬各函式區域遮蔽的 `int n2`，0xEE8CB0 亦無其他命名別名）→ domain **UNRESOLVED（終局）**，正常值 0/1/2；`n2==2` 與 op15 A-final「mode2 變體」分支同鍵（§L682)。 |
+| 3 | `u8` | `n2==2` 時 `-2`，否則 `CMyData+13`(**別名坐實：`n0x10`@0xEE8975 = EE8968+13**),via `sub_592920` | source-dependent byte；特別值 `-2` 上線為 `0xFE`。`CMyData+13` 直指寫點同窮查收斂（無精准直呼）→ domain **UNRESOLVED（終局）**，維持不得命名為 team/mode/peer id。 |
 | 4 | `s32` | `CMyData + 844` (`dword_EE8CB4`) via `sub_592A20` | client 自報的本地 player identifier；room/join 流程中參與比對，無 server 授權規則證據。 |
 | 8 | NUL 結尾 CP949/ANSI 字串 | `sub_537740(CMyData)` = `CMyData + 896`，via `sub_5926F0` | 本地 nickname；無長度前綴，含結尾 NUL。 |
 
@@ -571,7 +571,7 @@ op17 raw 送出會被 loopback，也不授權推測 server 收端行為。
    再存 101；>100 抑制後續送出。這是 client 可觀測 fallback，非 server 可
    自由重設的 retry 政策。
 5. 建構前查 `sub_67F120`：本地 game-mode 物件內部狀態為 **9** 時，直接做
-   本地完成 mutation、**不送 op19**；mode state 9 的名稱 **UNRESOLVED**。
+   本地完成 mutation、**不送 op19**；mode state 9 的名稱 **UNRESOLVED（2026-09-19 標終局：屬 sub_67F120 內部狀態機，無外部命名錨）**。
 6. op20 只有在 manager active、全域 dispatch 物件非 null 且
    `sub_67EAC0()==0` 時才進 `sub_595E80`；case 20 `sub_5968C0` **不讀任何
    欄位**，設 `byte_1D0CFE7=1`、清 mgr `+44/+8/+4`、記 `+24`，呼叫
@@ -679,7 +679,7 @@ UDP session/queue 物件基底 `&byte_1324330`：+0/+1 為 A/B 狀態位元組�
 | A-list | 4（入） | count×{memberKey,raw16 sockaddr}→16 槽成員表填位址；隨即對每個非本地位址送 **op5 ×3**，stateA=4 |
 | A-punch | 5（入） | 首次匹配 key：存本次 `recvfrom` source 為該 member 位址 → 回 **op6 ×3**；重複只 ++counter |
 | A-punch-ack | 6（入） | 首次匹配 key：同樣建位址記錄並設 A4/A5 旗標；不回覆 |
-| A-init(mode2 變體)/A-final | 15（出：n2==2 分支 / 入） | 出：與 op1 同一 `sub_593830`，n2==2 分支送 `u8,u8` ×3 → **stateA=7**（直入完成態）；入：raw16 一次性 latch `unk_F25648`（**全 dump 零讀者**，見 UNRESOLVED） |
+| A-init(mode2 變體)/A-final | 15（出：n2==2 分支 / 入） | 出：與 op1 同一 `sub_593830`，n2==2 分支送 `u8,u8` ×3 → **stateA=7**（直入完成態）；入：raw16 一次性 latch `unk_F25648`(**全 dump 僅 1 decl+1 寫、零讀者 — — 2026-09-19 再驗 2 命中坐實，UNRESOLVED 終局**) |
 | B-init | 9（出） | `sub_594300`：同 A-init 標頭送 secondary（stateB==0 時） |
 | B-solo/list | 10/12（入） | 單筆或清單 {key,raw16 addr} → 存位址後回 **op13 ×3**，stateB=2/4 |
 | B-punch | 13（入） | 首次匹配：用已存位址 `unk_F6D594` → 回 **op14 ×3**，stateB=4 |
@@ -814,7 +814,7 @@ CyAIMultiModeLobbyUI → `sub_4070B0()` busy-wait 重送直到 20 或逾時）�
   `sub_5B71F0(&pos, memberKey)`；碰撞/遮蔽 `sub_5E2570(dword_1D37AB4,…)`。
   `memberKey!=本地 && 槽位 0..15` 才套用；handler 家族已由 debug 字串
   錨定（`Y_UDP_S_MOVE_INF`，tsv 未登錄者），惟 8 與 24 各自的數值
-  歸屬仍 UNRESOLVED（切分鍵在 server 端）。
+  歸屬仍 UNRESOLVED（切分鍵在 server 端；**client 側地道無名錨，2026-09-19 標終局**）。
 - **27（出）＝互動實體的一擊事件報告（edge-trigger；語義升級）**：
   `sub_6013E0` 每幀遍歷實體向量（this+74/76）；當實體 `v24` 的掛載件
   `v24[80]` 經 vtable+96 更新、`v22=vtable+8(v27, flags112/113) > 0` 且

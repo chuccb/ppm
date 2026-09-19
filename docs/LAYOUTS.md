@@ -145,7 +145,7 @@ raw4 讀取，但分支選擇器取其低位元組。完整佈局見 `PACKETS.md
 | 999 | `GL_BLOCK_DEL_ACK` | HIGH | `{u8 code, str nick}`(sub_568170):0→**1325**「%sを解除」+`sub_539B60/539680` 真刪除+重送 1000 / 1→**1326**「24時間は解除できません。'（**24h 冷卻**)/3→**182**（查無） |
 | 1010 | assist-point 增量 assign 推送〔推定〕 | HIGH | `u8 count, count×{u8 slot, s32 value}`(sub_5680E0 行級： `sub_67F380()` 存在閘→`sub_67D8F0(slot,0)` 取列→`v3[60194]=value`);+60194 與 **994 `GG_ASSISTPOINT_NOTIFY`**(tsv Fact）同槽，且 272965 送至 `sub_65FD40`(MY_RESULT_OCCUPYPOINT) ⇒ 增量式 assist/occupy-point 指派 |
 | 1005 | `GL_RANDOMMAP_LIST_ACK` | HIGH | `u8 count`×{u8 mode, u8 mapId} 隨機地圖清單；對向 1004〔推定〕；官方 RANDOMMAP token 先例 748 `GR_SELECTRANDOMMAP_ACK`（tsv） |
-| 488 | `GL_MYROOMCHANGE_ACK` | MEDIUM-HIGH | u8 結果：==1→再讀 u8 slot 寫入 `*sub_417D00()`+0（`CLobbyChannel` 狀態位元組）；!=11→大廳 UI 還原 `sub_44C1D0`；對向 487〔推定〕 |
+| 488 | `GL_MYROOMCHANGE_ACK` | HIGH | `u8 status, [u8 slot if status==1]`（sub_5861C0 行級三分派）:**status==1**→讀 `u8 slot`(預設 0）寫入 `*sub_417D00()`=**CLobbyChannel+0 選中房槽位元組**;**status==11**→no-op（非成功中間碼；**命名層只證『跳過還原』，不臆造 pending 語名**);**其他**→`sub_44C1D0(dword_E9FE70)` **MyRoom UI 還原**(sub_44C1D0 行級： `L"MYROOM_%d"`＋`*(this+4252)` 當前房→sub_451320 重綁背景控制 ⇒ dword_E9FE70 = MyRoom 視窗實例）；對向 487〔推定〕（wire `u8 slot(0..4)`,/clby) |
 | 958 | `GR_TIMEOVER_ONGAME_ACK` | HIGH | dev 標籤 `GameNetwork::OnGRTimeOverOnGameACK`（REQ 審計已錄）字尾 ACK；handler 不讀 payload，收到即回送 957 `GR_TIMEOVER_ONGAME_RESPON_REQ`〔推定〕（s8＝剩餘秒數歸零與否） |
 | 203 | `GL_MYAVATARINFO_ACK` | MEDIUM-HIGH | 讀取序列修正：`u8 count(≤4)`，每筆 `{u8 tag, u16, [3×u16 if tag!=3], [8×raw4 if u16!=0]}`，經 `sub_571D50→sub_524660` 灌入全域 4 槽×44B `p_p_p_p_p_n1189`；消費者＝`GAMEROOM_AVATAR` 3D 預覽 `sub_6A9950` 與 `GAMEROOM_MAIN_GUN_%d0` 面板（12 個 accessor）；無 userKey＋自角色情境 → 自身 avatar／裝備資料推送（server push，無對向 REQ） |
 | 880 | `GQ_QUEST_ACCEPT_DAILY_NOTIFY` | MEDIUM-HIGH | handler 更正＝`sub_91DC50`（case 本體為 `sub_407E00(); sub_91DC50(packet);`，原表誤取 getter）；不讀 payload，KR log（已損毀）後立即送出 876 `GQ_QUEST_ACCEPT_DAILY_REQ`（tsv Fact）；與官方 877 `GQ_QUEST_ACCEPT_DAILY_ACK`（handler `sub_91D7E0`、讀取空）為不同 case／handler，非別名；876 其他觸發點＝登入大廳流程、任務窗刷新、866 清單 <3 項自動補齊 → server 端每日任務接取提示 |
@@ -317,7 +317,7 @@ raw4 讀取，但分支選擇器取其低位元組。完整佈局見 `PACKETS.md
 | 482 | GL_GAMECENTER_COIN_CHANGED_ACK | sub_585F50 | `u16 u16` |
 | 484 | GG_GAMECENTER_GAME_START_OK_ACK | sub_584F70 | `u16 u8 u16 s32` |
 | 486 | GL_GET_GAMEROOM_PROGRESSTIME_ACK | sub_56AE30 | `u8 u8 s8/bool u8 s8/bool u16 u8 s32 u8 s8/bool u16 u8 s32 u8 s8/bool u8 s8/bool u8 u8 s8/bool s8/bool u8 s8/bool` |
-| 488 | GL_MYROOMCHANGE_ACK〔推定〕 | sub_5861C0 | `u8 u8` |
+| 488 | GL_MYROOMCHANGE_ACK〔推定〕 | sub_5861C0 | `u8 status, [u8 slot if status==1]`（1=成功寫 CLobbyChannel+0;11=no-op;其他→MyRoom UI 還原） |
 | 489 | 〔未命名〕 | sub_57C230 | `u8`（bit0→清全域 `this_5`；UNRESOLVED，見審計節） |
 | 572 | GV_TEST_ACK | sub_58E5E0 | `(無直接讀取/轉發)` |
 | 584 | GC_CLAN_PROTOCOL_ACK | sub_54D040 | `s32` |
