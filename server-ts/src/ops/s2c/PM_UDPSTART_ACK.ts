@@ -2,7 +2,9 @@
  * Channel admission result.
  *
  * The client reads every field before it branches on `result` (`sub_555D50`),
- * so all of them must be present even on failure. (docs/PACKETS.md §3.15d)
+ * so all of them must be present even on failure. (docs/PACKETS.md §3.15d;
+ * full-body re-read 2026-09-19: v72/v68 stored-only, restriction `%d`/`%.1f`
+ * sites at result 6..10, net-cafe tail = {4 x u8, 8 x s32}.)
  *
  * Note the client's second-level handler ignores `result` entirely and sends
  * the enter-channel request regardless, so rejecting here is not enough on its
@@ -57,10 +59,18 @@ export default function PM_UDPSTART_ACK(op: number, admission: Admission): Packe
     .u8(rankRestricted ? 1 : 0)
     .s32(dailyLoginRewardPg)
     .str(channelName) // native v71 local char[40]
-    .s32(0) // read then unused
-    .s32(0) // read then unused
+    // v72/v68: line-proven stored-only in sub_555D50 (read into locals,
+    // never referenced afterwards) — zero is the honest value.
+    .s32(0)
+    .s32(0)
     .s32(restrictionLevel)
     .f32(restrictionKdr)
-    .u32(0) // client_request_context: echoed into later requests, meaning unproven
-    .u8(0); // has_net_cafe_info: 0 = omit the trailing block
+    // Native reads this word via sub_592AC0 (raw4), stores it into the
+    // request-context global dword_F2A684; the echo semantics upstream
+    // stay unproven, so 0 is the only non-fabricated value.
+    .u32(0)
+    // has_net_cafe_info: non-zero makes the client read the trailing
+    // block {4 x u8, 8 x s32} into sub_A1C800 — not emittable without a
+    // net-cafe model, so 0.
+    .u8(0);
 }
