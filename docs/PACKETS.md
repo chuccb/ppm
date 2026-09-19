@@ -1500,6 +1500,11 @@ else:
   if has_my != 0: u8 selected_raw, u8 footer_raw
   raw4 state494 (native local `int v57`, stored at client state [494])
 ```
+**記錄建構者 `sub_53F830` 行級 (2026-09-19)**: `mode_param_a`→mode 物件 +12
+(有條件)、`mode_param_b`→mode 物件 +4 (`sub_74F450` = 純 `*(this+1)=a2` setter,
+旁支寫入 `a2 & 1` ⇒ +4 是布林旗);room **+107/+136/+144/+146 由建構者寫入
+literal 1/0/0/0,完全不在 wire 上**;typeA→+108、paramB→+4、nskbg→+185 都經
+ctor 再行證實。
 `sub_580A80` 的 round-4/non-round-4 分支讀取數量不同；不要把 mode-3
 header 的 `n4` 當 ordinary room count，也不要把 `pair_byte_3` 直接命名成
 bool：native `sub_592900/sub_592940` 都只證明它們各是一個 byte。兩個

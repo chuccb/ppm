@@ -37,6 +37,18 @@
  *       s32 teamId, s32 texCrc (native reads both as `sub_592A40`,
  *       NOT the u32 reader), str texName, u8 tailByte
  *
+ * Record-constructor truth (sub_53F830, line level 2026-09-19):
+ * `mode_param_a` reaches the mode object's +12 slot only when the
+ * factory produced an object; `mode_param_b` reaches the mode object's
+ * +4 slot through `sub_74F450` (a plain `*(this+1) = a2` setter — and a
+ * sibling write path masks `a2 & 1`, i.e. +4 carries a boolean flag in
+ * native flows). room +107/+136/+144/+146 are filled with native
+ * LITERALS (1/0/0/0) and never come from the wire — so a must not send
+ * "special" values there: they do not exist on the wire at all.
+ * game_mode goes to the `sub_53FBB0` lobby-UI factory; room_type_a to
+ * room +108, room_type_b +109, double_damage +128 (all set after the
+ * ctor call by the case itself).
+ *
  * Mode 3 (tournament) keeps its own grammar in PACKETS §3.9 and is not
  * emittable by this server: the client routes it to a different reader
  * that does not consume the ordinary `count`, so writing it without a

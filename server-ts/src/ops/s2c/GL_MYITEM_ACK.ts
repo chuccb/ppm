@@ -2,6 +2,29 @@
  * 199 -> 200 inventory page (consumer `sub_570AB0`: `s8/bool success`
  * gate, nonzero forwards to the `sub_524B70` record loop).
  *
+ * Native store layout in the 5120-slot table (sub_524B70, line level
+ * 2026-09-19; all offsets are DWORD-indexed, record stride 7 dwords at
+ * base 210):
+ * - slot       -> +210+7i (echoed out by the sub_74E390 serializer)
+ * - item id    -> +211+7i (`sub_535020` catalog check up front;
+ *   failure is the native **error code 6** via `sub_528960(6,...)`,
+ *   not the 527550-path error 10)
+ * - f1/f2      -> +212/+213+7i — a full base-address sweep shows BOTH
+ *   cells are written ONLY here and never read by any other code in
+ *   the client image: proven stored-only (the "float?" question is
+ *   answered negatively; this build just ignores them)
+ * - period     -> +214+7i — the only live counter: `sub_526E80` /
+ *   `sub_528D20` set it per item id, and the outbound serializer keeps
+ *   records in the special item-id ranges ONLY when period > 0;
+ *   ordinary ids serialize whenever id > 0. Behaviourally a
+ *   remaining-duration/activity counter.
+ * - extra      -> +215+7i, read only when the a3 gate is set
+ *   (a3 = 1 for the MYITEM page) — same base-address sweep result as
+ *   f1/f2: stored-only.
+ * - durability -> u16 into the separate `28*i+862` DWORD-indexed table;
+ *   the `14*i+431/432` pair mirrors current/max, and `sub_534450`
+ *   refreshes the client item catalog's durability words from it.
+ *
  * The current Store has no inventory/catalog model. An empty successful page is
  * nevertheless a complete, client-consumable response: start index 0 followed
  * immediately by the documented negative-slot sentinel.
@@ -12,12 +35,14 @@ import { Packet } from "../../packet.ts";
 export interface InvItem {
   readonly slot: number;
   readonly itemId: number;
-  /** Native generic raw4 slot; current TS accepts a finite f32 projection only. */
+  /** raw4 wire, stored into +212+7i, never read anywhere (stored-only);
+   * finite-f32 projection kept solely for byte compatibility of the API. */
   readonly f1: number;
-  /** Native generic raw4 slot; current TS accepts a finite f32 projection only. */
+  /** raw4 wire, stored into +213+7i, never read anywhere (stored-only). */
   readonly f2: number;
   readonly period: number;
-  /** Native u8 after the period; its domain is unresolved. */
+  /** u8 after the period; native stores it into +215+7i on the a3=1 page
+   * and no code path ever reads it again (stored-only). */
   readonly extra?: number;
   /** Native u16 current/max durability word. */
   readonly durability: number;
