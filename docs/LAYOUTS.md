@@ -671,7 +671,30 @@ raw4 讀取，但分支選擇器取其低位元組。完整佈局見 `PACKETS.md
 >   方向解讀為 Inference/HIGH，「server 管理的 nick 黑單、client 同步
 >   快取」之功能面為 Fact。
 
-### 隨機地圖（1004–1005）
+### 佔領/助攻鏈（906/907/994）TS 落地記事（2026-09-19）
+
+> - **server-ts 落地**:`src/ops/{c2s,s2c}/GG_OCC_FAIL_{REQ,ACK}.ts` +
+>   `src/ops/s2c/GG_ASSISTPOINT_NOTIFY.ts`；GRAMMAR 權威仍為本檔行級行。
+> - 906(sub_565470 行級）:`u8 pointId, u8 claimedSlot, s32 claimedUserId`——
+>   pointId = wire `*(entity+64)+1`(1..3,對 `pointId-1<3` 防護）；claimedSlot
+>   非對稱——觀戰 `n2==2` 給字 254，否則給自身 n0x10 原值（無 +1);
+>   claimedUserId = dword_EE8CB4(§3.15d3a 交叉驗證命名沿用）。
+> - 907(sub_565560 行級）:`u8 action, u8 point, u8 actorSlot, u8 points
+>   [, s32 actorUid if action==0]`;**actorUid 僅 fail 臂讀入 v11、之後零引用
+>   （讀後未用）；§3.15d3a 交叉驗證語意為 acting uid → TS 誠實回聲 requester uid
+>   （勝於偽造 0)**;action 15 且自槽吻合走 sub_7713C0 特殊閃；成功臂 point
+>   驅動 controller 行 `point-1`(hijack sub_771380 / occupy sub_7784D0,1..3 域）;
+>   fail 臂 actorSlot==自槽才放「capture interrupted, 獲得point=%d」橫條、
+>   觀戰比較 -2 永不中。
+> - TS 907 reply policy：本 server 無 occupy/hijack 模態 → action=0（未加分
+>   是事實）、points=0;point/actorUid 回聲 request 欄位；actorSlot=
+>   (claimedSlot==254? 0:claimedSlot 回聲）。
+> - 994(sub_5676D0 行級）:`u8 eventType〔; u8 messageContext, s32 v18_if_eventType<100〕,
+>   u8 count, count×{u8 slot, s32 charId, s32 assistValue, s32 occupyPoint}`;
+>   **v18 讀後未用 → 投影 0**;eventType 三個定點：0=裸包、<100=雙位標頭閘、
+>   3=popup 僅自槽/隊友分、107+自 charId 吻合→(32,23) banner;charId==EE8CB4 觸發
+>   assist.wav + own-score 全域；occupyPoint 落 `(ppt+60194)` 與 907/1010 同族。
+> - native 堆上限：v16[64] dword = 4/筆 → 單幀至多 16 筆（MAX_ASSIST_RECORDS)。
 
 > - 1004 於大廳主 UI 初始化末段**無條件**送出一次（`sub_588420`，行
 >   33357；先前可疑的 `+4264` gate 經原始碼複讀確認為 xref 工具偽影）。

@@ -2010,6 +2010,14 @@ u8 point_id, u8 claimed_slot, s32 claimed_user_id
 | C2S → S2C | 已確認 ACK layout | client 行為 |
 |---|---|---|
 | 902 → 903 | `u8 action, u8 point, u8 actor_slot, u8 capture_participant_count, s32 actor_uid` | `action==0` 時 `sub_564E30` → `sub_771490(point-1, actor_slot, capture_participant_count, actor_uid)` |
+
+> **2026-09-19 行級加錨（906/907，sub_565470/sub_565560 重讀）**:
+> REQ 906 三欄 `u8 pointId(=field+1), u8 claimedSlot, s32 claimedUserId` 6 bytes,
+> 與本節同名對齊（舊扁表 `u8 u8 s32` 一致）;ACK 907 行級證**第四欄 msg 字串自帶
+> 「獲得point=%d」標籤 = points 值**（非 participant count;`sub_771670(point-1,
+> actor_slot, points)` 繪 HUD 同值），且 **s32 actor_uid 僅 `action==0` 臂讀入,
+> 讀後未用（v11 零後續引用）**——語意沿用本節交叉驗證（actor uid),TS 落地
+> (server-ts `GG_OCC_FAIL_REQ/ACK`）回聲 requester uid 勝於偽造 0。
 | 904 → 905 | `u8 action, u8 point, u8 slot_a, u8 slot_b` | 原版 Occupy `action==0` → `sub_771550(point-1, slot_a, slot_b)`；Renewal client 只讀前二欄，因此四欄 payload 對兩者皆安全 |
 | 906 → 907 | `u8 action, u8 point, u8 actor_slot, u8 capture_participant_count, s32 actor_uid` | `action==0` → `sub_771670(point-1, actor_slot, capture_participant_count)` |
 | 908 | `(空)` | `sub_565850` 純觸發 `sub_771770`，尚未由可重現條件證明何時可發 |

@@ -8,6 +8,7 @@
 
 import { describe, expect, test } from "bun:test";
 import { Glob } from "bun";
+import { gapTable } from "../src/opcodes.ts";
 
 const opsRoot = new URL("../src/ops/", import.meta.url).pathname;
 
@@ -18,6 +19,11 @@ for (const line of tsv.split("\n")) {
   if (tab < 0) continue;
   officialNameByOpcode.set(Number(line.slice(0, tab)), line.slice(tab + 1).trim());
 }
+
+// Handler-proven official-name-table gaps (docs/LAYOUTS.md 〔推定〕 rows):
+// the client binary's registry omits these numbers, so the style gate accepts
+// the shared table from opcodes.ts instead of duplicating names here.
+for (const [opcode, name] of [...gapTable]) officialNameByOpcode.set(opcode, name);
 
 const modules: { dir: "c2s" | "s2c"; name: string; source: string }[] = [];
 for (const dir of ["c2s", "s2c"] as const) {

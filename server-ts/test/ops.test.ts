@@ -12,6 +12,7 @@ import { Result, type GameServer } from "../src/ops/s2c/GL_LOGIN_ACK.ts";
 import { read as readCredentials } from "../src/ops/c2s/GL_LOGIN_REQ.ts";
 import { Store } from "../src/store.ts";
 import dataRecvCompletedRequest from "../src/ops/c2s/GL_DATA_RECV_COMPLETED_REQ.ts";
+import occFailRequest from "../src/ops/c2s/GG_OCC_FAIL_REQ.ts";
 import roomBroadcastRequest from "../src/ops/c2s/GG_ROOMBROADCAST_REQ.ts";
 import msgAddRequest from "../src/ops/c2s/GL_MSG_ADD_REQ.ts";
 import msgDelRequest from "../src/ops/c2s/GL_MSG_DEL_REQ.ts";
@@ -792,6 +793,141 @@ describe("370 — change-channel request", () => {
         connection,
       ),
     ).toThrow(/370/);
+  });
+});
+
+describe("906/907 — occupy-fail request/ack", () => {
+  test("907 carries fixed succeed/fail grammars (s32 actorUid only on the fail arm)", () => {
+    const success = reread(buildPacket("GG_OCC_FAIL_ACK", 1, 2, 3, 4, 55));
+    expect(success.opcode).toBe(907);
+    expect(success.u8()).toBe(1);
+    expect(success.u8()).toBe(2);
+    expect(success.u8()).toBe(3);
+    expect(success.u8()).toBe(4);
+    expect(success.remaining).toBe(0); // success arm reads no s32 — none emitted
+
+    const failure = reread(buildPacket("GG_OCC_FAIL_ACK", 0, 1, 5, 0, 777));
+    expect(failure.u8()).toBe(0);
+    expect(failure.u8()).toBe(1);
+    expect(failure.u8()).toBe(5);
+    expect(failure.u8()).toBe(0);
+    expect(failure.s32()).toBe(777); // actorUid echo (native v11: read-but-unused)
+    expect(failure.remaining).toBe(0);
+  });
+
+  test("906 parses 6 bytes and answers the failure arm echoing point/slot/uid", () => {
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof occFailRequest>[1];
+    occFailRequest(
+      reread(new Packet(opcodeFor("GG_OCC_FAIL_REQ")).u8(2).u8(4).s32(777)),
+      connection,
+    );
+    expect(replies).toEqual([["GG_OCC_FAIL_ACK", 0, 2, 4, 0, 777]]);
+  });
+
+  test("906 spectator report (254 sentinel) projects the inert slot 0", () => {
+    const replies: unknown[][] = [];
+    const connection = {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    } as unknown as Parameters<typeof occFailRequest>[1];
+    occFailRequest(
+      reread(new Packet(opcodeFor("GG_OCC_FAIL_REQ")).u8(1).u8(254).s32(-7)),
+      connection,
+    );
+    expect(replies).toEqual([["GG_OCC_FAIL_ACK", 0, 1, 0, 0, -7]]);
+  });
+
+  test("906 refuses short or long payloads", () => {
+    const connection = {
+      reply: () => undefined,
+    } as unknown as Parameters<typeof occFailRequest>[1];
+    expect(() =>
+      occFailRequest(
+        reread(new Packet(opcodeFor("GG_OCC_FAIL_REQ")).u8(9).u8(4).u8(1).u8(2).u8(3)),
+        connection,
+      ),
+    ).toThrow(/906/);
+    expect(() =>
+      occFailRequest(
+        reread(new Packet(opcodeFor("GG_OCC_FAIL_REQ")).u8(9).u8(4).s32(7).u8(0)),
+        connection,
+      ),
+    ).toThrow(/906/);
+  });
+});
+
+describe("994 — assist-point notify", () => {
+  test("eventType=0 emits a bare packet (native reads nothing beyond it)", () => {
+    const reader = reread(buildPacket("GG_ASSISTPOINT_NOTIFY", 0));
+    expect(reader.opcode).toBe(994);
+    expect(reader.u8()).toBe(0);
+    expect(reader.remaining).toBe(0);
+  });
+
+  test("eventType>=100 skips the popup header pair and streams records", () => {
+    const reader = reread(
+      buildPacket("GG_ASSISTPOINT_NOTIFY", 107, {
+        entries: [
+          { slot: 1, charId: 42, assistValue: 11, occupyPoint: 22 },
+          { slot: 2, charId: 43, assistValue: -3, occupyPoint: 44 },
+        ],
+      }),
+    );
+    expect(reader.u8()).toBe(107);
+    expect(reader.u8()).toBe(2);
+    expect(reader.u8()).toBe(1);
+    expect(reader.s32()).toBe(42);
+    expect(reader.s32()).toBe(11);
+    expect(reader.s32()).toBe(22);
+    expect(reader.u8()).toBe(2);
+    expect(reader.s32()).toBe(43);
+    expect(reader.s32()).toBe(-3);
+    expect(reader.s32()).toBe(44);
+    expect(reader.remaining).toBe(0);
+  });
+
+  test("eventType<100 requires messageContext and emits the read-but-unused s32", () => {
+    const reader = reread(
+      buildPacket("GG_ASSISTPOINT_NOTIFY", 3, {
+        messageContext: 7,
+        entries: [{ slot: 5, charId: 6, assistValue: 7, occupyPoint: 8 }],
+      }),
+    );
+    expect(reader.u8()).toBe(3);
+    expect(reader.u8()).toBe(7);
+    expect(reader.s32()).toBe(0); // native v18: read-but-unused
+    expect(reader.u8()).toBe(1);
+    expect(reader.u8()).toBe(5);
+    expect(reader.s32()).toBe(6);
+    expect(reader.s32()).toBe(7);
+    expect(reader.s32()).toBe(8);
+    expect(reader.remaining).toBe(0);
+
+    expect(() => buildPacket("GG_ASSISTPOINT_NOTIFY", 3, {})).toThrow(/messageContext/);
+  });
+
+  test("native v16 stack grants at most 16 records per frame", () => {
+    const entries = Array.from({ length: 17 }, (_, slot) => ({
+      slot,
+      charId: slot,
+      assistValue: slot,
+      occupyPoint: slot,
+    }));
+    expect(() => buildPacket("GG_ASSISTPOINT_NOTIFY", 100, { entries })).toThrow(
+      /16/,
+    );
+    const sixteen = reread(
+      buildPacket(
+        "GG_ASSISTPOINT_NOTIFY",
+        100,
+        { entries: entries.slice(0, 16) },
+      ),
+    );
+    expect(sixteen.u8()).toBe(100);
+    expect(sixteen.u8()).toBe(16);
+    expect(sixteen.remaining).toBe(16 * 13);
   });
 });
 
@@ -1820,8 +1956,8 @@ describe("registry", () => {
   });
 
   test("the registry exposes both operation folders at startup", () => {
-    expect(summary()).toMatch(/^c2s 69 \(/);
-    expect(summary()).toMatch(/\), s2c 69 \(/);
+    expect(summary()).toMatch(/^c2s 70 \(/);
+    expect(summary()).toMatch(/\), s2c 71 \(/);
     expect(summary()).toContain("GL_LOGIN_ACK");
     expect(summary()).toContain("GL_LOGIN_REQ");
   });

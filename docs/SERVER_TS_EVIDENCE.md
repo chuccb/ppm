@@ -1,4 +1,23 @@
 
+## 2026-09-19 — OCC 鏈 906/907 與 ASSISTPOINT 994 落地(fail-closed policy 實踐)
+
+- **Grammar 權威**:docs/LAYOUTS.md 行級行(sub_565470、sub_565560、sub_5676D0)已對回
+  PaperMan.exe.c;906/907 欄名沿用 PACKETS.md §3.15d3a REQ→case→ACK 三重交叉驗證
+  (`pointId/claimedSlot/claimedUserId` ↔ `action/point/actorSlot/points/actorUid`)。
+- **讀後未用(read-but-unused)行級證**:907 的 s32 `actorUid` 僅 `action==0` 臂讀入
+  `v11`,v11 全函式僅「宣告/init 0/讀入」三處 → 零後續引用;994 的 `s32 v18`(標頭對偶欄)
+  同型(宣告/init 0/讀入僅三處)。TS 對 907 誠實**回聲 requester uid**(§3.15d3a actor-uid
+  語意)勝於偽造 0;對 994 v18 投影 0 並註明(native 讀後未用)。
+- **907 fail-closed 實踐**(對應 Part II item 3 政策):server 無 occupy/hijack 模態與
+  controller state,906 一律回 action=0、points=0(未加分為事實),point/actorUid 自
+  request 回聲;actorSlot 回聲 claimedSlot、惟 254(觀戰 sentinel,客端比較器=-2 永不中)
+  投影 0。無 state mutation、無偽造成功尾。
+- **994 事件碼域**:`AssistEvent` 常數表(AssistDamage=1、AssistAirshot=2、AssistHp=3、
+  BombPlant=101、BombExplo=102、BombDestroy=103、Dye=104、Pulp=105、PulpDestroy=106、
+  Occupy=107、Goal=108)源自 sub_6750B0 cond36 映射(guard `!=0 && <0x6D`);record 上限
+  `MAX_ASSIST_RECORDS=16` 源自 native 堆 v16[64]·4dword/record。模組 grammar 完整但
+  **無擬發caller**(無助攻事件源,現行部署不送 994)。
+
 ## 2026-09-19 — 黑單鏈 996–1003 與 MYROOM 487/488 全模組落地
 
 - **Grammar 權威**：docs/LAYOUTS.md 行級行（sub_567D50、sub_567BD0、sub_5861C0、sub_567F20、
