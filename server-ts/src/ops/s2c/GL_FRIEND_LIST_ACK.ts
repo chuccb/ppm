@@ -17,7 +17,6 @@
 
 import { Packet } from "../../packet.ts";
 
-
 export interface FriendListEntry {
   readonly nickname: string;
   /** s32 wire; the native table retains only the low byte. */

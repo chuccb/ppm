@@ -53,7 +53,6 @@ export interface CharacterDataPatch {
   readonly appearance: readonly number[];
 }
 
-
 export interface MyInfo {
   readonly userId: number;
   readonly nickname: string;

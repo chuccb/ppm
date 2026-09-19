@@ -21,7 +21,6 @@
 
 import { Packet } from "../../packet.ts";
 
-
 export interface MsgListEntry {
   /** field_s1: key proven to drive the 421/423 mark requests. */
   readonly key: string;

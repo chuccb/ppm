@@ -95,7 +95,6 @@ const snapshot = {
   })),
 } satisfies NewSkillProfileSnapshot;
 
-
 describe("142 connect-ack payload snapshot", () => {
   // Fixed wall clock: 2026-09-19 21:30 local.
   // packed = 26<<24 | 9<<19 | 19<<13 | 21<<7 | 30 = 0x1A4A6A9E (sub_534F20 inverse).
@@ -180,7 +179,6 @@ describe("native 198/247/255 payload snapshots", () => {
     `));
   });
 
-
   test("426 emits the full native message row in wire order", () => {
     expect(hex(GL_MSG_RECVLIST_ACK(426).payload())).toBe(compact("0000 00 00"));
     const rows = [
@@ -192,7 +190,6 @@ describe("native 198/247/255 payload snapshots", () => {
       73656E64657200 02 7375626A00 78563412 68656C6C6F00 4600 FEFF
     `));
   });
-
 
   test("422/424 emit the exact {u8 statusRaw, str key} frames", () => {
     expect(hex(GL_MSG_ADD_ACK(420, "nick1", 6, 0).payload())).toBe("6E69636B31000600");

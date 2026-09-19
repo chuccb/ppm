@@ -156,7 +156,6 @@ export class Packet {
     return this;
   }
 
-
   /** UTF-16LE + 16-bit NUL (`sub_592770`). */
   wstr(text: string): this {
     if (typeof text !== "string") throw new TypeError("UTF-16 string must be a string");

@@ -24,7 +24,6 @@ export interface PartsUpEntry {
   readonly period: number;
 }
 
-
 export function writePartsUpEntry(packet: Packet, entry: PartsUpEntry): Packet {
   return packet
     .s32(entry.key0)

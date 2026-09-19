@@ -151,7 +151,6 @@ describe("scalar domains", () => {
     expect(() => new Packet(1).f32(Number.MAX_VALUE)).toThrow(/f32 expects/);
   });
 
-
 });
 
 describe("validation", () => {

@@ -11,7 +11,6 @@
 import { Packet } from "../../packet.ts";
 import { type NewSkillProfileSnapshot, type MyInfo } from "../../store.ts";
 
-
 export default function GL_MYINFO_ACK(
   op: number,
   myInfo: MyInfo | null,

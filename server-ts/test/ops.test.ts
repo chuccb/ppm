@@ -1757,7 +1757,6 @@ describe("681 — login ack", () => {
     expect(reader.remaining).toBe(0);
   });
 
-
   test("keeps the s32 login words unmasked", () => {
     const reader = build("GL_LOGIN_ACK", { userNo: 7, n100: 0x1234_5678, servers });
     reader.s32();
@@ -1770,7 +1769,6 @@ describe("681 — login ack", () => {
       servers: [{ ...servers[0]!, serverId: Number.NaN }],
     })).toThrow(/u16 expects/);
   });
-
 
 });
 
