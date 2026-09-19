@@ -12,11 +12,30 @@
  * so at most 19/20/200/1 bytes plus NUL per slot. The key slot drives the
  * 421/423 mark/read requests; the name slot feeds the MSG_NAME/reply path;
  * the selector string is compared against `F`/`M` to pick friend-action or
- * reply controls. The stored raw4 (extraRaw) and raw2 (flagRaw) keep only
- * their low byte in the native table — a client storage fact that does NOT
- * narrow wire widths (docs/PACKETS.md §3.11 forbids renaming the raw4 a
- * timestamp). The mailbox is not part of the current Store; the default
- * empty projection stays the automatic answer.
+ * reply controls.
+ *
+ * Native store layout (sub_5378C0, one byte table per record family;
+ * 2026-09-19 行級):
+ * - key    -> +241712 + 20*i (char[20])
+ * - kind   -> +241912 + 2*i  low byte ONLY; the 424 mark-read path
+ *   (`sub_537D20`) OVERWRITES it with 89, and the sole reader anywhere
+ *   (`sub_537E10`-family) returns `*(...) == 89`. The kind byte is
+ *   therefore effectively the mail read-state channel: 0 or any
+ *   non-89 = unread, 89 = read. No client branch distinguishes any
+ *   other kind value.
+ * - name   -> +241932 + 21*i
+ * - extraRaw-> +60536 + i      low byte ONLY; besides the store and the
+ *   table compaction shifts, THE ENTIRE CLIENT IMAGE HAS NO READ SITE
+ *   — it is a stored-only cell. 4-byte wire width still holds
+ *   (§3.11 forbids calling it a timestamp; it is narrower to say the
+ *   client truly ignores it).
+ * - body   -> +242184 + 201*i
+ * - selector-> +244194 + 2*i
+ * - flagRaw-> +122107 + i      low byte ONLY; same as extraRaw:
+ *   store/compaction only, zero read sites — stored-only.
+ *
+ * The mailbox is not part of the current Store; the default empty
+ * projection stays the automatic answer.
  */
 
 import { Packet } from "../../packet.ts";
@@ -24,17 +43,20 @@ import { Packet } from "../../packet.ts";
 export interface MsgListEntry {
   /** field_s1: key proven to drive the 421/423 mark requests. */
   readonly key: string;
-  /** field_a3: semantics unresolved. */
+  /** Read-state channel: native stores the low byte and the 424 path
+   * overwrites it with 89 (`== 89` is the sole is-read getter). */
   readonly kind: number;
   /** field_s2: feeds the native MSG_NAME/reply controls. */
   readonly name: string;
-  /** field_a5: raw4 wire; low byte retained by the native table. */
+  /** field_a5: raw4 wire; native keeps the low byte at a stored-only cell
+   * (no read site in the whole client image). */
   readonly extraRaw: number;
   /** field_s3: no recovered direct join to the MESSAGE control. */
   readonly body: string;
   /** field_s4: compared against "F"/"M" in the native UI controls. */
   readonly selector: string;
-  /** field_a8: raw2 wire; low byte retained by the native table. */
+  /** field_a8: raw2 wire; native keeps the low byte at a stored-only cell
+   * (no read site in the whole client image). */
   readonly flagRaw: number;
 }
 

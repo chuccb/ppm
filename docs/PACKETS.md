@@ -1565,6 +1565,13 @@ The dump does not show the wire raw4 being written to that dword array, so
 raw4 must not be renamed timestamp. The 201-byte string has no recovered direct
 address join to the `MESSAGE` control, and raw2/header/context remain raw.
 
+**2026-09-19 行級定案（store/compaction 全位址掃描）**:
+`+241912+2i` kind 低 byte 的同基址完全清單 = store / compaction shift /
+mark-read 覆寫 89 / 唯一 getter `==89` — **kind 低 byte 實效即已讀通道**;
+`+60536+i`(extraRaw 低 byte)與 `+122107+i`(flagRaw 低 byte)的同基址清單
+只有 store 與 compaction shift —— **整個客戶端影像零讀點 = stored-only,
+0 是唯一不虛構的值**(wire 寬度仍不縮)。
+
 **2026-09-18 重驗 (425/426 leg)**: reader `sub_55A630` + store `sub_5378C0`
 三式一致;TS builder 已升級為全語法投影, 逐欄對齊原生表 stride 安全上限
 (key 19B / name 20B / body 200B / selector 1B / count 10), raw4/raw2 低 byte
