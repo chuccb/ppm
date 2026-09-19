@@ -298,6 +298,58 @@ describe("lobby bootstrap packets", () => {
     expect(rooms.u8()).toBe(0);
     expect(rooms.remaining).toBe(0);
 
+    // 108 full grammar: one state>=0 room record, native 12-field order.
+    const oneRoom = decode(build("GL_GAMEROOMINFO_ACK", [{
+      roomNo: 7, state: 2, curPlayers: 3, hasPass: 1, maxPlayers: 8,
+      maxSlotMask: 0xff, gameMode: 0, roomTypeA: 0, modeParamA: 1,
+      roomTypeB: 0, doubleDamage: 1, map: 5, modeParamB: 2, noSkillBg: 0,
+    }]).encode());
+    expect(oneRoom.u8()).toBe(0); // outer mode
+    expect(oneRoom.u8()).toBe(1); // count
+    expect(oneRoom.u8()).toBe(7); // room_no
+    expect(oneRoom.s8()).toBe(2); // state -> preset title 0x135+2
+    expect(oneRoom.u8()).toBe(3); // cur_players
+    expect(oneRoom.s8()).toBe(1); // has_pass (native s8 accessor)
+    expect(oneRoom.u8()).toBe(8); // max_players
+    expect(oneRoom.u16()).toBe(0xff); // max_slot_mask
+    expect(oneRoom.u8()).toBe(0); // game_mode TeamMatch
+    expect(oneRoom.s8()).toBe(0); // room_type_a
+    expect(oneRoom.s8()).toBe(1); // mode_param_a
+    expect(oneRoom.s8()).toBe(0); // room_type_b
+    expect(oneRoom.s8()).toBe(1); // double_damage
+    expect(oneRoom.u8()).toBe(5); // map
+    expect(oneRoom.u8()).toBe(2); // mode_param_b
+    expect(oneRoom.u8()).toBe(0); // no_skill_bg
+    expect(oneRoom.remaining).toBe(0);
+
+    // 108 custom-title arm: state < 0 carries the inline str title.
+    const custom = decode(build("GL_GAMEROOMINFO_ACK", [{
+      roomNo: 1, state: -1, title: "hello", curPlayers: 1, hasPass: 0,
+      maxPlayers: 4, maxSlotMask: 0xf, gameMode: 7, roomTypeA: 0,
+      modeParamA: 0, roomTypeB: 0, doubleDamage: 0, map: 1,
+      modeParamB: 0, noSkillBg: 1,
+    }]).encode());
+    expect(custom.u8()).toBe(0);
+    expect(custom.u8()).toBe(1);
+    expect(custom.u8()).toBe(1);
+    expect(custom.s8()).toBe(-1);
+    expect(custom.str()).toBe("hello");
+    expect(custom.remaining).toBe(13); // 12 documented room fields follow
+
+    // 106 full grammar: one positive-key user with emblem tail.
+    const users2 = decode(build("GL_USERLIST_ACK", [{
+      userKey: 42, nick: "bob", exp: 7, texKey: 9, texName: "em",
+    }]).encode());
+    expect(users2.u16()).toBe(1); // nonzero gate
+    expect(users2.u8()).toBe(0); // flags
+    expect(users2.u8()).toBe(1); // count
+    expect(users2.s32()).toBe(42); // userKey
+    expect(users2.str()).toBe("bob");
+    expect(users2.s32()).toBe(7); // exp (NOT a status byte)
+    expect(users2.s32()).toBe(9); // emblem texKey
+    expect(users2.str()).toBe("em");
+    expect(users2.remaining).toBe(0);
+
     expect(decode(build("GL_SHOPIN_ACK").encode()).remaining).toBe(0);
     expect(decode(build("GL_DATA_RECV_COMPLETED_ACK").encode()).remaining).toBe(0);
 

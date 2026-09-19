@@ -1458,23 +1458,26 @@ if mode != 3:
     u8    room_no (需 <0xD2=210), s8 state
     state>=0: title 由 client 查字串表 state+309 (msgtableres 0x135+state
               = 預設房名片語, 如「私達はペラペラだ！」「日々の努力が実力に
-              なる」…); state<0: string title (自訂房名) — 之後皆為下列 12 欄:
+              なる」…); state<0: string title (自訂房名) — 之後皆為下列 12 欄
+              (2026-09-19 accessor 行級訂正 signedness, LAYOUTS 列早已對):
       u8   cur_players   (+105; sub_44E970, 「cur/max」第一數)
-      u8   has_pass      (+106)
+      s8   has_pass      (+106)            ← sub_592900, 非 u8
       u8   max_players   (+129; 冗餘 — client 以 +110 popcount 重算覆寫)
       u16  max_slot_mask (+110; bit 0..max-1 = 1, sub_53FB10 以 popcount
                           重算 +129 並展開 +112..+127 逐槽旗標)
       u8   game_mode     (→ sub_53FBB0 建立 CyGameModes LobbyUI, 見下表)
-      u8   room_type_A   (+108; sub_44E7B0 — ROOMTYPE bit)
-      u8   mode_param_a  (→ mode 物件 +12)
-      u8   room_type_B   (+109; sub_44DA70 — ROOMTYPE bit)
-      u8   double_damage (+128; sub_44DBB0)
+      s8   room_type_A   (+108; sub_44E7B0 — ROOMTYPE bit)   ← sub_592900
+      s8   mode_param_a  (→ mode 物件 +12)                    ← sub_592900
+      s8   room_type_B   (+109; sub_44DA70 — ROOMTYPE bit)   ← sub_592900
+      s8   double_damage (+128; sub_44DBB0)                   ← sub_592900
       u8   map           (+130; sub_540280/sub_540260 — 122 亦寫此欄,
                           124/125 = 特殊地圖 id)
       u8   mode_param_b  (→ mode 物件 +4, sub_74F450)
       u8   no_skill_bg   (+185; sub_44E820 — NOSKILLBG)
-    若 mode==2: 兩組 {s32 team_id, u32 custom_tex_crc, str(75/87) tex_name,
-                u8 x} (隊伍自訂圖示, 存 room+188.., CCustomTexture 註冊)
+    若 外層 mode==2 (n2 鮮值=外層 mode 位元已行級證實, 非 game_mode):
+      每房尾接兩組 {s32 team_id, s32 custom_tex_crc, str tex_name, u8 x}
+      (隊伍自訂圖示, CCustomTexture 註冊; crc 亦走 sub_592A40 非 u32 reader;
+      tex_name 容量第一組 75B、第二組 87B)
 else:
   u8   n4, u8 i1, u8 flags142
   repeat i=n4-1 downto i1:
