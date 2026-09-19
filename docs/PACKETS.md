@@ -1361,6 +1361,18 @@ count==0 失敗路徑的 `u8 err` (→ sub_468470 a3, 十一輪逐 case):
 1=餘額不足(0xCD), 4=格式訊息(0x39A), 5/7=期限/重複(0x63),
 8=背包滿(0x327), 9=其他 — 只有這 7 個值有訊息, 其他值靜默。
 ```
+**205 例語行級解碼 (2026-09-19)**: `sub_571910` 每列的 6 欄經
+`sub_524F70(p_roster, item, period, f1, f2, kind, durability)` → 組成 28B
+記錄 `n14_3` 後 upsert 進 MYITEM 表：**byte 0 未填(=0)**、+4=itemId、
+**+8=f1(raw4 v21)**、**+12=f2(raw4 v23)**、**+16=period_days(s32 v14)**、
+**+20=item_kind(u8 n14)**、+22/+24=durability pair (u16 v13 雙寫 = 插槽時
+current=max)。`sub_526DD0(this,item)` 判存在：存在 → `sub_526E20` 取位、
+**僅 kind ∈ {0,1,12,13,14,17} 時 qmemcpy 覆寫**（其餘 kind 對既有列不改寫）；
+不存在 → `this + 7*(*(this+209))++ + 210` — **+209 此刻證實=表列數/下一空
+位索引**（非「page start」,200 文檔隨之訂正）。→ 200/205 共享的 MYITEM
+記錄各欄正式定名：^+212=f1、+213=f2、**+214=period_days**、**+215=
+item_kind**(wire 授權來源；但仍無直接讀者 = stored-only 結論不變）。
+
 ### 3.4a 204/468 bulk purchase routing, 206 part purchase, and 358 cash purchase
 
 `sub_571100` validates the selected item families/periods, builds the normal
@@ -2756,7 +2768,11 @@ status∈{0,1} 二分。首欄 = CClientData+88 選中索引,與 312 同欄,亦
 `sub_573230`→狀態機 `sub_4BCF00`:**status=1 ⇒ pending→applied 遷移**(+0xC UI
 刷新);**status=0 ⇒ abort-sync 臂**;其他值全域 no-op。TS 無 slot store ⇒
 恆回 `status=1`(wire `01`),client 狀態機落定。
+<<<<<<< HEAD
 | 220 | `GI_CHANGEWP_REQ` | `sub_573340` writer / `sub_57C270` ACK consumer (221 reader) | C2S | 行級定案 2026-09-19:**empty arm=裸 opcode frame 無 payload**；否則 `u8 count`(≤4),每槽 `u8 slot(<4 守衛) → u16 raw0(roster+72103,原生 s8 符號擴展成 raw2) → [slot!=3] 3×u16 extras(+72104/72105/72106) → [raw0!=0] 8×raw4(roster+36054 dword 表)`。**writer 與 consumer(sub_5735F0→sub_524880）的規則一致到逐位元**(Level-1 自我審查結論見模組註）;raw0 的 `!=0` 是 8×raw4 的唯一閘。221=`u8 count, count×s32 actionId, s8 snapshot 閘→4 條共享 snapshot 鏈`,並可觸發遞迴 220 再廣播。slot 位元組 domain 0..3=武器/模型槽，3=特別槽（無 extras)。 |
+=======
+| 220 | `GI_CHANGEWP_REQ` | `sub_573340` writer / `sub_57C270` ACK consumer (221 reader) | C2S | 行級定案 2026-09-19:**empty arm=裸 opcode frame 無 payload**；否則 `u8 count`(≤4),每槽 `u8 slot(<4 守衛) → u16 raw0(roster+72103,原生 s8 符號擴展成 raw2) → [slot!=3] 3×u16 extras(+72104/72105/72106) → [raw0!=0] 8×raw4(roster+36054 dword 表)`。**writer 與 consumer(sub_5735F0→sub_524880）的規則一致到逐位元**;raw0 的 `!=0` 是 8×raw4 的唯一閘。~訂正:前稿所稱可變尾 writer(+72105 變數閘)經驗證在本 dump 零匹配——撤回。~221=`u8 count, count×s32 actionId, s8 snapshot 閘→4 條共享 snapshot 鏈`,並可觸發遞迴 220 再廣播。slot 位元組 domain 0..3=武器/模型槽，3=特別槽（無 extras)。 |
+>>>>>>> 12047664 (docs+server-ts: phase 69 incident cleanup + 205 upsert decoding)
 | 221 | `GI_CHANGEWP_ACK` | `sub_5735F0` | S2C | `u8 count(4), 4×weapon_group` |
 | 312 | `GI_CHANGESLOT_REQ` | `sub_573270` | C2S | `u8 slot_no` |
 | 313 | `GI_CHANGESLOT_ACK` | `sub_573320` | S2C | `u8 slot_no` |

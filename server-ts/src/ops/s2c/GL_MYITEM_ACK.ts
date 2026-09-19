@@ -28,6 +28,10 @@
  * The current Store has no inventory/catalog model. An empty successful page is
  * nevertheless a complete, client-consumable response: start index 0 followed
  * immediately by the documented negative-slot sentinel.
+ * 2026-09-19 upsert 解碼 (sub_524F70 via 205): 記錄 = {itemId,+8=f1(raw4
+ * v21),+12=f2(raw4 v23),+16=period_days(s32),+20=item_kind(u8 ∈{0,1,12,13,
+ * 14,17} 覆寫閘),+22/+24=durability pair (insert 時 current=max)};+209=表列
+ * 數而非 page start。f1/f2/item_kind stored-only、period_days 活計數均同前結論。
  */
 
 import { Packet } from "../../packet.ts";
