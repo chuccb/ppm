@@ -132,9 +132,9 @@ raw4 讀取，但分支選擇器取其低位元組。完整佈局見 `PACKETS.md
 |---:|---|---|---|
 | 946 | `GR_AI_UDPSENDER_CHANGE_START_NOTIFY` | HIGH | handler 內 dev 標籤 ASCII 完好：`GameNetwork::OnGRAiUDPSenderChangeStartNotify`；`u8 key, s32 playno`，切換 UDP host（`sub_75D550`／`sub_764910` flag=1）；KR log 行已損毀不引證 |
 | 947 | `GR_AI_UDPSENDER_CHANGE_END_NOTIFY` | HIGH | dev 標籤 `…EndNotify`；`u8 oldKey, u8 newKey, s32`：舊 sender `sub_548AE0(row,0)`、新 sender `(row,1)`，後接 UDP 重綁 `sub_6054A0`；KR log（UDP SENDER）已損毀不引證 |
-| 949 | `GR_AI_MULTI_SHIELD_NOTIFY` | HIGH | cp949 字串完好 `[%s] AI Multi Shield 무적 %s!!`（무적＝無敵）系統列廣播；u8 旗標 bit0=On/Off、≥2=All_Channel 否則 This_Room；本端無對向 C2S（GM／伺服器觸發）；`AI_MULTI` 詞彙依 941 `MASTER_GO_AI_MULTI_WAVE_DIRECTLY_REQ`（tsv），`GR_AI_…SHIELD` 家族先例 922/923 `GR_AI_DAMAGE_SHIELD_REQ/ACK`（tsv）；全頻道廣播不改 GR 前綴有 911 `GL_SCHEDULED_GM_NOTICE_NOTIFY`（tsv）先例 |
-| 931 | `GR_AI_CONTINUE_FAIL_ACK` | HIGH | u8 結果：==1→再讀 u8 並設 PvE mgr continue 狀態 2；==0→播 `pve_01_sounds\AI3_continue_fail.wav`；handler log「continue 취소 …받음」為接收端用語，名仍鏡像對向 930 `GR_AI_CONTINUE_FAIL_REQ`〔推定〕 |
-| 954 | `MASTER_PVE_ACK` | HIGH | u8→`PVE On Succ!!`／`PVE Off Succ!!`；對向 953 `MASTER_PVE_REQ`〔推定〕（`/pveon`、`/pveoff`） |
+| 949 | `GR_AI_MULTI_SHIELD_NOTIFY` | HIGH | cp949 字串完好 `[%s] AI Multi Shield 무적 %s!!`（무적＝無敵）系統列廣播；u8 旗標：bit0=On/Off、`n2>=2`→`All_Channel` 否則 `This_Room`(sub_58EF00 行級，僅此一讀、無狀態寫入——**純 GM 廣播訊息組字串 echo**)；本端無對向 C2S（GM／伺服器觸發）；`AI_MULTI` 詞彙依 941 `MASTER_GO_AI_MULTI_WAVE_DIRECTLY_REQ`（tsv），`GR_AI_…SHIELD` 家族先例 922/923 `GR_AI_DAMAGE_SHIELD_REQ/ACK`（tsv）；全頻道廣播不改 GR 前綴有 911 `GL_SCHEDULED_GM_NOTICE_NOTIFY`（tsv）先例 |
+| 931 | `GR_AI_CONTINUE_FAIL_ACK` | HIGH | `u8 result,[u8 slot if result==1]`（sub_762170 行級，僅 0/1 兩分派):**result==0**→PvE mgr vtbl+88=2＋播 `pve_01_sounds\AI3_continue_fail.wav`＋`sub_8EED70` 繼續 UI 關閉（1,1);**result==1**→讀 `u8 slot`→`sub_67D8F0(slot,0)` 取玩家列（與 1010/913 同 slot accessor 家族），當 `sub_67DD90(player)==sub_67D1D0()`（該列掛於全域 PvE mgr）時設 continue 狀態 2 並驅動 `sub_8DEFF0`；其餘值無操作；handler log 為 KR 接收用語（continue 취소)，名仍鏡像對向 930 `GR_AI_CONTINUE_FAIL_REQ`〔推定〕 |
+| 954 | `MASTER_PVE_ACK` | HIGH | `s8 pveOn`(0=Off，非 0=On;sub_57DA20 行級：0/!=0 兩分支）→**全域鏡像 `byte_1D0D21B`（暫名 PVE_ON bool)**,log `PVE On/Off Succ!!`；同全域亦由 `CLobbyChannel::sub_4179D0`（頻道封包 u32 bit0）寫入 ⇒ 頻道原生 PvE 旗標；消費者=`sub_4292B0` 與 `CUIComplexControl::sub_50D820` 兩 UI 清單組建器：==1 時追加 **msg 1240**「ふっ...もうあらゆることが終わったよ...屋上のヘリコプターだけ乗れば...」(PvE 劇情風味行，msgtableres.lang)；對向 953 `MASTER_PVE_REQ`〔推定〕（`/pveon`、`/pveoff`) |
 | 976 | `MASTER_SETMULTIPLYDAMAGE_ACK` | HIGH | u8→`SET DAMAGE SUCCESS!!`／`SET DAMAGE FAILED!! INVALID SERVER INDEX!!`；對向 975〔推定〕（`/setmultiplydamage <int> <float>`） |
 | 852 | `MASTER_RELOAD_GAMECENTER_RANKING_ACK` | HIGH | u8==1→`GAME CENTER RANK RELOAD SUCCESS`，否則 FAIL（系統列 `sub_541BF0`）；對向 851〔推定〕（`/reloadgcrank`） |
 | 997 | `GL_BLOCK_ADD_ACK` | HIGH | u8 結果驅動訊息：0→**1320**「ブラックリストに登録しました。」+重送 1000 / 1→**1323**（重複）/ 2→**282**（查無此人）/ 3→**1322**（名額滿）/ 4→**1330**（不能封自己）；對向 996〔推定〕（msgtableres.lang 行級，2026-09-19) |
@@ -432,7 +432,7 @@ raw4 讀取，但分支選擇器取其低位元組。完整佈局見 `PACKETS.md
 | 925 | GR_AI_RECHARGE_MAGAZINE_START_ACK | sub_558550 | `u8 u8 u8 u8 u16 u8 s32` |
 | 927 | GR_AI_RECHARGE_MAGAZINE_END_ACK | sub_558880 | `u8 u8 s8/bool u8 u8 s32` |
 | 929 | GR_AI_CONTINUE_START_ACK | sub_761E90 | `u8 u8 s32 str s32 s32` |
-| 931 | GR_AI_CONTINUE_FAIL_ACK〔推定〕 | sub_762170 | `u8 u8` |
+| 931 | GR_AI_CONTINUE_FAIL_ACK〔推定〕 | sub_762170 | `u8 result(0/1),[u8 slot if result==1]` |
 | 933 | 〔未命名〕 | unknown_libname_105 | `(非 sub 直呼；無函式體，見審計節)` |
 | 934 | GR_AI_TEAMSCORE_NOTIFY | sub_762630 | `s32 u8 s32 u8 s32 s32` |
 | 936 | GR_AI_FEVER_START_ACK | sub_7623A0 | `u8 u8 s32 u8` |
@@ -442,8 +442,8 @@ raw4 讀取，但分支選擇器取其低位元組。完整佈局見 `PACKETS.md
 | 945 | GR_RESET_GAMEROOMSLOT_ACK | sub_585F30 | `(無直接讀取/轉發)` |
 | 946 | GR_AI_UDPSENDER_CHANGE_START_NOTIFY〔推定〕 | sub_565AA0 | `u8 s32` |
 | 947 | GR_AI_UDPSENDER_CHANGE_END_NOTIFY〔推定〕 | sub_565BB0 | `u8 u8 s32` |
-| 949 | GR_AI_MULTI_SHIELD_NOTIFY〔推定〕 | sub_58EF00 | `u8`（bit0=On/Off、≥2=All_Channel） |
-| 954 | MASTER_PVE_ACK〔推定〕 | sub_57DA20 | `s8/bool` |
+| 949 | GR_AI_MULTI_SHIELD_NOTIFY〔推定〕 | sub_58EF00 | `u8 n2`(bit0=On/Off;n2>=2→All_Channel 否則 This_Room) |
+| 954 | MASTER_PVE_ACK〔推定〕 | sub_57DA20 | `s8 pveOn`(0/!=0→`byte_1D0D21B`;另寫點 CLobbyChannel::sub_4179D0 u32 bit0) |
 | 958 | GR_TIMEOVER_ONGAME_ACK〔推定〕 | sub_565E00 | `（無讀取；收到即回送 957 RESPON_REQ）` |
 | 959 | GG_DROPWEAPON_CREATE_NOTIFY | sub_5666D0 | `u16 u8 s32 u16 s16 s16 s16 u16 u16 f32 raw32` |
 | 960 | GG_DROPWEAPON_DESTROY_NOTIFY | sub_566B30 | `u8 count, count×u16` (0 id stops early) |
