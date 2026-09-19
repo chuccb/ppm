@@ -2,10 +2,15 @@
  * 437 room broadcast (GG_) — legacy/special-tool opcode.
  *
  * Native builder `sub_55B430(flag: u8, blob: ptr, len: usize)`:
- * wire is `{u8 flag, s32 len, raw[len]}` written on the GL lobby socket
- * (`dword_1321D00`). The builder has NO reachable caller in the
- * decompile (message-table / function-pointer only), and the dispatcher
- * has no `case 438` — the client never parses a 438 reply.
+ * wire is `{u8 flag, raw4 len, raw[len]}` written on the GL lobby socket
+ * (`dword_1321D00`; the length word goes through the generic
+ * `sub_592AA0` raw4 writer, TS parses it as the s32 width projection).
+ * The builder is a VERBATIM passthrough: it composes nothing of the
+ * blob — no field writes, no embedded packet — so the blob's inner
+ * schema lives entirely in the caller. That caller never shipped in
+ * this binary (no reachable reference in the decompile), making the
+ * blob structure unrecoverable from the client image; and the
+ * dispatcher has no `case 438` — the client never parses a 438 reply.
  *
  * TS policy: parse and validate the exact wire grammar (flag u8, signed
  * 32-bit length, then exactly `len` raw bytes; primitives already reject

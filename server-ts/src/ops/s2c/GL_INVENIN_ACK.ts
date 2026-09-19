@@ -1,11 +1,29 @@
 /**
  * 254 -> 255 local-user NewSkill profile snapshot (consumer
- * `sub_574270`; branch facts in docs/PACKETS.md around §1660).
+ * `sub_574270`, re-read line level 2026-09-19).
  *
- * The client has another mode-0 branch for remote-user preview: after the
- * common mode/uid/context/unknown prefix it reads two more u8 values and one
- * s32 lookup value. 254's native request is always the local inventory-enter
- * path, so this server emits the proven mode-1 self snapshot only.
+ * Accepted modes are only 0/1 — any other first byte is silently
+ * dropped before a single further read.
+ *
+ * Mode 1 (self, the one this server emits): after
+ * `{u8 mode, s32 uid, u8 context(n16), u8 v11}` the client checks
+ * `dword_EE8CB4 == uid` (the local-identity global); on match it
+ * zero-fills a 5x8-dword struct array, reads the `u8 selectedProfile`
+ * (native cap: value must be < 5 or hydration is skipped ENTIRELY),
+ * then reads the five profiles as ONE raw 0xA0-byte blob
+ * (5 x 32 bytes) and hands it to `sub_4BDD80`.
+ *
+ * Profile record = 8 dwords (32B). Before the blob read the client
+ * pre-zeroes dword index 7 of every record — the slot this server's
+ * projection fills with `expiresAtPackedMinute`, so 0 there is the
+ * honest "no expiry" and the seven leading dwords are the puzzle ids.
+ *
+ * Mode 0 (remote preview): re-reads the triple `{u8 v11, u8 n16,
+ * s32 uid}` for the TARGET player and resolves n16 through
+ * `sub_67D870` (negative result = top bit set => skip; otherwise
+ * routes to `sub_47B040`/`sub_4345C0` depending on the n2_0==3 club
+ * gate). The native 254 request is always the local path, so this
+ * server emits the mode-1 snapshot only.
  */
 
 import { Packet } from "../../packet.ts";

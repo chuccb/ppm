@@ -217,6 +217,8 @@ export const NEW_SKILL_PUZZLE_SLOT_COUNT = 7;
 export interface NewSkillProfile {
   readonly puzzleItemIds: readonly number[];
   /** Native packed local-time word; profile 0 ignores it on the client. */
+  /** Record dword 7 of the native 32B profile; the client pre-zeroes this
+   * slot before the 0xA0 blob read, so 0 = no expiry. */
   readonly expiresAtPackedMinute: number;
 }
 
