@@ -136,7 +136,7 @@ raw4 讀取，但分支選擇器取其低位元組。完整佈局見 `PACKETS.md
 | 976 | `MASTER_SETMULTIPLYDAMAGE_ACK` | HIGH | u8→`SET DAMAGE SUCCESS!!`／`SET DAMAGE FAILED!! INVALID SERVER INDEX!!`；對向 975〔推定〕（`/setmultiplydamage <int> <float>`） |
 | 852 | `MASTER_RELOAD_GAMECENTER_RANKING_ACK` | HIGH | u8==1→`GAME CENTER RANK RELOAD SUCCESS`，否則 FAIL（系統列 `sub_541BF0`）；對向 851〔推定〕（`/reloadgcrank`） |
 | 997 | `GL_BLOCK_ADD_ACK` | HIGH | u8 結果驅動訊息：0→**1320**「ブラックリストに登録しました。」+重送 1000 / 1→**1323**（重複）/ 2→**282**（查無此人）/ 3→**1322**（名額滿）/ 4→**1330**（不能封自己）；對向 996〔推定〕（msgtableres.lang 行級，2026-09-19) |
-| 999 | `GL_BLOCK_DEL_ACK` | HIGH | `u8 結果, str nick`：0=本地移除+UI 刷新+0x52D，1=0x52E，3=0xB6；對向 998〔推定〕 |
+| 999 | `GL_BLOCK_DEL_ACK` | HIGH | `u8 結果, str nick`：0→真刪(`sub_539B60/539680`)+重送 1000+**1325**「%sさんをブラックリストから解除しました。」 / 1→**1326**「ブラックリストから解除できません。(24時間）」**=24h 冷卻** / 3→**182**「ID不存在」；對向 998〔推定〕(msgtableres.lang 行級) |
 | 1001 | `GL_BLOCK_LIST_ACK` | HIGH | `u16 v23, str v14, s32 count, count×{s32 v5, str nick}`(sub_567D50 行級： 先 `sub_53A460(dword_EE8C90)` 清表再逐筆 `sub_5395E0(mydata, nick, v5)` 寫入，尾 `dword_EA131C+132` UI 刷新）；對向 1000〔推定〕 |
 | 1003 | `GL_BLOCKME_LIST_ACK` | MEDIUM-HIGH | `u16, str, s32 count, count×str nick`(sub_567BD0 行級： `sub_53A6E0` 清→`sub_539360` 逐筆）；「別人封鎖我」方向語義為 Inference，功能面確定；對向 1002〔推定〕 |
 | 998 | `GL_BLOCK_DEL_REQ`〔推定〕 | HIGH | `{str nick}`(sub_568030,5926F0)；對向 999 |
@@ -685,7 +685,8 @@ raw4 讀取，但分支選擇器取其低位元組。完整佈局見 `PACKETS.md
   命令首碼（同群 `/reloadtnmt`→**773 MASTER_RELOAD_TNMT_REQ(sub_57D8D0)**、
   `/reloadgcrank`→**851(sub_57DA90，裸 opcode 請求）**、`/printgcrank`→
   **853(sub_57DB30)**、`/print_tnmt_state`=無 wire(local only));852=**純名錄
-  空隙**(全檔 `ctor(852)` 零匹配,真死 op)。**852/853 之 `GCRANK` 推定
+  空隙**(全檔 `ctor(852)` 零匹配)——**但 852 ≠ 死 op**:它是
+  851 的 S2C ACK(sub_5854C0,'GAME CENTER RANK RELOAD SUCCESS/FAIL');方向別遮描教訓紀錄於此。**852/853 之 `GCRANK` 推定
   = GAMECENTER_RANKING(與 892/480 平行案一致)。WT/VT 之字母仍屬
   server-policy(reshuffle wire 語義已定,字母擴展 server 保留)。
 - 1002 方向語義（block-ME 模型）Inference/HIGH，見上。
