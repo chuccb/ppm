@@ -598,7 +598,7 @@ result==1 且有端點尾段時）依序 **`sub_58ED30(host,port)`（transport �
 初始化；本 build 唯一進場點）→ `sub_596E60(&sock, host, port)`（寫
 AES lane 目標 sockaddr#2＝socket 物件 +40）**。sockaddr#2 的其餘
 寫入者只有 371 `GL_CHANGECHANNEL_ACK`（`sub_570100`）與 142
-`PM_CONNECT_ACK`（`sub_5565D0`）⇒ **換頻道只重設目標、不重建
+`PM_CONNECT_ACK`（`sub_5565D0`)⇒ 2026-09-19 行級訂正：sockaddr 全域 `unk_1326908` 僅 142/(196 成功流）/371 三寫點共管**同一**端點 —— 換頻道只重設目標、不重建
 transport**；目標ip/port 一律由伺服器封包指定，client 端無預設值。
 主執行緒每幀 `sub_58AFD0`：處理兩條 TCP
 socket（`sub_555550(&dword_1321D00)`、`sub_555550(dword_131F730)`）→
@@ -1230,7 +1230,7 @@ bool    success                 0 時直接顯示 resource 0x70 / code 17
       = 7×s32 (sub_527AF0); 非零 id 同樣驗證, 失敗 → client 錯誤 9。
       ⭐ 驗證段 11,010,001..11,070,000 = **ヘアパズル段** (1,273 條,
       kind 13) → 七個 NewSkill puzzle ordinals；這是 255 五-profile snapshot
-      中 selected record 的鏡像，**不是快速槽**。n5 的原服語意仍 **UNRESOLVED**
+      中 selected record 的鏡像，**不是快速槽**。n5 全域 `+144452` 僅三處寫點 (=0 / 鏡像拷貝 / =n5) 零讀者 ⇒ **stored-only,消費者端不可回復**（終結，不再列 UNRESOLVED)
       （現有 server 保留既有 raw value 5 convention）。
   --- sub_570550 尾段 (五輪補完, 先前部分遺漏):
   u16     → i_23 (禮物盒 pending 數; F0C100 — 299 寫入禮物盒,
@@ -2706,7 +2706,7 @@ writer ⇒ 空 wire。788 有三訂閱點:`sub_407360` @6565 是**唯一讀 payl
 | 834 | `GL_DATA_RECV_COMPLETED_REQ` | `sub_583120` | C2S | `s32 raw client request context` (原樣取 `dword_F2A684`, 與 144 的 propagated raw4 共用；不可命名為 user_id) |
 | 835 | `GL_DATA_RECV_COMPLETED_ACK` | `sub_5831D0` | S2C | `(空)` |
 | 370 | `GL_CHANGECHANNEL_REQ` | `sub_570030` | C2S | `u8 channel_id` |
-| 371 | `GL_CHANGECHANNEL_ACK` | `sub_570100` | S2C | `u8 status, u8 channel_id, str host_ip, s32 host_port, u8 extra`; client passes this independently to `sub_596E60` (secondary UDP address field). Its relation to successful-196 primary endpoint is **UNRESOLVED**; do not merge endpoint state. |
+| 371 | `GL_CHANGECHANNEL_ACK` | `sub_570100` | S2C | `u8 status, u8 channel_id, str host_ip, s32 host_port, u8 extra`; status==1 時 client 直接重寫**同一組共享狀態** (行級 2026-09-19 定案): `*sub_417D00() = channel_id`、opaque byte→`unk_1D0CFE4`、`sub_596E60(&unk_1326908, ip, port)` — 1326908 全域僅三處寫點,另兩處是 **142 `PM_CONNECT_ACK` (sub_5565D0)** 與 **196 成功流 (含 sub_58ED30 配對儲存)** ⇒ 142/196/371 共管**同一個** UDP control endpoint,371 即「換頻道重寫唯一控制點」;成功前若在 n15==9/8 狀態會先 vtable+120/124 關舊裝置(EA095C/E9FDE0)。status 非 1 僅讀一個 u8 即返回。 |
 
 **TS 對位 (2026-09-19)**: 370 builder `sub_570030` @165825(目標=現況不同才送):ctor→1B ⇒ wire=恰 `u8 channel_id`。371 consumer `sub_570100`:`u8 status`;**status==1** 才讀 `u8 channel_id, str host_ip, s32 host_port, u8 extra` → `sub_596E60` 副端點 + 橫幅 0x163;**0/2/3** = 橫幅 0xDA/0x148/0x328 + 重置待接 holder(wire 只 1B);**≥4** = 只靜默重置。TS 現行部署僅一個 channel(其餘 maxUsers=0)⇒ 無合法替代端點 ⇒ 恆回 `status=0`(wire `00`)。
 | 131 | `GR_FORCEOUT_REQ` | `sub_56EC10` | C2S | `u8 target_slot` (房主踢人) |
@@ -2830,7 +2830,7 @@ log 即還;==0 ⇒ 讀 `str title` + client 定長 raw blob(長度=this+239104,
 `err=1`(wire `01`),無 title/無 blob,latch 維持 0。
 | 698 | `GP_ENTER_PEPACHI_REQ` | `sub_46E080` | C2S | `(空)` |
 | 699 | `GP_ENTER_PEPACHI_ACK` | `CLobbyShop::sub_46AD00` case 699 | S2C | `s8/bool status(1), s32 rawA, s32 rawB`（行級：`sub_592900`+2×`sub_592A40`;status 1→`sub_469CF0` 進 Pepachi 場景）;The two words are not proven currency fields. |
-| 700 | `GP_START_GAME_REQ` | `sub_8458D0`, called by `sub_8459C0` | C2S | `u8 raw0,s32 raw1`; exact 5-byte body. Native computes raw1 as `19,900,000 + (sub_525790(activeCharacter) % 100000)`; field/domain meaning remains UNRESOLVED. |
+| 700 | `GP_START_GAME_REQ` | `sub_8458D0`, called by `sub_8459C0` | C2S | `u8 n5 (machine/panel index), s32 key`; exact 5-byte body. `key = 0x12FA660 (=19,900,000) + (sub_525790(activeChar) % 100000)` — slot-0 member of the client's room-object key family (bases 19,900,000/10,000,000/10,100,000/10,200,000/... written by the v17[0..N] serializer; decoder `n20 = a2 - 19,900,000` unwraps slot 0). `sub_525790` = active character's roster byte at `+158 + 13*selectedSlot` (data-driven bat/group code from ITEMDB). Server-side acceptance of the (machine, key) pair remains policy-unproven. |
 | 701 | `GP_START_GAME_ACK` | `sub_84A000` → `sub_84A490` | S2C | `u8 result, u8 rawCode`; only `result==1` continues with `s32 rawA,s32 rawB,u8 rawMode,u8 prizeCount, prizeCount×{s32 reelA,s32 reelB,s32 reelC}` (client processes at most 11 prize triples). **`reelC` 是伺服器指定的「演出級別」**，不是外觀參數 — 見下方 §3.15p。 |
 | 702 | `GP_PEPACHI_LIST_REQ` | `sub_45C9B0` | C2S | `(空)` |
 | 703 | `GP_PEPACHI_LIST_ACK` | `CLobbyShop::sub_46AD00` case 703 | S2C | `s32 countA, s32 countB, (countA+countB)×raw4 entry`（行級：2×`sub_592A40`＋`sub_592AC0` 迴圈；舊「`s16 signedEntry`」為並行路徑誤記，2026-09-19 訂正）; `{0,0}` is a structural empty list only—not a probability-table assertion. |
@@ -3732,7 +3732,7 @@ sub_54DD70), 1..7 = 錯誤碼 (重名/GP 不足/等級不夠...)。
 | `Total_Package_Index.xml` has 114 `total_package` entries, each mapping a package index to fourteen `type_N` item IDs. | **Fact / HIGH** | `sub_A03E90`–`sub_A041D0` and exact main resource. It is a client selection/display map, not a grant list. |
 | `RecommandItem.pat` has 1,030 set rows (plus two header rows). `808` sends `{s32 count,count×s32 recommendationId}` only for a nonempty client selection; `809` returns `{s32 count,count×{s32 itemId,u8 rawClass,u8 rawValue}}`. | **Fact / HIGH** | decoded resource, `sub_46E140`, `CLobbyShop::sub_46AD00` case 809. Client maps classes 1/4→22, 2/5→23, 3→24, but the server-side lookup/meaning is **UNRESOLVED**. No 808 handler is registered. |
 | `ui/Gaccha.xml` enables only `START_CASH` and `START_TEN_CASH`; its `START_PG` and `START_CP` blocks are commented out. `ui/pepachi.xml` enables `START_PG`, `START_CASH`, `START_PG_10`, and `START_CASH_10`. | **Fact / HIGH (UI revision only)** | exact `main:Extracted` XML. The residual code can still recognize the commented Gaccha control names, so a code path is not evidence that this resource revision exposes that purchase. |
-| 700 is a five-byte request `{u8 selector,s32 selectedCharacterId}`. Its writer derives the second value as `19,900,000 + (selectedCharacterValue mod 100,000)` and its caller supplies raw selectors 1, 2, 4, and 5. | **Fact / HIGH** | `sub_8458D0`, `sub_8459C0`, `sub_525790`; the old `{count,coin_type}` description is disproven. |
+| 700 is a five-byte request `{u8 selector,s32 selectedCharacterId}`. Its writer derives the second value as `19,900,000 + (selectedCharacterValue mod 100,000)` and its caller supplies raw selectors 1, 2, 4, and 5. | **Fact / HIGH** | `sub_8458D0`, `sub_8459C0`, `sub_525790`; the old `{count,coin_type}` description is disproven. 2026-09-19 addendum: `19,900,000` IS `&unk_12FA660`, i.e. the slot-0 base of the client room-object key family (v17[0..N] serializer writes bases 19,900,000/10,000,000/10,100,000/10,200,000/...; decoder `n20 = a2 - 19,900,000`). The s32 is the slot-0 object key of the active character (roster byte at `+158 + 13*selectedSlot`, ITEMDB-driven bat/group code). |
 | The Pepachi caller's local balance gates and four UI names associate selector 1/2/4/5 with cash-single / PG-single / cash-ten / PG-ten. | **Fact / HIGH** (upgraded from Inference; see §3.15r) | `sub_8459C0` gates selectors 1/4 on the cash balance at 1/300 and 2/5 on the other balance at 1/10,000; XML has those exact four labels. The decompiler lost the four wide-string initializers, but the **level gate is attached to only one branch**, which disambiguates them — see §3.15r. |
 
 #### 3.15r 700/900 的送出前置條件：三個 client gate 與 995 錢包推播（本輪定案）
