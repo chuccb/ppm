@@ -130,12 +130,12 @@ raw4 讀取，但分支選擇器取其低位元組。完整佈局見 `PACKETS.md
 
 | op | 推定名 | 等級 | 關鍵證據（摘要） |
 |---:|---|---|---|
-| 946 | `GR_AI_UDPSENDER_CHANGE_START_NOTIFY` | HIGH | handler 內 dev 標籤 ASCII 完好：`GameNetwork::OnGRAiUDPSenderChangeStartNotify`；`u8 key, s32 playno`，切換 UDP host（`sub_75D550`／`sub_764910` flag=1）；KR log 行已損毀不引證 |
-| 947 | `GR_AI_UDPSENDER_CHANGE_END_NOTIFY` | HIGH | dev 標籤 `…EndNotify`；`u8 oldKey, u8 newKey, s32`：舊 sender `sub_548AE0(row,0)`、新 sender `(row,1)`，後接 UDP 重綁 `sub_6054A0`；KR log（UDP SENDER）已損毀不引證 |
+| 946 | `GR_AI_UDPSENDER_CHANGE_START_NOTIFY` | HIGH | handler 內 dev 標籤 ASCII 完好：`GameNetwork::OnGRAiUDPSenderChangeStartNotify`；`u8 v4(預設 -1,KR 標籤損毀→**僅診斷 log 消費**,無狀態依賴), s32 playno(預設 -1,log 本名)`；本機玩家 `v3=*(n0x10_0+12)` 存在則 `sub_75D550(v3,1)` + `sub_764910(v3,1)` 兩 setter 置位(UDP sender change 進入) |
+| 947 | `GR_AI_UDPSENDER_CHANGE_END_NOTIFY` | HIGH | dev 標籤 `…EndNotify`;`u8 oldSlot(預設 -1), u8 newSlot(預設 -1), s32 v9(讀後未用=協議保留)`：舊 sender 經 `sub_67D7D0(oldSlot)` 取玩家記錄(`byte_F33120+240780×v`;名欄於 +64,log 「?UDP SENDER?」用之)→`sub_548AE0(row,0)` 除位，新 sender →`(row,1)` 置位；本機玩家兩 setter 歸 0;**`sub_6054A0` 重綁有閘**:`sub_67EB70()` 且 `newSlot==sub_67D110()`（本機成為 sender）才執行 |
 | 949 | `GR_AI_MULTI_SHIELD_NOTIFY` | HIGH | cp949 字串完好 `[%s] AI Multi Shield 무적 %s!!`（무적＝無敵）系統列廣播；u8 旗標：bit0=On/Off、`n2>=2`→`All_Channel` 否則 `This_Room`(sub_58EF00 行級，僅此一讀、無狀態寫入——**純 GM 廣播訊息組字串 echo**)；本端無對向 C2S（GM／伺服器觸發）；`AI_MULTI` 詞彙依 941 `MASTER_GO_AI_MULTI_WAVE_DIRECTLY_REQ`（tsv），`GR_AI_…SHIELD` 家族先例 922/923 `GR_AI_DAMAGE_SHIELD_REQ/ACK`（tsv）；全頻道廣播不改 GR 前綴有 911 `GL_SCHEDULED_GM_NOTICE_NOTIFY`（tsv）先例 |
 | 931 | `GR_AI_CONTINUE_FAIL_ACK` | HIGH | `u8 result,[u8 slot if result==1]`（sub_762170 行級，僅 0/1 兩分派):**result==0**→PvE mgr vtbl+88=2＋播 `pve_01_sounds\AI3_continue_fail.wav`＋`sub_8EED70` 繼續 UI 關閉（1,1);**result==1**→讀 `u8 slot`→`sub_67D8F0(slot,0)` 取玩家列（與 1010/913 同 slot accessor 家族），當 `sub_67DD90(player)==sub_67D1D0()`（該列掛於全域 PvE mgr）時設 continue 狀態 2 並驅動 `sub_8DEFF0`；其餘值無操作；handler log 為 KR 接收用語（continue 취소)，名仍鏡像對向 930 `GR_AI_CONTINUE_FAIL_REQ`〔推定〕 |
 | 954 | `MASTER_PVE_ACK` | HIGH | `s8 pveOn`(0=Off，非 0=On;sub_57DA20 行級：0/!=0 兩分支）→**全域鏡像 `byte_1D0D21B`（暫名 PVE_ON bool)**,log `PVE On/Off Succ!!`；同全域亦由 `CLobbyChannel::sub_4179D0`（頻道封包 u32 bit0）寫入 ⇒ 頻道原生 PvE 旗標；消費者=`sub_4292B0` 與 `CUIComplexControl::sub_50D820` 兩 UI 清單組建器：==1 時追加 **msg 1240**「ふっ...もうあらゆることが終わったよ...屋上のヘリコプターだけ乗れば...」(PvE 劇情風味行，msgtableres.lang)；對向 953 `MASTER_PVE_REQ`〔推定〕（`/pveon`、`/pveoff`) |
-| 976 | `MASTER_SETMULTIPLYDAMAGE_ACK` | HIGH | u8→`SET DAMAGE SUCCESS!!`／`SET DAMAGE FAILED!! INVALID SERVER INDEX!!`；對向 975〔推定〕（`/setmultiplydamage <int> <float>`） |
+| 976 | `MASTER_SETMULTIPLYDAMAGE_ACK` | HIGH | `s8 result`(sub_57D660 行級，僅 0/≠0 兩分派):≠0→`SET DAMAGE SUCCESS!!`(3000ms),==0→`SET DAMAGE FAILED!! INVALID SERVER INDEX!!`(3000ms)——**純系統列 echo,無狀態寫入**;失敗文案坐實 975 首參=server index；對向 975〔推定〕（`/setmultiplydamage <int> <float>`) |
 | 852 | `MASTER_RELOAD_GAMECENTER_RANKING_ACK` | HIGH | u8==1→`GAME CENTER RANK RELOAD SUCCESS`，否則 FAIL（系統列 `sub_541BF0`）；對向 851〔推定〕（`/reloadgcrank`） |
 | 997 | `GL_BLOCK_ADD_ACK` | HIGH | u8 結果驅動訊息：0→**1320**「ブラックリストに登録しました。」+重送 1000 / 1→**1323**（重複）/ 2→**282**（查無此人）/ 3→**1322**（名額滿）/ 4→**1330**（不能封自己）；對向 996〔推定〕（msgtableres.lang 行級，2026-09-19) |
 | 999 | `GL_BLOCK_DEL_ACK` | HIGH | `u8 結果, str nick`：0→真刪(`sub_539B60/539680`)+重送 1000+**1325**「%sさんをブラックリストから解除しました。」 / 1→**1326**「ブラックリストから解除できません。(24時間）」**=24h 冷卻** / 3→**182**「ID不存在」；對向 998〔推定〕(msgtableres.lang 行級) |
@@ -440,8 +440,8 @@ raw4 讀取，但分支選擇器取其低位元組。完整佈局見 `PACKETS.md
 | 940 | GR_AI_GO_NEXT_WAVE_ACK | sub_7613D0 | `u8 s32` |
 | 942 | GR_AI_REWARDITEM_SELECT_START_NOTIFY | sub_761830 | `u8 s32 u8 u8 s32 s32` |
 | 945 | GR_RESET_GAMEROOMSLOT_ACK | sub_585F30 | `(無直接讀取/轉發)` |
-| 946 | GR_AI_UDPSENDER_CHANGE_START_NOTIFY〔推定〕 | sub_565AA0 | `u8 s32` |
-| 947 | GR_AI_UDPSENDER_CHANGE_END_NOTIFY〔推定〕 | sub_565BB0 | `u8 u8 s32` |
+| 946 | GR_AI_UDPSENDER_CHANGE_START_NOTIFY〔推定〕 | sub_565AA0 | `u8 v4(診斷用), s32 playno` |
+| 947 | GR_AI_UDPSENDER_CHANGE_END_NOTIFY〔推定〕 | sub_565BB0 | `u8 oldSlot, u8 newSlot, s32 v9(保留，讀後未用)` |
 | 949 | GR_AI_MULTI_SHIELD_NOTIFY〔推定〕 | sub_58EF00 | `u8 n2`(bit0=On/Off;n2>=2→All_Channel 否則 This_Room) |
 | 954 | MASTER_PVE_ACK〔推定〕 | sub_57DA20 | `s8 pveOn`(0/!=0→`byte_1D0D21B`;另寫點 CLobbyChannel::sub_4179D0 u32 bit0) |
 | 958 | GR_TIMEOVER_ONGAME_ACK〔推定〕 | sub_565E00 | `（無讀取；收到即回送 957 RESPON_REQ）` |
@@ -455,7 +455,7 @@ raw4 讀取，但分支選擇器取其低位元組。完整佈局見 `PACKETS.md
 | 970 | GR_SOCCER_ACK | sub_586180 | `s8/bool` |
 | 972 | GG_SOCCER_RESPON_ACK | sub_566400 | `u8 u8 s16 s16 s16` |
 | 974 | GG_SOCCERBALL_HAVE_INCREASE_PG_ACK | sub_566650 | `u8` |
-| 976 | MASTER_SETMULTIPLYDAMAGE_ACK〔推定〕 | sub_57D660 | `s8/bool` |
+| 976 | MASTER_SETMULTIPLYDAMAGE_ACK〔推定〕 | sub_57D660 | `s8 result`(0=FAIL INVALID SERVER INDEX/≠0=SUCCESS;純 echo) |
 | 984 | GL_MATCHINGROOM_MAKE_ACK | sub_5865A0 | `u8` |
 | 985 | GL_ENTERMATCHINGROOM_ACK | sub_586610 | `u8 s32 u8 str s32 s8/bool s32 s32 str u16 u16 u16 u16 f32/s32 u8 f32/s32 u8 s32 str s32 str u8 u8 f32/s32 ...` |
 | 986 | GR_MATCHINGROOM_START_ACK | sub_5880A0 | `u8 s8/bool f32/s32 u8 u8 u8 u16 u8 u8 u16 u8 s8/bool s8/bool s8/bool u8 s8/bool f32/s32` |
