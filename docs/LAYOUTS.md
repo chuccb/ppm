@@ -135,10 +135,13 @@ raw4 讀取，但分支選擇器取其低位元組。完整佈局見 `PACKETS.md
 | 954 | `MASTER_PVE_ACK` | HIGH | u8→`PVE On Succ!!`／`PVE Off Succ!!`；對向 953 `MASTER_PVE_REQ`〔推定〕（`/pveon`、`/pveoff`） |
 | 976 | `MASTER_SETMULTIPLYDAMAGE_ACK` | HIGH | u8→`SET DAMAGE SUCCESS!!`／`SET DAMAGE FAILED!! INVALID SERVER INDEX!!`；對向 975〔推定〕（`/setmultiplydamage <int> <float>`） |
 | 852 | `MASTER_RELOAD_GAMECENTER_RANKING_ACK` | HIGH | u8==1→`GAME CENTER RANK RELOAD SUCCESS`，否則 FAIL（系統列 `sub_541BF0`）；對向 851〔推定〕（`/reloadgcrank`） |
-| 997 | `GL_BLOCK_ADD_ACK` | HIGH | u8 結果驅動訊息 0x528／0x52B／0x11A／0x52A／0x532；==0 自動重送 1000 刷新黑名單；對向 996〔推定〕 |
+| 997 | `GL_BLOCK_ADD_ACK` | HIGH | u8 結果驅動訊息：0→**1320**「ブラックリストに登録しました。」+重送 1000 / 1→**1323**（重複）/ 2→**282**（查無此人）/ 3→**1322**（名額滿）/ 4→**1330**（不能封自己）；對向 996〔推定〕（msgtableres.lang 行級，2026-09-19) |
 | 999 | `GL_BLOCK_DEL_ACK` | HIGH | `u8 結果, str nick`：0=本地移除+UI 刷新+0x52D，1=0x52E，3=0xB6；對向 998〔推定〕 |
-| 1001 | `GL_BLOCK_LIST_ACK` | HIGH | `u16 str s32 s32 str`（清單迴圈，與 REQ 審計同鏈）；對向 1000〔推定〕 |
-| 1003 | `GL_BLOCKME_LIST_ACK` | MEDIUM-HIGH | 同鏈清單格式；「別人封鎖我」方向語義為 Inference，功能面確定；對向 1002〔推定〕 |
+| 1001 | `GL_BLOCK_LIST_ACK` | HIGH | `u16 v23, str v14, s32 count, count×{s32 v5, str nick}`(sub_567D50 行級： 先 `sub_53A460(dword_EE8C90)` 清表再逐筆 `sub_5395E0(mydata, nick, v5)` 寫入，尾 `dword_EA131C+132` UI 刷新）；對向 1000〔推定〕 |
+| 1003 | `GL_BLOCKME_LIST_ACK` | MEDIUM-HIGH | `u16, str, s32 count, count×str nick`(sub_567BD0 行級： `sub_53A6E0` 清→`sub_539360` 逐筆）；「別人封鎖我」方向語義為 Inference，功能面確定；對向 1002〔推定〕 |
+| 998 | `GL_BLOCK_DEL_REQ`〔推定〕 | HIGH | `{str nick}`(sub_568030,5926F0)；對向 999 |
+| 999 | `GL_BLOCK_DEL_ACK` | HIGH | `{u8 code, str nick}`(sub_568170):0→**1325**「%sを解除」+`sub_539B60/539680` 真刪除+重送 1000 / 1→**1326**「24時間は解除できません。'（**24h 冷卻**)/3→**182**（查無） |
+| 1010 | 黑單擴展訊息？[GM 側] | MEDIUM | `{u8 count, count×{u8 slot, s32 value}}`→`sub_67D8F0(slot,0)`→**`v3[60194]=value`**(=result 佔點？ No — 與 994 GG_ASSISTPOINT_NOTIFY 同格的每玩家 dword；slot 視窗) |
 | 1005 | `GL_RANDOMMAP_LIST_ACK` | HIGH | `u8 count`×{u8 mode, u8 mapId} 隨機地圖清單；對向 1004〔推定〕；官方 RANDOMMAP token 先例 748 `GR_SELECTRANDOMMAP_ACK`（tsv） |
 | 488 | `GL_MYROOMCHANGE_ACK` | MEDIUM-HIGH | u8 結果：==1→再讀 u8 slot 寫入 `*sub_417D00()`+0（`CLobbyChannel` 狀態位元組）；!=11→大廳 UI 還原 `sub_44C1D0`；對向 487〔推定〕 |
 | 958 | `GR_TIMEOVER_ONGAME_ACK` | HIGH | dev 標籤 `GameNetwork::OnGRTimeOverOnGameACK`（REQ 審計已錄）字尾 ACK；handler 不讀 payload，收到即回送 957 `GR_TIMEOVER_ONGAME_RESPON_REQ`〔推定〕（s8＝剩餘秒數歸零與否） |

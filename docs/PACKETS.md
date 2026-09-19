@@ -415,6 +415,23 @@ call sites** 把 **670 個唯一** packet 名稱註冊進全域 map `dword_2317F
 > （206, 295, 487, 828, 851, 853, 896, 898, 930, 932, 953, 957, 973, 975,
 > 992, 996, 998, 1000, 1002, 1004, 1006, 1008）。
 
+**黑名單服務鏈 (996-1003, 2026-09-19 全證**: 996 REQ `{str nick}` →
+997 ACK `u8 code`,msg 對應官方素材 (`msgtableres.lang` 行級):
+0→1320「ブラックリストに登録しました。」(並重送 1000 刷新)、1→1323 重複、
+2→282 查無此人、3→1322 名額滿、4→1330 不能封自己；998 REQ `{str nick}` →
+999 ACK `{u8 code, str nick}`,0→1325 真刪除、**1→1326 24h 冷卻**、3→182;
+1000 裸 REQ (sub_567CB0) → 1003 黑單快照 `u16, str, s32 count, count×str`
+(sub_567BD0： 清表 sub_53A6E0→sub_539360 逐筆）;1002 裸 REQ (sub_567B30) →
+1001 blocked-by 快照 `u16, str, s32 count, count×{s32 v5, str nick}`
+(sub_567D50： 清表 sub_53A460→sub_5395E0 — **該 s32 帶 0x80000000 標誌位、
+經 sub_5395E0 存在別張表**, = 每筆的時間戳/serial 空間）。1010:
+`u8 count, count×{u8 slot, s32}` → `v3[60194]` 每玩家 occupy/assist dword
+（與 994 GG_ASSISTPOINT_NOTIFY 同槽，官方名 ASSISTPOINT 級已錨在 994;
+60194 的 bar - 272965 送至 sub_65FD40 (MY_RESULT_OCCUPYPOINT) ⇒ 
++60194 = **每一位玩家的 result/occupy-point 展示欄位**)。1007/1009:
+dispatcher 落到 `unknown_libname_94/95`(VM/Crt helper 不在 dump,終局未知）。
+1006/1008 = `{u8}` 小命令 (sub_564B70/564C30)。996 對向 997 鏈定案。
+
 **GM `/r` 命令族行級定案 (2026-09-19, dispatcher grep**:命令列解析於
 `~L144060-144260`):
 `/reloadtnmt`→`sub_57D8D0`=**773 `MASTER_RELOAD_TNMT_REQ`**(裸 op 送),
