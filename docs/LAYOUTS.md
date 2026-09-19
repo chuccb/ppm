@@ -113,8 +113,10 @@ raw4 讀取，但分支選擇器取其低位元組。完整佈局見 `PACKETS.md
 > （UNRESOLVED 者附行為紀錄）。
 >
 > **結果**：367／970／991 為 tsv Fact 回填（先前 stale 空白）；
-> 17 列推定命名（主表標 `〔推定〕`；對照表實測 17 rows）；489、933、1007、1009、1010
-> 明確保留 unnamed。
+> 17 列推定命名（主表標 `〔推定〕`；對照表實測 17 rows）；**1010 於** **
+> 2026-09-19 升格（sub_5680E0 行級 → assist-point 增量 assign）**；489、933、
+> 1007、1009 明確保留 unnamed（489=bit0 死路徑級 UNRESOLVED、933/1007/1009=
+> lib thunk 無函式體可恢復,屬終局既判）。
 
 **tsv 回填（Fact）**
 
@@ -141,7 +143,7 @@ raw4 讀取，但分支選擇器取其低位元組。完整佈局見 `PACKETS.md
 | 1003 | `GL_BLOCKME_LIST_ACK` | MEDIUM-HIGH | `u16, str, s32 count, count×str nick`(sub_567BD0 行級： `sub_53A6E0` 清→`sub_539360` 逐筆）；「別人封鎖我」方向語義為 Inference，功能面確定；對向 1002〔推定〕 |
 | 998 | `GL_BLOCK_DEL_REQ`〔推定〕 | HIGH | `{str nick}`(sub_568030,5926F0)；對向 999 |
 | 999 | `GL_BLOCK_DEL_ACK` | HIGH | `{u8 code, str nick}`(sub_568170):0→**1325**「%sを解除」+`sub_539B60/539680` 真刪除+重送 1000 / 1→**1326**「24時間は解除できません。'（**24h 冷卻**)/3→**182**（查無） |
-| 1010 | 黑單擴展訊息？[GM 側] | MEDIUM | `{u8 count, count×{u8 slot, s32 value}}`→`sub_67D8F0(slot,0)`→**`v3[60194]=value`**(=result 佔點？ No — 與 994 GG_ASSISTPOINT_NOTIFY 同格的每玩家 dword；slot 視窗) |
+| 1010 | assist-point 增量 assign 推送〔推定〕 | HIGH | `u8 count, count×{u8 slot, s32 value}`(sub_5680E0 行級： `sub_67F380()` 存在閘→`sub_67D8F0(slot,0)` 取列→`v3[60194]=value`);+60194 與 **994 `GG_ASSISTPOINT_NOTIFY`**(tsv Fact）同槽，且 272965 送至 `sub_65FD40`(MY_RESULT_OCCUPYPOINT) ⇒ 增量式 assist/occupy-point 指派 |
 | 1005 | `GL_RANDOMMAP_LIST_ACK` | HIGH | `u8 count`×{u8 mode, u8 mapId} 隨機地圖清單；對向 1004〔推定〕；官方 RANDOMMAP token 先例 748 `GR_SELECTRANDOMMAP_ACK`（tsv） |
 | 488 | `GL_MYROOMCHANGE_ACK` | MEDIUM-HIGH | u8 結果：==1→再讀 u8 slot 寫入 `*sub_417D00()`+0（`CLobbyChannel` 狀態位元組）；!=11→大廳 UI 還原 `sub_44C1D0`；對向 487〔推定〕 |
 | 958 | `GR_TIMEOVER_ONGAME_ACK` | HIGH | dev 標籤 `GameNetwork::OnGRTimeOverOnGameACK`（REQ 審計已錄）字尾 ACK；handler 不讀 payload，收到即回送 957 `GR_TIMEOVER_ONGAME_RESPON_REQ`〔推定〕（s8＝剩餘秒數歸零與否） |
