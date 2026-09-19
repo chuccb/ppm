@@ -3,7 +3,7 @@
  *
  * Wire (native order, conditional raw arms off under the all-zero
  * policy): `u16 game_id, s32 high_score, u8 top3_cnt, u8 top10_cnt,
- * u8 v24, u8 v35, s16 v28, s32 v30, 16x raw zero, u8 v23, u8 v31,
+ * u8 v24, u8 v35, u16 v28, s32 v30, 16x raw zero, u8 v23, u8 v31,
  * u16 v32Raw, u16 v21` = 38 bytes with empty 0x38-row lists.
  * This server keeps no mini-game records, so the frame is the empty
  * board with only the echoed game id nonzero.
@@ -22,7 +22,7 @@ export default function GL_GAMECENTER_REC_ACK(
     .u8(0)       // top10_cnt (0x38-row list empty)
     .u8(0)       // v24
     .u8(0)       // v35 (no trailing 0x20 raw)
-    .s16(0)      // v28
+    .u16(0)      // v28
     .s32(0);     // v30
   for (let i = 0; i < 16; i++) p.u8(0); // 0x10 raw
   return p

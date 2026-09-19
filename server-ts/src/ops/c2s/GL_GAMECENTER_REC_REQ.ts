@@ -10,7 +10,7 @@
  *   u8 top3_cnt,  top3_cnt  x 0x38-byte rows,
  *   u8 top10_cnt, top10_cnt x 0x38-byte rows,
  *   u8 v24, u8 v35, [v35 != 0: 0x20 raw],
- *   s16 v28, s32 v30, 0x10 raw,
+ *   u16 v28, s32 v30, 0x10 raw,
  *   u8 v23, [v23 != 0: 0x2C raw],
  *   u8 v31, u16 v32Raw, u16 v21
  *

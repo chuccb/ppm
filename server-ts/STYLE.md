@@ -98,3 +98,44 @@ strict，另加 `exactOptionalPropertyTypes`、`noUncheckedIndexedAccess` 與
 
 預設用 Bun 原生 API：`Bun.listen`、`bun:sqlite`、`Bun.password`、
 `bun test`。僅在 Bun 無對應時才動用 `node:`。
+
+## 官方命名權威層級（2026-09-19 定案）
+
+改名、補名、欄位選詞，只允許引用下列來源，且優先序即列序：
+
+1. **資源面板字串**（`sub_6A8D80` 系列標籤、msgtable / uidatatable 資源 id、
+   UI 類名與視窗名）
+2. **`db/packets.tsv`** 註冊的 opcode 官方名（唯一 Fact 來源）
+3. **wire 欄名**（`active_channel_index`、`channel_id`、`channel_type`、
+   `client_flags`、`client_default`、`endpoint_opaque` 等已回收的讀寫位名）
+4. **`docs/RESOURCES.md`** schema 欄名
+5. **`docs/LAYOUTS.md` native grammar**（`sub_XXXXXX` 函式體欄位序與
+   key0/key1 之類的參數位名；Part I/II 的 helper 稽核列是 **signedness
+   權威**——文件互衝突時以它為準）
+6. **`docs/PACKETS.md` 私有命名總表的〔推定〕名**：引用時必須連〔推定〕
+   標記一起寫，絕不升格為 Fact
+
+不屬於以上任何來源的「改善名」一律不動。**未命名（UNRESOLVED）是結論，
+不是缺漏**；489/933/1007/1009 類不得因看起來眼熟而補名。
+
+## op module 註解與程式碼的一致性 invariant
+
+`test/style.test.ts` 機檢；手寫時先自查：
+
+- **註解提到的參數必須存在。** 寫 `` `foo` argument/parameter/參數 `` 之前，
+  `foo` 必須真的在函式簽章裡。改名後重跑 `bun test` 會攔截。
+- **「echo」只能用在真的被傳進來的值。** 常數 0 不是 echo；若原生 denial
+  arm 不讀該欄，寫明「不讀，0 是唯一不捏造值」，不寫 echo。
+- **無條件尾段算在 wire 裡。** 原生 consumer「status 有條件分支、但尾段
+  UNCONDITIONALLY read」時，wire 描述必須包含尾段（哪怕全零），
+  禁止寫「zero trailing fields」與實際 byte 數並存。
+- **數字住在程式碼與測試，不住在註解。** 模組數、測試數、member 數這類
+  會長大的計數，註解一律不寫死（registry「15/16」是反例）；
+  需要計數時從 `summary()`／`OPCODE_COUNT` 取，或以測試釘住。
+- **不留孤兒註解塊。** `/** */` 之後必須直接接宣告（檔首 module doc
+  例外）；`strMax`/label 撤除後留下的空殼註解同罪。
+- **s2c 只序列化。** 零 `throw`、零驗證、零 label：值域交 `packet.ts`
+  typed writer；buffer 容量寫在註釋。`.label(` 與 `strMax` 字樣禁止
+  回到 `src/ops/`。
+- **檔頭配對註解照抄實號。** 「`476 -> 477 GG_…_ACK`」的兩個數字與名稱
+  必須與 `db/packets.tsv` 完全一致（request/ack 互指）。
