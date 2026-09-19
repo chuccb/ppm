@@ -69,9 +69,9 @@ model 的地方，TS 只輸出已確認可被 client 完整消費的空 projecti
 | 419 `GL_MSG_ADD_REQ` | `raw4 contextRaw, str ownNick, str toNick, str body, str title, u16 iconRaw, u8 soundRaw`（2026-09-19 行級訂正：lead 欄是 `sub_592AA0(dword_F2A684)` 的 4B context——即 834 同源的 shared raw context,舊列 `u8 raw0` 誤） | builder `sub_559550`:body 1..200B / toNick 1..24B / ownNick=登入 nick 截 24;420 reader `sub_559810` 只讀 str+u8+u8,switch xRaw ∈ {0,1,2,3,4,5,10},default→通用 error 資源。TS 無信箱 ⇒ 恆回 default 臂 xRaw=6,resultRaw=0,不回存收件者謊。 | `sub_559550`/`sub_559810`（+accessor `sub_5929A0`=2B write)；HIGH for wire/gates, UNRESOLVED x/result 全 enum |
 | 420 `GL_MSG_ADD_ACK` | `str toNick, u8 xRaw, u8 resultRaw` | 對位 420 reader:default 臂 0x1E2;TS 僅 emit default 臂以避任何虛構郵件狀態。 | `sub_559810`；HIGH for shape, UNRESOLVED enum |
 | 421 `GL_MSG_DEL_REQ` | `str key` | Native builder `sub_55A1E0` 以兩閘作為送件前提: key 非空且 `strlen <= 20`,且 `sub_537DE0` 證明 key 存在於本地信箱。TS 解一個非空 `str key`(cap=原生 char[20] key 槽 19B)、拒絕 trailing bytes;空信箱伺服器回 `statusRaw=0`(原生失敗臂)並回送 key。 | `sub_55A1E0`、`sub_55A310` ACK consumer；HIGH for wire gate/shape, UNRESOLVED status enum beyond zero/nonzero |
-| 422 `GL_MSG_DEL_ACK` | `u8 statusRaw, str key` | `sub_55A310`: status 非零→`sub_537A80` 移除 key+刪除路徑 UI;零→彈 resource `0x1E3`。builder emit `{u8 statusRaw, strMax(key,19)}`;status enum 不造。 | `sub_55A310`、`sub_537A80`；HIGH |
+| 422 `GL_MSG_DEL_ACK` | `s8/bool statusRaw, str key` | `sub_55A310` 首讀 `sub_592900`(s8/bool)後接 `sub_592730`: status 非零→`sub_537A80` 移除 key+刪除路徑 UI;零→彈 resource `0x1E3`。builder emit `{s8 statusRaw, strMax(key,19)}`;status enum 不造。 | `sub_55A310`、`sub_537A80`；HIGH |
 | 423 `GL_MSG_READ_REQ` | `str key` | `sub_55A3C0` 鏡像 421 兩閘,但 `sub_537E90(...)==0`(未讀才送)。TS 對位與 421 相同。 | `sub_55A3C0`、`sub_55A4F0` ACK consumer；HIGH for wire gate/shape, UNRESOLVED status enum beyond zero/nonzero |
-| 424 `GL_MSG_READ_ACK` | `u8 statusRaw, str key` | `sub_55A4F0`: status 非零→`sub_537D20` 寫 `89` 標記;零→彈 resource `0x1E4`。builder emit `{u8 statusRaw, strMax(key,19)}`;status enum 不造。 | `sub_55A4F0`、`sub_537D20`；HIGH |
+| 424 `GL_MSG_READ_ACK` | `s8/bool statusRaw, str key` | `sub_55A4F0` 首讀 `sub_592900`(s8/bool)後接 `sub_592730`: status 非零→`sub_537D20` 寫 `89` 標記;零→彈 resource `0x1E4`。builder emit `{s8 statusRaw, strMax(key,19)}`;status enum 不造。 | `sub_55A4F0`、`sub_537D20`；HIGH |
 | 783 `GL_NEW_MSG_COUNT_REQ` | (空) | builder `sub_5643E0` ✓。784 `sub_564480`:單 `s32`→`dword_F0C104`,`!=0` 切 UI 新信件指標。TS 信箱恆空 ⇒ 回 `s32(0)`。 | `sub_5643E0`/`sub_564480`；HIGH |
 | --- **2026-09-19 S2C 零值總審計**(60 件全體,新增 5 件註記) --- | | | |
 | 141↔142 `PM_CONNECT` 握手落地 | 141 空體;142=`str host(≤19B), s32 port(low u16), u8 active_channel_index, u32 packed_calendar` | builder `sub_556530` 空體實證、consumer `sub_5565D0` 行級(142 進 `sub_596E60` 次 UDP 地址族)、`sub_534F20` 解碼 mask 對拍;TS 回 config.channel.endpoint/index + process-local wall clock(wire 無時區,zone 明確文件化) | 全值有 live 來源,零亂填;HIGH |
@@ -374,7 +374,7 @@ The following are consumer facts, not reconstructed business names.
 ### 421/422 and 423/424 adjacent operations
 
 The dispatcher routes 422 to `sub_55A310` and 424 to `sub_55A4F0`. Each reader
-consumes `u8 statusRaw` followed by one string. For 422, a nonzero status calls
+consumes an `s8/bool statusRaw` (`sub_592900`) followed by one string. For 422, a nonzero status calls
 `sub_537A80` with the string key; for 424, a nonzero status calls
 `sub_537D20`. Zero status selects a localized error path. The C2S builders
 validate a nonempty string of at most 20 bytes and use the same local key table

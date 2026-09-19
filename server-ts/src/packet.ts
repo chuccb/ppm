@@ -11,6 +11,47 @@
  *   ...  payload
  *
  * Strings are NUL-terminated inline with no length prefix (`sub_5926F0`).
+ *
+ * Every primitive here is one native helper, dual on both directions
+ * (docs/LAYOUTS.md 圖例)`sub_592xxx` —— TS writer ↔ client C2S 寫入 ↔
+ * client S2C 讀取:
+ *
+ *   TS            client 寫入 helper          client 讀取 helper
+ *   u8            sub_592920 / sub_592960     sub_592940 / sub_592980
+ *   s8            sub_5928E0                  sub_592900 (s8/bool)
+ *   u16           sub_5929A0                  sub_592A00
+ *   s16           sub_5929E0                  sub_5929C0
+ *   s32           sub_592A20                  sub_592A40
+ *   u32           sub_592A60                  sub_592A80
+ *   u64           sub_592AE0 / sub_592B60     sub_592B00 / sub_592B80
+ *   f32           sub_592B20                  sub_592B40
+ *   (raw4投影)     sub_592AA0 / sub_592AC0     sub_592AC0 (caller-defined)
+ *   str           sub_5926F0                  sub_592730
+ *   wstr          sub_592770                  sub_5927B0
+ *   raw / zeros   sub_592580 (rawN) 等        sub_592C40 / sub_592500 (定寬 raw)
+ *   packet        sub_5927F0 (embedded)       —
+ *
+ * `sub_592AA0`/`592AC0` 是 caller-defined generic 4B 寫/讀：wire 只有寬度,
+ * signedness 由欄位文件決定,因此 TS 端以 u32/s32/f32 的「投影」承接,
+ * 註解一律寫 raw4(禁止反向命名成具體型別,見 STYLE.md 權威層級)。
+ *
+ * `packet(...)`（embedded packet 寫入）行級實證的三類合法觀測位,
+ * 每一類都是建構期把一個完整 packet 實體(與 `v121` 同型,~19KB 陣列槽)
+ * 嵌進目前的 packet:
+ *
+ *   類                  觀測位(.c 行級)
+ *   user bound packet   707 `sub_46AD00`:
+ *   (user_args, v-L/H)  `Packet::possible_ctor_or_dtor_1(v121, a2)` ——
+ *                       把呼叫端傳入的 packet `a2` 重綁成 `v121`,再
+ *                       `switch (sub_591EE0(v121))` 依 opcode 分派;
+ *                       case 707 本體只讀一支 `str token`(→ this+521173)
+ *   plugin worker       700 `sub_4618E0`:
+ *   packet (v-U 分槽)   `sub_4077C0(&v15, 707)` / `sub_4077C0(&v17, 711)`
+ *                       等 4 支 ctor,每支綁定自己的 opcode(693/695/707/711)
+ *                       並個別掛 plugin-registered dtor([0x8910] 大小槽)
+ *   byte fragment       700 的 v-L 值為兩個 4B int buffer
+ *   (STREAM_ASK 細欄)   倒序列印(`u32 long & 0xFFFF` 為 v-U,
+ *                       其餘位元為 v-L):wire 上仍是 4B 整數欄
  */
 
 import { PACKET_ROUND_KEYS, cfbDecrypt, cfbEncrypt } from "./aes.ts";

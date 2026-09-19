@@ -118,11 +118,14 @@ def check_equivalent_handlers(text: str) -> None:
 
 
 SYMBOL = re.compile(r"\b(sub_[0-9A-Fa-f]{4,8})\b")
-# PACKETS.md mentions 8 sub_ symbols absent from every dump: 6 genuinely
-# unresolved, plus two kept as before/after examples in the header note. 28 more
-# were resolved by following Packet(opcode) builders. LAYOUTS.md (merged S2C+C2S)
-# is machine-extracted and must stay at zero. See the note at the top of PACKETS.md.
-EXPECTED_STALE = {"docs/PACKETS.md": 8, "docs/LAYOUTS.md": 0}
+# PACKETS.md mentions 9 sub_ symbols absent from every dump: 6 genuinely
+# unresolved, two kept as before/after examples in the header note, plus
+# sub_593260 cited at the send_count++ row and explicitly annotated as
+# drifted. 28 more were resolved by following Packet(opcode) builders.
+# LAYOUTS.md (merged S2C+C2S) is machine-extracted and must stay at zero.
+# See the note at the top of PACKETS.md. (Baseline 8 -> 9 on 2026-09-19:
+# the drifted 593260 citation predates this count.)
+EXPECTED_STALE = {"docs/PACKETS.md": 9, "docs/LAYOUTS.md": 0}
 
 
 def check_cited_symbols(text: str) -> None:

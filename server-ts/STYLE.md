@@ -143,3 +143,20 @@ strict，另加 `exactOptionalPropertyTypes`、`noUncheckedIndexedAccess` 與
 TS 註解與 `docs/LAYOUTS.md` 列文不一致時，**先回 `PaperMan.exe.c` 行級
 重讀該 sub 再改，不靠猜**(2026-09-19 的 419 事故：舊註解把 lead 的
 `sub_592AA0` raw4 context 誤記成 `u8 raw0`,LAYOUTS 列文才是對的)。
+
+## 窮盡查證原則（2026-09-19 使用者定案）
+
+**每一個相關的欄位、opcode、數值、flag、結構，都要想盡辦法弄清它的意義
+與用途**，手段依權威層序窮盡，直到其中之一給出答案，或證據耗盡才允許
+保守命名（`raw*`/`unknown`/`UNRESOLVED`）:
+
+1. `PaperMan.exe.c` 行級重讀（builder／consumer／caller 三體；`sub_592xxx`
+   accessor 序就是 wire 序）
+2. 遊戲資源檔（`Extracted/` itemdata.pat、msgtable、uidatatable、UI XML、
+   資源面板字串）
+3. Wiki／機制文件（只作語意交叉線索，不單獨定 wire 或 server policy）
+4. 本專案文件名錄（LAYOUTS helper 稽核、PACKETS 命名總表、tsv）
+
+查證過程**必須留痕**：在註解裡寫下依據（`sub_XXXXXX`、檔名+行、章節號），
+讓下一個人不必重查；查過仍無解的，寫明「窮盡手段仍 UNRESOLVED」而不留
+無痕的 raw。419／900 兩案證明：只靠文件層會互相抄錯，行級重讀是唯一定案。

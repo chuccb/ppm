@@ -284,8 +284,8 @@ raw4 讀取，但分支選擇器取其低位元組。完整佈局見 `PACKETS.md
 | 405 | MASTER_EVENTEXP_ACK | sub_579650 | `f32` |
 | 417 | MASTER_KILLALL_ACK | *(dispatcher inline)* | `(空)` — 不讀 payload; 顯示 msg 0xA5 後斷線提示 |
 | 420 | GL_MSG_ADD_ACK | sub_559810 | `str u8 u8` |
-| 422 | GL_MSG_DEL_ACK | sub_55A310 | `u8 statusRaw, str key` |
-| 424 | GL_MSG_READ_ACK | sub_55A4F0 | `u8 statusRaw, str key` |
+| 422 | GL_MSG_DEL_ACK | sub_55A310 | `s8/bool statusRaw, str key` |
+| 424 | GL_MSG_READ_ACK | sub_55A4F0 | `s8/bool statusRaw, str key` |
 | 426 | GL_MSG_RECVLIST_ACK | sub_55A630 | `raw2 header, str context, u8 count, repeat {str key, u8 stateRaw, str rawString2, raw4 raw4, str rawString3, str typeString, raw2 raw2}` |
 | 430 | GL_FRIEND_ADD_ACK | sub_55AA90 | `u8 statusRaw, str characterName/key` |
 | 432 | GL_FRIEND_DEL_ACK | sub_55AE10 | `u8 statusRaw, str characterName/key` |
@@ -402,7 +402,7 @@ raw4 讀取，但分支選擇器取其低位元組。完整佈局見 `PACKETS.md
 | 872 | GQ_QUEST_SUCCESS_ACK | sub_91C6F0 | `(無直接讀取/轉發)` |
 | 874 | GQ_QUEST_COMPLETE_ACK | sub_91C1E0 | `(無直接讀取/轉發)` |
 | 875 | GQ_QUEST_CHANGEDSTATE_ACK | sub_91D690 | `(無直接讀取/轉發)` |
-| 877 | GQ_QUEST_ACCEPT_DAILY_ACK | sub_91D7E0 | `(無直接讀取/轉發)` |
+| 877 | GQ_QUEST_ACCEPT_DAILY_ACK | sub_91D7E0 | `raw1 err(0), raw4 count(0), count×13B rows` |
 | 879 | GQ_QUEST_USER_COMPLETE_HONOR_ACK | sub_91CAA0 | `u8 str` |
 | 880 | GQ_QUEST_ACCEPT_DAILY_NOTIFY〔推定〕 | sub_91DC50（case 先呼 getter sub_407E00；原表誤記） | `（無讀取；KR log 後立即送出 876）` |
 | 881 | GQ_QUEST_CURRENTITEMQUEST_ACK | sub_407E00 | `(無直接讀取/轉發)` |

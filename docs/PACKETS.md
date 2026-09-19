@@ -2797,7 +2797,7 @@ match 後 **i_23-- 成為 -1 = 計數污染**) + 橫幅 0x309;status≠1 只彈�
 | 423 | `GL_MSG_READ_REQ` | `sub_55A3C0` | C2S | `str key` (native sends only when the 426 local key is not marked `89`) |
 | 424 | `GL_MSG_READ_ACK` | `sub_55A4F0` | S2C | `u8 statusRaw, str key`; nonzero invokes the local `89` marker helper |
 | 876 | `GQ_QUEST_ACCEPT_DAILY_REQ` | `sub_91D730` | C2S | `(空)` |
-| 877 | `GQ_QUEST_ACCEPT_DAILY_ACK` | `sub_91D7E0` | S2C | `u8 err(0), s32 count(0), count×13B snapshot` |
+| 877 | `GQ_QUEST_ACCEPT_DAILY_ACK` | `sub_91D7E0` | S2C | `raw1 err(0), raw4 count(0), count×13B snapshot`（consumer 三欄全走 `sub_592500` 定寬 raw 讀；TS 可能以 u8/s32 投影） |
 
 **TS 對位 (2026-09-19)**: 876 builder `sub_91D730` @594466:ctor→send 無
 writer ⇒ 空 wire(send log 亦正式署名 GQ_QUEST_ACCEPT_DAILY_REQ)。877
