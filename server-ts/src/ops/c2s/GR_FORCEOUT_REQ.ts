@@ -2,7 +2,7 @@
  * 131 GR_FORCEOUT_REQ — room host kicks a member (builder sub_56EC10:
  * ctor(131) -> sub_592920 = one byte `u8 target_slot` -> send).
  *
- * Native 132 consumer sub_56ECC0: `u8 status` read first and the whole
+ * Native 132 consumer sub_56ECC0: `s8/bool status` read first and the whole
  * body is inside `if (status != 0)` with no else arm; only then is
  * `u8 target_slot` read (plus, for the room view mode, two
  * {s32, str} user-detail pairs). status == 0 is the proven fully

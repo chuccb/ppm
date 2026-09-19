@@ -4,7 +4,7 @@
  * their bodies: sub_592A20 = 4 bytes each, so the wire is exactly
  * 6 x s32 = 24 bytes: `s32 char_type, 5 x s32 items`).
  *
- * Native 311 consumer sub_5728A0: `u8 status`; status != 0 reads the
+ * Native 311 consumer sub_5728A0: `s8/bool status`; status != 0 reads the
  * 6 x s32 purchase snapshot (slot, char_type, exp, cash, gp, dura),
  * and unconditionally afterwards reads `u8 v26Raw, s32 v33Raw,
  * s32 v29Raw` (the v26Raw wallet switch only fires under status != 0).

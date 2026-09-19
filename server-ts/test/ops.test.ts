@@ -107,17 +107,17 @@ describe("419 — add-message request", () => {
     } as unknown as Parameters<typeof msgAddRequest>[1];
     msgAddRequest(reread(payload), connection);
   };
+  // Native builder order (sub_559550): raw4 context, then four strings.
   const draft = () => new Packet(opcodeFor("GL_MSG_ADD_REQ"))
-    .u8(1)
-    .str("me")
     .s32(0x1357)
+    .str("me")
     .str("you")
     .str("hi")
     .str("t")
     .u16(0)
     .u8(0);
 
-  test("parses the 8-field wire grammar and answers via the native default arm", () => {
+  test("parses the 7-field wire grammar and answers via the native default arm", () => {
     const replies: unknown[][] = [];
     pipeline(draft(), replies);
     expect(replies).toEqual([["GL_MSG_ADD_ACK", "you", 6, 0]]);
@@ -129,28 +129,28 @@ describe("419 — add-message request", () => {
     expect(() =>
       pipeline(
         new Packet(opcodeFor("GL_MSG_ADD_REQ"))
-          .u8(1).str("me").s32(0).str("").str("hi").str("t").u16(0).u8(0),
+          .s32(0).str("me").str("").str("hi").str("t").u16(0).u8(0),
         replies,
       ),
     ).toThrow(/1\.\.24/);
     expect(() =>
       pipeline(
         new Packet(opcodeFor("GL_MSG_ADD_REQ"))
-          .u8(1).str("me").s32(0).str("you".padEnd(25, "x")).str("hi").str("t").u16(0).u8(0),
+          .s32(0).str("me").str("you".padEnd(25, "x")).str("hi").str("t").u16(0).u8(0),
         replies,
       ),
     ).toThrow(/1\.\.24/);
     expect(() =>
       pipeline(
         new Packet(opcodeFor("GL_MSG_ADD_REQ"))
-          .u8(1).str("me").s32(0).str("you").str("").str("t").u16(0).u8(0),
+          .s32(0).str("me").str("you").str("").str("t").u16(0).u8(0),
         replies,
       ),
     ).toThrow(/1\.\.200/);
     expect(() =>
       pipeline(
         new Packet(opcodeFor("GL_MSG_ADD_REQ"))
-          .u8(1).str("me").s32(0).str("you").str("h".repeat(201)).str("t").u16(0).u8(0),
+          .s32(0).str("me").str("you").str("h".repeat(201)).str("t").u16(0).u8(0),
         replies,
       ),
     ).toThrow(/1\.\.200/);

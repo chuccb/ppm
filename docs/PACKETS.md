@@ -2569,9 +2569,14 @@ inventory materialization. See the implementation boundary in
 
 ### 3.15c 好友/訊息家族 419-441 (九輪讀畢; 439-442 本輪補完)
 ```
-419 GL_MSG_ADD_REQ (builder sub_559550): `u8 raw0, str ownNick, s32
-    uidContextRaw, str toNick, str body, str title, s16 iconRaw, u8 soundRaw`;
-    送件閘: body 1..200B、toNick 1..24B; ownNick 為登入暱稱截 24B。
+419 GL_MSG_ADD_REQ (builder sub_559550, 2026-09-19 自 PaperMan.exe.c 行級
+    重讀訂正;舊列把 lead raw4 誤記成 `u8 raw0` 並將 context 排錯位):
+    `sub_592AA0(v20, dword_F2A684)` raw4 caller-defined context,
+    `sub_5926F0`×4 = `str ownNick`(送端本地截 char[24])、`str toNick`、
+    `str body`、`str title`,`sub_5929A0` = `u16 iconRaw`,
+    `sub_592920` = `u8 soundRaw`。
+    送件閘: body 1..200B、toNick 1..24B(對 lpString 檢查); ownNick 不在
+    builder 檢查,僅本地截斷。
 420 GL_MSG_ADD_ACK (sub_559810): 讀序 str toNick → u8 xRaw → u8 resultRaw;
     switch 僅對 xRaw {0,1,2,3,4,5,10} 開臂(0/3 再內部分 resultRaw 支臂,
     0 加 recipient-store 呼叫 / 3 走 friend-request-accept 樣式);

@@ -1,7 +1,7 @@
 /**
  * 131 -> 132 GR_FORCEOUT_ACK (consumer sub_56ECC0).
  *
- * Wire: `u8 status`; only when status != 0 the client additionally reads
+ * Wire: `s8/bool status`; only when status != 0 the client additionally reads
  * `u8 target_slot` (and in the room-view mode two {s32, str} user-detail
  * pairs) and removes the member from the room UI. status == 0 is the
  * proven silent arm (whole body gated, no else). With no room model this
@@ -12,5 +12,5 @@
 import { Packet } from "../../packet.ts";
 
 export default function GR_FORCEOUT_ACK(op: number): Packet {
-  return new Packet(op).u8(0);
+  return new Packet(op).s8(0);
 }

@@ -1,6 +1,6 @@
 /**
  * 926 -> 927 GR_AI_RECHARGE_MAGAZINE_END_ACK (consumer sub_558880,
- * full body re-read): `u8 slot, u8 team, u8 unk, u8 statusRaw` is the
+ * full body re-read): `u8 slot, u8 team, s8/bool unk, u8 statusRaw` is the
  * fixed 4-byte head; statusRaw == 0 continues +u8+s32 into the
  * refuel-end logic, nonzero terminates in the denial sub_763510.
  * The TS denial frame therefore is exactly the head with statusRaw = 1;
@@ -15,5 +15,5 @@ export default function GR_AI_RECHARGE_MAGAZINE_END_ACK(
   slot: number,
   team: number,
 ): Packet {
-  return new Packet(op).u8(slot).u8(team).u8(0).u8(1);
+  return new Packet(op).u8(slot).u8(team).s8(0).u8(1);
 }

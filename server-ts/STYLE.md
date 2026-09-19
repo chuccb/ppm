@@ -139,3 +139,7 @@ strict，另加 `exactOptionalPropertyTypes`、`noUncheckedIndexedAccess` 與
   回到 `src/ops/`。
 - **檔頭配對註解照抄實號。** 「`476 -> 477 GG_…_ACK`」的兩個數字與名稱
   必須與 `db/packets.tsv` 完全一致（request/ack 互指）。
+
+TS 註解與 `docs/LAYOUTS.md` 列文不一致時，**先回 `PaperMan.exe.c` 行級
+重讀該 sub 再改，不靠猜**(2026-09-19 的 419 事故：舊註解把 lead 的
+`sub_592AA0` raw4 context 誤記成 `u8 raw0`,LAYOUTS 列文才是對的)。

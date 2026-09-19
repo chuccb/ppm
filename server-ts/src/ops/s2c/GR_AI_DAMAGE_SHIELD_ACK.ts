@@ -5,7 +5,8 @@
  * raw32 is carried verbatim — natively it is the sign-extended LOW
  * BYTE of the builder's float scale argument (sub_592B20/SLOBYTE),
  * so a verbatim echo is byte-identical to what a native server would
- * broadcast. The consumer only acts when a room object matches the
+ * broadcast. (The 923 consumer mirror-reads the three 2-byte fields as
+ * u16 per docs/LAYOUTS.md; the echo is width-identical either way.) The consumer only acts when a room object matches the
  * (id, damage) pair and remain is 4 or 7; the echo itself is inert.
  */
 

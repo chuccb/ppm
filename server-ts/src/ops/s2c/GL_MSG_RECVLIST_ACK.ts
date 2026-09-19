@@ -5,7 +5,7 @@
  *   `raw2 header` (semantics unresolved), `str context` (read into a local
  *   with no recovered consumer — bounded compatibility projection only),
  *   `u8 count`, then count x
- *   `{str key, u8 kind, str name, raw4 extraRaw, str body, str selector, s16 flagRaw}`.
+ *   `{str key, u8 kind, str name, raw4 extraRaw, str body, str selector, raw2 flagRaw}`.
  *
  * Consumer-safe bounds come from the native mail table in sub_5378C0:
  * at most 10 rows (`*(this + 241704) < 0xA`), string strides 20/21/201/2,
@@ -34,7 +34,7 @@ export interface MsgListEntry {
   readonly body: string;
   /** field_s4: compared against "F"/"M" in the native UI controls. */
   readonly selector: string;
-  /** field_a8: s16 wire; low byte retained by the native table. */
+  /** field_a8: raw2 wire; low byte retained by the native table. */
   readonly flagRaw: number;
 }
 

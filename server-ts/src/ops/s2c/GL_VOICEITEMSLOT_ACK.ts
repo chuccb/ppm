@@ -1,10 +1,11 @@
 /**
  * 792 GL_VOICEITEMSLOT_ACK (CMyVoiceCustomize::sub_876B00, audited
- * 2026-09-19): `u8 soundPack, u16 topVoiceA, u16 topVoiceB,
- * 27 x {u16 voiceItem, u8 flag}` = 86 bytes.
+ * 2026-09-19): `u8 soundPack, s16 topVoiceA, s16 topVoiceB,
+ * 27 x {s16 voiceItem, u8 flag}` = 86 bytes (docs/LAYOUTS.md row 792:
+ * `u8 s16 s16 27x(s16 u8)`).
  *
  * soundPack indexes sub_876DB0('s side-record table; 0 is the local
- * character. Every u16 voice id routes through vtbl+8 with
+ * character. Every s16 voice id routes through vtbl+8 with
  * `&unk_EAFC40 + id` when nonzero, ELSE 0 — so a zero voice id is
  * literally "use the character's native (non-customized) voice", and
  * flag 0 is the "未自訂/預設" slot marker (PACKETS §3.15voice).
@@ -20,6 +21,6 @@ const SLOT_COUNT = 27;
 
 export default function GL_VOICEITEMSLOT_ACK(op: number, soundPack = OWN_CHARACTER_SOUND_PACK): Packet {
   const p = new Packet(op).u8(soundPack).u16(0).u16(0);
-  for (let i = 0; i < SLOT_COUNT; i += 1) p.u16(0).u8(0);
+  for (let i = 0; i < SLOT_COUNT; i += 1) p.s16(0).u8(0);
   return p;
 }
