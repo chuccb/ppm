@@ -2814,11 +2814,11 @@ log 即還;==0 ⇒ 讀 `str title` + client 定長 raw blob(長度=this+239104,
 全檔僅此處讀取)→ 置被動 latch =1。TS 無 honor 任務模型 ⇒ 恆回
 `err=1`(wire `01`),無 title/無 blob,latch 維持 0。
 | 698 | `GP_ENTER_PEPACHI_REQ` | `sub_46E080` | C2S | `(空)` |
-| 699 | `GP_ENTER_PEPACHI_ACK` | `CLobbyShop::sub_46AD00` case 699 | S2C | `u8 status, s32 rawA, s32 rawB`; only status 1 enters the Pepachi scene. The two words are not proven currency fields. |
+| 699 | `GP_ENTER_PEPACHI_ACK` | `CLobbyShop::sub_46AD00` case 699 | S2C | `s8/bool status(1), s32 rawA, s32 rawB`（行級：`sub_592900`+2×`sub_592A40`;status 1→`sub_469CF0` 進 Pepachi 場景）;The two words are not proven currency fields. |
 | 700 | `GP_START_GAME_REQ` | `sub_8458D0`, called by `sub_8459C0` | C2S | `u8 raw0,s32 raw1`; exact 5-byte body. Native computes raw1 as `19,900,000 + (sub_525790(activeCharacter) % 100000)`; field/domain meaning remains UNRESOLVED. |
 | 701 | `GP_START_GAME_ACK` | `sub_84A000` → `sub_84A490` | S2C | `u8 result, u8 rawCode`; only `result==1` continues with `s32 rawA,s32 rawB,u8 rawMode,u8 prizeCount, prizeCount×{s32 reelA,s32 reelB,s32 reelC}` (client processes at most 11 prize triples). **`reelC` 是伺服器指定的「演出級別」**，不是外觀參數 — 見下方 §3.15p。 |
 | 702 | `GP_PEPACHI_LIST_REQ` | `sub_45C9B0` | C2S | `(空)` |
-| 703 | `GP_PEPACHI_LIST_ACK` | `CLobbyShop::sub_46AD00` case 703 | S2C | `s32 start, s32 count, (start+count)×s16 signedEntry`; `{0,0}` is a structural empty list only—not a probability-table assertion. |
+| 703 | `GP_PEPACHI_LIST_ACK` | `CLobbyShop::sub_46AD00` case 703 | S2C | `s32 countA, s32 countB, (countA+countB)×raw4 entry`（行級：2×`sub_592A40`＋`sub_592AC0` 迴圈；舊「`s16 signedEntry`」為並行路徑誤記，2026-09-19 訂正）; `{0,0}` is a structural empty list only—not a probability-table assertion. |
 | 900 | `GS_CAPSULEMACHINE_START_REQ` | `sub_99CFA0`, called by `sub_99D0A0` | C2S | `u8 raw0,s32 raw1`; exact 5-byte body, not a two-byte body or an `s32 machine_id`; observed raw pairs include `{3,1}` and `{1,10}`. |
 | 901 | `GS_CAPSULEMACHINE_START_ACK` | `sub_9A1A30` | S2C | `u8 result, s32 prizeCount, prizeCount×{u8 rawClass,s32 rawA,s32 rawB}, s32 rawTailA,s32 rawTailB,s32 rawTailC`; `result==0` performs local state/reward processing, nonzero shows failure UI. |
 

@@ -1,5 +1,6 @@
 /**
- * Compression threshold, and the login trigger.
+ * Compression threshold, and the login trigger (consumer:
+ * `CLobbyLogin::sub_43E500`, 694 case, reads one u16 via `sub_592A00`).
  *
  * Carries the LZ threshold, and in the same client handler invokes the login
  * request builder — so this packet is what makes the client send credentials.

@@ -1,5 +1,6 @@
 /**
- * 199 -> 200 inventory page.
+ * 199 -> 200 inventory page (consumer `sub_570AB0`: `s8/bool success`
+ * gate, nonzero forwards to the `sub_524B70` record loop).
  *
  * The current Store has no inventory/catalog model. An empty successful page is
  * nevertheless a complete, client-consumable response: start index 0 followed
@@ -23,7 +24,7 @@ export interface InvItem {
 }
 
 export default function GL_MYITEM_ACK(op: number, items: readonly InvItem[] = []): Packet {
-  const p = new Packet(op).u8(1).s32(0);
+  const p = new Packet(op).s8(1).s32(0);
   for (const item of items) {
     // A negative slot is the native end-of-page sentinel, not a record value.
     // Native 200 reads both slots with sub_592AC0 (generic raw4), not the

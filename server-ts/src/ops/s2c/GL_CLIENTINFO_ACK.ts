@@ -1,5 +1,7 @@
 /**
- * 246 -> 247 public MyInfo profile.
+ * 246 -> 247 public MyInfo profile (consumer `sub_573EB0`: gate
+ * `u8 ok(==1)` then the shared `sub_523BF0` basic-data block, docs/
+ * PACKETS.md §3251).
  *
  * 247 shares the 198 basic-data block, then carries only one character
  * appearance record instead of the complete private loadout projection.

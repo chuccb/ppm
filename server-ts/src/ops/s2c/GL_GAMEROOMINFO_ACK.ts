@@ -1,5 +1,6 @@
 /**
- * 107 -> 108 empty room list.
+ * 107 -> 108 empty room list (consumer `sub_568CE0`; per-field line
+ * audit in docs/PACKETS.md §3.9).
  *
  * Mode 0 is the ordinary list branch; with count zero the client reads no room
  * records. Native mode 3 is a separate tournament grammar (it does not read

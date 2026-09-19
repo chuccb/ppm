@@ -1,4 +1,5 @@
-/** 834 -> 835 is an empty completion acknowledgement. */
+/** 834 -> 835 is an empty completion acknowledgement (consumer `sub_5831D0`:
+ * reads nothing, only forwards to `sub_522440`). */
 
 import { Packet } from "../../packet.ts";
 

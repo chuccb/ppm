@@ -194,7 +194,7 @@ raw4 讀取，但分支選擇器取其低位元組。完整佈局見 `PACKETS.md
 | 194 | GC_CHANNEL_ACK | sub_56FE90 | `u8` |
 | 196 | GC_ENTERCHANNEL_ACK | sub_4179D0 | `u8 s32 u8 [str s32 u8 u8 u32 u8]` |
 | 198 | GL_MYINFO_ACK | sub_570550 | `s8/bool s32 u16 s32 u8 u8` |
-| 200 | GL_MYITEM_ACK | sub_570AB0 | `u8 success, s32 start, repeat≤100 {s32 slot, s32 item, raw4 f1, raw4 f2, s32 period, u8 extra, u16 durability}, s32 negative-slot sentinel` |
+| 200 | GL_MYITEM_ACK | sub_570AB0 | `s8/bool success, s32 start, repeat≤100 {s32 slot, s32 item, raw4 f1, raw4 f2, s32 period, u8 extra, u16 durability}, s32 negative-slot sentinel` |
 | 201 | GL_MYPARTSUP_ACK | sub_95A3B0 | `s32 count, repeat {raw4 raw4 raw1 raw4 raw4}` |
 | 202 | GL_EXPIRE_PARTSUP_ACK | sub_95AE40 | `s32 count, repeat {raw4 raw4 raw1 raw4 raw4}` |
 | 203 | GL_MYAVATARINFO_ACK〔推定〕 | sub_571D50→sub_524660 | `u8 count(≤4); repeat {u8 tag, u16, [3×u16 if tag!=3], [8×raw4 if u16!=0]}`（詳審計節） |
@@ -1678,7 +1678,7 @@ builder 前綴。native helper 函式體與 direct-caller 稽核仍為獨立檢�
 | 696 | `GS_BUY_ONCEITEM_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
 | 697 | `GG_CHEATER_REPORT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
 | 698 | `GP_ENTER_PEPACHI_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
-| 699 | `GP_ENTER_PEPACHI_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 699 | `GP_ENTER_PEPACHI_ACK` | 官方 catalog | ✗ | ✗ | — | — | UDP dispatcher 之外：consumer＝`CLobbyShop::sub_46AD00` case 699（行級：`s8/bool status, s32, s32`;status 1→`sub_469CF0`） |
 
 #### 700–799
 
@@ -1687,7 +1687,7 @@ builder 前綴。native helper 函式體與 direct-caller 稽核仍為獨立檢�
 | 700 | `GP_START_GAME_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
 | 701 | `GP_START_GAME_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
 | 702 | `GP_PEPACHI_LIST_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
-| 703 | `GP_PEPACHI_LIST_ACK` | 官方 catalog | ✗ | ✗ | — | — | registry-only：官方有名錄，client build 無 native endpoint |
+| 703 | `GP_PEPACHI_LIST_ACK` | 官方 catalog | ✗ | ✗ | — | — | UDP dispatcher 之外：consumer＝`CLobbyShop::sub_46AD00` case 703（行級：`s32 countA, s32 countB, (a+b)×raw4 entry`） |
 | 704 | `GL_LEVEL_KILL_LIMIT_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |
 | 705 | `GL_LEVEL_KILL_LIMIT_ACK` | 官方 catalog | ✓ | ✗ | — | — |  |
 | 706 | `GL_BILLTOKEN_REQ` | 官方 catalog | ✗ | ✓ | — | — |  |

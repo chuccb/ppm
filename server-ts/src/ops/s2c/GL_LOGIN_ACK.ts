@@ -1,5 +1,7 @@
 /**
- * Login result, in the client's read order.
+ * Login result, in the client's read order (consumer:
+ * `CLobbyLogin::sub_43E500`, 681 case — same function hosts the 694
+ * compression-threshold case).
  *
  * The client reads a raw 4-byte result word but branches on its low byte only;
  * a full s32 is written either way. Anything beyond that word is present only

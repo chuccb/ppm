@@ -1,5 +1,6 @@
 /**
- * 254 -> 255 local-user NewSkill profile snapshot.
+ * 254 -> 255 local-user NewSkill profile snapshot (consumer
+ * `sub_574270`; branch facts in docs/PACKETS.md around §1660).
  *
  * The client has another mode-0 branch for remote-user preview: after the
  * common mode/uid/context/unknown prefix it reads two more u8 values and one
