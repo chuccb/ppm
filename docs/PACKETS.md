@@ -2917,7 +2917,7 @@ log 即還;==0 ⇒ 讀 `str title` + client 定長 raw blob(長度=this+239104,
 | Opcode | 封包名稱 | 來源函數 | 方向 | Wire 格式與行為 |
 |---|---|---|---|---|
 | 472 | `GL_GAMECENTER_REC_REQ` | `sub_584850` | C2S | `s16 game_id` (查詢小遊戲紀錄) |
-| 473 | `GL_GAMECENTER_REC_ACK` | `sub_584910` | S2C | `u16 game_id, s32 high_score, u8 top3_cnt, top3_cnt×0x38, u8 top10_cnt, top10_cnt×0x38, u8 v24, u8 v35, [v35≠0: raw 0x20], s16 v28, s32 v30, raw 0x10, u8 v23, [v23≠0: raw 0x2C], u8 v31, u16 v32Raw, u16 v21` |
+| 473 | `GL_GAMECENTER_REC_ACK` | `sub_584910` | S2C | `u16 game_id, s32 v22(stored-only), u8 top3_cnt, top3_cnt×0x38, u8 top10_cnt, top10_cnt×0x38, u8 v24→sub_4574F0 列表態, u8 v35, [v35≠0: raw 0x20→sub_5384E0], u16 v28(stored-only), s32 v30→sub_5384E0, raw 0x10(stored-only), u8 v23, [v23≠0: raw 0x2C→sub_5384E0/+首字→sub_4122F0], u8 v31(stored-only), u16 v32→sub_5384E0(v32[0]), u16 v21→sub_5392D0(低/高位元→槽200/201)`（2026-09-19 行級：舊 `s32 high_score`/`s16 v28` 皆誤） |
 
 **TS 對位 (2026-09-19)**: 472 builder `sub_584850` @175275:
 `sub_5929E0`(2B 驗證)= `u16 game_id` ✓(0x66-EA12F4 旗標語義未定保持)。
@@ -2933,7 +2933,7 @@ game_id(wire 38B)。
 consumer `sub_584E80` **本體零讀取**(僅 `sub_457380` 列表刷新)⇒ body
 在解析面之下 → TS echo game_id/stage + status=1(文件記錄形)。
 | 476 | `GG_GAMECENTER_GAME_END_REQ` | `sub_564930` | C2S | `s16 game_id, raw24 score_data, raw44 stats_data` |
-| 477 | `GG_GAMECENTER_GAME_END_ACK` | `sub_564A00` / `sub_76E450` | S2C | `s16 game_id, raw32, raw44, s16, s32 high_score, raw24, raw8, s32 score, s32 reward_gp, s32 reward_exp, s32 rank, s8, u8, u8, s8, s8` |
+| 477 | `GG_GAMECENTER_GAME_END_ACK` | `sub_564A00` / `sub_76E450` | S2C | `u16 game_id, raw 0x20, raw 0x2C, u16 v45(stored), s32 v42(stored), raw 0x18, raw 8, s32 v40→全域槽[2], s32 v22→dword_EE8D0C 累加(sub_403360 類別化總值), s32 v28→dword_EE8D18 直接指派, s32 v44(stored), s8 v23, u8, u8, s8 v29→byte_EE8C80, s8 v43→sub_996140`（2026-09-19 行級推翻舊 high_score/gp/exp/rank 命名與 s16 型別） |
 | 478 | `GG_GAMECENTER_GAME_PLAY_CHECK_REQ` | `sub_564A40` | C2S | `raw36 check_data` (小遊戲反作弊心跳) |
 | 479 | `GG_GAMECENTER_GAME_PLAY_CHECK_ACK` | — | S2C | `u8 status(1)` |
 

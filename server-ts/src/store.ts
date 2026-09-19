@@ -60,6 +60,10 @@ export interface MyInfo {
   readonly experience: number;
   readonly gamePoints: number;
   readonly cash: number;
+  /** Coupon balance: the native COUPON label's `%10d` source (+112 wire word);
+   * purchase gates compare an item's price against it (`v25 <= dword_EE8D1C`).
+   * No coupon model exists yet, so the projection is 0 = no coupons. */
+  readonly coupon: number;
   /** Serialized character-list index emitted in the native 198/247 fields. */
   readonly selectedCharIndex: number;
   readonly stats: Stats;
@@ -679,6 +683,7 @@ export class Store {
       experience: row.experience,
       gamePoints: row.game_points,
       cash: row.cash,
+      coupon: 0,
       selectedCharIndex,
       stats: statsFromRow(row),
       characters,

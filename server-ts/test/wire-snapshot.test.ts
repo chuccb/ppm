@@ -58,6 +58,7 @@ const info = {
   experience: -2,
   gamePoints: 7,
   cash: 8,
+  coupon: 0,
   stats: {
     wins: 10,
     losses: 11,

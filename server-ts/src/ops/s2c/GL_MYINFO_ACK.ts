@@ -93,14 +93,22 @@ export function writeMyInfoBasicData(packet: Packet, myInfo: MyInfo): Packet {
     .s32(stats.zKill)
     .s32(stats.kKill)
     .s32(stats.ddKill)
+    // this+304/305/306 flags: read and stored by sub_523BF0 but no read
+    // site exists anywhere in the client image — reserved zeros.
     .u8(0)
     .u8(0)
     .u8(0)
     .s32(myInfo.cash)
+    // this+112: coupon balance — the native COUPON label's `%10d` source
+    // (sub_45FE60, `*(this+41188) = *dword_EE8D1C`); shop checks
+    // `price <= dword_EE8D1C`. Zero = no coupon balance.
+    .s32(myInfo.coupon ?? 0)
+    // this+116: wire word with no proven consumer anywhere in the
+    // client image — reserved to the zero the reader stores but never reads
     .s32(0)
-    .s32(0)
-    // Native [52] is the cumulative play-time task counter; [53..63]
-    // are mode counters/reserved words without a TS data model yet.
+    // Native [52] is the cumulative play-time task counter; [53..60]
+    // are per-mode counters still without a TS session model (zero = no
+    // recorded play in those modes); [61..63] have no proven consumer.
     .s32(stats.playTimeSeconds)
     .zeros(44)
     .u8(myInfo.selectedCharIndex);
