@@ -164,12 +164,16 @@ dispatcher。Server 使用 cancellation 與 receive-loop 結束後的 socket cle
 
 ## 5. Server 現況
 
-- Packet modules：15 個 C2S、16 個 S2C；由 `ops/registry.ts` explicit registry
-  綁定，並以 directory check 防止遺漏檔案；filename 必須存在於 `db/packets.tsv`，
-  重複或未知 opcode 會在啟動時失敗。
+- Packet modules：63 個 C2S、61 個 S2C（數量由 registry `summary()` 回報並由
+  測試釘住）；由 `ops/registry.ts` explicit registry 綁定，並以 directory
+  check 防止遺漏檔案；filename 必須存在於 `db/packets.tsv`，重複或未知
+  opcode 會在啟動時失敗。
 - 已涵蓋：694/682/681 login handshake、693/143/144/195/196 channel handshake、
-  lobby bootstrap（197/198、199/200、105/106、107/108、425/426、433/434）、
-  250/252/254 compatibility projections、keepalive，以及 private UDP 19→空 20。
+  lobby bootstrap（197/198、199/200、201/202、105/106、107/108、246/247、
+  419–444 訊息與好友家族、250/252/254 compatibility projections）、
+  商店／福袋／膠囊（GS_*、GP_PEPACHI）、排位與遊戲中心（GG_GAMECENTER_*）、
+  每日任務（GQ_*）、PvE AI（GR_AI_*）、投票與房務（GR_*）、keepalive，
+  以及 private UDP 19→空 20。
 - Wire safety：9600-byte frame、AES-CFB、native field width、fixed-buffer bounds、
   count/length limits、single-use admission 與 196 success gate 均保留；未知 policy
   不做成功 mutation。

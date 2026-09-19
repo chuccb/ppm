@@ -7,8 +7,9 @@
  *   s2c  opcode + fields     -> Packet
  *
  * This is intentionally not a dynamic import registry. Static imports make the
- * actual 15/16 runtime surface visible to TypeScript, while the directory
- * check below still fails startup if a packet file is added and forgotten.
+ * actual inbound/outbound runtime surface visible to TypeScript, while the
+ * directory check below still fails startup if a packet file is added and
+ * forgotten.
  */
 
 import { Glob } from "bun";

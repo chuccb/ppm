@@ -60,8 +60,9 @@ src/ops/s2c/GL_LOGIN_ACK.ts   我們送出；由我們組建
 ```
 
 命名、registry 與 module-load 檢查的完整規則見 [STYLE.md](STYLE.md)。
-現行 31 個 packet module 的逐欄完整審計見
-[`../docs/SERVER_TS_EVIDENCE.md`](../docs/SERVER_TS_EVIDENCE.md)。
+早期 31 個 packet module 的逐欄審計（2026-09-17 範圍）見
+[`../docs/SERVER_TS_EVIDENCE.md`](../docs/SERVER_TS_EVIDENCE.md)；
+現行 module 數量由 registry 的 `summary()` 在啟動時回報，測試釘住。
 
 ## 本實作涵蓋的協定事實
 
