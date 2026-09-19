@@ -439,6 +439,12 @@ dispatcher 落到 `unknown_libname_94/95`(VM/Crt helper 不在 dump,終局未知
 **853**(裸 op),`/rshufflewt`→`sub_57DBD0`=**896**(`j__atol` 參數→非零
 gate 之 raw4),`/rshufflevt`→`sub_57DC80`=**898**(同形),`/print_tnmt_state`
 不送 wire(單純 local print)。852=**851 的 S2C ACK**(sub_5854C0,'GAME CENTER RANK RELOAD SUCCESS/FAIL'log);**方向別遮描教訓**:ctor側零匹配≠死 op,dispatcher case 側才是 s2c 正解。
+**2026-09-19 server-ts 對應實作**：黑單鏈（996/998/1000/1002 REQ→997/999/1001/1003 ACK）全面於
+`server-ts/src/ops/{c2s,s2c}/GL_BLOCK_*` 落地；487/488 MYROOM 對（`GL_MYROOMCHANGE_REQ/ACK`）同批。
+result／status 編碼遵循 LAYOUTS 行級 grammar 與官方 msgtable 語義命名；1001/1003 的 `{u16,str}` 雙標頭
+經行級確認為 client 讀後未用，TS 一律投影 `0/""` 並於模組註明理由。欄概念詳見
+`docs/SERVER_TS_EVIDENCE.md` 2026-09-19 節。
+
 > dispatcher 共 **306** 個 case，其中 **24** 個不在名稱表內：
 > 即上列 23 個 S2C，再加 **417**。417 已於下方 MASTER 表以
 > `MASTER_KILLALL_ACK` 立項（416 的配對 ACK），但**未收進 `db/packets.tsv`**，

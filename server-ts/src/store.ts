@@ -53,6 +53,19 @@ export interface CharacterDataPatch {
   readonly appearance: readonly number[];
 }
 
+export interface BlocklistEntry {
+  nickname: string;
+  addedAt: number;
+}
+
+interface BlocklistRow {
+  nickname: string;
+  added_at: number;
+}
+
+/** Official 24h deletion cooldown proven by msgtable 1326 (999 code 1 arm). */
+export const BLOCKLIST_REMOVE_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+
 export interface MyInfo {
   readonly userId: number;
   readonly nickname: string;
@@ -248,6 +261,18 @@ CREATE TABLE IF NOT EXISTS player (
   tutorial_index  INTEGER NOT NULL DEFAULT 0
 ) STRICT;
 
+-- Blacklist entries paired to a player row. added_at is the epoch-ms the
+-- entry was created; the native client proves the service semantics through
+-- its 996-1003 handlers (official msgtable rows 1320/1322/1323/1330,
+-- 1325/1326/182): rows are removable only after BLOCKLIST_REMOVE_COOLDOWN_MS
+-- (the 24h window proven by msgtable 1326).
+CREATE TABLE IF NOT EXISTS player_blocklist (
+  player_id    INTEGER NOT NULL REFERENCES player(id) ON DELETE CASCADE,
+  nickname     TEXT    NOT NULL,
+  added_at     INTEGER NOT NULL,
+  PRIMARY KEY (player_id, nickname)
+) STRICT;
+
 CREATE TABLE IF NOT EXISTS player_stats (
   player_id       INTEGER PRIMARY KEY REFERENCES player(id) ON DELETE CASCADE,
   wins            INTEGER NOT NULL DEFAULT 0,
@@ -419,6 +444,59 @@ export class Store {
     }
 
     return this.getMyInfoByAccountId(accountId);
+  }
+
+  /**
+   * Native blacklist semantics (996-1003 handler family in PaperMan.exe.c):
+   *  - a nickname can appear at most once (997 code 1 -> msgtable 1323);
+   *  - an entry younger than REMOVE_COOLDOWN (997's 24h text, msgtable 1326)
+   *    refuses deletion with 999 code 1.
+   * The blocking player stores rows locally; the blocked side owns nothing,
+   * so the table only models the blocking player's list.
+   */
+  blocklistAdd(userId: number, nickname: string, at: number): void {
+    this.#db
+      .query("INSERT INTO player_blocklist (player_id, nickname, added_at) VALUES ($p, $n, $t)")
+      .run({ p: userId, n: nickname, t: at });
+  }
+
+  blocklistEntry(userId: number, nickname: string): BlocklistEntry | null {
+    const row = this.#db
+      .query<BlocklistRow, { p: number; n: string }>(
+        "SELECT nickname, added_at FROM player_blocklist WHERE player_id = $p AND nickname = $n",
+      )
+      .get({ p: userId, n: nickname });
+    return row ? { nickname: row.nickname, addedAt: row.added_at } : null;
+  }
+
+  blocklistEntries(userId: number): BlocklistEntry[] {
+    return this.#db
+      .query<BlocklistRow, { p: number }>(
+        "SELECT nickname, added_at FROM player_blocklist WHERE player_id = $p ORDER BY added_at, nickname",
+      )
+      .all({ p: userId })
+      .map((row) => ({ nickname: row.nickname, addedAt: row.added_at }));
+  }
+
+  /** Removes the entry; returns whether a row existed. */
+  blocklistRemove(userId: number, nickname: string): boolean {
+    return this.#db
+      .query("DELETE FROM player_blocklist WHERE player_id = $p AND nickname = $n")
+      .run({ p: userId, n: nickname })
+      .changes === 1;
+  }
+
+  /** Nicknames of other players whose blocklist currently contains `nickname` (1002 -> 1001 source). */
+  blocklistBlockedBy(nickname: string): Omit<BlocklistEntry, "addedAt">[] {
+    return this.#db
+      .query<{ nickname: string }, { n: string }>(
+        `SELECT player.nickname AS nickname
+           FROM player_blocklist
+           JOIN player ON player.id = player_blocklist.player_id
+          WHERE player_blocklist.nickname = $n
+          ORDER BY player_blocklist.added_at, player.nickname`,
+      )
+      .all({ n: nickname });
   }
 
   getMyInfoByNickname(nickname: string): MyInfo | null {

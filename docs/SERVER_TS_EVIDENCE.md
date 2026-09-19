@@ -1,3 +1,19 @@
+
+## 2026-09-19 — 黑單鏈 996–1003 與 MYROOM 487/488 全模組落地
+
+- **Grammar 權威**：docs/LAYOUTS.md 行級行（sub_567D50、sub_567BD0、sub_5861C0、sub_567F20、
+  sub_568170 全部直接對回 PaperMan.exe.c)，外加官方 msgtable(msgtableres.lang cp932 解碼）
+  1320/1323/282/1322/1330、1325/1326/182 語義命名。
+- **Result/Status enums 非猜**:`BlockAddResult`{Success=0, Duplicate=1, NoSuchAccount=2,
+  CannotBlockSelf=4}、`BlockDelResult`{Success=0, Cooldown=1, NotFound=3}、`MyRoomChangeStatus`
+  {Success=1, Rejected=0} —— 全部直接在 client handler 的分派條件上等價映射；1001/1003 的
+  `{u16,str}` 讀後未用標頭投影 `0/""`(honest 欄，不偽語義）。
+- **Store 層真值流**:player_blocklist 記帳真實 epoch-ms;`BLOCKLIST_REMOVE_COOLDOWN_MS`
+  以官方 24h 文本命名（value=86400000);add/del/list/blocked-by 四向皆以 member-nickname
+  （server 的玩家真名）進行，未持有/未登入回 honest empty/denial（防偽 0 律）。
+- **Gap-op 白表**:`src/opcodes.ts` 的 `gapTable`(487/488/996-1003,10 對）記 native builder/handler
+  地址；`test/style.test.ts` 合併該表，避免「官方名錄缺」與「TS 模組」間的名稱斷層。
+
 # server-ts 欄位證據與待辦（原 SERVER_TS_PACKET_FIELDS.md＋TODO_HANDLERS.md）
 
 > **合併說明（2026-09-17）**：本檔由 `SERVER_TS_PACKET_FIELDS.md`（31 個

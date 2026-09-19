@@ -17,6 +17,15 @@ import msgAddRequest from "../src/ops/c2s/GL_MSG_ADD_REQ.ts";
 import msgDelRequest from "../src/ops/c2s/GL_MSG_DEL_REQ.ts";
 import newMsgCountRequest from "../src/ops/c2s/GL_NEW_MSG_COUNT_REQ.ts";
 import voiceItemSlotRequest from "../src/ops/c2s/GL_VOICEITEMSLOT_REQ.ts";
+import blockAddRequest from "../src/ops/c2s/GL_BLOCK_ADD_REQ.ts";
+import blockDelRequest from "../src/ops/c2s/GL_BLOCK_DEL_REQ.ts";
+import blockListRequest from "../src/ops/c2s/GL_BLOCK_LIST_REQ.ts";
+import blockListMeRequest from "../src/ops/c2s/GL_BLOCKME_LIST_REQ.ts";
+import myroomChangeRequest from "../src/ops/c2s/GL_MYROOMCHANGE_REQ.ts";
+import { BlockAddResult } from "../src/ops/s2c/GL_BLOCK_ADD_ACK.ts";
+import { BlockDelResult } from "../src/ops/s2c/GL_BLOCK_DEL_ACK.ts";
+import { BLOCK_LIST_ENTRY_FLAG_NONE } from "../src/ops/s2c/GL_BLOCK_LIST_ACK.ts";
+import { MyRoomChangeStatus } from "../src/ops/s2c/GL_MYROOMCHANGE_ACK.ts";
 import friendAddRequest from "../src/ops/c2s/GL_FRIEND_ADD_REQ.ts";
 import friendChatRequest from "../src/ops/c2s/GL_FRIEND_CHAT_REQ.ts";
 import friendDelRequest from "../src/ops/c2s/GL_FRIEND_DEL_REQ.ts";
@@ -1811,9 +1820,234 @@ describe("registry", () => {
   });
 
   test("the registry exposes both operation folders at startup", () => {
-    expect(summary()).toMatch(/^c2s 64 \(/);
-    expect(summary()).toMatch(/\), s2c 64 \(/);
+    expect(summary()).toMatch(/^c2s 69 \(/);
+    expect(summary()).toMatch(/\), s2c 69 \(/);
     expect(summary()).toContain("GL_LOGIN_ACK");
     expect(summary()).toContain("GL_LOGIN_REQ");
+  });
+});
+
+describe("996-1003 — blacklist chain", () => {
+  type Rows = Map<string, number>; // nickname -> addedAt
+  const mkConnection = (
+    replies: unknown[][],
+    opts: { nickname: string | null; userId?: number; rows?: Rows; blockedByNames?: string[] },
+  ) => {
+    const rows = opts.rows ?? new Map<string, number>();
+    const knownNicknames = new Set(["alice", "bob", "zoe"]);
+    return {
+      reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+      accountId: opts.nickname === null ? null : 42,
+      config: {
+        store: {
+          ensurePlayerIdentity: () => (opts.nickname === null
+            ? null
+            : { nickname: opts.nickname, userId: opts.userId ?? 9001 }),
+          getMyInfoByNickname: (nick: string) =>
+            (knownNicknames.has(nick) ? { nickname: nick } : null),
+          blocklistEntry: (_id: number, nick: string) =>
+            (rows.has(nick) ? { nickname: nick, addedAt: rows.get(nick)! } : null),
+          blocklistAdd: (_id: number, nick: string, at: number) => void rows.set(nick, at),
+          blocklistEntries: () =>
+            [...rows.entries()].map(([nickname, addedAt]) => ({ nickname, addedAt })),
+          blocklistRemove: (_id: number, nick: string) => rows.delete(nick),
+          blocklistBlockedBy: () =>
+            (opts.blockedByNames ?? []).map((nickname) => ({ nickname })),
+        },
+      },
+    } as unknown as Parameters<typeof blockAddRequest>[1];
+  };
+
+  const DAY = 24 * 60 * 60 * 1000;
+
+  test("996 add covers every proven arm and stores the entry", () => {
+    const replies: unknown[][] = [];
+    const rows: Rows = new Map([["zoe", Date.now() - DAY]]);
+    blockAddRequest(
+      reread(new Packet(opcodeFor("GL_BLOCK_ADD_REQ")).str("bob")),
+      mkConnection(replies, { nickname: "alice", rows }),
+    );
+    expect(replies).toEqual([["GL_BLOCK_ADD_ACK", BlockAddResult.Success]]);
+    expect(rows.has("bob")).toBe(true);
+
+    const self: unknown[][] = [];
+    blockAddRequest(
+      reread(new Packet(opcodeFor("GL_BLOCK_ADD_REQ")).str("alice")),
+      mkConnection(self, { nickname: "alice" }),
+    );
+    expect(self).toEqual([["GL_BLOCK_ADD_ACK", BlockAddResult.CannotBlockSelf]]);
+
+    const ghost: unknown[][] = [];
+    blockAddRequest(
+      reread(new Packet(opcodeFor("GL_BLOCK_ADD_REQ")).str("nobody")),
+      mkConnection(ghost, { nickname: "alice" }),
+    );
+    expect(ghost).toEqual([["GL_BLOCK_ADD_ACK", BlockAddResult.NoSuchAccount]]);
+
+    const dup: unknown[][] = [];
+    const dupRows: Rows = new Map([["bob", Date.now()]]);
+    blockAddRequest(
+      reread(new Packet(opcodeFor("GL_BLOCK_ADD_REQ")).str("bob")),
+      mkConnection(dup, { nickname: "alice", rows: dupRows }),
+    );
+    expect(dup).toEqual([["GL_BLOCK_ADD_ACK", BlockAddResult.Duplicate]]);
+
+    expect(() =>
+      blockAddRequest(
+        reread(new Packet(opcodeFor("GL_BLOCK_ADD_REQ")).str("bob").u8(1)),
+        mkConnection([], { nickname: "alice" }),
+      ),
+    ).toThrow(/trailing/);
+  });
+
+  test("998 delete: fresh entries hit the proven 24h cooldown, aged ones are removed", () => {
+    const replies: unknown[][] = [];
+    const rows: Rows = new Map([["bob", Date.now() - 1000]]); // 1s old: inside the 24h window
+    blockDelRequest(
+      reread(new Packet(opcodeFor("GL_BLOCK_DEL_REQ")).str("bob")),
+      mkConnection(replies, { nickname: "alice", rows }),
+    );
+    expect(replies).toEqual([["GL_BLOCK_DEL_ACK", BlockDelResult.Cooldown, "bob"]]);
+    expect(rows.has("bob")).toBe(true); // cooldown must not delete
+
+    const aged: unknown[][] = [];
+    const agedRows: Rows = new Map([["bob", Date.now() - DAY]]);
+    blockDelRequest(
+      reread(new Packet(opcodeFor("GL_BLOCK_DEL_REQ")).str("bob")),
+      mkConnection(aged, { nickname: "alice", rows: agedRows }),
+    );
+    expect(aged).toEqual([["GL_BLOCK_DEL_ACK", BlockDelResult.Success, "bob"]]);
+    expect(agedRows.has("bob")).toBe(false);
+
+    const miss: unknown[][] = [];
+    blockDelRequest(
+      reread(new Packet(opcodeFor("GL_BLOCK_DEL_REQ")).str("nobody")),
+      mkConnection(miss, { nickname: "alice" }),
+    );
+    expect(miss).toEqual([["GL_BLOCK_DEL_ACK", BlockDelResult.NotFound, "nobody"]]);
+  });
+
+  test("1000 list refresh emits the full replacement snapshot in native order", () => {
+    const replies: unknown[][] = [];
+    const rows: Rows = new Map([["bob", 5], ["zoe", 6]]);
+    blockListRequest(
+      reread(new Packet(opcodeFor("GL_BLOCK_LIST_REQ"))),
+      mkConnection(replies, { nickname: "alice", rows }),
+    );
+    expect(replies).toEqual([[
+      "GL_BLOCK_LIST_ACK",
+      [
+        { flags: BLOCK_LIST_ENTRY_FLAG_NONE, nickname: "bob" },
+        { flags: BLOCK_LIST_ENTRY_FLAG_NONE, nickname: "zoe" },
+      ],
+    ]]);
+
+    // Wire shape check: {u16 0, str "", s32 count, count x {s32 0, str nick}}.
+    const bytes = reread(buildPacket("GL_BLOCK_LIST_ACK", replies[0]![1] as never));
+    expect(bytes.u16()).toBe(0);
+    expect(bytes.str()).toBe("");
+    expect(bytes.s32()).toBe(2);
+    expect(bytes.s32()).toBe(0);
+    expect(bytes.str()).toBe("bob");
+    expect(bytes.s32()).toBe(0);
+    expect(bytes.str()).toBe("zoe");
+    expect(bytes.remaining).toBe(0);
+  });
+
+  test("1002 blocked-by refresh projects who currently lists the requester", () => {
+    const replies: unknown[][] = [];
+    blockListMeRequest(
+      reread(new Packet(opcodeFor("GL_BLOCKME_LIST_REQ"))),
+      mkConnection(replies, { nickname: "bob", blockedByNames: ["alice"] }),
+    );
+    expect(replies).toEqual([["GL_BLOCKME_LIST_ACK", ["alice"]]]);
+
+    const bytes = reread(buildPacket("GL_BLOCKME_LIST_ACK", ["alice"]));
+    expect(bytes.u16()).toBe(0);
+    expect(bytes.str()).toBe("");
+    expect(bytes.s32()).toBe(1);
+    expect(bytes.str()).toBe("alice");
+    expect(bytes.remaining).toBe(0);
+  });
+
+  test("unauthenticated callers receive the honest empty state, not fabricated content", () => {
+    const replies: unknown[][] = [];
+    const anonymous = mkConnection(replies, { nickname: null });
+    blockAddRequest(reread(new Packet(opcodeFor("GL_BLOCK_ADD_REQ")).str("bob")), anonymous);
+    blockDelRequest(reread(new Packet(opcodeFor("GL_BLOCK_DEL_REQ")).str("bob")), anonymous);
+    blockListRequest(reread(new Packet(opcodeFor("GL_BLOCK_LIST_REQ"))), anonymous);
+    blockListMeRequest(reread(new Packet(opcodeFor("GL_BLOCKME_LIST_REQ"))), anonymous);
+    expect(replies).toEqual([
+      ["GL_BLOCK_ADD_ACK", BlockAddResult.NoSuchAccount],
+      ["GL_BLOCK_DEL_ACK", BlockDelResult.NotFound, "bob"],
+      ["GL_BLOCK_LIST_ACK", []],
+      ["GL_BLOCKME_LIST_ACK", []],
+    ]);
+  });
+
+  test("store round-trip: add persists, cooldown window computed from added_at", async () => {
+    const store = new Store();
+    const alice = await store.createAccount("alice", "pw");
+    await store.createAccount("bob", "pw");
+    const identity = store.ensurePlayerIdentity(alice.id)!;
+
+    store.blocklistAdd(identity.userId, "bob", 1234);
+    expect(store.blocklistEntry(identity.userId, "bob")).toEqual({ nickname: "bob", addedAt: 1234 });
+    expect(store.blocklistEntries(identity.userId)).toEqual([{ nickname: "bob", addedAt: 1234 }]);
+    expect(store.blocklistBlockedBy("bob")).toEqual([{ nickname: "alice" }]);
+    expect(store.blocklistBlockedBy("alice")).toEqual([]);
+
+    store.blocklistRemove(identity.userId, "bob");
+    expect(store.blocklistEntry(identity.userId, "bob")).toBeNull();
+    expect(store.blocklistBlockedBy("bob")).toEqual([]);
+    store.close();
+  });
+});
+
+describe("487/488 — my-room slot change", () => {
+  const mkConnection = (replies: unknown[][], signedIn: boolean) => ({
+    reply: (name: string, ...args: unknown[]) => replies.push([name, ...args]),
+    accountId: signedIn ? 42 : null,
+    config: { store: { ensurePlayerIdentity: () => (signedIn ? { nickname: "alice", userId: 9001 } : null) } },
+  }) as unknown as Parameters<typeof myroomChangeRequest>[1];
+
+  test("487 accepts only the proven 0..4 domain and echoes the slot on success", () => {
+    const replies: unknown[][] = [];
+    for (const slot of [0, 4]) {
+      myroomChangeRequest(
+        reread(new Packet(opcodeFor("GL_MYROOMCHANGE_REQ")).u8(slot)),
+        mkConnection(replies, true),
+      );
+    }
+    expect(replies).toEqual([
+      ["GL_MYROOMCHANGE_ACK", MyRoomChangeStatus.Success, 0],
+      ["GL_MYROOMCHANGE_ACK", MyRoomChangeStatus.Success, 4],
+    ]);
+
+    // Wire: status 1 carries the trailing slot byte; rejection carries none.
+    const ok = reread(buildPacket("GL_MYROOMCHANGE_ACK", MyRoomChangeStatus.Success, 3));
+    expect(ok.u8()).toBe(1);
+    expect(ok.u8()).toBe(3);
+    expect(ok.remaining).toBe(0);
+    const rejected = reread(buildPacket("GL_MYROOMCHANGE_ACK", MyRoomChangeStatus.Rejected, 0));
+    expect(rejected.u8()).toBe(0);
+    expect(rejected.remaining).toBe(0); // native client restores the UI without reading further
+  });
+
+  test("487 rejects out-of-domain slots and unsigned connections with the single reject arm", () => {
+    for (const [slot, signedIn] of [[5, true], [255, true], [0, false]] as const) {
+      const replies: unknown[][] = [];
+      myroomChangeRequest(
+        reread(new Packet(opcodeFor("GL_MYROOMCHANGE_REQ")).u8(slot)),
+        mkConnection(replies, signedIn),
+      );
+      expect(replies).toEqual([["GL_MYROOMCHANGE_ACK", MyRoomChangeStatus.Rejected, 0]]);
+    }
+    expect(() =>
+      myroomChangeRequest(
+        reread(new Packet(opcodeFor("GL_MYROOMCHANGE_REQ")).u8(1).u8(0)),
+        mkConnection([], true),
+      ),
+    ).toThrow(/trailing/);
   });
 });

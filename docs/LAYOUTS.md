@@ -640,6 +640,12 @@ raw4 讀取，但分支選擇器取其低位元組。完整佈局見 `PACKETS.md
 | 1008 | `GG_OCC_ZONE_LEAVE_REQ` | u8（同） | 1009（handler 本 dump 不可回收） | HIGH | 韓 log「내가 깃발(인덱스=%d)에 점령가능지역에서 빠져나왔습니다.」（我離開旗子 index 之可佔領區域），狀態 1→0 觸發 |
 
 ### 黑名單家族（996–1003）
+> - **2026-09-19 TS 落地（server-ts)**:996-1003 四向全模組——GRAMMAR 權威仍為本檔行級行；1001 每筆
+>   `{s32 flag, str nick}`、1003 純 `str`、兩組 `{u16,str}` 標頭讀後未用（TS 投影 `0/""`，不臆造）；
+>   result enums 按官方 msgtable 1320/1323/282/1322/1330（加）、1325/1326/182（刪）命名；
+>   冷卻窗=msgtable 1326 官方「24時間」文，常數 `BLOCKLIST_REMOVE_COOLDOWN_MS` 統一於 store.ts；
+>   未持有/未登入一律**honest empty/denial**，嚴禁 blank-0 假像。實作：`server-ts/src/ops/{c2s,s2c}/GL_BLOCK_*`，
+>   store 表 `player_blocklist`。487/488 MYROOM 對同步落地（0..4 槽域、status 1 成功／11 無動／其余還原）。
 
 > - **功能語意（Fact：msgtableres.lang + UI）**：0x52C 確認對話框
 >   「フレンド解除をしてブラックリストに追加しますか？」（解除好友並加入
